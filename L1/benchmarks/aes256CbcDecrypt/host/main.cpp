@@ -24,6 +24,7 @@
 #include <cstdlib>
 
 #include <xcl2.hpp>
+#include "xf_utils_sw/logger.hpp"
 
 // text length for each task in 128-bit
 #define N_ROW 64
@@ -179,20 +180,30 @@ int main(int argc, char* argv[]) {
     std::cout << "Host map buffer has been allocated and set.\n";
 
     // Get CL devices.
+    xf::common::utils_sw::Logger logger;
+    cl_int err = CL_SUCCESS;
+
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
+
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel0(program, "aes256CbcDecryptKernel");
-    std::cout << "Kernel has been created.\n";
+
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+
+    cl::Kernel kernel0(program, "aes256CbcDecryptKernel", &err);
+    logger.logCreateKernel(err);
 
 #ifdef USE_DDR
     std::cout << "allocate to DDR" << std::endl;
@@ -376,8 +387,10 @@ int main(int argc, char* argv[]) {
     std::cout << "Total execution time " << tvdiff(&start_time, &end_time) << "us" << std::endl;
 
     if (checked) {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

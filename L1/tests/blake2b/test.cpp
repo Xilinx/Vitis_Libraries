@@ -19,12 +19,12 @@
 
 void test(hls::stream<ap_uint<64> >& msg_strm,
           hls::stream<ap_uint<128> >& msg_len_strm,
-          hls::stream<ap_uint<64> >& key_strm,
+          hls::stream<ap_uint<512> >& key_strm,
           hls::stream<ap_uint<8> >& key_len_strm,
           hls::stream<ap_uint<8> >& out_len_strm,
           hls::stream<bool>& end_len_strm,
           hls::stream<ap_uint<512> >& digest_strm,
           hls::stream<bool>& end_digest_strm) {
-    xf::security::blake2b<64>(msg_strm, msg_len_strm, key_strm, key_len_strm, out_len_strm, end_len_strm, digest_strm,
-                              end_digest_strm);
+    xf::security::blake2b(msg_strm, msg_len_strm, key_strm, key_len_strm, out_len_strm, end_len_strm, digest_strm,
+                          end_digest_strm);
 }

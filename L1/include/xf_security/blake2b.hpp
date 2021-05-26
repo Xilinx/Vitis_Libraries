@@ -36,17 +36,12 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 
-// for debug
-#ifndef __SYNTHESIS__
-#include <iostream>
-#endif
-
 namespace xf {
 namespace security {
 namespace internal {
 
 // @brief 1024-bit Processing block
-struct blockType {
+struct blake2BlockType {
     ap_uint<64> M[16];
 };
 
@@ -71,16 +66,15 @@ struct blockType {
  *
  */
 
-template <unsigned int w = 64>
 void generateBlock(
     // inputs
-    hls::stream<ap_uint<w> >& msg_strm,
+    hls::stream<ap_uint<64> >& msg_strm,
     hls::stream<ap_uint<128> >& msg_len_strm,
-    hls::stream<ap_uint<w> >& key_strm,
+    hls::stream<ap_uint<512> >& key_strm,
     hls::stream<ap_uint<8> >& key_len_strm,
     hls::stream<bool>& end_len_strm,
     // outputs
-    hls::stream<blockType>& blk_strm,
+    hls::stream<blake2BlockType>& blk_strm,
     hls::stream<ap_uint<128> >& nblk_strm,
     hls::stream<bool>& end_nblk_strm,
     hls::stream<ap_uint<128> >& msg_len_out_strm,
@@ -104,9 +98,6 @@ LOOP_PREPROCESSING_MAIN:
         } else {
             blk_num = (key_len > 0) + (msg_len >> 7) + ((msg_len % 128) > 0);
         }
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_BLAKE2B_DEBUG_ == 1
-        std::cout << "blk_num = " << std::dec << blk_num << std::endl;
-#endif
 
         // inform digest function
         msg_len_out_strm.write(msg_len);
@@ -115,67 +106,19 @@ LOOP_PREPROCESSING_MAIN:
         end_nblk_strm.write(false);
 
         // generate key block
-        if (key_len > 0) {
-            // key block
-            blockType k;
+        blake2BlockType k;
 #pragma HLS array_partition variable = k.M complete
-
-        LOOP_GEN_KEY_BLK:
-            for (ap_uint<5> i = 0; i < 16; i++) {
+        ap_uint<512> tmp_k = key_strm.read();
+        for (int i = 0; i < 8; i++) {
 #pragma HLS unroll
-                if (i < (key_len >> 3)) {
-                    // still have full key words
-                    // XXX algorithm assumes little-endian
-                    k.M[i] = key_strm.read();
-                } else if (i > (key_len >> 3)) {
-                    // no key word to read
-                    k.M[i] = 0UL;
-                } else {
-                    // pad the 64-bit key word with specific zero bytes
-                    ap_uint<3> e = key_len & 0x7UL;
-                    if (e == 0) {
-                        // contains no key byte
-                        k.M[i] = 0x0UL;
-                    } else if (e == 1) {
-                        // contains 1 key byte
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x00000000000000ffUL;
-                    } else if (e == 2) {
-                        // contains 2 key bytes
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x000000000000ffffUL;
-                    } else if (e == 3) {
-                        // contains 3 key bytes
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x0000000000ffffffUL;
-                    } else if (e == 4) {
-                        // contains 4 key bytes
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x00000000ffffffffUL;
-                    } else if (e == 5) {
-                        // contains 5 key bytes
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x000000ffffffffffUL;
-                    } else if (e == 6) {
-                        // contains 6 key bytes
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x0000ffffffffffffUL;
-                    } else {
-                        // contains 7 key bytes
-                        ap_uint<w> l = key_strm.read();
-                        // XXX algorithm assumes little-endian
-                        k.M[i] = l & 0x00ffffffffffffffUL;
-                    }
-                }
-            }
+            k.M[i] = tmp_k.range(i * 64 + 63, i * 64);
+            k.M[i + 8] = 0;
+        }
 
-            // send key block
+    LOOP_GEN_KEY_BLK:
+
+        // send key block
+        if (key_len != 0) {
             blk_strm.write(k);
         }
 
@@ -184,7 +127,7 @@ LOOP_PREPROCESSING_MAIN:
 #pragma HLS pipeline II = 16
 #pragma HLS loop_tripcount min = 1 max = 1 avg = 1
             // message block
-            blockType b0;
+            blake2BlockType b0;
 
         // this block will hold 16 words (64-bit for each) of message
         LOOP_GEN_ONE_FULL_BLK:
@@ -204,7 +147,7 @@ LOOP_PREPROCESSING_MAIN:
         // or the special case of an unkeyed empty message, send a zero block
         if ((left > 0) | ((msg_len == 0) && (key_len == 0))) {
             // last message block
-            blockType b;
+            blake2BlockType b;
 #pragma HLS array_partition variable = b.M complete
 
         LOOP_PAD_ZEROS:
@@ -225,37 +168,37 @@ LOOP_PREPROCESSING_MAIN:
                         b.M[i] = 0x0UL;
                     } else if (e == 1) {
                         // contains 1 message byte
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x00000000000000ffUL;
                     } else if (e == 2) {
                         // contains 2 message bytes
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x000000000000ffffUL;
                     } else if (e == 3) {
                         // contains 3 message bytes
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x0000000000ffffffUL;
                     } else if (e == 4) {
                         // contains 4 message bytes
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x00000000ffffffffUL;
                     } else if (e == 5) {
                         // contains 5 message bytes
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x000000ffffffffffUL;
                     } else if (e == 6) {
                         // contains 6 message bytes
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x0000ffffffffffffUL;
                     } else {
                         // contains 7 message bytes
-                        ap_uint<w> l = msg_strm.read();
+                        ap_uint<64> l = msg_strm.read();
                         // XXX algorithm assumes little-endian
                         b.M[i] = l & 0x00ffffffffffffffUL;
                     }
@@ -314,86 +257,34 @@ ap_uint<w> ROTR(
  *
  */
 
-template <unsigned int w = 64>
 void G(
     // in-out
-    ap_uint<w> v[16],
+    ap_uint<64> v[16],
     // inputs
     ap_uint<4> a,
     ap_uint<4> b,
     ap_uint<4> c,
     ap_uint<4> d,
-    ap_uint<w> x,
-    ap_uint<w> y) {
-    //#pragma HLS inline
+    ap_uint<64> x,
+    ap_uint<64> y) {
+#pragma HLS inline
 
     v[a] = v[a] + v[b] + x;
-    v[d] = ROTR<w, 32>(v[d] ^ v[a]);
+    v[d] = ROTR<64, 32>(v[d] ^ v[a]);
     v[c] = v[c] + v[d];
-    v[b] = ROTR<w, 24>(v[b] ^ v[c]);
+    v[b] = ROTR<64, 24>(v[b] ^ v[c]);
     v[a] = v[a] + v[b] + y;
-    v[d] = ROTR<w, 16>(v[d] ^ v[a]);
+    v[d] = ROTR<64, 16>(v[d] ^ v[a]);
     v[c] = v[c] + v[d];
-    v[b] = ROTR<w, 63>(v[b] ^ v[c]);
+    v[b] = ROTR<64, 63>(v[b] ^ v[c]);
 
 } // end G
 
-/**
- * @brief Mixing 2 halves for unroll purpose.
- *
- * @tparam Bit width of the words, default value is 64.
- *
- * @param v Working vector.
- * @param vi0 The 1st index for working vector.
- * @param vi1 The 2nd index for working vector.
- * @param vi2 The 3rd index for working vector.
- * @param vi3 The 4th index for working vector.
- * @param vi4 The 5th index for working vector.
- * @param vi5 The 6th index for working vector.
- * @param vi6 The 7th index for working vector.
- * @param vi7 The 8th index for working vector.
- * @param vi8 The 9th index for working vector.
- * @param vi9 The 10th index for working vector.
- * @param vi10 The 11th index for working vector.
- * @param vi11 The 12th index for working vector.
- * @param vi12 The 13th index for working vector.
- * @param vi13 The 14th index for working vector.
- * @param vi14 The 15th index for working vector.
- * @param vi15 The 16th index for working vector.
- * @param y Message vector.
- * @param mi0 The 1st index for message vector.
- * @param mi1 The 2nd index for message vector.
- * @param mi2 The 3rd index for message vector.
- * @param mi3 The 4th index for message vector.
- * @param mi4 The 5th index for message vector.
- * @param mi5 The 6th index for message vector.
- * @param mi6 The 7th index for message vector.
- * @param mi7 The 8th index for message vector.
- *
- */
-
-template <unsigned int w = 64>
-void halfMixing(
+void halfMixing2(
     // in-out
-    ap_uint<w> v[16],
+    ap_uint<64> v[16],
     // inputs
-    ap_uint<4> vi0,
-    ap_uint<4> vi1,
-    ap_uint<4> vi2,
-    ap_uint<4> vi3,
-    ap_uint<4> vi4,
-    ap_uint<4> vi5,
-    ap_uint<4> vi6,
-    ap_uint<4> vi7,
-    ap_uint<4> vi8,
-    ap_uint<4> vi9,
-    ap_uint<4> vi10,
-    ap_uint<4> vi11,
-    ap_uint<4> vi12,
-    ap_uint<4> vi13,
-    ap_uint<4> vi14,
-    ap_uint<4> vi15,
-    ap_uint<w> m[16],
+    ap_uint<64> m[16],
     ap_uint<4> mi0,
     ap_uint<4> mi1,
     ap_uint<4> mi2,
@@ -401,15 +292,28 @@ void halfMixing(
     ap_uint<4> mi4,
     ap_uint<4> mi5,
     ap_uint<4> mi6,
-    ap_uint<4> mi7) {
+    ap_uint<4> mi7,
+    ap_uint<4> mi8,
+    ap_uint<4> mi9,
+    ap_uint<4> mi10,
+    ap_uint<4> mi11,
+    ap_uint<4> mi12,
+    ap_uint<4> mi13,
+    ap_uint<4> mi14,
+    ap_uint<4> mi15) {
 #pragma HLS inline off
 
-    G<w>(v, vi0, vi1, vi2, vi3, m[mi0], m[mi1]);
-    G<w>(v, vi4, vi5, vi6, vi7, m[mi2], m[mi3]);
-    G<w>(v, vi8, vi9, vi10, vi11, m[mi4], m[mi5]);
-    G<w>(v, vi12, vi13, vi14, vi15, m[mi6], m[mi7]);
+    G(v, 0, 4, 8, 12, m[mi0], m[mi1]);
+    G(v, 1, 5, 9, 13, m[mi2], m[mi3]);
+    G(v, 2, 6, 10, 14, m[mi4], m[mi5]);
+    G(v, 3, 7, 11, 15, m[mi6], m[mi7]);
 
-} // end halfMixing
+    G(v, 0, 5, 10, 15, m[mi8], m[mi9]);
+    G(v, 1, 6, 11, 12, m[mi10], m[mi11]);
+    G(v, 2, 7, 8, 13, m[mi12], m[mi13]);
+    G(v, 3, 4, 9, 14, m[mi14], m[mi15]);
+
+} // end halfMixing2
 
 /**
  * @brief Compression function F as defined in standard.
@@ -421,77 +325,58 @@ void halfMixing(
  * @tparam round Number of rounds, 12 for BLAKE2b and 10 for BLAKE2s.
  *
  * @param h State vector.
- * @param blake2b_iv Initialization vector.
  * @param m Message block vector.
  * @param t Offset counter.
  * @param last Final block indicator.
  *
  */
 
-template <unsigned int w = 64, unsigned int round = 12>
 void Compress(
     // in-out
-    ap_uint<w> h[8],
+    ap_uint<64> h[8],
     // inputs
-    ap_uint<w> blake2b_iv[8],
-    ap_uint<w> m[16],
-    ap_uint<2 * w> t,
+    ap_uint<64> m[16],
+    ap_uint<128> t,
     bool last) {
-    // message schedule sigma
-    const ap_uint<4> sigma[12][16] = {
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3},
-        {11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4}, {7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8},
-        {9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13}, {2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9},
-        {12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11}, {13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10},
-        {6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5}, {10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0},
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3}};
-#pragma HLS array_partition variable = sigma complete dim = 1
+    ap_uint<64> blake2b_iv[8] = {0x6A09E667F3BCC908, 0xBB67AE8584CAA73B, 0x3C6EF372FE94F82B, 0xA54FF53A5F1D36F1,
+                                 0x510E527FADE682D1, 0x9B05688C2B3E6C1F, 0x1F83D9ABFB41BD6B, 0x5BE0CD19137E2179};
+
+#pragma HLS array_partition variable = blake2b_iv complete
 
     // working variables
-    ap_uint<w> v[16];
+    ap_uint<64> v[16];
 #pragma HLS array_partition variable = v complete
-LOOP_INIT_WORKING_VARIABLES:
     for (ap_uint<4> i = 0; i < 8; i++) {
 #pragma HLS unroll
         v[i] = h[i];
         v[i + 8] = blake2b_iv[i];
     }
     // xor with low word of the total number of bytes
-    v[12] ^= t.range(w - 1, 0);
+    v[12] ^= t.range(63, 0);
     // high word
-    v[13] ^= t.range(2 * w - 1, w);
+    v[13] ^= t.range(127, 64);
     // invert v[14] if its final block
     if (last) {
         v[14] = ~v[14];
     }
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_BLAKE2B_DEBUG_ == 1
-    for (unsigned int i = 0; i < 16; i++) {
-        std::cout << "v[" << i << "] = " << std::hex << v[i] << std::endl;
-    }
-#endif
 
 LOOP_CRYPTOGRAPHIC_MIXING:
-    for (ap_uint<5> i = 0; i < round; i++) {
-#pragma HLS pipeline off
-        halfMixing<w>(v, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, m, sigma[i][0], sigma[i][1], sigma[i][2],
-                      sigma[i][3], sigma[i][4], sigma[i][5], sigma[i][6], sigma[i][7]);
+    halfMixing2(v, m, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    halfMixing2(v, m, 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3);
+    halfMixing2(v, m, 11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4);
+    halfMixing2(v, m, 7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8);
+    halfMixing2(v, m, 9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13);
+    halfMixing2(v, m, 2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9);
+    halfMixing2(v, m, 12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11);
+    halfMixing2(v, m, 13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10);
+    halfMixing2(v, m, 6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5);
+    halfMixing2(v, m, 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0);
+    halfMixing2(v, m, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    halfMixing2(v, m, 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3);
 
-        halfMixing<w>(v, 0, 5, 10, 15, 1, 6, 11, 12, 2, 7, 8, 13, 3, 4, 9, 14, m, sigma[i][8], sigma[i][9],
-                      sigma[i][10], sigma[i][11], sigma[i][12], sigma[i][13], sigma[i][14], sigma[i][15]);
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_BLAKE2B_DEBUG_ == 1
-        for (unsigned int i = 0; i < 16; i++) {
-            std::cout << "v[" << i << "] = " << std::hex << v[i] << std::endl;
-        }
-#endif
-    }
-
-LOOP_XOR_2_HALVES:
     for (ap_uint<4> i = 0; i < 8; i++) {
 #pragma HLS unroll
         h[i] ^= v[i] ^ v[i + 8];
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_BLAKE2B_DEBUG_ == 1
-        std::cout << "h[" << i << "] = " << std::hex << h[i] << std::endl;
-#endif
     }
 
 } // end Compress
@@ -515,17 +400,16 @@ LOOP_XOR_2_HALVES:
  *
  */
 
-template <unsigned int w>
 void blake2bDigest(
     // inputs
-    hls::stream<blockType>& blk_strm,
+    hls::stream<blake2BlockType>& blk_strm,
     hls::stream<ap_uint<128> >& nblk_strm,
     hls::stream<bool>& end_nblk_strm,
     hls::stream<ap_uint<8> >& key_len_strm,
     hls::stream<ap_uint<128> >& msg_len_strm,
     hls::stream<ap_uint<8> >& out_len_strm,
     // ouputs
-    hls::stream<ap_uint<8 * w> >& digest_strm,
+    hls::stream<ap_uint<512> >& digest_strm,
     hls::stream<bool>& end_digest_strm) {
     // initialization vector
     ap_uint<64> blake2b_iv[8] = {0x6A09E667F3BCC908, 0xBB67AE8584CAA73B, 0x3C6EF372FE94F82B, 0xA54FF53A5F1D36F1,
@@ -538,14 +422,14 @@ LOOP_BLAKE2B_MAIN:
     while (!endFlag) {
 #pragma HLS loop_tripcount min = 1 max = 1 avg = 1
         // state vector
-        ap_uint<w> h[8];
+        ap_uint<64> h[8];
 #pragma HLS array_partition variable = h complete
 
         // read key length in byte
-        ap_uint<w> key_len = key_len_strm.read();
+        ap_uint<64> key_len = key_len_strm.read();
 
         // read result hash value length in byte
-        ap_uint<w> out_len = out_len_strm.read();
+        ap_uint<64> out_len = out_len_strm.read();
 
         // read message length in byte
         ap_uint<128> msg_len = msg_len_strm.read();
@@ -556,13 +440,13 @@ LOOP_BLAKE2B_MAIN:
 #pragma HLS unroll
             h[i] = blake2b_iv[i];
         }
-        h[0] ^= ap_uint<w>(0x0000000001010000) ^ (key_len << 8) ^ out_len;
+        h[0] ^= ap_uint<64>(0x0000000001010000) ^ (key_len << 8) ^ out_len;
 
         // total number blocks to digest
         ap_uint<128> blkNum = nblk_strm.read();
 
         // total number of bytes
-        ap_uint<2 * w> t = 0;
+        ap_uint<128> t = 0;
 
         // last block flag
         bool last = false;
@@ -570,14 +454,9 @@ LOOP_BLAKE2B_MAIN:
     LOOP_BLAKE2B_DIGEST_NBLK:
         for (ap_uint<128> n = 0; n < blkNum; n++) {
 #pragma HLS loop_tripcount min = 1 max = 1 avg = 1
-#pragma HLS pipeline off
+#pragma HLS pipeline
             // input block
-            blockType blk = blk_strm.read();
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_BLAKE2B_DEBUG_ == 1
-            for (ap_uint<5> i = 0; i < 16; i++) {
-                std::cout << "M[" << i << "] = " << std::hex << blk.M[i] << std::endl;
-            }
-#endif
+            blake2BlockType blk = blk_strm.read();
 
             // unkeyed hashing
             if (key_len == 0) {
@@ -608,12 +487,9 @@ LOOP_BLAKE2B_MAIN:
                     t += 128;
                 }
             }
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_BLAKE2B_DEBUG_ == 1
-            std::cout << "t = " << std::hex << t << std::endl;
-#endif
 
             // hash core
-            Compress<w, 12>(h, blake2b_iv, blk.M, t, last);
+            Compress(h, blk.M, t, last);
         }
 
         // emit digest
@@ -621,7 +497,7 @@ LOOP_BLAKE2B_MAIN:
     LOOP_EMIT_DIGEST:
         for (ap_uint<4> i = 0; i < 8; i++) {
 #pragma HLS unroll
-            digest.range(w * i + w - 1, w * i) = h[i];
+            digest.range(64 * i + 63, 64 * i) = h[i];
         }
         digest_strm.write(digest);
         end_digest_strm.write(false);
@@ -652,22 +528,21 @@ LOOP_BLAKE2B_MAIN:
  *
  */
 
-template <unsigned int w>
 void blake2b(
     // inputs
-    hls::stream<ap_uint<w> >& msg_strm,
+    hls::stream<ap_uint<64> >& msg_strm,
     hls::stream<ap_uint<128> >& msg_len_strm,
-    hls::stream<ap_uint<w> >& key_strm,
+    hls::stream<ap_uint<512> >& key_strm,
     hls::stream<ap_uint<8> >& key_len_strm,
     hls::stream<ap_uint<8> >& out_len_strm,
     hls::stream<bool>& end_len_strm,
     // ouputs
-    hls::stream<ap_uint<8 * w> >& digest_strm,
+    hls::stream<ap_uint<8 * 64> >& digest_strm,
     hls::stream<bool>& end_digest_strm) {
 #pragma HLS dataflow
 
     // 1024-bit processing block stream
-    hls::stream<internal::blockType> blk_strm("blk_strm");
+    hls::stream<internal::blake2BlockType> blk_strm("blk_strm");
 #pragma HLS stream variable = blk_strm depth = 32
 #pragma HLS resource variable = blk_strm core = FIFO_LUTRAM
 
@@ -692,15 +567,196 @@ void blake2b(
 #pragma HLS resource variable = msg_len_out_strm core = FIFO_LUTRAM
 
     // padding key (optional) and message words into blocks
-    internal::generateBlock<w>(msg_strm, msg_len_strm, key_strm, key_len_strm, end_len_strm,            // in
-                               blk_strm, nblk_strm, end_nblk_strm, msg_len_out_strm, key_len_out_strm); // out
+    internal::generateBlock(msg_strm, msg_len_strm, key_strm, key_len_strm, end_len_strm,            // in
+                            blk_strm, nblk_strm, end_nblk_strm, msg_len_out_strm, key_len_out_strm); // out
 
     // digest processing blocks into hash value
-    internal::blake2bDigest<w>(blk_strm, nblk_strm, end_nblk_strm, key_len_out_strm, msg_len_out_strm,
-                               out_len_strm,                  // in
-                               digest_strm, end_digest_strm); // out
+    internal::blake2bDigest(blk_strm, nblk_strm, end_nblk_strm, key_len_out_strm, msg_len_out_strm,
+                            out_len_strm,                  // in
+                            digest_strm, end_digest_strm); // out
 
 } // end blake2b
+
+namespace internal {
+void initBlock(blake2BlockType& block) {
+#pragma HLS inline
+    for (int i = 0; i < 16; i++) {
+#pragma HLS unroll
+        block.M[i] = 0;
+    }
+}
+
+void genBlock(
+    // input
+    hls::stream<ap_uint<64> >& msg_strm,
+    hls::stream<ap_uint<6> >& msg_pack_len_strm,
+    hls::stream<ap_uint<512> >& key_strm,
+    hls::stream<ap_uint<8> >& key_len_strm,
+    hls::stream<ap_uint<8> >& hash_len_strm,
+    // output
+    hls::stream<blake2BlockType>& blk_strm,
+    hls::stream<ap_uint<10> >& blk_len_strm,
+    hls::stream<ap_uint<8> >& key_len_mid_strm,
+    hls::stream<ap_uint<8> >& hash_len_mid_strm) {
+    //
+    ap_uint<6> pack_len = msg_pack_len_strm.read();
+    while (pack_len[5] != 1) {
+        ap_uint<8> key_len = key_len_strm.read();
+        ap_uint<8> hash_len = hash_len_strm.read();
+        key_len_mid_strm.write(key_len);
+        hash_len_mid_strm.write(hash_len);
+
+        blake2BlockType blk;
+        ap_uint<10> blk_len;
+        ap_uint<8> counter;
+
+        // read key
+        ap_uint<512> tmp_k = key_strm.read();
+        for (int i = 0; i < 8; i++) {
+#pragma HLS unroll
+            blk.M[i] = tmp_k.range(i * 64 + 63, i * 64);
+            blk.M[i + 8] = 0;
+        }
+        if (key_len != 0) {
+            blk_len = 128;
+            if ((pack_len[4] == 1) && (pack_len.range(3, 0) == 0)) {
+                blk_len[8] = 1;
+            } else {
+                blk_len[8] = 0;
+            }
+
+            blk_strm.write(blk);
+            blk_len_strm.write(blk_len);
+        }
+
+        // read msg
+        initBlock(blk);
+        blk_len = 0;
+        counter = 0;
+        while (pack_len[4] != 1) {
+#pragma HLS pipeline II = 1
+            blk.M[counter] = msg_strm.read();
+            pack_len = msg_pack_len_strm.read();
+
+            counter++;
+            blk_len += 8;
+            if (counter == 16) {
+                blk_strm.write(blk);
+                blk_len_strm.write(ap_uint<10>(128));
+                counter = 0;
+                blk_len = 0;
+                initBlock(blk);
+            }
+        }
+
+        if (pack_len.range(3, 0) == 0) {
+            msg_strm.read();
+            if (key_len == 0) {
+                blk_strm.write(blk);
+
+                blk_len_strm.write(ap_uint<10>(1 << 8));
+            }
+        } else {
+            blk.M[counter] = msg_strm.read();
+            blk_len += pack_len.range(3, 0);
+            blk_len[8] = 1;
+            blk_strm.write(blk);
+            blk_len_strm.write(blk_len);
+        }
+
+        pack_len = msg_pack_len_strm.read();
+    }
+    blk_len_strm.write(ap_uint<10>(1 << 9));
+}
+
+void digestBlock(
+    // input
+    hls::stream<internal::blake2BlockType>& blk_strm,
+    hls::stream<ap_uint<10> >& blk_len_strm,
+    hls::stream<ap_uint<8> >& key_len_mid_strm,
+    hls::stream<ap_uint<8> >& hash_len_mid_strm,
+    // output
+    hls::stream<ap_uint<512> >& digest_strm,
+    hls::stream<bool>& end_digest_strm) {
+    //
+    ap_uint<64> blake2b_iv[8] = {0x6A09E667F3BCC908, 0xBB67AE8584CAA73B, 0x3C6EF372FE94F82B, 0xA54FF53A5F1D36F1,
+                                 0x510E527FADE682D1, 0x9B05688C2B3E6C1F, 0x1F83D9ABFB41BD6B, 0x5BE0CD19137E2179};
+
+    ap_uint<10> blk_len = blk_len_strm.read();
+    while (blk_len[9] == 0) {
+        ap_uint<64> hash_len = hash_len_mid_strm.read();
+        ap_uint<64> key_len = key_len_mid_strm.read();
+
+        ap_uint<64> h[8];
+#pragma HLS array_partition variable = h complete
+        for (ap_uint<4> i = 0; i < 8; i++) {
+#pragma HLS unroll
+            h[i] = blake2b_iv[i];
+        }
+        h[0] ^= ap_uint<64>(0x0000000001010000) ^ (key_len << 8) ^ hash_len;
+
+        ap_uint<128> t = 0;
+        blake2BlockType blk;
+
+        while (blk_len[8] == 0) {
+            blk = blk_strm.read();
+            t += 128;
+            Compress(h, blk.M, t, false);
+
+            blk_len = blk_len_strm.read();
+        }
+
+        blk = blk_strm.read();
+        t += blk_len.range(7, 0);
+        Compress(h, blk.M, t, true);
+
+        ap_uint<512> digest;
+        for (int i = 0; i < 8; i++) {
+#pragma HLS unroll
+            digest.range(i * 64 + 63, i * 64) = h[i];
+        }
+        digest_strm.write(digest);
+        end_digest_strm.write(false);
+
+        blk_len = blk_len_strm.read();
+    }
+    end_digest_strm.write(true);
+}
+}
+
+void blake2b(
+    // input
+    hls::stream<ap_uint<64> >& msg_strm,
+    hls::stream<ap_uint<6> >& msg_pack_len_strm,
+    hls::stream<ap_uint<512> >& key_strm,
+    hls::stream<ap_uint<8> >& key_len_strm,
+    hls::stream<ap_uint<8> >& hash_len_strm,
+    // output
+    hls::stream<ap_uint<512> >& digest_strm,
+    hls::stream<bool>& end_digest_strm) {
+#pragma HLS dataflow
+    hls::stream<internal::blake2BlockType> blk_strm;
+#pragma HLS stream variable = blk_strm depth = 2
+#pragma HLS resource variable = blk_strm core = FIFO_LUTRAM
+
+    hls::stream<ap_uint<10> > blk_len_strm;
+#pragma HLS stream variable = blk_len_strm depth = 2
+#pragma HLS resource variable = blk_len_strm core = FIFO_LUTRAM
+
+    hls::stream<ap_uint<8> > key_len_mid_strm;
+#pragma HLS stream variable = key_len_mid_strm depth = 2
+#pragma HLS resource variable = key_len_mid_strm core = FIFO_LUTRAM
+
+    hls::stream<ap_uint<8> > hash_len_mid_strm;
+#pragma HLS stream variable = hash_len_mid_strm depth = 2
+#pragma HLS resource variable = hash_len_mid_strm core = FIFO_LUTRAM
+
+    internal::genBlock(msg_strm, msg_pack_len_strm, key_strm, key_len_strm, hash_len_strm, // input
+                       blk_strm, blk_len_strm, key_len_mid_strm, hash_len_mid_strm);       // output
+
+    internal::digestBlock(blk_strm, blk_len_strm, key_len_mid_strm, hash_len_mid_strm, // input
+                          digest_strm, end_digest_strm);                               // output
+}
 
 } // namespace security
 } // namespace xf

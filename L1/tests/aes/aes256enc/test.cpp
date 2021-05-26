@@ -18,24 +18,15 @@
 
 #include "xf_security/aes.hpp"
 
-void test(hls::stream<ap_uint<128> >& plaintext_strm,
-          hls::stream<bool>& i_e_strm,
-          hls::stream<ap_uint<256> >& cipherkey_strm,
-          hls::stream<ap_uint<128> >& ciphertext_strm,
-          hls::stream<bool>& o_e_strm) {
-    bool is_end = i_e_strm.read();
+#define N 10
+void test(ap_uint<128> in, ap_uint<256> key, ap_uint<128>& out) {
+    ap_uint<128> outArr[N];
     xf::security::aesEnc<256> cipher;
-    ap_uint<256> cipherkey = cipherkey_strm.read();
-    cipher.updateKey(cipherkey);
-LOOP_A:
-    while (!is_end) {
-#pragma HLS PIPELINE II = 1
-        i_e_strm >> is_end;
-        ap_uint<128> plaintext = plaintext_strm.read();
-        ap_uint<128> ciphertext;
-        cipher.process(plaintext, cipherkey, ciphertext);
-        ciphertext_strm.write(ciphertext);
-        o_e_strm << false;
+    cipher.updateKey(key);
+#pragma HLS ARRAY_PARTITION variable = outArr complete
+    for (int i = 0; i < N; i++) {
+#pragma HLS pipeline II = 1
+        cipher.process(in, key, outArr[i]);
     }
-    o_e_strm << true;
+    out = outArr[0];
 }

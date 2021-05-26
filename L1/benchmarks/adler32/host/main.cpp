@@ -15,6 +15,7 @@
  */
 #ifndef HLS_TEST
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 #endif
 #include "utils.hpp"
 #include <iostream>
@@ -122,20 +123,29 @@ int main(int argc, const char* argv[]) {
     // do pre-process on CPU
     struct timeval start_time, end_time, test_time;
     // platform related operations
+    xf::common::utils_sw::Logger logger;
+    cl_int err = CL_SUCCESS;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
+
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel(program, "Adler32Kernel");
-    std::cout << "kernel has been created" << std::endl;
+
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+
+    cl::Kernel kernel(program, "Adler32Kernel", &err);
+    logger.logCreateKernel(err);
 
     cl_mem_ext_ptr_t mext_o[5];
     int j = 0;
@@ -210,6 +220,11 @@ int main(int argc, const char* argv[]) {
             std::cout << std::hex << "crc_out=" << crc_out << ",golden=" << golden << std::endl;
             nerr = 1;
         }
+    }
+    if (nerr == 0) {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    } else {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
     }
     return nerr;
 }

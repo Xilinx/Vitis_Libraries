@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <ap_int.h>
-#include <hls_stream.h>
+#ifndef _TEST_H_
+#define _TEST_H_
 
-void test(hls::stream<ap_uint<128> >& plaintext_strm,
-          hls::stream<bool>& i_e_strm,
-          hls::stream<ap_uint<256> >& cipherkey,
-          hls::stream<ap_uint<128> >& ciphertext_strm,
-          hls::stream<bool>& o_e_strm);
+#include <ap_int.h>
+
+void test(ap_uint<128> in, ap_uint<256> key, ap_uint<128>& out);
+
+#endif

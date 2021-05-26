@@ -21,7 +21,7 @@
 
 void test(hls::stream<ap_uint<64> >& msg_strm,
           hls::stream<ap_uint<128> >& msg_len_strm,
-          hls::stream<ap_uint<64> >& key_strm,
+          hls::stream<ap_uint<512> >& key_strm,
           hls::stream<ap_uint<8> >& key_len_strm,
           hls::stream<ap_uint<8> >& out_len_strm,
           hls::stream<bool>& end_len_strm,
