@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": true,
     "name": "Xillinx General Similarity Test", 
     "description": "", 
     "flow": "vitis", 
@@ -8,7 +8,7 @@
     ], 
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u50": {
             "v++": {
@@ -19,7 +19,7 @@
                 }
             }
         }
-    }, 
+    },
     "data": [
         "./data"
     ], 
@@ -40,7 +40,8 @@
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/include/hw", 
                 "LIB_DIR/L2/tests/general_similarity/host", 
-                "LIB_DIR/L2/tests/general_similarity/kernel", 
+                "LIB_DIR/L2/tests/general_similarity/kernel",
+                "LIB_DIR/../utils/L1/include", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
@@ -62,95 +63,95 @@
                     "location": "LIB_DIR/L2/tests/general_similarity/kernel/generalSimilarityKernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=generalSimilarityKernel", 
-                    "name": "generalSimilarityKernel", 
-                    "num_compute_units": 1, 
+                    "name": "generalSimilarityKernel",
+		            "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "generalSimilarityKernel", 
-                            "slr": "SLR0", 
+                            "name": "generalSimilarityKernel",
+                            "slr": "SLR0",
                             "arguments": [
                                 {
-                                    "name": "config", 
+                                    "name": "config",
                                     "memory": "HBM[28]"
-                                }, 
+                                },
                                 {
-                                    "name": "sourceIndice", 
+                                    "name": "sourceIndice",
                                     "memory": "HBM[28]"
-                                }, 
+                                },
                                 {
-                                    "name": "sourceWeight", 
+                                    "name": "sourceWeight",
                                     "memory": "HBM[28]"
-                                }, 
+                                },
                                 {
-                                    "name": "resultID", 
+                                    "name": "resultID",
                                     "memory": "HBM[28]"
-                                }, 
+                                },
                                 {
-                                    "name": "similarity", 
+                                    "name": "similarity",
                                     "memory": "HBM[28]"
-                                }, 
-                                {
-                                    "name": "dataIn00", 
+                                },
+				                {
+                                    "name": "dataIn00",
                                     "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "dataIn01", 
+                                },
+				                {
+                                    "name": "dataIn01",
                                     "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "dataIn02", 
+                                },
+				                {
+                                    "name": "dataIn02",
                                     "memory": "HBM[2]"
-                                }, 
-                                {
-                                    "name": "dataIn03", 
+                                },
+				                {
+                                    "name": "dataIn03",
                                     "memory": "HBM[3]"
-                                }, 
-                                {
-                                    "name": "dataIn10", 
+                                },
+				                {
+                                    "name": "dataIn10",
                                     "memory": "HBM[8]"
-                                }, 
-                                {
-                                    "name": "dataIn11", 
+                                },
+				                {
+                                    "name": "dataIn11",
                                     "memory": "HBM[9]"
-                                }, 
-                                {
-                                    "name": "dataIn12", 
+                                },
+				                {
+                                    "name": "dataIn12",
                                     "memory": "HBM[10]"
-                                }, 
-                                {
-                                    "name": "dataIn13", 
+                                },
+				                {
+                                    "name": "dataIn13",
                                     "memory": "HBM[11]"
-                                }, 
+                                },
                                 {
-                                    "name": "dataIn20", 
+                                    "name": "dataIn20",
                                     "memory": "HBM[16]"
-                                }, 
-                                {
-                                    "name": "dataIn21", 
+                                },
+				                {
+                                    "name": "dataIn21",
                                     "memory": "HBM[17]"
-                                }, 
-                                {
-                                    "name": "dataIn22", 
+                                },
+				                {
+                                    "name": "dataIn22",
                                     "memory": "HBM[18]"
-                                }, 
-                                {
-                                    "name": "dataIn23", 
+                                },
+				                {
+                                    "name": "dataIn23",
                                     "memory": "HBM[19]"
-                                }, 
-                                {
-                                    "name": "dataIn30", 
+                                },
+				                {
+                                    "name": "dataIn30",
                                     "memory": "HBM[24]"
-                                }, 
-                                {
-                                    "name": "dataIn31", 
+                                },
+				                {
+                                    "name": "dataIn31",
                                     "memory": "HBM[25]"
-                                }, 
-                                {
-                                    "name": "dataIn32", 
+                                },
+				                {
+                                    "name": "dataIn32",
                                     "memory": "HBM[26]"
-                                }, 
-                                {
-                                    "name": "dataIn33", 
+                                },
+				                {
+                                    "name": "dataIn33",
                                     "memory": "HBM[27]"
                                 }
                             ]
@@ -170,15 +171,10 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
-                    "vitis_hw_run": 10240
-                }, 
+                "max_memory_MB": 65536, 
                 "max_time_min": {
                     "vitis_hw_build": 800, 
-                    "vitis_hw_emu": 300, 
+                    "vitis_hw_emu": 600, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

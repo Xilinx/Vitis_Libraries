@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "xf_utils_sw/logger.hpp"
 #include "utils.hpp"
 #include "xf_graph_L3.hpp"
 #include <algorithm>
@@ -20,6 +21,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <math.h>
 
 #define DT float
 
@@ -220,7 +222,7 @@ int main(int argc, const char* argv[]) {
         data >> vertex;
         data >> distance;
         data >> pred_golden;
-        if (std::abs(result[0][vertex - 1] - distance) / distance > 0.00001) {
+        if (std::fabs(result[0][vertex - 1] - distance) / distance > 0.00001) {
             std::cout << "Error : distance " << vertex - 1 << " " << distance << " " << result[0][vertex - 1]
                       << std::endl;
             err++;
@@ -244,7 +246,7 @@ int main(int argc, const char* argv[]) {
                 tmp_fromID = pred[0][tmp_fromID];
                 iter++;
             }
-            if (std::abs(result[0][vertex - 1] - tmp_distance) / tmp_distance > 0.00001) {
+            if (std::fabs(result[0][vertex - 1] - tmp_distance) / tmp_distance > 0.00001) {
                 std::cout << "Error : predecessor " << vertex - 1 << std::endl;
                 tmp_fromID = pred[0][vertex - 1];
                 tmp_toID = vertex - 1;
@@ -271,11 +273,6 @@ int main(int argc, const char* argv[]) {
             err++;
         }
     }
-    if (err == 0) {
-        std::cout << "INFO: Test passed." << std::endl;
-    } else {
-        std::cout << "Error: There are in total " << err << " errors." << std::endl;
-    }
     free(connect);
 
     //--------------- Free and delete -----------------------------------
@@ -289,6 +286,12 @@ int main(int argc, const char* argv[]) {
     }
     delete[] result;
     delete[] pred;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    if (err) {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
+    } else {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    }
 
     return err;
 }

@@ -40,7 +40,8 @@
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/include/hw", 
                 "LIB_DIR/L2/tests/dense_similarity_int/host", 
-                "LIB_DIR/L2/tests/dense_similarity_int/kernel", 
+                "LIB_DIR/L2/tests/dense_similarity_int/kernel",
+                "LIB_DIR/../utils/L1/include", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "

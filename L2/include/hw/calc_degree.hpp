@@ -975,7 +975,6 @@ void calcuWeightedDegree(int numVertex,
  *
  * @param numVertex CSR/CSC data vertex number
  * @param numEdge CSR/CSC data edge number
- * @param numEdgePerChannel CSR/CSC data edge number per channel
  * @param index input CSR/CSC data index array
  * @param weight input CSR/CSC data weight array, default float type.
  * @param degree output degree array, default float type.

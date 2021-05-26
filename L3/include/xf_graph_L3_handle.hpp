@@ -29,6 +29,7 @@
 #include "op_convertcsrcsc.hpp"
 #include "op_similaritysparse.hpp"
 #include "op_similaritydense.hpp"
+#include "op_twohop.hpp"
 
 namespace xf {
 namespace graph {
@@ -75,6 +76,11 @@ class Handle {
         }
     };
 
+    /**
+     * \brief twohop operation
+     *
+     */
+    class opTwoHop* optwohop;
     /**
      * \brief pageRank operation
      *
@@ -132,6 +138,7 @@ class Handle {
     class openXRM* xrm;
 
     Handle() {
+        optwohop = new class opTwoHop;
         oppg = new class opPageRank;
         opsp = new class opSP;
         optcount = new class opTriangleCount;
@@ -147,7 +154,7 @@ class Handle {
 
     void free();
 
-    void setUp();
+    int setUp();
 
     void getEnv();
 
@@ -167,6 +174,14 @@ class Handle {
     void loadXclbin(unsigned int deviceId, char* xclbinName);
 
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName);
+    std::future<int> loadXclbinAsync(unsigned int deviceId, char* xclbinName);
+
+    void initOpTwoHop(const char* kernelName,
+                      char* xclbinFile,
+                      char* kernelAlias,
+                      unsigned int requestLoad,
+                      unsigned int deviceNeeded,
+                      unsigned int cuPerBoard);
 
     void initOpPageRank(const char* kernelName,
                         char* xclbinFile,

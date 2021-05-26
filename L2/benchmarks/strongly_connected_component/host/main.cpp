@@ -26,6 +26,7 @@
 #include <sys/time.h>
 #include <vector>
 #include <unordered_map>
+#include "xf_utils_sw/logger.hpp"
 
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
@@ -158,20 +159,30 @@ int main(int argc, const char* argv[]) {
 #ifndef HLS_TEST
     // do pre-process on CPU
     struct timeval start_time, end_time;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
+    cl_int err;
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
+
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel scc(program, "scc_kernel");
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+
+    cl::Kernel scc(program, "scc_kernel", &err);
+    logger.logCreateKernel(err);
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[10];
@@ -259,20 +270,23 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel end------" << std::endl;
     std::cout << "Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
 
-    unsigned long time1, time2, total_time;
-    events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Write DDR Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    total_time = time2 - time1;
-    events_kernel[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_kernel[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Kernel Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    total_time += time2 - time1;
-    events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Read DDR Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    total_time += time2 - time1;
-    std::cout << "Total Execution time " << total_time / 1000000.0 << "ms" << std::endl;
+    cl_ulong ts, te;
+
+    events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &ts);
+    events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &te);
+    float elapsed = ((float)te - (float)ts) / 1000000.0;
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_H2D_MS, elapsed);
+
+    events_kernel[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &ts);
+    events_kernel[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &te);
+    elapsed = ((float)te - (float)ts) / 1000000.0;
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_KERNEL_MS, elapsed);
+
+    events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &ts);
+    events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &te);
+    elapsed = ((float)te - (float)ts) / 1000000.0;
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_D2H_MS, elapsed);
+
 #else
     scc_kernel(numEdges, numVertices, (ap_uint<512>*)column32G1, (ap_uint<512>*)offset32G1, (ap_uint<512>*)column32G2,
                column32G2, (ap_uint<512>*)offset32G2, (ap_uint<512>*)column32G1, (ap_uint<512>*)offset32G1,
@@ -318,16 +332,17 @@ int main(int argc, const char* argv[]) {
         std::cout << "Warning : Some nodes are missing in the golden file, validation will skip them." << std::endl;
     }
 
-    int err = 0;
+    int errs = 0;
     for (int i = 0; i < numVertices; i++) {
         if (gold_result[i] != -1 && result[i].to_int() != gold_result[i]) {
             std::cout << "Mismatch-" << i << ":\tsw: " << gold_result[i] << " -> "
                       << "hw: " << result[i] << std::endl;
-            err++;
+            errs++;
         }
     }
 
-    if (err == 0) std::cout << "Check Passed.\n\n";
+    errs ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
-    return err;
+    return errs;
 }

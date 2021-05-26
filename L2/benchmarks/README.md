@@ -5,9 +5,9 @@ Here are benchmarks of the Vitis Graph Library using the Vitis environment and c
 ## Prerequisites
 
 ### Vitis Graph Library
-- Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted
+- Alveo U250 installed and configured as per [Alveo U250 Data Center Accelerator Card](https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted)
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2019.2 installed and configured
+- Xilinx Vitis 2020.2 installed and configured
 
 ### Spark
 - Spark 3.0.0 installed and configured
@@ -17,81 +17,41 @@ Here are benchmarks of the Vitis Graph Library using the Vitis environment and c
 - Datasets from https://sparse.tamu.edu/
 - Format requirement: compressed sparse row (CSR) or compressed sparse column (CSC).
 
+Table 1 Datasets for benchmark
+
+|   Datasets         |  Vertex  |   Edges   |   Degree    |
+|--------------------|----------|-----------|-------------|
+|  as-Skitter        | 1694616  |  11094209 | 6.546739202 |
+|  coPapersDBLP      | 540486   |  15245729 | 28.20744478 |
+|  coPapersCiteseer  | 434102   |  16036720 | 36.94228545 |
+|  cit-Patents       | 3774768  |  16518948 | 4.37614921  |
+|  europe_osm        | 50912018 |  54054660 | 1.061726919 |
+|  hollywood         | 1139905  |  57515616 | 50.45649945 |
+|  soc-LiveJournal1  | 4847571  |  68993773 | 14.23264827 |
+|  ljournal-2008     | 5363260  |  79023142 | 14.73416206 |
+|  patients          | 1250000  |  200      |      -      |
+
 ## Building
 
 Here, TriangleCount is taken as an example to indicate how to build the application and kernel with the command line Makefile flow.
 
-### Step 1 :
+- ### Download code
 
-Setup the build environment using the Vitis and XRT scripts:
-
-```
-        source <install path>/Vitis/2019.2/settings64.sh
-	source /opt/xilinx/xrt/setup.sh
-```
-
-### Step 2 :
-
-Call the Makefile. For example:
+These graph benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``master`` branch.
 
 ```
-        export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-	make run TARGET=sw_emu DEVICE=xilinx_u250_xdma_201830_2
+   git clone https://github.com/Xilinx/Vitis_Libraries.git
+   cd Vitis_Libraries
+   git checkout master
+   cd graph
 ```
 
-The Makefile supports various build target including software emulation, hardware emulation and hardware ('sw_emu', 'hw_emu' and 'hw', respectively). 
+- ### Setup environment
 
-In the case of the software and hardware emulations, the Makefile will build and launch the host code as part of the run.  These can be rerun manually using the following pattern:
-
-```
-        <host application> <xclbin> <argv>
-```
-
-For example, to run a prebuilt software emulation output (assuming the standard build directories):
+Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
 
 ```
-./bin_xilinx_u250_xdma_201830_2/host.exe -xclbin xclbin_xilinx_u250_xdma_201830_2_sw_emu/TC_Kernel.xclbin -o data/csr_offsets.txt -i data/csr_columns.txt
+   source <intstall_path>/installs/lin64/Vitis/2020.2/settings64.sh
+   source /opt/xilinx/xrt/setup.sh
+   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
-
-Assuming XRT with an Alveo U250 card has been configured, the hardware build is run as follows:
-
-```
-./bin_xilinx_u250_xdma_201830_2/host.exe -xclbin xclbin_xilinx_u250_xdma_201830_2_hw/TC_Kernel.xclbin -o data/csr_offsets.txt -i data/csr_columns.txt
-```
-
-## Example Output
-
-The testbench will compute the input data via the kernel and will compare with the expected result. For example, the following is the key information from the software emulation:
-
-```
----------------------Triangle Count-----------------
-Found Platform
-Platform Name: Xilinx
-Found Device=xilinx_u250_xdma_201830_2
-INFO: Importing xclbin_xilinx_u250_xdma_201830_2_sw_emu/TC_kernel.xclbin
-Loading: 'xclbin_xilinx_u250_xdma_201830_2_sw_emu/TC_kernel.xclbin'
-kernel start------
-vertexNum=10
-edgeNum=20
-offset Arr2Strm
-row Arr2Strm
-offset Arr2Strm2
-row Arr2Strm2
-coreControlImpl
-coreControlImpl2
-row1CopyImpl
-row2Impl
-mergeImpl
-tcAccUnit
-triangle count = 11
-kernel end------
-Execution time 3352.76ms
-Write DDR Execution time 3348.48 ms
-Kernel Execution time 4.01216 ms
-Read DDR Execution time 0.106196 ms
-Total Execution time 3352.69 ms
-INFO: case pass!
-
-```
-
-

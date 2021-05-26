@@ -25,18 +25,18 @@ DEBUG := no
 #'estimate' for estimate report generation
 #'system' for system report generation
 ifneq ($(REPORT), no)
-LDCLFLAGS += --report estimate
-LDCLFLAGS += --report system
+VPP_LDFLAGS += --report estimate
+VPP_LDFLAGS += --report system
 endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-LDCLFLAGS += --profile_kernel data:all:all:all
+VPP_LDFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
-LDCLFLAGS += --dk protocol:all:all:all
+VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
 #Check environment setup

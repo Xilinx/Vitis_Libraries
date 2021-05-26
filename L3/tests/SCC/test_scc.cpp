@@ -22,6 +22,7 @@
 #include <vector>
 #include "stdlib.h"
 #include <unordered_map>
+#include "xf_utils_sw/logger.hpp"
 
 #define DT uint32_t
 
@@ -210,11 +211,12 @@ int main(int argc, const char* argv[]) {
     g.freeBuffers();
     free(result);
 
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     if (err == 0) {
-        std::cout << "INFO: Results are correct" << std::endl;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
-        std::cout << "ERROR: Results are false" << std::endl;
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

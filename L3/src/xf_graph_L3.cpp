@@ -33,6 +33,21 @@ int runMultiEvents(uint32_t number, std::vector<xf::graph::L3::event<int> >& f) 
     return ret;
 }
 
+event<int> twoHop(xf::graph::L3::Handle& handle,
+                  uint32_t* numPart,
+                  uint64_t** pairPart,
+                  uint32_t** resPart,
+                  xf::graph::Graph<uint32_t, float> g) {
+    for (int i = 0; i < 5; ++i) {
+        (handle.optwohop)
+            ->eventQueue.push_back((handle.optwohop)->addwork(numPart[i], &pairPart[i][0], &resPart[i][0], g));
+    }
+    std::packaged_task<int(uint32_t, std::vector<event<int> >&)> t(runMultiEvents);
+    std::future<int> f0 = t.get_future();
+    (handle.optwohop)->twoHopThread = std::thread(std::move(t), 5, std::ref((handle.optwohop)->eventQueue));
+    return event<int>(std::forward<std::future<int> >(f0));
+};
+
 event<int> pageRankWeight(xf::graph::L3::Handle& handle,
                           float alpha,
                           float tolerance,

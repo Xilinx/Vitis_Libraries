@@ -33,9 +33,7 @@
 
 #ifndef __SYNTHESIS__
 
-//#define DEBUG true
-
-#ifdef DEBUG
+#ifdef DEBUG_SIMILARITY
 
 #define DEBUG_CSR_TO_COO true
 
@@ -218,11 +216,10 @@ Load_weight:
     } else {
         if (EN_FLOAT) {
             norm_float = hls::sqrt(accum_float);
-            norm = floatToBits<float, uint32_t>(norm_float);
         } else {
-            norm_uint32 = hls::sqrt(accum_uint32);
-            norm = norm_uint32;
+            norm_float = hls::sqrt((float)accum_uint32);
         }
+        norm = floatToBits<float, uint32_t>(norm_float);
     }
 
     max_col = max;
@@ -362,11 +359,10 @@ Load_weight:
     } else {
         if (EN_DOUBLE) {
             norm_double = hls::sqrt(accum_double); // sqrt
-            norm = floatToBits<double, uint64_t>(norm_double);
         } else {
-            norm_uint64 = hls::sqrt(accum_uint32); // no uint64 sqrt
-            norm = norm_uint64;
+            norm_double = hls::sqrt((double)accum_uint32); // no uint64 sqrt
         }
+        norm = floatToBits<double, uint64_t>(norm_double);
     }
     max_col = max;
 }

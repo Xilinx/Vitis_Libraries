@@ -31,8 +31,8 @@
 #include "similarity/enums.hpp"
 
 #ifndef __SYNTHESIS__
-#define DEBUG true
-#ifdef DEBUG
+#define DEBUG_SIMILARITY true
+#ifdef DEBUG_SIMILARITY
 #define DEBUG_INPUT_MUX true
 #endif
 #endif
@@ -2022,7 +2022,6 @@ void findCorrelation(hls::stream<ap_uint<WData> >& row_id,
 template <typename DT>
 DT adder(bool enable0, bool enable1, DT a, DT b) {
 #pragma HLS inline
-#pragma HLS PIPELINE
 
     DT result, in0, in1;
     if (enable0)
@@ -2042,7 +2041,6 @@ DT adder(bool enable0, bool enable1, DT a, DT b) {
 template <typename DT>
 DT adder(DT a, DT b) {
 #pragma HLS inline
-#pragma HLS PIPELINE
 
     DT result;
     result = a + b;
@@ -2051,8 +2049,7 @@ DT adder(DT a, DT b) {
 
 template <int CHNM, typename DT>
 DT adder_tree_top(ap_uint<CHNM> enable, DT in[CHNM]) {
-#pragma HLS inline off
-#pragma HLS PIPELINE
+#pragma HLS inline
 
     DT level1[CHNM / 2];
 #pragma HLS ARRAY_PARTITION variable = level1 complete dim = 1

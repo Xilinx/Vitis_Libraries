@@ -18,6 +18,7 @@
 #else
 #include "shortestPath_top.hpp"
 #endif
+#include "xf_utils_sw/logger.hpp"
 #include "ap_int.h"
 #include "utils.hpp"
 #include <cstring>
@@ -67,6 +68,9 @@ class ArgParser {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n---------------------Shortest Path----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -189,16 +193,20 @@ int main(int argc, const char* argv[]) {
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
     cl::Kernel shortestPath;
-    shortestPath = cl::Kernel(program, "shortestPath_top");
+    shortestPath = cl::Kernel(program, "shortestPath_top", &fail);
+    logger.logCreateKernel(fail);
 
     std::cout << "kernel has been created" << std::endl;
 
@@ -285,7 +293,7 @@ int main(int argc, const char* argv[]) {
 
     gettimeofday(&end_time, 0);
     std::cout << "kernel end------" << std::endl;
-    std::cout << "Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
+/*    std::cout << "Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
 
     unsigned long time1, time2, total_time;
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
@@ -302,7 +310,7 @@ int main(int argc, const char* argv[]) {
     events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
     std::cout << "Read DDR Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
     total_time += time2 - time1;
-    std::cout << "Total Execution time " << total_time / 1000000.0 << "ms" << std::endl;
+    std::cout << "Total Execution time " << total_time / 1000000.0 << "ms" << std::endl;*/
 #else
     ap_uint<512>* result512 = reinterpret_cast<ap_uint<512>*>(result);
     ap_uint<32>* result32 = reinterpret_cast<ap_uint<32>*>(result);
@@ -357,6 +365,12 @@ int main(int argc, const char* argv[]) {
                       << std::endl;
             err++;
         }
+    }
+
+    if (err) {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
+    } else {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     }
 
     return err;

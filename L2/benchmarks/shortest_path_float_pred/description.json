@@ -47,7 +47,8 @@
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/benchmarks/shortest_path_float_pred/host", 
                 "LIB_DIR/L2/benchmarks/shortest_path_float_pred/kernel", 
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }

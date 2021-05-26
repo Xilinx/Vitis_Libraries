@@ -199,7 +199,6 @@ void sortTopK(hls::stream<DATA_TYPE>& dinStrm,
               hls::stream<bool>& endOutStrm,
               int k,
               bool order) {
-#pragma HLS PIPELINE
 #pragma HLS INLINE
 
     internal::sort_top_k::insert_sort_top<DATA_TYPE, KEY_TYPE, MAX_SORT_NUMBER>(dinStrm, kinStrm, endInStrm, doutStrm,

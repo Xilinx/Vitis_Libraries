@@ -18,6 +18,7 @@
 #define _XF_GRAPH_L3_OP_SIMILARITYDENSE_CPP_
 
 #include "op_similaritydense.hpp"
+#include "xf_utils_sw/logger.hpp"
 #include <unordered_map>
 
 namespace xf {
@@ -25,18 +26,24 @@ namespace graph {
 namespace L3 {
 
 void createHandleSimDense(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
     handle.xclBins = xcl::import_binary_file(pXclbin);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins);
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
 }
 
 uint32_t opSimilarityDense::cuPerBoardSimDense;
@@ -378,6 +385,9 @@ void opSimilarityDense::bufferInit(clHandle* hds,
                                    cl::Kernel& kernel0,
                                    std::vector<cl::Memory>& ob_in,
                                    std::vector<cl::Memory>& ob_out) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     cl::Device device = hds[0].device;
 
     const char* instanceName = instanceName0.c_str();
@@ -389,7 +399,8 @@ void opSimilarityDense::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName);
+    kernel0 = cl::Kernel(program, instanceName, &fail);
+    logger.logCreateKernel(fail);
     std::cout << "INFO: Kernel has been created" << std::endl;
 
     uint32_t splitNm = g.splitNum;
@@ -471,6 +482,9 @@ void opSimilarityDense::bufferInitInt(clHandle* hds,
                                       cl::Kernel& kernel0,
                                       std::vector<cl::Memory>& ob_in,
                                       std::vector<cl::Memory>& ob_out) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     cl::Device device = hds[0].device;
 
     instanceName0 = "denseSimilarityKernel:{" + instanceName0 + "}";
@@ -488,7 +502,8 @@ void opSimilarityDense::bufferInitInt(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName);
+    kernel0 = cl::Kernel(program, instanceName, &fail);
+    logger.logCreateKernel(fail);
     std::cout << "INFO: Kernel has been created" << std::endl;
 
     int32_t splitNm = g.splitNum;

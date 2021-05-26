@@ -26,6 +26,22 @@ namespace graph {
 namespace L3 {
 
 /**
+ * @brief twoHop algorithm is implemented.
+ *
+ * @param handle Graph library L3 handle
+ * @param numPart Number of pairs of each part to be counted.
+ * @param pairPart Source and destination pairs of each part to be counted.
+ * @param resPart result of each part. The order matches the order of the input pairPart.
+ * @param g Input, CSR graph of IDs' type of uint32_t and weights' type of float
+ *
+ */
+event<int> twoHop(xf::graph::L3::Handle& handle,
+                  uint32_t* numPart,
+                  uint64_t** pairPart,
+                  uint32_t** resPart,
+                  xf::graph::Graph<uint32_t, float> g);
+
+/**
  * @brief pageRank algorithm is implemented.
  *
  * @param handle Graph library L3 handle
