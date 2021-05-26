@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2020 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ Currently this includes the following operations for dense matrix
    guide_L2/L2.rst
 
 .. toctree::
-   :caption: Benchmark Result
-   :maxdepth: 1
+   :caption: Benchmark 
+   :maxdepth: 2
    
    benchmark/benchmark.rst
 

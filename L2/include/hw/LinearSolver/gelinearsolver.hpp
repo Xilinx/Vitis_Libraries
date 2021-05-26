@@ -145,8 +145,8 @@ void gelinearsolver(int n, T* A, int b, T* B, int lda, int ldb, int& info) {
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
         static T matB[NCU][(NMAX + NCU - 1) / NCU];
-#pragma HLS array_partition variable = matA cyclic factor = NCU dim = 1
-#pragma HLS array_partition variable = matB cyclic factor = NCU dim = 1
+#pragma HLS array_partition variable = matA cyclic factor = NCU
+#pragma HLS array_partition variable = matB cyclic factor = NCU
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
         for (int j = 0; j < b; j++) {

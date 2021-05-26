@@ -39,13 +39,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Solver Library'
-copyright = '2019, Xilinx'
+copyright = '2020, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2020.1'
+version = '2021.1'
 # The full version, including alpha/beta/rc tags
-release = '2020.1 release'
+release = '2021.1 release'
 html_last_updated_fmt = '%B %d, %Y'
 
 rst_epilog = """

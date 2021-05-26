@@ -2,11 +2,13 @@
     "name": "Xilinx TRTRS", 
     "description": "Linear System Solver for dense upper / lower triangular matrix", 
     "flow": "vitis", 
-    "platform_type": "pcie", 
+    "platform_type": "", 
     "platform_whitelist": [
         "u50", 
         "u250", 
-        "u200"
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [
         "zc"
@@ -59,6 +61,22 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
     }, 
     "launch": [
@@ -76,7 +94,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/ext/xcl2", 
-                "LIB_DIR/ext/MatrixGen"
+                "LIB_DIR/ext/MatrixGen", 
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }

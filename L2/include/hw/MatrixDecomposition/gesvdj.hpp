@@ -867,10 +867,10 @@ void funcDataflow(int i,
     T m_c_right1[3 * UN][m_diagSize];
     T m_s_right1[3 * UN][m_diagSize];
     int tmp[16];
-#pragma HLS array_partition variable = tmp dim = 0 complete
-#pragma HLS array_partition variable = Order1 dim = 1
-#pragma HLS array_partition variable = m_c_right1 dim = 1
-#pragma HLS array_partition variable = m_s_right1 dim = 1
+#pragma HLS array_partition variable = tmp complete
+#pragma HLS array_partition variable = Order1
+#pragma HLS array_partition variable = m_c_right1
+#pragma HLS array_partition variable = m_s_right1
     for (int i = 0; i < 16; ++i) {
 #pragma HLS loop_tripcount min = 16 max = 16
         if (i < UN) {
@@ -1022,8 +1022,8 @@ While_Loop:
             T m_s_left[m_diagSize];
             T m_c_right[m_diagSize];
             T m_s_right[m_diagSize];
-#pragma HLS ARRAY_PARTITION variable = m_c_right dim = 0
-#pragma HLS ARRAY_PARTITION variable = m_s_right dim = 0
+#pragma HLS ARRAY_PARTITION variable = m_c_right
+#pragma HLS ARRAY_PARTITION variable = m_s_right
             if (flag) {
                 finished = false;
                 T matrix[3];
@@ -1155,9 +1155,9 @@ void gesvdj(int m,
     T dataU_2D[NCU][NCU][NMAXUN][NMAXUN];
 #pragma HLS RESOURCE variable = dataA_2D core = RAM_T2P_URAM
 #pragma HLS RESOURCE variable = dataU_2D core = RAM_T2P_URAM
-#pragma HLS ARRAY_PARTITION variable = dataA_2D dim = 1
-#pragma HLS ARRAY_PARTITION variable = dataU_2D dim = 1
-#pragma HLS ARRAY_PARTITION variable = dataA_2D dim = 2
+#pragma HLS ARRAY_PARTITION variable = dataA_2D
+#pragma HLS ARRAY_PARTITION variable = dataU_2D
+#pragma HLS ARRAY_PARTITION variable = dataA_2D
 #endif
 
 // Matrix transform from 1D to 2D

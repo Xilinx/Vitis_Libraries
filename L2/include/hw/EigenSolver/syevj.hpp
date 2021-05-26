@@ -78,9 +78,9 @@ void syevj(int m, T A[NMAX * NMAX], int lda, T S[NMAX], T U[NMAX * NMAX], int ld
     T dataU_2D[NCU][NCU][NMAXUN][NMAXUN];
 #pragma HLS RESOURCE variable = dataA_2D core = RAM_T2P_URAM
 #pragma HLS RESOURCE variable = dataU_2D core = RAM_T2P_URAM
-#pragma HLS ARRAY_PARTITION variable = dataA_2D dim = 1
-#pragma HLS ARRAY_PARTITION variable = dataU_2D dim = 1
-#pragma HLS ARRAY_PARTITION variable = dataA_2D dim = 2
+#pragma HLS ARRAY_PARTITION variable = dataA_2D
+#pragma HLS ARRAY_PARTITION variable = dataU_2D
+#pragma HLS ARRAY_PARTITION variable = dataA_2D
 #endif
 
 // Matrix transform from 1D to 2D
