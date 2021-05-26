@@ -4,7 +4,9 @@
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u50"
+        "u50", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [
         "zc"
@@ -18,6 +20,22 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            } 
         }
     }, 
     "launch": [
@@ -37,7 +55,8 @@
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L1/benchmarks/adler32/host", 
                 "LIB_DIR/L1/benchmarks/adler32/kernel", 
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }

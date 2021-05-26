@@ -491,7 +491,7 @@ LOOP_SHA1_MAIN:
             for (ap_uint<7> t = 0; t < 80; t++) {
 #pragma HLS pipeline II = 1
                 ap_uint<w> Wt = w_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && DEBUG
                 std::cout << "W[" << std::dec << t << "] = " << std::hex << Wt << std::endl;
 #endif
                 ap_uint<w> T;
@@ -508,7 +508,7 @@ LOOP_SHA1_MAIN:
                 c = ROTL<w>(30, b);
                 b = a;
                 a = T;
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && DEBUG
                 std::cout << "a = " << std::hex << a << std::endl;
                 std::cout << "b = " << std::hex << b << std::endl;
                 std::cout << "c = " << std::hex << c << std::endl;
@@ -523,7 +523,7 @@ LOOP_SHA1_MAIN:
             H[2] = c + H[2];
             H[3] = d + H[3];
             H[4] = e + H[4];
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && DEBUG
             std::cout << "H[0] = " << std::hex << H[0] << std::endl;
             std::cout << "H[1] = " << std::hex << H[1] << std::endl;
             std::cout << "H[2] = " << std::hex << H[2] << std::endl;

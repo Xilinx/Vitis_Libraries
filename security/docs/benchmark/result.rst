@@ -27,95 +27,63 @@ Benchmark Result
 *****************
 
 
-===========================
-aes256CbcDecrypt throughput
-===========================
-
-To profile performance of aes256CbcDecrypt, we prepare a datapack of 32K messages, each message is 1Kbyte. 
-We have 1 kernels, each kernel has 4 PUs.
-Kernel utilization and throughput is shown in table below. 
-
-=========== ================ ================ ============== ======= ========== =============
- Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
-=========== ================ ================ ============== ======= ========== =============
- 286MHz      203,595(11.8%)   312,900(9.1%)     761(28.3%)     0      29(0.3%)    4.7GB/s
-=========== ================ ================ ============== ======= ========== =============
-
-
-
-===========================
-aes256CbcEncrypt throughput
-===========================
-
-To profile performance of aes256CbcEncrypt, we prepare a datapack of 96K messages, each message is 1Kbyte. 
-We have 4 kernels, each kernel has 12 PUs.
-Kernel utilization and throughput is shown in table below. 
-
-=========== ================ ================ ============== ======= ========== =============
- Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
-=========== ================ ================ ============== ======= ========== =============
- 224MHz     1,059,093(61.3%) 1,010,145(34.9%)  654(24.3%)       0     152(1.3%)    5.5GB/s
-=========== ================ ================ ============== ======= ========== =============
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+|  API             | Frequency |     LUT        |     REG        |    BRAM      |  URAM |   DSP    | Throughput  |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+| aes256CbcDecrypt |  286MHz   |    203,595     |    312,900     |     761      |   0   |    29    |   4.7GB/s   |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+| aes256CbcEncrypt |  224MHz   |   1,059,093    |    1,010,145   |     654      |   0   |    152   |   5.5GB/s   |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+| rc4              |  147MHz   |   1,126,259    |    1,120,505   |     640      |   0   |    216   |   3.0GB/s   |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+| hmacSha1         |  227MHz   |    959,078     |    1,794,522   |     777      |   0   |    56    |   8.0 GB/s  |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+| crc32            |  300MHz   |    5,322       |    10,547      |     16       |   0   |    0     |   4.7 GB/s  |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
+| adler32          |  262MHz   |    6,348       |    12,232      |     16       |   0   |    0     |   4.1 GB/s  |
++------------------+-----------+----------------+----------------+--------------+-------+----------+-------------+
 
 
+These are details for benchmark result and usage steps.
 
-==============
-rc4 throughput
-==============
+.. toctree::
+   :maxdepth: 1
 
-To profile performance of rc4, we prepare a datapack of 24 messages, each message is 2Mbyte.
-We have 4 kernels, each kernel has 12 PUs.
-Kernel utilization and throughput is shown in table below. 
+   ../guide_L1/benchmark/aes256CbcDecrypt.rst
+   ../guide_L1/benchmark/aes256CbcEncrypt.rst
+   ../guide_L1/benchmark/hmacSha1.rst
+   ../guide_L1/benchmark/rc4.rst
+   ../guide_L1/benchmark/crc32.rst
+   ../guide_L1/benchmark/adler32.rst
 
-=========== ================ ================ ============== ======= ========== =============
- Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
-=========== ================ ================ ============== ======= ========== =============
- 147MHz     1,126,259(73.0%) 1,120,505(34.9%)   640 (44.0%)    0     216(1.8%)    3.0GB/s
-=========== ================ ================ ============== ======= ========== =============
+Test Overview
+--------------
 
-
-
-===================
-hmacSha1 throughput
-===================
-
-To profile performance of hmacSha1, we prepare a datapack of 512K messages, each message is 1Kbyte,
-key length is 256bits. We have 4 kernels, each kernel has 16 PUs.
-Kernel utilization and throughput is shown in table below. 
-
-=========== ================ ================== ============== ======= ========== =============
- Frequency        LUT                REG             BRAM       URAM       DSP     Throughput
-=========== ================ ================== ============== ======= ========== =============
- 227 MHz     959,078(55.5%)   1,794,522(52.0%)   777 (28.9%)     0      56(0.5%)    8.0 GB/s
-=========== ================ ================== ============== ======= ========== =============
+Here are benchmarks of the Vitis Security Library using the Vitis environment,
 
 
-===================
-crc32 throughput
-===================
+.. _l1_vitis_security: 
 
-To profile performance of crc32, we prepare a datapack of 268,435,456 byte messages as kernel input. 
-Base on U50, We have 1 kernel, each kernel has 1 PU.
-Kernel utilization and throughput is shown in table below. 
+Vitis Security Library
+~~~~~~~~~~~~~~~~~~~~~~~
 
-=========== ================ ================== ============== ======= ========== =============
- Frequency        LUT                REG             BRAM       URAM       DSP     Throughput
-=========== ================ ================== ============== ======= ========== =============
- 300 MHz      5,322(0.69%)      10,547(0.65%)     16 (1.37%)      0        0        4.7 GB/s
-=========== ================ ================== ============== ======= ========== =============
+* **Download code**
 
+These solver benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
 
-===================
-adler32 throughput
-===================
+.. code-block:: bash
 
-To profile performance of adler32, we prepare a datapack of 268,435,456 byte messages as kernel input. 
-Base on U50, We have 1 kernel, each kernel has 1 PU.
-Kernel utilization and throughput is shown in table below. 
+   git clone https://github.com/Xilinx/Vitis_Libraries.git
+   cd Vitis_Libraries
+   git checkout master
+   cd security
 
-=========== ================ ================== ============== ======= ========== =============
- Frequency        LUT                REG             BRAM       URAM       DSP     Throughput
-=========== ================ ================== ============== ======= ========== =============
- 262 MHz      6,348(0.83%)      12,232(0.76%)     16 (1.37%)      0        0        4.1 GB/s
-=========== ================ ================== ============== ======= ========== =============
+* **Setup environment**
 
+Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
+
+.. code-block:: bash
+
+   source /opt/xilinx/Vitis/2021.1/settings64.sh
+   source /opt/xilinx/xrt/setup.sh
+   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

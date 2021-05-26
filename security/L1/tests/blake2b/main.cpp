@@ -123,7 +123,7 @@ int main() {
 
     hls::stream<ap_uint<8 * MSG_SIZE> > msg_strm("msg_strm");
     hls::stream<ap_uint<128> > msg_len_strm("msg_len_strm");
-    hls::stream<ap_uint<8 * MSG_SIZE> > key_strm("key_strm");
+    hls::stream<ap_uint<512> > key_strm("key_strm");
     hls::stream<ap_uint<8> > key_len_strm("key_len_strm");
     hls::stream<ap_uint<8> > out_len_strm("out_len_strm");
     hls::stream<bool> end_len_strm("end_len_strm");
@@ -153,23 +153,13 @@ int main() {
         if (n != 0) {
             msg_strm.write(msg);
         }
-        unsigned int nk = 0;
         // write key stream word by word
+        ap_uint<512> tmp_k = 0;
         for (string::size_type i = 0; i < (*test).key.length(); i++) {
-            if (nk == 0) {
-                key = 0;
-            }
-            key.range(7 + 8 * nk, 8 * nk) = (unsigned)((*test).key[i]);
-            nk++;
-            if (nk == MSG_SIZE) {
-                key_strm.write(key);
-                nk = 0;
-            }
+            tmp_k.range(i * 8 + 7, i * 8) = (unsigned)((*test).key[i]);
         }
-        // deal with the condition that we didn't hit a boundary of the last word
-        if (nk != 0) {
-            key_strm.write(key);
-        }
+        key_strm.write(tmp_k);
+
         // inform the prmitive how many bytes do we have in this message
         msg_len_strm.write((unsigned long long)((*test).msg.length()));
         key_len_strm.write((unsigned long long)((*test).key.length()));
