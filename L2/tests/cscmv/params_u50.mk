@@ -5,7 +5,7 @@
 SPARSE_maxParamDdrBlocks=128
 SPARSE_maxParamHbmBlocks=64
 SPARSE_paramOffset=1024
-SPARSE_maxColMemBlocks = 128 
+SPARSE_maxColMemBlocks = 256
 SPARSE_maxColParBlocks = 512 
 SPARSE_maxRowBlocks = 512 
 SPARSE_dataType = float 
