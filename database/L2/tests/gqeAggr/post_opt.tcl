@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/writeTableAggr*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/multi_dynamic_eval_wrapper*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/scan_cols_wrapper*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/filter_ongoing*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR0 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/group_aggregate_wrapper*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical writeTableAggr*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical multi_dynamic_eval_wrapper*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical scan_cols_wrapper*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical filter_ongoing*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical group_aggregate_wrapper*] -clear_locs

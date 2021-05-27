@@ -99,9 +99,9 @@ int main() {
     {
         using namespace xf::database;
 
-        hls::stream<typename DynamicFilterInfo<4>::cfg_type> filter_cfg_strm;
+        hls::stream<typename DynamicFilterInfo<4, 32>::cfg_type> filter_cfg_strm;
         {
-            uint32_t config_bits[DynamicFilterInfo<4>::dwords_num];
+            uint32_t config_bits[DynamicFilterInfo<4, 32>::dwords_num];
             int n = 0;
             // a < 10
             config_bits[n++] = 0UL;

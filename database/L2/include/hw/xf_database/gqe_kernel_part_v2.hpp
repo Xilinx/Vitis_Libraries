@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _XF_DB_GQE_PART_H_
-#define _XF_DB_GQE_PART_H_
+#ifndef _XF_DB_GQE_PART_V2_H_
+#define _XF_DB_GQE_PART_V2_H_
 
 /**
  * @file gqe_kernel_part_v2.hpp
@@ -50,6 +50,9 @@ const int PU = (1 << HASHWH);
  * @param col_index index of input column
  * @param bit_num number of defined partition, log2(number of partition)
  *
+ * @param tin_meta input meta info
+ * @param tout_meta output meta info
+ *
  * @param buf_A input table buffer
  * @param buf_B output table buffer
  * @param buf_D configuration buffer
@@ -78,4 +81,4 @@ extern "C" void gqePart(const int k_depth,
                         ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_B8[],
                         ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_D[]);
 
-#endif // _XF_DB_GQE_PART_H_
+#endif // _XF_DB_GQE_PART_V2_H_

@@ -30,7 +30,7 @@ These APIs are software APIs that can be used to genreate configuration bits for
 .. toctree::
    :maxdepth: 2
 
-.. include:: ../rst_2/class_xf_database_gqe_JoinCommand.rst
+.. include:: ../rst_2/class_xf_database_gqe_KernelCommand.rst
 
 .. include:: ../rst_2/class_xf_database_gqe_AggrCommand.rst
 

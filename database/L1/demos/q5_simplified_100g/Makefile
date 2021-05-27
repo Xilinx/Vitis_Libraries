@@ -96,6 +96,7 @@ CXXFLAGS += -I$(CUR_DIR)/kernel
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST

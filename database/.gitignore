@@ -18,5 +18,6 @@ sample_*.ini
 emconfig.json
 profile*.csv
 timeline*.csv
+opencl_*.csv
 *xclbin.run_summary
 reports

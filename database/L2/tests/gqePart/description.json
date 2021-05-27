@@ -5,40 +5,19 @@
     "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3",
-        "xilinx_u50_gen3x16_xdma_201920_3"
+        "xilinx_u280_xdma_201920_3"
     ],
     "platform_blacklist": [
         "other"
     ],
     "platform_properties": {
         "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": []
+            "containers": [
+                {
+                    "name": "gqe_part_v2",
+                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.cfg"
-                    ]
-                }
-            }
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
+            ]
         }
     },
     "launch": [
@@ -70,7 +49,8 @@
                 "LIB_DIR/L1/include/sw",
                 "LIB_DIR/L2/include/sw",
                 "LIB_DIR/L2/tests/common",
-                "host"
+                "host",
+                "LIB_DIR/../utils/L1/include"
             ],
             "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
@@ -95,7 +75,7 @@
             "accelerators": [
                 {
                     "name": "gqePart",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v2.cpp",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v3.cpp",
                     "frequency": 200,
                     "num_compute_units": 1
                 }

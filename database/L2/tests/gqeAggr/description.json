@@ -12,32 +12,20 @@
     ],
     "platform_properties": {
         "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": []
+            "containers": [
+                {
+                    "name": "gqe_aggr_v2",
+                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.cfg"
-                    ]
-                }
-            }
+            ]
         },
         "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": []
+            "containers": [
+                {
+                    "name": "gqe_aggr_v2",
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
+            ]
         }
     },
     "launch": [
@@ -69,7 +57,8 @@
                 "LIB_DIR/L1/include/sw",
                 "LIB_DIR/L2/include/sw",
                 "LIB_DIR/L2/tests/common",
-                "host"
+                "host",
+                "LIB_DIR/../utils/L1/include"
             ],
             "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
@@ -94,8 +83,7 @@
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 180,
-            "ldclflags": "--config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
+            "frequency": 180
         }
     ],
     "testinfo": {
@@ -113,7 +101,7 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 800,
+                    "vitis_hw_build": 1440,
                     "vitis_hw_emu": 470,
                     "vitis_sw_emu": 60,
                     "vitis_hw_run": 10

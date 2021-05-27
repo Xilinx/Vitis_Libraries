@@ -255,47 +255,47 @@ void group_aggregate_wrapper(
     hls::stream<ap_uint<_WStrm> > dup0_strm[_CHNM][_ColNM];
 #pragma HLS stream variable = dup0_strm depth = 8
 #pragma HLS array_partition variable = dup0_strm complete
-#pragma HLS resource variable = dup0_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dup0_strm type = fifo impl = lutram
     hls::stream<ap_uint<_WStrm> > dup1_strm[_CHNM][_ColNM];
 #pragma HLS stream variable = dup1_strm depth = 8
 #pragma HLS array_partition variable = dup1_strm complete
-#pragma HLS resource variable = dup1_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dup1_strm type = fifo impl = lutram
     hls::stream<bool> e0_strm[_CHNM];
 #pragma HLS stream variable = e0_strm depth = 8
 #pragma HLS array_partition variable = e0_strm complete
-#pragma HLS resource variable = e0_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = lutram
     hls::stream<bool> e1_strm[_CHNM];
 #pragma HLS stream variable = e1_strm depth = 8
 #pragma HLS array_partition variable = e1_strm complete
-#pragma HLS resource variable = e1_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = lutram
 
     hls::stream<ap_uint<_WStrm> > strm_key_in[_CHNM][_ColNM];
 #pragma HLS stream variable = strm_key_in depth = 8
 #pragma HLS array_partition variable = strm_key_in complete
-#pragma HLS resource variable = strm_key_in core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = strm_key_in type = fifo impl = lutram
     hls::stream<ap_uint<_WStrm> > strm_pld_in[_CHNM][_ColNM];
 #pragma HLS stream variable = strm_pld_in depth = 8
 #pragma HLS array_partition variable = strm_pld_in complete
-#pragma HLS resource variable = strm_pld_in core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = strm_pld_in type = fifo impl = lutram
     hls::stream<bool> e2_strm[_CHNM];
 #pragma HLS stream variable = e2_strm depth = 8
 #pragma HLS array_partition variable = e2_strm complete
-#pragma HLS resource variable = e1_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = lutram
     hls::stream<bool> e3_strm[_CHNM];
 #pragma HLS stream variable = e3_strm depth = 8
-#pragma HLS resource variable = e3_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e3_strm type = fifo impl = lutram
 
     hls::stream<ap_uint<_WStrm> > strm_key_out[_ColNM];
 #pragma HLS stream variable = strm_key_out depth = 512
 #pragma HLS array_partition variable = strm_key_out complete
-#pragma HLS resource variable = strm_key_out core = FIFO_BRAM
+#pragma HLS bind_storage variable = strm_key_out type = fifo impl = bram
     hls::stream<ap_uint<_WStrm> > strm_pld_out[3][_ColNM];
 #pragma HLS stream variable = strm_pld_out depth = 512
 #pragma HLS array_partition variable = strm_pld_out complete
-#pragma HLS resource variable = strm_pld_out core = FIFO_BRAM
+#pragma HLS bind_storage variable = strm_pld_out type = fifo impl = bram
     hls::stream<bool> e4_strm;
 #pragma HLS stream variable = e4_strm depth = 512
-#pragma HLS resource variable = e4_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e4_strm type = fifo impl = lutram
 
     for (int i = 0; i < _CHNM; i++) {
 #pragma HLS unroll

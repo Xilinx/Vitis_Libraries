@@ -197,39 +197,39 @@ void aggr_kernel_internal(ap_uint<8 * KEY_SZ * VEC_LEN> buf_l_orderkey[L_DEPTH],
     hls::stream<ap_uint<8 * KEY_SZ> > k0_strm_arry[VEC_LEN];
     hls::stream<ap_uint<8 * MONEY_SZ> > p0_strm_arry[VEC_LEN];
     hls::stream<bool> e0_strm_arry[VEC_LEN];
-#pragma HLS RESOURCE variable = k0_strm_arry core = FIFO_LUTRAM
-#pragma HLS STREAM variable = k0_strm_arry depth = 64 dim = 1
-#pragma HLS RESOURCE variable = p0_strm_arry core = FIFO_LUTRAM
-#pragma HLS STREAM variable = p0_strm_arry depth = 64 dim = 1
-#pragma HLS RESOURCE variable = e0_strm_arry core = FIFO_LUTRAM
-#pragma HLS STREAM variable = e0_strm_arry depth = 64 dim = 1
+#pragma HLS bind_storage variable = k0_strm_arry type = fifo impl = lutram
+#pragma HLS STREAM variable = k0_strm_arry depth = 64
+#pragma HLS bind_storage variable = p0_strm_arry type = fifo impl = lutram
+#pragma HLS STREAM variable = p0_strm_arry depth = 64
+#pragma HLS bind_storage variable = e0_strm_arry type = fifo impl = lutram
+#pragma HLS STREAM variable = e0_strm_arry depth = 64
 
     hls::stream<ap_uint<8 * KEY_SZ> > k1_strm_arry[VEC_LEN][KEY_COL];
     hls::stream<ap_uint<8 * MONEY_SZ> > p1_strm_arry[VEC_LEN][PLD_COL];
     hls::stream<bool> e1_strm_arry[VEC_LEN];
-#pragma HLS RESOURCE variable = k1_strm_arry core = FIFO_LUTRAM
-#pragma HLS STREAM variable = k1_strm_arry depth = 64 dim = 1
-#pragma HLS RESOURCE variable = p1_strm_arry core = FIFO_LUTRAM
-#pragma HLS STREAM variable = p1_strm_arry depth = 64 dim = 1
-#pragma HLS RESOURCE variable = e1_strm_arry core = FIFO_LUTRAM
-#pragma HLS STREAM variable = e1_strm_arry depth = 64 dim = 1
+#pragma HLS bind_storage variable = k1_strm_arry type = fifo impl = lutram
+#pragma HLS STREAM variable = k1_strm_arry depth = 64
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = lutram
+#pragma HLS STREAM variable = p1_strm_arry depth = 64
+#pragma HLS bind_storage variable = e1_strm_arry type = fifo impl = lutram
+#pragma HLS STREAM variable = e1_strm_arry depth = 64
 
     hls::stream<ap_uint<32> > config_strm;
     hls::stream<ap_uint<32> > result_info_strm;
-#pragma HLS RESOURCE variable = config_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = config_strm depth = 8 dim = 1
-#pragma HLS RESOURCE variable = result_info_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = result_info_strm depth = 8 dim = 1
+#pragma HLS bind_storage variable = config_strm type = fifo impl = lutram
+#pragma HLS STREAM variable = config_strm depth = 8
+#pragma HLS bind_storage variable = result_info_strm type = fifo impl = lutram
+#pragma HLS STREAM variable = result_info_strm depth = 8
 
     hls::stream<ap_uint<KEY_SZ * 8> > aggr_key_out[KEY_COL];
     hls::stream<ap_uint<MONEY_SZ * 8> > aggr_pld_out[3][PLD_COL];
     hls::stream<bool> strm_e_out;
-#pragma HLS RESOURCE variable = aggr_key_out core = FIFO_BRAM
-#pragma HLS STREAM variable = aggr_key_out depth = 512 dim = 1
-#pragma HLS RESOURCE variable = aggr_pld_out core = FIFO_BRAM
-#pragma HLS STREAM variable = aggr_pld_out depth = 512 dim = 1
-#pragma HLS RESOURCE variable = strm_e_out core = FIFO_LUTRAM
-#pragma HLS STREAM variable = strm_e_out depth = 512 dim = 1
+#pragma HLS bind_storage variable = aggr_key_out type = fifo impl = bram
+#pragma HLS STREAM variable = aggr_key_out depth = 512
+#pragma HLS bind_storage variable = aggr_pld_out type = fifo impl = bram
+#pragma HLS STREAM variable = aggr_pld_out depth = 512
+#pragma HLS bind_storage variable = strm_e_out type = fifo impl = lutram
+#pragma HLS STREAM variable = strm_e_out depth = 512
 
     //--------------------------- scan in -----------------------------//
     xf::database::scanCol<32, VEC_LEN, 4, KEY_SZ, MONEY_SZ>(buf_l_orderkey, buf_l_extendedprice, l_nrow, k0_strm_arry,

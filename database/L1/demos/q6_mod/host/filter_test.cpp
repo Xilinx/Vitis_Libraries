@@ -34,12 +34,14 @@
 #include <cstring>
 #include <sys/time.h>
 
+#include "xf_utils_sw/logger.hpp"
+
 #include "xclhost.hpp"
 #include "CL/cl_ext_xilinx.h"
 #include "cl_errcode.hpp"
 #define XBANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
-int err = 0;
+int ret = 0;
 
 enum flt_debug_level { FLT_ERROR, FLT_WARNING, FLT_INFO, FLT_DEBUG, FLT_ALL };
 
@@ -95,7 +97,7 @@ int create_buffers(cl_context ctx,
     cl_mem_ext_ptr_t mext_l_extendedprice = {5, col_l_extendedprice, kernel};
     cl_mem_ext_ptr_t mext_revenue = {7, col_revenue, kernel};
 
-    // cl_int err;
+    cl_int err;
 
     *buf_filter_cfg = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                                      (sizeof(uint32_t) * BUF_CFG_DEPTH), &mext_filter_cfg, &err);
@@ -165,14 +167,14 @@ void CL_CALLBACK print_buffer(cl_event ev, cl_int st, void* d) {
     // compare FPGA results with CPU ref results
     if (t->row == 1000) {
         std::cout << "First 1000 rows from 1G data, reference value: 16575.2594\n";
-        err = (rv == 165752594) ? 0 : 1;
+        ret = (rv == 165752594) ? 0 : 1;
     } else if (t->row == L_MAX_ROW) {
         std::cout << "All rows from 1G data, reference value: 62102819.2435\n";
-        err = (rv == 621028192435) ? 0 : 1;
+        ret = (rv == 621028192435) ? 0 : 1;
     }
 
-    if (err)
-        std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
+    if (ret)
+        std::cout << "FAIL: " << ret << " error(s) detected!" << std::endl;
     else if (t->row == 1000 || t->row == L_MAX_ROW)
         std::cout << "PASS!" << std::endl;
     else
@@ -184,6 +186,9 @@ using namespace xf::database::enums;
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n------------ TPC-H Query 6 Modified (1G) -------------\n";
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
 
     // cmd arg parser.
     ArgParser parser(argc, argv);
@@ -397,9 +402,7 @@ int main(int argc, const char* argv[]) {
     cl_kernel kernel;
 
     kernel = clCreateKernel(prog, "filter_kernel", &err);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: fail to create kernel: %s.\n", clGetErrorString(err));
-    }
+    logger.logCreateKernel(err);
 
     // two step ping-pang.
     const int step = 2;
@@ -573,6 +576,8 @@ int main(int argc, const char* argv[]) {
     free(col_l_commitdate);
     free(col_l_extendedprice);
 
+    ret ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
+
     std::cout << "------------------------------------------------------\n\n";
-    return err;
+    return ret;
 }

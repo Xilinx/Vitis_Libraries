@@ -96,9 +96,9 @@ void syn_bloom_filter_bram_and_strm(hls::stream<ap_uint<INPUT_WIDTH> >& gen_msg_
                                     hls::stream<bool>& res_in_e_strm) {
 #pragma HLS dataflow
     hls::stream<ap_uint<16> > bit_vet_strm;
-#pragma HLS STREAM variable = bit_vet_strm depth = 64 dim = 1
+#pragma HLS STREAM variable = bit_vet_strm depth = 64
     hls::stream<bool> bit_vet_e_strm;
-#pragma HLS STREAM variable = bit_vet_e_strm depth = 64 dim = 1
+#pragma HLS STREAM variable = bit_vet_e_strm depth = 64
 
     xf::database::bfGenStream<true, INPUT_WIDTH, HASH_WIDTH>(gen_msg_strm, gen_in_e_strm, bit_vet_strm, bit_vet_e_strm);
 
@@ -112,13 +112,13 @@ void syn_bloom_filter_uram(hls::stream<ap_uint<INPUT_WIDTH> >& gen_msg_strm,
                            hls::stream<bool>& res_msg_strm,
                            hls::stream<bool>& res_in_e_strm) {
     ap_uint<72> bit_vector_ptr0[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector_ptr0 type = ram_2p impl = uram
 
     ap_uint<72> bit_vector_ptr1[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector_ptr1 type = ram_2p impl = uram
 
     ap_uint<72> bit_vector_ptr2[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector_ptr2 type = ram_2p impl = uram
 
     for (int i = 0; i < URAM_MEM_SPACE; i++) {
 #pragma HLS pipeline II = 1
@@ -141,13 +141,13 @@ void load_uram_and_check(hls::stream<ap_uint<64> >& bit_vet_strm,
                          hls::stream<bool>& res_in_e_strm) {
     // init
     ap_uint<72> bit_vector_ptr0[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector_ptr0 type = ram_2p impl = uram
 
     ap_uint<72> bit_vector_ptr1[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector_ptr1 type = ram_2p impl = uram
 
     ap_uint<72> bit_vector_ptr2[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector_ptr2 type = ram_2p impl = uram
 
     for (int i = 0; i < URAM_MEM_SPACE; i++) {
 #pragma HLS pipeline II = 1
@@ -186,9 +186,9 @@ void syn_bloom_filter_uram_and_strm(hls::stream<ap_uint<INPUT_WIDTH> >& gen_msg_
                                     hls::stream<bool>& res_in_e_strm) {
 #pragma HLS dataflow
     hls::stream<ap_uint<64> > bit_vet_strm;
-#pragma HLS STREAM variable = bit_vet_strm depth = 64 dim = 1
+#pragma HLS STREAM variable = bit_vet_strm depth = 64
     hls::stream<bool> bit_vet_e_strm;
-#pragma HLS STREAM variable = bit_vet_e_strm depth = 64 dim = 1
+#pragma HLS STREAM variable = bit_vet_e_strm depth = 64
 
     xf::database::bfGenStream<false, INPUT_WIDTH, HASH_WIDTH>(gen_msg_strm, gen_in_e_strm, bit_vet_strm,
                                                               bit_vet_e_strm);

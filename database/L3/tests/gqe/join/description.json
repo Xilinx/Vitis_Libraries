@@ -12,18 +12,12 @@
     ],
     "platform_properties": {
         "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": []
+            "containers": [
+                {
+                    "name": "gqe_join_part",
+                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.cfg"
-                    ]
-                }
-            }
+            ]
         }
     },
     "launch": [
@@ -49,8 +43,12 @@
             "sources": [
                 "host/test_q5s.cpp",
                 "LIB_DIR/L3/src/sw/gqe_table.cpp",
+                "LIB_DIR/L3/src/sw/gqe_base_config.cpp",
                 "LIB_DIR/L3/src/sw/gqe_join_config.cpp",
+                "LIB_DIR/L3/src/sw/gqe_partjoin_config.cpp",
+                "LIB_DIR/L3/src/sw/gqe_init.cpp",
                 "LIB_DIR/L3/src/sw/gqe_ocl.cpp",
+                "LIB_DIR/L3/src/sw/gqe_base.cpp",
                 "LIB_DIR/L3/src/sw/gqe_join.cpp"
             ],
             "includepaths": [
@@ -59,7 +57,8 @@
                 "LIB_DIR/L2/include/sw",
                 "LIB_DIR/L3/tests/gqe/common",
                 "LIB_DIR/L3/include/sw",
-                "host"
+                "host",
+                "LIB_DIR/../utils/L1/include"
             ],
             "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
@@ -84,19 +83,18 @@
             "accelerators": [
                 {
                     "name": "gqeJoin",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_v2.cpp",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_filter.cpp",
                     "frequency": 250,
                     "num_compute_units": 1
                 },
                 {
                     "name": "gqePart",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v2.cpp",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v3.cpp",
                     "frequency": 250,
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 180,
-            "ldclflags": "--config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
+            "frequency": 160
         }
     ],
     "testinfo": {

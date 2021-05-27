@@ -197,7 +197,7 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     hls::stream<ap_uint<WPayload> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 8
 #pragma HLS array_partition variable = p1_strm_arry dim = 0
-#pragma HLS resource variable = p1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<WhashLow> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 8
 #pragma HLS array_partition variable = hash_strm_arry dim = 0
@@ -212,7 +212,7 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     hls::stream<ap_uint<WPayload> > p1_strm_arry_c0[PU];
 #pragma HLS stream variable = p1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c0 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<WhashLow> > hash_strm_arry_c0[PU];
 #pragma HLS stream variable = hash_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c0 dim = 0
@@ -226,7 +226,7 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     hls::stream<ap_uint<WPayload> > p1_strm_arry_c1[PU];
 #pragma HLS stream variable = p1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c1 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<WhashLow> > hash_strm_arry_c1[PU];
 #pragma HLS stream variable = hash_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c1 dim = 0
@@ -240,7 +240,7 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     hls::stream<ap_uint<WPayload> > p1_strm_arry_c2[PU];
 #pragma HLS stream variable = p1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c2 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<WhashLow> > hash_strm_arry_c2[PU];
 #pragma HLS stream variable = hash_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c2 dim = 0
@@ -253,7 +253,7 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     hls::stream<ap_uint<WPayload> > p1_strm_arry_c3[PU];
 #pragma HLS stream variable = p1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c3 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<WhashLow> > hash_strm_arry_c3[PU];
 #pragma HLS stream variable = hash_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c3 dim = 0
@@ -269,11 +269,11 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     hls::stream<ap_uint<WKey> > k2_strm_arry[PU];
 #pragma HLS stream variable = k2_strm_arry depth = 32
 #pragma HLS array_partition variable = k2_strm_arry dim = 0
-#pragma HLS resource variable = k2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k2_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<WPayload> > p2_strm_arry[PU];
 #pragma HLS stream variable = p2_strm_arry depth = 32
 #pragma HLS array_partition variable = p2_strm_arry dim = 0
-#pragma HLS resource variable = p2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p2_strm_arry type = fifo impl = srl
     hls::stream<bool> e2_strm_arry[PU];
 #pragma HLS stream variable = e2_strm_arry depth = 8
 #pragma HLS array_partition variable = e2_strm_arry dim = 0
@@ -284,15 +284,15 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
 #pragma HLS array_partition variable = e4_strm_arry dim = 0
 #pragma HLS stream variable = e4_strm_arry depth = 8
     hls::stream<ap_uint<WTmpBufferAddress> > addr_strm[PU];
-#pragma HLS stream variable = raddr_strm depth = 8
-#pragma HLS array_partition variable = raddr_strm dim = 0
+#pragma HLS stream variable = addr_strm depth = 8
+#pragma HLS array_partition variable = addr_strm dim = 0
     hls::stream<ap_uint<18> > nm0_strm_arry[PU];
 #pragma HLS stream variable = nm0_strm_arry depth = 32
 #pragma HLS array_partition variable = nm0_strm_arry dim = 0
     hls::stream<ap_uint<WPayload> > j0_strm_arry[PU];
 #pragma HLS stream variable = j0_strm_arry depth = 8
 #pragma HLS array_partition variable = j0_strm_arry dim = 0
-#pragma HLS resource variable = j0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = j0_strm_arry type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     ap_uint<72>* bit_vector0[PU];
@@ -311,13 +311,13 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     ap_uint<72> bit_vector2[PU][(HDP_J >> 2)];
     ap_uint<72> bit_vector3[PU][(HDP_J >> 2)];
 #pragma HLS array_partition variable = bit_vector0 dim = 1
-#pragma HLS resource variable = bit_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector0 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector1 dim = 1
-#pragma HLS resource variable = bit_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector1 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector2 dim = 1
-#pragma HLS resource variable = bit_vector2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector2 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector3 dim = 1
-#pragma HLS resource variable = bit_vector3 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector3 type = ram_2p impl = uram
 #endif
 
     // clang-format off

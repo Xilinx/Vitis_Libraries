@@ -50,6 +50,9 @@ class MetaTable {
     // valid input cols
     int8_t _vnum;
 
+    // sec_id, used for gen_row_id
+    int32_t _secID;
+
     // only used in gqePart, indicate the size of each parition in each col output
     int32_t _partition_size = 0;
     // only used in gqePart, the num of partition
@@ -72,6 +75,7 @@ class MetaTable {
 
    public:
     MetaTable() {
+        _secID = -1;
         _mbuf = gqe::utils::aligned_alloc<ap_uint<512> >(_metaDepth);
         memset(_mbuf, 0, sizeof(ap_uint<512>) * _metaDepth);
     };
@@ -87,6 +91,7 @@ class MetaTable {
             _mbuf[m].range(95, 88) = _vecs[m]._buffer_ids[2];
             _mbuf[m].range(103, 96) = _vecs[m]._buffer_ids[3];
             _mbuf[m].range(135, 104) = _partition_size;
+            _mbuf[m].range(167, 136) = _secID;
         }
         for (int m = _vnum; m < 8; ++m) {
             _mbuf[m].range(7, 0) = _vnum;
@@ -96,6 +101,9 @@ class MetaTable {
 
         return _mbuf;
     };
+    //! set the sec id in meta
+    void setSecID(int32_t _id) { _secID = _id; };
+
     //! set the col num of input table
     void setColNum(int8_t num) {
         assert(num < 17);

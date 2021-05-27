@@ -36,8 +36,6 @@ namespace details {
 /// sort 2 number
 template <typename type_t>
 int bitonic_sort2(type_t a[2], type_t b[2], bool sign) {
-#pragma HLS INLINE off
-#pragma HLS PIPELINE II = 1
     if (sign) {
         // ascending
         if (a[0] > a[1]) {
@@ -66,7 +64,6 @@ struct bitonic_sort_inst {
     /// sort N, N must be a power of 2
     static int sub_sort(type_t a[Number], type_t b[Number], bool sign) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II = 1
         int i;
         type_t temp1[Number / 2];
 #pragma HLS ARRAY_PARTITION variable = temp1 complete dim = 1
@@ -112,7 +109,6 @@ struct bitonic_sort_inst {
     /// merge a[N] to a[2*N], N must be a power of 2
     static int sub_merge(type_t a[2 * Number], type_t b[2 * Number], bool sign) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II = 1
         int i;
         type_t temp00[Number][2];
 #pragma HLS ARRAY_PARTITION variable = temp00 complete
@@ -166,8 +162,6 @@ template <typename type_t>
 struct bitonic_sort_inst<type_t, 2> {
     /// Sort Termination condition
     static int sub_sort(type_t a[2], type_t b[2], bool sign) {
-#pragma HLS INLINE off
-#pragma HLS PIPELINE II = 1
         type_t temp[2];
         temp[0] = a[0];
         temp[1] = a[1];
@@ -198,7 +192,6 @@ struct bitonic_sort_inst<type_t, 2> {
     /// Merge Termination condition
     static int sub_merge(type_t a[4], type_t b[4], bool sign) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II = 1
         type_t temp1[2];
 #pragma HLS ARRAY_PARTITION variable = temp1 complete dim = 1
         type_t temp2[2];
@@ -247,7 +240,6 @@ void bitonic_sort_top(hls::stream<Key_Type>& kin_strm,
                       hls::stream<Key_Type>& kout_strm,
                       hls::stream<bool>& dout_strm_end,
                       bool sign) {
-#pragma HLS PIPELINE
 #pragma HLS INLINE
 
 #ifndef __SYNTHESIS__
@@ -314,9 +306,6 @@ void bitonicSort(hls::stream<Key_Type>& kin_strm,
                  hls::stream<Key_Type>& kout_strm,
                  hls::stream<bool>& kout_strm_end,
                  bool order) {
-#pragma HLS INLINE
-#pragma HLS PIPELINE II = 1
-
     details::bitonic_sort_top<Key_Type, BitonicSortNumber>(kin_strm, kin_strm_end, kout_strm, kout_strm_end, order);
 }
 

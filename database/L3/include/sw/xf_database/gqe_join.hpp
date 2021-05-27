@@ -25,114 +25,123 @@
 #include <cstring>
 #include <cstdio>
 #include <queue>
-// L3
+
+// commmon
+// for opencl
+// helpers for OpenCL C API
+#ifndef HLS_TEST
 #include "xf_database/gqe_ocl.hpp"
-#include "xf_database/gqe_join_config.hpp"
+#endif
+
+#include "xf_database/gqe_init.hpp"
+#include "xf_database/gqe_base.hpp"
+// gqe_table
 #include "xf_database/gqe_join_strategy.hpp"
+
+// gqe_join_config
+#include "xf_database/gqe_join_config.hpp"
+#include "xf_database/gqe_partjoin_config.hpp"
+
+// meta
+#include "xf_database/meta_table.hpp"
 
 namespace xf {
 namespace database {
 namespace gqe {
 
-enum {
-    PU_NM = 8,
-    VEC_SCAN = 8,
-    HT_BUFF_DEPTH = (1 << 25),
-    S_BUFF_DEPTH = (1 << 25),
-    HBM_BUFF_DEPTH = (1 << 25),
-    VEC_LEN = 16,
-    KEY_SZ = sizeof(int32_t)
-};
-
-class Joiner {
+class Joiner : public Base {
    private:
-    // for platform init
-    cl_int err;
-    cl_context ctx;
-    cl_device_id dev_id;
-    cl_command_queue cq;
-    cl_program prg;
-    std::string xclbin_path;
-
     // solutions:
-    // only build + probe
-    ErrCode join_sol0(Table& tab_a, Table& tab_b, Table& tab_c, JoinConfig& jcmd, std::vector<size_t> params);
-    // build + pipelined probes
+    // direct join: 1 x build + 1 x probe
+    ErrCode join_sol0(Table& tab_a, Table& tab_b, Table& tab_c, JoinConfig& jcmd, StrategySet params);
 
-    ErrCode join_sol1(Table& tab_a, Table& tab_b, Table& tab_c, JoinConfig& jcmd, std::vector<size_t> params);
-    // section + partion
+    // pipelined join: 1 x build + pipelined N x probes
+    ErrCode join_sol1(Table& tab_a, Table& tab_b, Table& tab_c, JoinConfig& jcmd, StrategySet params);
 
-    ErrCode join_sol2(Table& tab_a, Table& tab_b, Table& tab_c, JoinConfig& jcmd, std::vector<size_t> params);
-    // join
-
-    ErrCode join_all(Table& tab_a, Table& tab_b, Table& tab_c, JoinConfig& jcmd, std::vector<size_t> params);
+    // pipelined partition + pipelined join
+    ErrCode join_sol2(Table& tab_a, Table& tab_b, Table& tab_c, PartJoinConfig& jcmd, StrategySet params);
 
    public:
-    // constructer
     /**
-     * @brief construct of Joiner.
-     *
-     * @param xclbin xclbin path
-     *
-     */
-    Joiner(std::string xclbin);
+    * @brief constructor of Joiner.
+    *
+    * @param obj the FpgaInit instance.
+    *
+    * Passing FpgaInit obj to Joiner class. Splitting FpgaInit(OpenCL context, program, commandqueue, host/device
+    * buffers creation/allocation etc.) and Joiner Init, guaranteens OpenCL stuff are not released after each join call.
+    * So the joiner may launch multi-times.
+    *
+    **/
+    Joiner(FpgaInit& obj) : Base(obj){};
 
-    ~Joiner();
+    ~Joiner(){};
 
     /**
-     * @brief join function.
-     *
-     * Usage:
-     *
-     * \rst
-     * ::
-     *
-     *   auto sptr = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part, cpu_aggr);
-     *   err_code = bigjoin.join(
-     *       tab_o, "19940101<=o_orderdate && o_orderdate<19950101",
-     *       tab_l, "",
-     *       "o_orderkey = l_orderkey",
-     *       tab_c1, "c1=l_extendedprice, c2=l_discount, c3=o_orderdate, c4=l_orderkey",
-     *       gqe::INNER_JOIN,
-     *       sptr);
-     *   delete smanual;
-     *
-     * \endrst
-     *
-     * Input filter_a/filter_b like "19940101<=o_orderdate && o_orderdate<19950101",
-     * o_orderdate and o_orderdate must be exsisted colunm names in table a/b
-     * when no filter conditions, input ""
-     *
-     * Input join conditions like "left_join_key_0=right_join_key_0"
-     * when enable dual key join, use comma as seperator,
-     * "left_join_key_0=right_join_key_0,left_join_key_1=right_join_key_1"
-     *
-     * Output strings are like "output_c0 = tab_a_col/tab_b_col",
-     * when contains several columns, use comma as seperator
-     *
-     *
-     * @param tab_a left table
-     * @param filter_a filter condition of left table
-     * @param tab_b right table
-     * @param filter_b filter condition of right table
-     * @param join_str join condition(s)
-     * @param tab_c result table
-     * @param output_str output column mapping
-     * @param join_type INNER_JOIN(default) | SEMI_JOIN | ANTI_JOIN.
-     * @param strategyimp pointer to an object of JoinStrategyBase or its derived type.
-     *
-     *
-     */
+    * @brief Run join with the input arguments defined strategy, which includes
+    * - solution: the join solution (direct-join or partation-join)
+    * - sec_o: left table sec number
+    * - sec_l: right table sec number
+    * - slice_num: the slice number that used in probe
+    * - log_part, the partition number of left/right table
+    * - coef_exp_partO: the expansion coefficient of table O result buffer size / input buffer size, this param affects
+    * the output buffer size, but not the perf
+    * - coef_exp_partL: the expansion coefficient of table L result buffer size / input buffer size, this param affects
+    * the output buffer size, but not the perf
+    * - coef_exp_join: the expansion coefficient of result buffer size / input buffer size, this param affects the
+    * output buffer size, but not the perf
+    *
+    * Usage:
+    *
+    * \rst
+    * ::
+    *
+    *   auto smanual = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part, coef_exp_partO,
+    * coef_exp_partL, coef_exp_join);
+    *
+    *   ErrCode err = bigjoin.run(
+    *       tab_o, "o_rowid > 0",
+    *       tab_l, "",
+    *       "o_orderkey = l_orderkey",
+    *       tab_c, "c1=l_orderkey, c2=o_rowid, c3=l_rowid",
+    *       gqe::INNER_JOIN,
+    *       smanual);
+    *   delete smanual;
+    *
+    * \endrst
+    *
+    * Table tab_o filter condition like "o_rowid > 0", o_rowid is the col name of tab_o
+    * when no filter conditions, given empty fitler condition ""
+    *
+    * The join condition like "left_join_key_0=right_join_key_0"
+    * when dual key join is enabled, using comma as the seperator in join condition, e.g.
+    * "left_join_key_0=right_join_key_0,left_join_key_1=right_join_key_1"
+    *
+    * Output strings are like "output_c0 = tab_a_col/tab_b_col",
+    * when several columns are output, using comma as the seperator
+    *
+    *
+    * @param tab_a left table
+    * @param filter_a filter condition of left table
+    * @param tab_b right table
+    * @param filter_b filter condition of right table
+    * @param join_str join condition(s)
+    * @param tab_c result table
+    * @param output_str output columns
+    * @param join_type INNER_JOIN(default) | SEMI_JOIN | ANTI_JOIN.
+    * @param strategyimp pointer to an object of JoinStrategyBase or its derived type.
+    *
+    *
+    */
 
-    ErrCode join(Table& tab_a,
-                 std::string filter_a,
-                 Table& tab_b,
-                 std::string filter_b,
-                 std::string join_str, // comma seprated
-                 Table& tab_c,
-                 std::string output_str, // comma seprated
-                 int join_type = INNER_JOIN,
-                 JoinStrategyBase* strategyimp = nullptr);
+    ErrCode run(Table& tab_a,
+                std::string filter_a,
+                Table& tab_b,
+                std::string filter_b,
+                std::string join_str, // comma seperated
+                Table& tab_c,
+                std::string output_str, // comma seperated
+                int join_type = INNER_JOIN,
+                JoinStrategyBase* strategyimp = nullptr);
 };
 //-----------------------------------------------------------------------------------------------
 // put the implementations here for solving compiling deduction

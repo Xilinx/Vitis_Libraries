@@ -23,7 +23,7 @@
 #include "xf_database/gqe_blocks_v2/scan_col_part.hpp"
 #include "xf_database/gqe_blocks/filter_part.hpp"
 #include "xf_database/gqe_blocks_v2/hash_partition.hpp"
-#include "xf_database/gqe_blocks_v2/write_out.hpp"
+#include "xf_database/gqe_blocks_v2/write_out_part_aggr.hpp"
 
 namespace xf {
 namespace database {
@@ -60,10 +60,10 @@ void load_config(ap_uint<8 * TPCH_INT_SZ * VEC_LEN> ptr[9],
     const int filter_cfg_depth = 45;
 
     ap_uint<8 * TPCH_INT_SZ * VEC_LEN> config[9];
-#pragma HLS resource variable = config core = RAM_1P_LUTRAM
+#pragma HLS bind_storage variable = config type = ram_1p impl = lutram
 
     ap_uint<32> filter_cfg_a[filter_cfg_depth];
-#pragma HLS resource variable = filter_cfg_a core = RAM_1P_LUTRAM
+#pragma HLS bind_storage variable = filter_cfg_a type = ram_1p impl = lutram
 
     for (int i = 0; i < 9; i++) {
 #pragma HLS PIPELINE II = 1
@@ -214,11 +214,14 @@ void hash_partition_wrapper(hls::stream<bool>& mk_on_strm,
 } // namespace xf
 
 /**
- * @breif GQE partition kernel
+ * @breif GQE partition kernel (32-bit key version)
  *
  * @param k_depth depth of each hash bucket in URAM
  * @param col_index index of input column
  * @param bit_num number of defined partition, log2(number of partition)
+ *
+ * @param tin_meta input meta info
+ * @param tout_meta output meta info
  *
  * @param buf_A input table buffer
  * @param buf_B output table buffer
@@ -396,12 +399,12 @@ extern "C" void gqePart(const int k_depth,
 
     hls::stream<ap_uint<32> > fcfg; // only 45x32bits
 #pragma HLS stream variable = fcfg depth = 48
-#pragma HLS resource variable = fcfg core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = fcfg type = fifo impl = lutram
 
     // filter part
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > flt_strms[CH_NUM][COL_NUM];
 #pragma HLS stream variable = flt_strms depth = 32
-#pragma HLS resource variable = flt_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = flt_strms type = fifo impl = srl
     hls::stream<bool> e_flt_strms[CH_NUM];
 #pragma HLS stream variable = e_flt_strms depth = 32
 
@@ -414,7 +417,7 @@ extern "C" void gqePart(const int k_depth,
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ * PU> > hp_out_strms[COL_NUM];
 #pragma HLS stream variable = hp_out_strms depth = 256
-#pragma HLS resource variable = hp_out_strms core = FIFO_BRAM
+#pragma HLS bind_storage variable = hp_out_strms type = fifo impl = bram
 
     load_scan_wrapper<8 * TPCH_INT_SZ, VEC_SCAN, CH_NUM, COL_NUM>(
         buf_D, tin_meta, col_index, bit_num, k_depth, mk_on_strm, k_depth_strm, wr_cfg_strm, fcfg, buf_A1, buf_A2,

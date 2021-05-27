@@ -18,7 +18,7 @@
 
 // XXX inline with tpch_read_2.h
 #include <stdint.h>
-typedef int32_t TPCH_INT;
+typedef int64_t TPCH_INT;
 
 typedef TPCH_INT MONEY_T;
 typedef TPCH_INT DATE_T;
@@ -32,7 +32,7 @@ typedef TPCH_INT KEY_T;
 #define TPCH_INT_SZ sizeof(TPCH_INT)
 
 // every cycle, 4 input rows.
-#define VEC_LEN 16
+#define VEC_LEN 8
 
 //
 // ensure when kernel read in vec, won't over read

@@ -100,11 +100,11 @@ int main() {
     {
         using namespace xf::database;
 
-        hls::stream<typename DynamicFilterInfo<4>::cfg_type> filter_cfg_strm;
+        hls::stream<typename DynamicFilterInfo<4, WKEY>::cfg_type> filter_cfg_strm;
 
         // XXX this must match the get_golden_sum function.
-        auto p = FilterConfig("(a < 10 && b < 10 ) || (c < d)").getConfigBits();
-        for (unsigned i = 0; i < DynamicFilterInfo<4>::dwords_num; ++i) {
+        auto p = FilterConfig<WKEY>("(a < 10 && b < 10 ) || (c < d)").getConfigBits();
+        for (unsigned i = 0; i < DynamicFilterInfo<4, WKEY>::dwords_num; ++i) {
             filter_cfg_strm.write(p[i]);
         }
 

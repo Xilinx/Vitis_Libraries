@@ -689,11 +689,11 @@ void hashloop(hls::stream<ap_uint<STR_IN_W> >& msg_strm,
               hls::stream<bool>& out_e_strm) {
     hls::stream<ap_uint<STR_IN_W> > msg;
 #pragma HLS STREAM variable = msg depth = 8
-#pragma HLS resource variable = msg core = FIFO_SRL
+#pragma HLS bind_storage variable = msg type = fifo impl = srl
 
     hls::stream<ap_uint<64> > hash;
 #pragma HLS STREAM variable = hash depth = 8
-#pragma HLS resource variable = hash core = FIFO_SRL
+#pragma HLS bind_storage variable = hash type = fifo impl = srl
 
     const int max_width = STR_IN_W > HASH_OUT_W ? HASH_OUT_W : STR_IN_W;
 
@@ -969,11 +969,11 @@ void bf_gen_bram_and_stream(hls::stream<ap_uint<STR_IN_W> >& msg_strm,
     // bit_vector
     // store the bit-vector in BRAM and width of each data is 16-bit
     ap_uint<16> bit_vector0[(1 << (BV_W - 4))];
-#pragma HLS RESOURCE variable = bit_vector0 core = RAM_S2P_BRAM
+#pragma HLS bind_storage variable = bit_vector0 type = ram_s2p impl = bram
     ap_uint<16> bit_vector1[(1 << (BV_W - 4))];
-#pragma HLS RESOURCE variable = bit_vector1 core = RAM_S2P_BRAM
+#pragma HLS bind_storage variable = bit_vector1 type = ram_s2p impl = bram
     ap_uint<16> bit_vector2[(1 << (BV_W - 4))];
-#pragma HLS RESOURCE variable = bit_vector2 core = RAM_S2P_BRAM
+#pragma HLS bind_storage variable = bit_vector2 type = ram_s2p impl = bram
 
 INIT_LOOP: // initialize bit_vector to zero
     for (int i = 0; i < (1 << (BV_W - 4)); i++) {
@@ -1084,11 +1084,11 @@ void bf_gen_uram_and_stream(hls::stream<ap_uint<STR_IN_W> >& msg_strm,
     // bit_vector
     // store the bit-vector in URAM and width of each data is 72-bit
     ap_uint<72> bit_vector0[(1 << (BV_W - 6))];
-#pragma HLS RESOURCE variable = bit_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector0 type = ram_2p impl = uram
     ap_uint<72> bit_vector1[(1 << (BV_W - 6))];
-#pragma HLS RESOURCE variable = bit_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector1 type = ram_2p impl = uram
     ap_uint<72> bit_vector2[(1 << (BV_W - 6))];
-#pragma HLS RESOURCE variable = bit_vector2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector2 type = ram_2p impl = uram
 
 INIT_LOOP: // initialize bit_vector to zero
     for (int i = 0; i < (1 << (BV_W - 6)); i++) {

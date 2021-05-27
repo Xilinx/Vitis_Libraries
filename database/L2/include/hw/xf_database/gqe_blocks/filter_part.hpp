@@ -34,7 +34,7 @@ namespace gqe {
 template <int STRM_NM>
 void dup_filter_config(hls::stream<ap_uint<32> >& filter_cfg_single,
                        hls::stream<ap_uint<32> > filter_cfg_strm[STRM_NM]) {
-    for (int i = 0; i < xf::database::DynamicFilterInfo<4>::dwords_num; i++) {
+    for (int i = 0; i < xf::database::DynamicFilterInfo<4, 32>::dwords_num; i++) {
         ap_uint<32> cfg = filter_cfg_single.read();
         for (int j = 0; j < STRM_NM; j++) {
 #pragma HLS unroll
@@ -101,21 +101,21 @@ void filter_ongoing(bool join_on,
                     hls::stream<bool> e_out_strm[CH_NM]) {
     hls::stream<ap_uint<32> > fcfg_strm[CH_NM];
 #pragma HLS stream variable = fcfg_strm depth = 64
-#pragma HLS resource variable = fcfg_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = fcfg_strm type = fifo impl = lutram
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > filter_key_strm[CH_NM][4];
 #pragma HLS array_partition variable = filter_key_strm dim = 1
 #pragma HLS stream variable = filter_key_strm depth = 64
-#pragma HLS resource variable = filter_key_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_key_strm type = fifo impl = lutram
     hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_OUT_NM> > filter_pld_strm[CH_NM];
 #pragma HLS stream variable = filter_pld_strm depth = 64
-#pragma HLS resource variable = filter_pld_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_pld_strm type = fifo impl = lutram
 
     hls::stream<bool> e_filter_pld_strm[CH_NM];
 #pragma HLS stream variable = e_filter_pld_strm depth = 64
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_OUT_NM> > filter_result_strm[CH_NM];
 #pragma HLS stream variable = filter_result_strm depth = 64
-#pragma HLS resource variable = filter_result_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_result_strm type = fifo impl = lutram
 
     hls::stream<bool> e_filter_result_strm[CH_NM];
 #pragma HLS stream variable = e_filter_result_strm depth = 64
@@ -166,21 +166,21 @@ void filter_ongoing(hls::stream<ap_uint<32> >& filter_cfg_strm,
                     hls::stream<bool> e_out_strm[CH_NM]) {
     hls::stream<ap_uint<32> > fcfg_strm[CH_NM];
 #pragma HLS stream variable = fcfg_strm depth = 64
-#pragma HLS resource variable = fcfg_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = fcfg_strm type = fifo impl = lutram
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > filter_key_strm[CH_NM][4];
 #pragma HLS array_partition variable = filter_key_strm dim = 1
 #pragma HLS stream variable = filter_key_strm depth = 64
-#pragma HLS resource variable = filter_key_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_key_strm type = fifo impl = lutram
     hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_OUT_NM> > filter_pld_strm[CH_NM];
 #pragma HLS stream variable = filter_pld_strm depth = 64
-#pragma HLS resource variable = filter_pld_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_pld_strm type = fifo impl = lutram
 
     hls::stream<bool> e_filter_pld_strm[CH_NM];
 #pragma HLS stream variable = e_filter_pld_strm depth = 64
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_OUT_NM> > filter_result_strm[CH_NM];
 #pragma HLS stream variable = filter_result_strm depth = 64
-#pragma HLS resource variable = filter_result_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_result_strm type = fifo impl = lutram
 
     hls::stream<bool> e_filter_result_strm[CH_NM];
 #pragma HLS stream variable = e_filter_result_strm depth = 64

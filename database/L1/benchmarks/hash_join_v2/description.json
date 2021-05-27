@@ -13,36 +13,20 @@
     ],
     "platform_properties": {
         "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
+            "containers": [
+                {
+                    "name": "hash_join_v2",
+                    "ldclflags": "--config PROJECT/conn_u280.cfg"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.cfg"
-                    ]
-                }
-            }
+            ]
         },
         "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
+            "containers": [
+                {
+                    "name": "hash_join_v2",
+                    "ldclflags": "--config PROJECT/conn_u50.cfg"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
+            ]
         }
     },
     "launch": [
@@ -72,6 +56,7 @@
             "includepaths": [
                 "host",
                 "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include",
                 "kernel"
             ],
             "options": "-O3 ",

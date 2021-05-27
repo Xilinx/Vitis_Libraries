@@ -153,7 +153,7 @@ void merge1to4Wrapper(hls::stream<KEY_TYPE>& inKeyStrm,
 #pragma HLS stream variable = keyStrm0 depth = 2048
 #pragma HLS stream variable = endBlockStrm0 depth = 2048
 #pragma HLS stream variable = endStrm0 depth = 4
-#pragma HLS resource variable = endBlockStrm0 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = endBlockStrm0 type = fifo impl = lutram
 #pragma HLS stream variable = keyStrm1 depth = 4
 #pragma HLS stream variable = endBlockStrm1 depth = 4
 #pragma HLS stream variable = endStrm1 depth = 4
@@ -338,7 +338,7 @@ void compoundSort(bool order,
 #endif
     int keyLength = 0;
     const int AP = SORT_LEN / INSERT_LEN / 8;
-#pragma HLS resource variable = value core = RAM_2P_URAM
+#pragma HLS bind_storage variable = value type = ram_2p impl = uram
 #pragma HLS array_partition variable = value dim = 1 block factor = AP
     details::sortPart1<KEY_TYPE, ap_uint<64>, INSERT_LEN>(inKeyStrm, inEndStrm, keyLength, order, value);
     details::sortPart2<KEY_TYPE, ap_uint<64>, SORT_LEN, INSERT_LEN * 8>(order, keyLength, value, outKeyStrm,

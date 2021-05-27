@@ -356,11 +356,11 @@ static void scan_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* buf_skey1,
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > skey_1[CH_NM];
 #pragma HLS stream variable = skey_1 depth = 32
 #pragma HLS array_partition variable = skey_1 dim = 0
-#pragma HLS resource variable = skey_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = skey_1 type = fifo impl = srl
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > spay_1[CH_NM];
 #pragma HLS stream variable = spay_1 depth = 32
 #pragma HLS array_partition variable = spay_1 dim = 0
-#pragma HLS resource variable = spay_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = spay_1 type = fifo impl = srl
     hls::stream<bool> s_1e[CH_NM]; // flag stream, when true, end of data.
 #pragma HLS stream variable = s_1e depth = 32
 #pragma HLS array_partition variable = s_1e dim = 0
@@ -368,19 +368,19 @@ static void scan_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* buf_skey1,
     // ------------ scan lineitem -----------
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bkey1_1[CH_NM];
 #pragma HLS stream variable = bkey1_1 depth = 32
-#pragma HLS resource variable = bkey1_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = bkey1_1 type = fifo impl = srl
 #pragma HLS array_partition variable = bkey1_1 dim = 0
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bpay1_1[CH_NM];
 #pragma HLS stream variable = bpay1_1 depth = 32
-#pragma HLS resource variable = bpay1_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = bpay1_1 type = fifo impl = srl
 #pragma HLS array_partition variable = bpay1_1 dim = 0
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bpay2_1[CH_NM];
 #pragma HLS stream variable = bpay2_1 depth = 32
-#pragma HLS resource variable = bpay2_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = bpay2_1 type = fifo impl = srl
 #pragma HLS array_partition variable = bpay2_1 dim = 0
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bpay3_1[CH_NM];
 #pragma HLS stream variable = bpay3_1 depth = 32
-#pragma HLS resource variable = bpay3_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = bpay3_1 type = fifo impl = srl
 #pragma HLS array_partition variable = bpay3_1 dim = 0
     hls::stream<bool> b_1e[CH_NM]; // flag stream, when true, end of data.
 #pragma HLS stream variable = b_1e depth = 32
@@ -389,19 +389,19 @@ static void scan_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* buf_skey1,
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bkey1_2[CH_NM];
 #pragma HLS stream variable = bkey1_2 depth = 16
 #pragma HLS array_partition variable = bkey1_2 dim = 0
-#pragma HLS resource variable = bkey1_2 core = FIFO_SRL
+#pragma HLS bind_storage variable = bkey1_2 type = fifo impl = srl
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bpay1_2[CH_NM];
 #pragma HLS stream variable = bpay1_2 depth = 16
 #pragma HLS array_partition variable = bpay1_2 dim = 0
-#pragma HLS resource variable = bpay1_2 core = FIFO_SRL
+#pragma HLS bind_storage variable = bpay1_2 type = fifo impl = srl
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bpay2_2[CH_NM];
 #pragma HLS stream variable = bpay2_2 depth = 16
 #pragma HLS array_partition variable = bpay2_2 dim = 0
-#pragma HLS resource variable = bpay2_2 core = FIFO_SRL
+#pragma HLS bind_storage variable = bpay2_2 type = fifo impl = srl
     hls::stream<ap_uint<8 * (TPCH_INT_SZ)> > bpay3_2[CH_NM];
 #pragma HLS stream variable = bpay3_2 depth = 16
 #pragma HLS array_partition variable = bpay3_2 dim = 0
-#pragma HLS resource variable = bpay3_2 core = FIFO_SRL
+#pragma HLS bind_storage variable = bpay3_2 type = fifo impl = srl
     hls::stream<bool> b_2e[CH_NM]; // flag stream, when true, end of data.
 #pragma HLS stream variable = b_2e depth = 16
 #pragma HLS array_partition variable = b_2e dim = 0
@@ -462,7 +462,7 @@ static void hash_join_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* buf_skey1,
     hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM];
 #pragma HLS stream variable = k0_strm_arry depth = 8
 #pragma HLS array_partition variable = k0_strm_arry dim = 0
-#pragma HLS resource variable = k0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k0_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<PW> > p0_strm_arry[CH_NM];
 #pragma HLS stream variable = p0_strm_arry depth = 18
 #pragma HLS array_partition variable = p0_strm_arry dim = 0
@@ -478,7 +478,7 @@ static void hash_join_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* buf_skey1,
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ * OUT_COL_NUM> > j1_strm;
 #pragma HLS stream variable = j1_strm depth = 70
-#pragma HLS resource variable = j1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = j1_strm type = fifo impl = srl
     hls::stream<bool> e5_strm;
 #pragma HLS stream variable = e5_strm depth = 8
 
