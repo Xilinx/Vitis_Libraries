@@ -17,9 +17,10 @@
 #include "params.hpp"
 #include "rtm.hpp"
 
-typedef xf::hpc::rtm::Stencil3D<DATATYPE, ORDER, MaxD, MaxD, nPE> STENCEIL_TYPE;
+typedef xf::hpc::rtm::Stencil3D<DATATYPE, ORDER, MaxD, MaxD, nPE, 1> STENCEIL_TYPE;
 typedef STENCEIL_TYPE::t_InType t_InType;
 typedef STENCEIL_TYPE::t_WideType t_WideType;
+typedef STENCEIL_TYPE::t_DataTypeX t_DataTypeX;
 
 extern "C" void top(const unsigned int p_z,
                     const unsigned int p_y,
