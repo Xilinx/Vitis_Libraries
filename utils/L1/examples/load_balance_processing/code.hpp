@@ -19,10 +19,10 @@
 
 #include "xf_utils_hw/types.hpp"
 
-#define W_STRM 512
-#define W_PU 64
-#define W_PRC 32
-#define W_DSC 32
+#define W_STRM 128
+#define W_PU 16
+#define W_PRC 8
+#define W_DSC 8
 #define NS (1024 * 2 * 2)
 #define NPU 8
 

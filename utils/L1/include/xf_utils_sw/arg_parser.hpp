@@ -46,6 +46,31 @@ T to_upper(const T& orig) {
 } // details
 
 class ArgParser {
+   private:
+    void checkStyle(const std::string& opt, const std::string& opt_full, bool is_flag = false) {
+        std::string t = is_flag ? "flag" : "option";
+        if (opt != "") {
+            if (opt.length() > 2) {
+                _log << "ERROR: short " << t << " " << opt << " is too long." << std::endl;
+                exit(1);
+            }
+            if (opt[0] != '-') {
+                _log << "ERROR: short " << t << " " << opt << " should begin with dash." << std::endl;
+                exit(1);
+            }
+        }
+        if (opt_full != "") {
+            if (opt_full.length() < 4) {
+                _log << "ERROR: long " << t << " " << opt_full << " is too short." << std::endl;
+                exit(1);
+            }
+            if (opt_full[0] != '-' || opt_full[1] != '-') {
+                _log << "ERROR: long " << t << " " << opt_full << " should begin with double dash." << std::endl;
+                exit(1);
+            }
+        }
+    }
+
    public:
     ArgParser(int argc, const char* argv[], std::ostream& log = std::cerr) : _log(log) {
         _bin_name = details::base_name(std::string(argv[0]));
@@ -59,7 +84,7 @@ class ArgParser {
     /// @param opt_full the full opt name, must start with "--", pass "" if not used.
     /// @param info the info to be shown in usage.
     void addFlag(const std::string opt, const std::string opt_full, const std::string info) {
-        // TODO check opt and opt_full
+        checkStyle(opt, opt_full, true);
         if (opt == "") {
             if (opt_full != "") {
                 _flags.emplace_back(opt_full, info);
@@ -87,7 +112,7 @@ class ArgParser {
                    const std::string info,
                    const std::string def,
                    bool required = false) {
-        // TODO check opt and opt_full
+        checkStyle(opt, opt_full, false);
         if (opt == "") {
             if (opt_full != "") {
                 _opts.emplace_back(opt_full, info, def, required);

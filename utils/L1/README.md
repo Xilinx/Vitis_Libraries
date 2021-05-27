@@ -1,7 +1,6 @@
-# Level 1: HLS Modules
+# L1: Reusable Modules
 
-The Level 1 APIs of XF Utility Library is presented as HLS C++ modules.
+This layer contains reusable modules developed in HLS C++, and stores as header files.
+It also provies some common software headers.
 
-**Hardware-savvy developers** can find the API description and design details of these kernels
-in *Section Level 1* in the library document.
-
+Specifically, the data-mover kernel generated in L2 will include these headers and assemble kernel from these modules.

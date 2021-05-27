@@ -86,7 +86,7 @@ void top_func(ap_uint<AXI_WIDTH> rbuf[BUF_DEPTH],
 #pragma HLS RESOURCE variable = ostrm2 core = FIFO_LUTRAM
 #pragma HLS STREAM variable = ostrm2 depth = NONBLOCK_DEPTH
 #pragma HLS RESOURCE variable = e_ostrm2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = e_ostrm2 depth = NONBLOCK_DEPTHS
+#pragma HLS STREAM variable = e_ostrm2 depth = NONBLOCK_DEPTH
 
         xf::common::utils_hw::axiToMultiStream<BURST_LENTH, AXI_WIDTH, DT0, DT1, DT2>(
             rbuf, ostrm0, e_ostrm0, ostrm1, e_ostrm1, ostrm2, e_ostrm2, len, offset);
