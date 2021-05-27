@@ -47,7 +47,7 @@ help::
 
 # -----------------------------------------------------------------------------
 #                          common de.cfgtion for building hw 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))                          
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))                          
 include ./params_u280.mk
 else
 include ./params_u50.mk
@@ -77,6 +77,13 @@ ifeq (sw_emu,$(TARGET))
 else
 	SEQ_KERNEL=0
 endif
+
+# inherit settings from command line
+GEN_PARTITION_CXXFLAGS = $(CXXFLAGS)
+GEN_PARTITION_LDFLAGS = $(LDCLFLAGS)
+GEN_BIN_CXXFLAGS = $(CXXFLAGS)
+GEN_BIN_LDFLAGS = $(LDCLFLAGS)
+
 
 TOOL_VERSION ?= 2020.1
 DEBUG = no 
