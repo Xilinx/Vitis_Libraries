@@ -224,7 +224,7 @@ static void scan_wrapper(
     hls::stream<ap_uint<8 * (KEY_SZ)> > o_okey_1[CH_NM];
 #pragma HLS stream variable = o_okey_1 depth = 32
 #pragma HLS array_partition variable = o_okey_1 dim = 0
-#pragma HLS resource variable = o_okey_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = o_okey_1 type = fifo impl = srl
 
     hls::stream<bool> o_1e[CH_NM]; // flag stream, when true, end of data.
 #pragma HLS stream variable = o_1e depth = 32
@@ -233,17 +233,17 @@ static void scan_wrapper(
     // ------------ scan lineitem -----------
     hls::stream<ap_uint<8 * (KEY_SZ)> > l_okey_1[CH_NM];
 #pragma HLS stream variable = l_okey_1 depth = 32
-#pragma HLS resource variable = l_okey_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = l_okey_1 type = fifo impl = srl
 #pragma HLS array_partition variable = l_okey_1 dim = 0
 
     hls::stream<ap_uint<8 * (MONEY_SZ)> > l_eprice_1[CH_NM];
 #pragma HLS stream variable = l_eprice_1 depth = 32
-#pragma HLS resource variable = l_eprice_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = l_eprice_1 type = fifo impl = srl
 #pragma HLS array_partition variable = l_eprice_1 dim = 0
 
     hls::stream<ap_uint<8 * (MONEY_SZ)> > l_discount_1[CH_NM];
 #pragma HLS stream variable = l_discount_1 depth = 32
-#pragma HLS resource variable = l_discount_1 core = FIFO_SRL
+#pragma HLS bind_storage variable = l_discount_1 type = fifo impl = srl
 #pragma HLS array_partition variable = l_discount_1 dim = 0
 
     hls::stream<bool> l_1e[CH_NM]; // flag stream, when true, end of data.
@@ -366,7 +366,7 @@ extern "C" void join_kernel(ap_uint<8 * KEY_SZ * VEC_LEN> buf_o_orderkey[O_DEPTH
     hls::stream<ap_uint<8 * KEY_SZ> > k0_strm_arry[HJ_CH_NM];
 #pragma HLS stream variable = k0_strm_arry depth = 8
 #pragma HLS array_partition variable = k0_strm_arry dim = 0
-#pragma HLS resource variable = k0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k0_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<8 * (MONEY_SZ + MONEY_SZ)> > p0_strm_arry[HJ_CH_NM];
 #pragma HLS stream variable = p0_strm_arry depth = 18
 #pragma HLS array_partition variable = p0_strm_arry dim = 0
@@ -384,7 +384,7 @@ extern "C" void join_kernel(ap_uint<8 * KEY_SZ * VEC_LEN> buf_o_orderkey[O_DEPTH
 
     hls::stream<ap_uint<8 * (MONEY_SZ + MONEY_SZ)> > j1_strm;
 #pragma HLS stream variable = j1_strm depth = 70
-#pragma HLS resource variable = j1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = j1_strm type = fifo impl = srl
     hls::stream<bool> e5_strm;
 #pragma HLS stream variable = e5_strm depth = 8
 

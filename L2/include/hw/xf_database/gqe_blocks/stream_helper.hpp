@@ -178,6 +178,87 @@ void stream1D_demux1To2(hls::stream<bool>& select_cfg,
  * @param e_ostrm end flag stream for output data.
  */
 
+template <int _WIn, int _NStrm, int _NStrm2>
+void stream1D_mux2To1(hls::stream<ap_uint<6> >& i_join_cfg_strm,
+                      hls::stream<ap_uint<6> >& o_join_cfg_strm,
+
+                      hls::stream<ap_uint<_WIn> > istrms_0[_NStrm],
+                      hls::stream<ap_uint<_WIn> > istrms_1[_NStrm2],
+                      hls::stream<bool>& e_istrm_0,
+                      hls::stream<bool>& e_istrm_1,
+
+                      hls::stream<ap_uint<_WIn> > ostrms[_NStrm],
+                      hls::stream<bool>& e_ostrm) {
+    ap_uint<6> join_cfg = i_join_cfg_strm.read();
+    o_join_cfg_strm.write(join_cfg);
+    bool cfg = join_cfg[0];
+    bool e;
+#if !defined __SYNTHESIS__ && XDEBUG == 1
+    for (int i = 0; i < _NStrm2; ++i) {
+        if (i < _NStrm) {
+            printf("Input-0 stream %d left data %d before mux \n", i, istrms_0[i].size());
+            printf("Input-1 stream %d left data %d before mux \n", i, istrms_1[i].size());
+        }
+    }
+    printf("Input-0 stream left end %d before mux \n", e_istrm_0.size());
+    printf("Input-1 stream left end %d before mux \n", e_istrm_1.size());
+#endif
+    if (cfg == 0) {
+        e = e_istrm_0.read();
+    } else {
+        e = e_istrm_1.read();
+    }
+    int cnt = 0;
+    while (!e) {
+#pragma HLS pipeline II = 1
+        if (cfg == 0) {
+            e = e_istrm_0.read();
+        } else {
+            e = e_istrm_1.read();
+        }
+
+        for (int i = 0; i < _NStrm2; ++i) {
+#pragma HLS unroll
+            ap_uint<_WIn> in;
+            if (cfg == 0) {
+                if (i < _NStrm) {
+                    in = istrms_0[i].read();
+                } else {
+                    in = 0;
+                }
+            } else {
+                in = istrms_1[i].read();
+            }
+            ostrms[i].write(in);
+        }
+        cnt++;
+        e_ostrm.write(false);
+    }
+    e_ostrm.write(true);
+#if !defined __SYNTHESIS__ && XDEBUG == 1
+    for (int i = 0; i < _NStrm2; ++i) {
+        if (i < _NStrm) {
+            if (istrms_0[i].size() != 0) printf("Input-0 stream %d left data %d after mux \n", i, istrms_0[i].size());
+            if (istrms_1[i].size() != 0) printf("Input-1 stream %d left data %d after mux \n", i, istrms_1[i].size());
+        }
+    }
+#endif
+}
+/* @brief 1Dtream_mux2To1 select the data from 2 input and output 1, where the input is a 1 dimensional array.
+ *
+ * @tparam _WIn input stream width.
+ * @tparam _NStrm size of 1th-dim for input stream array.
+ *
+ * @param select_cfg binary encoded selection, used to select which stream to input.
+ * @param istrms_0 first input data streams array.
+ * @param istrms_1 second input data streams array.
+ * @param e_istrm_0 end flag for first input stream.
+ * @param e_istrm_1 end flag for second input stream.
+ *
+ * @param ostrms output data stream
+ * @param e_ostrm end flag stream for output data.
+ */
+
 template <int _WIn, int _NStrm>
 void stream1D_mux2To1(hls::stream<bool>& select_cfg,
 
@@ -323,6 +404,38 @@ void demux_wrapper(hls::stream<bool>& join_on_strm,
                    hls::stream<bool> e_ostrm_0[CH_NM],
                    hls::stream<bool> e_ostrm_1[CH_NM]) {
     bool join_on = join_on_strm.read();
+    hls::stream<bool> jn_on_strm;
+#pragma HLS stream variable = jn_on_strm depth = 3
+    int lp_nm = join_on ? TB_NM : 1;
+    for (int i = 0; i < lp_nm; ++i) {
+        jn_on_strm.write(join_on);
+        stream2D_demux1To2<8 * TPCH_INT_SZ, CH_NM, COL_NM>(jn_on_strm, istrm, e_istrm, ostrm_0, ostrm_1, e_ostrm_0,
+                                                           e_ostrm_1);
+    }
+    // add more data to prepare for do-while
+    if (!join_on) {
+        for (int col = 0; col < COL_NM; ++col) {
+#pragma HLS pipeline II = 1
+            for (int ch = 0; ch < CH_NM; ++ch) {
+#pragma HLS unroll
+                ostrm_0[ch][col].write(0);
+            }
+        }
+    }
+}
+template <int COL_NM, int CH_NM, int TB_NM>
+void demux_wrapper(hls::stream<ap_uint<6> >& i_join_cfg_strm,
+                   hls::stream<ap_uint<8 * TPCH_INT_SZ> > istrm[CH_NM][COL_NM],
+                   hls::stream<bool> e_istrm[CH_NM],
+                   hls::stream<ap_uint<6> > o_join_cfg_strm[2],
+                   hls::stream<ap_uint<8 * TPCH_INT_SZ> > ostrm_0[CH_NM][COL_NM],
+                   hls::stream<ap_uint<8 * TPCH_INT_SZ> > ostrm_1[CH_NM][COL_NM],
+                   hls::stream<bool> e_ostrm_0[CH_NM],
+                   hls::stream<bool> e_ostrm_1[CH_NM]) {
+    ap_uint<6> join_cfg = i_join_cfg_strm.read();
+    o_join_cfg_strm[0].write(join_cfg);
+    o_join_cfg_strm[1].write(join_cfg);
+    bool join_on = join_cfg[0];
     hls::stream<bool> jn_on_strm;
 #pragma HLS stream variable = jn_on_strm depth = 3
     int lp_nm = join_on ? TB_NM : 1;

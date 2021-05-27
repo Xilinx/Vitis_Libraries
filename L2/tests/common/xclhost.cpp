@@ -42,6 +42,7 @@ cl_int init_hardware(cl_context* context,
                      cl_command_queue* cmd_queue,
                      cl_command_queue_properties queue_props,
                      const char* dsa_name) {
+    xf::common::utils_sw::Logger logger(std::cerr);
     cl_int err;
 
     cl_uint platform_count = 0;
@@ -80,17 +81,11 @@ cl_int init_hardware(cl_context* context,
         // device found.
         cl_context_properties ctx_prop[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[pid], 0};
         cl_context ctx = clCreateContext(ctx_prop, 1, device_id, NULL, NULL, &err);
-        if (err != CL_SUCCESS) {
-            return err;
-        }
-        printf("INFO: initilized context.\n");
+        // will not exit with failure by default
+        logger.logCreateContext(err);
         // context ready.
         cl_command_queue q = clCreateCommandQueue(ctx, devices[did], queue_props, &err);
-        if (err != CL_SUCCESS) {
-            fprintf(stderr, "ERROR: Failed to create command queue.\n");
-            return err;
-        }
-        printf("INFO: initilized command queue.\n");
+        logger.logCreateCommandQueue(err);
         // queue ready.
         *context = ctx;
         *cmd_queue = q;
@@ -104,14 +99,15 @@ cl_int init_hardware(cl_context* context,
 }
 
 cl_int load_binary(cl_program* program, cl_context context, cl_device_id device_id, const char* xclbin) {
+    // set non-default log destination
+    xf::common::utils_sw::Logger logger(std::cerr);
+
     cl_int err;
     void* kernel_image = NULL;
     unsigned long size = read_binary_file(xclbin, &kernel_image);
     cl_program prog =
         clCreateProgramWithBinary(context, 1, &device_id, &size, (const unsigned char**)&kernel_image, NULL, &err);
-    if (err != CL_SUCCESS) {
-        return err;
-    }
+    logger.logCreateProgram(err);
     printf("INFO: created program with binary %s\n", xclbin);
 
     err = clBuildProgram(prog,       // program

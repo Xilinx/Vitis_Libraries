@@ -189,7 +189,7 @@ void dynamic_eval_wrapper(ap_uint<289> alu_cfg,
     hls::stream<ap_uint<WStrm> > split0_strm[ColNM - 4];
 #pragma HLS stream variable = split0_strm depth = 512
 #pragma HLS array_partition variable = split0_strm complete
-#pragma HLS resource variable = split0_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = split0_strm type = fifo impl = bram
     hls::stream<ap_uint<WStrm> > split1_strm[4];
 #pragma HLS stream variable = split1_strm depth = 8
 #pragma HLS array_partition variable = split1_strm complete
@@ -200,7 +200,7 @@ void dynamic_eval_wrapper(ap_uint<289> alu_cfg,
     hls::stream<ap_uint<WStrm> > dup0_strm[4];
 #pragma HLS stream variable = dup0_strm depth = 512
 #pragma HLS array_partition variable = dup0_strm complete
-#pragma HLS resource variable = dup0_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = dup0_strm type = fifo impl = bram
     hls::stream<ap_uint<WStrm> > dup1_strm[1][4];
 #pragma HLS stream variable = dup1_strm depth = 8
 #pragma HLS array_partition variable = dup1_strm complete

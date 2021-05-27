@@ -584,20 +584,77 @@ std::string prepare(std::string& wrk_dir, const int sf, std::vector<std::string>
     std::string dat_dir = wrk_dir;
     dat_dir += "/dat" + std::to_string(sf);
     if (debug) std::cout << "dat dir is: " << dat_dir << std::endl;
+    bool must_generate = false;
     for (std::string col_name : col_names) {
         if (x_utils::is_file(dat_dir + "/" + col_name + ".dat")) {
-            if (debug) std::cout << "file exist, skip generate." << std::endl;
+            if (debug) std::cout << col_name << ".dat exists." << std::endl;
         } else {
-            if (debug) std::cout << "file not exist, generate." << std::endl;
-            if (!x_utils::is_dir(wrk_dir)) {
-                std::string cmd = "mkdir -p ";
-                cmd += wrk_dir;
-                system(cmd.c_str());
-            }
-            generate_tbl(dbgen_dir, tbl_dir, sf);
-            convert_dat(tbl_dir, dat_dir);
+            if (debug) std::cout << col_name << ".dat needs to be generated." << std::endl;
+            must_generate = true;
         }
+    }
+    if (must_generate) {
+        if (debug) std::cout << "calling data generator..." << std::endl;
+        if (!x_utils::is_dir(wrk_dir)) {
+            std::string cmd = "mkdir -p " + wrk_dir;
+            system(cmd.c_str());
+        }
+        generate_tbl(dbgen_dir, tbl_dir, sf);
+        convert_dat(tbl_dir, dat_dir);
+        if (debug) std::cout << ".dat file genrated" << std::endl;
     }
     return dat_dir;
 }
+
+inline void generate_valid(const std::string& in_dir,
+                           const int sf,
+                           const std::string& v_name,
+                           const std::string& col_name,
+                           const unsigned elem_bits,
+                           const uint64_t ge_v,
+                           const uint64_t lt_v) {
+    assert((elem_bits == 32 || elem_bits == 64) && "unknown element width");
+    std::string dir = in_dir + "/dat" + std::to_string(sf) + "/";
+    if (x_utils::is_file(dir + v_name + ".dat")) {
+        std::cout << v_name << ".dat exists, skip generation." << std::endl;
+        return;
+    }
+    std::ifstream fin(dir + col_name + ".dat", std::ios::ate | std::ios::binary);
+    size_t n = fin.tellg() / (elem_bits / 8);
+    std::cout << "Filtering " << n << " rows into validaty bits..." << std::flush;
+    fin.seekg(std::ios::beg);
+    std::ofstream fout(dir + v_name + ".dat", std::ios::binary);
+    char t;
+    unsigned bit_cnt = 0;
+    size_t v = 0;
+    for (size_t i = 0; i < n; ++i) {
+        char pass = 1;
+        if (elem_bits == 64) {
+            uint64_t d;
+            fin.read(reinterpret_cast<char*>(&d), 8);
+            pass = (d >= ge_v) && (d < lt_v);
+        } else {
+            uint32_t d;
+            fin.read(reinterpret_cast<char*>(&d), 4);
+            pass = (d >= ge_v) && (d < lt_v);
+        }
+        v += pass;
+        if (bit_cnt == 7) {
+            t |= (pass << bit_cnt);
+            fout.write(&t, 1);
+            t = 0;
+            bit_cnt = 0;
+        } else {
+            t |= (pass << bit_cnt);
+            ++bit_cnt;
+        }
+    }
+    if (bit_cnt != 0) {
+        fout.write(&t, 1);
+    }
+    std::cout << "Done. " << v << " rows valid." << std::endl;
+    fout.close();
+    fin.close();
+}
+
 #endif

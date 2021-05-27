@@ -87,10 +87,10 @@ void hash_wrapper(hls::stream<ap_uint<KEYW> >& i_key_strm,
 
     hls::stream<ap_uint<KEYW> > key_strm_in;
 #pragma HLS STREAM variable = key_strm_in depth = 8
-#pragma HLS resource variable = key_strm_in core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm_in type = fifo impl = srl
     hls::stream<ap_uint<64> > hash_strm_out;
 #pragma HLS STREAM variable = hash_strm_out depth = 8
-#pragma HLS resource variable = hash_strm_out core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_out type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     unsigned int cnt = 0;
@@ -204,10 +204,10 @@ void dispatch_unit(hls::stream<ap_uint<KEYW> >& i_key_strm,
 
     hls::stream<ap_uint<HASHWH + HASHWL> > hash_strm;
 #pragma HLS STREAM variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > key_strm;
 #pragma HLS STREAM variable = key_strm depth = 8
-#pragma HLS resource variable = key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm type = fifo impl = srl
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 8
 
@@ -705,15 +705,15 @@ void hashPartition(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = k1_strm_arry_mc depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_mc complete dim = 0
-#pragma HLS resource variable = k1_strm_arry_mc core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_mc type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = p1_strm_arry_mc depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_mc complete dim = 0
-#pragma HLS resource variable = p1_strm_arry_mc core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_mc type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = hash_strm_arry_mc depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_mc complete dim = 0
-#pragma HLS resource variable = hash_strm_arry_mc core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_mc type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = e1_strm_arry_mc depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_mc complete dim = 0
@@ -722,11 +722,11 @@ void hashPartition(
     hls::stream<ap_uint<KEYW> > k1_strm_arry[PU];
 #pragma HLS stream variable = k1_strm_arry depth = 8
 #pragma HLS array_partition variable = k1_strm_arry dim = 1
-#pragma HLS resource variable = k1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 8
 #pragma HLS array_partition variable = p1_strm_arry dim = 1
-#pragma HLS resource variable = p1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 8
 #pragma HLS array_partition variable = hash_strm_arry dim = 1
@@ -738,15 +738,15 @@ void hashPartition(
     hls::stream<ap_uint<KEYW + PW> > t_kpld_strm_arry[PU];
 #pragma HLS stream variable = t_kpld_strm_arry depth = BDEPTH
 #pragma HLS array_partition variable = t_kpld_strm_arry dim = 1
-#pragma HLS resource variable = t_kpld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_kpld_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<10> > t_nm_strm_arry[PU];
 #pragma HLS stream variable = t_nm_strm_arry depth = BDEPTH
 #pragma HLS array_partition variable = t_nm_strm_arry dim = 1
-#pragma HLS resource variable = t_nm_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_nm_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<10> > t_bk_nm_strm_arry[PU];
 #pragma HLS stream variable = t_bk_nm_strm_arry depth = BDEPTH
 #pragma HLS array_partition variable = t_bk_nm_strm_arry dim = 1
-#pragma HLS resource variable = t_bk_nm_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_bk_nm_strm_arry type = fifo impl = bram
 
 //---------------------------------dispatch PU-------------------------------
 #ifndef __SYNTHESIS__

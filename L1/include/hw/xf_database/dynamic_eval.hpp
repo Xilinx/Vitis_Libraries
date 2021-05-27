@@ -214,7 +214,6 @@ struct cell_data {
 // implement alu_cell
 template <typename In_Type1, typename In_Type2, typename Out_Type>
 void alu_cell1(In_Type1 strm_in1, In_Type2 strm_in2, ap_uint<4> OP, cell_data<Out_Type>& cell_output) {
-#pragma HLS PIPELINE II = 1
 #pragma HLS INLINE
 
     Out_Type compute_result1;
@@ -241,7 +240,6 @@ void alu_cell2(cell_data<In_Type1> cell_Input1,
                cell_data<In_Type2> cell_Input2,
                ap_uint<4> OP,
                cell_data<Out_Type>& cell_output) {
-#pragma HLS PIPELINE II = 1
 #pragma HLS INLINE
 
     Out_Type compute_result1;

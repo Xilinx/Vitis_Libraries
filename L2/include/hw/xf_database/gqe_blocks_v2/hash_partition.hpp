@@ -88,10 +88,10 @@ void hash_wrapper(hls::stream<bool>& mk_on_strm,
 
     hls::stream<ap_uint<KEYW> > key_strm_in;
 #pragma HLS STREAM variable = key_strm_in depth = 8
-#pragma HLS resource variable = key_strm_in core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm_in type = fifo impl = srl
     hls::stream<ap_uint<64> > hash_strm_out;
 #pragma HLS STREAM variable = hash_strm_out depth = 8
-#pragma HLS resource variable = hash_strm_out core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_out type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     unsigned int cnt = 0;
@@ -231,10 +231,10 @@ void dispatch_unit(hls::stream<bool>& mk_on_strm,
 
     hls::stream<ap_uint<HASHWH + HASHWL> > hash_strm;
 #pragma HLS STREAM variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > key_strm;
 #pragma HLS STREAM variable = key_strm depth = 8
-#pragma HLS resource variable = key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm type = fifo impl = srl
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 8
 
@@ -456,7 +456,7 @@ void hashInfo(hls::stream<int>& k_depth_strm, // bucket depth
               hls::stream<ap_uint<HASHWL> >& o_bucket_idx_strm,
               hls::stream<ap_uint<ARW - HASHWH> >& o_waddr_strm,
               hls::stream<ap_uint<KEYW + PW> >& o_wdata_strm,
-              hls::stream<ap_uint<10> >& o_bucket_idx_cnt_strm,
+              hls::stream<ap_uint<11> >& o_bucket_idx_cnt_strm,
               hls::stream<bool>& o_e_strm) {
     int k_depth = k_depth_strm.read();
     const ap_uint<10> depth = k_depth % 1024;
@@ -492,7 +492,7 @@ void hashInfo(hls::stream<int>& k_depth_strm, // bucket depth
         }
 
         // update according bucket cnt + 1
-        ap_uint<10> bucket_reg = bucket_cnt[bucket_idx];
+        ap_uint<11> bucket_reg = bucket_cnt[bucket_idx];
 
         // generate waddr wdata
         ap_uint<ARW - HASHWH> waddr = bucket_idx * depth * 2 + bucket_reg;
@@ -518,7 +518,7 @@ void readWriteUram(hls::stream<int>& k_depth_strm, // bucket depth
                    hls::stream<ap_uint<HASHWL> >& i_bucket_idx_strm,
                    hls::stream<ap_uint<ARW - HASHWH> >& i_waddr_strm,
                    hls::stream<ap_uint<KEYW + PW> >& i_wdata_strm,
-                   hls::stream<ap_uint<10> >& i_bucket_idx_cnt_strm,
+                   hls::stream<ap_uint<11> >& i_bucket_idx_cnt_strm,
                    hls::stream<bool>& i_e_strm,
 
                    // output key + payload
@@ -556,7 +556,7 @@ INIT:
     ap_uint<HASHW> bucket_idx;
     ap_uint<ARW - HASHWH> waddr;
     ap_uint<KEYW + PW> wdata;
-    ap_uint<10> bucket_idx_cnt;
+    ap_uint<11> bucket_idx_cnt;
     ap_uint<1> pingpong;
 
     bool isNonBlocking = true;
@@ -575,7 +575,7 @@ BU_WLOOP:
             waddr = i_waddr_strm.read();
             wdata = i_wdata_strm.read();
             bucket_idx_cnt = i_bucket_idx_cnt_strm.read();
-            pingpong = bucket_idx_cnt[9];
+            pingpong = bucket_idx_cnt > 512 ? 1 : 0;
         }
         // std::cout << "bucket_idx: " << bucket_idx << ", ";
         // std::cout << "bucket_idx_cnt: " << bucket_idx_cnt << ", ";
@@ -588,14 +588,13 @@ BU_WLOOP:
         }
 
         if (isNonBlocking) {
-            bucket_cnt_copy[bucket_idx] = bucket_idx_cnt;
-
-            if ((bucket_idx_cnt == depth - 1) || (bucket_idx_cnt == 2 * depth - 1)) {
+            if ((bucket_idx_cnt == depth) || (bucket_idx_cnt == 2 * depth)) {
                 bucket_flag[bucket_idx][pingpong] = 1;
                 wlist_strm.write((bucket_idx, pingpong));
                 // std::cout << "flag[" << bucket_idx << "][" << pingpong << "]: " << bucket_flag[bucket_idx][pingpong]
                 // << std::endl;
             }
+            bucket_cnt_copy[bucket_idx] = bucket_idx_cnt;
             uram_inst.write(waddr, wdata);
         }
 
@@ -719,6 +718,13 @@ BU_WLOOP:
         }
     }
 
+    // corner case, when only 1 data left after 512/1024, the data is saved in waddr, wdata
+    if (!isNonBlocking && last) {
+        o_nm_strm.write(1);
+        o_bk_nm_strm.write(bucket_idx);
+        o_kpld_strm.write(wdata);
+    }
+
     o_nm_strm.write(0);
 }
 
@@ -756,7 +762,7 @@ void build_unit(hls::stream<int>& k_depth_strm, // bucket depth
     hls::stream<ap_uint<KEYW + PW> > mid_wdata_strm;
 #pragma HLS STREAM variable = mid_wdata_strm depth = 32
 
-    hls::stream<ap_uint<10> > mid_bucket_idx_cnt_strm;
+    hls::stream<ap_uint<11> > mid_bucket_idx_cnt_strm;
 #pragma HLS STREAM variable = mid_bucket_idx_cnt_strm depth = 32
 
     hls::stream<bool> mid_e_strm;
@@ -860,13 +866,13 @@ void combine_read(hls::stream<ap_uint<KEYW + PW> > i_kpld_strm[PU],
                   hls::stream<ap_uint<EW * PU> > o_strm[COL_NM]) {
     hls::stream<ap_uint<10> > mid_bk_strm[PU];
 #pragma HLS stream variable = mid_bk_strm depth = 8
-#pragma HLS resource variable = mid_bk_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = mid_bk_strm type = fifo impl = srl
     hls::stream<ap_uint<10> > mid_nm_strm[PU];
 #pragma HLS stream variable = mid_nm_strm depth = 8
-#pragma HLS resource variable = mid_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = mid_nm_strm type = fifo impl = srl
     hls::stream<ap_uint<EW * PU> > mid_strm[PU][COL_NM];
 #pragma HLS stream variable = mid_strm depth = 512
-#pragma HLS resource variable = mid_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = mid_strm type = fifo impl = bram
 
 #pragma HLS dataflow
     for (int i = 0; i < PU; i++) {
@@ -933,23 +939,23 @@ void hashPartition(
     // Channel 1~4
     hls::stream<ap_uint<KEYW> > k1_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = k1_strm_arry_mc depth = 8
-#pragma HLS resource variable = k1_strm_arry_mc core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_mc type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = p1_strm_arry_mc depth = 8
-#pragma HLS resource variable = p1_strm_arry_mc core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_mc type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = hash_strm_arry_mc depth = 8
-#pragma HLS resource variable = hash_strm_arry_mc core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_mc type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_mc[CH_NM][PU];
 #pragma HLS stream variable = e1_strm_arry_mc depth = 8
 
     // merge channel 1~4 here, then perform build process
     hls::stream<ap_uint<KEYW> > k1_strm_arry[PU];
 #pragma HLS stream variable = k1_strm_arry depth = 8
-#pragma HLS resource variable = k1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 8
-#pragma HLS resource variable = p1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 8
     hls::stream<bool> e1_strm_arry[PU];
@@ -958,13 +964,13 @@ void hashPartition(
     // output of PU
     hls::stream<ap_uint<KEYW + PW> > t_kpld_strm_arry[PU];
 #pragma HLS stream variable = t_kpld_strm_arry depth = BDEPTH
-#pragma HLS resource variable = t_kpld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_kpld_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<10> > t_nm_strm_arry[PU];
 #pragma HLS stream variable = t_nm_strm_arry depth = 4
-#pragma HLS resource variable = t_nm_strm_arry core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = t_nm_strm_arry type = fifo impl = lutram
     hls::stream<ap_uint<10> > t_bk_nm_strm_arry[PU];
 #pragma HLS stream variable = t_bk_nm_strm_arry depth = 4
-#pragma HLS resource variable = t_bk_nm_strm_arry core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = t_bk_nm_strm_arry type = fifo impl = lutram
 
     hls::stream<bool> mid_mk_on_strms[CH_NM];
 #pragma HLS stream variable = mid_mk_on_strms depth = 2

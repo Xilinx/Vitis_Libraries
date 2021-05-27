@@ -183,9 +183,9 @@ void stream_to_buf(
     // streams between combine_col and stream_to_axi
     hls::stream<ap_uint<_WBuffer> > strm_unhandle_data;
     hls::stream<bool> strm_unhandle_e;
-#pragma HLS RESOURCE variable = strm_unhandle_data core = FIFO_SRL
+#pragma HLS bind_storage variable = strm_unhandle_data type = fifo impl = srl
 #pragma HLS STREAM variable = strm_unhandle_data depth = 32
-#pragma HLS RESOURCE variable = strm_unhandle_e core = FIFO_SRL
+#pragma HLS bind_storage variable = strm_unhandle_e type = fifo impl = srl
 #pragma HLS STREAM variable = strm_unhandle_e depth = 32
 
     // combine unhandled streams from aggr_spill
@@ -254,10 +254,10 @@ void buf_to_stream(
 
     // streams between axi_to_stream and split_col
     hls::stream<ap_uint<_WBuffer> > ostrm;
-#pragma HLS RESOURCE variable = ostrm core = FIFO_SRL
+#pragma HLS bind_storage variable = ostrm type = fifo impl = srl
 #pragma HLS STREAM variable = ostrm depth = 32
     hls::stream<bool> e0_strm;
-#pragma HLS RESOURCE variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 #pragma HLS STREAM variable = e0_strm depth = 32
 
     xf::common::utils_hw::axiToStream<_BurstLenR, _WBuffer, ap_uint<_WBuffer> >(in_buf, unhandle_cnt, ostrm, e0_strm);
@@ -499,19 +499,19 @@ void dispatch_wrapper(hls::stream<ap_uint<_WKey> > i_key_strm[_KeyNM],
 
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > key0_strm;
 #pragma HLS STREAM variable = key0_strm depth = 8
-#pragma HLS resource variable = key0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key0_strm type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > pld0_strm;
 #pragma HLS STREAM variable = pld0_strm depth = 32
-#pragma HLS resource variable = pld0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = pld0_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS STREAM variable = e0_strm depth = 8
 
     hls::stream<ap_uint<_HASHWH + _HASHWL> > hash_strm;
 #pragma HLS STREAM variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > key1_strm;
 #pragma HLS STREAM variable = key1_strm depth = 8
-#pragma HLS resource variable = key1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key1_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS STREAM variable = e1_strm depth = 8
 
@@ -1430,24 +1430,24 @@ void update_uram(
 
     // streams between update_key_uram and stream_to_buf
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > key0_strm;
-#pragma HLS RESOURCE variable = key0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key0_strm type = fifo impl = srl
 #pragma HLS STREAM variable = key0_strm depth = 8
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > pld0_strm;
-#pragma HLS RESOURCE variable = pld0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = pld0_strm type = fifo impl = srl
 #pragma HLS STREAM variable = pld0_strm depth = 8
     hls::stream<bool> e0_strm;
-#pragma HLS RESOURCE variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 #pragma HLS STREAM variable = e0_strm depth = 8
 
     // streams between update_key_uram and update_pld_uram
     hls::stream<ap_uint<_WHash> > hash_strm;
-#pragma HLS RESOURCE variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
 #pragma HLS STREAM variable = hash_strm depth = 8
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > pld1_strm;
-#pragma HLS RESOURCE variable = pld1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = pld1_strm type = fifo impl = srl
 #pragma HLS STREAM variable = pld1_strm depth = 8
     hls::stream<bool> e1_strm;
-#pragma HLS RESOURCE variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 #pragma HLS STREAM variable = e1_strm depth = 8
 
     ap_uint<_Wcnt> max_col = key_column > pld_column ? key_column : pld_column;
@@ -1887,13 +1887,13 @@ void uram_to_stream(
 #pragma HLS dataflow
 
     hls::stream<ap_uint<_WHash> > array_idx_strm("uram_to_stream1");
-#pragma HLS RESOURCE variable = array_idx_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = array_idx_strm type = fifo impl = srl
 #pragma HLS STREAM variable = array_idx_strm depth = 8
     hls::stream<ap_uint<_Wcnt> > i_cnt_strm("uram_to_stream2");
-#pragma HLS RESOURCE variable = i_cnt_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = i_cnt_strm type = fifo impl = srl
 #pragma HLS STREAM variable = i_cnt_strm depth = 8
     hls::stream<bool> e0_strm("uram_to_stream3");
-#pragma HLS RESOURCE variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 #pragma HLS STREAM variable = e0_strm depth = 8
 
     ap_uint<_Wcnt> max_col = key_column > pld_column ? key_column : pld_column;
@@ -1975,16 +1975,16 @@ void hash_aggr_pu_wrapper(
 #else
 
     ap_uint<_WKey * _KeyNM + _Wcnt> key_uram[depth];
-#pragma HLS resource variable = key_uram core = RAM_2P_URAM
+#pragma HLS bind_storage variable = key_uram type = ram_2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = key_uram block factor = 4
     ap_uint<_WPay * _PayNM> pld_uram0[depth];
-#pragma HLS resource variable = pld_uram0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = pld_uram0 type = ram_2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = pld_uram0 block factor = 4
     ap_uint<_WPay * _PayNM> pld_uram1[depth];
-#pragma HLS resource variable = pld_uram1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = pld_uram1 type = ram_2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = pld_uram1 block factor = 4
     ap_uint<_WPay * _PayNM> pld_uram2[depth];
-#pragma HLS resource variable = pld_uram2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = pld_uram2 type = ram_2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = pld_uram2 block factor = 4
 
 #endif
@@ -2266,15 +2266,15 @@ void hash_aggr_top(
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > k1_strm_arry_c0[PU];
 #pragma HLS stream variable = k1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c0 complete
-#pragma HLS resource variable = k1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c0 type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > p1_strm_arry_c0[PU];
 #pragma HLS stream variable = p1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c0 complete
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<_WHashLow> > hash_strm_arry_c0[PU];
 #pragma HLS stream variable = hash_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c0 complete
-#pragma HLS resource variable = hash_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c0 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c0[PU];
 #pragma HLS stream variable = e1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c0 complete
@@ -2283,15 +2283,15 @@ void hash_aggr_top(
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > k1_strm_arry_c1[PU];
 #pragma HLS stream variable = k1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c1 complete
-#pragma HLS resource variable = k1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c1 type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > p1_strm_arry_c1[PU];
 #pragma HLS stream variable = p1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c1 complete
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<_WHashLow> > hash_strm_arry_c1[PU];
 #pragma HLS stream variable = hash_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c1 complete
-#pragma HLS resource variable = hash_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c1 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c1[PU];
 #pragma HLS stream variable = e1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c1 complete
@@ -2300,15 +2300,15 @@ void hash_aggr_top(
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > k1_strm_arry_c2[PU];
 #pragma HLS stream variable = k1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c2 complete
-#pragma HLS resource variable = k1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c2 type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > p1_strm_arry_c2[PU];
 #pragma HLS stream variable = p1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c2 complete
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<_WHashLow> > hash_strm_arry_c2[PU];
 #pragma HLS stream variable = hash_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c2 complete
-#pragma HLS resource variable = hash_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c2 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c2[PU];
 #pragma HLS stream variable = e1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c2 complete
@@ -2317,15 +2317,15 @@ void hash_aggr_top(
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > k1_strm_arry_c3[PU];
 #pragma HLS stream variable = k1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c3 complete
-#pragma HLS resource variable = k1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c3 type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > p1_strm_arry_c3[PU];
 #pragma HLS stream variable = p1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c3 complete
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<_WHashLow> > hash_strm_arry_c3[PU];
 #pragma HLS stream variable = hash_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c3 complete
-#pragma HLS resource variable = hash_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c3 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c3[PU];
 #pragma HLS stream variable = e1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c3 complete
@@ -2335,15 +2335,15 @@ void hash_aggr_top(
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > k1_strm_arry[PU];
 #pragma HLS stream variable = k1_strm_arry depth = 8
 #pragma HLS array_partition variable = k1_strm_arry complete
-#pragma HLS resource variable = k1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 8
 #pragma HLS array_partition variable = p1_strm_arry complete
-#pragma HLS resource variable = p1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<_WHashLow> > hash1_strm_arry[PU];
 #pragma HLS stream variable = hash1_strm_arry depth = 8
 #pragma HLS array_partition variable = hash1_strm_arry complete
-#pragma HLS resource variable = hash1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = hash1_strm_arry type = fifo impl = srl
     hls::stream<bool> e1_strm_arry[PU];
 #pragma HLS stream variable = e1_strm_arry depth = 8
 #pragma HLS array_partition variable = e1_strm_arry complete
@@ -2352,11 +2352,11 @@ void hash_aggr_top(
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > aggr_key_arry[PU];
 #pragma HLS stream variable = aggr_key_arry depth = 64
 #pragma HLS array_partition variable = aggr_key_arry complete
-#pragma HLS resource variable = aggr_key_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = aggr_key_arry type = fifo impl = srl
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > aggr_pld_array[PU][3];
-#pragma HLS stream variable = aggr_pld_arry depth = 8
-#pragma HLS array_partition variable = aggr_pld_arry complete
-#pragma HLS resource variable = aggr_pld_arry core = FIFO_SRL
+#pragma HLS stream variable = aggr_pld_array depth = 8
+#pragma HLS array_partition variable = aggr_pld_array complete
+#pragma HLS bind_storage variable = aggr_pld_array type = fifo impl = srl
     hls::stream<bool> e2_strm_arry[PU];
 #pragma HLS stream variable = e2_strm_arry depth = 8
 #pragma HLS array_partition variable = e2_strm_arry complete
@@ -2364,11 +2364,11 @@ void hash_aggr_top(
     // output of collect pu
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > collect_key;
 #pragma HLS stream variable = collect_key depth = 512
-#pragma HLS resource variable = collect_key core = FIFO_BRAM
+#pragma HLS bind_storage variable = collect_key type = fifo impl = bram
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > collect_pld[3];
 #pragma HLS stream variable = collect_pld depth = 512
 #pragma HLS array_partition variable = collect_pld complete
-#pragma HLS resource variable = collect_pld core = FIFO_BRAM
+#pragma HLS bind_storage variable = collect_pld type = fifo impl = bram
     hls::stream<bool> e3_strm;
 #pragma HLS stream variable = e3_strm depth = 512
 
@@ -2679,7 +2679,7 @@ void hashGroupAggregate(
 
     do {
 // clang-format off
-#pragma HLS ALLOCATION function instances = hash_aggr_top<_WKey, _KeyNM, _WPay, _PayNM, _HashMode, _WHashHigh,  _WHashLow, _CHNM, _Wcnt, _WBuffer, _BurstLenW, _BurstLenR> limit = 1
+#pragma HLS ALLOCATION function instances = details::hash_group_aggregate::hash_aggr_top<_WKey, _KeyNM, _WPay, _PayNM, _HashMode, _WHashHigh,  _WHashLow, _CHNM, _Wcnt, _WBuffer, _BurstLenW, _BurstLenR> limit = 1
 // clang-format on
 
 #ifndef __SYNTHESIS__

@@ -56,14 +56,23 @@ struct true_table_info {
 
 namespace xf {
 namespace database {
-template <int NCOL>
+
+// @tparam W input data width
+// @tparam NOCL number of columns
+template <int NCOL, int W>
 struct DynamicFilterInfo {
+    // will error out if mis-used.
+};
+// special
+template <int W>
+struct DynamicFilterInfo<4, W> {
+    static constexpr int NCOL = 4;
     typedef ap_uint<32> cfg_type;
     static const int var_var_cmp_num = NCOL * (NCOL - 1) / 2;
-    static const int dwords_num = 3 * NCOL + (var_var_cmp_num + (32 / FilterOpWidth - 1)) / (32 / FilterOpWidth) +
+    static const int dwords_num = (2 * ((W - 1) / 32 + 1) + 1) * NCOL +
+                                  (var_var_cmp_num + (32 / FilterOpWidth - 1)) / (32 / FilterOpWidth) +
                                   details::true_table_info<NCOL>::dwords_num;
 };
-
 } // namespace database
 } // namespace xf
 
@@ -397,7 +406,7 @@ void parse_filter_config(hls::stream<ap_uint<32> >& filter_cfg_strm,
                          //
                          hls::stream<typename var_const_cmp_info<W>::cfg_type> cmpvc_cfg_strms[NCOL],
                          hls::stream<typename var_var_cmp_info<W>::cfg_type>
-                             cmpvv_cfg_strms[database::DynamicFilterInfo<NCOL>::var_var_cmp_num],
+                             cmpvv_cfg_strms[database::DynamicFilterInfo<NCOL, W>::var_var_cmp_num],
                          hls::stream<typename true_table_info<NCOL>::cfg_type>& tt_cfg_strm) {
     /* config variable-in-range comparison
      *
@@ -430,7 +439,7 @@ void parse_filter_config(hls::stream<ap_uint<32> >& filter_cfg_strm,
      * | 0 . . . . . . | op(N+2) | op(N+1) |
      */
     {
-        const int NVV = database::DynamicFilterInfo<NCOL>::var_var_cmp_num;
+        const int NVV = database::DynamicFilterInfo<NCOL, W>::var_var_cmp_num;
         char nb = 0;
         ap_uint<32> dw;
         for (int i = 0; i < NVV; ++i) {
@@ -514,7 +523,8 @@ void dynamicFilter(hls::stream<ap_uint<32> >& filter_cfg_strm,
     // parse dynamic config.
     hls::stream<typename details::var_const_cmp_info<W>::cfg_type> cmpvc_cfg_strms[4];
 
-    hls::stream<typename details::var_var_cmp_info<W>::cfg_type> cmpvv_cfg_strms[DynamicFilterInfo<4>::var_var_cmp_num];
+    hls::stream<typename details::var_var_cmp_info<W>::cfg_type>
+        cmpvv_cfg_strms[DynamicFilterInfo<4, W>::var_var_cmp_num];
 
     hls::stream<typename details::true_table_info<4>::cfg_type> tt_cfg_strm;
 
@@ -654,7 +664,7 @@ void dynamicFilter(hls::stream<ap_uint<32> >& filter_cfg_strm,
 #pragma HLS stream variable = vb_strm1 depth = 8
 #pragma HLS stream variable = vc_strm1 depth = 8
 #pragma HLS stream variable = vd_strm1 depth = 8
-#pragma HLS stream variable = pay_strm1 depth = 8
+#pragma HLS stream variable = pay_strm1 depth = 32
 #pragma HLS stream variable = e_strm1 depth = 8
 
     details::filter_3_to_4(v0_strm, v1_strm, v2_strm, pay_in_strm,

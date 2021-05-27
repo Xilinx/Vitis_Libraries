@@ -29,6 +29,8 @@
 #include <cstring>
 #include <sys/time.h>
 
+#include "xf_utils_sw/logger.hpp"
+
 #include "xclhost.hpp"
 #include "cl_errcode.hpp"
 
@@ -198,6 +200,9 @@ void CL_CALLBACK update_buffer(cl_event ev, cl_int st, void* d) {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n------------ TPC-H Query 5 Simplified (1~100G) -------------\n";
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
 
     // cmd arg parser.
     ArgParser parser(argc, argv);
@@ -384,12 +389,13 @@ int main(int argc, const char* argv[]) {
     cl_command_queue cq;
     cl_program prog;
 
-    err = init_hardware(&ctx, &dev_id, &cq, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, "");
+    err = xclhost::init_hardware(&ctx, &dev_id, &cq, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                 "");
     if (clCheckError(err) != CL_SUCCESS) {
         return err;
     }
 
-    err = load_binary(&prog, ctx, dev_id, xclbin_path.c_str());
+    err = xclhost::load_binary(&prog, ctx, dev_id, xclbin_path.c_str());
     if (clCheckError(err) != CL_SUCCESS) {
         return err;
     }
@@ -397,12 +403,9 @@ int main(int argc, const char* argv[]) {
     cl_kernel kernel;
 
     kernel = clCreateKernel(prog, "q5simplified", &err);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: fail to create kernel: %s.\n", clGetErrorString(err));
-    }
+    logger.logCreateKernel(err);
 
     // temp buffers.
-
     cl_mem buf_table[PU_NM];
 
     cl_mem_ext_ptr_t memExt[PU_NM];
@@ -614,10 +617,7 @@ int main(int argc, const char* argv[]) {
 
     err += (v == golden_sum) ? 0 : 1;
 
-    if (err)
-        std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
-    else
-        std::cout << "PASS!" << std::endl;
+    err ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
 
     std::cout << "-----------------------------------------------------------\n\n";
     return err;

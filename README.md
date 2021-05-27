@@ -19,7 +19,7 @@ At each level, this library strives to make modules configurable through documen
 so that advanced users can easily tailor, optimize or combine with property logic for specific needs.
 Test cases are provided for all the public APIs, and can be used as examples of usage.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/2020.2/) for more details.
+Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/2021.1/) for more details.
 
 ## Requirements
 
@@ -43,7 +43,7 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2020.2,
+This library is designed to work with Vitis 2021.1,
 and a matching version of XRT should be installed.
 
 ### Dependency
@@ -68,7 +68,7 @@ Build environment needs setup with the Vitis and XRT scripts before running any 
 For command-line developers the following settings are required before running any case in this library:
 
 ```console
-source /opt/xilinx/Vitis/2020.2/settings64.sh
+source /opt/xilinx/Vitis/2021.1/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
@@ -120,11 +120,22 @@ Here, `TARGET` decides the FPGA binary type
 
 Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build target.
 
+
+
+## Benchmark Result
+
+In `L1/benchmarks`, a list of key primitives are combined with data-loading/storing modules and built into xclbins targeting Alveo U280.
+For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/database/2021.1/benchmark/benchmark.html).
+
+## Documentations
+For more details of the database library, please refer to [Database Library Documentation](https://xilinx.github.io/Vitis_Libraries/xf_database/2021.1/index.html).
+
+
 ## License
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019-2020 Xilinx, Inc.
+    Copyright 2019-2021 Xilinx, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

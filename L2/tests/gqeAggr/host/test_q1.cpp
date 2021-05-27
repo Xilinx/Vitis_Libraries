@@ -17,6 +17,7 @@
 // OpenCL C API utils
 #include "xclhost.hpp"
 #include "x_utils.hpp"
+#include "xf_utils_sw/logger.hpp"
 // GQE L2
 #include "xf_database/meta_table.hpp"
 #include "xf_database/aggr_command.hpp"
@@ -158,6 +159,9 @@ int main(int argc, const char* argv[]) {
     meta_aggr_out.setCol(6, 6, result_nrow);
     meta_aggr_out.setCol(7, 7, result_nrow);
 
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
+
     // setup OpenCL related stuff
     cl_int err;
     cl_context ctx;
@@ -180,10 +184,8 @@ int main(int argc, const char* argv[]) {
 
     // build kernel
     cl_kernel agg_kernel = clCreateKernel(prg, "gqeAggr", &err);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, "ERROR: failed to create kernel.\n");
-        return err;
-    }
+    logger.logCreateKernel(err);
+
     std::cout << "Kernel has been created\n";
 
     MM mm;
@@ -396,5 +398,9 @@ int main(int argc, const char* argv[]) {
     cpuQ1((int*)table_in_col0, (int*)table_in_col1, (int*)table_in_col2, (int*)table_in_col3, (int*)table_in_col4,
           (int*)table_in_col5, (int*)table_in_col6, (int*)table_in_col7, lineitem_n, tbg);
 
-    return check_result(tk1, tbg);
+    int nerror = check_result(tk1, tbg);
+
+    (nerror > 0) ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
+
+    return nerror;
 }

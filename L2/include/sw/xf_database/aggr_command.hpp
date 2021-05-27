@@ -72,6 +72,9 @@ class AggrCommand {
     /**
      * @brief construct of AggrCommand.
      *
+     * The aggregate command used buffer is allocated on host.
+     * Some default settings are provided.
+     *
      */
 
     AggrCommand() {
@@ -92,7 +95,7 @@ class AggrCommand {
     /**
      * @brief scan valid cols and shuffle for evaluation 1.
      *
-     * @param index, input valid column ids
+     * @param index input valid column ids
      *
      */
     void Scan(std::vector<int8_t> index) {
@@ -113,10 +116,10 @@ class AggrCommand {
     /**
      * @brief set Evaluation string.
      *
-     * @param eval_id, most support two evaluations
-     * @param s0, evaluation string for special strm format (not support '/')
-     * @param index, evaluation constants for each strm, default 0
-     * @param post_div, post division alu operation, nosf for no division, sf10
+     * @param eval_id most support two evaluations
+     * @param s0 evaluation string for special strm format (not support '/')
+     * @param index evaluation constants for each strm, default 0
+     * @param post_div post division alu operation, nosf for no division, sf10
      * for "a/10", sf100 for "a/100",
      * sf1k for "a/1000", sf10k for "a/10000" (a is result of evaluation
      * expression)
@@ -151,8 +154,8 @@ class AggrCommand {
     /**
      * @brief set Evaluation string.
      *
-     * @param eval_id, most two evaluations
-     * @param eval_str, evaluation expression string
+     * @param eval_id most two evaluations
+     * @param eval_str evaluation expression string
      *
      */
     void setEvaluation(int eval_id, std::string eval_str) {
@@ -187,7 +190,7 @@ class AggrCommand {
      *
      */
     void setFilter(std::string filter_string) {
-        FilterConfig fp(filter_string);
+        FilterConfig<32> fp(filter_string);
         auto cfg = fp.getConfigBits();
         memcpy(&hbuf[22], cfg.get(), sizeof(uint32_t) * 45);
     }

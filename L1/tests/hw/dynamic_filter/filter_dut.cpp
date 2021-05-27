@@ -17,7 +17,7 @@
 // top header
 #include "filter_dut.hpp"
 
-void filter_dut(hls::stream<xf::database::DynamicFilterInfo<4>::cfg_type>& filter_cfg_strm,
+void filter_dut(hls::stream<xf::database::DynamicFilterInfo<4, 32>::cfg_type>& filter_cfg_strm,
                 hls::stream<ap_uint<WKEY> > k_strms[4],
                 hls::stream<ap_uint<WPAY> >& p_strm,
                 hls::stream<bool>& e_strm,

@@ -22,8 +22,14 @@
 #include "utils.hpp"
 #include "kernel_sort.hpp"
 
+#include "xf_utils_sw/logger.hpp"
+
 int main(int argc, const char* argv[]) {
     std::cout << "\n-----------Sort Design---------------\n";
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
+
     int err = 0;
     int keyLength;
 
@@ -67,14 +73,18 @@ int main(int argc, const char* argv[]) {
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_SortKernel(program, "SortKernel");
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel kernel_SortKernel(program, "SortKernel", &err);
+    logger.logCreateKernel(err);
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[3];
@@ -115,11 +125,6 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    if (err)
-        std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
-    else
-        std::cout << "PASS!" << std::endl;
-
     unsigned long time1, time2, total_time;
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
@@ -135,5 +140,6 @@ int main(int argc, const char* argv[]) {
     total_time += time2 - time1;
     std::cout << "Total Execution time " << total_time / 1000.0 << "us" << std::endl;
 
+    err ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
     return err;
 }
