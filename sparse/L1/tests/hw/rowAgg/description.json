@@ -7,7 +7,9 @@
     "part_whitelist": [], 
     "platform_blacklist": [], 
     "platform_whitelist": [
-        "u280"
+        "u280", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "rowAgg_test", 
     "solution": "sol", 

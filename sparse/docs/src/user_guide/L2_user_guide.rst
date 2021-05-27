@@ -27,5 +27,7 @@ L2 Kernel User Guide
 .. toctree::
    :maxdepth: 2
 
-   L2_intro.rst
-   L2_api.rst
+   L2_cscmv_intro.rst
+   L2_spmv_double_intro.rst
+   L2_cscmv_api.rst
+   L2_spmv_double_api.rst

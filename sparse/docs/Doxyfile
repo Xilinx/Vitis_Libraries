@@ -799,12 +799,20 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ../L1/include/hw/xf_sparse \
-                         ../L2/include/hw/loadColKernel.hpp \
-                         ../L2/include/hw/bufTransColVecKernel.hpp \
-                         ../L2/include/hw/bufTransNnzColKernel.hpp \
-                         ../L2/include/hw/xBarColKernel.hpp \
-                         ../L2/include/hw/cscRowKernel.hpp \
-                         ../L2/include/hw/readWriteHbmKernel.cpp
+                         ../L2/include/hw/fp32/loadColKernel.hpp \
+                         ../L2/include/hw/fp32/bufTransColVecKernel.hpp \
+                         ../L2/include/hw/fp32/bufTransNnzColKernel.hpp \
+                         ../L2/include/hw/fp32/xBarColKernel.hpp \
+                         ../L2/include/hw/fp32/cscRowKernel.hpp \
+                         ../L2/include/hw/fp32/readWriteHbmKernel.hpp \
+                         ../L2/include/hw/fp64/loadNnzKernel.hpp \
+                         ../L2/include/hw/fp64/loadParXkernel.hpp \
+                         ../L2/include/hw/fp64/loadRbParamKernel.hpp \
+                         ../L2/include/hw/fp64/moveXkernel.hpp \
+                         ../L2/include/hw/fp64/selMultXkernel.hpp \
+                         ../L2/include/hw/fp64/rowAccKernel.hpp \
+                         ../L2/include/hw/fp64/assembleYkernel.hpp \
+                         ../L2/include/hw/fp64/storeYkernel.hpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
