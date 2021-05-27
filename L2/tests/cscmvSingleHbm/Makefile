@@ -83,12 +83,13 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L2/src/sw/cscmvSeq.cpp
-HOST_SRCS += $(XFLIB_DIR)/L2/src/sw/xcl2.cpp
+HOST_SRCS += $(XFLIB_DIR)/L2/src/sw/fp32/cscmvSeq.cpp
+HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/xcl2/xcl2.cpp
 
 CXXFLAGS += -DSPARSE_maxParamDdrBlocks=1024 -DSPARSE_maxParamHbmBlocks=512 -DSPARSE_paramOffset=1024 -DSPARSE_maxColMemBlocks=128 -DSPARSE_maxColParBlocks=512 -DSPARSE_maxRowBlocks=512 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_hbmMemBits=256 -DSPARSE_ddrMemBits=512 -DSPARSE_hbmChannels=1 -DSPARSE_hbmChannelMegaBytes=256 -DSPARSE_printWidth=6 -DSPARSE_pageSize=4096 -DDEBUG_dumpData=0 -DSEQ_KERNEL=0
-CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/fp32
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/hw
@@ -117,6 +118,7 @@ endif
 EXE_NAME := cscmv.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  $(BUILD_DIR)/cscmv.xclbin $(CUR_DIR)/data/app.bin
+
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
 VPP_FLAGS += --jobs 8
@@ -126,7 +128,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw/fp32
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw
 
 cscmvSeqKernel_VPP_FLAGS += --config $(CUR_DIR)/compile_opts_seq.cfg
@@ -159,7 +161,7 @@ xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 build: xclbin
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/cscmvSeqKernel.xo: $(XFLIB_DIR)/L2/src/hw/cscmvSingleHbm.cpp
+$(TEMP_DIR)/cscmvSeqKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/cscmvSingleHbm.cpp
 	$(ECHO) "Compiling Kernel: cscmvSeqKernel"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(cscmvSeqKernel_VPP_FLAGS) $(VPP_FLAGS) -k cscmvSeqKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'

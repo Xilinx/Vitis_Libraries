@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,415 +12,247 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# makefile-generator v1.0.3
 #
-# -----------------------------------------------------------------------------
-#                          project common settings
 
-MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-
+# ####################################### Help Section #####################################
 .PHONY: help
 
 help::
-	@echo "Makefile Usage:"
-	@echo "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA PLATFORM>"
-	@echo "      Command to generate the design for specified Target and Shell."
-	@echo ""
-	@echo "		 TARGET defaults to sw_emu."
-	@echo ""
-	@echo "      DEVICE is case-insensitive and support awk regex."
-	@echo "      For example, \`make xclbin TARGET=hw DEVICE='u280.*xdma'\`"
-	@echo "      It can also be an absolute path to platform file."
-	@echo ""
-	@echo "	 Use 'host' or 'xclbin' as make target to build only wanted binary."
-	@echo ""
-	@echo "	 make run DEBUG=yes TARGET=<sw_emu|hw_emu>"
-	@echo "	 	 Command to run application in emulation"
-	@echo ""
-	@echo "  make clean "
-	@echo "      Command to remove the generated non-hardware files."
-	@echo ""
-	@echo "  make cleanall"
-	@echo "      Command to remove all the generated files."
-	@echo ""
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to generate the design for specified Target and Shell."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to build xclbin application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to build host application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
+	$(ECHO) ""
 
+# ##################### Setting up default value of TARGET ##########################
+TARGET ?= hw_emu
 
-# -----------------------------------------------------------------------------
-#                          common de.cfgtion for building hw 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))                          
-include ./params_u280.mk
-else
-include ./params_u50.mk
-endif
-# -----------------------------------------------------------------------------
+# ################### Setting up default value of DEVICE ##############################
+DEVICE ?= xilinx_u280_xdma_201920_3
 
-# Target check
-TARGET ?= sw_emu
-ifeq (,$(filter $(TARGET),sw_emu hw_emu hw))
-$(error TARGET is not sw_emu, hw_emu or hw)
-endif
-HOST_ARCH := x86
-SYSROOT := $(SYSROOT)
-DEVICE ?= xilinx_u280_xdma_201920_1
-#DEVICE ?= xilinx_u50_gen3x16_xdma_201920_3
+# ###################### Setting up default value of HOST_ARCH ####################### 
+HOST_ARCH ?= x86
 
+# #################### Checking if DEVICE in blacklist #############################
+
+# #################### Checking if DEVICE in whitelist ############################
 ifneq ($(findstring u280, $(DEVICE)), u280)
-ifneq ($(findstring u50, $(DEVICE)), u50)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-endif
 
+# ######################## Setting up Project Variables #################################
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+XFLIB_DIR = $(XF_PROJ_ROOT)
+
+# ######################### Include environment variables in utils.mk ####################
 include ./utils.mk
-
-ifeq (sw_emu,$(TARGET))
-	SEQ_KERNEL=1
-else
-	SEQ_KERNEL=0
-endif
-
-TOOL_VERSION ?= 2020.1
-DEBUG = no 
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
-
-BOOST_INCLUDE = $(XILINX_VIVADO)/tps/boost_1_64_0
-BOOST_LIB = $(XILINX_VIVADO)/lib/lnx64.o
 XDEVICE := $(call device2xsa, $(DEVICE))
-
-# -----------------------------------------------------------------------------
-# BEGIN_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
-
-DATA_STAMP := $(CUR_DIR)/db_data/dat/.stamp
-$(DATA_STAMP):
-	make -C $(CUR_DIR)/db_data
-
-.PHONY: data
-data: $(DATA_STAMP)
-
-.PHONY: debug
-debug:
-	@echo "KERNELS are $(KERNELS)"
-	@echo "> KERNEL_NAMES are $(KERNEL_NAMES)"
-	@echo "> XO_DIR is $(XO_DIR)"
-
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/*}')
-XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
-
-# -----------------------------------------------------------------------------
-
-KSRC_DIR = $(XFLIB_DIR)/L2/src/hw
-
-XCLBIN_NAME := cscmv
-ifneq (sw_emu,$(TARGET))
-	KERNELS := loadColKernel:loadColKernel.cpp bufTransColVecKernel:bufTransColVecKernel.cpp bufTransNnzColKernel:bufTransNnzColKernel.cpp xBarColKernel:xBarColKernel.cpp cscRowKernel:cscRowKernel.cpp readWriteHbmKernel:readWriteHbmKernel.cpp      
-else
-	KERNELS := cscmvSeqKernel:cscmvSeqKernel.cpp
-endif
-
-EXTRA_HDRS = $(XFLIB_DIR)/L2/include/hw/cscKernel.hpp \
-		     $(XFLIB_DIR)/L2/include/hw/cscMatMoverL2.hpp
-
-# FIXME L1 dependency still missing
-
-VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw \
-		       -I$(XFLIB_DIR)/L2/include/hw \
-		       -I$(XFLIB_DIR)/../blas/L1/include/hw
-
-# U280
-ifneq (sw_emu,$(TARGET))
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-	VPP_LDFLAGS += --config $(CUR_DIR)/conn_u280.cfg
-else
-	VPP_LDFLAGS += --config $(CUR_DIR)/conn_u50.cfg
-endif 
-else
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-	VPP_LDFLAGS += --config $(CUR_DIR)/conn_u280_seq.cfg
-else
-	VPP_LDFLAGS += --config $(CUR_DIR)/conn_u50_seq.cfg
-endif 
-endif
-
-ifneq (sw_emu,$(TARGET))
-	VPP_LDFLAGS += --config opts.cfg
-else 
-	VPP_LDFLAGS += --config opts_seq.cfg
-endif
-
-# -----------------------------------------------------------------------------
-
-EXE_NAME = cscmv
-GEN_PARTITION_EXE_NAME = gen_partition
-GEN_BIN_EXE_NAME = gen_bin
-#
-#HOST_ARGS = -xclbin $(XCLBIN_FILE) -in $(CUR_DIR)/db_data/dat
-HOST_ARGS = $(XCLBIN_FILE) $(BIN_DIR)/app.bin 
-#
-SRC_DIR = $(XFLIB_DIR)/L2/src/sw
-#
-CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw -I$(XFLIB_DIR)/L1/include/sw
-GEN_PARTITION_CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw -I$(XFLIB_DIR)/L1/include/sw -I$(BOOST_INCLUDE)
-GEN_BIN_CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw -I$(XFLIB_DIR)/L1/include/sw -I$(BOOST_INCLUDE)
-#
-ifneq (sw_emu,$(TARGET))
-	SRCS = xcl2.cpp cscmv.cpp
-else
-	SRCS = xcl2.cpp cscmvSeq.cpp
-endif
-GEN_PARTITION_SRCS = gen_partition.cpp
-GEN_BIN_SRCS = gen_bin.cpp
-
-# -----------------------------------------------------------------------------
-# END_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
-
-.PHONY: all
-all: host xclbin
-
-# MK_INC_BEGIN vitis_kernel_rules.mk
-
-VPP_DIR_BASE ?= _x
-XO_DIR_BASE ?= xo
-XCLBIN_DIR_BASE ?= xclbin
-
-XCLBIN_DIR_SUFFIX ?= _$(XDEVICE)_$(TARGET)
-
-VPP_DIR = $(CUR_DIR)/$(VPP_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-XO_DIR = $(CUR_DIR)/$(XO_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-XCLBIN_DIR = $(CUR_DIR)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-
-XFREQUENCY ?= 250
-
-VPP = v++
-
-ifeq (no,$(DEBUG))
-	VPP_FLAGS += -O3
-else
-	VPP_FLAGS += -g -O0
-endif
-
-VPP_FLAGS += -I$(KSRC_DIR)
-VPP_FLAGS += $(COMMON_DEFS)
-VPP_FLAGS += --target $(TARGET) -f $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps
-VPP_FLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-
-MAKE_GEN_INI_FILE ?= $(CUR_DIR)/make_gen_$(XDEVICE).cfg
-.PHONY: write.cfg
-ifneq (,$(MAKE_GEN_INI))
-write.cfg: export MAKE_GEN_INI := $(MAKE_GEN_INI)
-write.cfg:
-	@echo "----Generating $(notdir $(MAKE_GEN_INI_FILE)) ..."
-	@echo "$${MAKE_GEN_INI}" > $(MAKE_GEN_INI_FILE)
-VPP_FLAGS += --config $(MAKE_GEN_INI_FILE)
-endif
-ifneq (sw_emu,$(TARGET))
-	VPP_FLAGS += --config compile_opts.cfg
-else
-	VPP_FLAGS += --config compile_opts_seq.cfg
-endif
-
-KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
-XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
-XCLBIN_FILE ?= $(XCLBIN_DIR)/$(XCLBIN_NAME).xclbin
-
-define kernel_src_dep
-$(word 1, $(subst :, ,$(1)))_SRCS := $(KSRC_DIR)/$(word 2, $(subst :, ,$(1)))
-$(word 1, $(subst :, ,$(1)))_SRCS += $($(word 1, $(subst :, ,$(1)))_EXTRA_SRCS)
-endef
-
-$(foreach k,$(KERNELS),$(eval $(call kernel_src_dep,$(k))))
-
-
-define kernel_hdr_dep
-kernelname := $(word 1, $(subst :, ,$(1)))
-kernelfile := $(if $(findstring :, $(1)),$(basename $(word 2, $(subst :, ,$(1)))),$$(kernelname))
-$(kernelname)_HDRS := $(wildcard $(KSRC_DIR)/$(kernelfile).h $(KSRC_DIR)/$(kernelfile).hpp)
-$(kernelname)_HDRS += $($(1)_EXTRA_HDRS)
-endef
-
-$(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
-
-#$(XO_DIR)/%.xo: VPP_FLAGS += $($(*)_VPP_FLAGS)
-#$(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
-$(XO_DIR)/%.xo: $(%_SRCS) | check_vpp 
-	@echo -e "----\nCompiling kernel $*...\n"
-	mkdir -p $(XO_DIR)
-	$(VPP) -o $@ --kernel $* --compile $(filter %.cpp,$($*_SRCS)) \
-		$(VPP_FLAGS)
-
-$(XCLBIN_FILE): $(XO_FILES) | check_vpp
-	@echo -e "----\nCompiling xclbin $(XCLBIN_DIR)/$(XCLBIN_NAME)... $(XCLBIN_FILE)"
-	mkdir -p $(XCLBIN_DIR)
-	$(VPP) -o $@ --link $^ \
-		$(VPP_FLAGS) $(VPP_LDFLAGS) \
-		$(foreach k,$(KERNEL_NAMES),$($(k)_VPP_FLAGS)) \
-		$(foreach k,$(KERNEL_NAMES),$($(k)_VPP_LDFLAGS))
-
-.PHONY: xo xclbin
-
-xo: write.cfg check_vpp check_platform $(XO_FILES)
-
-xclbin: write.cfg check_vpp check_platform $(XCLBIN_FILE)
-
-# MK_INC_END vitis_kernel_rules.mk
-
-# MK_INC_BEGIN vitis_host_rules.mk
-
-OBJ_DIR_BASE ?= obj
-BIN_DIR_BASE ?= bin
-
-BIN_DIR_SUFFIX ?= _$(XDEVICE)
-
-OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
-BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
-
-ifeq (no,$(DEBUG))
-	CXXFLAGS += -O3
-	GEN_PARTITION_CXXFLAGS += -O3
-	GEN_BIN_CXXFLAGS += -O3
-else
-	CXXFLAGS += -g -O0
-	GEN_PARTITION_CXXFLAGS += -g -O0
-	GEN_BIN_CXXFLAGS += -g -O0
-endif
-CXXFLAGS += -std=c++11 -fPIC \
-	-I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include \
-	-Wall -Wno-unknown-pragmas -Wno-unused-label
-CXXFLAGS += $(COMMON_DEFS)
-GEN_PARTITION_CXXFLAGS += -std=c++11
-GEN_PARTITION_CXXFLAGS += $(GEN_PARTITION_DEFS)
-
-GEN_BIN_CXXFLAGS += -std=c++11
-GEN_BIN_CXXFLAGS += $(GEN_BIN_DEFS)
-
-ifneq ($(HOST_ARCH), x86)
-	LDCLFLAGS += --sysroot=$(SYSROOT)
-endif
-
-LDCLFLAGS += -lpthread -L$(XILINX_XRT)/lib -lOpenCL
-LDCLFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr \
-	   -lIp_floating_point_v7_0_bitacc_cmodel \
-	   -lstdc++ \
-	   -lrt \
-	   -Wl,--rpath=$(XILINX_XRT)/lib
-GEN_PARTITION_LDFLAGS += -lpthread -L$(XILINX_XRT)/lib \
-				 -L$(BOOST_LIB) \
-				 -lboost_iostreams -lz \
-				 -lstdc++ \
-				 -lrt \
-	   		     -Wl,--rpath=$(XILINX_XRT)/lib
-
-GEN_BIN_LDFLAGS += -lpthread -L$(XILINX_XRT)/lib \
-				 -L$(BOOST_LIB) \
-				 -lboost_iostreams -lz \
-				 -lstdc++ \
-				 -lrt \
-	   		     -Wl,--rpath=$(XILINX_XRT)/lib
-
-OBJ_FILES = $(foreach s,$(SRCS),$(OBJ_DIR)/$(basename $(s)).o)
-GEN_PARTITION_OBJ_FILES = $(foreach s,$(GEN_PARTITION_SRCS),$(OBJ_DIR)/$(basename $(s)).o)
-GEN_BIN_OBJ_FILES = $(foreach s,$(GEN_BIN_SRCS),$(OBJ_DIR)/$(basename $(s)).o)
-
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | check_vpp check_xrt check_platform
-	@echo -e "----\nCompiling object $*..."
-	mkdir -p $(OBJ_DIR)
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
-
-EXE_EXT ?= exe
-EXE_FILE ?= $(BIN_DIR)/$(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
-GEN_PARTITION_EXE_FILE ?= $(BIN_DIR)/$(GEN_PARTITION_EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
-GEN_BIN_EXE_FILE ?= $(BIN_DIR)/$(GEN_BIN_EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
-
-$(EXE_FILE): $(OBJ_FILES) | check_vpp check_xrt check_platform
-	@echo -e "----\nCompiling host $(notdir $@)..."
-	mkdir -p $(BIN_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDCLFLAGS)
-
-$(GEN_PARTITION_EXE_FILE): $(GEN_PARTITION_OBJ_FILES)
-	@echo -e "----\nCompiling gen_partition $(notdir $@)..."
-	mkdir -p $(BIN_DIR)
-	$(CXX) -o $@ $^ $(GEN_PARTITION_CXXFLAGS) $(GEN_PARTITION_LDFLAGS)
-
-$(GEN_BIN_EXE_FILE): $(GEN_BIN_OBJ_FILES)
-	@echo -e "----\nCompiling gen_bin $(notdir $@)..."
-	mkdir -p $(BIN_DIR)
-	$(CXX) -o $@ $^ $(GEN_BIN_CXXFLAGS) $(GEN_BIN_LDFLAGS)
-
-.PHONY: gen_partition gen_bin host
-
-gen_partition: $(GEN_PARTITION_EXE_FILE)
-gen_bin: $(GEN_BIN_EXE_FILE)
-host: check_vpp check_xrt check_platform $(EXE_FILE)
-
-# MK_INC_END vitis_host_rules.mk
-
-# MK_INC_BEGIN vitis_test_rules.mk
-
-# -----------------------------------------------------------------------------
-#                                clean up
-
-clean:
-ifneq (,$(OBJ_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(OBJ_DIR_BASE)*
-endif
-ifneq (,$(BIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*
-endif
-
-cleanx:
-ifneq (,$(VPP_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(VPP_DIR_BASE)*
-endif
-ifneq (,$(XO_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(XO_DIR_BASE)*
-endif
-ifneq (,$(XCLBIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(XCLBIN_DIR_BASE)*
-endif
-ifneq (,$(BIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*/emconfig.json
-endif
-ifneq (,$(MAKE_GEN_INI_FILE))
-	rm -rf $(MAKE_GEN_INI_FILE)
-endif
-
-cleanall: clean cleanx
-	rm -rf *.log plist $(DATA_STAMP)
-	rm -rf .Xil
-
-# -----------------------------------------------------------------------------
-#                                simulation run
-
-$(BIN_DIR)/emconfig.json :
-	emconfigutil -f $(XPLATFORM) --od $(BIN_DIR)
+TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
+BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
+EMCONFIG_DIR := $(BUILD_DIR)
+XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
+export XCL_BINDIR = $(XCLBIN_DIR)
+
+# ######################### Setting up Host Variables #########################
+#Include Required Host Source Files
+HOST_SRCS += $(XFLIB_DIR)/L2/src/sw/fp32/cscmv.cpp
+HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/xcl2/xcl2.cpp
+
+CXXFLAGS += -DSPARSE_maxParamDdrBlocks=1024 -DSPARSE_maxParamHbmBlocks=512 -DSPARSE_paramOffset=1024 -DSPARSE_maxColMemBlocks=128 -DSPARSE_maxColParBlocks=512 -DSPARSE_maxRowBlocks=512 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_hbmMemBits=256 -DSPARSE_ddrMemBits=512 -DSPARSE_hbmChannels=16 -DSPARSE_hbmChannelMegaBytes=256 -DSPARSE_printWidth=6 -DSPARSE_pageSize=4096
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/fp32
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/hw
 
 ifeq ($(TARGET),sw_emu)
-RUN_ENV += XCL_EMULATION_MODE=sw_emu
-EMU_CONFIG = $(BIN_DIR)/emconfig.json
-else ifeq ($(TARGET),hw_emu)
-RUN_ENV += XCL_EMULATION_MODE=hw_emu
-EMU_CONFIG = $(BIN_DIR)/emconfig.json
-else ifeq ($(TARGET),hw)
-RUN_ENV += echo "TARGET=hw";
-EMU_CONFIG = $(BIN_DIR)/emconfig.json
+CXXFLAGS += -D SW_EMU_TEST
 endif
 
-.PHONY: run check
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+endif
 
-MTX_FILE = $(XFLIB_DIR)/L2/tests/mtxFiles/bcsstm01.mtx
-run: gen_bin host xclbin $(EMU_CONFIG)
-	$(GEN_BIN_EXE_FILE) -config-write $(BIN_DIR)/app.bin $(BIN_DIR)/inVec.bin $(BIN_DIR)/outVec.bin $(MTX_FILE)
-	cp $(BIN_DIR)/emconfig.json ./
-	$(RUN_ENV) $(EXE_FILE) $(HOST_ARGS)
+# ######################### Host compiler global settings ############################
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+CXXFLAGS += -fmessage-length=0 -O0 
+CXXFLAGS += -I$(CUR_DIR)/src/ 
 
-check: run
+ifeq ($(HOST_ARCH), x86)
+LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+endif
 
-# MK_INC_END vitis_test_rules.mk
+# ################### Setting package and image directory #######################
+
+EXE_NAME := cscmv.exe
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+HOST_ARGS :=  $(BUILD_DIR)/cscmv.xclbin $(CUR_DIR)/data/app.bin
+
+# ##################### Kernel compiler global settings ##########################
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += --jobs 8
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
+VPP_FLAGS += --config $(CUR_DIR)/compile_opts.cfg
+endif
+
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/sw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
+
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw/fp32
+VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
+VPP_LDFLAGS_cscmv += --kernel_frequency 250
+else
+loadColKernel_VPP_FLAGS += --hls.clock 250000000:loadColKernel
+bufTransColVecKernel_VPP_FLAGS += --hls.clock 250000000:bufTransColVecKernel
+bufTransNnzColKernel_VPP_FLAGS += --hls.clock 250000000:bufTransNnzColKernel
+xBarColKernel_VPP_FLAGS += --hls.clock 250000000:xBarColKernel
+cscRowKernel_VPP_FLAGS += --hls.clock 250000000:cscRowKernel
+readWriteHbmKernel_VPP_FLAGS += --hls.clock 250000000:readWriteHbmKernel
+VPP_LDFLAGS_cscmv += --kernel_frequency 250
+endif
+
+VPP_FLAGS += -DSPARSE_maxParamDdrBlocks=1024 -DSPARSE_maxParamHbmBlocks=512 -DSPARSE_paramOffset=1024 -DSPARSE_maxColMemBlocks=128 -DSPARSE_maxColParBlocks=512 -DSPARSE_maxRowBlocks=512 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_hbmMemBits=256 -DSPARSE_ddrMemBits=512 -DSPARSE_hbmChannels=16 -DSPARSE_hbmChannelMegaBytes=256 -DSPARSE_printWidth=6 -DSPARSE_pageSize=4096 
+
+# Kernel linker flags
+VPP_LDFLAGS_cscmv_temp := --config $(CUR_DIR)/opts.cfg
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
+VPP_LDFLAGS_cscmv_temp += --config $(CUR_DIR)/conn_u280.cfg
+endif
+VPP_LDFLAGS_cscmv += $(VPP_LDFLAGS_cscmv_temp)
+
+# ############################ Declaring Binary Containers ##########################
+
+BINARY_CONTAINERS += $(BUILD_DIR)/cscmv.xclbin
+BINARY_CONTAINER_cscmv_OBJS += $(TEMP_DIR)/loadColKernel.xo
+BINARY_CONTAINER_cscmv_OBJS += $(TEMP_DIR)/bufTransColVecKernel.xo
+BINARY_CONTAINER_cscmv_OBJS += $(TEMP_DIR)/bufTransNnzColKernel.xo
+BINARY_CONTAINER_cscmv_OBJS += $(TEMP_DIR)/xBarColKernel.xo
+BINARY_CONTAINER_cscmv_OBJS += $(TEMP_DIR)/cscRowKernel.xo
+BINARY_CONTAINER_cscmv_OBJS += $(TEMP_DIR)/readWriteHbmKernel.xo
+
+# ######################### Setting Targets of Makefile ################################
+
+.PHONY: all clean cleanall docs emconfig
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+
+.PHONY: host
+host: check_xrt check_sysroot $(EXE_FILE)
+
+.PHONY: xclbin
+xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 
 .PHONY: build
-build: xclbin host
+build: xclbin
+
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
+$(TEMP_DIR)/loadColKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/loadColKernel.cpp
+	$(ECHO) "Compiling Kernel: loadColKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(loadColKernel_VPP_FLAGS) $(VPP_FLAGS) -k loadColKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+$(TEMP_DIR)/bufTransColVecKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/bufTransColVecKernel.cpp
+	$(ECHO) "Compiling Kernel: bufTransColVecKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(bufTransColVecKernel_VPP_FLAGS) $(VPP_FLAGS) -k bufTransColVecKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+$(TEMP_DIR)/bufTransNnzColKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/bufTransNnzColKernel.cpp
+	$(ECHO) "Compiling Kernel: bufTransNnzColKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(bufTransNnzColKernel_VPP_FLAGS) $(VPP_FLAGS) -k bufTransNnzColKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+$(TEMP_DIR)/xBarColKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/xBarColKernel.cpp
+	$(ECHO) "Compiling Kernel: xBarColKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(xBarColKernel_VPP_FLAGS) $(VPP_FLAGS) -k xBarColKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+$(TEMP_DIR)/cscRowKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/cscRowKernel.cpp
+	$(ECHO) "Compiling Kernel: cscRowKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(cscRowKernel_VPP_FLAGS) $(VPP_FLAGS) -k cscRowKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+$(TEMP_DIR)/readWriteHbmKernel.xo: $(XFLIB_DIR)/L2/src/hw/fp32/readWriteHbmKernel.cpp
+	$(ECHO) "Compiling Kernel: readWriteHbmKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(readWriteHbmKernel_VPP_FLAGS) $(VPP_FLAGS) -k readWriteHbmKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
+$(BUILD_DIR)/cscmv.xclbin: $(BINARY_CONTAINER_cscmv_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/cscmv $(VPP_LDFLAGS) $(VPP_LDFLAGS_cscmv) -o '$@' $(+)
+else 
+$(BUILD_DIR)/cscmv.xclbin: $(BINARY_CONTAINER_cscmv_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/cscmv $(VPP_LDFLAGS) $(VPP_LDFLAGS_cscmv) -o '$@' $(+)
+endif
+
+
+# ################# Setting Rules for Host (Building Host Executable) ################
+$(EXE_FILE): $(HOST_SRCS) | check_xrt
+	mkdir -p $(BUILD_DIR)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
+
+
+# ###############Setting Essential Checks And Running Rules For Vitis Flow #############
+run: all
+	XCL_EMULATION_MODE=$(TARGET) make -f makeGenBin.mk gen_data
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+else
+	$(EXE_FILE) $(HOST_ARGS)
+endif
+
+# ################################# Cleaning Rules ##################################
+cleanh:
+	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
+
+cleank:
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
+	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
+	-$(RMDIR) _x_temp.* 
+
+cleanall: cleanh cleank
+	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+
+	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
+
+clean: cleanh
