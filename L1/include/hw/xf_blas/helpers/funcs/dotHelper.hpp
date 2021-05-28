@@ -49,6 +49,7 @@ namespace blas {
  * @param p_res the dot product of x and y
  */
 namespace {
+
 template <typename t_DataType,
           unsigned int t_LogParEntries,
           typename t_IndexType = unsigned int,
@@ -133,6 +134,7 @@ class DotHelper<float, t_LogParEntries, t_IndexType, float> {
         dot_tree<float, t_LogParEntries, t_IndexType>(p_n, p_iter, p_x, p_y, p_res);
     }
 };
+
 template <unsigned int t_LogParEntries, typename t_IndexType>
 class DotHelper<double, t_LogParEntries, t_IndexType, double> {
    public:

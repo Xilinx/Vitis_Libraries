@@ -38,7 +38,7 @@ namespace xf {
 
 namespace blas {
 
-template <typename T, unsigned int t_Width, unsigned int t_DataWidth = sizeof(T) * 8>
+template <typename T, unsigned int t_Width, unsigned int t_DataWidth = sizeof(T) * 8, typename Enable = void>
 class WideType {
    private:
     T m_Val[t_Width];
@@ -204,7 +204,7 @@ class WideType {
 };
 
 template <typename T, unsigned int t_DataWidth>
-class WideType<T, 1, t_DataWidth> {
+class WideType<T, 1, t_DataWidth, typename std::enable_if<std::is_same<ap_uint<t_DataWidth>, T>::value>::type> {
    private:
     T m_Val;
     static const unsigned int t_4k = 4096;
@@ -238,10 +238,11 @@ class WideType<T, 1, t_DataWidth> {
 
     WideType(const WideType& wt) { m_Val = wt[0]; }
 
-    WideType(const T p_initScalar) { m_Val = p_initScalar; }
-    WideType(const t_TypeInt p_initScalar) { m_Val = *reinterpret_cast<const T*>(&p_initScalar); }
+    WideType(const t_TypeInt p_val) { m_Val = p_val; }
 
-    operator const t_TypeInt() { return *reinterpret_cast<t_TypeInt*>(&m_Val); }
+    operator const t_TypeInt() { return m_Val; }
+
+    bool operator==(const WideType& p_w) const { return m_Val == p_w[0]; }
 
     T shift(T p_ValIn) {
         T l_valOut = m_Val;

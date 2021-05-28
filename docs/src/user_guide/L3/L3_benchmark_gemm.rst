@@ -26,239 +26,232 @@
 L3 API GEMM benchmark
 ***********************
 
-1. Benchmarking Intel® Math Kernel Library (MKL)
-=================================================
+The benchmark performs the matrix-matrix multiplication (A * B = C), M is number of rows of matrix A/C, K is number of columns of matrix A/number of rows of matrix B, N is number of columns of matrix B/C
 
-1.1 Introduction
------------------
+1. memKernel
+===============
+This example resides in ``L3/benchmarks/gemm/memKernel`` directory. The tutorial provides a step-by-step guide that covers commands for building and running kernel.
 
-Intel® Math Kernel Library provides performance improvement of math functions, e.g. GEMM, when running with Intel processors. To compare with Xilinx's Vitis BLAS library, you can use our run-script (run_gemm_mkl.sh) to generate the data and performance benchmark.
-
-.. _MKL_benchmark:
-
-1.2 Benchmarking Steps
------------------------
-
-1.2.1 Access Nimbix cloud
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
-- Launch application "Xilinx Vitis Unified Software Platform 2020.1" and select "Desktop Mode with FPGA"
-- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)"
-- Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
-- Follow the steps below to run Intel® MKL GEMM APIsbenchmarks.
-
-.. _Vitis On Nimbix: https://www.xilinx.com/xilinxtraining/assessments/portal/alveo/intro_nimbix_cloud/story_html5.html 
-
-.. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's Vitis BLAS library.
-
-1.2.2 Install Intel® MK library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To install MKL on Nimbix, please download the full installation package for MKL2020 from `Intel® MKL Webste`_. You need to register for downloading the package. After you have downloaded the package, please unzip it and navigate to the directory includeing "install.sh". Please enter the following command to install the MKL package.
-
-.. code-block:: bash 
-  
-  sudo ./install.sh
-
-.. _Intel® MKL Webste: https://software.intel.com/en-us/mkl/choose-download/linux
-
-1.2.3 Set up MKL environment variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**Intel® MKL**: Assume you have installed Intel® MKL, run the appropriate script to set up the environment variables (such as $MKLROOT).
-
-.. code-block:: bash
- 
-  source <INTEL_MKL_INSTALL_DIR>/bin/mklvars.sh intel64
-
-1.2.4 Install numactl
-^^^^^^^^^^^^^^^^^^^^^^^
-
-**NUMACTL**: The linux operating system provides a function, called numactl, that allows the control of scheduling or memory placement policy, which is essential to run parallel programs.
-
-For Ubuntu (you only need to do it once),
-
-.. code-block:: bash
- 
-  sudo apt-get install numactl
-
-1.2.5 Run MKL benchmarking script 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The run-script runs the GEMM benchmark with a number of threads, data type, and work mode. Then, it will explore the GEMM's matrix size from 256 to 16384.
-
-.. code-block:: bash
- 
-  ./run_gemm_mkl.sh <thread#> <data_type> <mode>
-  
-.. rubric:: where:
-
-- thread#: Number of threads to run, e.g. 1, 2, 4, 8, 16, etc.
-
-- data_type: Either **float** or **double**.
-
-- mode: **g** for generating the data, **b** for benchmarking the performance, and **a** for both workloads. 
-
-1.3 Performance Result on Nimbix Cloud
----------------------------------------
-
-.. rubric:: Configuration:
-
-.. list-table::
-	:widths: 20 80
-	
-	*
-		- cpu_model
-		- Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz
-	*
-		- thread#
-		- 16
-	*
-		- data_type
-		- float
-	*
-		- benchmark command 
-		- ./run_gemm_mkl.sh 16 float a
-
-.. rubric:: Performance Result (nonCaching):
-
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| Square Matrix Size | matrix paris running simultaneously | Cache (Y/N) | API time(ms)  | TFlops/sec  |
-+====================+=====================================+=============+===============+=============+
-| 256                | 1                                   | N           |   29.700      | 0.001       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 512                | 1                                   | N           |   11.799      | 0.023       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 1024               | 1                                   | N           |   16.591      | 0.129       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 2048               | 1                                   | N           |   41.319      | 0.416       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 4096               | 1                                   | N           |  172.369      | 0.797       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 8192               | 1                                   | N           | 1073.250      | 1.024       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 16384              | 1                                   | N           | 9060.830      | 0.971       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-
-.. rubric:: Performance Result (Caching):
-
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| Square Matrix Size | matrix paris running simultaneously | Cache (Y/N) | API time(ms)  | TFlops/sec  |
-+====================+=====================================+=============+===============+=============+
-| 256                | 1                                   | Y           |    1.380      | 0.024       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 512                | 1                                   | Y           |    4.038      | 0.066       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 1024               | 1                                   | Y           |    4.383      | 0.490       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 2048               | 1                                   | Y           |   21.282      | 0.807       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 4096               | 1                                   | Y           |  149.755      | 0.918       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 8192               | 1                                   | Y           | 1042.860      | 1.054       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-| 16384              | 1                                   | Y           | 9045.700      | 0.972       |
-+--------------------+-------------------------------------+-------------+---------------+-------------+
-
-
-1.4 Reference
---------------
-
-[1] `Improving Performance of Math Functions with Intel® Math Kernel Library`_
-
-[2] `Benchmarking GEMM on Intel® Architecture Processors`_
-
-.. _Improving Performance of Math Functions with Intel® Math Kernel Library: https://software.intel.com/en-us/articles/improving-performance-of-math-functions-with-intel-math-kernel-library
-
-.. _Benchmarking GEMM on Intel® Architecture Processors: https://software.intel.com/en-us/articles/benchmarking-gemm-with-intel-mkl-and-blis-on-intel-processors
-
-
-2. Benchmarking xfblasGemm - Xilinx's Vitis BLAS library
-==========================================================
-
-Before benchmarking xfblashGemm, please run the following command to build hw xclbin
-
-.. code-block:: bash
-
-  make build TARGET=hw PLATFORM_REPO_PATHS=LOCAL_PLATFORM_PATH
-
-2.1 Benchmarking Steps 
+1.1 Executable Usage
 ------------------------
 
-2.1.1 Generate test inputs and golden reference
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Follow the MKL_benchmark_ steps to run MKL benchmarks to generate test inputs and golden reference. To generate test inputs and golden reference for float data type, please run the following command.
-
-.. code-block:: bash
-
-  ./run_gemm_mkl.sh 16 float a
-
-
-2.1.2 Build benchmark application
+1.1.1 Work Directory(Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Before benchmark the xfblasGemm, please build the host executable for the corresponding .xclbin files via following script
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/blas/L2/benchmarks#building). For getting the design,
 
-.. code-block:: bash
+.. code-block:: bash 
 
-  ./build_gemm_bench.sh config_info_file
+   cd L3/benchmarks/gemm/memKernel
 
-2.1.3 Run benchmark
-^^^^^^^^^^^^^^^^^^^^
 
-The run-script runs the GEMM benchmark with xclbin and cfg files. It will explore the GEMM's matrix size from 256 to 8192.
+1.1.2 Build kernel(Step 2)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-.. code-block:: bash
- 
-  ./run_gemm_benchmark.sh xclbin_file config_info_file
-  
-.. rubric:: where:
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
 
-- **xclbin_file** refers to the blas.xclbin file, including the path.
-- **config_info_file** refers to config_info.dat file, including the path.
-  
-2.2 Performance Results on Nimbix Cloud
-------------------------------------------
+.. code-block:: bash 
 
-.. rubric:: Configuration:
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u250_xdma_201830_2
 
-.. list-table::
-	:widths: 20 80
+1.1.3 Run kernel(Step 3)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	*
-		- fpga_model
-		- Xilinx Alveo U250 FPGA
-	*
-		- Frequency
-		- 242 Mhz
-	*
-		- data_type
-		- float
-	*
-		- build command 
-		- ./build_gemm_bench.sh config_info.dat
-	*
-		- benchmark command
-		- ./run_gemm_bench.sh blas.xclbin config_info.dat
-		
-.. rubric:: Performance Result:
+To get the benchmark results, please run the following command.
 
-+--------------------+-------------------------------------+--------------+-------------+
-| Square Matrix Size | matrix paris running simultaneously | API time(ms) | TFlops/sec  |
-+====================+=====================================+==============+=============+
-| 256                | 4                                   |  2.348       |      0.057  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 512                | 4                                   |  6.422       |      0.167  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 1024               | 4                                   |  33.366      |      0.257  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 2048               | 4                                   |  217.949     |      0.316  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 4096               | 4                                   |  1595.487    |      0.344  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 8192               | 4                                   |  12587.950   |      0.349  |
-+--------------------+-------------------------------------+--------------+-------------+
+Input Arguments:
 
-Please notice that we used OpenMP library for multi-kernel support in host side, so for smaller sizes, total API times include OpenMP initialization time.
+.. code-block:: bash 
+
+    <host application> <xclbin> <config_info.dat>
+
+
+For example:
+
+.. code-block:: bash 
+
+    build_dir.hw.xilinx_u250_xdma_201830_2/gemm_bench.exe build_dir.hw.xilinx_u250_xdma_201830_2/blas.xclbin build_dir.hw.xilinx_u250_xdma_201830_2/config_info.dat
+
+
+1.1.4 Example output(Step 4)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+.. code-block:: bash 
+
+    xfblasCreate  276.965961 msec
+    copyToFpga  0.237744 msec
+    copyFromFpga  0.753792 msec
+    Api time is 0.991536 msec
+    DATA_CSV:,Freq,M,K,N,TimeApiMs,EffApiPct,PerfApiTops
+    DATA_CSV:,242.000000,64,64,64,0.991536,0.426753,0.000541
+    >> Kernel #0 << Test passed!
+
+
+
+1.1.5 Use script to run benchmark
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use mkl to generate dataset, usage of this script is: ./run_gemm_mkl.sh number_of_thread datatype g(generate)/b(benchmark)
+Then use run_gemm_bench.sh to run benchmark
+
+.. code-block:: bash 
+
+    cd ../gemm_mkl
+    ./run_gemm_mkl.sh 16 float g
+    ./run_gemm_bench.sh build_dir.hw.xilinx_u250_xdma_201830_2/blas.xclbin build_dir.hw.xilinx_u250_xdma_201830_2/config_info.dat
+
+
+1.2 Profiling
+-----------------
+
+The xclbin could be built in 242 MHz
+The hardware resource utilization and benchmark results are shown in the two tables below.
+
+*Table 1 Hardware resources*
+
++------------+----------+--------+-------+--------+---------+
+|    Name    |   LUT    |  BRAM  |  URAM |   DSP  |    FF   |
++============+==========+========+=======+========+=========+
+| blasKernel | 250679   | 94     | 24    | 1224   | 430512  |
++------------+----------+--------+-------+--------+---------+
+
+
+
+*Table 2 Benchmark results*
+
++------+------+------+----------------------------+--------------+---------------+
+|  M   |  N   |  K   |  api execution time [ms]   | api Eff [%]  |  PerfApiTops  |
++======+======+======+============================+==============+===============+
+| 256  | 256  | 256  | 2.295277                   | 11.798572    | 0.058818      |
++------+------+------+----------------------------+--------------+---------------+
+| 512  | 512  | 512  | 7.185994                   | 30.148638    | 0.149859      |
++------+------+------+----------------------------+--------------+---------------+
+| 1024 | 1024 | 1024 | 33.357721                  | 51.957490    | 0.257887      |
++------+------+------+----------------------------+--------------+---------------+
+| 2048 | 2048 | 2048 | 218.662946                 | 63.410230    | 0.314501      |
++------+------+------+----------------------------+--------------+---------------+
+| 4096 | 4096 | 4096 | 1594.648667                | 69.559988    | 0.344877      |
++------+------+------+----------------------------+--------------+---------------+
+| 8192 | 8192 | 8192 | 12695.637510               | 69.897233    | 0.346485      |
++------+------+------+----------------------------+--------------+---------------+
+
+2. streamingKernel
+======================
+
+This example resides in ``L3/benchmarks/gemm/streamingKernel`` directory. The tutorial provides a step-by-step guide that covers commands for building and running kernel.
+
+2.1 Executable Usage
+---------------------
+
+2.1.1 Work Directory(Step 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/blas/L2/benchmarks#building). For getting the design,
+
+.. code-block:: bash 
+
+   cd L3/benchmarks/gemm/streamingKernel
+
+
+2.1.2 Build kernel(Step 2)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+
+.. code-block:: bash 
+
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u250_gen3x16_xdma_3_1_202020_1
+
+
+2.1.3 Run kernel(Step 3)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To get the benchmark results, please run the following command.
+
+Input Arguments:
+
+.. code-block:: bash 
+
+    <host application> <xclbin> <config_info.dat>
+
+
+For example:
+
+.. code-block:: bash 
+
+    build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/gemm_bench.exe build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/blas.xclbin build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/config_info.dat
+
+
+2.1.4 Example output(Step 4)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+.. code-block:: bash 
+
+    xfblasCreate  249.914832 msec
+    copyToFpga  0.243765 msec
+    copyFromFpga  0.437556 msec
+    Api time is 0.681321 msec
+    DATA_CSV:,Freq,M,K,N,TimeApiMs,EffApiPct,PerfApiTops
+    DATA_CSV:,250.000000,64,64,64,0.681321,0.601185,0.000788
+    >> Kernel #0 << Test passed!
+
+
+2.1.5 Use script to run benchmark
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use mkl to generate dataset, usage of this script is: ./run_gemm_mkl.sh number_of_thread datatype g(generate)/b(benchmark)
+Then use run_gemm_bench.sh to run benchmark
+
+.. code-block:: bash 
+
+    cd ../gemm_mkl
+    ./run_gemm_mkl.sh 16 float g
+    ./run_gemm_bench.sh build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/blas.xclbin build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/config_info.dat
+
+
+2.2 Profiling
+--------------
+
+The xclbin could be built in 250 MHz
+The hardware resource utilization and benchmark results are shown in the two tables below.
+
+*Table 1 Hardware resources*
+
++-------------------------+--------------+-----------+----------+--------+------------+
+|    Name                 |      LUT     |    BRAM   |   URAM   |   DSP  |      REG   |
++=========================+==============+===========+==========+========+============+
+| gemmAddsKernel          | 101988       | 0         | 0        | 384    | 192516     |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmCPlusXKernel        | 8529         | 24        | 0        | 66     | 20358      |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmLoadStoreKernel     | 7126         | 23        | 0        | 16     | 19457      |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmMergeKernel         | 8342         | 0         | 0        | 0      | 25219      |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmMulsKernel          | 50640        | 0         | 0        | 768    | 98013      |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmSystolicArrayKernel | 2541         | 0         | 0        | 0      | 240        |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmTagsKernel          | 20203        | 15        | 0        | 8      | 34678      |
++-------------------------+--------------+-----------+----------+--------+------------+
+| gemmTimerKernel         | 32           | 0         | 0        | 0      | 115        |
++-------------------------+--------------+-----------+----------+--------+------------+
+
+
+
+*Table 2 Benchmark results*
+
++------+------+------+----------------------------+--------------+---------------+
+|  M   |  N   |  K   |  api execution time [ms]   | api Eff [%]  |  PerfApiTops  |
++======+======+======+============================+==============+===============+
+| 256  | 256  | 256  | 1.370527                   | 19.127241    | 0.024626      |
++------+------+------+----------------------------+--------------+---------------+
+| 512  | 512  | 512  | 4.517989                   | 46.417820    | 0.059589      |
++------+------+------+----------------------------+--------------+---------------+
+| 1024 | 1024 | 1024 | 29.500145                  | 56.871639    | 0.072902      |
++------+------+------+----------------------------+--------------+---------------+
+| 2048 | 2048 | 2048 | 217.555482                 | 61.693563    | 0.079026      |
++------+------+------+----------------------------+--------------+---------------+
+| 4096 | 4096 | 4096 | 1685.337895                | 63.710774    | 0.081580      |
++------+------+------+----------------------------+--------------+---------------+
+
