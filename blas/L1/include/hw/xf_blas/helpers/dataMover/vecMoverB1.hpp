@@ -45,34 +45,6 @@ void duplicateStream(unsigned int p_n,
     }
 }
 
-template <unsigned int t_StrWidth, unsigned int t_Mult>
-void narrow2wide(unsigned int p_n,
-                 hls::stream<ap_uint<t_StrWidth> >& p_str,
-                 hls::stream<ap_uint<t_StrWidth * t_Mult> >& p_wideStream) {
-#ifndef __SYNTHESIS__
-    assert(p_n % t_Mult == 0);
-#endif
-    for (unsigned int i = 0; i < p_n / t_Mult; i++) {
-        ap_uint<t_StrWidth * t_Mult> p_out;
-        for (unsigned int j = 0; j < t_Mult; j++) {
-#pragma HLS PIPELINE
-            p_out.range(t_StrWidth * (j + 1) - 1, t_StrWidth * j) = p_str.read();
-        }
-        p_wideStream.write(p_out);
-    }
-}
-template <unsigned int t_StrWidth, unsigned int t_Mult>
-void wide2narrow(unsigned int p_n,
-                 hls::stream<ap_uint<t_StrWidth * t_Mult> >& p_wideStream,
-                 hls::stream<ap_uint<t_StrWidth> >& p_str) {
-    for (unsigned int i = 0; i < p_n; i++) {
-        ap_uint<t_StrWidth* t_Mult> p_in = p_wideStream.read();
-        for (unsigned int j = 0; j < t_Mult; j++) {
-#pragma HLS PIPELINE
-            p_str.write(p_in.range(t_StrWidth * (j + 1) - 1, t_StrWidth * j));
-        }
-    }
-}
 template <unsigned int t_NumStreams, typename t_DataType>
 void splitStream(unsigned int p_n,
                  hls::stream<typename WideType<t_DataType, t_NumStreams>::t_TypeInt>& p_wideStream,
@@ -104,23 +76,32 @@ template <typename t_DataType, typename t_DesDataType = t_DataType>
 void mem2stream(unsigned int p_n,
                 const t_DataType* p_in,
                 hls::stream<t_DesDataType>& p_out,
-                unsigned int p_repeat = 1) {
-    for (unsigned int r = 0; r < p_repeat; r++)
-        for (unsigned int i = 0; i < p_n; ++i) {
+                unsigned int p_repeat = 1,
+                unsigned int p_batch = 1) {
+    if (p_repeat == 1) {
+        for (unsigned int i = 0; i < p_n * p_batch; ++i) {
 #pragma HLS PIPELINE
             t_DesDataType l_val = p_in[i];
             p_out.write(l_val);
         }
+    } else {
+        for (unsigned int b = 0; b < p_batch; b++)
+            for (unsigned int r = 0; r < p_repeat; r++)
+                for (unsigned int i = 0; i < p_n; ++i) {
+#pragma HLS PIPELINE
+                    t_DesDataType l_val = p_in[i + b * p_n];
+                    p_out.write(l_val);
+                }
+    }
 } // end mem2stream
 
 template <typename t_DataType, typename t_DesDataType = t_DataType>
-void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DesDataType* p_out, unsigned int p_repeat = 1) {
-    for (unsigned int r = 0; r < p_repeat; r++)
-        for (unsigned int i = 0; i < p_n; ++i) {
+void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DesDataType* p_out, unsigned int p_batch = 1) {
+    for (unsigned int i = 0; i < p_n * p_batch; ++i) {
 #pragma HLS PIPELINE
-            t_DesDataType l_val = p_in.read();
-            p_out[i] = l_val;
-        }
+        t_DesDataType l_val = p_in.read();
+        p_out[i] = l_val;
+    }
 } // end stream2mem
 
 /**

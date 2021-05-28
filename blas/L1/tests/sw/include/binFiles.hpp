@@ -24,6 +24,16 @@
 
 using namespace std;
 
+size_t getBinBytes(const string filename) {
+    ifstream file(filename, ios::binary);
+    file.unsetf(ios::skipws);
+    streampos fileSize;
+    file.seekg(0, ios::end);
+    fileSize = file.tellg();
+    file.close();
+    return fileSize;
+}
+
 template <typename T>
 vector<T> readBin(const string filename) {
     vector<T> vec;

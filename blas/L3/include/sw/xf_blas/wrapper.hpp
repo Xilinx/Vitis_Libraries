@@ -34,7 +34,6 @@
 
 #include "handle.hpp"
 #include "gemm_host.hpp"
-#include "gemv_host.hpp"
 #include <future>
 
 namespace xf {
@@ -81,16 +80,6 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
                 shared_ptr<BLASHost>(new GEMMHost(xclbin, &l_status, i, deviceIndex)));
-        }
-        return l_status;
-    } else if (engineName == XFBLAS_ENGINE_GEMV) {
-        if (ConfigDict::instance().m_dict["BLAS_runGemv"] != "1") {
-            return XFBLAS_STATUS_INVALID_VALUE;
-        }
-
-        for (unsigned int i = 0; i < kernelNumber; i++) {
-            BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new GEMVHost(xclbin, &l_status, i, deviceIndex)));
         }
         return l_status;
     } else {
@@ -140,21 +129,6 @@ xfblasStatus_t xfblasMalloc(
                 BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
         }
         return l_status;
-    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
-        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
-        int l_paddedRows, l_paddedLda;
-        if (lda == 1) {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = lda;
-        } else {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = getPaddedSize(lda, l_minSize);
-        }
-        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
-        l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
-        return l_status;
 
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
@@ -190,21 +164,6 @@ xfblasStatus_t xfblasMalloc(
         }
         return l_status;
 
-    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
-        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
-        int l_paddedRows, l_paddedLda;
-        if (lda == 1) {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = lda;
-        } else {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = getPaddedSize(lda, l_minSize);
-        }
-        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
-        l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
-        return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -250,29 +209,6 @@ xfblasStatus_t xfblasMallocRestricted(
             return l_status;
         }
 
-    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
-        if (lda == 1) {
-            if (rows % l_minSize != 0) {
-                return XFBLAS_STATUS_NOT_PADDED;
-            } else {
-                unsigned long long l_bufSize = rows * lda * elemSize;
-                xfblasStatus_t l_status =
-                    BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMatRestricted(A, A,
-                                                                                                         l_bufSize);
-                return l_status;
-            }
-        } else {
-            if (rows % l_minSize != 0 || cols % l_minSize != 0 || lda % l_minSize != 0) {
-                return XFBLAS_STATUS_NOT_PADDED;
-            } else {
-                unsigned long long l_bufSize = rows * lda * elemSize;
-                xfblasStatus_t l_status =
-                    BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMatRestricted(A, A,
-                                                                                                         l_bufSize);
-                return l_status;
-            }
-        }
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -329,23 +265,6 @@ xfblasStatus_t xfblasMallocManaged(short** devPtr,
         }
         return l_status;
 
-    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
-        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
-        int l_paddedRows, l_paddedLda;
-        if (lda == 1) {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = lda;
-            *paddedLda = lda;
-        } else {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = getPaddedSize(lda, l_minSize);
-            *paddedLda = l_paddedLda;
-        }
-        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
-        l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
-        return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -386,23 +305,7 @@ xfblasStatus_t xfblasMallocManaged(float** devPtr,
                 BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
         }
         return l_status;
-    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
-        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
-        int l_paddedRows, l_paddedLda;
-        if (lda == 1) {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = lda;
-            *paddedLda = lda;
-        } else {
-            l_paddedRows = getPaddedSize(rows, l_minSize);
-            l_paddedLda = getPaddedSize(lda, l_minSize);
-            *paddedLda = l_paddedLda;
-        }
-        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
-        l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
-        return l_status;
+
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -444,7 +347,7 @@ xfblasStatus_t xfblasSetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status =
@@ -475,74 +378,12 @@ xfblasStatus_t xfblasSetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status =
             BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->setMatToFPGA<float*>(d_A, rows, lda,
                                                                                                    paddedLda, A, d_A);
-        return l_status;
-    } else {
-        return XFBLAS_STATUS_NOT_SUPPORTED;
-    }
-}
-
-/**
- * @brief This function copies a vector in host memory to FPGA device memory. xfblasMalloc() need to be called prior to
- * this function.
- * @param n number of elements in vector
- * @param elemSize number of bytes required to store each element in the vector
- * @param x pointer to the vector in the host memory
- * @param incx the storage spacing between consecutive elements of vector x
- * @param d_x pointer to mapped memory
- * @param kernelIndex index of kernel that is being used, default is 0
- * @param deviceIndex index of device that is being used, default is 0
- * @retval xfblasStatus_t 0 if the operation completed successfully
- * @retval xfblasStatus_t 1 if the library was not initialized
- * @retval xfblasStatus_t 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
- * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the vector
- * @retval xfblasStatus_t 4 if the engine is not supported for now
- */
-xfblasStatus_t xfblasSetVector(
-    int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
-    if (ConfigDict::instance().m_dict.empty()) {
-        return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-    if (n <= 0 || elemSize <= 0) {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->setMatToFPGA<short*>(d_x, n, 1, 1, x,
-                                                                                                   d_x);
-        return l_status;
-    } else {
-        return XFBLAS_STATUS_NOT_SUPPORTED;
-    }
-}
-
-xfblasStatus_t xfblasSetVector(
-    int n, int elemSize, float* x, int incx, float* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
-    if (ConfigDict::instance().m_dict.empty()) {
-        return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-    if (n <= 0 || elemSize <= 0) {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->setMatToFPGA<float*>(d_x, n, 1, 1, x,
-                                                                                                   d_x);
         return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
@@ -641,7 +482,7 @@ xfblasStatus_t xfblasGetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
@@ -672,71 +513,12 @@ xfblasStatus_t xfblasGetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
         l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMat<float*>(d_A, rows, lda,
                                                                                                     paddedLda, A, d_A);
-        return l_status;
-    } else {
-        return XFBLAS_STATUS_NOT_SUPPORTED;
-    }
-}
-
-/**
- * @brief This function copies a vector in FPGA device memory to host memory
- * @param n number of elements in vector
- * @param elemSize number of bytes required to store each element in the vector
- * @param d_x pointer to mapped memory
- * @param x pointer to the vector in the host memory
- * @param incx the storage spacing between consecutive elements of vector x
- * @param kernelIndex index of kernel that is being used, default is 0
- * @param deviceIndex index of device that is being used, default is 0
- * @retval xfblasStatus_t 0 if the operation completed successfully
- * @retval xfblasStatus_t 1 if the library was not initialized
- * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the vector
- */
-xfblasStatus_t xfblasGetVector(
-    int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
-    if (ConfigDict::instance().m_dict.empty()) {
-        return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-    if (n <= 0 || elemSize <= 0) {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
-        l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMat<short*>(d_x, n, 1, 1, x, d_x);
-        return l_status;
-    } else {
-        return XFBLAS_STATUS_NOT_SUPPORTED;
-    }
-}
-
-xfblasStatus_t xfblasGetVector(
-    int n, int elemSize, float* d_x, float* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
-    if (ConfigDict::instance().m_dict.empty()) {
-        return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-    if (n <= 0 || elemSize <= 0) {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
-        return XFBLAS_STATUS_INVALID_VALUE;
-    }
-
-    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
-        l_status =
-            BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMat<float*>(d_x, n, 1, 1, x, d_x);
         return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
@@ -843,7 +625,7 @@ xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1, unsigned int deviceI
  * @param k number of cols in matrix A, number of rows in matrix B
  * @param alpha scalar used for multiplication
  * @param A pointer to matrix A in the host memory
- * @param lda leading dimension of matirx A
+ * @param lda leading dimension of matrix A
  * @param B pointer to matrix B in the host memory
  * @param ldb leading dimension of matrix B
  * @param beta scalar used for multiplication
@@ -967,65 +749,6 @@ xfblasStatus_t xfblasGemmByAddress(unsigned int l_aOff,
     xfblasStatus_t l_status =
         l_gemmPtr->addGEMMOpByAddress(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_n, p_k, p_lda, p_ldb, p_ldc, p_ldx, 1, 0);
     return l_status;
-}
-
-/**
- * @brief This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*y
- * @param transa operation op(A) that is non- or (conj.) transpose
- * @param m number of rows in matrix A
- * @param n number of cols in matrix A
- * @param alpha scalar used for multiplication
- * @param A pointer to matrix A in the host memory
- * @param lda leading dimension of matirx A
- * @param x pointer to vector x in the host memory
- * @param incx stride between consecutive elements of x
- * @param beta scalar used for multiplication
- * @param y pointer to vector y in the host memory
- * @param incy stride between consecutive elements of y
- * @param kernelIndex index of kernel that is being used, default is 0
- * @param deviceIndex index of device that is being used, default is 0
- * @retval xfblasStatus_t 0 if the operation completed successfully
- * @retval xfblasStatus_t 1 if the library was not initialized
- * @retval xfblasStatus_t 3 if not all the matrices have FPGA devie memory allocated
- * @retval xfblasStatus_t 4 if the engine is not supported for now
- */
-xfblasStatus_t xfblasGemv(xfblasOperation_t trans,
-                          int m,
-                          int n,
-                          int alpha,
-                          void* A,
-                          int lda,
-                          void* x,
-                          int incx,
-                          int beta,
-                          void* y,
-                          int incy,
-                          unsigned int kernelIndex = 0,
-                          unsigned int deviceIndex = 0) {
-    if (ConfigDict::instance().m_dict.empty()) {
-        return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
-        if (trans == XFBLAS_OP_N && alpha == 1 && beta == 1 && incx == 1 && incy == 1) {
-            GEMVHost* l_gemvPtr =
-                static_cast<GEMVHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
-            xfblasStatus_t l_status;
-            int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
-            if (m % l_minSize != 0 || n % l_minSize != 0) {
-                int paddedM = getPaddedSize(m, l_minSize);
-                int paddedN = getPaddedSize(n, l_minSize);
-                int paddedLda = getPaddedSize(lda, l_minSize);
-                l_status = l_gemvPtr->addGEMVOp(A, x, y, paddedM, paddedN, paddedLda);
-            } else {
-                l_status = l_gemvPtr->addGEMVOp(A, x, y, m, n, lda);
-            }
-            return l_status;
-        } else {
-            return XFBLAS_STATUS_NOT_SUPPORTED;
-        }
-    } else {
-        return XFBLAS_STATUS_NOT_SUPPORTED;
-    }
 }
 
 /**

@@ -27,7 +27,9 @@ namespace xf {
 
 namespace blas {
 
+#ifndef BLAS_streamingKernel
 typedef enum { OpControl, OpGemv, OpGemm, OpTransp, OpResult, OpFail, OpFcn } OpType;
+#endif
 
 class BLASArgs {
    public:
@@ -60,7 +62,22 @@ xfblasStatus_t buildConfigDict(string p_configFile,
     }
 
     l_configInfo.close();
-
+#if BLAS_streamingKernel
+    // Additional limit for different engines
+    if (p_engineName == XFBLAS_ENGINE_GEMM) {
+        if (l_configDict.find("BLAS_mParWords") != l_configDict.end()) {
+            int l_mBlock = stoi(l_configDict["BLAS_mParWords"]);
+            int l_kBlock = stoi(l_configDict["BLAS_kParWords"]);
+            int l_nBlock = stoi(l_configDict["BLAS_nParWords"]);
+            int l_ddrWidth = stoi(l_configDict["BLAS_parEntries"]);
+            int l_maxBlock = max(l_mBlock, max(l_kBlock, l_nBlock));
+            int l_minSize = l_ddrWidth * l_maxBlock;
+            l_configDict["minSize"] = to_string(l_minSize);
+        } else {
+            return XFBLAS_STATUS_NOT_INITIALIZED;
+        }
+    }
+#else
     // Additional limit for different engines
     if (p_engineName == XFBLAS_ENGINE_GEMM) {
         if (l_configDict.find("BLAS_gemmMBlocks") != l_configDict.end()) {
@@ -75,20 +92,7 @@ xfblasStatus_t buildConfigDict(string p_configFile,
             return XFBLAS_STATUS_NOT_INITIALIZED;
         }
     }
-
-    if (p_engineName == XFBLAS_ENGINE_GEMV) {
-        if (l_configDict.find("BLAS_gemvmGroups") != l_configDict.end()) {
-            int l_mBlock = stoi(l_configDict["BLAS_gemvmGroups"]);
-            int l_nBlock = stoi(l_configDict["BLAS_transpBlocks"]);
-            int l_ddrWidth = stoi(l_configDict["BLAS_ddrWidth"]);
-            int l_maxBlock = max(l_mBlock, l_nBlock);
-            int l_minSize = l_ddrWidth * l_maxBlock;
-            l_configDict["minSize"] = to_string(l_minSize);
-        } else {
-            return XFBLAS_STATUS_NOT_INITIALIZED;
-        }
-    }
-
+#endif
     *p_configDict = l_configDict;
     return XFBLAS_STATUS_SUCCESS;
 }

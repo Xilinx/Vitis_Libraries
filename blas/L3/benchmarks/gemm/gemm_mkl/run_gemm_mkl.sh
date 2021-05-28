@@ -41,6 +41,7 @@ if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
 		 make sgemm_mkl_gen
 	elif [[ ("$DATA_TYPE" == "short") ]]; then
 		make sgemm_mkl_gen_short
+
 	else
 		echo "Error in data_type"
 		exit 1
@@ -107,14 +108,14 @@ if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
 		echo "############# $n ################"
 		if [[ ("$DATA_TYPE" == "double") ]]; then
 			if [ -e dgemm_mkl_bench ]; then
-				$NUMA ./dgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
+				./dgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
 			else
 				echo "Error in Benchmarking: ./dgemm_mkl_bench not found"
 				exit 1
 			fi
 		elif [[ ("$DATA_TYPE" == "float") ]]; then
 			if [ -e sgemm_mkl_bench ]; then
-				$NUMA ./sgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
+				./sgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
 			else
 				echo "Error in Benchmarking: ./sgemm_mkl_bench not found"
 				exit 1

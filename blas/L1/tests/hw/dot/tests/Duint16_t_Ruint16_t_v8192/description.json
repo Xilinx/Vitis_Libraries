@@ -8,7 +8,9 @@
     "platform_blacklist": [], 
     "platform_whitelist": [
         "u280", 
-        "u200"
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "dot_Duint16_t_Ruint16_t_v8192_test", 
     "solution": "sol", 

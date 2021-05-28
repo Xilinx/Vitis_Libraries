@@ -42,6 +42,7 @@ void mul(unsigned int p_n,
          hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_x,
          hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_y,
          hls::stream<typename WideType<t_MulDataType, t_ParEntries>::t_TypeInt>& p_res,
+         hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_y_c,
          unsigned int p_mulIters = 1) {
 #ifndef __SYNTHESIS__
     assert(p_n % t_ParEntries == 0);
@@ -53,9 +54,35 @@ void mul(unsigned int p_n,
             WideType<t_DataType, t_ParEntries> l_valX;
             WideType<t_DataType, t_ParEntries> l_valY;
             WideType<t_MulDataType, t_ParEntries> l_valRes;
-#pragma HLS ARRAY_PARTITION variable = l_valX complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = l_valY complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = l_valRes complete dim = 1
+            l_valX = p_x.read();
+            l_valY = p_y.read();
+            for (unsigned int j = 0; j < t_ParEntries; ++j) {
+                l_valRes[j] = l_valX[j] * l_valY[j];
+            }
+            p_res.write(l_valRes);
+            p_y_c.write(l_valY);
+        }
+}
+
+template <typename t_DataType,
+          unsigned int t_ParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_MulDataType = t_DataType>
+void mul(unsigned int p_n,
+         hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_x,
+         hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_y,
+         hls::stream<typename WideType<t_MulDataType, t_ParEntries>::t_TypeInt>& p_res,
+         unsigned int p_mulIters = 1) {
+#ifndef __SYNTHESIS__
+    assert(p_n % t_ParEntries == 0);
+#endif
+    t_IndexType l_numParEntries = p_n / t_ParEntries;
+    for (int r = 0; r < p_mulIters; r++)
+        for (t_IndexType i = 0; i < l_numParEntries; ++i) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_valX;
+            WideType<t_DataType, t_ParEntries> l_valY;
+            WideType<t_MulDataType, t_ParEntries> l_valRes;
             l_valX = p_x.read();
             l_valY = p_y.read();
             for (unsigned int j = 0; j < t_ParEntries; ++j) {

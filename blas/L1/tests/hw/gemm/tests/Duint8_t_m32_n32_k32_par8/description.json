@@ -9,7 +9,9 @@
     "platform_whitelist": [
         "u280", 
         "u250", 
-        "u200"
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "gemm_Duint8_t_m32_n32_k32_par8_test", 
     "solution": "sol", 
