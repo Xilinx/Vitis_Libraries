@@ -203,9 +203,10 @@ class WideType {
     }
 };
 
-template <typename T, unsigned int t_DataWidth>
-class WideType<T, 1, t_DataWidth> {
+template <unsigned int t_DataWidth>
+class WideType<ap_uint<t_DataWidth>, 1, t_DataWidth> {
    private:
+    typedef ap_uint<t_DataWidth> T;
     T m_Val;
     static const unsigned int t_4k = 4096;
     static const unsigned int FLOAT_WIDTH = 7;
@@ -239,9 +240,10 @@ class WideType<T, 1, t_DataWidth> {
     WideType(const WideType& wt) { m_Val = wt[0]; }
 
     WideType(const T p_initScalar) { m_Val = p_initScalar; }
-    WideType(const t_TypeInt p_initScalar) { m_Val = *reinterpret_cast<const T*>(&p_initScalar); }
 
-    operator const t_TypeInt() { return *reinterpret_cast<t_TypeInt*>(&m_Val); }
+    operator const t_TypeInt() { return m_Val; }
+
+    bool operator==(const WideType& p_w) const { return m_Val == p_w[0]; }
 
     T shift(T p_ValIn) {
         T l_valOut = m_Val;
