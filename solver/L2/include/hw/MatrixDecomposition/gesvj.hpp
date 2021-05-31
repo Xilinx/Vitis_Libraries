@@ -204,13 +204,13 @@ void read_and_gen_2x2(T matA[MCU][ACUM][NCMAX],
     // used for accumulate alpha*alpha, beta*beta, gamma*gamma
     T alpha_acc[MCU][DEP];
 #pragma HLS resource variable = alpha_acc core = RAM_2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = alpha_acc complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = alpha_acc complete
     T beta_acc[MCU][DEP];
 #pragma HLS resource variable = beta_acc core = RAM_2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = beta_acc complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = beta_acc complete
     T gamma_acc[MCU][DEP];
 #pragma HLS resource variable = gamma_acc core = RAM_2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = gamma_acc complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = gamma_acc complete
 
     T alpha_sum[DEP];
     T beta_sum[DEP];
@@ -380,24 +380,24 @@ void gesvj(int m, int n, T* A, T* U, T* S, T* V) {
 
     T matA[MCU][ACUM][NCMAX];
 #pragma HLS RESOURCE variable = matA core = RAM_T2P_URAM
-#pragma HLS ARRAY_PARTITION variable = matA dim = 1
+#pragma HLS ARRAY_PARTITION variable = matA
     T matU[NRMAX][NRMAX];
 #pragma HLS RESOURCE variable = matU core = RAM_T2P_URAM
     T matV[NCU][ACUN][NCMAX];
 #pragma HLS RESOURCE variable = matV core = RAM_T2P_URAM
-#pragma HLS ARRAY_PARTITION variable = matV dim = 1
+#pragma HLS ARRAY_PARTITION variable = matV
     T A_i[MCU][ACUM];
 #pragma HLS RESOURCE variable = A_i core = RAM_S2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = A_i dim = 1
+#pragma HLS ARRAY_PARTITION variable = A_i
     T A_j[MCU][ACUM];
 #pragma HLS RESOURCE variable = A_j core = RAM_S2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = A_j dim = 1
+#pragma HLS ARRAY_PARTITION variable = A_j
     T V_i[NCU][ACUN];
 #pragma HLS RESOURCE variable = V_i core = RAM_S2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = V_i dim = 1
+#pragma HLS ARRAY_PARTITION variable = V_i
     T V_j[NCU][ACUN];
 #pragma HLS RESOURCE variable = V_j core = RAM_S2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = V_j dim = 1
+#pragma HLS ARRAY_PARTITION variable = V_j
 
     T sigma[NCMAX];
 #pragma HLS RESOURCE variable = sigma core = RAM_S2P_BRAM
@@ -459,17 +459,17 @@ READ_A:
     }
 
     hls::stream<T> alpha_strm;
-#pragma HLS STREAM variable = alpha_strm depth = 16 dim = 1
+#pragma HLS STREAM variable = alpha_strm depth = 16
     hls::stream<T> beta_strm;
-#pragma HLS STREAM variable = beta_strm depth = 16 dim = 1
+#pragma HLS STREAM variable = beta_strm depth = 16
     hls::stream<T> gamma_strm;
-#pragma HLS STREAM variable = gamma_strm depth = 16 dim = 1
+#pragma HLS STREAM variable = gamma_strm depth = 16
     hls::stream<T> s_strm;
-#pragma HLS STREAM variable = s_strm depth = 16 dim = 1
+#pragma HLS STREAM variable = s_strm depth = 16
     hls::stream<T> c_strm;
-#pragma HLS STREAM variable = c_strm depth = 16 dim = 1
+#pragma HLS STREAM variable = c_strm depth = 16
     hls::stream<T> conv_strm;
-#pragma HLS STREAM variable = conv_strm depth = 16 dim = 1
+#pragma HLS STREAM variable = conv_strm depth = 16
 
     T converge = 1.0;
 

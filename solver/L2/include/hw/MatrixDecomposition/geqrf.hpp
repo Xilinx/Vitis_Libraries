@@ -84,8 +84,8 @@ loop_update:
     loop_dp:
         for (int k = 0; k < length; ++k) {
 #pragma HLS pipeline
-#pragma HLS RESOURCE variable = temp core = DMul_meddsp
             DataType temp = v[k] * matrix[k + baseCol][j];
+#pragma HLS RESOURCE variable = temp core = DMul_meddsp
             int index = k % 16;
             tmp[index] = tmp[index] + temp;
         }
@@ -93,9 +93,9 @@ loop_update:
         DataType s1[8];
         for (int idx = 0; idx < 8; ++idx) {
 #pragma HLS pipeline
-#pragma HLS RESOURCE variable = temp core = DMul_meddsp
             int id = idx << 1;
             DataType temp = tmp[id] + tmp[id + 1];
+#pragma HLS RESOURCE variable = temp core = DMul_meddsp
             s1[idx] = temp;
         }
 
@@ -144,7 +144,7 @@ loop_columns:
 template <typename DataType, int M, int N, int K>
 void qrf(int m, int n, DataType matrix[K][M][(N + K - 1) / K], int lda, DataType tau[N]) {
     DataType v[K][M];
-#pragma HLS array_partition variable = v dim = 1 cyclic factor = K
+#pragma HLS array_partition variable = v cyclic factor = K
     DataType epsilon = 0.00001;
     if (Trait<DataType>::eps == 0) {
         epsilon = 0.00000000000001;
@@ -273,7 +273,7 @@ int geqrf(int m, int n, T A[NRMAX * NCMAX], int lda, T tau[NCMAX]) {
 
     static T data[NCU][NRMAX][(NCMAX + NCU - 1) / NCU];
 #pragma HLS resource variable = data core = XPM_MEMORY uram
-#pragma HLS array_partition variable = data dim = 1 cyclic factor = NCU
+#pragma HLS array_partition variable = data cyclic factor = NCU
 
     // read
     for (int i = 0; i < m; ++i) {
@@ -300,7 +300,7 @@ template <typename T, int NRMAX, int NCMAX, int NCU>
 int geqrf(int m, int n, T A[NRMAX][NCMAX], int lda, T tau[NCMAX]) {
     static T data[NCU][NRMAX][(NCMAX + NCU - 1) / NCU];
 #pragma HLS resource variable = data core = XPM_MEMORY uram
-#pragma HLS array_partition variable = data dim = 1 complete
+#pragma HLS array_partition variable = data complete
 
     // read
     for (int i = 0; i < m; ++i) {

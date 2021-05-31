@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #include "matrixUtility.hpp"
 
@@ -102,25 +103,30 @@ int main(int argc, const char* argv[]) {
     //    dataAN = dataAM;
 
     // Platform related operations
+    xf::common::utils_sw::Logger logger;
+    cl_int err = CL_SUCCESS;
+
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
+
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    int errPre;
-    cl::Program program(context, devices, xclBins, NULL, &errPre);
-    if (errPre != NULL) {
-        std::cout << "Error: cl::Program fails" << std::endl;
-        return -1;
-    }
-    cl::Kernel kernel_gesvj_0(program, "kernel_gesvj_0");
-    std::cout << "INFO: Kernel has been created" << std::endl;
+
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+
+    cl::Kernel kernel_gesvj_0(program, "kernel_gesvj_0", &err);
+    logger.logCreateKernel(err);
 
     // Output the inputs information
     std::cout << "INFO: Number of kernel runs: " << num_runs << std::endl;
@@ -274,12 +280,10 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "-------------- " << std::endl;
     if (errA > 0.0001) {
-        std::cout << "INFO: Result false" << std::endl;
-        std::cout << "-------------- " << std::endl;
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return -1;
     } else {
-        std::cout << "INFO: Result correct" << std::endl;
-        std::cout << "-------------- " << std::endl;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     }
 }

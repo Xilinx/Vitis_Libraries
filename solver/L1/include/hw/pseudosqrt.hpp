@@ -72,7 +72,7 @@ void pseudosqrtStrm(int nrows, hls::stream<ap_uint<TLen * TO> >& matrix, hls::st
         outMat.write(tmp);
     } else {
         static T matA[unrollNm][(rowTemplate + unrollNm - 1) / unrollNm][rowTemplate];
-#pragma HLS array_partition variable = matA cyclic factor = unrollNm dim = 1
+#pragma HLS array_partition variable = matA cyclic factor = unrollNm
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
         int size0 = nrows;

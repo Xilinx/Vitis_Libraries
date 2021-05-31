@@ -21,6 +21,11 @@
 #define MCU 2  // Matrix Col size
 #define NCU 2  // Matrix Col size
 
+//#define MAXM 512 // Matrix Row size
+//#define MAXN 512 // Matrix Col size
+//#define MCU 16  // Matrix Col size
+//#define NCU 16  // Matrix Col size
+
 extern "C" void kernel_gesvj_0(
     int m, int n, double dataA[MAXM * MAXN], double sigma[MAXN], double dataU[MAXM * MAXM], double dataV[MAXN * MAXN]) {
 // clang-format off

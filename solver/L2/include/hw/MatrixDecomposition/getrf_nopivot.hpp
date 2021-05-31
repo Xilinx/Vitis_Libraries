@@ -58,7 +58,7 @@ void getrf_nopivot_core(int m, int n, T A[NCU][NRCU][NCMAX], int lda) {
 LoopSweeps:
     for (int s = 0; s < (m - 1); s++) {
         T pivot[NCU][NCMAX];
-#pragma HLS array_partition variable = pivot dim = 1
+#pragma HLS array_partition variable = pivot
 #pragma HLS resource variable = pivot core = RAM_2P_BRAM
 
     LoopPivot:
@@ -119,7 +119,7 @@ void getrf_nopivot(int n, T* A, int lda, int& info) {
     const int NRCU = int((NMAX + NCU - 1) / NCU);
 
     T matA[NCU][NRCU][NMAX];
-#pragma HLS array_partition variable = matA dim = 1 complete
+#pragma HLS array_partition variable = matA complete
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
 LoopRead:

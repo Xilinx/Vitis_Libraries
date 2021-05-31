@@ -19,6 +19,9 @@
 #define NRC 16
 #define NCU 1
 
+//#define NRC 1024
+//#define NCU 16
+
 extern "C" void kernel_gtsv_0(int n, double* matDiagLow, double* matDiag, double* matDiagUp, double* rhs) {
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = matDiagLow latency = 64 num_read_outstanding = \
     16 num_write_outstanding = 16 max_read_burst_length = 64 max_write_burst_length = 64 depth = 16

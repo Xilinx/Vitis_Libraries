@@ -210,13 +210,13 @@ void gtsv_multisweeps_ncu(T low1[N], T diag1[N], T up1[N], T rhs1[N], T low2[N],
     T cachediag[2][NCU2];
     T cacheup[2][NCU2];
     T cacherhs[2][NCU2];
-#pragma HLS array_partition variable = cachelow complete dim = 0
-#pragma HLS array_partition variable = cachediag complete dim = 0
-#pragma HLS array_partition variable = cacheup complete dim = 0
-#pragma HLS array_partition variable = cacherhs complete dim = 0
+#pragma HLS array_partition variable = cachelow complete
+#pragma HLS array_partition variable = cachediag complete
+#pragma HLS array_partition variable = cacheup complete
+#pragma HLS array_partition variable = cacherhs complete
 
     T cacheadd[2][NCU2];
-#pragma HLS array_partition variable = cacheadd complete dim = 0
+#pragma HLS array_partition variable = cacheadd complete
 
     const unsigned int nIter = ((unsigned int)(N + NCU - 1)) / NCU + 2;
 
@@ -447,13 +447,13 @@ void gtsv_singlesweep(
     T cachediag[2][NCU2];
     T cacheup[2][NCU2];
     T cacherhs[2][NCU2];
-#pragma HLS array_partition variable = cachelow complete dim = 0
-#pragma HLS array_partition variable = cachediag complete dim = 0
-#pragma HLS array_partition variable = cacheup complete dim = 0
-#pragma HLS array_partition variable = cacherhs complete dim = 0
+#pragma HLS array_partition variable = cachelow complete
+#pragma HLS array_partition variable = cachediag complete
+#pragma HLS array_partition variable = cacheup complete
+#pragma HLS array_partition variable = cacherhs complete
 
     T cacheadd[2][NCU2];
-#pragma HLS array_partition variable = cacheadd complete dim = 0
+#pragma HLS array_partition variable = cacheadd complete
 
     const unsigned int nIter = ((unsigned int)(N + NCU - 1)) / NCU;
 
@@ -663,13 +663,13 @@ void gtsv_singlesweep(T inlow[N],
     T cachediag[2][NCU2];
     T cacheup[2][NCU2];
     T cacherhs[2][NCU2];
-#pragma HLS array_partition variable = cachelow complete dim = 0
-#pragma HLS array_partition variable = cachediag complete dim = 0
-#pragma HLS array_partition variable = cacheup complete dim = 0
-#pragma HLS array_partition variable = cacherhs complete dim = 0
+#pragma HLS array_partition variable = cachelow complete
+#pragma HLS array_partition variable = cachediag complete
+#pragma HLS array_partition variable = cacheup complete
+#pragma HLS array_partition variable = cacherhs complete
 
     T cacheadd[2][NCU2];
-#pragma HLS array_partition variable = cacheadd complete dim = 0
+#pragma HLS array_partition variable = cacheadd complete
 
     const unsigned int nIter = ((unsigned int)(N + NCU - 1)) / NCU;
 
