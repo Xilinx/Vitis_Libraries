@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": true,
     "name": "Xilinx Sparse Similarity Test", 
     "description": "", 
     "flow": "vitis", 
@@ -8,7 +8,7 @@
     ], 
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u50": {
             "v++": {
@@ -19,7 +19,7 @@
                 }
             }
         }
-    }, 
+    },
     "data": [
         "./data"
     ], 
@@ -40,7 +40,8 @@
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/include/hw", 
                 "LIB_DIR/L2/tests/sparse_similarity/host", 
-                "LIB_DIR/L2/tests/sparse_similarity/kernel", 
+                "LIB_DIR/L2/tests/sparse_similarity/kernel",
+                "LIB_DIR/../utils/L1/include", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
@@ -62,127 +63,127 @@
                     "location": "LIB_DIR/L2/tests/sparse_similarity/kernel/sparseSimilarityKernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=sparseSimilarityKernel", 
-                    "name": "sparseSimilarityKernel", 
-                    "num_compute_units": 1, 
+                    "name": "sparseSimilarityKernel",
+		            "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "sparseSimilarityKernel", 
-                            "slr": "SLR0", 
+                            "name": "sparseSimilarityKernel",
+                            "slr": "SLR0",
                             "arguments": [
                                 {
-                                    "name": "config", 
+                                    "name": "config",
                                     "memory": "HBM[24]"
-                                }, 
+                                },
                                 {
-                                    "name": "sourceIndice", 
+                                    "name": "sourceIndice",
                                     "memory": "HBM[24]"
-                                }, 
+                                },
                                 {
-                                    "name": "sourceWeight", 
+                                    "name": "sourceWeight",
                                     "memory": "HBM[24]"
-                                }, 
+                                },
                                 {
-                                    "name": "resultID", 
+                                    "name": "resultID",
                                     "memory": "HBM[24]"
-                                }, 
+                                },
                                 {
-                                    "name": "similarity", 
+                                    "name": "similarity",
                                     "memory": "HBM[24]"
-                                }, 
-                                {
-                                    "name": "offsetCSR0", 
+                                },
+				                {
+                                    "name": "offsetCSR0",
                                     "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "indiceCSR0", 
+                                },
+				                {
+                                    "name": "indiceCSR0",
                                     "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "weight0", 
+                                },
+				                {
+                                    "name": "weight0",
                                     "memory": "HBM[2]"
-                                }, 
-                                {
-                                    "name": "offsetCSR1", 
+                                },
+				                {
+                                    "name": "offsetCSR1",
                                     "memory": "HBM[3]"
-                                }, 
-                                {
-                                    "name": "indiceCSR1", 
+                                },
+				                {
+                                    "name": "indiceCSR1",
                                     "memory": "HBM[4]"
-                                }, 
-                                {
-                                    "name": "weight1", 
+                                },
+				                {
+                                    "name": "weight1",
                                     "memory": "HBM[5]"
-                                }, 
-                                {
-                                    "name": "offsetCSR2", 
+                                },
+				                {
+                                    "name": "offsetCSR2",
                                     "memory": "HBM[6]"
-                                }, 
-                                {
-                                    "name": "indiceCSR2", 
+                                },
+				                {
+                                    "name": "indiceCSR2",
                                     "memory": "HBM[7]"
-                                }, 
+                                },
                                 {
-                                    "name": "weight2", 
+                                    "name": "weight2",
                                     "memory": "HBM[8]"
-                                }, 
-                                {
-                                    "name": "offsetCSR3", 
+                                },
+				                {
+                                    "name": "offsetCSR3",
                                     "memory": "HBM[9]"
-                                }, 
-                                {
-                                    "name": "dindiceCSR3", 
+                                },
+				                {
+                                    "name": "dindiceCSR3",
                                     "memory": "HBM[10]"
-                                }, 
-                                {
-                                    "name": "weight3", 
+                                },
+				                {
+                                    "name": "weight3",
                                     "memory": "HBM[11]"
-                                }, 
-                                {
-                                    "name": "offsetCSR4", 
+                                },
+				                {
+                                    "name": "offsetCSR4",
                                     "memory": "HBM[12]"
-                                }, 
-                                {
-                                    "name": "indiceCSR4", 
+                                },
+				                {
+                                    "name": "indiceCSR4",
                                     "memory": "HBM[13]"
-                                }, 
-                                {
-                                    "name": "weight4", 
+                                },
+				                {
+                                    "name": "weight4",
                                     "memory": "HBM[14]"
-                                }, 
-                                {
-                                    "name": "offsetCSR5", 
+                                },
+				                {
+                                    "name": "offsetCSR5",
                                     "memory": "HBM[15]"
-                                }, 
+                                },
                                 {
-                                    "name": "indiceCSR5", 
+                                    "name": "indiceCSR5",
                                     "memory": "HBM[16]"
-                                }, 
-                                {
-                                    "name": "weight5", 
+                                },
+				                {
+                                    "name": "weight5",
                                     "memory": "HBM[17]"
-                                }, 
-                                {
-                                    "name": "offsetCSR6", 
+                                },
+				                {
+                                    "name": "offsetCSR6",
                                     "memory": "HBM[18]"
-                                }, 
-                                {
-                                    "name": "indiceCSR6", 
+                                },
+				                {
+                                    "name": "indiceCSR6",
                                     "memory": "HBM[19]"
-                                }, 
+                                },
                                 {
-                                    "name": "weight6", 
+                                    "name": "weight6",
                                     "memory": "HBM[20]"
-                                }, 
-                                {
-                                    "name": "offsetCSR7", 
+                                },
+				                {
+                                    "name": "offsetCSR7",
                                     "memory": "HBM[21]"
-                                }, 
-                                {
-                                    "name": "dindiceCSR7", 
+                                },
+				                {
+                                    "name": "dindiceCSR7",
                                     "memory": "HBM[22]"
-                                }, 
-                                {
-                                    "name": "weight7", 
+                                },
+				                {
+                                    "name": "weight7",
                                     "memory": "HBM[23]"
                                 }
                             ]
@@ -202,15 +203,10 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
-                    "vitis_hw_run": 10240
-                }, 
+                "max_memory_MB": 65536, 
                 "max_time_min": {
                     "vitis_hw_build": 800, 
-                    "vitis_hw_emu": 300, 
+                    "vitis_hw_emu": 600, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

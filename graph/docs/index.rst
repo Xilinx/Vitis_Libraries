@@ -42,7 +42,7 @@ Setup the build environment using the Vitis and XRT scripts.
 .. ref-code-block:: bash
 	:class: overview-code-block
 
-        source <install path>/Vitis/2019.2/settings64.sh
+        source <install path>/Vitis/2021.1/settings64.sh
         source /opt/xilinx/xrt/setup.sh
         export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
@@ -97,6 +97,11 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
 
    plugin/tigergraph_integration.rst
 
+.. toctree::
+   :caption: Benchmark 
+   :maxdepth: 1 
+
+   results.rst
 
 Indices and tables
 ------------------

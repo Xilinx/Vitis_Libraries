@@ -25,6 +25,22 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
+void Handle::initOpTwoHop(const char* kernelName,
+                          char* xclbinFile,
+                          char* kernelAlias,
+                          unsigned int requestLoad,
+                          unsigned int deviceNeeded,
+                          unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    optwohop->setHWInfo(deviceNm, maxCU);
+    optwohop->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
+    optwohop->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+};
+
 void Handle::initOpSP(const char* kernelName,
                       char* xclbinFile,
                       char* kernelAlias,
@@ -206,12 +222,35 @@ void Handle::addOp(singleOP op) {
     ops.push_back(op);
 }
 
-void Handle::setUp() {
+int Handle::setUp() {
     getEnv();
     unsigned int opNm = ops.size();
     unsigned int deviceCounter = 0;
     for (int i = 0; i < opNm; ++i) {
-        if (strcmp(ops[i].operationName, "pagerank") == 0) {
+        if (strcmp(ops[i].operationName, "twoHop") == 0) {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            if (deviceCounter + boardNm > numDevices) {
+                std::cout << "Error: Need more devices" << std::endl;
+                exit(1);
+            }
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            std::thread th[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                th[j].join();
+            }
+            deviceCounter += boardNm;
+            initOpTwoHop(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
+                         ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (strcmp(ops[i].operationName, "pagerank") == 0) {
             unsigned int boardNm = ops[i].deviceNeeded;
             if (deviceCounter + boardNm > numDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
@@ -271,12 +310,19 @@ void Handle::setUp() {
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j].join();
             }
-            std::thread th[boardNm];
+            std::future<int> th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinAsync(deviceCounter + j, ops[i].xclbinFile);
             }
             for (int j = 0; j < boardNm; ++j) {
-                th[j].join();
+                auto loadedDevId = th[j].get();
+                if (loadedDevId < 0) {
+                    std::cout << "ERROR: failed to load " << ops[i].xclbinFile << "(Status=" << loadedDevId
+                              << "). Please check if it is "
+                              << "created for the Xilinx Acceleration card installed on "
+                              << "the server." << std::endl;
+                    return loadedDevId;
+                }
             }
             deviceCounter += boardNm;
             initOpSimDense(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
@@ -474,6 +520,7 @@ void Handle::setUp() {
             exit(1);
         }
     }
+    return 0;
 }
 
 void Handle::getEnv() {
@@ -523,7 +570,18 @@ void Handle::free() {
     unsigned int opNm = ops.size();
     unsigned int deviceCounter = 0;
     for (int i = 0; i < opNm; ++i) {
-        if (strcmp(ops[i].operationName, "pagerank") == 0) {
+        if (strcmp(ops[i].operationName, "twoHop") == 0) {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            deviceCounter += boardNm;
+            optwohop->freeTwoHop();
+        } else if (strcmp(ops[i].operationName, "pagerank") == 0) {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -656,6 +714,10 @@ void Handle::loadXclbin(unsigned int deviceId, char* xclbinName) {
 
 std::thread Handle::loadXclbinNonBlock(unsigned int deviceId, char* xclbinName) {
     return xrm->loadXclbinNonBlock(deviceId, xclbinName);
+};
+
+std::future<int> Handle::loadXclbinAsync(unsigned int deviceId, char* xclbinName) {
+    return xrm->loadXclbinAsync(deviceId, xclbinName);
 };
 
 } // L3

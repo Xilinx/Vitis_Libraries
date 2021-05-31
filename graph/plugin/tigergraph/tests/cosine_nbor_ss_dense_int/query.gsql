@@ -1,6 +1,6 @@
 set query_timeout = 600000
 use graph xgraph
-drop query cosinesim_ss_tg, code_str, cosinesim_ss_fpga, cosinesim_ss_test
+drop query cosinesim_ss_tg, loadgraph_cosinesim_ss_fpga, code_str, cosinesim_ss_fpga, cosinesim_ss_test
 
 create query code_str(vertex<patients> p, string e_str, int num) for graph xgraph returns (string){
     string res;
@@ -20,13 +20,13 @@ create query code_str(vertex<patients> p, string e_str, int num) for graph xgrap
     return res;
 }
 
-create query cosinesim_ss_tg() for graph xgraph {
+create query cosinesim_ss_tg(string log_file) for graph xgraph {
     uint topK;
     double score;
     vertex<patients> newPatient;
     ListAccum<ListAccum<int> > @@patientsAll;
     ListAccum<testResults> @@result;
-    FILE file1 ("PATH_REPO/plugin/tigergraph/tests/cosine_nbor_ss_dense_int/tg.txt");
+    FILE file1 (log_file);
     topK = 100;
 # Patient Population
     population = {patients.*};
@@ -61,14 +61,33 @@ create query cosinesim_ss_tg() for graph xgraph {
     end;
 }
 
-create query cosinesim_ss_fpga() for graph xgraph {
+create query loadgraph_cosinesim_ss_fpga() for graph xgraph {
+    STRING status;
+    INT ret;
+    ret = loadgraph_cosinesim_ss_fpga_core();
+    print ret;
+    IF ret == 0 THEN
+        status = "FPGA loaded successfully";
+    ELSE IF ret == -2 THEN
+        status = "config_cosinesim_ss_dense_fpga.json does not exit";
+    ELSE IF ret == -3 THEN
+        status = "xclbin does not exist";
+    ELSE IF ret == -4 THEN
+        status = "xclbin2 does not exist";
+    ELSE IF ret == -1 THEN
+        status = "xclbin loading failed";
+    END;
+    PRINT status;
+}
+
+create query cosinesim_ss_fpga(string log_file1, string log_file2) for graph xgraph {
     uint topK;
     vertex<patients> newPatient;
     ListAccum<testResults> @@result;
     ListAccum<testResults> @@result2;
     double score;
-    FILE file1 ("PATH_REPO/plugin/tigergraph/tests/cosine_nbor_ss_dense_int/fpga.txt");
-    FILE file2 ("PATH_REPO/plugin/tigergraph/tests/cosine_nbor_ss_dense_int/fpga2.txt");
+    FILE file1 (log_file1);
+    FILE file2 (log_file2);
     topK = 100;
 # Patient Population
     population = {patients.*};
@@ -80,7 +99,6 @@ create query cosinesim_ss_fpga() for graph xgraph {
         ACCUM newPatient = p;
     print newPatient;
 # Cosine Similarity using TigerGraph
-    loadgraph_cosinesim_ss_fpga_core();
     @@result = cosinesim_ss_fpga_core(newPatient, topK);
     @@result2 = cosinesim_ss_fpga_core(newPatient, topK);
     print @@result2;
@@ -191,4 +209,4 @@ create query cosinesim_ss_test() for graph xgraph {
     end;
 }
 
-install query code_str, cosinesim_ss_tg, cosinesim_ss_fpga, cosinesim_ss_test
+install query code_str, cosinesim_ss_tg, loadgraph_cosinesim_ss_fpga, cosinesim_ss_fpga, cosinesim_ss_test

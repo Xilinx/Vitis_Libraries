@@ -26,6 +26,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include "graph.hpp"
+#include "xf_utils_sw/logger.hpp"
 #endif
 
 #include "xf_graph_L2.hpp"
@@ -183,20 +184,27 @@ int main(int argc, const char* argv[]) {
     ap_uint<512>* indiceCSC = reinterpret_cast<ap_uint<512>*>(indiceArr);
     kernel_calcuDegree_0(nrows, nnz, degree, indiceCSC);
 #else
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
+    cl_int err;
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_calcuDegree(program, "kernel_calcuDegree_0");
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel kernel_calcuDegree(program, "kernel_calcuDegree_0", &err);
+    logger.logCreateKernel(err);
     std::cout << "INFO: Kernel has been created" << std::endl;
 
     // DDR Settings
@@ -250,53 +258,54 @@ int main(int argc, const char* argv[]) {
     q.finish();
 
     gettimeofday(&tendE2E, 0);
-    unsigned long timeStart, timeEnd;
+    cl_ulong ts, te;
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "INFO: Finish kernel0 execution" << std::endl;
-    kernel_evt1[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
-    kernel_evt1[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
-    unsigned long exec_time0 = (timeEnd - timeStart) / 1000.0;
-    std::cout << "INFO: Average kernel execution per run: " << exec_time0 << " us\n";
-    std::cout << "-------------------------------------------------------" << std::endl;
-    kernel_evt[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
-    kernel_evt[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
-    unsigned long exec_time0_in = (timeEnd - timeStart) / 1000.0;
-    kernel_evt2[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
-    kernel_evt2[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
-    unsigned long exec_time0_out = (timeEnd - timeStart) / 1000.0;
-    std::cout << "INFO: Average kernel + datatransfer execution per run: "
-              << exec_time0 + exec_time0_in + exec_time0_out << " us\n";
+    kernel_evt1[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &ts);
+    kernel_evt1[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &te);
+    float elapsed = ((float)te - (float)ts) / 1000000.0;
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_H2D_MS, elapsed);
+
+    kernel_evt[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &ts);
+    kernel_evt[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &te);
+    elapsed = ((float)te - (float)ts) / 1000000.0;
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_KERNEL_MS, elapsed);
+
+    kernel_evt2[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &ts);
+    kernel_evt2[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &te);
+    elapsed = ((float)te - (float)ts) / 1000000.0;
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_D2H_MS, elapsed);
+
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "INFO: Finish E2E execution" << std::endl;
     int exec_timeE2E = diff(&tendE2E, &tstartE2E);
-    std::cout << "INFO: FPGA execution time of " << num_runs << " runs:" << exec_timeE2E << " us\n"
-              << "INFO: Average execution per run: " << exec_timeE2E - exec_time0 * num_runs + exec_time0 << " us\n";
+    std::cout << "INFO: FPGA execution time of " << num_runs << " runs:" << exec_timeE2E << " us\n";
     std::cout << "-------------------------------------------------------" << std::endl;
 #endif
     // Calculate err
-    DT err = 0.0;
+    DT errs = 0.0;
     DT tolerance = 1e-3;
     int accurate = 0;
     for (int i = 0; i < nrows; ++i) {
-        err += (golden[i] - degreeCSR[i]) * (golden[i] - degreeCSR[i]);
+        errs += (golden[i] - degreeCSR[i]) * (golden[i] - degreeCSR[i]);
         if (std::abs(degreeCSR[i] - golden[i]) < tolerance) {
             accurate += 1;
         }
     }
     DT accRate = accurate * 1.0 / nrows;
-    err = std::sqrt(err);
+    errs = std::sqrt(err);
     std::cout << "INFO: Accurate Rate = " << accRate << std::endl;
-    std::cout << "INFO: Err Geomean = " << err << std::endl;
+    std::cout << "INFO: Err Geomean = " << errs << std::endl;
 
     free(indiceArr);
     free(degreeCSR);
     delete[] golden;
 
-    if (err < 1e-2) {
-        std::cout << "INFO: Result is correct" << std::endl;
+    if (errs < 1e-2) {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
-        std::cout << "INFO: Result is wrong" << std::endl;
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

@@ -246,9 +246,9 @@ inline ListAccum<int64_t> udf_get_similarity_vec(int64_t property,
     return result;
 }
 
-inline double udf_loadgraph_cosinesim_ss_fpga(int64_t numVertices,
-                                              int64_t vecLength,
-                                              ListAccum<ListAccum<int64_t> >& oldVectors) {
+inline int udf_loadgraph_cosinesim_ss_fpga(int64_t numVertices,
+                                           int64_t vecLength,
+                                           ListAccum<ListAccum<int64_t> >& oldVectors) {
     xai::IDMap.clear();
     ListAccum<testResults> result;
     int32_t numEdges = vecLength - 3;
@@ -333,7 +333,8 @@ inline double udf_loadgraph_cosinesim_ss_fpga(int64_t numVertices,
         }
     }
 
-    int ret = loadgraph_cosinesim_ss_dense_fpga(deviceNeeded, cuNm, g);
+    int ret = loadgraph_cosinesim_ss_dense_fpga_wrapper(deviceNeeded, cuNm, g);
+    std::cout << "udf_loadgraph_cosinesim_ss_dense_fpga ret = " << ret << std::endl;
     return ret;
 }
 

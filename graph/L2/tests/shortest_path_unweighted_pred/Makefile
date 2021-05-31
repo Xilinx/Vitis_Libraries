@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.0
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -92,6 +92,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/shortest_path_unweighted_pred/host
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/shortest_path_unweighted_pred/kernel
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/../database/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/../quantitative_finance/L1/include
@@ -120,22 +121,14 @@ CXXFLAGS += -D USE_HBM
 endif
 
 # ################### Setting package and image directory #######################
-PKG_OUT_DIR := package_$(TARGET)
-ifneq (,$(findstring zc706, $(XDEVICE)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/shortestPath_top.xclbin -o $(XFLIB_DIR)/L2/tests/shortest_path_unweighted_pred/data/data-csr-offset.mtx -c $(XFLIB_DIR)/L2/tests/shortest_path_unweighted_pred/data/data-csr-indicesweights.mtx -g $(XFLIB_DIR)/L2/tests/shortest_path_unweighted_pred/data/data-golden.sssp.mtx
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --hls.jobs 8
-VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
+VPP_FLAGS += --jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u50.cfg
 endif
@@ -158,13 +151,7 @@ VPP_LDFLAGS_shortestPath_top += --kernel_frequency 300
 
 # ############################ Declaring Binary Containers ##########################
 
-ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/shortestPath_top.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/shortestPath_top.xclbin
-else
-BINARY_CONTAINERS += $(BUILD_DIR)/shortestPath_top_xo.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/shortestPath_top.xclbin
-endif
 BINARY_CONTAINER_shortestPath_top_OBJS += $(TEMP_DIR)/shortestPath_top.xo
 
 # ######################### Setting Targets of Makefile ################################
@@ -189,9 +176,9 @@ $(TEMP_DIR)/shortestPath_top.xo: $(XFLIB_DIR)/L2/tests/shortest_path_unweighted_
 	$(VPP) -c $(shortestPath_top_VPP_FLAGS) $(VPP_FLAGS) -k shortestPath_top -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
 
-$(BINARY_CONTAINERS): $(BINARY_CONTAINER_shortestPath_top_OBJS)
+$(BUILD_DIR)/shortestPath_top.xclbin: $(BINARY_CONTAINER_shortestPath_top_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/shortestPath_top $(VPP_LDFLAGS) $(VPP_LDFLAGS_shortestPath_top) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/shortestPath_top $(VPP_LDFLAGS) $(VPP_LDFLAGS_shortestPath_top) -o '$@' $(+)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
@@ -227,6 +214,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

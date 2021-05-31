@@ -271,8 +271,8 @@ inline void forwardSCCS1Dataflow(const int vertexNum,
 #pragma HLS resource variable = ctrlStrm1 core = FIFO_LUTRAM
 
     hls::stream<ap_uint<32> > rootIDStrm2;
-#pragma HLS stream variable = fromIDStrm2 depth = 2
-#pragma HLS resource variable = fromIDStrm2 core = FIFO_LUTRAM
+#pragma HLS stream variable = rootIDStrm2 depth = 2
+#pragma HLS resource variable = rootIDStrm2 core = FIFO_LUTRAM
 
     hls::stream<ap_uint<32> > offsetLowStrm;
 #pragma HLS stream variable = offsetLowStrm depth = 32
@@ -409,8 +409,8 @@ inline void backwardSCCS1Dataflow(const int vertexNum,
 #pragma HLS resource variable = ctrlStrm1 core = FIFO_LUTRAM
 
     hls::stream<ap_uint<32> > rootIDStrm2;
-#pragma HLS stream variable = fromIDStrm2 depth = 2
-#pragma HLS resource variable = fromIDStrm2 core = FIFO_LUTRAM
+#pragma HLS stream variable = rootIDStrm2 depth = 2
+#pragma HLS resource variable = rootIDStrm2 core = FIFO_LUTRAM
 
     hls::stream<ap_uint<32> > offsetLowStrm;
 #pragma HLS stream variable = offsetLowStrm depth = 32

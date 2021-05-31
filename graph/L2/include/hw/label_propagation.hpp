@@ -262,8 +262,6 @@ void labelInit(int vertexNum, uint512* labelArr) {
  * @param offsetCSR row offset of CSR format
  * @param indexCSC row index of CSC format
  * @param offsetCSC column of CSC format
- * @param pingHashBuf hash ping buffer
- * @param pongHashBuf hash pong buffer
  * @param labelPing label ping buffer
  * @param labelPong label pong buffer
  */

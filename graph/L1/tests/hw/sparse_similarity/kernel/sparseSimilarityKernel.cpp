@@ -365,9 +365,9 @@ void sparseSimilarityTop8PU(ap_uint<32> k,
     std::cout << "processing similarity" << std::endl;
 #endif
 
-    xf::graph::sparseSimilarity<CHNM, PU, WData, RAM_SZ, true>(config_strm, sourceIndice, sourceWeight, offset_strm1,
-                                                               indice_strm1, weight_strm1, row_strm2, similarity_strm2,
-                                                               end_strm2);
+    xf::graph::sparseSimilarity<CHNM, PU, WData, RAM_SZ, false>(config_strm, sourceIndice, sourceWeight, offset_strm1,
+                                                                indice_strm1, weight_strm1, row_strm2, similarity_strm2,
+                                                                end_strm2);
 
 #ifndef __SYNTHESIS__
     std::cout << "sorting for topK result" << std::endl;

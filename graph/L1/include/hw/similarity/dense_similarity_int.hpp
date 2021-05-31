@@ -32,9 +32,7 @@
 
 #ifndef __SYNTHESIS__
 
-#define DEBUG true
-
-#ifdef DEBUG
+#ifdef DEBUG_SIMILARITY
 
 #define DEBUG_INPUT_MUX true
 
@@ -793,7 +791,7 @@ void load_source_vertex32(ap_int<WData> num,
 #endif
 #endif
 
-    ap_int<4> i = 0;
+    ap_int<8> i = 0;
     ap_int<32 * CHNM> weight_tmp = 0;
     ap_int<WData> addr = 0;
 Load_weight:
@@ -910,7 +908,7 @@ void load_source_vertex64(ap_int<WData> num,
 #endif
 #endif
 
-    ap_int<4> i = 0;
+    ap_int<8> i = 0;
     ap_int<64 * CHNM> weight_tmp = 0;
     ap_int<WData> addr = 0;
 Load_weight:
@@ -1306,7 +1304,6 @@ void findCorrelationDense(hls::stream<ap_int<WData> >& row_id,
 template <typename DT>
 DT adder(bool enable0, bool enable1, DT a, DT b) {
 #pragma HLS inline
-#pragma HLS PIPELINE
 
     DT result, in0, in1;
     if (enable0)
@@ -1326,7 +1323,6 @@ DT adder(bool enable0, bool enable1, DT a, DT b) {
 template <typename DT>
 DT adder(DT a, DT b) {
 #pragma HLS inline
-#pragma HLS PIPELINE
 
     DT result;
     result = a + b;
@@ -1335,8 +1331,7 @@ DT adder(DT a, DT b) {
 
 template <int CHNM, typename DT>
 DT adder_tree_top(ap_int<CHNM> enable, DT in[CHNM]) {
-#pragma HLS inline off
-#pragma HLS PIPELINE
+#pragma HLS inline
 
     DT level1[CHNM / 2];
 #pragma HLS ARRAY_PARTITION variable = level1 complete dim = 1
@@ -2078,18 +2073,40 @@ void similarityTop(
     } else if (PU == 2) {
         collect2_1<32, float, false>(rowID1[0], similarity_strm1[0], strm_end1[0], rowID1[1], similarity_strm1[1],
                                      strm_end1[1], rowID, similarity, strm_out_end);
-    } else if (PU == 4) {
+    } else if (PU <= 4) {
+        if (PU == 3) {
+            rowID1[3].write(0);
+            similarity_strm1[3].write(0);
+            strm_end1[3].write(true);
+        }
+
         collect4_1<32, float, false>(rowID1[0], similarity_strm1[0], strm_end1[0], rowID1[1], similarity_strm1[1],
                                      strm_end1[1], rowID1[2], similarity_strm1[2], strm_end1[2], rowID1[3],
                                      similarity_strm1[3], strm_end1[3], rowID, similarity, strm_out_end);
-    } else if (PU == 8) {
+    } else if (PU <= 8) {
+    PADD8:
+        for (int i = PU; i < 8; i++) {
+#pragma HLS UNROLL
+            rowID1[i].write(0);
+            similarity_strm1[i].write(0);
+            strm_end1[i].write(true);
+        }
+
         collect8_1<32, float, false>(rowID1[0], similarity_strm1[0], strm_end1[0], rowID1[1], similarity_strm1[1],
                                      strm_end1[1], rowID1[2], similarity_strm1[2], strm_end1[2], rowID1[3],
                                      similarity_strm1[3], strm_end1[3], rowID1[4], similarity_strm1[4], strm_end1[4],
                                      rowID1[5], similarity_strm1[5], strm_end1[5], rowID1[6], similarity_strm1[6],
                                      strm_end1[6], rowID1[7], similarity_strm1[7], strm_end1[7], rowID, similarity,
                                      strm_out_end);
-    } else if (PU == 16) {
+    } else if (PU <= 16) {
+    PADD16:
+        for (int i = PU; i < 4; i++) {
+#pragma HLS UNROLL
+            rowID1[i].write(0);
+            similarity_strm1[i].write(0);
+            strm_end1[i].write(true);
+        }
+
         hls::stream<ap_int<WData> > row_id_tmp[4];
 #pragma HLS stream variable = row_id_tmp depth = 8
 #pragma HLS array_partition variable = row_id_tmp complete

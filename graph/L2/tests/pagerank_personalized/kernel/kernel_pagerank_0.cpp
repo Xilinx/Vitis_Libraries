@@ -227,7 +227,7 @@ extern "C" void kernel_pagerank_0(int nrows,
     OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthOffset
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem2 port = orderUnroll latency =          \
     OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 num_write_outstanding = \
-        32 max_write_burst_length = 32 depth = depOffset
+        32 max_write_burst_length = 32 depth = depthOffset
 
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem3 port = indiceCSC latency = \
     OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthEdge

@@ -32,4 +32,5 @@
 #include "hw/shortest_path.hpp"
 #include "hw/strongly_connected_components.hpp"
 #include "hw/triangle_count.hpp"
+#include "hw/twoHop.hpp"
 #endif

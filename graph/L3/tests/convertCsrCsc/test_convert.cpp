@@ -21,6 +21,8 @@
 #include <iostream>
 #include <vector>
 #include "stdlib.h"
+#include <cmath>
+#include "xf_utils_sw/logger.hpp"
 
 #define uint32_t uint32_t
 
@@ -52,6 +54,7 @@ class ArgParser {
 };
 
 int main(int argc, const char* argv[]) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     //--------------- cmd parser -------------------------------
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -204,10 +207,10 @@ int main(int argc, const char* argv[]) {
     g2.freeBuffers();
 
     if (err == 0) {
-        std::cout << "INFO: Results are correct" << std::endl;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
-        std::cout << "ERROR: Results are false" << std::endl;
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

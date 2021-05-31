@@ -22,7 +22,7 @@ Interface
 ===========
 The input should be a set of vertex list with known size.
 The result will return a vertex list with each vertex corresponding similarity value.
-The config contains several boolean value to control the similarityType (0:Jaccard Similarity, 1:Cosine Similarity), dataType(0:uint32, 1:float, 2:uint64, 3:double, 4:int32, 5:int64). There are two dense similarity primitives are provided in the library. One can perform the computation of both uint and float, and it takes almost twice resource consumption compared with the other dense similarity primitive which can only support integer as its input.
+The config contains several boolean value to control the similarityType (0:Jaccard Similarity, 1:Cosine Similarity), dataType(0:uint32, 1:float, 2:uint64, 3:double, 4:int32, 5:int64). There are two dense similarity primitives are provided in the library. One can perform the computation of both uint and float, and it takes almost twice resource consumption compared with the other dense similarity primitive which can only support integer as its input. For interger version of dense similarity, there is a design of 2-CU instantiation to get the best performance on the platform of U50.
 
 .. image:: /images/dense_similarity_api.PNG
    :alt: API of Dense Similarity
@@ -60,6 +60,9 @@ The hardware resource utilization and benchmark results are shown in the two tab
     +------------------------+--------------+----------------+----------+----------+--------+
     |  denseSimilarityKernel |    134446    |    160671      |    402   |    16    |   807  |
     |         (int)          |              |                |          |          |        |
+    +------------------------+--------------+----------------+----------+----------+--------+
+    |  denseSimilarityKernel |    272521    |    333259      |    618   |    48    |  2364  |
+    |       (int + 2CU)      |              |                |          |          |        |
     +------------------------+--------------+----------------+----------+----------+--------+
 
 .. table:: Table 2 Performance comparison of dense graph between TigerGraph on CPU and FPGA

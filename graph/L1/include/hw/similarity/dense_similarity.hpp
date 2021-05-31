@@ -33,9 +33,7 @@
 
 #ifndef __SYNTHESIS__
 
-//#define DEBUG true
-
-#ifdef DEBUG
+#ifdef DEBUG_SIMILARITY
 
 #define DEBUG_INPUT_MUX true
 

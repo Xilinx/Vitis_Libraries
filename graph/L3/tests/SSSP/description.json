@@ -22,7 +22,9 @@
     "launch": [
         {
             "cmd_args": " -dataSetDir PROJECT/data/ -refDir PROJECT/data/", 
-            "ld_library_path": "PROJECT/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib", 
+            "ld_library_path": [
+                "PROJECT/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib"
+            ], 
             "name": "generic launch for all flows"
         }
     ], 
@@ -34,7 +36,8 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/include"
+                "LIB_DIR/L3/include",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 -I$(XILINX_XRM)/include"
         },
