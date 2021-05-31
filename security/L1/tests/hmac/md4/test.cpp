@@ -198,7 +198,7 @@ int main() {
     unsigned int ncorrect = 0;
 
     hls::stream<ap_uint<KEYW> > keyStrm("keyStrm");
-#pragma HLS stream variable = key_strm depth = 128
+#pragma HLS stream variable = keyStrm depth = 128
     hls::stream<ap_uint<64> > lenKeyStrm("lenKeyStrm");
 #pragma HLS stream variable = lenKeyStrm depth = 128
     hls::stream<ap_uint<MSGW> > msgStrm("msgStrm");

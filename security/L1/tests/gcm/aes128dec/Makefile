@@ -162,7 +162,7 @@ XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
 ifeq (1, $(words $(XPLATFORM)))
 # Query the part name of device
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
-override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
+override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.devices[0].fpgaPart" --platform $(firstword $(XPLATFORM)) | sed 's/^[^:]*://g' | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/-\+/-/g')
 endif
 endif
 check_part: check_platform check_vpp

@@ -50,28 +50,8 @@ int main() {
 
     p = (ap_uint<128>*)plaintext;
     ck = (ap_uint<256>*)cipherkey;
-    // for (int i = 0; i < 16; i++) {
-    // p(i * 8 + 7, i * 8) = plaintext[15 - i](7, 0);
-    // }
-    // for (int i = 0; i < 32; i++) {
-    // ck(i * 8 + 7, i * 8) = cipherkey[31 - i](7, 0);
-    // }
 
-    hls::stream<ap_uint<128> > plaintext_strm;
-    hls::stream<bool> i_e_strm;
-    hls::stream<ap_uint<256> > cipherkey_strm;
-    hls::stream<ap_uint<128> > ciphertext_strm;
-    hls::stream<bool> o_e_strm;
-
-    plaintext_strm << *p;
-    i_e_strm << false;
-    i_e_strm << true;
-    cipherkey_strm << *ck;
-
-    test(plaintext_strm, i_e_strm, cipherkey_strm, ciphertext_strm, o_e_strm);
-    while (!o_e_strm.read()) {
-        ciphertext_strm >> cp;
-    }
+    test(*p, *ck, cp);
 
     ap_uint<128>* gd = (ap_uint<128>*)golden;
     if (cp == *gd) {

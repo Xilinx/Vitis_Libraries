@@ -24,6 +24,7 @@
 #include <cstdlib>
 
 #include <xcl2.hpp>
+#include "xf_utils_sw/logger.hpp"
 
 // text length for each task in byte
 #define N_ROW 2048
@@ -224,24 +225,35 @@ int main(int argc, char* argv[]) {
     std::cout << "Host map buffer has been allocated and set.\n";
 
     // Get CL devices.
+    xf::common::utils_sw::Logger logger;
+    cl_int err = CL_SUCCESS;
+
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
+
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
 
-    cl::Kernel kernel0(program, "rc4EncryptKernel_1");
-    cl::Kernel kernel1(program, "rc4EncryptKernel_2");
-    cl::Kernel kernel2(program, "rc4EncryptKernel_3");
-    cl::Kernel kernel3(program, "rc4EncryptKernel_4");
-    std::cout << "Kernel has been created.\n";
+    cl::Kernel kernel0(program, "rc4EncryptKernel_1", &err);
+    logger.logCreateKernel(err);
+    cl::Kernel kernel1(program, "rc4EncryptKernel_2", &err);
+    logger.logCreateKernel(err);
+    cl::Kernel kernel2(program, "rc4EncryptKernel_3", &err);
+    logger.logCreateKernel(err);
+    cl::Kernel kernel3(program, "rc4EncryptKernel_4", &err);
+    logger.logCreateKernel(err);
 
     cl_mem_ext_ptr_t mext_in[4];
     mext_in[0] = {XCL_MEM_DDR_BANK0, hb_in1, 0};
@@ -429,8 +441,10 @@ int main(int argc, char* argv[]) {
     if (checked) {
         std::cout << std::dec << CH_NM << " channels, " << N_TASK << " tasks, " << N_ROW
                   << " messages verified. No error found!" << std::endl;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

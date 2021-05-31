@@ -9,7 +9,11 @@ Since all the primitive code is developed in HLS C++ with the permissive Apache 
 advanced users can easily tailor, optimize or assemble property logic.
 Benchmarks of 4 different acceleration applications are also provided with the library for easy on-boarding and comparison.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/2020.2/index.html)
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/2021.1/index.html)
+
+## Benchmark Result
+
+A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://xilinx.github.io/Vitis_Libraries/security/2021.1/benchmark/result.html).
 
 ## Library Contents
 
@@ -183,12 +187,6 @@ To run the Vitis projects for benchmark evaluation and test, you may need the ex
 	$ # Delete xclbin and host excutable program
 	$ make cleanall
 ```
-
-## Benchmark Result
-
-A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives.
-
-For further detials, please refer to the `Benchmark Reuslt` page in the library document.
 
 ## License
 
