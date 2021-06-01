@@ -117,7 +117,7 @@ void InputTransposeChainStreaming<t_instanceID, t_stage, t_subStage, t_forkNumbe
     // Recursion will create a chain of processes....
     T_dtype temp[t_R][t_L / t_R];
 #pragma HLS data_pack variable = temp
-#pragma HLS STREAM variable = temp depth = 8 dim = 2
+#pragma HLS STREAM variable = temp depth = 8
 #pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
 #pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
@@ -158,7 +158,7 @@ void InputTransposeChainStreaming<t_instanceID,
 #pragma HLS INLINE // The swap is p_in-lined p_in a data-flow region to expose dataCommutor to become a process.
     // Recursion will create a chain of processes....
     T_dtype temp[t_R][t_L / t_R];
-#pragma HLS STREAM variable = temp depth = 8 dim = 2
+#pragma HLS STREAM variable = temp depth = 8
 #pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
 #pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
 #pragma HLS data_pack variable = temp

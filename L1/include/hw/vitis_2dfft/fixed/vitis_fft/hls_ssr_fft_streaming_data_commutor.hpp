@@ -158,8 +158,8 @@ template <typename T_in>
 void streamingDataCommutations<t_instanceID, t_stage, t_subStage, t_forkNumber, t_L, t_R, t_PF, t_isLargeMem>::
     streamingDataCommutor(T_in p_in[t_R][t_L / t_R], T_in p_out[t_R][t_L / t_R]) {
 #pragma HLS INLINE
-#pragma HLS STREAM variable = p_in dim = 2
-#pragma HLS STREAM variable = p_out dim = 2
+#pragma HLS STREAM variable = p_in
+#pragma HLS STREAM variable = p_out
 #pragma HLS RESOURCE variable = p_in core = FIFO_LUTRAM
 #pragma HLS RESOURCE variable = p_out core = FIFO_LUTRAM
 
@@ -167,11 +167,11 @@ void streamingDataCommutations<t_instanceID, t_stage, t_subStage, t_forkNumber, 
 #pragma HLS ARRAY_PARTITION variable = p_out complete dim = 1
 
     hls::stream<SuperSampleContainer<t_R, T_in> > superSample_in;
-#pragma HLS STREAM variable = superSample_in depth = 8 // dim = 1
+#pragma HLS STREAM variable = superSample_in depth = 8
 #pragma HLS RESOURCE variable = superSample_in core = FIFO_LUTRAM
 
     hls::stream<SuperSampleContainer<t_R, T_in> > superSample_out;
-#pragma HLS STREAM variable = superSample_out depth = 8 // dim = 1
+#pragma HLS STREAM variable = superSample_out depth = 8
 #pragma HLS RESOURCE variable = superSample_out core = FIFO_LUTRAM
 
     convertArrayToSuperStream<t_stage, t_instanceID, t_L, t_R, T_in>(p_in, superSample_in);

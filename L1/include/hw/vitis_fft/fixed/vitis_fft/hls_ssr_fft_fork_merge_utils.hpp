@@ -18,18 +18,18 @@
 #ifndef HLS_SSR_FFT_FORK_MERGE_UTILS_H_
 #define HLS_SSR_FFT_FORK_MERGE_UTILS_H_
 
-#include "vitis_fft/hls_ssr_fft_utilities.hpp"
-#include "vitis_fft/hls_ssr_fft_super_sample.hpp"
 #include "vitis_fft/hls_ssr_fft_enums.hpp"
+#include "vitis_fft/hls_ssr_fft_super_sample.hpp"
+#include "vitis_fft/hls_ssr_fft_utilities.hpp"
 
 /*
  =========================================================================================
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
  -_-
 
  SSR FFT in last few stages break its kernel into small FFT kernel
@@ -44,14 +44,14 @@
  These utility functions are used to create a smaller forked stream
  and also to merge a small stream into big one for final output.
 
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
  ========================================================================================
  */
 
@@ -220,7 +220,7 @@ void convertSuperStreamToArrayNScale(hls::stream<SuperSampleContainer<t_R, T_dty
     //#pragma HLS ARRAY_PARTITION variable = p_outDataArray complete dim = 1
 
     for (int i = 0; i < t_L / t_R; i++) {
-#pragma HLS PIPELINE II = 1 rewind
+#pragma HLS PIPELINE II = 1
 
         p_in.read(temp);
 
