@@ -249,7 +249,7 @@ extern "C" void mjkernel(
     hls::stream<ap_uint<WPAY> > p_strms[VEC_LEN];
 #pragma HLS stream variable = p_strms depth = 8
 #pragma HLS array_partition variable = p_strms dim = 0
-#pragma HLS resource variable = p_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = p_strms type = fifo impl = srl
     hls::stream<bool> e_strms[VEC_LEN];
 #pragma HLS stream variable = e_strms depth = 8
 #pragma HLS array_partition variable = e_strms dim = 0
@@ -257,7 +257,7 @@ extern "C" void mjkernel(
     // write back
     hls::stream<ap_uint<WKEY + 2 * WPAY> > j_strm;
 #pragma HLS stream variable = j_strm depth = 8
-#pragma HLS resource variable = j_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = j_strm type = fifo impl = srl
     hls::stream<bool> j_e_strm;
 #pragma HLS stream variable = j_e_strm depth = 8
 

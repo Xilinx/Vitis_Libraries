@@ -153,7 +153,7 @@ void hash_wrapper(hls::stream<ap_uint<KEYW> >& i_key_strm,
                   hls::stream<bool>& o_e1_strm) {
     hls::stream<ap_uint<KEYW> > key_strm_in;
 #pragma HLS STREAM variable = key_strm_in depth = 24
-#pragma HLS resource variable = key_strm_in core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm_in type = fifo impl = srl
     hls::stream<ap_uint<64> > hash_strm_out;
 #pragma HLS STREAM variable = hash_strm_out depth = 8
 // radix hash function
@@ -1595,7 +1595,7 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 8
 #pragma HLS array_partition variable = p1_strm_arry dim = 0
-#pragma HLS resource variable = p1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 8
 #pragma HLS array_partition variable = hash_strm_arry dim = 0
@@ -1610,7 +1610,7 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c0[PU];
 #pragma HLS stream variable = p1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c0 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c0[PU];
 #pragma HLS stream variable = hash_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c0 dim = 0
@@ -1624,7 +1624,7 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c1[PU];
 #pragma HLS stream variable = p1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c1 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c1[PU];
 #pragma HLS stream variable = hash_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c1 dim = 0
@@ -1638,7 +1638,7 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c2[PU];
 #pragma HLS stream variable = p1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c2 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c2[PU];
 #pragma HLS stream variable = hash_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c2 dim = 0
@@ -1651,7 +1651,7 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c3[PU];
 #pragma HLS stream variable = p1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c3 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c3[PU];
 #pragma HLS stream variable = hash_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c3 dim = 0
@@ -1667,11 +1667,11 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<KEYW> > k2_strm_arry[PU];
 #pragma HLS stream variable = k2_strm_arry depth = 32
 #pragma HLS array_partition variable = k2_strm_arry dim = 0
-#pragma HLS resource variable = k2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k2_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<PW> > p2_strm_arry[PU];
 #pragma HLS stream variable = p2_strm_arry depth = 32
 #pragma HLS array_partition variable = p2_strm_arry dim = 0
-#pragma HLS resource variable = p2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p2_strm_arry type = fifo impl = srl
     hls::stream<bool> e2_strm_arry[PU];
 #pragma HLS stream variable = e2_strm_arry depth = 8
 #pragma HLS array_partition variable = e2_strm_arry dim = 0
@@ -1690,7 +1690,7 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<S_PW + B_PW> > j0_strm_arry[PU];
 #pragma HLS stream variable = j0_strm_arry depth = 8
 #pragma HLS array_partition variable = j0_strm_arry dim = 0
-#pragma HLS resource variable = j0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = j0_strm_arry type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     ap_uint<72>* bit_vector0[PU];
@@ -1709,13 +1709,13 @@ static void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     ap_uint<72> bit_vector2[PU][(HDP_J >> 2)];
     ap_uint<72> bit_vector3[PU][(HDP_J >> 2)];
 #pragma HLS array_partition variable = bit_vector0 dim = 1
-#pragma HLS resource variable = bit_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector0 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector1 dim = 1
-#pragma HLS resource variable = bit_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector1 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector2 dim = 1
-#pragma HLS resource variable = bit_vector2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector2 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector3 dim = 1
-#pragma HLS resource variable = bit_vector3 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector3 type = ram_2p impl = uram
 #endif
 
     // clang-format off
@@ -1833,7 +1833,7 @@ void hash_wrapper(hls::stream<ap_uint<KEYW> >& i_key_strm,
                   hls::stream<bool>& o_e_strm) {
     hls::stream<ap_uint<KEYW> > key_strm_in;
 #pragma HLS STREAM variable = key_strm_in depth = 24
-#pragma HLS resource variable = key_strm_in core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm_in type = fifo impl = srl
     hls::stream<ap_uint<64> > hash_strm_out;
 #pragma HLS STREAM variable = hash_strm_out depth = 8
 // radix hash function
@@ -2749,7 +2749,7 @@ void build_probe_wrapper(hls::stream<ap_uint<HASHW> >& i_hash_strm,
 
     ap_uint<HASHW> hp_addr_tb[ARW - 8][DH];
 #pragma HLS array_partition variable = hp_addr_tb dim = 1
-#pragma HLS resource variable = hp_addr_tb core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = hp_addr_tb type = ram_2p impl = bram
 
     ap_uint<1> tg_tb[DH];
 
@@ -2838,7 +2838,7 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 8
 #pragma HLS array_partition variable = p1_strm_arry dim = 0
-#pragma HLS resource variable = p1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 8
 #pragma HLS array_partition variable = hash_strm_arry dim = 0
@@ -2853,7 +2853,7 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c0[PU];
 #pragma HLS stream variable = p1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c0 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c0[PU];
 #pragma HLS stream variable = hash_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c0 dim = 0
@@ -2868,7 +2868,7 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c1[PU];
 #pragma HLS stream variable = p1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c1 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c1[PU];
 #pragma HLS stream variable = hash_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c1 dim = 0
@@ -2883,7 +2883,7 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c2[PU];
 #pragma HLS stream variable = p1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c2 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c2[PU];
 #pragma HLS stream variable = hash_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c2 dim = 0
@@ -2896,7 +2896,7 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p1_strm_arry_c3[PU];
 #pragma HLS stream variable = p1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c3 dim = 0
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL> > hash_strm_arry_c3[PU];
 #pragma HLS stream variable = hash_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c3 dim = 0
@@ -2912,11 +2912,11 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<KEYW> > k2_strm_arry[PU];
 #pragma HLS stream variable = k2_strm_arry depth = 64
 #pragma HLS array_partition variable = k2_strm_arry dim = 0
-#pragma HLS resource variable = k2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = k2_strm_arry type = fifo impl = srl
     hls::stream<ap_uint<PW> > p2_strm_arry[PU];
 #pragma HLS stream variable = p2_strm_arry depth = 64
 #pragma HLS array_partition variable = p2_strm_arry dim = 0
-#pragma HLS resource variable = p2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = p2_strm_arry type = fifo impl = srl
     hls::stream<bool> e2_strm_arry[PU];
 #pragma HLS stream variable = e2_strm_arry depth = 8
 #pragma HLS array_partition variable = e2_strm_arry dim = 0
@@ -2935,7 +2935,7 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<S_PW + B_PW> > j0_strm_arry[PU];
 #pragma HLS stream variable = j0_strm_arry depth = 8
 #pragma HLS array_partition variable = j0_strm_arry dim = 0
-#pragma HLS resource variable = j0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = j0_strm_arry type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     ap_uint<72>* bit_vector0[PU];
@@ -2954,13 +2954,13 @@ void hashJoinMPU(hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     ap_uint<72> bit_vector2[PU][(HDP_J >> 2)];
     ap_uint<72> bit_vector3[PU][(HDP_J >> 2)];
 #pragma HLS array_partition variable = bit_vector0 dim = 1
-#pragma HLS resource variable = bit_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector0 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector1 dim = 1
-#pragma HLS resource variable = bit_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector1 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector2 dim = 1
-#pragma HLS resource variable = bit_vector2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector2 type = ram_2p impl = uram
 #pragma HLS array_partition variable = bit_vector3 dim = 1
-#pragma HLS resource variable = bit_vector3 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bit_vector3 type = ram_2p impl = uram
 #endif
 
     // clang-format off

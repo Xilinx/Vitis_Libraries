@@ -13,49 +13,37 @@
     ],
     "platform_properties": {
         "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": []
+            "containers": [
+                {
+                    "name": "gqe_join_v3",
+                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt_u280.tcl"
-                    ]
-                }
-            }
+            ]
         },
         "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": []
+            "containers": [
+                {
+                    "name": "gqe_join_v3",
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
                 }
-            },
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt_u50.tcl"
-                    ]
-                }
-            }
+            ]
         }
     },
     "launch": [
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_join_v2.xclbin -scale 10"
+            "cmd_args": " -xclbin BUILD/gqe_join_v3.xclbin -scale 100"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_join_v2.xclbin -scale 10000"
+            "cmd_args": " -xclbin BUILD/gqe_join_v3.xclbin -scale 10000"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/gqe_join_v2.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_join_v3.xclbin"
         }
     ],
     "host": {
@@ -70,7 +58,8 @@
                 "LIB_DIR/L1/include/sw",
                 "LIB_DIR/L2/include/sw",
                 "LIB_DIR/L2/tests/common",
-                "host"
+                "host",
+                "LIB_DIR/../utils/L1/include"
             ],
             "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
@@ -91,11 +80,11 @@
     },
     "containers": [
         {
-            "name": "gqe_join_v2",
+            "name": "gqe_join_v3",
             "accelerators": [
                 {
                     "name": "gqeJoin",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_v2.cpp",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_filter.cpp",
                     "frequency": 250,
                     "num_compute_units": 1
                 }

@@ -20,6 +20,8 @@
 #include "utils.hpp"
 // clang-format on
 
+#include "xf_utils_sw/logger.hpp"
+
 #include <unordered_map>
 #include <iomanip>
 #include <iostream>
@@ -104,6 +106,9 @@ ap_uint<64> get_golden_sum(int l_row,
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n------------- Hash-Join Test ----------------\n";
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
 
     // cmd arg parser.
     ArgParser parser(argc, argv);
@@ -212,17 +217,21 @@ int main(int argc, const char* argv[]) {
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
     cl::CommandQueue q(context, device,
                        // CL_QUEUE_PROFILING_ENABLE);
-                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel0(program, "join_kernel"); // XXX must match
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel kernel0(program, "join_kernel", &err); // XXX must match
+    logger.logCreateKernel(err);
     std::cout << "Kernel has been created\n";
 
     cl_mem_ext_ptr_t mext_o_orderkey = {0, col_o_orderkey, kernel0()};
@@ -427,6 +436,9 @@ int main(int argc, const char* argv[]) {
     }
 #endif
 
+    ret ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
+
     std::cout << "---------------------------------------------\n\n";
+
     return ret;
 }

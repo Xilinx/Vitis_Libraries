@@ -25,6 +25,8 @@
 #include <cstring>
 #include <sys/time.h>
 
+#include "xf_utils_sw/logger.hpp"
+
 // XXX work-around gmp.h issue.
 #include <cstddef>
 
@@ -136,6 +138,9 @@ int load_dat(void* data, const std::string& name, const std::string& dir, size_t
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n------------ TPC-H Query 5 (1G) -------------\n";
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
 
     // cmd arg parser.
     ArgParser parser(argc, argv);
@@ -442,17 +447,21 @@ int main(int argc, const char* argv[]) {
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
     cl::CommandQueue q(context, device,
                        // CL_QUEUE_PROFILING_ENABLE);
-                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel0(program, "q5_hash_join"); // XXX must match
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel kernel0(program, "q5_hash_join", &err); // XXX must match
+    logger.logCreateKernel(err);
     std::cout << "Kernel has been created\n";
 
     cl_mem_ext_ptr_t mext_n_out_k = {0, n_out_k, kernel0()};
@@ -896,14 +905,14 @@ int main(int argc, const char* argv[]) {
         err += query_result[2].group_result == 532934636888 ? 0 : 1;
         err += query_result[3].group_result == 504877781438 ? 0 : 1;
         err += query_result[4].group_result == 488014573985 ? 0 : 1;
-        if (err)
-            std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
-        else
-            std::cout << "PASS!" << std::endl;
+
     } else {
         std::cout << "WARNING: unknown test size, result is not checked with provisioned golden data." << std::endl;
     }
 
+    err ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
+
     std::cout << "---------------------------------------------\n\n";
+
     return err;
 }

@@ -1,7 +1,8 @@
 # Key L1 Module Benchmark Test
 
-The Vitis projects in this folder are for benchmarking the performance of key L1 modules,
-whose proformance depends dynamically on input and cannot be simply rated via clock frequency.
+Many database key operations are heavy on memory access, and as a result most key L1 modules
+in this library has AXI-master port to store intermediate data structure or partial result in DRAM.
+While latency in DRAM dominate these primitives, it cannot be accurately modeled in HLS simulation.
 
-Since L1 modules cannot run alone on Alveo cards, the target modules are combined with
-minimal supportive L1 modules into Vitis kernels.
+Therefore in this benchmark folder, key L1 modules are combined with fast data source and sink into Vitis kernels, 
+as these kernels can enable more-accurate Vitis hardware emulation or direct run on Alveo card for performance evaluation.

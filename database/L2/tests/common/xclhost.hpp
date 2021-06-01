@@ -21,6 +21,9 @@
 #include <CL/cl_ext_xilinx.h>
 #include <CL/cl.h>
 
+// for shared host utility
+#include "xf_utils_sw/logger.hpp"
+
 #include <cstddef>
 #include <cstdlib>
 #include <new>

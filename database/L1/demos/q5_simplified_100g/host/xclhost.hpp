@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2018 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,38 @@
  * limitations under the License.
  */
 
-#ifndef __XCLHOST_H__
-#define __XCLHOST_H__
+#ifndef XCLHOST_HPP
+#define XCLHOST_HPP
 
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#include <CL/cl.h>
+// Include xilinx header first, to define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl_ext_xilinx.h>
+#include <CL/cl.h>
 
-#include <cstdio>
+// for shared host utility
+#include "xf_utils_sw/logger.hpp"
+
+#include <cstddef>
 #include <cstdlib>
-#include <cstring>
 #include <new>
 
 #define MSTR_(m) #m
 #define MSTR(m) MSTR_(m)
 
-unsigned long read_binary_file(const char* fname, void** buffer);
-
+namespace xclhost {
 cl_int init_hardware(cl_context* context,
                      cl_device_id* device_id,
                      cl_command_queue* cmd_queue,
                      cl_command_queue_properties queue_props,
-                     const char* shell_name);
+                     const char* dsa_name);
 
 cl_int load_binary(cl_program* program, cl_context context, cl_device_id device_id, const char* xclbin);
 
-#endif // !defined(__XCLHOST_H__)
+template <typename T>
+T* aligned_alloc(std::size_t num) {
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr, 4096, num * sizeof(T))) throw std::bad_alloc();
+    return reinterpret_cast<T*>(ptr);
+}
+} // namespace xclhost
+
+#endif // XCLHOST_HPP

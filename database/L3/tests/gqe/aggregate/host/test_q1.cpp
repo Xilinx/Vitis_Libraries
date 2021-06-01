@@ -18,6 +18,8 @@
 #include "x_utils.hpp"
 #include "q1.hpp"
 
+#include "xf_utils_sw/logger.hpp"
+
 // load one col data into 1 buffer
 template <typename T>
 int load_dat(void* data, const std::string& name, const std::string& dir, const int sf, const size_t n) {
@@ -40,6 +42,9 @@ int load_dat(void* data, const std::string& name, const std::string& dir, const 
 
 int main(int argc, const char* argv[]) {
     std::cout << "--------------- Query 1, aggregation --------------- " << std::endl;
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
 
     // cmd arg parser.
     x_utils::ArgParser parser(argc, argv);
@@ -234,6 +239,17 @@ int main(int argc, const char* argv[]) {
     int32_t* tab_l_col5 = mm.aligned_alloc<int32_t>(table_l_nrow);
     int32_t* tab_l_col6 = mm.aligned_alloc<int32_t>(table_l_nrow);
 
+    int64_t* tab_c_col0 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col1 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col2 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col3 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col4 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col5 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col6 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col7 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col8 = mm.aligned_alloc<int64_t>(table_c_nrow);
+    int64_t* tab_c_col9 = mm.aligned_alloc<int64_t>(table_c_nrow);
+
     int err = 0;
     err += load_dat<int32_t>(tab_l_col0, "l_returnflag", in_dir, factor_l, table_l_nrow);
     err += load_dat<int32_t>(tab_l_col1, "l_linestatus", in_dir, factor_l, table_l_nrow);
@@ -245,7 +261,7 @@ int main(int argc, const char* argv[]) {
     if (err) return err;
     std::cout << "LineItem table has been read from disk" << std::endl;
 
-    gqe::Table tab_l;
+    gqe::Table tab_l("Table L");
     tab_l.addCol("l_returnflag", gqe::TypeEnum::TypeInt32, tab_l_col0, table_l_nrow);
     tab_l.addCol("l_linestatus", gqe::TypeEnum::TypeInt32, tab_l_col1, table_l_nrow);
     tab_l.addCol("l_quantity", gqe::TypeEnum::TypeInt32, tab_l_col2, table_l_nrow);
@@ -254,17 +270,17 @@ int main(int argc, const char* argv[]) {
     tab_l.addCol("l_tax", gqe::TypeEnum::TypeInt32, tab_l_col5, table_l_nrow);
     tab_l.addCol("l_shipdate", gqe::TypeEnum::TypeInt32, tab_l_col6, table_l_nrow);
 
-    gqe::Table tab_c;
-    tab_c.addCol("c0", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c1", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c2", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c3", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c4", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c5", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c6", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c7", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c8", gqe::TypeEnum::TypeInt64, table_c_nrow);
-    tab_c.addCol("c9", gqe::TypeEnum::TypeInt64, table_c_nrow);
+    gqe::Table tab_c("Table C");
+    tab_c.addCol("c0", gqe::TypeEnum::TypeInt64, tab_c_col0, table_c_nrow);
+    tab_c.addCol("c1", gqe::TypeEnum::TypeInt64, tab_c_col1, table_c_nrow);
+    tab_c.addCol("c2", gqe::TypeEnum::TypeInt64, tab_c_col2, table_c_nrow);
+    tab_c.addCol("c3", gqe::TypeEnum::TypeInt64, tab_c_col3, table_c_nrow);
+    tab_c.addCol("c4", gqe::TypeEnum::TypeInt64, tab_c_col4, table_c_nrow);
+    tab_c.addCol("c5", gqe::TypeEnum::TypeInt64, tab_c_col5, table_c_nrow);
+    tab_c.addCol("c6", gqe::TypeEnum::TypeInt64, tab_c_col6, table_c_nrow);
+    tab_c.addCol("c7", gqe::TypeEnum::TypeInt64, tab_c_col7, table_c_nrow);
+    tab_c.addCol("c8", gqe::TypeEnum::TypeInt64, tab_c_col8, table_c_nrow);
+    tab_c.addCol("c9", gqe::TypeEnum::TypeInt64, tab_c_col9, table_c_nrow);
 
     // constructor
     gqe::Aggregator bigaggr(xclbin_path);
@@ -291,6 +307,7 @@ int main(int argc, const char* argv[]) {
         return err_code;
     }
     std::cout << "Q1 Demo Finished!" << std::endl;
+    int nerror = 0;
     if (validate == "on") {
         std::cout << "---------------Validate results---------------" << std::endl;
         std::cout << "Run Q1 in CPU as Golen" << std::endl;
@@ -302,8 +319,8 @@ int main(int argc, const char* argv[]) {
         cpuQ1(tab_l_col0, tab_l_col1, tab_l_col2, tab_l_col3, tab_l_col4, tab_l_col5, tab_l_col6, table_l_nrow, golden,
               golden_n);
         std::cout << "Q1 CPU run done,Start Validate..." << std::endl;
-        int nerror = check_result(tab_c, golden, golden_n);
-        return nerror;
+        nerror = check_result(tab_c, golden, golden_n);
     }
-    return 0;
+    nerror ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
+    return nerror;
 }

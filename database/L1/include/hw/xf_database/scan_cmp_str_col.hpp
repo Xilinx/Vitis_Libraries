@@ -341,12 +341,12 @@ void scanCmpStrCol(ap_uint<512>* ddr_ptr,
 
 #pragma HLS DATAFLOW
     hls::stream<ap_uint<512> > stream_t1, stream_t2;
-#pragma HLS STREAM variable = stream_t1 depth = 8 dim = 1
-#pragma HLS STREAM variable = stream_t2 depth = 8 dim = 1
+#pragma HLS STREAM variable = stream_t1 depth = 8
+#pragma HLS STREAM variable = stream_t2 depth = 8
 
     hls::stream<bool> stream_f1, stream_f2;
-#pragma HLS STREAM variable = stream_f1 depth = 8 dim = 1
-#pragma HLS STREAM variable = stream_f2 depth = 8 dim = 1
+#pragma HLS STREAM variable = stream_f1 depth = 8
+#pragma HLS STREAM variable = stream_f2 depth = 8
 
     details::read_ddr(ddr_ptr, size, stream_t1, stream_f1);
     details::padding_stream_out(stream_t1, stream_f1, num_str, stream_t2, stream_f2);

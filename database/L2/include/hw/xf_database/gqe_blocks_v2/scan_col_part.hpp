@@ -23,8 +23,8 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 
-#include "xf_database/utils.hpp"
 #include "xf_database/types.hpp"
+#include "xf_database/utils.hpp"
 #include <iostream>
 
 namespace xf {
@@ -353,11 +353,11 @@ void scan_cols(const ap_uint<WD * VEC>* ptr0,
     // need wide buffering for fast input, slow output, wide to narrow.
     hls::stream<ap_uint<WD * VEC> > vs[nCol];
 #pragma HLS stream variable = vs depth = burstLen2
-#pragma HLS resource variable = vs core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vs type = fifo impl = lutram
 
     hls::stream<int> config_copies[nCol + 2];
 #pragma HLS stream variable = config_copies depth = 2
-#pragma HLS resource variable = config_copies core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = config_copies type = fifo impl = lutram
 
     int nrowA = nrow_strm.read(); 
 

@@ -15,40 +15,36 @@
     ],
     "platform_properties": {
         "u280": {
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.cfg"
-                    ]
+            "containers": [
+                {
+                    "name": "SortKernel",
+                    "ldclflags": "--config PROJECT/conn_u280.cfg"
                 }
-            }
+            ]
         },
         "u250": {
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u250.cfg"
-                    ]
+            "containers": [
+                {
+                    "name": "SortKernel",
+                    "ldclflags": "--config PROJECT/conn_u250.cfg"
                 }
-            }
+            ]
         },
         "u200": {
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
+            "containers": [
+                {
+                    "name": "SortKernel",
+                    "ldclflags": "--config PROJECT/conn_u200.cfg"
                 }
-            }
+            ]
         },
         "u50": {
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
+            "containers": [
+                {
+                    "name": "SortKernel",
+                    "ldclflags": "--config PROJECT/conn_u50.cfg"
                 }
-            }
+            ]
         }
     },
     "launch": [
@@ -68,7 +64,8 @@
                 "LIB_DIR/L1/include/hw",
                 "host",
                 "kernel",
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ],
             "options": "-O3 ",
             "symbols": [

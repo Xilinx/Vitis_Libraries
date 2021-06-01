@@ -18,7 +18,7 @@
 
 // XXX inline with tpch_read_2.h
 #include <stdint.h>
-typedef int32_t TPCH_INT;
+typedef int64_t TPCH_INT;
 
 typedef TPCH_INT MONEY_T;
 typedef TPCH_INT DATE_T;
@@ -31,8 +31,8 @@ typedef TPCH_INT KEY_T;
 
 #define TPCH_INT_SZ sizeof(TPCH_INT)
 
-// every cycle, 4 input rows.
-#define VEC_LEN 16
+// every cycle, 8 input rows.
+#define VEC_LEN 8
 
 //
 // ensure when kernel read in vec, won't over read
@@ -45,8 +45,8 @@ typedef TPCH_INT KEY_T;
 
 #define BUFF_DEPTH (O_MAX_ROW / 8 * 2)
 
-#define HT_BUFF_DEPTH (1 << 25)  // 30M
-#define S_BUFF_DEPTH (1 << 25)   // 30M
-#define HBM_BUFF_DEPTH (1 << 25) // 30M
+#define HT_BUFF_DEPTH (1 << 23)  // 30M
+#define S_BUFF_DEPTH (1 << 23)   // 30M
+#define HBM_BUFF_DEPTH (1 << 23) // 30M
 
 #endif // TABLE_DT_H

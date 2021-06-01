@@ -23,16 +23,17 @@
 #include <string>
 #include <regex>
 #include <memory>
+// Op code, etc.
 #include "xf_database/enums.hpp"
+// HW header for config details
+#include "xf_database/dynamic_filter.hpp"
+
+//#define DEBUGTT 1
 
 namespace xf {
 namespace database {
 namespace internals {
 namespace filter_config {
-
-// TODO this should match the trait of filter implementation.
-// but we have just implementation as now. To be extended in future.
-enum { FCFG_SIZE = 45 };
 
 static const std::map<std::string, int> opMap = {{"<", FOP_LTU},  {"<=", FOP_LEU}, {">", FOP_GTU},
                                                  {">=", FOP_GEU}, {"==", FOP_EQ},  {"!=", FOP_NE}};
@@ -157,7 +158,7 @@ class TTParser {
 #endif
         }
     }
-    void storeTrueTableCfg(std::unique_ptr<uint32_t[]>& tCfg, int n = NCOL) {
+    void storeTrueTableCfg(uint32_t* tCfg, int n = NCOL) {
         for (int i = 0; i < (1 << n); i += 32) {
             uint32_t x = 0;
             for (int j = 0; j < 32; j++) {
@@ -166,7 +167,7 @@ class TTParser {
                 std::cout << "  " << trueTable[n][i + j];
 #endif
             }
-            tCfg[13 + i / 32] = x;
+            tCfg[i / 32] = x;
 #ifdef DEBUGTT
             std::cout << std::endl;
 #endif
@@ -242,7 +243,7 @@ class TTParser {
         }
 #endif
     }
-    void doParser(std::unique_ptr<uint32_t[]>& cfg) {
+    void doParser(uint32_t* cfg) {
         trim(midExpr);
         toSufExpr();
         trueTableCfg();
@@ -251,6 +252,8 @@ class TTParser {
 };
 
 class FilterParser {
+    const int bits;
+    const int dw_per_imm;
     std::string midExpr;
     std::vector<std::string> sufExpr;
     std::vector<bool> sufExprTag;
@@ -275,7 +278,7 @@ class FilterParser {
         std::cout << "doCmp: " << rstr << std::endl;
 #endif
         std::string restr;
-        int tmps[2];
+        uint64_t tmps[2];
         int opcode = FOP_DC;
 
         int type = -1;
@@ -302,13 +305,13 @@ class FilterParser {
         try {
             if (type == 0) {
                 tmps[0] = lchar - 0x61;
-                tmps[1] = std::stoi(rstr);
+                tmps[1] = std::stoull(rstr);
                 opcode = opMap.at(op);
                 restr = "r";
                 restr.append(1, lchar);
             } else if (type == 1) {
                 tmps[0] = rchar - 0x61;
-                tmps[1] = std::stoi(lstr);
+                tmps[1] = std::stoull(lstr);
                 opcode = revs_opMap.at(op);
                 lchar = rchar;
                 type = 0;
@@ -339,29 +342,32 @@ class FilterParser {
         std::cout << "debug bitmap:" << opcode << " " << tmps[0] << " " << tmps[1] << std::endl;
 #endif
         // add for bitmap
-        int off = tmps[0] * 3;
+        int off = tmps[0] * (2 * dw_per_imm + 1); // 2 immediate + two op in one dword.
         int ind = bitmapIndMap.at(opcode);
         if (ind != 0 && ind != 1) {
             std::cerr << "wrong input pattern!\n";
         }
         if (type == 0) {
-            cfg[off + ind] = (uint32_t)tmps[1];
-            cfg[off + 2] |= (opcode << ((1 - ind) * FilterOpWidth));
+            cfg[off + ind * dw_per_imm] = (uint32_t)(tmps[1] & 0xffffffff);
+            if (dw_per_imm > 1) {
+                cfg[off + ind * dw_per_imm + 1] = (uint32_t)(tmps[1] >> 32);
+            }
+            cfg[off + 2 * dw_per_imm] |= (opcode << ((1 - ind) * FilterOpWidth));
 #ifdef DEBUGFP
             std::cout << "off: " << off << ", ind: " << ind << std::endl;
 #endif
         }
         if (type == 2) {
-#ifdef DEBUGFP
-            std::cout << "off: " << off << ", ind: " << ind << std::endl;
-#endif
             int base = 0;
             if (tmps[0] == 1)
                 base = 3;
             else if (tmps[0] == 2)
                 base = 5;
             int sh = (tmps[1] - tmps[0] + base - 1) * FilterOpWidth;
-            cfg[12] |= (uint32_t)(opcode << sh);
+#if __cplusplus >= 201103L
+            static_assert(FilterOpWidth == 4); // otherwise may need more than one dword.
+#endif
+            cfg[(2 * dw_per_imm + 1) * 4] |= (uint32_t)(opcode << sh);
         }
 #ifdef DEBUGFP
         std::cout << "in doCmp:" << restr << std::endl;
@@ -413,7 +419,6 @@ class FilterParser {
             T r = data.top();
             processR(r, cfg);
             data.pop();
-            // std::cout << l << " " << r <<std::endl;
             if (!validate(l, r)) {
                 std::cerr << "Err: not supported filter!" << std::endl;
                 exit(0);
@@ -436,7 +441,7 @@ class FilterParser {
     }
 
    public:
-    FilterParser(std::string s) {
+    FilterParser(std::string s, int b) : bits(b), dw_per_imm((b - 1) / 32 + 1) {
         midExpr = s;
         trim(midExpr);
     }
@@ -528,9 +533,8 @@ class FilterParser {
     void doParser(std::unique_ptr<uint32_t[]>& cfg) {
         toSufExpr();
         std::string result_s = computeSufExpr(cfg);
-        // std::cout << result_s << std::endl;
         TTParser<bool, 10> e(result_s);
-        e.doParser(cfg);
+        e.doParser(cfg.get() + 4 * (dw_per_imm * 2 + 1) + 1);
     }
 };
 
@@ -539,8 +543,14 @@ class FilterParser {
 
 /**
  * @class Dynamic Filter Configuration Generator.
+ *
+ * @tparam BITS number of bits for each element, default to 32, can also be 64.
  */
+template <int BITS = 32>
 class FilterConfig {
+#if __cplusplus >= 201103L
+    static_assert(BITS == 32 || BITS == 64);
+#endif
     std::string filter_str;
 
    public:
@@ -550,6 +560,7 @@ class FilterConfig {
      * The string uses ``a``, ``b``, ``c``, ``d`` to refer to first to the fourth column,
      * and supports comparison and logical operator like C++.
      * Parentheses can be used to group logic, but notice that the underlying hardware module
+            // off++;
      * does not support comparing one column with multiple constant boundaries in OR relationship.
      * Integral constants will be extracted from expression.
      *
@@ -557,17 +568,30 @@ class FilterConfig {
      *
      * @param s the filter expression string.
      */
-    FilterConfig(const std::string& s) { filter_str = s; }
+    FilterConfig(const std::string& s) {
+        filter_str = s;
+        internals::filter_config::trim(filter_str);
+    }
 
     /**
      * @brief generate a configuration bits buffer.
      * @return a unique_ptr to configuration bits buffer of ``uint32_t`` type.
      */
     std::unique_ptr<uint32_t[]> getConfigBits() const {
-        std::unique_ptr<uint32_t[]> cfg(new uint32_t[internals::filter_config::FCFG_SIZE]);
-        memset(cfg.get(), 0, sizeof(uint32_t) * 45);
-        internals::filter_config::FilterParser fp(filter_str);
-        fp.doParser(cfg);
+        const unsigned dw_num = DynamicFilterInfo<4, BITS>::dwords_num;
+        std::cout << "Num of dword in filter config: " << dw_num << std::endl;
+        std::unique_ptr<uint32_t[]> cfg(new uint32_t[dw_num]);
+        memset(cfg.get(), 0, sizeof(uint32_t) * dw_num);
+
+        if (filter_str.size() == 0) { // if input filter_str is empty, then no filter and set true table to all "1"
+            const unsigned tt_dw_num = details::true_table_info<4>::dwords_num;
+            for (unsigned int i = dw_num - 1; i >= dw_num - tt_dw_num; i--) {
+                cfg[i] = 0xFFFFFFFF;
+            }
+        } else { // if input filter_str is not empty. Might need extra valid check.
+            internals::filter_config::FilterParser fp(filter_str, BITS);
+            fp.doParser(cfg);
+        }
         return cfg;
     }
 };

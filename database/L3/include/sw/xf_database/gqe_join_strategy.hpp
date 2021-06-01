@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 // L3
 #include "xf_database/gqe_table.hpp"
 
@@ -47,6 +48,17 @@ enum DATASIZE : int64_t {
 
 enum SOLUTION { SOL0 = 0, SOL1 = 1, SOL2 = 2 };
 
+struct StrategySet {
+    size_t sol;
+    size_t sec_o;
+    size_t sec_l;
+    size_t slice_num;
+    size_t log_part;
+    float coef_expansion_partO;
+    float coef_expansion_partL;
+    float coef_expansion_join;
+};
+
 class JoinStrategyBase {
    public:
     /**
@@ -63,7 +75,7 @@ class JoinStrategyBase {
      * @param tab_b right table
      *
      */
-    virtual std::vector<size_t> getSolutionParams(Table tab_a, Table tab_b) { return {0, 0, 0, 0, 0, 0}; };
+    virtual StrategySet getSolutionParams(Table tab_a, Table tab_b) { return StrategySet(); };
     //
 };
 
@@ -87,13 +99,13 @@ class JoinStrategyV1 : public JoinStrategyBase {
      * @param tab_b right table
      *
      */
-    std::vector<size_t> getSolutionParams(Table tab_a, Table tab_b) {
+    StrategySet getSolutionParams(Table tab_a, Table tab_b) {
         // int64_t tb0_one_col_sz = tb0_n * type_size_tb0;
         // int64_t tb1_one_col_sz = tb1_n * type_size_tb1;
         size_t tb0_n = tab_a.getRowNum();
         size_t tb1_n = tab_b.getRowNum();
-        size_t type_size_tb0 = sizeof(int32_t);
-        size_t type_size_tb1 = sizeof(int32_t);
+        size_t type_size_tb0 = sizeof(int64_t);
+        size_t type_size_tb1 = sizeof(int64_t);
         size_t valid_col_num_tb0 = tab_a.getColNum();
         size_t valid_col_num_tb1 = tab_b.getColNum();
 
@@ -150,21 +162,29 @@ class JoinStrategyV1 : public JoinStrategyBase {
 
 #ifdef USER_DEBUG
         std::cout << "create gqe::SOL" << _solution << std::endl;
-        std::cout << "sec_l:" << sec_o << ", sec_r:" << sec_l << ", log_part:" << log_part
+        std::cout << "sec_o:" << sec_o << ", sec_l:" << sec_l << ", log_part:" << log_part
                   << ", slice_num:" << slice_num << std::endl;
 #endif
-        return {_solution, sec_o, sec_l, slice_num, log_part, true};
+        StrategySet params;
+        params.sol = _solution;
+        params.sec_o = sec_o;
+        params.sec_l = sec_l;
+        params.slice_num = slice_num;
+        params.log_part = log_part;
+
+        return params;
     }
 };
-
 class JoinStrategyManualSet : public JoinStrategyBase {
    private:
     size_t sol;
+    size_t sec_o;
     size_t sec_l;
-    size_t sec_r;
     size_t slice_num;
     size_t log_part;
-    bool probe_buf_size_auto;
+    float coef_expansion_partO;
+    float coef_expansion_partL;
+    float coef_expansion_join;
 
    public:
     JoinStrategyManualSet(){};
@@ -176,26 +196,31 @@ class JoinStrategyManualSet : public JoinStrategyBase {
      * derived class of JoinStrategyBase, for set solution and parameters manually
      *
      * @param sol solution id SOL0 | SOL1 | SOL2.
-     * @param sec_l section number of left table
-     * @param sec_r section number of right table
+     * @param sec_o section number of left table
+     * @param sec_l section number of right table
      * @param slice_num slice number of probe kernel.
      * @param log_part log number of hash partition.
-     * @param _probe_buf_size_auto solution2: when true (default), auto set, false, refer to size of user buffer
-     * //todo:  current version, only solution2 add cpu aggregation, reserve the parameter
+     * @param _expansion_partO partition O output_buffer_size = _expansion_partO * input_buffer_size
+     * @param _expansion_partL partition L output_buffer_size = _expansion_partL * input_buffer_size
+     * @param _expansion_join join output_buffer_size = _expansion_join * input_buffer_size
      *
      */
     JoinStrategyManualSet(size_t _sol,
+                          size_t _sec_o,
                           size_t _sec_l,
-                          size_t _sec_r,
                           size_t _slice_num,
                           size_t _log_part,
-                          bool _probe_buf_size_auto = true) {
+                          float _expansion_partO = 2,
+                          float _expansion_partL = 2,
+                          float _expansion_join = 1) {
         sol = _sol;
+        sec_o = _sec_o;
         sec_l = _sec_l;
-        sec_r = _sec_r;
         slice_num = _slice_num;
         log_part = _log_part;
-        probe_buf_size_auto = _probe_buf_size_auto;
+        coef_expansion_partO = _expansion_partO;
+        coef_expansion_partL = _expansion_partL;
+        coef_expansion_join = _expansion_join;
     };
 
     /**
@@ -205,13 +230,27 @@ class JoinStrategyManualSet : public JoinStrategyBase {
      * @param tab_b right table
      *
      */
-    std::vector<size_t> getSolutionParams(Table tab_a, Table tab_b) {
+    StrategySet getSolutionParams(Table tab_a, Table tab_b) {
 #ifdef USER_DEBUG
         std::cout << "create gqe::SOL" << sol << std::endl;
-        std::cout << "sec_l:" << sec_l << ", sec_r:" << sec_r << ", log_part:" << log_part
-                  << ", slice_num:" << slice_num << std::endl;
+        std::cout << "sec_o:" << sec_o << ", sec_l:" << sec_l << ", log_part:" << log_part
+                  << ", slice_num:" << slice_num << ", expansion_partO:" << _expansion_partO
+                  << " , expansion_partL: " << _expansion_partL << " , expansion_join: " << _expansion_join
+                  << std::endl;
 #endif
-        return {sol, sec_l, sec_r, slice_num, log_part, probe_buf_size_auto};
+
+        StrategySet params;
+
+        params.sol = sol;
+        params.sec_o = sec_o;
+        params.sec_l = sec_l;
+        params.slice_num = slice_num;
+        params.log_part = log_part;
+        params.coef_expansion_partO = coef_expansion_partO;
+        params.coef_expansion_partL = coef_expansion_partL;
+        params.coef_expansion_join = coef_expansion_join;
+
+        return params;
     };
 };
 

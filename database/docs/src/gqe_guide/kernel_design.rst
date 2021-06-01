@@ -38,6 +38,8 @@ GQE Kernel Design
 Join Kernel
 ===========
 
+.. _gqe_join_kernel:
+
 The GQE join kernel is a compound of multiple post-bitstream programmable primitives,
 and can execute not only hash-join but also a number of primitives often found as
 prologue or epilogue of join operations. With its bypass design in data path,
@@ -45,99 +47,121 @@ it can even perform execution without a join.
 
 .. image:: /images/hashjoin_bp_structure.png
    :alt: GQE Join Kernel
-   :scale: 70%
+   :scale: 80%
    :align: center
 
 The internal of this kernel is illustrated in the figure above. Internal multi-join supports
 three reconfigurable modes, namely inner join, anti-join and semi-join. To join efficiently at different data scale, the join process is divided into two phases: build and probe. Build phase takes Table A as input to build the hash table, while Probe phase takes Table B as input and probes the conflicting rows from built hash table. By calling Table B multiple iterations, any sized Table B can be joined. On the other hand, By spliting Table A into multiple slice and running mutli-(build + Nx probe), Table A with any size can be employed as the left table. 
 
-This kernel works with three types of input buffers, 1x kernel configuration buffer, 1x meta info buffer and 8x column data buffers. The result buffers are 1x result data meta and 8x output column data. 
+This kernel works with three types of input buffers, 1x kernel configuration buffer, 1x meta info buffer and 3x column data buffers. The result buffers are 1x result data meta and 4x output column data. 
 
-The 8x input / output data columns saves all raw column data. The statistic information, e.g., row number, column number, is recorded in meta input / output buffer. The internal structure of meta info is shown in the figure below. The first 8 rows are valid for Join kernel. Each row represents the info of one data column.
+The input / output data columns save all raw column data. The statistic information, e.g., row number, column number, is recorded in meta input / output buffer. The internal structure of meta info is shown in the figure below. The first 4 rows are valid for Join kernel. Each row represents the info of one data column.
 
 .. image:: /images/meta_layout.png
    :alt: meta info layout 
-   :scale: 70%
+   :scale: 100%
    :align: center
 
 .. NOTE::
-   In the current release, all columns are expected to have the same number of elements of same type.
+    - gqePart kernel supports maximum 256 partitions, each partition nrow is 32-bit, starting from meta[8], 256 / 16 = 16 lines are used for partitioning nrow output.
+    - When the partition num is less than 256, using the first N parts, starting from meta[8][31-0] 
+
+.. CAUTION:: 
+    In the current release, all columns are expected to have the same number of elements of same type.
 
 The configuration buffer basically programs the kernel at runtime. It toggles execution step
 primitives on or off, and defines the filter and/or evaluation expressions.
-The details are documented in the following table:
+The details are documented in the following figure:
 
-+---------+---------------+--------------+--------------+--------+----------+----------+---------+---------+
-| 192-511 | 191-184       | 120-183      | 56-119       | 6      | 3-5      | 2        | 1       | 0       |
-+=========+===============+==============+==============+========+==========+==========+=========+=========+
-| Shuffle | Tab C col sel | Tab B col-id | Tab A col-id | append | join sel | dual key | aggr on | join on |
-+---------+---------------+--------------+--------------+--------+----------+----------+---------+---------+
-| (padding at MSB) eval-0 config                                                                           |
-+----------------------------------------------------------------------------------------------------------+
-| (padding at MSB) eval-1 config                                                                           |
-+----------------------------------------------------------------------------------------------------------+
-| filter Tab A config                                                                                      |
-+----------------------------------------------------------------------------------------------------------+
-| filter Tab A config (cont')                                                                              |
-+----------------------------------------------------------------------------------------------------------+
-| (padding at MSB) filter Tab A config (cont')                                                             |
-+----------------------------------------------------------------------------------------------------------+
-| filter Tab B config                                                                                      |
-+----------------------------------------------------------------------------------------------------------+
-| filter Tab B config (cont')                                                                              |
-+----------------------------------------------------------------------------------------------------------+
-| (padding at MSB) filter Tab B config (cont')                                                             |
-+----------------------------------------------------------------------------------------------------------+
+.. image:: /images/kernelcmd.png
+   :alt: kernel command info layout 
+   :scale: 100%
+   :align: center
 
-Both input table A and B can support up to 8 columns, which may consist of 1-2 key columns and 6-7 payload columns.
-The selection and order of columns in pipeline is appointed via the column index.
-Within each buffer, the columns are indexed starting from 0.
-``-1`` is used as a special value to instruct the table scanner to feed zero for that column.
+14 lines of 512-bit configure data are used in kernel command. Address 0x00 is join only config, 0x01 for partition kernel, 0x02 for bloomfilter kernel, and 0x03-0x05 is reserved for gqeAggr kernel. Since the filtering module is the same in all kernels, same configuration lines 0x06 - 0x13 are used.
 
-The filter config is aligned to lower bits, and each filter's config fully covers the first two
-512-bit slots, and partially use the third one.
+Both input table A and B can support up to 3 columns, which may consist of 1-2 key columns and 1 payload columns. The col enable flags are set in bit 6-11. The output column enable flags are 12-15 bits.
 
-Here the ``join_on`` option toggles whether hash-join is enabled or by-passed in the pipeline.
+Payload column data, which is normally used as rowID column, can be read from user input or auto-generating in kernel. The rowID generation config is controled by bit16/18. If generating rowID inside the kernel, the validation enable flag also must be configured to determin whether to use the validation buffer.  
 
-The ``dual_key`` option instructs the kernel to use
-both first and second column as join key in hash-join, and when it is asserted, the third column
+The columns are indexed starting from 0.  ``-1`` is used as a special value to instruct the table scanner to feed zero for that column.
+
+Current kernel join kernel can be configured to join mode or bloomfilter mode, which is controlled by bit 1. 
+
+The filter config is aligned to lower bits. Build/probe table's filter config are located in addr 0x06-0x09 / 0x10-0x13.
+
+The ``join_on`` option toggles whether hash-join is enabled or by-passed in the pipeline.
+
+The ``dual_key`` option instructs the kernel to use both first and second column as join key in hash-join, and when it is asserted, the third column
 becomes the first part of the payload input.
 
-The ``join sel`` option indicates the work mode of multi-join, 0 for normal hash join, 1 for semi-join and
-2 for anti-join.
-
-The ``append`` option toggles whether the append mode is enabled during writing out consecutive joined table.
-This option would be usually used when it joins two sub-tables after hash partition.
-
-The write option is basically a bit mask for 8 slots in data path.
-Only when the corresponding one-hot bit is asserted, the column is written to the output buffer.
+The ``join sel`` option indicates the work mode of multi-join, 0 for normal hash join, 1 for semi-join and 2 for anti-join.
 
 .. CAUTION::
-   The 8-columns input data are scanned in via 4x 256-bit AXI ports by default, each AXI responds for 2 columns data scanning, e.g., AXI0 for col0 and col4, AXI1 for col1 and col5. Thus, when the input column number is more than 4, scan performance drop will appear. Moreover, when input column number is less than 4, it is not recommend to use same AXI served columns. e.g, 3cols input, using 0,1,2 is more efficient than 0,1,4.   
+   The 3-columns input data are scanned in via 3x 256-bit AXI ports. However, only 1x 512-bit AXI port is employed to output (up to_ 4 cols data. When the resulting data are huge, the write out module performance would decrease the kernel performance.
 
 .. NOTE::
    Directly bypass is supported by configuring the join kernel to probe mode. Then the kernel works as a filtering kernel. All data will go through the "channel merge" path in the kernel structure figure shown on the top.
-  
 
-The hardware resource utilization of join kernel is shown in the table below (work as 180MHz).
+The hardware resource utilization of join kernel is shown in the table below (work at 180MHz).
 
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-| Primitive      |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|   Scan         | 12814 |    4758       |    8056      |  18968   |   0    |  0   |  0  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|   Filter       |  2155 |      13       |    2142      |  1776    |   0.5  |  0   |  0  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|  Hash join     | 118625|    36990      |    900005    |  141015  |  276   | 192  | 96  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|   Write        | 20604 |    5693       |   14911      |    30275 |   0    |  0   |  0  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|   AXI DDR      |  6803 |    1370       |   5433       |    15045 |  60    |  0   |  0  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|   AXI HBM      | 25734 |    3321       |   22413      |    31290 |  32    |  0   |  0  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
-|   Total        | 235621|   66324       |   169279     |  284784  |  472   | 192  | 96  |
-+----------------+-------+---------------+--------------+----------+--------+------+-----+
++-----------------+-------+---------------+----------+--------+------+-----+
+| Module          |  LUT  | LUT as memory | Register | BRAM36 | URAM | DSP |
++-----------------+-------+---------------+----------+--------+------+-----+
+|   AXI adapters  | 53546 |    23316      |  79997   |  156.5 |  0   |  0  |
++-----------------+-------+---------------+----------+--------+------+-----+
+|   Scan          | 8402  |    931        |  10032   |   1    |  0   |  0  |
++-----------------+-------+---------------+----------+--------+------+-----+
+|   Filter        | 20496 |   3936        |  12629   |   0    |  0   |  0  |
++-----------------+-------+---------------+----------+--------+------+-----+
+| crossbar 4-to-8 | 7166  |   729         |  11653   |   0    |  0   |  0  |
++-----------------+-------+---------------+----------+--------+------+-----+
+| join (BF)       | 12375 |    2659       |  15272   |  9.5   |  24  | 12  |
++-----------------+-------+---------------+----------+--------+------+-----+
+| collect 8-to-1  | 608   |    0          |  2110    |  0     |  0   |  0  |
++-----------------+-------+---------------+----------+--------+------+-----+
+|   Write         | 7687  |   8           |  6738    |  30    |  0   |  0  |
++-----------------+-------+---------------+----------+--------+------+-----+
+|   Total         | 110280|   31579       |  138431  |  197   | 24   | 12  |
++-----------------+-------+---------------+----------+--------+------+-----+
+
+Bloom-Filter Kernel
+==================
+
+The bloom-filter is a space-efficient probabilistic data structure that is used to test whether an element is a member of a set. False positive matches are possible, but false negatives are not - in other words, a query returns either "possibly in set" or "definitely not in set". (from Wikipedia)
+
+The GQE Bloom-Filter kernel is an HLS kernel implementation that fully utilizes the high bandwidth feature of HBM to accelerate the query (probe-only) ability and expands the capacity as large as possible at the same time.
+
+The GQE Bloom-Filter kernel also shares the same framework as GQE Join. Thus, the input key and payload should be 64-bit width, and 1 or 2 key column(s) plus 1 playoad column is allowed to be applied to the kernel. In addition, the bloom-filter and join functionality selection is controlled by kernel command bit ``config[0][1]``, where bloom-filter is enabled by setting the corresponding bit to **1**.
+
+The structure of the gqeJoin (bloom-filter) can be shown as the following figure:
+
+.. image:: /images/join_bloomfilter_structure.png
+   :alt: GQE Join (BF) Kernel
+   :scale: 80%
+   :align: center
+
+As the main usage of the GQE kernel is already covered in :ref:`GQE Join kernel design <gqe_join_kernel>`. We'll only introduce the specifications for input and output columns of GQE for using bloom-filter flow here.
+
+The columns for using the bloom-filter flow can be explained as:
+
++--------+----------+-----------------------------------------------------+
+|        | Column 0 | key 0                                               |
++        +----------+-----------------------------------------------------+
+| Input  | Column 1 | key 1 (if dual-key is enabled)                      |
++        +----------+-----------------------------------------------------+
+|        | Column 2 | payload                                             |
++--------+----------+-----------------------------------------------------+
+|        | Column 0 | payload                                             |
++        +----------+-----------------------------------------------------+
+| Output | Column 1 | unused (no additional payload in bloom-filter flow) |
++        +----------+-----------------------------------------------------+
+|        | Column 2 | key 0                                               |
++        +----------+-----------------------------------------------------+
+|        | Column 3 | key 1 (if dual-key is enabled)                      |
++--------+----------+-----------------------------------------------------+
+
+Software developer who wants to benefit from the hardware acceleration for bloom-filtering, please kindly refer to the :ref:`Example Usage <bloomfilter_l3_usage>` in L3 documentation.
 
 Aggregate Kernel
 ================

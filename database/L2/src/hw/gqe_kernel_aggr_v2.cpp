@@ -20,9 +20,9 @@
 
 #include "xf_database/gqe_kernel_aggr_v2.hpp"
 
-#include "xf_database/gqe_blocks_v2/load_config.hpp"
-#include "xf_database/gqe_blocks_v2/scan_col_bufs.hpp"
-#include "xf_database/gqe_blocks_v2/write_out.hpp"
+#include "xf_database/gqe_blocks_v2/load_config_aggr.hpp"
+#include "xf_database/gqe_blocks_v2/scan_cols_aggr.hpp"
+#include "xf_database/gqe_blocks_v2/write_out_part_aggr.hpp"
 #include "xf_database/gqe_blocks/stream_helper.hpp"
 #include "xf_database/gqe_blocks/eval_part.hpp"
 #include "xf_database/gqe_blocks/filter_part.hpp"
@@ -236,65 +236,65 @@ extern "C" void gqeAggr(                                         //
 
     hls::stream<int8_t> cid_strm;
 #pragma HLS stream variable = cid_strm depth = 8
-#pragma HLS resource variable = cid_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = cid_strm type = fifo impl = srl
 
     hls::stream<ap_uint<32> > filter_cfg_strm;
 #pragma HLS stream variable = filter_cfg_strm depth = 64
-#pragma HLS resource variable = filter_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = filter_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<32> > alu0_cfg_strm;
 #pragma HLS stream variable = alu0_cfg_strm depth = 16
-#pragma HLS resource variable = alu0_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = alu0_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<32> > alu1_cfg_strm;
 #pragma HLS stream variable = alu1_cfg_strm depth = 16
-#pragma HLS resource variable = alu1_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = alu1_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<n_column * n_column> > shuffle1_cfg_strm[n_channel];
 #pragma HLS stream variable = shuffle1_cfg_strm depth = 4
 #pragma HLS array_partition variable = shuffle1_cfg_strm complete
-#pragma HLS resource variable = shuffle1_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = shuffle1_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<n_column * n_column> > shuffle2_cfg_strm[n_channel];
 #pragma HLS stream variable = shuffle2_cfg_strm depth = 4
 #pragma HLS array_partition variable = shuffle2_cfg_strm complete
-#pragma HLS resource variable = shuffle2_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = shuffle2_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<n_column * n_column> > shuffle3_cfg_strm[n_channel];
 #pragma HLS stream variable = shuffle3_cfg_strm depth = 4
 #pragma HLS array_partition variable = shuffle3_cfg_strm complete
-#pragma HLS resource variable = shuffle3_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = shuffle3_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<n_column * n_column> > shuffle4_cfg_strm[n_channel];
 #pragma HLS stream variable = shuffle4_cfg_strm depth = 4
 #pragma HLS array_partition variable = shuffle4_cfg_strm complete
-#pragma HLS resource variable = shuffle4_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = shuffle4_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<32> > merge_column_cfg_strm;
 #pragma HLS stream variable = merge_column_cfg_strm depth = 4
-#pragma HLS resource variable = merge_column_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = merge_column_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<32> > group_aggr_cfg_strm;
 #pragma HLS stream variable = group_aggr_cfg_strm depth = 4
-#pragma HLS resource variable = group_aggr_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = group_aggr_cfg_strm type = fifo impl = srl
 
     hls::stream<bool> direct_aggr_cfg_strm;
 #pragma HLS stream variable = direct_aggr_cfg_strm depth = 4
-#pragma HLS resource variable = direct_aggr_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = direct_aggr_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<32> > write_cfg_strm;
 #pragma HLS stream variable = write_cfg_strm depth = 4
-#pragma HLS resource variable = write_cfg_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = write_cfg_strm type = fifo impl = srl
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > scan_strms[n_channel][n_column];
 #pragma HLS stream variable = scan_strms depth = 8
 #pragma HLS array_partition variable = scan_strms complete
-#pragma HLS resource variable = scan_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = scan_strms type = fifo impl = srl
 
     hls::stream<bool> e_scan_strms[n_channel];
 #pragma HLS stream variable = e_scan_strms depth = 8
 #pragma HLS array_partition variable = e_scan_strms complete
-#pragma HLS resource variable = e_scan_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = e_scan_strms type = fifo impl = srl
 
     hls::stream<int> nrow_strm;
 #pragma HLS stream variable = nrow_strm depth = 2
@@ -338,22 +338,22 @@ extern "C" void gqeAggr(                                         //
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > eval0_strms[n_channel][n_column];
 #pragma HLS stream variable = eval0_strms depth = 8
 #pragma HLS array_partition variable = eval0_strms complete
-#pragma HLS resource variable = eval0_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = eval0_strms type = fifo impl = srl
 
     hls::stream<bool> e_eval0_strms[n_channel];
 #pragma HLS stream variable = e_eval0_strms depth = 8
 #pragma HLS array_partition variable = e_eval0_strms complete
-#pragma HLS resource variable = e_eval0_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = e_eval0_strms type = fifo impl = srl
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > eval1_strms[n_channel][n_column];
 #pragma HLS stream variable = eval1_strms depth = 8
 #pragma HLS array_partition variable = eval1_strms complete
-#pragma HLS resource variable = eval1_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = eval1_strms type = fifo impl = srl
 
     hls::stream<bool> e_eval1_strms[n_channel];
 #pragma HLS stream variable = e_eval1_strms depth = 8
 #pragma HLS array_partition variable = e_eval1_strms complete
-#pragma HLS resource variable = e_eval1_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = e_eval1_strms type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     printf("******************************\n");
@@ -393,11 +393,11 @@ extern "C" void gqeAggr(                                         //
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > flt_strms[n_channel][n_column];
 #pragma HLS stream variable = flt_strms depth = 512
 #pragma HLS array_partition variable = flt_strms complete
-#pragma HLS resource variable = flt_strms core = FIFO_BRAM
+#pragma HLS bind_storage variable = flt_strms type = fifo impl = bram
     hls::stream<bool> e_flt_strms[n_channel];
 #pragma HLS stream variable = e_flt_strms depth = 128
 #pragma HLS array_partition variable = e_flt_strms complete
-#pragma HLS resource variable = e_flt_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = e_flt_strms type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     printf("******************************\n");
@@ -450,14 +450,14 @@ extern "C" void gqeAggr(                                         //
 
     hls::stream<ap_uint<32> > result_info_strm;
 #pragma HLS STREAM variable = result_info_strm depth = 8
-#pragma HLS RESOURCE variable = result_info_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = result_info_strm type = fifo impl = srl
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > aggr_strms[2 * n_column];
 #pragma HLS stream variable = aggr_strms depth = 8
-#pragma HLS array_partition variable = aggr_pld_strms complete
-#pragma HLS resource variable = aggr_pld_strms core = FIFO_SRL
+#pragma HLS array_partition variable = aggr_strms complete
+#pragma HLS bind_storage variable = aggr_strms type = fifo impl = srl
     hls::stream<bool> e_aggr_strms;
 #pragma HLS stream variable = e_aggr_strms depth = 8
-#pragma HLS resource variable = e_aggr_strms core = FIFO_SRL
+#pragma HLS bind_storage variable = e_aggr_strms type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     printf("******************************\n");
@@ -492,7 +492,7 @@ extern "C" void gqeAggr(                                         //
 
     hls::stream<ap_uint<32> > direct_aggr_strm[2 * n_column];
 #pragma HLS stream variable = direct_aggr_strm depth = 8
-#pragma HLS resource variable = direct_aggr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = direct_aggr_strm type = fifo impl = srl
     hls::stream<bool> e_direct_aggr_strm;
 #pragma HLS stream variable = e_direct_aggr_strm depth = 8
 

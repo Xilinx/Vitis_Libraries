@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeJoin_1/inst/load_scan_wrapper_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeJoin_1/inst/filter_ongoing_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeJoin_1/inst/gmem0_*] -clear_locs
-#add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeJoin_1/inst/writeTableMeta_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR0 [get_cells pfm_top_i/dynamic_region/gqeJoin_1/inst/hash_join_wrapper_*] -clear_locs
+#add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical load_scan_wrapper_*] -clear_locs
+#add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical filter_ongoing_*] -clear_locs
+#add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical gmem0_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical write_table_hj_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical bloomfilter_join_wrapper_*] -clear_locs

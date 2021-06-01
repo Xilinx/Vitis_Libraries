@@ -188,24 +188,24 @@ void write_stb(ap_uint<64>* stb_buf,
 
     hls::stream<bool> e0_strm;
 #pragma HLS STREAM variable = e0_strm depth = 8
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS STREAM variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     hls::stream<ap_uint<ARW> > addr_strm;
 #pragma HLS STREAM variable = addr_strm depth = 512
-#pragma HLS resource variable = addr_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = addr_strm type = fifo impl = bram
     hls::stream<bool> e2_strm;
 #pragma HLS STREAM variable = e2_strm depth = 512
-#pragma HLS resource variable = e2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e2_strm type = fifo impl = srl
 
     hls::stream<ap_uint<64> > row_strm;
 #pragma HLS STREAM variable = row_strm depth = 512
-#pragma HLS resource variable = row_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = row_strm type = fifo impl = bram
     hls::stream<bool> e3_strm;
 #pragma HLS STREAM variable = e3_strm depth = 512
-#pragma HLS resource variable = e3_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e3_strm type = fifo impl = srl
 
     join_v3::sc::duplicate_strm_end<bool>(i_e_strm, e0_strm, e1_strm);
 
@@ -303,17 +303,17 @@ void read_stb(ap_uint<64>* stb_buf,
 
     hls::stream<ap_uint<ARW> > addr_strm;
 #pragma HLS STREAM variable = addr_strm depth = 512
-#pragma HLS resource variable = addr_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = addr_strm type = fifo impl = bram
     hls::stream<bool> e0_strm;
 #pragma HLS STREAM variable = e0_strm depth = 512
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 
     hls::stream<ap_uint<64> > row_strm;
 #pragma HLS STREAM variable = row_strm depth = 8
-#pragma HLS resource variable = row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS STREAM variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     stb_addr_gen<RW, ARW>(i_addr_strm, i_e_strm, addr_strm, e0_strm);
 
@@ -443,10 +443,10 @@ void read_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<64> length, 
 
     hls::stream<ap_uint<64> > bitmap_strm;
 #pragma HLS STREAM variable = bitmap_strm depth = 512
-#pragma HLS resource variable = bitmap_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = bitmap_strm type = fifo impl = bram
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 512
-#pragma HLS resource variable = e_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = e_strm type = fifo impl = bram
 
     read_bitmap<ARW>(htb_buf, addr_shift, length,
 
@@ -551,10 +551,10 @@ void write_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<64> length,
 
     hls::stream<ap_uint<72> > bitmap_strm;
 #pragma HLS STREAM variable = bitmap_strm depth = 512
-#pragma HLS resource variable = bitmap_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = bitmap_strm type = fifo impl = bram
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 512
-#pragma HLS resource variable = e_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = e_strm type = fifo impl = bram
 
     read_uram<ARW>(length, bitmap_strm, e_strm, bit_vector);
 
@@ -669,10 +669,10 @@ void hash_wrapper(hls::stream<ap_uint<KEYW> >& i_key_strm,
 
     hls::stream<ap_uint<KEYW> > key_strm_in;
 #pragma HLS STREAM variable = key_strm_in depth = 8
-#pragma HLS resource variable = key_strm_in core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm_in type = fifo impl = srl
     hls::stream<ap_uint<64> > hash_strm_out;
 #pragma HLS STREAM variable = hash_strm_out depth = 8
-#pragma HLS resource variable = hash_strm_out core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_out type = fifo impl = srl
 
 #ifndef __SYNTHESIS__
     unsigned int cnt = 0;
@@ -793,10 +793,10 @@ void dispatch_unit(hls::stream<ap_uint<KEYW> >& i_key_strm,
 
     hls::stream<ap_uint<HASHWH + HASHWL + BF_HASH_NM * BFW> > hash_strm;
 #pragma HLS STREAM variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > key_strm;
 #pragma HLS STREAM variable = key_strm depth = 8
-#pragma HLS resource variable = key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm type = fifo impl = srl
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 8
 
@@ -1053,37 +1053,37 @@ void build_wrapper(
 
     hls::stream<ap_uint<HASHW> > hash_strm;
 #pragma HLS stream variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
 
     hls::stream<ap_uint<BFW> > bf_hash0_strm;
 #pragma HLS stream variable = bf_hash0_strm depth = 8
-#pragma HLS resource variable = bf_hash0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash0_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash1_strm;
 #pragma HLS stream variable = bf_hash1_strm depth = 8
-#pragma HLS resource variable = bf_hash1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash1_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash2_strm;
 #pragma HLS stream variable = bf_hash2_strm depth = 8
-#pragma HLS resource variable = bf_hash2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash2_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
 
     hls::stream<ap_uint<ARW> > base_addr_strm;
 #pragma HLS stream variable = base_addr_strm depth = 8
-#pragma HLS resource variable = base_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_addr_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW + S_PW> > base_row_strm;
 #pragma HLS stream variable = base_row_strm depth = 8
-#pragma HLS resource variable = base_row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_row_strm type = fifo impl = srl
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
 
     hls::stream<ap_uint<ARW> > overflow_addr_strm;
 #pragma HLS stream variable = overflow_addr_strm depth = 8
-#pragma HLS resource variable = overflow_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_addr_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW + S_PW> > overflow_row_strm;
 #pragma HLS stream variable = overflow_row_strm depth = 8
-#pragma HLS resource variable = overlfow_row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_row_strm type = fifo impl = srl
     hls::stream<bool> e3_strm;
 #pragma HLS stream variable = e3_strm depth = 8
 
@@ -1362,23 +1362,23 @@ void probe_stb(
     // for read_stb
     hls::stream<ap_uint<ARW> > read_addr_strm;
 #pragma HLS stream variable = read_addr_strm depth = 8
-#pragma HLS resource variable = read_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = read_addr_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 
     // for split probed stb
     hls::stream<ap_uint<KEYW + S_PW> > row_strm;
 #pragma HLS stream variable = row_strm depth = 8
-#pragma HLS resource variable = row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     // eliminate end strm
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
-#pragma HLS resource variable = e2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e2_strm type = fifo impl = srl
 
     // generate read addr from base addr
     probe_addr_gen<ARW>(i_base_stb_addr_strm, i_base_nm_strm, i_e_strm,
@@ -1474,61 +1474,61 @@ void probe_wrapper(
     // for split key hash and bloom filter hash
     hls::stream<ap_uint<HASHWL> > hash0_strm;
 #pragma HLS stream variable = hash0_strm depth = 32
-#pragma HLS resource variable = hash0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash0_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash0_strm;
 #pragma HLS stream variable = bf_hash0_strm depth = 8
-#pragma HLS resource variable = bf_hash0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash0_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash1_strm;
 #pragma HLS stream variable = bf_hash1_strm depth = 8
-#pragma HLS resource variable = bf_hash1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash1_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash2_strm;
 #pragma HLS stream variable = bf_hash2_strm depth = 8
-#pragma HLS resource variable = bf_hash2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash2_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 
     // for check bloom filter
     hls::stream<bool> valid_strm;
 #pragma HLS stream variable = valid_strm depth = 8
-#pragma HLS resource variable = valid_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = valid_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     // filter invalid ltb
     hls::stream<ap_uint<HASHWL> > hash1_strm;
 #pragma HLS stream variable = hash1_strm depth = 8
-#pragma HLS resource variable = hash1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash1_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > key_strm;
 #pragma HLS stream variable = key_strm depth = 8
-#pragma HLS resource variable = key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm type = fifo impl = srl
     hls::stream<ap_uint<T_PW> > pld_strm;
 #pragma HLS stream variable = pld_strm depth = 8
-#pragma HLS resource variable = pld_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = pld_strm type = fifo impl = srl
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
-#pragma HLS resource variable = e2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e2_strm type = fifo impl = srl
 
     hls::stream<ap_uint<ARW> > base_addr_strm;
 #pragma HLS stream variable = base_addr_strm depth = 8
-#pragma HLS resource variable = base_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_addr_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > base_nm_strm;
 #pragma HLS stream variable = base_nm_strm depth = 8
-#pragma HLS resource variable = base_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_nm_strm type = fifo impl = srl
     hls::stream<bool> e3_strm;
 #pragma HLS stream variable = e3_strm depth = 8
-#pragma HLS resource variable = e3_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e3_strm type = fifo impl = srl
 
     hls::stream<ap_uint<ARW> > overflow_addr_strm;
 #pragma HLS stream variable = overflow_addr_strm depth = 32
-#pragma HLS resource variable = overflow_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_addr_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > overflow_nm_strm;
 #pragma HLS stream variable = overflow_nm_strm depth = 32
-#pragma HLS resource variable = overflow_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_nm_strm type = fifo impl = srl
     hls::stream<bool> e4_strm;
 #pragma HLS stream variable = e4_strm depth = 32
-#pragma HLS resource variable = e4_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e4_strm type = fifo impl = srl
 
     // split bf hash and key hash
     database::splitCol<HASHWL + BF_HASH_NM * BFW, BFW, BFW, BFW, HASHWL>(i_hash_strm, i_e_strm,
@@ -1671,19 +1671,19 @@ void build_probe_wrapper(
 
     ap_uint<72> htb_vector0[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = htb_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = htb_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = htb_vector0 type = ram_2p impl = uram
 
     ap_uint<72> bf_vector0[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bf_vector0 type = ram_2p impl = uram
 
     ap_uint<72> bf_vector1[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector1 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bf_vector1 type = ram_2p impl = uram
 
     ap_uint<72> bf_vector2[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector2 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bf_vector2 type = ram_2p impl = uram
 
 #endif
 
@@ -2101,10 +2101,10 @@ void read_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<64> length, 
 
     hls::stream<ap_uint<64> > bitmap_strm;
 #pragma HLS STREAM variable = bitmap_strm depth = 512
-#pragma HLS resource variable = bitmap_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = bitmap_strm type = fifo impl = bram
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 512
-#pragma HLS resource variable = e_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = e_strm type = fifo impl = bram
 
     read_bitmap<ARW>(htb_buf, addr_shift, length,
 
@@ -2209,10 +2209,10 @@ void write_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<64> length,
 
     hls::stream<ap_uint<72> > bitmap_strm;
 #pragma HLS STREAM variable = bitmap_strm depth = 512
-#pragma HLS resource variable = bitmap_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = bitmap_strm type = fifo impl = bram
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 512
-#pragma HLS resource variable = e_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = e_strm type = fifo impl = bram
 
     read_uram<ARW>(length, bitmap_strm, e_strm, bit_vector);
 
@@ -2303,10 +2303,10 @@ void dispatch_wrapper(hls::stream<ap_uint<KEYW> >& i_key_strm,
 
     hls::stream<ap_uint<HASHWH + HASHWL + BF_HASH_NM * BFW> > hash_strm;
 #pragma HLS STREAM variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > key_strm;
 #pragma HLS STREAM variable = key_strm depth = 8
-#pragma HLS resource variable = key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm type = fifo impl = srl
     hls::stream<bool> e_strm;
 #pragma HLS STREAM variable = e_strm depth = 8
 
@@ -2613,34 +2613,34 @@ void build_wrapper(
 
     hls::stream<ap_uint<HASHW> > hash_strm;
 #pragma HLS stream variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
 
     hls::stream<ap_uint<BFW> > bf_hash0_strm;
 #pragma HLS stream variable = bf_hash0_strm depth = 8
-#pragma HLS resource variable = bf_hash0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash0_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash1_strm;
 #pragma HLS stream variable = bf_hash1_strm depth = 8
-#pragma HLS resource variable = bf_hash1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash1_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash2_strm;
 #pragma HLS stream variable = bf_hash2_strm depth = 8
-#pragma HLS resource variable = bf_hash2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash2_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
 
     hls::stream<ap_uint<ARW> > addr_strm;
 #pragma HLS stream variable = addr_strm depth = 8
-#pragma HLS resource variable = addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = addr_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW + PW> > row_strm;
 #pragma HLS stream variable = row_strm depth = 8
-#pragma HLS resource variable = row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row_strm type = fifo impl = srl
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
 
     hls::stream<ap_uint<HASHW> > overflow_hash_strm;
 #pragma HLS stream variable = overflow_hash_strm depth = 8
-#pragma HLS resource variable = overflow_hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_hash_strm type = fifo impl = srl
     hls::stream<bool> e3_strm;
 #pragma HLS stream variable = e3_strm depth = 8
 
@@ -2903,25 +2903,25 @@ void merge_htb(ap_uint<64>* htb_buf,
 
     hls::stream<ap_uint<ARW> > base_htb_strm;
 #pragma HLS stream variable = base_htb_strm depth = 8
-#pragma HLS resource variable = base_htb_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_htb_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > overflow_htb_strm;
 #pragma HLS stream variable = overflow_htb_strm depth = 8
-#pragma HLS resource variable = overflow_htb_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_htb_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
 
     hls::stream<ap_uint<HASHW> > overflow_hash_strm;
 #pragma HLS stream variable = overflow_hash_strm depth = 8
-#pragma HLS resource variable = overflow_hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_hash_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
 
     hls::stream<ap_uint<64> > bitmap_strm;
 #pragma HLS stream variable = bitmap_strm depth = 8
-#pragma HLS resource variable = bitmap_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bitmap_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > write_addr_strm;
 #pragma HLS stream variable = write_addr_strm depth = 8
-#pragma HLS resource variable = write_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = write_addr_strm type = fifo impl = srl
     hls::stream<bool> e_strm;
 #pragma HLS stream variable = e_strm depth = 8
 
@@ -3108,40 +3108,40 @@ void merge_stb(ap_uint<32> depth,
 
     hls::stream<ap_uint<ARW> > read_addr_strm;
 #pragma HLS stream variable = read_addr_strm depth = 8
-#pragma HLS resource variable = read_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = read_addr_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
 
     hls::stream<ap_uint<KEYW + PW> > row0_strm;
 #pragma HLS stream variable = row0_strm depth = 8
-#pragma HLS resource variable = row0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row0_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
 
     hls::stream<ap_uint<KEYW> > key0_strm;
 #pragma HLS stream variable = key0_strm depth = 8
-#pragma HLS resource variable = key0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key0_strm type = fifo impl = srl
     hls::stream<ap_uint<PW> > pld_strm;
 #pragma HLS stream variable = pld_strm depth = 8
-#pragma HLS resource variable = pld_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = pld_strm type = fifo impl = srl
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
 
     hls::stream<ap_uint<KEYW> > key1_strm;
 #pragma HLS stream variable = key1_strm depth = 8
-#pragma HLS resource variable = key1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key1_strm type = fifo impl = srl
     hls::stream<ap_uint<HASHWH + HASHWL> > hash_strm;
 #pragma HLS stream variable = hash_strm depth = 8
-#pragma HLS resource variable = hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm type = fifo impl = srl
     hls::stream<bool> e3_strm;
 #pragma HLS stream variable = e3_strm depth = 8
 
     hls::stream<ap_uint<KEYW + PW> > row1_strm;
 #pragma HLS stream variable = row1_strm depth = 8
-#pragma HLS resource variable = row1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row1_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > write_addr_strm;
 #pragma HLS stream variable = write_addr_strm depth = 8
-#pragma HLS resource variable = write_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = write_addr_strm type = fifo impl = srl
     hls::stream<bool> e4_strm;
 #pragma HLS stream variable = e4_strm depth = 8
 
@@ -3532,30 +3532,30 @@ void probe_htb(
 
     hls::stream<ap_uint<HASHW> > t_hash_strm;
 #pragma HLS stream variable = t_hash_strm depth = 8
-#pragma HLS resource variable = t_hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = t_hash_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > t_key_strm;
 #pragma HLS stream variable = t_key_strm depth = 8
-#pragma HLS resource variable = t_key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = t_key_strm type = fifo impl = srl
     hls::stream<ap_uint<PW> > t_pld_strm;
 #pragma HLS stream variable = t_pld_strm depth = 8
-#pragma HLS resource variable = t_pld_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = t_pld_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > base_nm_strm;
 #pragma HLS stream variable = base_nm_strm depth = 8
-#pragma HLS resource variable = base_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_nm_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 
     hls::stream<ap_uint<HASHW> > overflow_hash_strm;
 #pragma HLS stream variable = overflow_hash_strm depth = 8
-#pragma HLS resource variable = overflow_hash_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_hash_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     hls::stream<ap_uint<ARW> > overflow_nm_strm;
 #pragma HLS stream variable = overflow_nm_strm depth = 8
-#pragma HLS resource variable = overflow_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_nm_strm type = fifo impl = srl
 
     // probe the hash table and output address which hash same hash_value
     probe_base_htb<HASHW, KEYW, PW, ARW>(
@@ -3655,23 +3655,23 @@ void probe_base_stb(
     // for read_stb
     hls::stream<ap_uint<ARW> > read_addr_strm;
 #pragma HLS stream variable = read_addr_strm depth = 8
-#pragma HLS resource variable = read_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = read_addr_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 
     // for split probed stb
     hls::stream<ap_uint<KEYW + S_PW> > row_strm;
 #pragma HLS stream variable = row_strm depth = 8
-#pragma HLS resource variable = row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     // eliminate end strm
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
-#pragma HLS resource variable = e2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e2_strm type = fifo impl = srl
 
     // generate read addr from base addr
     probe_addr_gen<ARW>(i_base_stb_addr_strm, i_base_nm_strm, i_e_strm,
@@ -3707,23 +3707,23 @@ void read_overflow_stb(
     // for read_stb
     hls::stream<ap_uint<ARW> > read_addr_strm;
 #pragma HLS stream variable = read_addr_strm depth = 8
-#pragma HLS resource variable = read_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = read_addr_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
-#pragma HLS resource variable = e0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e0_strm type = fifo impl = srl
 
     // for split probed stb
     hls::stream<ap_uint<KEYW + S_PW> > row_strm;
 #pragma HLS stream variable = row_strm depth = 8
-#pragma HLS resource variable = row_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = row_strm type = fifo impl = srl
     hls::stream<bool> e1_strm;
 #pragma HLS stream variable = e1_strm depth = 8
-#pragma HLS resource variable = e1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm type = fifo impl = srl
 
     // eliminate end strm
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
-#pragma HLS resource variable = e2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = e2_strm type = fifo impl = srl
 
     // generate read addr
     read_addr_gen<ARW>(overflow_addr, overflow_nm,
@@ -3820,16 +3820,16 @@ void probe_wrapper(
     // for split key hash and bloom filter hash
     hls::stream<ap_uint<HASHWL> > hash0_strm;
 #pragma HLS stream variable = hash0_strm depth = 512
-#pragma HLS resource variable = hash0_strm core = FIFO_BRAM
+#pragma HLS bind_storage variable = hash0_strm type = fifo impl = bram
     hls::stream<ap_uint<BFW> > bf_hash0_strm;
 #pragma HLS stream variable = bf_hash0_strm depth = 8
-#pragma HLS resource variable = bf_hash0_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash0_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash1_strm;
 #pragma HLS stream variable = bf_hash1_strm depth = 8
-#pragma HLS resource variable = bf_hash1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash1_strm type = fifo impl = srl
     hls::stream<ap_uint<BFW> > bf_hash2_strm;
 #pragma HLS stream variable = bf_hash2_strm depth = 8
-#pragma HLS resource variable = bf_hash2_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = bf_hash2_strm type = fifo impl = srl
     hls::stream<bool> e0_strm;
 #pragma HLS stream variable = e0_strm depth = 8
 
@@ -3842,31 +3842,31 @@ void probe_wrapper(
     // filter invalid ltb
     hls::stream<ap_uint<HASHWL> > hash1_strm;
 #pragma HLS stream variable = hash1_strm depth = 8
-#pragma HLS resource variable = hash1_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = hash1_strm type = fifo impl = srl
     hls::stream<ap_uint<KEYW> > key_strm;
 #pragma HLS stream variable = key_strm depth = 8
-#pragma HLS resource variable = key_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = key_strm type = fifo impl = srl
     hls::stream<ap_uint<T_PW> > pld_strm;
 #pragma HLS stream variable = pld_strm depth = 8
-#pragma HLS resource variable = pld_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = pld_strm type = fifo impl = srl
     hls::stream<bool> e2_strm;
 #pragma HLS stream variable = e2_strm depth = 8
 
     hls::stream<ap_uint<ARW> > base_addr_strm;
 #pragma HLS stream variable = base_addr_strm depth = 8
-#pragma HLS resource variable = base_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_addr_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > base_nm_strm;
 #pragma HLS stream variable = base_nm_strm depth = 8
-#pragma HLS resource variable = base_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = base_nm_strm type = fifo impl = srl
     hls::stream<bool> e3_strm;
 #pragma HLS stream variable = e3_strm depth = 8
 
     hls::stream<ap_uint<ARW> > overflow_pointer_addr_strm;
 #pragma HLS stream variable = overflow_pointer_addr_strm depth = 32
-#pragma HLS resource variable = overflow_pointer_addr_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_pointer_addr_strm type = fifo impl = srl
     hls::stream<ap_uint<ARW> > overflow_nm_strm;
 #pragma HLS stream variable = overflow_nm_strm depth = 32
-#pragma HLS resource variable = overflow_nm_strm core = FIFO_SRL
+#pragma HLS bind_storage variable = overflow_nm_strm type = fifo impl = srl
     hls::stream<bool> e4_strm;
 #pragma HLS stream variable = e4_strm depth = 32
 
@@ -4093,22 +4093,22 @@ void build_merge_probe_wrapper(
 
     ap_uint<72> htb_vector0[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = htb_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = htb_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = htb_vector0 type = ram_2p impl = uram
 
     ap_uint<72> htb_vector1[HASH_OVERFLOW_DEPTH];
-#pragma HLS resource variable = htb_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = htb_vector1 type = ram_2p impl = uram
 
     ap_uint<72> bf_vector0[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector0 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bf_vector0 type = ram_2p impl = uram
 
     ap_uint<72> bf_vector1[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector1 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector1 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bf_vector1 type = ram_2p impl = uram
 
     ap_uint<72> bf_vector2[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector2 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector2 core = RAM_2P_URAM
+#pragma HLS bind_storage variable = bf_vector2 type = ram_2p impl = uram
 
 #endif
 
@@ -4454,15 +4454,15 @@ static void hashJoinV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c0[PU];
 #pragma HLS stream variable = k1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c0 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c0[PU];
 #pragma HLS stream variable = p1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c0 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c0[PU];
 #pragma HLS stream variable = hash_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c0 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c0 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c0[PU];
 #pragma HLS stream variable = e1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c0 dim = 1
@@ -4471,15 +4471,15 @@ static void hashJoinV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c1[PU];
 #pragma HLS stream variable = k1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c1 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c1[PU];
 #pragma HLS stream variable = p1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c1 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c1[PU];
 #pragma HLS stream variable = hash_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c1 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c1 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c1[PU];
 #pragma HLS stream variable = e1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c1 dim = 1
@@ -4488,15 +4488,15 @@ static void hashJoinV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c2[PU];
 #pragma HLS stream variable = k1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c2 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c2[PU];
 #pragma HLS stream variable = p1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c2 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c2[PU];
 #pragma HLS stream variable = hash_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c2 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c2 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c2[PU];
 #pragma HLS stream variable = e1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c2 dim = 1
@@ -4505,15 +4505,15 @@ static void hashJoinV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c3[PU];
 #pragma HLS stream variable = k1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c3 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c3[PU];
 #pragma HLS stream variable = p1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c3 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c3[PU];
 #pragma HLS stream variable = hash_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c3 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c3 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c3[PU];
 #pragma HLS stream variable = e1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c3 dim = 1
@@ -4526,60 +4526,60 @@ static void hashJoinV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry[PU];
 #pragma HLS stream variable = k1_strm_arry depth = 512
 #pragma HLS array_partition variable = k1_strm_arry dim = 1
-#pragma HLS resource variable = k1_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = k1_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<PW> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 512
 #pragma HLS array_partition variable = p1_strm_arry dim = 1
-#pragma HLS resource variable = p1_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 8
 #pragma HLS array_partition variable = hash_strm_arry dim = 1
-#pragma HLS resource variable = hash_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry type = fifo impl = srl
     hls::stream<bool> e1_strm_arry[PU];
 #pragma HLS stream variable = e1_strm_arry depth = 8
 #pragma HLS array_partition variable = e1_strm_arry dim = 1
-#pragma HLS resource variable = e1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm_arry type = fifo impl = srl
 
     // output of probe for join
     hls::stream<ap_uint<KEYW> > t_key_strm_arry[PU];
 #pragma HLS stream variable = t_key_strm_arry depth = 512
 #pragma HLS array_partition variable = t_key_strm_arry dim = 1
-#pragma HLS resource variable = t_key_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_key_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<B_PW> > t_pld_strm_arry[PU];
 #pragma HLS stream variable = t_pld_strm_arry depth = 512
 #pragma HLS array_partition variable = t_pld_strm_arry dim = 1
-#pragma HLS resource variable = t_pld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_pld_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<ARW> > nm_strm_arry[PU];
 #pragma HLS stream variable = nm_strm_arry depth = 512
 #pragma HLS array_partition variable = nm_strm_arry dim = 1
-#pragma HLS resource variable = nm_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = nm_strm_arry type = fifo impl = bram
     hls::stream<bool> e2_strm_arry[PU];
 #pragma HLS stream variable = e2_strm_arry depth = 512
 #pragma HLS array_partition variable = e2_strm_arry dim = 1
-#pragma HLS resource variable = e2_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = e2_strm_arry type = fifo impl = bram
 
     hls::stream<ap_uint<KEYW> > s_base_key_strm_arry[PU];
 #pragma HLS stream variable = s_base_key_strm_arry depth = 512
 #pragma HLS array_partition variable = s_base_key_strm_arry dim = 1
-#pragma HLS resource variable = s_base_key_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_base_key_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<S_PW> > s_base_pld_strm_arry[PU];
 #pragma HLS stream variable = s_base_pld_strm_arry depth = 512
 #pragma HLS array_partition variable = s_base_pld_strm_arry dim = 1
-#pragma HLS resource variable = s_base_pld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_base_pld_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<KEYW> > s_overflow_key_strm_arry[PU];
 #pragma HLS stream variable = s_overflow_key_strm_arry depth = 512
 #pragma HLS array_partition variable = s_overflow_key_strm_arry dim = 1
-#pragma HLS resource variable = s_overflow_key_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_overflow_key_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<S_PW> > s_overflow_pld_strm_arry[PU];
 #pragma HLS stream variable = s_overflow_pld_strm_arry depth = 512
 #pragma HLS array_partition variable = s_overflow_pld_strm_arry dim = 1
-#pragma HLS resource variable = s_overflow_pld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_overflow_pld_strm_arry type = fifo impl = bram
 
     // output of join for collect
     hls::stream<ap_uint<KEYW + S_PW + B_PW> > j0_strm_arry[PU];
 #pragma HLS stream variable = j0_strm_arry depth = 9
 #pragma HLS array_partition variable = j0_strm_arry dim = 1
-#pragma HLS resource variable = j0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = j0_strm_arry type = fifo impl = srl
     hls::stream<bool> e3_strm_arry[PU];
 #pragma HLS array_partition variable = e3_strm_arry dim = 1
 #pragma HLS stream variable = e3_strm_arry depth = 9
@@ -4935,15 +4935,15 @@ static void hashBuildProbeV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c0[PU];
 #pragma HLS stream variable = k1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c0 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c0[PU];
 #pragma HLS stream variable = p1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c0 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c0 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c0[PU];
 #pragma HLS stream variable = hash_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c0 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c0 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c0 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c0[PU];
 #pragma HLS stream variable = e1_strm_arry_c0 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c0 dim = 1
@@ -4952,15 +4952,15 @@ static void hashBuildProbeV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c1[PU];
 #pragma HLS stream variable = k1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c1 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c1[PU];
 #pragma HLS stream variable = p1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c1 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c1 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c1[PU];
 #pragma HLS stream variable = hash_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c1 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c1 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c1 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c1[PU];
 #pragma HLS stream variable = e1_strm_arry_c1 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c1 dim = 1
@@ -4969,15 +4969,15 @@ static void hashBuildProbeV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c2[PU];
 #pragma HLS stream variable = k1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c2 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c2[PU];
 #pragma HLS stream variable = p1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c2 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c2 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c2[PU];
 #pragma HLS stream variable = hash_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c2 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c2 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c2 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c2[PU];
 #pragma HLS stream variable = e1_strm_arry_c2 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c2 dim = 1
@@ -4986,15 +4986,15 @@ static void hashBuildProbeV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry_c3[PU];
 #pragma HLS stream variable = k1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = k1_strm_arry_c3 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = k1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<PW> > p1_strm_arry_c3[PU];
 #pragma HLS stream variable = p1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = p1_strm_arry_c3 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = p1_strm_arry_c3 type = fifo impl = srl
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry_c3[PU];
 #pragma HLS stream variable = hash_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = hash_strm_arry_c3 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c3 core = FIFO_SRL
+#pragma HLS bind_storage variable = hash_strm_arry_c3 type = fifo impl = srl
     hls::stream<bool> e1_strm_arry_c3[PU];
 #pragma HLS stream variable = e1_strm_arry_c3 depth = 8
 #pragma HLS array_partition variable = e1_strm_arry_c3 dim = 1
@@ -5014,60 +5014,60 @@ static void hashBuildProbeV4(
     hls::stream<ap_uint<KEYW> > k1_strm_arry[PU];
 #pragma HLS stream variable = k1_strm_arry depth = 512
 #pragma HLS array_partition variable = k1_strm_arry dim = 1
-#pragma HLS resource variable = k1_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = k1_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<PW> > p1_strm_arry[PU];
 #pragma HLS stream variable = p1_strm_arry depth = 512
 #pragma HLS array_partition variable = p1_strm_arry dim = 1
-#pragma HLS resource variable = p1_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = p1_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<HASHWL + BF_HASH_NM * BFW> > hash_strm_arry[PU];
 #pragma HLS stream variable = hash_strm_arry depth = 512
 #pragma HLS array_partition variable = hash_strm_arry dim = 1
-#pragma HLS resource variable = hash_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = hash_strm_arry type = fifo impl = bram
     hls::stream<bool> e1_strm_arry[PU];
 #pragma HLS stream variable = e1_strm_arry depth = 512
 #pragma HLS array_partition variable = e1_strm_arry dim = 1
-#pragma HLS resource variable = e1_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = e1_strm_arry type = fifo impl = srl
 
     // output of probe for join
     hls::stream<ap_uint<KEYW> > t_key_strm_arry[PU];
 #pragma HLS stream variable = t_key_strm_arry depth = 512
 #pragma HLS array_partition variable = t_key_strm_arry dim = 1
-#pragma HLS resource variable = t_key_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_key_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<PW> > t_pld_strm_arry[PU];
 #pragma HLS stream variable = t_pld_strm_arry depth = 512
 #pragma HLS array_partition variable = t_pld_strm_arry dim = 1
-#pragma HLS resource variable = t_pld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = t_pld_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<ARW> > nm_strm_arry[PU];
 #pragma HLS stream variable = nm_strm_arry depth = 512
 #pragma HLS array_partition variable = nm_strm_arry dim = 1
-#pragma HLS resource variable = nm_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = nm_strm_arry type = fifo impl = bram
     hls::stream<bool> e2_strm_arry[PU];
 #pragma HLS stream variable = e2_strm_arry depth = 512
 #pragma HLS array_partition variable = e2_strm_arry dim = 1
-#pragma HLS resource variable = e2_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = e2_strm_arry type = fifo impl = srl
 
     hls::stream<ap_uint<KEYW> > s_base_key_strm_arry[PU];
 #pragma HLS stream variable = s_base_key_strm_arry depth = 512
 #pragma HLS array_partition variable = s_base_key_strm_arry dim = 1
-#pragma HLS resource variable = s_base_key_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_base_key_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<PW> > s_base_pld_strm_arry[PU];
 #pragma HLS stream variable = s_base_pld_strm_arry depth = 512
 #pragma HLS array_partition variable = s_base_pld_strm_arry dim = 1
-#pragma HLS resource variable = s_base_pld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_base_pld_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<KEYW> > s_overflow_key_strm_arry[PU];
 #pragma HLS stream variable = s_overflow_key_strm_arry depth = 512
 #pragma HLS array_partition variable = s_overflow_key_strm_arry dim = 1
-#pragma HLS resource variable = s_overflow_key_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_overflow_key_strm_arry type = fifo impl = bram
     hls::stream<ap_uint<PW> > s_overflow_pld_strm_arry[PU];
 #pragma HLS stream variable = s_overflow_pld_strm_arry depth = 512
 #pragma HLS array_partition variable = s_overflow_pld_strm_arry dim = 1
-#pragma HLS resource variable = s_overflow_pld_strm_arry core = FIFO_BRAM
+#pragma HLS bind_storage variable = s_overflow_pld_strm_arry type = fifo impl = bram
 
     // output of join for collect
     hls::stream<ap_uint<KEYW + S_PW + B_PW> > j0_strm_arry[PU];
 #pragma HLS stream variable = j0_strm_arry depth = 9
 #pragma HLS array_partition variable = j0_strm_arry dim = 1
-#pragma HLS resource variable = j0_strm_arry core = FIFO_SRL
+#pragma HLS bind_storage variable = j0_strm_arry type = fifo impl = srl
     hls::stream<bool> e3_strm_arry[PU];
 #pragma HLS array_partition variable = e3_strm_arry dim = 1
 #pragma HLS stream variable = e3_strm_arry depth = 9

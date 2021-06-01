@@ -27,16 +27,16 @@ void AggrConfig::CHECK_0(std::vector<std::string> str, size_t len, std::string s
         exit(1);
     }
 }
-// check output non-aggr column if group keys
 
+// check output non-aggr column if group keys
 void AggrConfig::CHECK_1(std::string key) {
     if (std::find(group_keys.begin(), group_keys.end(), key) == group_keys.end()) {
         std::cout << "Output columns must in group keys!" << std::endl;
         exit(1);
     }
 }
-// check input contain all group keys
 
+// check input contain all group keys
 void AggrConfig::CHECK_2(std::vector<std::string> col_names) {
     for (std::string gkey : group_keys) {
         if (std::find(col_names.begin(), col_names.end(), gkey) == col_names.end()) {

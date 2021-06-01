@@ -59,7 +59,7 @@ WRITE_RESULT_P:
 
 extern "C" void filter_kernel(
     // config/op
-    ap_uint<32> buf_filter_cfg[xf::database::DynamicFilterInfo<4>::dwords_num],
+    ap_uint<32> buf_filter_cfg[xf::database::DynamicFilterInfo<4, 32>::dwords_num],
     // input, condition columns
     ap_uint<8 * KEY_SZ * VEC_LEN> buf_l_shipdate[L_DEPTH],
     ap_uint<8 * MONEY_SZ * VEC_LEN> buf_l_discount[L_DEPTH],
@@ -122,19 +122,19 @@ extern "C" void filter_kernel(
 
 #pragma HLS dataflow
 
-    hls::stream<typename xf::database::DynamicFilterInfo<4>::cfg_type> filter_cfg_strm;
+    hls::stream<typename xf::database::DynamicFilterInfo<4, 32>::cfg_type> filter_cfg_strm;
     hls::stream<bool> e_cfg_strm;
 
 #pragma HLS stream variable = filter_cfg_strm depth = 16
 #pragma HLS stream variable = e_cfg_strm depth = 16
 
 #ifndef __SYNTHESIS__
-    std::cout << "INFO: reading " << xf::database::DynamicFilterInfo<4>::dwords_num
+    std::cout << "INFO: reading " << xf::database::DynamicFilterInfo<4, 32>::dwords_num
               << " 32-bit words from buf_filter_cfg..." << std::endl;
 #endif
 
     xf::database::scanCol<BURST_LEN, 1, sizeof(uint32_t)>(
-        buf_filter_cfg, xf::database::DynamicFilterInfo<4>::dwords_num, filter_cfg_strm, e_cfg_strm);
+        buf_filter_cfg, xf::database::DynamicFilterInfo<4, 32>::dwords_num, filter_cfg_strm, e_cfg_strm);
 
     // discard the end flag, as dynamic_filter knows how many dwords to read.
     flag_sink(e_cfg_strm);

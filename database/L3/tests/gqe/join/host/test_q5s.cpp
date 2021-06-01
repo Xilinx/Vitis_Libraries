@@ -18,6 +18,11 @@
 #include "x_utils.hpp"
 #include <unordered_map>
 
+#include "xf_utils_sw/logger.hpp"
+
+#define VEC_LEN 8
+#define USER_DEBUG 1
+
 // load one col data into 1 buffer
 template <typename T>
 int load_dat(void* data, const std::string& name, const std::string& dir, const int sf, const size_t n) {
@@ -37,54 +42,81 @@ int load_dat(void* data, const std::string& name, const std::string& dir, const 
     }
     return 0;
 }
-int64_t get_golden_sum(int l_row,
-                       int32_t* col_l_orderkey,
-                       int32_t* col_l_extendedprice,
-                       int32_t* col_l_discount,
-                       int o_row,
-                       int32_t* col_o_orderkey,
-                       int32_t* col_o_orderdate) {
-    ap_uint<64> sum = 0;
-    int cnt = 0;
 
-    std::unordered_multimap<uint32_t, uint32_t> ht1;
+struct golden_data {
+    int64_t nrow;
+    int64_t sum;
+};
+golden_data get_golden_sum(int o_row,
+                           int64_t* col_o_orderkey,
+                           int64_t* col_o_rowid,
+                           bool valid_o,
+                           char* tab_o_valid,
+                           int l_row,
+                           int64_t* col_l_orderkey,
+                           int64_t* col_l_rowid,
+                           bool valid_l,
+                           char* tab_l_valid) {
+    int64_t sum = 0;
+    int64_t cnt = 0;
 
-    {
-        for (int i = 0; i < o_row; ++i) {
-            uint32_t k = col_o_orderkey[i];
-            uint32_t date = col_o_orderdate[i];
-            if (date >= 19940101 && date < 19950101) ht1.insert(std::make_pair(k, date));
+    std::unordered_multimap<uint64_t, uint64_t> ht1;
+
+    for (int i = 0; i < o_row; ++i) {
+        char val_8 = tab_o_valid[i / 8];
+        bool valid = (val_8 >> (i % 8)) & 0x1;
+        // valid_o ==0: Table O not using validation buffer
+        if (valid_o == 0) valid = 1;
+        if (valid) {
+            int64_t k = col_o_orderkey[i];
+            ht1.insert(std::make_pair(k, i + 1));
         }
     }
+
     // read t once
     for (int i = 0; i < l_row; ++i) {
-        uint32_t k = col_l_orderkey[i];
-        uint32_t p = col_l_extendedprice[i];
-        uint32_t d = col_l_discount[i];
+        int64_t k = col_l_orderkey[i];
         // check hash table
         auto its = ht1.equal_range(k);
         for (auto it = its.first; it != its.second; ++it) {
-            // std::cout << p << ", " << d << std::endl;
-            sum += (p * (100 - d));
-            ++cnt;
+#ifdef USER_DEBUG
+            if (cnt < 16) {
+                std::cout << "key: " << k << ", o_rowid: " << it->second << ", l_rowid: " << i + 1 << std::endl;
+            }
+#endif
+            int64_t sum_i = (k * k) % 10000;
+            sum += sum_i;
+            cnt++;
         }
     }
 
+    golden_data result;
+
+    result.sum = sum;
+    result.nrow = cnt;
+#ifdef USER_DEBUG
     std::cout << "INFO: CPU ref matched " << cnt << " rows, sum = " << sum << std::endl;
-    return sum;
+#endif
+
+    return result;
 }
 
 int main(int argc, const char* argv[]) {
     std::cout << "--------------- Query 5 simplified, join --------------- " << std::endl;
 
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
+
     // cmd arg parser.
     x_utils::ArgParser parser(argc, argv);
 
     std::string xclbin_path;
+#ifndef HLS_TEST
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR: xclbin path is not set!\n";
         return 1;
     }
+#endif
     std::string in_dir;
     if (!parser.getCmdOption("-in", in_dir)) {
         in_dir = "db_data/";
@@ -119,25 +151,33 @@ int main(int argc, const char* argv[]) {
     parser.getCmdOption("-validate", validate);
     if (validate != "on" && validate != "off") validate = "on";
 
-    std::vector<std::string> cols_lt;
-    cols_lt.push_back("o_orderkey");
-    cols_lt.push_back("o_orderdate");
-    std::vector<std::string> cols_rt;
-    cols_rt.push_back("l_orderkey");
-    cols_rt.push_back("l_extendedprice");
-    cols_rt.push_back("l_discount");
+    std::vector<std::string> cols_lt{"o_orderkey", "o_orderdate"};
+    std::vector<std::string> cols_rt{"l_orderkey"};
+
     std::string in_dir_datl = prepare(in_dir, factor_o, cols_lt);
     std::string in_dir_datr = prepare(in_dir, factor_l, cols_rt);
     std::cout << "Read left table form " << in_dir_datl << std::endl;
     std::cout << "Read right table form " << in_dir_datr << std::endl;
 
-    std::string mode = "v1";
-    size_t solution = 2;
-    size_t sec_o = 2; // set 0, use user's input section
-    size_t sec_l = 2; // set 0, use user's input section
-    size_t slice_num = 2;
+    // XXX dat files are still 32bit.
+    generate_valid(in_dir, factor_o, "o_valid", "o_orderdate", 32, 19940101UL, 19950101UL);
+
+    size_t solution = 0;
+    size_t sec_o = 1; // set 0, use user's input section
+    size_t sec_l = 1; // set 0, use user's input section
+    size_t slice_num = 1;
     size_t log_part = 2;
+
+    // the coefficiency of partO output buffer expansion
+    float coef_exp_partO = 2;
+    // the coefficiency of partL output buffer expansion
+    float coef_exp_partL = 2;
+    // the coefficiency of join output buffer expansion
+    float coef_exp_join = 2;
+
+    std::string mode = "manual";
     parser.getCmdOption("-mode", mode);
+
     if (mode == "manual") {
         std::cout << "Using StrategyManualSet" << std::endl;
 
@@ -187,14 +227,35 @@ int main(int argc, const char* argv[]) {
                 slice_num = 1;
             }
         }
+        if (parser.getCmdOption("-coef_exp_partO", scale)) {
+            try {
+                coef_exp_partO = std::stof(scale);
+            } catch (...) {
+                coef_exp_partO = 2;
+            }
+        }
+        if (parser.getCmdOption("-coef_exp_partL", scale)) {
+            try {
+                coef_exp_partL = std::stof(scale);
+            } catch (...) {
+                coef_exp_partL = 2;
+            }
+        }
+        if (parser.getCmdOption("-coef_exp_join", scale)) {
+            try {
+                coef_exp_join = std::stof(scale);
+            } catch (...) {
+                coef_exp_join = 1;
+            }
+        }
     } else if (mode == "v1") {
         std::cout << "Using StrategyV1" << std::endl;
     } else {
         std::cout << "No supported Strategy" << std::endl;
         return 1;
     }
-    int32_t table_o_nrow = 1500000 * factor_o;
-    int32_t table_l_nrow = 6001215;
+    int64_t table_o_nrow = 1500000 * factor_o;
+    int64_t table_l_nrow = 6001215;
     switch (factor_l) {
         case 1:
             table_l_nrow = 6001215;
@@ -280,60 +341,104 @@ int main(int argc, const char* argv[]) {
 
     using namespace xf::database;
     gqe::utils::MM mm;
-    // set the proper size of output table nrow by different SF
-    int32_t table_c_nrow = 1 << 25;
 
-    int32_t* tab_o_col0 = mm.aligned_alloc<int32_t>(table_o_nrow);
-    int32_t* tab_o_col1 = mm.aligned_alloc<int32_t>(table_o_nrow);
+    // 32-bit data load from tpch data
+    int32_t* table_o_in_0 = mm.aligned_alloc<int32_t>(table_o_nrow);
+    int32_t* table_o_in_1 = mm.aligned_alloc<int32_t>(table_o_nrow);
 
-    int32_t* tab_l_col0 = mm.aligned_alloc<int32_t>(table_l_nrow);
-    int32_t* tab_l_col1 = mm.aligned_alloc<int32_t>(table_l_nrow);
-    int32_t* tab_l_col2 = mm.aligned_alloc<int32_t>(table_l_nrow);
+    // 64-bit data actually used in gqe-int64 kernel
+    int64_t* tab_o_col0 = mm.aligned_alloc<int64_t>(table_o_nrow);
+    int64_t* tab_o_col1 = mm.aligned_alloc<int64_t>(table_o_nrow);
 
-    ap_uint<512>* tab_c_col0 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow);
-    ap_uint<512>* tab_c_col1 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow);
-    ap_uint<512>* tab_c_col2 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow);
+    // 32-bit data load from tpch data
+
+    int32_t* table_l_in_0 = mm.aligned_alloc<int32_t>(table_l_nrow);
+    int32_t* table_l_in_1 = mm.aligned_alloc<int32_t>(table_l_nrow);
+
+    // 64-bit data actually used in gqe-int64 kernel
+    int64_t* tab_l_col0 = mm.aligned_alloc<int64_t>(table_l_nrow);
+    int64_t* tab_l_col1 = mm.aligned_alloc<int64_t>(table_l_nrow);
+
+    // define the validation buffer
+    int64_t tab_o_val_len = (table_o_nrow + 7) / 8;
+    char* tab_o_valid = mm.aligned_alloc<char>(tab_o_val_len);
+
+    int64_t tab_l_val_len = (table_l_nrow + 7) / 8;
+    char* tab_l_valid = mm.aligned_alloc<char>(tab_l_val_len);
+    for (int i = 0; i < tab_l_val_len; i++) {
+        tab_l_valid[i] = 0xff;
+    }
+
+    int64_t table_c_nrow = coef_exp_join * (float)table_l_nrow;
+    int64_t table_c_nrow_depth = (table_c_nrow + VEC_LEN - 1) / VEC_LEN;
+
+    ap_uint<512>* tab_c_col0 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow_depth);
+    ap_uint<512>* tab_c_col1 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow_depth);
+    ap_uint<512>* tab_c_col2 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow_depth);
+    // ap_uint<512>* tab_c_col3 = mm.aligned_alloc<ap_uint<512> >(table_c_nrow_depth);
 
     int err = 0;
 
-    err += load_dat<int32_t>(tab_o_col0, "o_orderkey", in_dir, factor_o, table_o_nrow);
-    err += load_dat<int32_t>(tab_o_col1, "o_orderdate", in_dir, factor_o, table_o_nrow);
+    err += load_dat<int32_t>(table_o_in_0, "o_orderkey", in_dir, factor_o, table_o_nrow);
+    err += load_dat<char>(tab_o_valid, "o_valid", in_dir, factor_o, tab_o_val_len);
     if (err) return err;
     std::cout << "Orders table has been read from disk" << std::endl;
 
-    err += load_dat<int32_t>(tab_l_col0, "l_orderkey", in_dir, factor_l, table_l_nrow);
-    err += load_dat<int32_t>(tab_l_col1, "l_extendedprice", in_dir, factor_l, table_l_nrow);
-    err += load_dat<int32_t>(tab_l_col2, "l_discount", in_dir, factor_l, table_l_nrow);
+    // convert data from 32-bit to 64-bit, for testing only
+    for (int i = 0; i < table_o_nrow; ++i) {
+        tab_o_col0[i] = table_o_in_0[i];
+        tab_o_col1[i] = table_o_in_1[i];
+        if (i < 64) std::cout << "Key: " << tab_o_col0[i] << ", o_rowid: " << i + 1 << std::endl;
+    }
+
+    err += load_dat<int32_t>(table_l_in_0, "l_orderkey", in_dir, factor_l, table_l_nrow);
+    // err += load_dat<int32_t>(table_l_in_1, "l_orderkey", in_dir, factor_l, table_l_nrow);
     if (err) return err;
     std::cout << "LineItem table has been read from disk" << std::endl;
 
-    gqe::Table tab_o;
-    tab_o.addCol("o_orderdate", gqe::TypeEnum::TypeInt32, tab_o_col1, table_o_nrow);
-    tab_o.addCol("o_orderkey", gqe::TypeEnum::TypeInt32, tab_o_col0, table_o_nrow);
+    // convert data from 32-bit to 64-bit, for testing only
+    for (int i = 0; i < table_l_nrow; ++i) {
+        tab_l_col0[i] = table_l_in_0[i];
+        tab_l_col1[i] = table_l_in_1[i];
+        if (i < 64) std::cout << "Key: " << tab_l_col0[i] << ", l_rowid: " << i + 1 << std::endl;
+    }
 
-    gqe::Table tab_l;
-    tab_l.addCol("l_extendedprice", gqe::TypeEnum::TypeInt32, tab_l_col1, table_l_nrow);
-    tab_l.addCol("l_discount", gqe::TypeEnum::TypeInt32, tab_l_col2, table_l_nrow);
-    tab_l.addCol("l_orderkey", gqe::TypeEnum::TypeInt32, tab_l_col0, table_l_nrow);
+    bool valid_o = 1;
+    bool valid_l = 0;
+    gqe::Table tab_o("Table O");
+    tab_o.addCol("o_orderkey", gqe::TypeEnum::TypeInt64, tab_o_col0, table_o_nrow);
+    // tab_o.addCol("o_orderkey1", gqe::TypeEnum::TypeInt64, tab_o_col1, table_o_nrow);
+    tab_o.genRowIDWithValidation("o_rowid", "o_valid", 1, valid_o, tab_o_valid, table_o_nrow); // gen row-id, use valid
 
-    gqe::Table tab_c;
-    tab_c.addCol("c1", gqe::TypeEnum::TypeInt32, tab_c_col0, table_c_nrow);
-    tab_c.addCol("c2", gqe::TypeEnum::TypeInt32, tab_c_col1, table_c_nrow);
-    tab_c.addCol("c3", gqe::TypeEnum::TypeInt32, tab_c_col2, table_c_nrow);
+    gqe::Table tab_l("Table L");
+    tab_l.addCol("l_orderkey", gqe::TypeEnum::TypeInt64, tab_l_col0, table_l_nrow);
+    // tab_l.addCol("l_orderkey1", gqe::TypeEnum::TypeInt64, tab_l_col1, table_l_nrow);
+    tab_l.genRowIDWithValidation("l_rowid", "l_valid", 1, valid_l, tab_l_valid, table_l_nrow); // gen row-id, use valid
+
+    gqe::Table tab_c("Table C");
+    tab_c.addCol("c1", gqe::TypeEnum::TypeInt64, tab_c_col0, table_c_nrow);
+    tab_c.addCol("c2", gqe::TypeEnum::TypeInt64, tab_c_col1, table_c_nrow);
+    tab_c.addCol("c3", gqe::TypeEnum::TypeInt64, tab_c_col2, table_c_nrow);
+    // tab_c.addCol("c4", gqe::TypeEnum::TypeInt64, tab_c_col3, table_c_nrow);
 
     tab_o.info();
     tab_l.info();
 
+    gqe::FpgaInit init_ocl(xclbin_path);
+
+    init_ocl.createHostBufs();
+    init_ocl.createDevBufs();
+
     // constructor
-    gqe::Joiner bigjoin(xclbin_path);
+    gqe::Joiner bigjoin(init_ocl);
+    bigjoin.SetBufAllocMaxNum(100);
 
     gqe::ErrCode err_code;
     if (mode == "v1") {
         // use JoinStrategyV1
         auto sv1 = new gqe::JoinStrategyV1();
-        err_code =
-            bigjoin.join(tab_o, "19940101<=o_orderdate && o_orderdate<19950101", tab_l, "", "o_orderkey = l_orderkey",
-                         tab_c, "c1=l_extendedprice, c2=l_discount, c3=l_orderkey", gqe::INNER_JOIN, sv1);
+        err_code = bigjoin.run(tab_o, "o_rowid>0", tab_l, "", "o_orderkey = l_orderkey", tab_c,
+                               "c1=l_orderkey, c2=o_rowid, c3=l_rowid", gqe::INNER_JOIN, sv1);
         if (!err_code) {
             delete sv1;
             std::cout << "Join done" << std::endl;
@@ -342,10 +447,11 @@ int main(int argc, const char* argv[]) {
         }
     } else if (mode == "manual") {
         // use JoinStrategyManualSet
-        auto smanual = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part);
-        err_code =
-            bigjoin.join(tab_o, "19940101<=o_orderdate && o_orderdate<19950101", tab_l, "", "o_orderkey = l_orderkey",
-                         tab_c, "c1=l_extendedprice, c2=l_discount, c3=l_orderkey", gqe::INNER_JOIN, smanual);
+        auto smanual = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part, coef_exp_partO,
+                                                      coef_exp_partL, coef_exp_join);
+
+        err_code = bigjoin.run(tab_o, "o_rowid>0", tab_l, "", "o_orderkey = l_orderkey", tab_c,
+                               "c1=l_orderkey,c2=o_rowid, c3=l_rowid", gqe::INNER_JOIN, smanual);
 
         if (!err_code) {
             delete smanual;
@@ -353,40 +459,64 @@ int main(int argc, const char* argv[]) {
             return err_code;
         }
     }
+
     std::cout << "Aggregate in CPU" << std::endl;
-    // calculate the aggr results:
-    // sum(l_extendedprice * (1-discount))
-    // col0:extendedprice*100 col1: discount*100 col2: orderdate col3: keyid
-    long long sum = 0;
+    // calculate the aggr results: sum(l_extendedprice + orderkey)
+    // col0: l_extendedprice; col1: l_orderkey
+    int64_t sum = 0;
     int p_nrow = tab_c.getRowNum();
-    std::cout << "Join result rows: " << p_nrow << std::endl;
-    for (int n = 0; n < p_nrow / 16; n++) {
-        for (int i = 0; i < 16; i++) {
-            uint32_t extendedprice = tab_c_col0[n](31 + 32 * i, 32 * i);
-            // uint32_t extendedprice = (tab_c.getColPointer(0))[n](31 + 32 * i, 32 * i);
-            uint32_t discount = tab_c_col1[n](31 + 32 * i, 32 * i);
-            // uint32_t discount = (tab_c.getColPointer(1))[n](31 + 32 * i, 32 * i);
-            sum += extendedprice * (100 - discount);
+#ifdef USER_DEBUG
+    int cnt = 0;
+#endif
+    for (int n = 0; n < p_nrow / 8; n++) {
+        for (int i = 0; i < 8; i++) {
+            int64_t key = tab_c_col0[n](63 + 64 * i, 64 * i);
+            int64_t o_rowid = tab_c_col1[n](63 + 64 * i, 64 * i);
+            int64_t l_rowid = tab_c_col2[n](63 + 64 * i, 64 * i);
+
+            int64_t sum_i = (key * key) % 10000;
+            sum += sum_i;
+
+#ifdef USER_DEBUG
+            if (cnt < 16) {
+                std::cout << "key: " << key << ", ";
+                std::cout << "o_rowid: (" << (o_rowid >> 32) << ", " << (o_rowid & 0xffffffff) << "), ";
+                std::cout << "l_rowid: (" << (l_rowid >> 32) << ", " << (l_rowid & 0xffffffff) << ") ";
+                std::cout << std::endl;
+            }
+            cnt++;
+#endif
         }
     }
-    for (int n = 0; n < p_nrow % 16; n++) {
-        uint32_t extendedprice = tab_c_col0[p_nrow / 16](31 + 32 * n, 32 * n);
-        uint32_t discount = tab_c_col1[p_nrow / 16](31 + 32 * n, 32 * n);
-        sum += extendedprice * (100 - discount);
+    for (int n = 0; n < p_nrow % 8; n++) {
+        int64_t key = tab_c_col0[p_nrow / 8](63 + 64 * n, 64 * n);
+        int64_t o_rowid = tab_c_col1[p_nrow / 8](63 + 64 * n, 64 * n);
+        int64_t l_rowid = tab_c_col2[p_nrow / 8](63 + 64 * n, 64 * n);
+        int64_t sum_i = (key * key) % 10000;
+        sum += sum_i;
+#ifdef USER_DEBUG
+        if (cnt < 16) {
+            std::cout << "key: " << key << ", ";
+            std::cout << "o_rowid: (" << (o_rowid >> 32) << ", " << (o_rowid & 0xffffffff) << "), ";
+            std::cout << "l_rowid: (" << (l_rowid >> 32) << ", " << (l_rowid & 0xffffffff) << ") ";
+            std::cout << std::endl;
+        }
+        cnt++;
+#endif
     }
-    std::cout << "Q5S Join done, result: " << sum << std::endl;
+    std::cout << "Q5S Join done, rows: " << p_nrow << ", result: " << sum << std::endl;
 
+    int ret = 0;
     if (validate == "on") {
         std::cout << "---------------------------------Checking result---------------------------------" << std::endl;
-        long long golden =
-            get_golden_sum(table_l_nrow, tab_l_col0, tab_l_col1, tab_l_col2, table_o_nrow, tab_o_col0, tab_o_col1);
-        std::cout << "Golen value: " << golden << ", FPGA value: " << sum << std::endl;
-        if (sum == golden) {
-            std::cout << "Validate Pass" << std::endl;
-        } else {
-            std::cout << "Validate Failed" << std::endl;
-            return 1;
-        }
+        golden_data golden;
+        golden = get_golden_sum(table_o_nrow, tab_o_col0, tab_o_col1, valid_o, tab_o_valid, table_l_nrow, tab_l_col0,
+                                tab_l_col1, valid_l, tab_l_valid);
+        std::cout << "Golen: rows: " << golden.nrow << ", value: " << golden.sum << std::endl;
+
+        ret = (golden.sum == sum) ? 0 : 1;
+        ret ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
     }
-    return 0;
+
+    return ret;
 }

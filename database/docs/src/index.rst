@@ -42,5 +42,6 @@
    :caption: Benchmark Result
    :maxdepth: 1
 
+   benchmark/benchmark.rst
    benchmark/tpc_h.rst
 
