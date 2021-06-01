@@ -47,6 +47,12 @@ for reference.
    user_guide/L1_user_guide.rst
    user_guide/L2_user_guide.rst
 
+.. toctree::
+   :caption: Benchmark Result
+   :maxdepth: 1
+
+   benchmark/benchmark.rst
+
 Index
 -----
 
