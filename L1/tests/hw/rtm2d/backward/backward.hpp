@@ -18,7 +18,8 @@
 #include "rtm.hpp"
 #include "params.hpp"
 
-using namespace xf::hpc::rtm;
+using namespace xf::hpc;
+using namespace rtm;
 typedef RTM2D<DATATYPE, ORDER, 1281, NXB, nPE> RTM_TYPE;
 typedef RTM_TYPE::t_WideType WIDE_TYPE;
 typedef RTM_TYPE::t_PairType PAIR_TYPE;

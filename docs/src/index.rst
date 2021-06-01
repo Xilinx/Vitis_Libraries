@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2019 - 2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,21 +27,31 @@ Vitis kernel developers. The L3 APIs provide C/C++ functions for software develo
 This library depends on the **Xilinx BLAS and SPARSE** library to implement some components.
 
 Because HPC applications normally have high precision requirements, the current supported data
-type is mainly single precsion floating point type (FP32 type). Although most components can be configured
+type are mainly single precision floating point type (FP32 type) and double precision floating point type (FP64 type). 
+Although most components can be configured
 to support other data types, some of the architectures are specifically optimized to address
 FP32 operations, e.g. accumulations.
 
-In the current release, two types of applications have been addressed by this library, namely
-RTM (Reverse Time Migration) and MLP-based high precesion seismic inversion.  RTM is an important
-seismic imaging technique used for producing an accurate representation of the subsurface.
+In the current release, three types of applications have been addressed by this library, namely
+RTM (Reverse Time Migration), CG (Conjugate Gradient) method and MLP-based high precesion seismic inversion.  
+RTM is an important seismic imaging technique used for producing an accurate representation of the subsurface.
 The basic computation unit of an RTM application is a stencil module, which is the essential 
 step for explicit **FDTD (Finite Difference Time Domain)** solutions. Seismic inversion is a procedure
-used to reconstruct subsurface properties via the seismic reflection data. Modern technology
-uses high precision MLP (Multilayer perceptron) based neural network to speed up this process.
+used to reconstruct subsurface properties via the seismic reflection data. 
+
+Many engineering problems, such as FEM, are eventually transformed to a group of linear systems. 
+Conjugate Gradient method, an iterative method, is widely adopted to solve linear systems, 
+especially those with highly sparse and large-dimention matrices.
+Preconditioner matrix is necessary for most of the problems in order to achieve convergent results and reduce dramatically the
+number of iterations, hence improves the entire performance. 
+
+Modern technology uses high precision MLP (Multilayer perceptron) based neural network to speed up this process.
 The basic unit of a MLP application normally includes a fully connected neural (**FCN**) network and an activation
 function, e.g. sigmoid function.
+
+
 In this library, you will find the implementations of stencil module, 2D and 3D RTM forward propogation path,
-2D RTM application, high-precision fully connected neural network and sigmoid activation function.
+2D RTM application, CG solvers with Jacobi preconditioner, high-precision fully connected neural network and sigmoid activation function.
 
 
 Since all the kernel code is developed with the permissive Apache 2.0 license,
@@ -64,6 +74,13 @@ for reference.
    user_guide/L1/L1.rst
    user_guide/L2/L2.rst
    user_guide/L3/L3.rst
+
+.. toctree::
+  :caption: Benchmark 
+  :maxdepth: 1 
+
+  benchmark.rst
+
 
 Index
 -----

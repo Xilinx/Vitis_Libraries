@@ -18,7 +18,8 @@
 #include "xf_blas.hpp"
 #include "rtm.hpp"
 #include "params.hpp"
-using namespace xf::hpc::rtm;
+using namespace xf::hpc;
+using namespace rtm;
 
 typedef Domain3D<MaxZ, MaxY, ORDER / 2, nPE, nPE, NUM_INST> DOMAIN_TYPE;
 typedef RTM3D<DOMAIN_TYPE, DATATYPE, ORDER, MaxZ, MaxY, MaxB, nPE, nPE> RTM_TYPE;

@@ -37,11 +37,12 @@
         "compiler": {
             "sources": [
                 "main.cpp", 
-                "LIB_DIR/../blas/L2/src/sw/xcl2/xcl2.cpp"
+                "LIB_DIR/../blas/L2/src/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
+                "LIB_DIR/L2/include/sw/", 
                 "LIB_DIR/L2/include/sw/rtm3d", 
-                "LIB_DIR/../blas/L2/include/sw/xcl2", 
+                "LIB_DIR/../blas/L2/include/xcl2", 
                 "LIB_DIR/../blas/L1/tests/sw/include/"
             ], 
             "symbols": [

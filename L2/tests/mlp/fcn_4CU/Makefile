@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.2
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -52,7 +52,7 @@ help::
 TARGET ?= sw_emu
 
 # ################### Setting up default value of DEVICE ##############################
-DEVICE ?= xilinx_u250_xdma_201830_2
+DEVICE ?= xilinx_u250_gen3x16_xdma_3_1_202020_1
 
 # ###################### Setting up default value of HOST_ARCH ####################### 
 HOST_ARCH ?= x86
@@ -84,12 +84,12 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L2/src/sw/mlp/api_fcn_multiInstr.cpp
-HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/sw/xcl2/xcl2.cpp
+HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/xcl2/xcl2.cpp
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/mlp
 CXXFLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw/xf_blas/helpers/utils
-CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/sw/xcl2
-CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/sw
-CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/memKernel/sw
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/memKernel
 
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
@@ -110,12 +110,10 @@ LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr 
 endif
 
 # ################### Setting package and image directory #######################
-EMBEDDED_PACKAGE_OUT = package_$(TARGET)
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS := $(BUILD_DIR)/fcn.xclbin 32 32 32 32 32 32 32 1 0 1 0 A B C X
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -131,7 +129,8 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw/xf_blas
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw/xf_blas/gemm
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw/xf_blas/helpers/utils
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include
-VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include/hw/xf_blas
+VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include/memKernel/
+VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include/memKernel/hw/xf_blas
 
 fcnKernel_VPP_FLAGS += --hls.clock 270000000:fcnKernel
 VPP_LDFLAGS_fcn += --kernel_frequency 250
@@ -144,7 +143,6 @@ VPP_LDFLAGS_fcn += $(VPP_LDFLAGS_fcn_temp)
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/fcn.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/fcn.xclbin
 BINARY_CONTAINER_fcn_OBJS += $(TEMP_DIR)/fcnKernel.xo
 
 # ######################### Setting Targets of Makefile ################################
@@ -171,7 +169,7 @@ $(TEMP_DIR)/fcnKernel.xo: $(XFLIB_DIR)/L2/src/hw/mlp/fcnKernel.cpp
 
 $(BUILD_DIR)/fcn.xclbin: $(BINARY_CONTAINER_fcn_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/fcn $(VPP_LDFLAGS) $(VPP_LDFLAGS_fcn) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/fcn $(VPP_LDFLAGS) $(VPP_LDFLAGS_fcn) -o '$@' $(+)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
@@ -186,6 +184,7 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 # ###############Setting Essential Checks And Running Rules For Vitis Flow #############
 run: all
+	XCL_EMULATION_MODE=$(TARGET) make dump_config
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

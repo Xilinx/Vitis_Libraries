@@ -25,7 +25,7 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2/../../propagate.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw"
+add_files "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2/../../propagate.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include/hw/rtm3d -I${XF_PROJ_ROOT}/../blas/L1/include/hw"
 add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2/../../main.cpp" -cflags "-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include"
 set_top top
 

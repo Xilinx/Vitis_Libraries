@@ -44,7 +44,7 @@ t_DataType FcnScalePRelu(t_DataType x, int16_t p_PReluVal) {
 #if BLAS_keepMacBits
     t_DataType l_postPRelu = (l_prePRelu < 0) ? (l_prePRelu * l_scaleVal.to_int()) >> l_alpha.to_int() : l_prePRelu;
 #else
-    t_DataType l_ceiling = _cast<t_DataType>(l_alpha);
+    t_DataType l_ceiling = static_cast<t_DataType>(l_alpha);
     t_DataType l_postPRelu = (l_prePRelu < 0)
                                  ? (l_prePRelu * l_scaleVal)
                                  : ((l_ceiling != 0) && (l_prePRelu >= l_ceiling)) ? l_ceiling : l_prePRelu;

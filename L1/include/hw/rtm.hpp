@@ -25,6 +25,7 @@
 #include "hls_stream.h"
 
 #include "xf_blas.hpp"
+#include "streamOps.hpp"
 #include "rtm/dataMover.hpp"
 
 // RTM 2D

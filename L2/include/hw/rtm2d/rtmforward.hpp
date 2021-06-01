@@ -15,7 +15,9 @@
 */
 #include "xf_blas.hpp"
 #include "rtm.hpp"
+#include "streamOps.hpp"
 
+using namespace xf::hpc;
 using namespace xf::hpc::rtm;
 typedef RTM2D<RTM_dataType, RTM_order, RTM_maxDim, RTM_MaxB, RTM_nPE> RTM_TYPE;
 typedef RTM_TYPE::t_PairInType RTM_pairType;
@@ -72,7 +74,7 @@ void forward(RTM_TYPE s[RTM_numFSMs],
         s[i].forward(p_src[i], l_upb[i], l_vt[i], l_vt[i + 1], l_p[i], l_p[i + 1]);
     }
 
-    dataConsumer(l_entries, l_vt[RTM_numFSMs]);
+    xf::hpc::dataConsumer(l_entries, l_vt[RTM_numFSMs]);
 
     RTM_TYPE::saveUpb<RTM_numFSMs>(l_width, p_t, l_upb, p_upb);
     stream2wide<RTM_pairTypeWidth, RTM_multi>(l_sizeP, l_p[RTM_numFSMs], l_pout);

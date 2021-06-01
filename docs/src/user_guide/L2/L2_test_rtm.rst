@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2019 - 2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _user_guide_test_l2:
+.. _rtm_test_l2:
 
 *******************************
 RTM Kernel Test
@@ -34,13 +34,12 @@ Please deactivate xf_hpc environment after testing.
 Set up Vitis environment
 =================================
 Please navigate to directory L2/tests, and change the setting of environment variable 
-**TA_PATH** to point to the installation path of your Vitis 2020.2, 
-  and run following command to set up Vivado_hls environment.
+**TA_PATH** to point to the installation path of your Vitis 2021.1, and run following command to set up Vivado_hls environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VITIS}/settings64.sh
 
 Test RTM kernels
@@ -77,27 +76,30 @@ and launch the kernel on Alveo U280 FPGA.
 The paramters listed in the following table can be configured with **make** command.
 Notice that **RTM_time** must be multiple of **RTM_numFSMs**.
 
-+----------------+----------------+------------------------------------+
-|  Parameter     |  Default Value |  Notes                             |
-+================+================+====================================+
-|  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
-+----------------+----------------+------------------------------------+
-|  RTM_NXB       |   40           |  Compile time: Boundary width      |
-+----------------+----------------+------------------------------------+
-|  RTM_NZB       |   40           |  Compile time: Boundary height     |
-+----------------+----------------+------------------------------------+
-|  NUM_numFSMs   |   2            |  Compile time: No.stream module    |
-+----------------+----------------+------------------------------------+
-|  RTM_nPE       |   4            |  Compile time: No.PE               |
-+----------------+----------------+------------------------------------+
-|  RTM_order     |   8            |  Compile time: Spatial Order       |
-+----------------+----------------+------------------------------------+
-|  RTM_height    |   10           |  Running time: Image total height  |
-+----------------+----------------+------------------------------------+
-|  RTM_width     |   10           |  Running time: Image total widht   |
-+----------------+----------------+------------------------------------+
-|  RTM_time      |   10           |  Running time: No.time             |
-+----------------+----------------+------------------------------------+
+.. table:: Parameters with make command 
+    :align: center
+
+    +----------------+----------------+------------------------------------+
+    |  Parameter     |  Default Value |  Notes                             |
+    +================+================+====================================+
+    |  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
+    +----------------+----------------+------------------------------------+
+    |  RTM_NXB       |   40           |  Compile time: Boundary width      |
+    +----------------+----------------+------------------------------------+
+    |  RTM_NZB       |   40           |  Compile time: Boundary height     |
+    +----------------+----------------+------------------------------------+
+    |  NUM_numFSMs   |   2            |  Compile time: No.stream module    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_nPE       |   4            |  Compile time: No.PE               |
+    +----------------+----------------+------------------------------------+
+    |  RTM_order     |   8            |  Compile time: Spatial Order       |
+    +----------------+----------------+------------------------------------+
+    |  RTM_height    |   10           |  Running time: Image total height  |
+    +----------------+----------------+------------------------------------+
+    |  RTM_width     |   10           |  Running time: Image total widht   |
+    +----------------+----------------+------------------------------------+
+    |  RTM_time      |   10           |  Running time: No.time             |
+    +----------------+----------------+------------------------------------+
 
 Backward kernel
 --------------------------------
@@ -117,27 +119,30 @@ and launch the kernel on Alveo U280 FPGA.
 The paramters listed in the following table can be configured with **make** command.
 Notice that **RTM_time** must be multiple of **RTM_numBSMs**.
 
-+----------------+----------------+------------------------------------+
-|  Parameter     |  Default Value |  Notes                             |
-+================+================+====================================+
-|  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
-+----------------+----------------+------------------------------------+
-|  RTM_NXB       |   40           |  Compile time: Boundary width      |
-+----------------+----------------+------------------------------------+
-|  RTM_NZB       |   40           |  Compile time: Boundary height     |
-+----------------+----------------+------------------------------------+
-|  NUM_numFSMs   |   2            |  Compile time: No.stream module    |
-+----------------+----------------+------------------------------------+
-|  RTM_nPE       |   4            |  Compile time: No.PE               |
-+----------------+----------------+------------------------------------+
-|  RTM_order     |   8            |  Compile time: Spatial Order       |
-+----------------+----------------+------------------------------------+
-|  RTM_height    |   10           |  Running time: Image total height  |
-+----------------+----------------+------------------------------------+
-|  RTM_width     |   10           |  Running time: Image total widht   |
-+----------------+----------------+------------------------------------+
-|  RTM_time      |   10           |  Running time: No.time             |
-+----------------+----------------+------------------------------------+
+.. table:: Parameters with make command 
+    :align: center
+
+    +----------------+----------------+------------------------------------+
+    |  Parameter     |  Default Value |  Notes                             |
+    +================+================+====================================+
+    |  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
+    +----------------+----------------+------------------------------------+
+    |  RTM_NXB       |   40           |  Compile time: Boundary width      |
+    +----------------+----------------+------------------------------------+
+    |  RTM_NZB       |   40           |  Compile time: Boundary height     |
+    +----------------+----------------+------------------------------------+
+    |  NUM_numFSMs   |   2            |  Compile time: No.stream module    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_nPE       |   4            |  Compile time: No.PE               |
+    +----------------+----------------+------------------------------------+
+    |  RTM_order     |   8            |  Compile time: Spatial Order       |
+    +----------------+----------------+------------------------------------+
+    |  RTM_height    |   10           |  Running time: Image total height  |
+    +----------------+----------------+------------------------------------+
+    |  RTM_width     |   10           |  Running time: Image total widht   |
+    +----------------+----------------+------------------------------------+
+    |  RTM_time      |   10           |  Running time: No.time             |
+    +----------------+----------------+------------------------------------+
 
 RTM kernel
 --------------------------------
@@ -160,29 +165,32 @@ and launch the kernel on Alveo U280 FPGA.
 The paramters listed in the following table can be configured with **make** command.
 Notice that **RTM_time** must be multiple of **RTM_numFSMs** and **RTM_numBSMs**.
 
-+----------------+----------------+------------------------------------+
-|  Parameter     |  Default Value |  Notes                             |
-+================+================+====================================+
-|  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
-+----------------+----------------+------------------------------------+
-|  RTM_NXB       |   40           |  Compile time: Boundary width      |
-+----------------+----------------+------------------------------------+
-|  RTM_NZB       |   40           |  Compile time: Boundary height     |
-+----------------+----------------+------------------------------------+
-|  NUM_numFSMs   |   4            |  Compile time: No.stream module    |
-+----------------+----------------+------------------------------------+
-|  NUM_numBSMs   |   4            |  Compile time: No.stream module    |
-+----------------+----------------+------------------------------------+
-|  RTM_nPE       |   2            |  Compile time: No.PE               |
-+----------------+----------------+------------------------------------+
-|  RTM_order     |   8            |  Compile time: Spatial Order       |
-+----------------+----------------+------------------------------------+
-|  RTM_height    |   10           |  Running time: Image total height  |
-+----------------+----------------+------------------------------------+
-|  RTM_width     |   10           |  Running time: Image total widht   |
-+----------------+----------------+------------------------------------+
-|  RTM_time      |   12           |  Running time: No.time             |
-+----------------+----------------+------------------------------------+
+.. table:: Parameters with make command 
+    :align: center
+
+    +----------------+----------------+------------------------------------+
+    |  Parameter     |  Default Value |  Notes                             |
+    +================+================+====================================+
+    |  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
+    +----------------+----------------+------------------------------------+
+    |  RTM_NXB       |   40           |  Compile time: Boundary width      |
+    +----------------+----------------+------------------------------------+
+    |  RTM_NZB       |   40           |  Compile time: Boundary height     |
+    +----------------+----------------+------------------------------------+
+    |  NUM_numFSMs   |   4            |  Compile time: No.stream module    |
+    +----------------+----------------+------------------------------------+
+    |  NUM_numBSMs   |   4            |  Compile time: No.stream module    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_nPE       |   2            |  Compile time: No.PE               |
+    +----------------+----------------+------------------------------------+
+    |  RTM_order     |   8            |  Compile time: Spatial Order       |
+    +----------------+----------------+------------------------------------+
+    |  RTM_height    |   10           |  Running time: Image total height  |
+    +----------------+----------------+------------------------------------+
+    |  RTM_width     |   10           |  Running time: Image total widht   |
+    +----------------+----------------+------------------------------------+
+    |  RTM_time      |   12           |  Running time: No.time             |
+    +----------------+----------------+------------------------------------+
 
 Test 3D RTM
 ===============
@@ -209,32 +217,35 @@ Notice that **RTM_time** must be multiple of **RTM_numFSMs**.
 **RTM_x** must be multiple of **RTM_nPEX**.
 
 
-+----------------+----------------+------------------------------------+
-|  Parameter     |  Default Value |  Notes                             |
-+================+================+====================================+
-|  RTM_maxY      |   280          |  Compile time: y-dimmention limit  |
-+----------------+----------------+------------------------------------+
-|  RTM_maxZ      |   180          |  Compile time: z-dimmention limit  |
-+----------------+----------------+------------------------------------+
-|  RTM_NXB       |   20           |  Compile time: Boundary width      |
-+----------------+----------------+------------------------------------+
-|  RTM_NYB       |   20           |  Compile time: Boundary width      |
-+----------------+----------------+------------------------------------+
-|  RTM_NZB       |   20           |  Compile time: Boundary height     |
-+----------------+----------------+------------------------------------+
-|  NUM_numFSMs   |   2            |  Compile time: No.stream module    |
-+----------------+----------------+------------------------------------+
-|  RTM_nPEX      |   4            |  Compile time: No.PE along X       |
-+----------------+----------------+------------------------------------+
-|  RTM_nPEZ      |   4            |  Compile time: No.PE along Z       |
-+----------------+----------------+------------------------------------+
-|  RTM_order     |   8            |  Compile time: Spatial Order       |
-+----------------+----------------+------------------------------------+
-|  RTM_x         |   10           |  Running time: Image x dim size    |
-+----------------+----------------+------------------------------------+
-|  RTM_y         |   10           |  Running time: Image y dim size    |
-+----------------+----------------+------------------------------------+
-|  RTM_z         |   10           |  Running time: Image z dim size    |
-+----------------+----------------+------------------------------------+
-|  RTM_time      |   10           |  Running time: No.time             |
-+----------------+----------------+------------------------------------+
+.. table:: Parameters with make command 
+    :align: center
+
+    +----------------+----------------+------------------------------------+
+    |  Parameter     |  Default Value |  Notes                             |
+    +================+================+====================================+
+    |  RTM_maxY      |   280          |  Compile time: y-dimmention limit  |
+    +----------------+----------------+------------------------------------+
+    |  RTM_maxZ      |   180          |  Compile time: z-dimmention limit  |
+    +----------------+----------------+------------------------------------+
+    |  RTM_NXB       |   20           |  Compile time: Boundary width      |
+    +----------------+----------------+------------------------------------+
+    |  RTM_NYB       |   20           |  Compile time: Boundary width      |
+    +----------------+----------------+------------------------------------+
+    |  RTM_NZB       |   20           |  Compile time: Boundary height     |
+    +----------------+----------------+------------------------------------+
+    |  NUM_numFSMs   |   2            |  Compile time: No.stream module    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_nPEX      |   4            |  Compile time: No.PE along X       |
+    +----------------+----------------+------------------------------------+
+    |  RTM_nPEZ      |   4            |  Compile time: No.PE along Z       |
+    +----------------+----------------+------------------------------------+
+    |  RTM_order     |   8            |  Compile time: Spatial Order       |
+    +----------------+----------------+------------------------------------+
+    |  RTM_x         |   10           |  Running time: Image x dim size    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_y         |   10           |  Running time: Image y dim size    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_z         |   10           |  Running time: Image z dim size    |
+    +----------------+----------------+------------------------------------+
+    |  RTM_time      |   10           |  Running time: No.time             |
+    +----------------+----------------+------------------------------------+

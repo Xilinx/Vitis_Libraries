@@ -109,7 +109,7 @@ void forward(bool p_sel,
     p_sm[t_NumFSMs - 1].forward(p_src[t_NumFSMs - 1], l_upb[t_NumFSMs - 1], l_vt[t_NumFSMs - 2], l_vt_out,
                                 l_pp[t_NumFSMs - 2], l_p[t_NumFSMs - 1], l_pp_out, l_p[t_NumFSMs]);
 #endif
-    dataConsumer(l_entries, l_vt_out);
+    xf::hpc::dataConsumer(l_entries, l_vt_out);
 
     p_sm[0].template saveUpb<t_NumFSMs>(p_t, l_upb, p_upb);
     p_domain.template streamSelMem(p_sel, l_p[t_NumFSMs], p_po0, p_po1);
@@ -192,7 +192,7 @@ void forward(bool p_sel,
     p_sm[t_NumFSMs - 1].forward(p_src[t_NumFSMs - 1], l_vt[t_NumFSMs - 2], l_vt_out, l_pp[t_NumFSMs - 2],
                                 l_p[t_NumFSMs - 1], l_pp_out, l_p[t_NumFSMs]);
 #endif
-    dataConsumer(l_entries, l_vt_out);
+    xf::hpc::dataConsumer(l_entries, l_vt_out);
 
     p_domain.template streamSelMem(p_sel, l_p[t_NumFSMs], p_po0, p_po1);
     p_domain.template streamSelMem(p_sel, l_pp_out, p_ppo0, p_ppo1);

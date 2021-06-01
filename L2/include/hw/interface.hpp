@@ -14,8 +14,8 @@
  * limitations under the License.
 */
 
-#ifndef _INTERFACE_HPP_
-#define _INTERFACE_HPP_
+#ifndef XF_HPC_INTERFACE_HPP
+#define XF_HPC_INTERFACE_HPP
 
 #define PRAGMA_HLS(x) _Pragma(#x)
 
@@ -24,5 +24,8 @@
 #define POINTER(NAME, BUNDLE)                                                  \
     PRAGMA_HLS(HLS INTERFACE m_axi port = NAME bundle = BUNDLE offset = slave) \
     SCALAR(NAME)
+
+#define AXIS(NAME) PRAGMA_HLS(HLS INTERFACE axis port = NAME)
+#define AP_CTRL_NONE(NAME) PRAGMA_HLS(HLS INTERFACE ap_ctrl_none port = NAME)
 
 #endif

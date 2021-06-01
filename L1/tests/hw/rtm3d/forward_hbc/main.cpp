@@ -115,11 +115,11 @@ int main(int argc, char** argv) {
     int err0 = 0, err1 = 0, err2 = 0;
     bool pass0 = compare<DATATYPE>(RTM_x * RTM_y * RTM_z, pp.data(), snap0.data(), err0);
     cout << "There are in total " << err0 << " errors in pp v.s. snap0" << endl;
-    writeBin(filePath + "snap_c_0.bin", sizeof(float) * RTM_x * RTM_y * RTM_z, pp.data());
+    // writeBin(filePath + "snap_c_0.bin", sizeof(float) * RTM_x * RTM_y * RTM_z, pp.data());
 
     bool pass1 = compare<DATATYPE>(RTM_x * RTM_y * RTM_z, p.data(), snap1.data(), err1);
     cout << "There are in total " << err1 << " errors in p v.s. snap1" << endl;
-    writeBin(filePath + "snap_c_1.bin", sizeof(float) * RTM_x * RTM_y * RTM_z, p.data());
+    // writeBin(filePath + "snap_c_1.bin", sizeof(float) * RTM_x * RTM_y * RTM_z, p.data());
 
     bool pass2 = compare<DATATYPE>(RTM_x * RTM_y * ORDER * NTime / 2, upbConv.data(), ref.data(), err2);
     cout << "There are in total " << err2 << " errors in upb v.s. ref" << endl;

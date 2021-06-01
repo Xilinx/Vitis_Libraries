@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2019 - 2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,4 +23,5 @@ L2 Kernels Tests Guide
    :maxdepth: 1
 
    L2_test_rtm.rst
+   L2_test_cg.rst
    L2_test_fcn.rst

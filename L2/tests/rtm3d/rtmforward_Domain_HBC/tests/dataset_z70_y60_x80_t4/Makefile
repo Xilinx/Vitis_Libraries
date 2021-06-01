@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.2
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -84,11 +84,12 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/rtm3d/rtmforward_Domain_HBC/main.cpp
-HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/sw/xcl2/xcl2.cpp
+HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/xcl2/xcl2.cpp
 
 CXXFLAGS += -DRTM_dataType=float -DRTM_numFSMs=2 -DRTM_maxZ=256 -DRTM_maxY=128 -DRTM_MaxB=20 -DRTM_NXB=20 -DRTM_NYB=20 -DRTM_NZB=20 -DRTM_order=8 -DRTM_nPEZ=2 -DRTM_nPEX=2
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/rtm3d/
-CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/sw/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/../blas/L1/tests/sw/include/
 
 ifeq ($(TARGET),sw_emu)
@@ -110,12 +111,10 @@ LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr 
 endif
 
 # ################### Setting package and image directory #######################
-EMBEDDED_PACKAGE_OUT = package_$(TARGET)
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS := $(BUILD_DIR)/rtmforward.xclbin $(CUR_DIR)/data/ 70 60 80 4 1
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -137,11 +136,11 @@ VPP_LDFLAGS_rtmforward += $(VPP_LDFLAGS_rtmforward_temp)
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/rtmforward.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/rtmforward.xclbin
 BINARY_CONTAINER_rtmforward_OBJS += $(TEMP_DIR)/rtmforward.xo
 
 # ######################### Setting Targets of Makefile ################################
 
+-include ./params.mk
 .PHONY: all clean cleanall docs emconfig
 all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
@@ -163,7 +162,7 @@ $(TEMP_DIR)/rtmforward.xo: $(XFLIB_DIR)/L2/src/hw/rtm3d/rtmforward_hbc.cpp
 
 $(BUILD_DIR)/rtmforward.xclbin: $(BINARY_CONTAINER_rtmforward_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/rtmforward $(VPP_LDFLAGS) $(VPP_LDFLAGS_rtmforward) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/rtmforward $(VPP_LDFLAGS) $(VPP_LDFLAGS_rtmforward) -o '$@' $(+)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
