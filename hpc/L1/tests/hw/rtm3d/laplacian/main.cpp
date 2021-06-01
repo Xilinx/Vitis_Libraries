@@ -45,13 +45,15 @@ int main(int argc, char** argv) {
         for (int j = 0; j < M_y; j++) {
             for (int k = 0; k < M_x; k++) {
                 int index = i * M_y * M_x + j * M_x + k;
-                float outV = ((t_WideType)out[index / nPE])[index % nPE];
+                float outV = ((t_DataTypeX)((t_WideType)out[index / nPE])[index % nPE])[0];
                 float refV = ref[index];
 
                 if (fabs(refV - outV) <= atol + rtol * fabs(refV))
                     continue;
                 else {
                     err++;
+                    cout << "ref = " << refV << '\t' << "val = " << outV << '\t' << "x = " << k << ", y=" << j
+                         << ", z =" << i << endl;
                 }
             }
         }

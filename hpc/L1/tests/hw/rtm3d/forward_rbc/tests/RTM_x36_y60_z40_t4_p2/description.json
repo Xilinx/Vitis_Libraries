@@ -1,5 +1,4 @@
 {
-    
     "clock": "3.3333", 
     "description": "", 
     "flow": "hls", 
@@ -8,7 +7,9 @@
     "part_whitelist": [], 
     "platform_blacklist": [], 
     "platform_whitelist": [
-        "u280"
+        "u280", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "forward_RTM_x36_y60_z40_t4_p2_test", 
     "solution": "sol", 
@@ -37,10 +38,10 @@
                     "hls_vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 20480, 
+                    "hls_vivado_impl": 40960, 
                     "hls_csynth": 10240
                 }, 
-                "max_time_min": 300
+                "max_time_min": 720
             }
         ], 
         "targets": [

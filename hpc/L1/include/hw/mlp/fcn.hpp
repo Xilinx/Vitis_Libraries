@@ -18,6 +18,7 @@
 #define XF_HPC_MLP_FCN_HPP
 
 #include "hls_math.h"
+#include "activations.hpp"
 #include "gemmKernel.hpp"
 
 using namespace xf::blas;
@@ -26,25 +27,6 @@ namespace xf {
 namespace hpc {
 namespace mlp {
 
-template <typename t_DataType>
-static t_DataType relu(t_DataType x) {
-    if (x > 0)
-        return x;
-    else
-        return 0;
-}
-
-template <typename t_DataType>
-static t_DataType sigmoid(t_DataType x) {
-    t_DataType l_exp = hls::expf(-x);
-    return 1.0f / (1.0f + l_exp);
-}
-
-template <typename t_DataType>
-static t_DataType tansig(t_DataType x) {
-    t_DataType l_exp = hls::expf(-2.0f * x);
-    return 2.0f / (1.0f + l_exp) - 1.0f;
-}
 ////////////////////////////////////////////////////////////////////////////////
 // class FCN (fully connected network)
 // add preScale, pRelu and postScal operations to the gemm results

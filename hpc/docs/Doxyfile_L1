@@ -24,6 +24,7 @@
 
 INPUT                  = ../L1/include/hw/ \
                          ../L1/include/hw/rtm/ \
+                         ../L1/include/hw/cgSolver/ \
                          ../L1/include/hw/mlp/
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a

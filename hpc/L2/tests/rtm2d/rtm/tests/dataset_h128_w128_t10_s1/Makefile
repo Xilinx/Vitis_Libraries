@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.2
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -84,12 +84,13 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/rtm2d/rtm/main.cpp
-HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/sw/xcl2/xcl2.cpp
+HOST_SRCS += $(XFLIB_DIR)/../blas/L2/src/xcl2/xcl2.cpp
 
 CXXFLAGS += -DRTM_dataType=float -DRTM_numFSMs=2 -DRTM_numBSMs=2 -DRTM_maxDim=256 -DRTM_MaxB=40 -DRTM_NXB=40 -DRTM_NZB=40 -DRTM_order=8 -DRTM_parEntries=8 -DRTM_verify=1 -DRTM_nPE=2
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/rtm2d/
 CXXFLAGS += -I$(XFLIB_DIR)/../blas/L1/tests/sw/include/
-CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/sw/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/xcl2
 
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
@@ -110,12 +111,10 @@ LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr 
 endif
 
 # ################### Setting package and image directory #######################
-EMBEDDED_PACKAGE_OUT = package_$(TARGET)
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS := $(BUILD_DIR)/rtm.xclbin $(CUR_DIR)/data/ 128 128 10 1 1
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -141,7 +140,6 @@ VPP_LDFLAGS_rtm += $(VPP_LDFLAGS_rtm_temp)
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/rtm.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/rtm.xclbin
 BINARY_CONTAINER_rtm_OBJS += $(TEMP_DIR)/rtmforward.xo
 BINARY_CONTAINER_rtm_OBJS += $(TEMP_DIR)/rtmbackward.xo
 
@@ -173,11 +171,11 @@ $(TEMP_DIR)/rtmbackward.xo: $(XFLIB_DIR)/L2/src/hw/rtm2d/rtmbackward.cpp
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 $(BUILD_DIR)/rtm.xclbin: $(BINARY_CONTAINER_rtm_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/rtm $(VPP_LDFLAGS) $(VPP_LDFLAGS_rtm) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/rtm $(VPP_LDFLAGS) $(VPP_LDFLAGS_rtm) -o '$@' $(+)
 else 
 $(BUILD_DIR)/rtm.xclbin: $(BINARY_CONTAINER_rtm_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/rtm $(VPP_LDFLAGS) $(VPP_LDFLAGS_rtm) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/rtm $(VPP_LDFLAGS) $(VPP_LDFLAGS_rtm) -o '$@' $(+)
 endif
 
 

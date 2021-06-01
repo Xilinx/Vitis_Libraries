@@ -49,8 +49,11 @@ int main(int argc, char** argv) {
         t_PairType s;
         t_WideType s0, s1;
         for (int pe = 0; pe < nPE; pe++) {
-            s0[pe] = p0[i * nPE + pe];
-            s1[pe] = p1[i * nPE + pe];
+            t_DataTypeX x0, x1;
+            x0[0] = p0[i * nPE + pe];
+            s0[pe] = x0;
+            x1[0] = p1[i * nPE + pe];
+            s1[pe] = x1;
         }
         s[0] = s0;
         s[1] = s1;
@@ -64,7 +67,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < M_x * M_y * M_z / nPE; i++) {
         t_PairType s = out[i];
         for (int pe = 0; pe < nPE; pe++) {
-            float outV = ((t_WideType)s[0])[pe];
+            float outV = ((t_DataTypeX)((t_WideType)s[0])[pe])[0];
             float refV = ref0[i * nPE + pe];
             if (fabs(refV - outV) <= atol + rtol * fabs(refV))
                 continue;
@@ -73,7 +76,7 @@ int main(int argc, char** argv) {
             }
         }
         for (int pe = 0; pe < nPE; pe++) {
-            float outV = ((t_WideType)s[1])[pe];
+            float outV = ((t_DataTypeX)((t_WideType)s[1])[pe])[0];
             float refV = ref1[i * nPE + pe];
             if (fabs(refV - outV) <= atol + rtol * fabs(refV))
                 continue;

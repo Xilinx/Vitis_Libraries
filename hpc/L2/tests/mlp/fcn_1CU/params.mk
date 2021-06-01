@@ -20,6 +20,9 @@ TEST_MEMCPY        = 0
 BLAS_CACHE         = 1
 BLAS_XVEC          = 1
 
+#MACROS += -D MLP_TANSIG=1
+#MACROS += -D MLP_RELU=1
+
 MACROS += -D TEST_MEMCPY=$(TEST_MEMCPY) \
           -D BLAS_instructionSizeBytes=$(BLAS_instructionSizeBytes) \
           -D BLAS_dataType=$(BLAS_dataType) \
