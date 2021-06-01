@@ -36,6 +36,7 @@ open_solution -reset $SOLN
 
 set_part $XPART
 create_clock -period $CLKP
+config_compile -disable_auto_rewind
 
 if {$CSIM == 1} {
   csim_design

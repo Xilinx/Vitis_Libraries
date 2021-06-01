@@ -3,7 +3,9 @@
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u200"
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
