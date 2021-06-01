@@ -31,4 +31,5 @@ L2 Kernels User Guide
 
    L2_overview.rst
    L2_gemm.rst
+   L2_benchmark.rst
 

@@ -43,7 +43,7 @@ bool compare<double>(double x, double ref) {
 template <>
 bool compare<float>(float x, float ref) {
     bool l_exactMatch;
-    return isClose<float>(1e-3, 3e-6, x, ref, l_exactMatch);
+    return isClose<float>(1e-3, 3e-5, x, ref, l_exactMatch);
 }
 
 template <typename T>
@@ -66,7 +66,7 @@ bool compare(unsigned int n, T* x, T* ref) {
 }
 
 template <typename T>
-bool compare(unsigned int n, T* x, T* ref, int& err) {
+bool compare(unsigned int n, T* x, T* ref, int& err, bool verbose = false) {
     bool l_ret = true;
     try {
         if (ref == nullptr) {
@@ -80,6 +80,10 @@ bool compare(unsigned int n, T* x, T* ref, int& err) {
         } else {
             for (unsigned int i = 0; i < n; i++) {
                 if (!compare(x[i], ref[i])) {
+                    if (verbose) {
+                        std::cout << "Mismatch at entry " << i << " outValue = " << x[i] << " refValue = " << ref[i]
+                                  << std::endl;
+                    }
                     l_ret = false;
                     err++;
                 }

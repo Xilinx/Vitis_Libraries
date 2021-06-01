@@ -33,27 +33,6 @@ namespace blas {
 
 template <typename t_DataType,
           unsigned int t_LogParEntries,
-          unsigned int t_NumStreams = (1 << t_LogParEntries),
-          typename t_IndexType = unsigned int>
-void gemv(const unsigned int p_m,
-          const unsigned int p_n,
-          hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt> p_M[t_NumStreams],
-          hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt> p_x[t_NumStreams],
-          hls::stream<typename WideType<t_DataType, t_NumStreams>::t_TypeInt>& p_y) {
-#ifndef __SYNTHESIS__
-    assert(p_n % (1 << t_LogParEntries) == 0);
-#endif
-#pragma HLS DATAFLOW
-    hls::stream<typename WideType<t_DataType, 1>::t_TypeInt> l_y[t_NumStreams];
-    for (int i = 0; i < t_NumStreams; i++) {
-#pragma HLS UNROLL
-        DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, l_y);
-    }
-    combineStream<t_NumStreams>(l_y, p_y);
-}
-
-template <typename t_DataType,
-          unsigned int t_LogParEntries,
           typename t_IndexType = unsigned int,
           typename t_MacDataType = t_DataType>
 void gemv(const unsigned int p_m,
@@ -65,13 +44,12 @@ void gemv(const unsigned int p_m,
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
-    DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, p_y);
+    DotHelper<t_DataType, t_LogParEntries, t_IndexType, t_MacDataType>::dot(p_n, p_m, p_M, p_x, p_y);
 }
 
 /**
  * @brief gemv function that returns the result vector of the multiplication of a matrix and a vector y = alpha * M * x
- * +
- * beta * y
+ * + beta * y
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector

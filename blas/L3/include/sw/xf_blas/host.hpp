@@ -13,6 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 
 #ifndef XF_BLAS_HOST_HPP
 #define XF_BLAS_HOST_HPP
@@ -33,6 +48,10 @@
 #include "../utility/utility.hpp"
 #include "helper.hpp"
 
+#if BLAS_streamingKernel
+#include "ISA.hpp"
+#endif
+
 #define IDX2R(i, j, ld) (((i) * (ld)) + (j))
 
 using namespace std;
@@ -41,18 +60,20 @@ namespace xf {
 
 namespace blas {
 
+#if BLAS_streamingKernel
+typedef MemInstr<64> MemInstrType;
+typedef GemmInstr<64> GemmInstrType;
+#endif
+
 class XFpga {
    public:
     xrt::device m_device;
     xrt::uuid m_uuid;
-    vector<string> m_cuNames;
 
     XFpga() = delete;
     XFpga(const char* p_xclbin, int* p_err, unsigned int deviceIndex = 0) {
         m_device = xrt::device(deviceIndex);
         m_uuid = m_device.load_xclbin(p_xclbin);
-        auto l_xclbin = xrt::xclbin(p_xclbin);
-        m_cuNames = l_xclbin.get_cu_names();
     }
 
     ~XFpga() {}
@@ -98,7 +119,11 @@ class XHost {
     unordered_map<void*, unsigned long long> m_hostMatSz;
     shared_ptr<XFpga> m_fpga;
     vector<unsigned int> m_execHandles;
+#if BLAS_streamingKernel
+    unsigned char* m_instrBuf;
+#else
     char* m_instrBuf;
+#endif
     unsigned int m_instrOffset;
     unsigned int m_cuIndex;
 
@@ -111,10 +136,19 @@ class XHost {
     XHost() = delete;
     XHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex) {
         m_fpga = XFpgaHold::instance().m_xFpgaPtr[p_deviceIndex];
-        xrt::kernel l_kernel = xrt::kernel(m_fpga->m_device, m_fpga->m_uuid.get(), m_fpga->m_cuNames[p_kernelIndex]);
+#if BLAS_streamingKernel
+        xrt::kernel l_kernel = xrt::kernel(m_fpga->m_device, m_fpga->m_uuid.get(), "gemmLoadStoreKernel");
+        m_kernel.push_back(l_kernel);
+        m_memId = 0;
+#elif BLAS_runFcn
+        xrt::kernel l_kernel = xrt::kernel(m_fpga->m_device, m_fpga->m_uuid.get(), "fcnKernel");
         m_kernel.push_back(l_kernel);
         m_memId = m_kernel[0].group_id(0);
-
+#else
+        xrt::kernel l_kernel = xrt::kernel(m_fpga->m_device, m_fpga->m_uuid.get(), "blasKernel");
+        m_kernel.push_back(l_kernel);
+        m_memId = m_kernel[0].group_id(0);
+#endif
         int l_memAllocStatus = posix_memalign((void**)&m_instrBuf, PAGE_SIZE, PAGE_SIZE * 2);
         if (l_memAllocStatus) {
             *p_status = XFBLAS_STATUS_ALLOC_FAILED;
@@ -228,12 +262,20 @@ class XHost {
         return XFBLAS_STATUS_SUCCESS;
     }
 
+#if BLAS_streamingKernel
+    void addInstr(MemInstrType* l_memInstr, size_t l_instrSize) {
+        unsigned char* l_currPos = &m_instrBuf[m_instrOffset];
+        l_memInstr->storeMem(l_currPos);
+        m_instrOffset += l_instrSize;
+    }
+#else
     void addInstr(BLASArgs* p_args) {
         char* l_instr = p_args->asByteArray();
         char* l_currPos = &m_instrBuf[m_instrOffset];
         memcpy(l_currPos, l_instr, p_args->sizeInBytes());
         m_instrOffset += p_args->sizeInBytes();
     }
+#endif
 
     template <typename t_dataType>
     xfblasStatus_t getMat(

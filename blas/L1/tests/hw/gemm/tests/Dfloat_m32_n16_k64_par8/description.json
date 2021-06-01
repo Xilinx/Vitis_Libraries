@@ -7,7 +7,9 @@
     "part_whitelist": [], 
     "platform_blacklist": [], 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "gemm_test_Dfloat_m32_n16_k64_par8", 
     "solution": "sol", 

@@ -192,7 +192,11 @@ int main(int argc, char** argv) {
     readConfigDict(l_configFile, &l_configDict);
 
     float l_freq = getBoardFreqMHz(l_xclbinFile);
+#if BLAS_streamingKernel
+    int BLAS_ddrWidth = stoi(l_configDict["BLAS_parEntries"]);
+#else
     int BLAS_ddrWidth = stoi(l_configDict["BLAS_ddrWidth"]);
+#endif
     unsigned long int l_Ops = l_numKernel * (2ull * m * k * n + m * n * 3);
     unsigned long int l_Parallel_Ops = 2ull * m * k * n;
 

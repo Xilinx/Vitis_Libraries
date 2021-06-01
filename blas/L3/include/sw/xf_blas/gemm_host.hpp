@@ -39,6 +39,94 @@ namespace xf {
 
 namespace blas {
 
+#if BLAS_streamingKernel
+
+typedef MemInstr<64> MemInstrType;
+typedef GemmInstr<64> GemmInstrType;
+
+class GEMMHost : public BLASHost {
+   public:
+    GEMMHost() = delete;
+    virtual ~GEMMHost() {}
+    GEMMHost(const GEMMHost&) = delete;
+    GEMMHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
+        : BLASHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex) {}
+
+    virtual xfblasStatus_t addGEMMOp(void* p_a,
+                                     void* p_b,
+                                     void* p_c,
+                                     void* p_bias,
+                                     unsigned int p_m,
+                                     unsigned int p_n,
+                                     unsigned int p_k,
+                                     unsigned int p_lda,
+                                     unsigned int p_ldb,
+                                     unsigned int p_ldc,
+                                     unsigned int p_ldx,
+                                     int p_postScale,
+                                     int p_postShift) {
+        if (this->m_bufHandle.find(p_a) == this->m_bufHandle.end() ||
+            this->m_bufHandle.find(p_b) == this->m_bufHandle.end() ||
+            this->m_bufHandle.find(p_c) == this->m_bufHandle.end() ||
+            this->m_bufHandle.find(p_bias) == this->m_bufHandle.end()) {
+            return XFBLAS_STATUS_ALLOC_FAILED;
+        }
+        auto& l_devPtr = this->m_bufHandle;
+
+        uint64_t address_A = l_devPtr[p_a].address();
+        uint64_t address_B = l_devPtr[p_b].address();
+        uint64_t address_C = l_devPtr[p_c].address();
+        uint64_t address_bias = l_devPtr[p_bias].address();
+
+        unsigned long long l_aOff, l_bOff, l_cOff, l_xOff;
+        l_aOff = (unsigned long long)address_A;
+        l_bOff = (unsigned long long)address_B;
+        l_cOff = (unsigned long long)address_C;
+        l_xOff = (unsigned long long)address_bias;
+
+        l_aOff -= this->m_baseAddress;
+        l_bOff -= this->m_baseAddress;
+        l_cOff -= this->m_baseAddress;
+        l_xOff -= this->m_baseAddress;
+
+        GemmInstrType l_gemmInstr(l_aOff, l_bOff, l_xOff, l_cOff, p_m, p_k, p_n);
+
+        MemInstrType l_memInstr;
+        l_gemmInstr.store(l_memInstr);
+
+        this->addInstr(&l_memInstr, sizeof(l_memInstr));
+        this->enableRun();
+
+        return XFBLAS_STATUS_SUCCESS;
+    }
+
+    virtual xfblasStatus_t addGEMMOpByAddress(unsigned int l_aOff,
+                                              unsigned int l_bOff,
+                                              unsigned int l_cOff,
+                                              unsigned int l_xOff,
+                                              unsigned int p_m,
+                                              unsigned int p_n,
+                                              unsigned int p_k,
+                                              unsigned int p_lda,
+                                              unsigned int p_ldb,
+                                              unsigned int p_ldc,
+                                              unsigned int p_ldx,
+                                              int p_postScale,
+                                              int p_postShift) {
+        GemmInstrType l_gemmInstr(l_aOff, l_bOff, l_xOff, l_cOff, p_m, p_k, p_n);
+
+        MemInstrType l_memInstr;
+        l_gemmInstr.store(l_memInstr);
+
+        this->addInstr(&l_memInstr, sizeof(l_memInstr));
+        this->enableRun();
+
+        return XFBLAS_STATUS_SUCCESS;
+    }
+};
+
+#else
+
 class GemmArgs : public BLASArgs {
    public:
     virtual ~GemmArgs() {}
@@ -151,6 +239,8 @@ class GEMMHost : public BLASHost {
         return XFBLAS_STATUS_SUCCESS;
     }
 };
+
+#endif
 
 } // namespace blas
 

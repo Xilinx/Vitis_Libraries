@@ -8,7 +8,9 @@
     "platform_blacklist": [], 
     "platform_whitelist": [
         "u280", 
-        "u200"
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "gbmv_Ddouble_m1024-n1024-l5-u5_test", 
     "solution": "sol", 

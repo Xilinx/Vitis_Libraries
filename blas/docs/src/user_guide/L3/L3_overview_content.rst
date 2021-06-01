@@ -1026,7 +1026,7 @@ This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + b
         - pointer to matrix A in the host memory
     *
         - lda
-        - leading dimension of matirx A
+        - leading dimension of matrix A
     *
         - B
         - pointer to matrix B in the host memory
