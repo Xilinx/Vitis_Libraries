@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ if {![info exists CLKP]} {
 open_project -reset $PROJ
 
 
-add_files "lz4_compress_test.cpp $XF_PROJ_ROOT/common/thirdParty/xxhash/xxhash.c" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash"
-add_files -tb "lz4_compress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash -DPARALLEL_BLOCK=8"
+add_files "lz4_compress_test.cpp $XF_PROJ_ROOT/common/thirdParty/xxhash/xxhash.c" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/libs/lz4 -I${XF_PROJ_ROOT}/common/libs/compress -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash"
+add_files -tb "lz4_compress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/libs/lz4 -I${XF_PROJ_ROOT}/common/libs/compress -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash -DPARALLEL_BLOCK=8"
 
 set_top hls_lz4CompressMutipleStreams
 

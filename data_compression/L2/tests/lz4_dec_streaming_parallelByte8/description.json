@@ -6,40 +6,49 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.lz4", 
+            "cmd_args": "-xbin BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.lz4", 
             "name": "generic launch for all flows"
         }
     ], 
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
-             ]
+                "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
+            ]
         }
     ], 
     "platform_blacklist": [
-        "zc", 
-        "vck"
+        "zc"
     ], 
     "platform_whitelist": [
         "u200", 
         "u250", 
-        "u50"
-    ], 
+        "u50", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+    "data": [
+        "PROJECT/sample.txt.lz4" 
+    ],   
     "host": {
-        "host_exe": "lz4", 
+        "host_exe": "xil_lz4_decompress_streaming", 
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L2/tests/src/lz4_stream.cpp", 
+                "LIB_DIR/common/libs/compress/lz4OCLHost.cpp",
+                "LIB_DIR/common/libs/compress/lz4Base.cpp",
+                "LIB_DIR/common/libs/compress/lz4App.cpp",
+                "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/common/libs/compress/", 
+                "LIB_DIR/L2/tests/src/", 
                 "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
@@ -52,14 +61,14 @@
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=1", 
-                "MULTIPLE_BYTES=8"
+                "MULTIPLE_BYTES=8" 
             ]
         }
     }, 
     "containers": [
         {
             "name": "decompress_streaming", 
-            "ldclflags": "--config PROJECT/decompress.ini", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
                     "name": "xilLz4DecompressStream", 
@@ -71,8 +80,12 @@
                 }
             ]
         }
-    ], 
-    "output_files": "sample.txt.lz4.*", 
+    ],
+    "output_files": [
+            "sample.txt.lz4.*",
+            "sample_run.*",
+            "test.list"
+    ],        
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -102,5 +115,23 @@
             "vitis_hw_run"
         ], 
         "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
     }
 }

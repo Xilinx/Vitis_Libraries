@@ -13,20 +13,24 @@
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/dualcore_decompress_streaming.xclbin"
-             ]
+                "./run.sh HOST_EXE LIB_DIR BUILD/dualcore_decompress_streaming.xclbin"
+            ]
         }
     ], 
-    "config_make": "./config.mk",
+    "config_make": "./config.mk", 
     "platform_blacklist": [
-        "zc", 
-        "vck"
+        "zc"
     ], 
     "platform_whitelist": [
         "u200", 
         "u250", 
-        "u50"
-    ], 
+        "u50", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+    "data": [
+        "PROJECT/sample.txt.snappy" 
+    ],   
     "host": {
         "host_exe": "xsnappy_decompress_streaming", 
         "compiler": {
@@ -40,12 +44,12 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/L2/tests/src/", 
                 "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "NUM_CORES=2", 
-                "MULTIPLE_BYTES=8",
+                "MULTIPLE_BYTES=8", 
                 "FREE_RUNNING_KERNEL"
             ]
         }
@@ -53,7 +57,7 @@
     "v++": {
         "compiler": {
             "symbols": [
-                "NUM_CORES=2",
+                "NUM_CORES=2", 
                 "MULTIPLE_BYTES=8"
             ]
         }
@@ -61,7 +65,7 @@
     "containers": [
         {
             "name": "dualcore_decompress_streaming", 
-            "ldclflags": "--config PROJECT/decompress.ini", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
                     "name": "xilSnappyDecompressStream", 
@@ -104,5 +108,23 @@
             "vitis_hw_run"
         ], 
         "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
     }
 }

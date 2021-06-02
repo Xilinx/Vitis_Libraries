@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #include "hls_stream.h"
 
 #include "ap_axi_sdata.h"
-#include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
 #include <ap_int.h>
@@ -155,12 +154,51 @@ void kStreamWriteFixedSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream
     outKStream.write(t1);
 }
 
-template <uint32_t DATAWIDTH>
+template <uint32_t DATAWIDTH, class SIZE_DT = uint32_t, int AXIWIDTH = 32>
 void kStreamWriteMultiByteSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream,
-                               hls::stream<ap_axiu<32, 0, 0, 0> >& outKSizeStream,
-                               hls::stream<ap_uint<DATAWIDTH> >& inDataStream,
-                               hls::stream<bool>& inDataStreamEoS,
-                               hls::stream<uint32_t>& inSizeStream) {
+                               hls::stream<ap_axiu<AXIWIDTH, 0, 0, 0> >& outKSizeStream,
+                               hls::stream<ap_uint<DATAWIDTH + 8> >& inDataStream,
+                               hls::stream<SIZE_DT>& inSizeStream) {
+    /**
+     * @brief Read N-bit wide data from internal hls streams and write to axi
+     *        kernel stream for the given size. N is the template parameter DATAWIDTH.
+     *
+     * @tparam DATAWIDTH    data width of the kernel stream
+     *
+     * @param outKStream    output kernel stream
+     * @param outDataStream output data stream from internal modules
+     * @param dataSize      size of data in streams
+     *
+     */
+    // read the original size
+    ap_uint<DATAWIDTH + 8> inValue;
+    ap_axiu<DATAWIDTH, 0, 0, 0> outValue;
+    ap_axiu<AXIWIDTH, 0, 0, 0> decompressSize;
+    ap_uint<DATAWIDTH> outData;
+
+    bool eosFlag = false;
+
+    while (!eosFlag) {
+#pragma HLS PIPELINE II = 1
+        inValue = inDataStream.read();
+        outData = inValue.range(DATAWIDTH - 1, 0);
+        eosFlag = inValue.range(DATAWIDTH + 7, DATAWIDTH);
+        outValue.data = outData;
+        outValue.last = (eosFlag) ? true : false;
+        outKStream.write(outValue);
+    }
+
+    decompressSize.data = inSizeStream.read();
+    decompressSize.last = true;
+    outKSizeStream.write(decompressSize);
+}
+
+template <uint32_t DATAWIDTH, class SIZE_DT = uint32_t, int AXIWIDTH = 32>
+void kStreamWrite(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream,
+                  hls::stream<ap_axiu<AXIWIDTH, 0, 0, 0> >& outKSizeStream,
+                  hls::stream<ap_uint<DATAWIDTH> >& inDataStream,
+                  hls::stream<bool>& inDataStreamEoS,
+                  hls::stream<SIZE_DT>& inSizeStream) {
     /**
      * @brief Read N-bit wide data from internal hls streams and write to axi
      *        kernel stream for the given size. N is the template parameter DATAWIDTH.
@@ -175,26 +213,34 @@ void kStreamWriteMultiByteSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKSt
     // read the original size
     ap_uint<DATAWIDTH> inValue;
     ap_axiu<DATAWIDTH, 0, 0, 0> outValue;
-    ap_axiu<32, 0, 0, 0> decompressSize;
+    ap_axiu<AXIWIDTH, 0, 0, 0> decompressSize;
 
     bool eosFlag = inDataStreamEoS.read();
+    inValue = inDataStream.read();
+    outValue.data = inValue;
+    outValue.last = false;
+    outValue.keep = -1;
 
-    for (; eosFlag == false; eosFlag = inDataStreamEoS.read()) {
+    while (!eosFlag) {
 #pragma HLS PIPELINE II = 1
+        eosFlag = inDataStreamEoS.read();
+        if (eosFlag) {
+            decompressSize.data = inSizeStream.read();
+            decompressSize.last = true;
+            outKSizeStream.write(decompressSize);
+
+            uint8_t value = decompressSize.data % (DATAWIDTH / 8);
+            outValue.last = true;
+            outValue.keep = ((1 << value) - 1);
+        }
+
+        outKStream.write(outValue);
+
         inValue = inDataStream.read();
         outValue.data = inValue;
         outValue.last = false;
-        outKStream.write(outValue);
+        outValue.keep = -1;
     }
-
-    inValue = inDataStream.read();
-    outValue.data = inValue;
-    outValue.last = true;
-    outKStream.write(outValue);
-
-    decompressSize.data = inSizeStream.read();
-    decompressSize.last = true;
-    outKSizeStream.write(decompressSize);
 }
 
 } // end details

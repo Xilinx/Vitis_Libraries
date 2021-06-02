@@ -74,13 +74,13 @@
                     "num_compute_units": "1"
                 }, 
                 {
-                    "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_rd.cpp", 
+                    "name": "xilGzipS2MM", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_s2mm.cpp", 
                     "num_compute_units": "1"
                 }, 
                 {
-                    "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_wr.cpp", 
+                    "name": "xilGzipMM2S", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_mm2s.cpp", 
                     "num_compute_units": "1"
                 }, 
                 {
@@ -91,7 +91,9 @@
             ]
         }
     ], 
-    "output_files": "sample.txt.*", 
+    "output_files": [
+          "sample.txt.*"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [

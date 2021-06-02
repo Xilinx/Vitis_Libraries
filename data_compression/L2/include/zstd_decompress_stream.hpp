@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,9 +60,7 @@ extern "C" {
  * @param sizestreamd output size kernel axi stream
  *
  */
-void xilZstdDecompressStream(uint64_t input_size,
-                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
-                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& outaxistreamd,
-                             hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd);
+void xilZstdDecompressStream(hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
+                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& outaxistreamd);
 }
 #endif // _XFCOMPRESSION_ZSTD_DECOMPRESS_STREAM_HPP_

@@ -68,10 +68,70 @@ DEVICE variable.
 Benchmark Result
 ----------------
 
-By offloading compression to FPGA, we achieved 3.6x speedup against
-single threaded LZ4 default (v1.9.0) and a 4.4x speedup against single
-core Snappy (v1.1.4). Benchmark evaluation of compression performance is
-of reference Silesia Corpus.
+By offloading compression to FPGA, we have achieved 19.3x speedup using single GZIP
+compress kernel against single core CPU Zlib fast (1.2.11, -1) and a 2x speedup
+achieved using single GZIP decompress kernel against single core CPU Zlib fast
+(1.2.11, -1).
+
+Dataset
+~~~~~~~
+Benchmark evaluation of compression performance is of reference `Silesia Corpus.
+<http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia>`__
+
+
+Compression
+~~~~~~~~~~~
+
+Tables below showcases throughput details of compression for various Alveo accelerated data compression algorithms.
+
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| Architecture                                                           |  Compression Ratio   |     Throughput    |  FMax    |  LUT    |  BRAM |  URAM |
++========================================================================+======================+===================+==========+=========+=======+=======+
+| `LZ4 Streaming <L2/tests/lz4_compress_streaming>`_                     |        2.13          |      290 MB/s     |  300MHz  |  3.2K   |  5    |  6    |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Snappy Streaming <L2/demos/snappy_streaming>`_                        |        2.13          |      290 MB/s     |  300MHz  |  3.1K   |  4    |  6    |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `LZ4 Memory Mapped <L2/tests/lz4_compress>`_                           |        2.13          |      2.2 GB/s     |  295MHz  |  47K    |  56   |  48   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Snappy Memory Mapped <L2/tests/snappy_compress>`_                     |        2.13          |      2.2 GB/s     |  300MHz  |  47K    |  48   |  48   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip/Zlib Memory Mapped <L2/tests/gzipc_block_mm>`_                   |        2.67          |      2 GB/s       |  285MHz  |  53.8K  |  75   |  72   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip/Zlib Compress Stream <L2/tests/gzipc>`_                          |        2.67          |      2 GB/s       |  285MHz  |  49.7K  |  67   |  72   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip/Zlib Fixed Compress Stream <L2/tests/gzipc_static>`_             |        2.25          |      2 GB/s       |  285MHz  |  34.6K  |  48   |  64   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+
+.. [*] LZ4 Streaming and Snappy Streaming: Uses Single Engine and Datawidth 8-bit
+.. [*] LZ4 Memory Mapped and Snappy Memory Mapped: Uses 8-Engines with Data Movers
+.. [*] GZip/Zlib Memory Mapped and GZip/Zlib Compress Stream: Uses 8-Engines with Data Movers and supports Dynamic Huffman
+
+
+Decompression
+~~~~~~~~~~~~~
+
+Tables below showcases throughput details of decompression for various Alveo accelerated data compression algorithms.
+
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| Architecture                                                         |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |           
++======================================================================+===================+==========+=========+=======+======+
+| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  300MHz  |  7.2K   |  0    |  4   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  300MHz  |  8.8K   |  0    |  4   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `GZip/Zlib Streaming <L2/tests/gzip_decompress>`_                    |     450  MB/s     |  252MHz  |  11.3K  |  6    |  3   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `ZStd Streaming <L2/demos/zstd_decompress>`_                         |     463  MB/s     |  232MHz  |  18K    |  52   |  4   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `ZStd Full File Streaming <L2/demos/zstd_decompress>`_               |     463  MB/s     |  232MHz  |  22K    |  52   |  4   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+
+.. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
+.. [*] LZ4 Streaming and Snappy Streaming: Uses Single Engine and Datawidth 64-bit
+.. [*] LZ4 Memory Mapped and Snappy Memory Mapped: Uses 8-Engines with Data Movers
+.. [*] GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported) and data width 64-bit.
+.. [*] ZStd Streaming: Uses single engine with datawidth 32-bit and full Standard support with limited Window Size upto 128KB.
+
 
 LICENSE
 -------
@@ -81,7 +141,7 @@ license. <https://www.apache.org/licenses/LICENSE-2.0>`__
 
 ::
 
-   Copyright 2020 Xilinx, Inc.
+   Copyright 2019-2021 Xilinx, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -94,7 +154,7 @@ license. <https://www.apache.org/licenses/LICENSE-2.0>`__
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   Copyright 2020 Xilinx, Inc.
+   Copyright 2019-2021 Xilinx, Inc.
 
 Contribution/Feedback
 ---------------------

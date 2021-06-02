@@ -3,11 +3,20 @@
     "description": "This is a L1 test design to validate LZ4 compression module. It processes the data to and from the DDR into multiple parallel streams that helps in processing 8x data and achieve higher performance.", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u200"
+        "u200", 
+        "vck190", 
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
+    "QoR_golden": {
+        "VV_LUT": "5714", 
+        "VV_FF": "7767", 
+        "VV_BRAM": "13", 
+        "VV_URAM": "6", 
+        "VV_AchievedClockPeriod": "2.915"
+    }, 
     "project": "lz4_compress_test", 
     "solution": "sol1", 
     "clock": "3.3", 

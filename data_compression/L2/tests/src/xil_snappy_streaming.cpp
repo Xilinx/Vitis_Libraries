@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,6 @@
 #include "xil_snappy_streaming.hpp"
 #include <fcntl.h>  /* For O_RDWR */
 #include <unistd.h> /* For open(), creat() */
-#define BLOCK_SIZE 64
-#define KB 1024
-#define MAGIC_HEADER_SIZE 4
-#define MAGIC_BYTE_1 4
-#define MAGIC_BYTE_2 34
-#define MAGIC_BYTE_3 77
-#define MAGIC_BYTE_4 24
-#define FLG_BYTE 104
 
 int fd_p2p_c_in = 0;
 const int RESIDUE_4K = 4096;
@@ -155,7 +147,10 @@ uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name,
     } else { // Standard Snappy flow
         // Build Java based snappy source code
         std::string command =
-            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -c " + inFile_name;
+            "java -cp "
+            "\".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6."
+            "jar\" MainClass -c " +
+            inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -189,7 +184,8 @@ uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_s
 
     // copy input to input buffer
     // std::memcpy(h_buf_in.data(), in, input_size);
-    // sequentially copy block sized buffers to kernel and wait for them to finish before enqueueing
+    // sequentially copy block sized buffers to kernel and wait for them to finish
+    // before enqueueing
     for (uint32_t blkIndx = 0, bufIndx = 0; blkIndx < total_block_count; blkIndx++, bufIndx += host_buffer_size) {
         // current block input size
         uint32_t c_input_size = host_buffer_size;
@@ -321,7 +317,10 @@ uint64_t xfSnappyStreaming::decompressFile(std::string& inFile_name,
     } else {
         // Use standard snappy compress/decompress below
         std::string command =
-            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -d " + inFile_name;
+            "java -cp "
+            "\".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6."
+            "jar\" MainClass -d " +
+            inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -364,7 +363,10 @@ uint32_t xfSnappyStreaming::decompressFileFull(
     } else {
         // Use standard snappy compress/decompress below
         std::string command =
-            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -d " + inFile_name;
+            "java -cp "
+            "\".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6."
+            "jar\" MainClass -d " +
+            inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -503,7 +505,6 @@ uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t i
 #endif
     cl_mem_ext_ptr_t p2pInExt;
     char* p2pPtr = NULL;
-
     uint32_t inputSize4KMultiple = 0;
     if (enable_p2p) {
         // roundoff inputSize to 4K

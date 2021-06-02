@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  *
  */
 #include "zlib.hpp"
-#include <fcntl.h>  /* For O_RDWR */
-#include <unistd.h> /* For open(), creat() */
-#include <sys/stat.h>
 #include "zlib.h"
-auto crc = 0; // CRC32 value
+#include <fcntl.h> /* For O_RDWR */
+#include <sys/stat.h>
+#include <unistd.h> /* For open(), creat() */
+auto crc = 0;       // CRC32 value
 extern unsigned long crc32(unsigned long crc, const unsigned char* buf, uint32_t len);
 int fd_p2p_c_in = 0;
 const int RESIDUE_4K = 4096;
@@ -85,6 +85,15 @@ void gzip_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip
     outFile.put(0);
     outFile.write((char*)zip_out, enbytes);
 
+#ifdef GZIP_MULTICORE_COMPRESS
+    // Last Block
+    outFile.put(1);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(255);
+    outFile.put(255);
+#endif
+
     unsigned long ifile_size = istat.st_size;
     uint8_t crc_byte = 0;
     long crc_val = crc;
@@ -149,17 +158,25 @@ uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
 #ifdef GZIP_MODE
+#ifndef GZIP_MULTICORE_COMPRESS
     std::thread gzipCrc(gzip_crc32, zlib_in.data(), input_size);
+#endif
 #else
 // Space for zlib CRC
 #endif
 
-    // zlib Compress
+// zlib Compress
+#ifdef GZIP_MULTICORE_COMPRESS
+    uint32_t enbytes = compressFull(zlib_in.data(), zlib_out.data(), input_size);
+#else
     uint32_t enbytes = compress(zlib_in.data(), zlib_out.data(), input_size, host_buffer_size);
+#endif
 
     if (enbytes > 0) {
 #ifdef GZIP_MODE
+#ifndef GZIP_MULTICORE_COMPRESS
         gzipCrc.join();
+#endif
         // Pack gzip encoded stream .gz file
         gzip_headers(inFile_name, outFile, zlib_out.data(), enbytes);
 #else
@@ -301,8 +318,9 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow, uint8_t d_ty
     for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
         m_q[i] = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
     }
-
+#ifndef FREE_RUNNING_KERNEL
     m_q_dec = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
+#endif
     m_q_rd = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
     m_q_rdd = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
     m_q_wr = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
@@ -312,17 +330,22 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow, uint8_t d_ty
     // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
-    // std::string binaryFile = xcl::find_binary_file(device_name,binaryFileName.c_str());
+    // std::string binaryFile =
+    // xcl::find_binary_file(device_name,binaryFileName.c_str());
     // cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     auto fileBuf = xcl::read_binary_file(binaryFileName);
     cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     m_program = new cl::Program(*m_context, {device}, bins);
     m_BinFlow = flow;
     if (flow == 1 || flow == 2) {
+// Create Compress kernels
+#ifdef GZIP_MULTICORE_COMPRESS
+        compress_kernel = new cl::Kernel(*m_program, compress_kernel_names[1].c_str());
+#else
         // Create Compress & Huffman kernels
         compress_kernel = new cl::Kernel(*m_program, compress_kernel_names[0].c_str());
-        // Create Compress & Huffman kernels
         huffman_kernel = new cl::Kernel(*m_program, huffman_kernel_names[0].c_str());
+#endif
     }
     if (flow == 0 || flow == 2) {
         // Create Decompress kernel
@@ -337,13 +360,17 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow, uint8_t d_ty
 int xil_zlib::release() {
     if (m_BinFlow) {
         delete compress_kernel;
+#ifndef GZIP_MULTICORE_COMPRESS
         delete huffman_kernel;
+#endif
     }
     if (m_BinFlow == 0 || m_BinFlow == 2) {
         delete decompress_kernel;
         delete data_writer_kernel;
         delete data_reader_kernel;
+#ifndef FREE_RUNNING_KERNEL
         delete (m_q_dec);
+#endif
         delete (m_q_rd);
         delete (m_q_rdd);
         delete (m_q_wr);
@@ -427,7 +454,8 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
     uint32_t dcmpSize = 0;
     cl::Buffer* buffer_out[BUFCNT];
     cl::Buffer* buffer_size[BUFCNT];
-    cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
+    cl::Buffer* buffer_status; // single common buffer to capture the
+                               // decompression status by kernel
     for (int i = 0; i < BUFCNT; i++) {
         buffer_out[i] =
             new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_zlibout[i].data());
@@ -459,7 +487,8 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
                 outSize = h_dcompressSize[cbf_idx].data();
                 raw_size = *outSize;
                 outP = h_dbuf_zlibout[cbf_idx].data();
-                // if output data size is multiple of buffer size, then (buffer_size + 1) is sent by reader kernel
+                // if output data size is multiple of buffer size, then (buffer_size +
+                // 1) is sent by reader kernel
                 if (raw_size > bufSize) {
                     --raw_size;
                 }
@@ -471,11 +500,12 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
 
                 if (dcmpSize > max_outbuf_size) {
                     std::cout << "\n" << std::endl;
-                    std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                    std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during "
+                                 "decompression \033[0m \n"
                               << std::endl;
-                    std::cout
-                        << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
-                        << std::endl;
+                    std::cout << "\x1B[35mUse -mcr option to increase the maximum "
+                                 "compression ratio (Default: 10) \033[0m \n"
+                              << std::endl;
                     std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
                     exit(1);
                 }
@@ -560,6 +590,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
 
     uint8_t cbf_idx = 0;  // index indicating current buffer(0-4) being used in loop
     uint32_t keq_idx = 0; // index indicating the number of writer kernel enqueues
+    uint32_t isLast = 0;
 
     for (keq_idx = 0; keq_idx < bufferCount; ++keq_idx) {
         cbf_idx = keq_idx % BUFCNT;
@@ -575,6 +606,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
                 cBufSize = inputSize - (bufSize * keq_idx);
                 if (enable_p2p) cBufSize4kMultiple = roundoff(cBufSize, RESIDUE_4K) * RESIDUE_4K;
             }
+            isLast = 1;
         }
 
         auto ssd_start = std::chrono::high_resolution_clock::now();
@@ -593,6 +625,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
         // set kernel arguments
         data_writer_kernel->setArg(0, *(buffer_in[cbf_idx]));
         data_writer_kernel->setArg(1, cBufSize);
+        data_writer_kernel->setArg(2, isLast);
 
         if (enable_p2p) {
             m_q_wr->enqueueTask(*data_writer_kernel, NULL, &(kernelWriteEvent[cbf_idx]));
@@ -623,14 +656,15 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
     if (input_size < inBufferSize) inBufferSize = input_size;
     if (max_outbuf_size < outBufferSize) outBufferSize = max_outbuf_size;
 
-    // Set Kernel Args
-    decompress_kernel->setArg(0, input_size);
-
-    // start parallel reader kernel enqueue thread
+// start parallel reader kernel enqueue thread
+#ifdef FREE_RUNNING_KERNEL
+    auto decompress_API_start = std::chrono::high_resolution_clock::now();
+#endif
     uint32_t decmpSizeIdx = 0;
     std::thread decompWriter(&xil_zlib::_enqueue_writes, this, inBufferSize, in, input_size, enable_p2p);
     std::thread decompReader(&xil_zlib::_enqueue_reads, this, outBufferSize, out, &decmpSizeIdx, max_outbuf_size);
 
+#ifndef FREE_RUNNING_KERNEL
     // enqueue decompression kernel
     m_q_dec->finish();
 
@@ -640,12 +674,15 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
     m_q_dec->finish();
 
     auto decompress_API_end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
-    decompress_API_time_ns_1 += duration;
+#endif
 
     decompReader.join();
     decompWriter.join();
-
+#ifdef FREE_RUNNING_KERNEL
+    auto decompress_API_end = std::chrono::high_resolution_clock::now();
+#endif
+    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+    decompress_API_time_ns_1 += duration;
     float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
     if (enable_p2p)
         std::cout << "E2E\t\t\t:" << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
@@ -659,6 +696,7 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
 uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
     std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     uint32_t inBufferSize = input_size;
+    uint32_t isLast = 1;
     const uint64_t max_outbuf_size = input_size * m_max_cr;
     const uint32_t lim_4gb = (uint32_t)(((uint64_t)4 * 1024 * 1024 * 1024) - 2); // 4GB limit on output size
     uint32_t outBufferSize = 0;
@@ -684,11 +722,9 @@ uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size,
     cl::Buffer* buffer_status =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t), h_dcompressStatus.data());
 
-    // Set Kernel Args
-    decompress_kernel->setArg(0, input_size);
-
     data_writer_kernel->setArg(0, *(buffer_dec_input));
     data_writer_kernel->setArg(1, inBufferSize);
+    data_writer_kernel->setArg(2, isLast);
 
     data_reader_kernel->setArg(0, *(buffer_dec_output));
     data_reader_kernel->setArg(1, *(buffer_size));
@@ -703,13 +739,22 @@ uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size,
     // start parallel reader kernel enqueue thread
     uint32_t decmpSizeIdx = 0;
 
-    // make sure that command queue is empty before decompression kernel enqueue
-    m_q_dec->finish();
-
+#ifdef FREE_RUNNING_KERNEL
     // enqueue data movers
+    m_q_rd->enqueueTask(*data_reader_kernel);
+
+    sleep(1);
+    // enqueue decompression kernel
+    auto decompress_API_start = std::chrono::high_resolution_clock::now();
+    m_q_wr->enqueueTask(*data_writer_kernel);
+    m_q_wr->finish();
+    auto decompress_API_end = std::chrono::high_resolution_clock::now();
+#else
+    m_q_dec->finish();
     m_q_wr->enqueueTask(*data_writer_kernel);
     m_q_rd->enqueueTask(*data_reader_kernel);
 
+    sleep(1);
     // enqueue decompression kernel
     auto decompress_API_start = std::chrono::high_resolution_clock::now();
 
@@ -717,6 +762,7 @@ uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size,
     m_q_dec->finish();
 
     auto decompress_API_end = std::chrono::high_resolution_clock::now();
+#endif
     auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
     decompress_API_time_ns_1 += duration;
 
@@ -804,7 +850,8 @@ uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint
     uint8_t cunits = (uint8_t)C_COMPUTE_UNIT;
     uint8_t queue_idx = 0;
 overlap:
-    for (uint32_t brick = 0, itr = 0; brick < total_chunks; /*brick += C_COMPUTE_UNIT,*/ itr++, flag = !flag) {
+    for (uint32_t brick = 0, itr = 0; brick < total_chunks;
+         /*brick += C_COMPUTE_UNIT,*/ itr++, flag = !flag) {
         if (cunits > 1)
             queue_idx = flag * OVERLAP_BUF_COUNT;
         else
@@ -862,7 +909,8 @@ overlap:
                     tail_block_size = block_size;
                     sizeOfChunk[brick + cu] -= block_size;
                 } else {
-                    //////printme("sizeofChunk %d block_size %d cu %d \n", sizeOfChunk[brick+cu], block_size, cu);
+                    //////printme("sizeofChunk %d block_size %d cu %d \n",
+                    /// sizeOfChunk[brick+cu], block_size, cu);
                     (h_blksize[cu][flag]).data()[idxblk++] = block_size;
                 }
             }
@@ -1002,3 +1050,90 @@ overlap:
     out[outIdx++] = 0xff;
     return outIdx;
 } // Overlap end
+
+// This compress function transfer full input file to DDR before kernel call
+uint32_t xil_zlib::compressFull(uint8_t* in, uint8_t* out, uint64_t input_size) {
+    uint32_t outputSize = input_size;
+
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_checksum_data(1);
+
+    h_checksum_data.resize(sizeof(uint32_t));
+
+    bool checksum_type = true;
+#ifdef GZIP_MODE
+    h_checksum_data.data()[0] = ~0;
+    checksum_type = true;
+#else
+    h_checksum_data.data()[0] = 1;
+    checksum_type = false;
+#endif
+
+    std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
+
+    uint32_t host_buffer_size = HOST_BUFFER_SIZE;
+
+    uint32_t outIdx = 0;
+    for (uint32_t inIdx = 0; inIdx < input_size; inIdx += host_buffer_size) {
+        uint32_t buf_size = host_buffer_size;
+        uint32_t hostChunk_cu = host_buffer_size;
+
+        if (inIdx + buf_size > input_size) hostChunk_cu = input_size - inIdx;
+
+        // Copy input data from in to host buffer based on the input_size
+        std::memcpy(h_buf_in[0][0].data(), &in[inIdx], hostChunk_cu);
+
+        buffer_checksum_data = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t),
+                                              h_checksum_data.data());
+
+        // Set kernel arguments
+        uint32_t narg = 0;
+        compress_kernel->setArg(narg++, *buffer_input[0][0]);
+        compress_kernel->setArg(narg++, *buffer_zlib_output[0][0]);
+        compress_kernel->setArg(narg++, *buffer_compress_size[0][0]);
+        compress_kernel->setArg(narg++, *buffer_checksum_data);
+        compress_kernel->setArg(narg++, hostChunk_cu);
+        compress_kernel->setArg(narg++, checksum_type);
+
+        // Migrate memory - Map host to device buffers
+        m_q[0]->enqueueMigrateMemObjects({*(buffer_input[0][0]), *(buffer_checksum_data), *(buffer_zlib_output[0][0]),
+                                          *(buffer_compress_size[0][0])},
+                                         0 /* 0 means from host*/);
+        m_q[0]->finish();
+
+        // Measure kernel execution time
+        auto kernel_start = std::chrono::high_resolution_clock::now();
+
+        // Fire kernel execution
+        m_q[0]->enqueueTask(*compress_kernel);
+        // Wait till kernels complete
+        m_q[0]->finish();
+
+        auto kernel_end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
+        kernel_time_ns_1 += duration;
+
+        // Migrate memory - Map device to host buffers
+        m_q[0]->enqueueMigrateMemObjects(
+            {*(buffer_checksum_data), *(buffer_zlib_output[0][0]), *(buffer_compress_size[0][0])},
+            CL_MIGRATE_MEM_OBJECT_HOST);
+        m_q[0]->finish();
+
+        uint32_t compressedSize = h_compressSize[0][0].data()[0];
+        std::memcpy(&out[outIdx], h_buf_zlibout[0][0].data(), compressedSize);
+        outIdx += compressedSize;
+
+        h_checksum_data[0] = ~h_checksum_data[0];
+
+        // Buffer deleted
+        delete buffer_checksum_data;
+    }
+
+    // checksum value
+    crc = h_checksum_data[0];
+    if (checksum_type) crc = ~crc;
+
+    float throughput_in_mbps_1 = (float)input_size * 1000 / kernel_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    return outIdx;
+}

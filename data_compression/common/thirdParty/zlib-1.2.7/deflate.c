@@ -398,7 +398,7 @@ int ZEXPORT deflateResetKeep(z_streamp strm) {
     _tr_init(s);
 
 #ifdef XILINX_CODE
-    zlibFactory::getInstance()->releaseDriverObj(strm);
+    zlibFactory::getInstance()->releaseZlibObj(strm);
 #endif
 
     return Z_OK;
@@ -599,14 +599,16 @@ int is_fpga_compatible(z_streamp strm) {
         return 0;
     }
 
+    if (strm->state->level == 0) return 0;
+
     if (strm->state->strategy != Z_DEFAULT_STRATEGY) { // RLE,stored and huffman not supported
         return 0;
     }
-   
-    zlibFactory *zfactObj = zlibFactory::getInstance(); 
+
+    zlibFactory* zfactObj = zlibFactory::getInstance();
     if (zfactObj == NULL) {
         return 0;
-    }   
+    }
 
     // Check precheck to evaluate if FPGA device is usable or not
     zfactObj->xilinxPreChecks();
@@ -617,8 +619,8 @@ int is_fpga_compatible(z_streamp strm) {
     // Create driver object for current stream pointer
     zlibDriver* driver = zfactObj->getDriverInstance(strm, XILINX_DEFLATE);
     if (driver == NULL) {
-        return 0; 
-    } 
+        return 0;
+    }
     return 1;
 }
 
@@ -670,6 +672,18 @@ int ZEXPORT deflate_hw(z_streamp strm, int flush) {
         s->strm->next_out[0] = (header >> 8);
         s->strm->next_out[1] = (header & 0xFF);
         s->strm->next_out += 2;
+
+        // 3 empty stored blocks Xilinx Marking
+        for (int i = 0; i < 3; i++) {
+            s->strm->total_out += 5;
+            s->strm->avail_out = s->strm->avail_out - 5;
+            s->strm->next_out[0] = 0x00;
+            s->strm->next_out[1] = 0x00;
+            s->strm->next_out[2] = 0x00;
+            s->strm->next_out[3] = 0xFF;
+            s->strm->next_out[4] = 0xFF;
+            s->strm->next_out += 5;
+        }
     }
 
     /* Flush as much pending output as possible */
@@ -1056,6 +1070,7 @@ int ZEXPORT deflate(z_streamp strm, int flush) {
 /* ========================================================================= */
 int ZEXPORT deflateEnd(z_streamp strm) {
 #ifdef XILINX_CODE
+    zlibFactory::getInstance()->releaseZlibObj(strm);
     // Ver 1.0: ZLIB Only supported for FPGA Acceleration
     // s->strm == 2 : GZip flow
     // Singleton releases the

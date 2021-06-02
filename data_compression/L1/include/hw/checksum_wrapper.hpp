@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@
 
 #include "hls_stream.h"
 #include <ap_int.h>
-#include <iostream>
-#include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
 
@@ -62,10 +60,51 @@ mm2s_simple:
     }
 }
 
+template <int INWIDTH = 32>
 void s2mm32(hls::stream<ap_uint<32> >& inStream, hls::stream<bool>& inStreamEos, ap_uint<32>* outChecksumData) {
     bool eos = inStreamEos.read();
     if (!eos) outChecksumData[0] = inStream.read();
     inStreamEos.read();
+}
+
+/**
+ * @brief crc32 computes the CRC32 check value of an input data.
+ * @tparam W byte number of input data, the value of W includes 1, 2, 4, 8, 16.
+ * @param crcInitStrm initialize crc32 value
+ * @param inStrm input messages to be checked
+ * @param inPackLenStrm effetive lengths of input message pack, 1~W. 0 means end of message
+ * @param outStrm crc32 result to output
+ */
+template <int W>
+void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
+           hls::stream<ap_uint<8 * W> >& inStrm,
+           hls::stream<ap_uint<5> >& inPackLenStrm,
+           hls::stream<ap_uint<32> >& outStrm) {
+    hls::stream<bool> endInPackLenStrm;
+    hls::stream<bool> endOutStrm;
+#pragma HLS STREAM variable = endInPackLenStrm depth = 4
+#pragma HLS STREAM variable = endOutStrm depth = 4
+    endInPackLenStrm << false;
+    endInPackLenStrm << true;
+    xf::security::crc32<W>(crcInitStrm, inStrm, inPackLenStrm, endInPackLenStrm, outStrm, endOutStrm);
+    endOutStrm.read();
+    endOutStrm.read();
+}
+
+template <int W>
+void adler32(hls::stream<ap_uint<32> >& adlerStrm,
+             hls::stream<ap_uint<W * 8> >& inStrm,
+             hls::stream<ap_uint<5> >& inPackLenStrm,
+             hls::stream<ap_uint<32> >& outStrm) {
+    hls::stream<bool> endInPackLenStrm;
+    hls::stream<bool> endOutStrm;
+#pragma HLS STREAM variable = endInPackLenStrm depth = 4
+#pragma HLS STREAM variable = endOutStrm depth = 4
+    endInPackLenStrm << false;
+    endInPackLenStrm << true;
+    xf::security::adler32<W>(adlerStrm, inStrm, inPackLenStrm, endInPackLenStrm, outStrm, endOutStrm);
+    endOutStrm.read();
+    endOutStrm.read();
 }
 
 } // End namespace details
@@ -129,6 +168,26 @@ void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
     // ADLER
     else {
         xf::security::adler32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
+    }
+}
+
+template <int W>
+void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
+                hls::stream<ap_uint<8 * W> >& inStrm,
+                hls::stream<ap_uint<32> >& inLenStrm,
+                hls::stream<bool>& endInStrm,
+                hls::stream<ap_uint<32> >& outStrm,
+                hls::stream<bool>& endOutStrm,
+                hls::stream<ap_uint<2> >& checksumTypeStrm) {
+    for (ap_uint<2> checksumType = checksumTypeStrm.read(); checksumType != 3; checksumType = checksumTypeStrm.read()) {
+        // CRC
+        if (checksumType == 1) {
+            xf::security::crc32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
+        }
+        // ADLER
+        else {
+            xf::security::adler32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
+        }
     }
 }
 

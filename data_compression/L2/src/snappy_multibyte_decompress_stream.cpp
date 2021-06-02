@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,25 +44,22 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& in
 #pragma HLS interface s_axilite port = return bundle = control
 
     hls::stream<ap_uint<c_parallelBit> > inStream("inStream");
-    hls::stream<ap_uint<c_parallelBit> > decompressedStream("decompressedStream");
-    hls::stream<bool> lzxendOfStream("lzxendOfStream");
+    hls::stream<ap_uint<c_parallelBit + 8> > decompressedStream("decompressedStream");
     hls::stream<uint32_t> decStreamSize;
 #pragma HLS STREAM variable = inStream depth = 32
 #pragma HLS STREAM variable = decompressedStream depth = 32
-#pragma HLS STREAM variable = lzxendOfStream depth = 32
 
 #pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = decompressedStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = lzxendOfStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
 
     xf::compression::details::kStreamRead<c_parallelBit>(inaxistream, inStream, inputSize);
 
-    xf::compression::snappyDecompressEngine<MULTIPLE_BYTES, historySize>(inStream, decompressedStream, lzxendOfStream,
-                                                                         decStreamSize, inputSize);
+    xf::compression::snappyDecompressEngine<MULTIPLE_BYTES, historySize>(inStream, decompressedStream, decStreamSize,
+                                                                         inputSize);
 
-    xf::compression::details::kStreamWriteMultiByteSize<c_parallelBit>(
-        outaxistream, outaxistreamsize, decompressedStream, lzxendOfStream, decStreamSize);
+    xf::compression::details::kStreamWriteMultiByteSize<c_parallelBit>(outaxistream, outaxistreamsize,
+                                                                       decompressedStream, decStreamSize);
 }
 }

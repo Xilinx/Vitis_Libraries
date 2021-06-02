@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,18 @@ constexpr int getDataPortWidth(int maxVal) {
 }
 
 extern "C" {
-void xilZstdDecompressStream(uint64_t input_size,
-                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
-                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& outaxistreamd,
-                             hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd) {
-#pragma HLS INTERFACE s_axilite port = input_size bundle = control
+void xilZstdDecompressStream(hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
+                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& outaxistreamd) {
+#ifdef FREE_RUNNING_KERNEL
+#pragma HLS interface ap_ctrl_none port = return
+#endif
 #pragma HLS interface axis port = inaxistreamd
 #pragma HLS interface axis port = outaxistreamd
-#pragma HLS interface axis port = sizestreamd
-#pragma HLS INTERFACE s_axilite port = return bundle = control
     // data width for literal length, match length and offset data
     const int c_lmoDWidth = 1 + getDataPortWidth(c_windowSize);
 
     // Call for decompression
-    xf::compression::zstdDecompressCore<MULTIPLE_BYTES, ZSTD_BLOCK_SIZE_KB, c_windowSize, c_lmoDWidth>(
-        inaxistreamd, outaxistreamd, sizestreamd, input_size);
+    xf::compression::zstdDecompressCore<MULTIPLE_BYTES, ZSTD_BLOCK_SIZE_KB, c_windowSize, c_lmoDWidth>(inaxistreamd,
+                                                                                                       outaxistreamd);
 }
 }

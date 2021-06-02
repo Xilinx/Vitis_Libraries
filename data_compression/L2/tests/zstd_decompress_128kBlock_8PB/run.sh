@@ -11,9 +11,9 @@ then
     cmd1=$(diff sample.txt sample.txt.zst.orig)
     if [ $? -eq 0 ]
      then
-        echo "files are the same"
+        echo "PASS: Files are the same"
     else
-        echo "files are different"
+        echo "ERROR: Files are different"
         echo "$cmd1"
     fi
 fi

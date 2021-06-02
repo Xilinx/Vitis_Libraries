@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 namespace xf {
 namespace compression {
@@ -181,7 +180,7 @@ snappy_decompress:
     } // End of main snappy_decoder for-loop
 }
 
-template <int PARALLEL_BYTES, class SIZE_DT = ap_uint<17> >
+template <int PARALLEL_BYTES, class SIZE_DT = ap_uint<17>, bool BLOCKD_ONLY = 0>
 static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
                                       hls::stream<SIZE_DT>& litlenStream,
                                       hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStream,
@@ -213,12 +212,46 @@ static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >&
             readBytes += PARALLEL_BYTES;
         }
 
+        uint8_t incrIdx = 2 * PARALLEL_BYTES;
         bool storedBlock = bInfo.storedBlock;
 
         if (storedBlock) {
             lit_len = input_size;
             litlenStream << lit_len;
             next_state = READ_LITERAL;
+        }
+
+        if (BLOCKD_ONLY) {
+            ap_uint<32> inBlkSize = 0;
+            inValue = input_window.range((inputIdx + 1) * 8 - 1, inputIdx * 8);
+            inputIdx++;
+
+            inValue1 = input_window.range((inputIdx + 1) * 8 - 1, inputIdx * 8);
+            inputIdx++;
+
+            bool flag = false;
+            bool c0 = ((inValue >> 7) == 1);
+            bool c1 = ((inValue1 >> 7) == 1);
+            if (c0 & c1) {
+                inBlkSize.range(6, 0) = inValue.range(6, 0);
+                inBlkSize.range(13, 7) = inValue1.range(6, 0);
+                ap_uint<8> inValue2 = input_window.range((inputIdx + 1) * 8 - 1, inputIdx * 8);
+                inputIdx++;
+                inBlkSize.range(20, 14) = inValue2.range(6, 0);
+                processedBytes += 3;
+            } else if (c0) {
+                inBlkSize.range(6, 0) = inValue.range(6, 0);
+                inBlkSize.range(13, 7) = inValue1.range(6, 0);
+                processedBytes += 2;
+            } else {
+                inBlkSize = inValue;
+                inputIdx--;
+                processedBytes += 1;
+            }
+
+            incrIdx -= inputIdx;
+            input_window >>= inputIdx * 8;
+            inputIdx = 0;
         }
 
     snappyMultiByteDecompress:
@@ -294,7 +327,11 @@ static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >&
                 if (readBytes < input_size) {
                     ap_uint<c_parallelBit> input = inStream.read();
                     readBytes += PARALLEL_BYTES;
-                    input_window.range(3 * c_parallelBit - 1, 2 * c_parallelBit) = input;
+                    if (BLOCKD_ONLY) {
+                        input_window.range((incrIdx + PARALLEL_BYTES) * 8 - 1, incrIdx * 8) = input;
+                    } else {
+                        input_window.range(3 * c_parallelBit - 1, 2 * c_parallelBit) = input;
+                    }
                 }
             }
 

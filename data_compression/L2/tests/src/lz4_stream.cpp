@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@
 #include <fcntl.h>  /* For O_RDWR */
 #include <unistd.h> /* For open(), creat() */
 
-#define BLOCK_SIZE 64
-#define KB 1024
 #define MAGIC_HEADER_SIZE 4
 #define MAGIC_BYTE_1 4
 #define MAGIC_BYTE_2 34
@@ -205,7 +203,8 @@ uint64_t xfLz4Streaming::compressStream(uint8_t* in, uint8_t* out, uint64_t inpu
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
-    // sequentially copy block sized buffers to kernel and wait for them to finish before enqueueing
+    // sequentially copy block sized buffers to kernel and wait for them to finish
+    // before enqueueing
     for (uint32_t blkIndx = 0, bufIndx = 0; blkIndx < total_block_count; blkIndx++, bufIndx += host_buffer_size) {
         // current block input size
         uint32_t c_input_size = host_buffer_size;

@@ -3,11 +3,20 @@
     "description": "This is a L1 test design to validate LZ4 compression and packer module. It processes the data to and from the DDR into multiple parallel streams that helps in processing 8x data and achieve higher performance and performs header processing to give an output file.", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u200"
+        "u200", 
+        "vck190", 
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
+    "QoR_golden": {
+        "VV_LUT": "19558", 
+        "VV_FF": "23002", 
+        "VV_BRAM": "43", 
+        "VV_URAM": "6", 
+        "VV_AchievedClockPeriod": "3.266"
+    }, 
     "project": "lz4_packer_test", 
     "solution": "sol1", 
     "clock": "3.3", 
