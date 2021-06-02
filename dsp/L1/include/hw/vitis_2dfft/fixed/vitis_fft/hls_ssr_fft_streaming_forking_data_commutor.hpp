@@ -75,7 +75,7 @@ void StreamingDataCommutorFork<t_instanceID, t_stage, t_subStage, t_forkNumber, 
 #pragma HLS INLINE
     T_dtype localFactoredInputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredInputBuff
-#pragma HLS STREAM variable = localFactoredInputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredInputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredInputBuff core = FIFO_LUTRAM
 
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
@@ -85,7 +85,7 @@ void StreamingDataCommutorFork<t_instanceID, t_stage, t_subStage, t_forkNumber, 
 #endif
     T_dtype localFactoredOutputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredOutputBuff
-#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredOutputBuff core = FIFO_LUTRAM
 
 //#pragma HLS ARRAY_RESHAPE variable=localFactoredOutputBuff complete dim=1
@@ -119,7 +119,7 @@ void StreamingDataCommutorFork<t_instanceID, t_stage, t_subStage, 1, t_L, t_R, t
 #pragma HLS INLINE
     T_dtype localFactoredInputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredInputBuff
-#pragma HLS STREAM variable = localFactoredInputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredInputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredInputBuff core = FIFO_LUTRAM
 
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
@@ -130,7 +130,7 @@ void StreamingDataCommutorFork<t_instanceID, t_stage, t_subStage, 1, t_L, t_R, t
 
     T_dtype localFactoredOutputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredOutputBuff
-#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredOutputBuff core = FIFO_LUTRAM
 //#pragma HLS ARRAY_RESHAPE variable=localFactoredOutputBuff complete dim=1
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
@@ -202,7 +202,7 @@ void StreamingDataCommutorForkNonInvertOut<
 #pragma HLS INLINE
     T_dtype localFactoredInputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredInputBuff
-#pragma HLS STREAM variable = localFactoredInputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredInputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredInputBuff core = FIFO_LUTRAM
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
 #pragma HLS ARRAY_PARTITION variable = localFactoredInputBuff complete dim = 1
@@ -211,7 +211,7 @@ void StreamingDataCommutorForkNonInvertOut<
 #endif
     T_dtype localFactoredOutputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredOutputBuff
-#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredOutputBuff core = FIFO_LUTRAM
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
 #pragma HLS ARRAY_PARTITION variable = localFactoredOutputBuff complete dim = 1
@@ -245,7 +245,7 @@ void StreamingDataCommutorForkNonInvertOut<t_instanceID, t_stage, t_subStage, 1,
 
     T_dtype localFactoredInputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredInputBuff
-#pragma HLS STREAM variable = localFactoredInputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredInputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredInputBuff core = FIFO_LUTRAM
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
 #pragma HLS ARRAY_PARTITION variable = localFactoredInputBuff complete dim = 1
@@ -255,7 +255,7 @@ void StreamingDataCommutorForkNonInvertOut<t_instanceID, t_stage, t_subStage, 1,
 
     T_dtype localFactoredOutputBuff[t_R / t_forkingFactor][t_L / t_R];
 #pragma HLS DATA_PACK variable = localFactoredOutputBuff
-#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8 dim = 1
+#pragma HLS STREAM variable = localFactoredOutputBuff depth = 8
 #pragma HLS RESOURCE variable = localFactoredOutputBuff core = FIFO_LUTRAM
 
 #pragma HLS ARRAY_RESHAPE variable = localFactoredOutputBuff complete dim = 1

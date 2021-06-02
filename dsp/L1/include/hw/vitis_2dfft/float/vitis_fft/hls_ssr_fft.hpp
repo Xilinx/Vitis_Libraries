@@ -2492,8 +2492,8 @@ struct FFTWrapper<0, 0, t_instanceID> // The Specialization when the FFT is not 
 
 #endif
 
-#pragma HLS STREAM variable = p_fftInData depth = 8 dim = 2
-#pragma HLS STREAM variable = p_fftOutData depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData depth = 8
+#pragma HLS STREAM variable = p_fftOutData depth = 8
 #pragma HLS RESOURCE variable = p_fftInData core = FIFO_LUTRAM
 #pragma HLS RESOURCE variable = p_fftOutData core = FIFO_LUTRAM
 
@@ -2626,8 +2626,8 @@ struct FFTWrapper<0, 1, t_instanceID> // The Specialization when the FFT is not 
 
 #endif
 
-#pragma HLS STREAM variable = p_fftInData depth = 8 dim = 2
-#pragma HLS STREAM variable = p_fftOutData depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData depth = 8
+#pragma HLS STREAM variable = p_fftOutData depth = 8
 #pragma HLS RESOURCE variable = p_fftInData core = FIFO_LUTRAM
 #pragma HLS RESOURCE variable = p_fftOutData core = FIFO_LUTRAM
 
@@ -2646,11 +2646,11 @@ struct FFTWrapper<0, 1, t_instanceID> // The Specialization when the FFT is not 
         typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
 //#pragma HLS data_pack variable = p_fftInData_reOrdered
-#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
 //#pragma HLS data_pack variable = casted_output
-#pragma HLS STREAM variable = casted_output depth = 8 dim = 2
+#pragma HLS STREAM variable = casted_output depth = 8
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
         castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
         InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 50000, t_R, t_L, t_R, 1, 1> swapObj;
@@ -2751,8 +2751,8 @@ struct FFTWrapper<1, 0, t_instanceID> {
 
 #endif
 
-#pragma HLS STREAM variable = p_fftInData depth = 8 dim = 2
-#pragma HLS STREAM variable = p_fftOutData depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData depth = 8
+#pragma HLS STREAM variable = p_fftOutData depth = 8
 #pragma HLS RESOURCE variable = p_fftInData core = FIFO_LUTRAM
 #pragma HLS RESOURCE variable = p_fftOutData core = FIFO_LUTRAM
 
@@ -2784,11 +2784,11 @@ struct FFTWrapper<1, 0, t_instanceID> {
         typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
 //#pragma HLS data_pack variable = p_fftInData_reOrdered
-#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
 //#pragma HLS data_pack variable = casted_output
-#pragma HLS STREAM variable = casted_output depth = 8 dim = 2
+#pragma HLS STREAM variable = casted_output depth = 8
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
         castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
         InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 60000, t_R, t_L, t_R, 1,
@@ -2909,8 +2909,8 @@ struct FFTWrapper<1, 1, t_instanceID> {
 #pragma HLS ARRAY_RESHAPE variable = p_fftOutData complete dim = 1
 ////////////////////////////////////////////////////////////////
 #endif
-#pragma HLS STREAM variable = p_fftInData depth = 8 dim = 2
-#pragma HLS STREAM variable = p_fftOutData depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData depth = 8
+#pragma HLS STREAM variable = p_fftOutData depth = 8
 #pragma HLS RESOURCE variable = p_fftInData core = FIFO_LUTRAM
 #pragma HLS RESOURCE variable = p_fftOutData core = FIFO_LUTRAM
 
@@ -2940,12 +2940,12 @@ struct FFTWrapper<1, 1, t_instanceID> {
 
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
 //#pragma HLS data_pack variable = p_fftInData_reOrdered
-#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
 
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
 //#pragma HLS data_pack variable = casted_output
-#pragma HLS STREAM variable = casted_output depth = 8 dim = 2
+#pragma HLS STREAM variable = casted_output depth = 8
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
 
         /* The casted output cannot be reshaped in this case because it is the TINY case where the
@@ -3017,12 +3017,12 @@ struct FFTWrapper<1, 1, t_instanceID> {
 
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
 //#pragma HLS data_pack variable = p_fftInData_reOrdered
-#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
 
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
 //#pragma HLS data_pack variable = casted_output
-#pragma HLS STREAM variable = casted_output depth = 8 dim = 2
+#pragma HLS STREAM variable = casted_output depth = 8
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
 
         /* The casted output cannot be reshaped in this case because it is the TINY case where the

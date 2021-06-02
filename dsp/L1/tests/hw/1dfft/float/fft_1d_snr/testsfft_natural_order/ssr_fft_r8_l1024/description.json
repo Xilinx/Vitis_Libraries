@@ -3,7 +3,9 @@
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u200"
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
@@ -40,10 +42,10 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "hls_vivado_syn": 40960, 
                     "hls_csim": 10240, 
-                    "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "hls_cosim": 40960, 
+                    "hls_vivado_impl": 40960, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
