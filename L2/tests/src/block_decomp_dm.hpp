@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@
 
 /**
  * @file block_decomp_datamover_kernel.hpp
- * @brief Header for data mover kernel which streams data to decompression streaming kernel.
+ * @brief Header for data mover kernel which streams data to decompression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
@@ -28,19 +29,20 @@
 #include "hls_stream.h"
 #include <ap_int.h>
 
+#include "axi_stream_utils.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
-#include "stream_upsizer.hpp"
 #include "stream_downsizer.hpp"
-#include "axi_stream_utils.hpp"
+#include "stream_upsizer.hpp"
 
-#include <stdio.h>
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 extern "C" {
 /**
- * @brief Data mover kernel top function for decompression kernel implementations.
+ * @brief Data mover kernel top function for decompression kernel
+ * implementations.
  *        It reads data from memory and streams it to target kernel.
  *
  * @param in                input stream

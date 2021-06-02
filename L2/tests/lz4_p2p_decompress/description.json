@@ -13,22 +13,26 @@
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
-             ]
+                "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
+            ]
         }
     ], 
     "platform_blacklist": [
-        "zc", 
-        "vck"
+        "zc"
     ], 
     "platform_whitelist": [
         "samsung_u2", 
         "samsung_U2", 
         "u200", 
         "u250", 
-        "u50"
-    ], 
-    "config_make": "./config.mk",
+        "u50", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+    "data": [
+        "PROJECT/sample.txt.lz4" 
+    ],   
+    "config_make": "./config.mk", 
     "platform_properties": {
         "samsung_u2": {
             "host": {
@@ -38,7 +42,7 @@
                     ]
                 }
             }
-        },
+        }, 
         "samsung_U2": {
             "host": {
                 "compiler": {
@@ -47,8 +51,24 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
-    },  
+    }, 
     "host": {
         "host_exe": "lz4", 
         "compiler": {
@@ -62,9 +82,9 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/L2/tests/src/", 
                 "LIB_DIR/common/thirdParty/xxhash"
-            ] 
+            ]
         }
     }, 
     "v++": {
@@ -78,7 +98,7 @@
     "containers": [
         {
             "name": "decompress_streaming", 
-            "ldclflags": "--config PROJECT/decompress.ini", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
                     "name": "xilLz4DecompressStream", 
@@ -90,8 +110,12 @@
                 }
             ]
         }
-    ], 
-    "output_files": "*.orig", 
+    ],
+    "output_files": [
+            "sample.txt.lz4.*",
+            "sample_run.*",
+            "test.list"
+    ],        
     "testinfo": {
         "disable": false, 
         "jobs": [

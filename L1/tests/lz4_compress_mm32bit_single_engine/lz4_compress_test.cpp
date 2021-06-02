@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 #include "hls_stream.h"
 #include <ap_int.h>
+#include <vector>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
@@ -28,26 +29,15 @@
 typedef ap_uint<32> data_t;
 
 #include "lz4_compress.hpp"
+#include "lz4_specs.hpp"
+#include "lz4Base.cpp"
 
 #define GMEM_DWIDTH 32
 #define GMEM_BURST_SIZE 16
-/*#define MIN_BLOCK_SIZE 128
-#define LZ_MAX_OFFSET_LIMIT 65536
-#define MIN_MATCH 4
-#define MAX_MATCH_LEN 255
-#define OFFSET_WINDOW (64 * 1024)
-#define MATCH_LEN 6
-#define MAX_LIT_COUNT 4096*/
 #define BLOCK_SIZE 64
 #define BLOCK_LENGTH (BLOCK_SIZE * 1024)
 #define PARALLEL_BLOCK 1
 #define CONST_SIZE 2 * 1024
-#define MAGIC_HEADER_SIZE 4
-#define MAGIC_BYTE_1 4
-#define MAGIC_BYTE_2 34
-#define MAGIC_BYTE_3 77
-#define MAGIC_BYTE_4 24
-#define FLG_BYTE 104
 
 const uint32_t c_size = (GMEM_DWIDTH / 8);
 const uint32_t c_csize = CONST_SIZE / c_size;
@@ -83,28 +73,10 @@ int main(int argc, char* argv[]) {
     uint64_t input_size = (uint64_t)inFile.tellg();
     uint32_t inSizeV = (input_size - 1) / c_size + 1;
     std::cout << "DATA_SIZE: " << input_size << " PARALLEL_BLOCK: " << PARALLEL_BLOCK << std::endl;
-
-    // LZ4 Header
-    outFile.put(MAGIC_BYTE_1);
-    outFile.put(MAGIC_BYTE_2);
-    outFile.put(MAGIC_BYTE_3);
-    outFile.put(MAGIC_BYTE_4);
-    // FLG & BD bytes
-    // --no-frame-crc flow
-    // --content-size
-    outFile.put(FLG_BYTE);
-    outFile.put(BLOCK_SIZE);
-
-    uint8_t temp_buff[10] = {FLG_BYTE,         BLOCK_SIZE,       input_size,       input_size >> 8,  input_size >> 16,
-                             input_size >> 24, input_size >> 32, input_size >> 40, input_size >> 48, input_size >> 56};
-
-    // xxhash is used to calculate hash value
-    uint32_t xxh = XXH32(temp_buff, 10, 0);
-    outFile.write((char*)&temp_buff[2], 8);
-
-    // Header CRC
-    outFile.put((uint8_t)(xxh >> 8));
-
+    lz4Base lz4Obj(true);
+    std::vector<uint8_t> headerBytes(input_size);
+    int headerIdx = lz4Obj.writeHeader(headerBytes.data());
+    outFile.write(reinterpret_cast<char*>(headerBytes.data()), headerIdx);
     data_t* source_in = new data_t[CONST_SIZE];
     data_t* source_out = new data_t[CONST_SIZE];
     uint32_t* compressedSize = new uint32_t[CONST_SIZE];
@@ -155,7 +127,6 @@ int main(int argc, char* argv[]) {
             oIdx += BLOCK_LENGTH;
         }
     }
-
     outFile.put(0);
     outFile.put(0);
     outFile.put(0);

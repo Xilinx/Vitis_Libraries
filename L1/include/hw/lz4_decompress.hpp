@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 namespace xf {
 namespace compression {
@@ -485,8 +484,7 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE>
 void lz4CoreDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                             hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                             hls::stream<bool>& outStreamEoS,
+                             hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
                              hls::stream<uint32_t>& outSizeStream,
                              hls::stream<uint32_t>& blockSizeStream) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
@@ -518,13 +516,12 @@ void lz4CoreDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream
     lz4MultiByteDecompress<PARALLEL_BYTES>(inStream, litlenStream, litStream, offsetStream, matchlenStream,
                                            blockInfoStream);
     lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, uint32_t>(litlenStream, litStream, offsetStream, matchlenStream,
-                                                               outStream, outStreamEoS, outSizeStream);
+                                                               outStream, outSizeStream);
 }
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE>
 void lz4DecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                         hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                         hls::stream<bool>& outStreamEoS,
+                         hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
                          hls::stream<uint32_t>& outSizeStream,
                          const uint32_t _input_size) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
@@ -556,7 +553,7 @@ void lz4DecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
     lz4MultiByteDecompress<PARALLEL_BYTES, uint32_t>(headerStream, litlenStream, litStream, offsetStream,
                                                      matchlenStream, blockInfoStream);
     lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, uint32_t>(litlenStream, litStream, offsetStream, matchlenStream,
-                                                               outStream, outStreamEoS, outSizeStream);
+                                                               outStream, outSizeStream);
 }
 
 } // namespace compression

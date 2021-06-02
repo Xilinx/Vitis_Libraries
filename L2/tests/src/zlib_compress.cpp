@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  *
  */
-#include "zlib.h"
 #include "zlib_compress.hpp"
-#include <fcntl.h>  /* For O_RDWR */
-#include <unistd.h> /* For open(), creat() */
+#include "zlib.h"
+#include <fcntl.h> /* For O_RDWR */
 #include <sys/stat.h>
-auto crc = 0; // CRC32 value
+#include <unistd.h> /* For open(), creat() */
+auto crc = 0;       // CRC32 value
 #ifdef GZIP_MODE
 extern unsigned long crc32(unsigned long crc, const unsigned char* buf, uint32_t len);
 #endif
@@ -155,7 +155,9 @@ uint64_t xfZlib::compressFile(std::string& inFile_name, std::string& outFile_nam
     inFile.read((char*)in.data(), input_size);
 
 #ifdef GZIP_MODE
+#ifndef GZIP_MULTICORE_COMPRESS
     std::thread gzipCrc(gzip_crc32, in.data(), input_size);
+#endif
 #endif
 
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
@@ -171,7 +173,9 @@ uint64_t xfZlib::compressFile(std::string& inFile_name, std::string& outFile_nam
 #endif
     if (enbytes > 0) {
 #ifdef GZIP_MODE
+#ifndef GZIP_MULTICORE_COMPRESS
         gzipCrc.join();
+#endif
         // Pack gzip encoded stream .gz file
         gzip_headers(inFile_name, outFile, out.data(), enbytes);
 #else
@@ -179,6 +183,31 @@ uint64_t xfZlib::compressFile(std::string& inFile_name, std::string& outFile_nam
         zlib_headers(inFile_name, outFile, out.data(), enbytes);
 #endif
     }
+
+    // Close file
+    inFile.close();
+    outFile.close();
+    return enbytes;
+}
+
+uint64_t xfZlib::compressFileFull(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+    std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
+    std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
+
+    if (!inFile) {
+        std::cout << "Unable to open file";
+        exit(1);
+    }
+
+    std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
+    uint64_t output_size = input_size + ((input_size - 1) / BLOCK_SIZE + 1) * 100;
+    std::vector<uint8_t, aligned_allocator<uint8_t> > out(output_size);
+
+    inFile.read((char*)in.data(), input_size);
+
+    // Full file compress
+    uint64_t enbytes = compressFull(in.data(), out.data(), input_size);
+    outFile.write((char*)out.data(), enbytes);
 
     // Close file
     inFile.close();
@@ -222,6 +251,13 @@ xfZlib::xfZlib(const std::string& binaryFile, uint32_t block_size_kb) {
 // Create Compress kernels
 #ifdef GZIP_MULTICORE_COMPRESS
     compress_kernel_zlib = new cl::Kernel(*m_program, compress_kernel_names[1].c_str());
+#elif FREE_RUNNING_KERNEL
+    datamover_kernel = new cl::Kernel(*m_program, datamover_kernel_name.c_str());
+#ifdef GZIP_STREAM
+    compress_kernel_zlib = new cl::Kernel(*m_program, compress_kernel_names[2].c_str());
+#else
+    compress_kernel_zlib = new cl::Kernel(*m_program, compress_kernel_names[1].c_str());
+#endif
 #else
     compress_kernel_zlib = new cl::Kernel(*m_program, compress_kernel_names[0].c_str());
 #endif
@@ -229,6 +265,9 @@ xfZlib::xfZlib(const std::string& binaryFile, uint32_t block_size_kb) {
 
 // Destructor
 xfZlib::~xfZlib() {
+#ifdef FREE_RUNNING_KERNEL
+    delete (datamover_kernel);
+#endif
     delete (compress_kernel_zlib);
     delete (m_program);
     delete (m_q);
@@ -359,60 +398,136 @@ uint64_t xfZlib::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_si
 uint64_t xfZlib::compressFull(uint8_t* in, uint8_t* out, uint64_t input_size) {
     uint32_t outputSize = input_size * 10;
 
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_checksum_data(1);
+
     h_buf_in.resize(input_size);
     h_buf_out.resize(outputSize);
     h_compressSize.resize(sizeof(uint32_t));
+    h_checksum_data.resize(sizeof(uint32_t));
+
+    bool checksum_type = true;
+#ifdef GZIP_MODE
+    h_checksum_data.data()[0] = ~0;
+    checksum_type = true;
+#else
+    h_checksum_data.data()[0] = 1;
+    checksum_type = false;
+#endif
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
-    // Copy input data from in to host buffer based on the input_size
-    std::memcpy(h_buf_in.data(), in, input_size);
+    uint32_t host_buffer_size = HOST_BUFFER_SIZE;
+    auto num_itr = 1;
+#ifdef FREE_RUNNING_KERNEL
+    host_buffer_size = input_size;
+    num_itr = xcl::is_emulation() ? 10 : (0x40000000 / input_size);
+#endif
 
-    // Device buffer allocation
-    buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_buf_in.data());
+    uint32_t outIdx = 0;
+    for (uint32_t inIdx = 0; inIdx < input_size; inIdx += host_buffer_size) {
+        uint32_t buf_size = host_buffer_size;
+        uint32_t hostChunk_cu = host_buffer_size;
 
-    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outputSize, h_buf_out.data());
+        if (inIdx + buf_size > input_size) hostChunk_cu = input_size - inIdx;
 
-    buffer_compressed_size =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t), h_compressSize.data());
+        // Copy input data from in to host buffer based on the input_size
+        std::memcpy(h_buf_in.data(), &in[inIdx], hostChunk_cu);
 
-    // Set kernel arguments
-    uint32_t narg = 0;
-    compress_kernel_zlib->setArg(narg++, *buffer_input);
-    compress_kernel_zlib->setArg(narg++, *buffer_output);
-    compress_kernel_zlib->setArg(narg++, *buffer_compressed_size);
-    compress_kernel_zlib->setArg(narg++, input_size);
+        // Device buffer allocation
+        buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_buf_in.data());
 
-    // Migrate memory - Map host to device buffers
-    m_q->enqueueMigrateMemObjects({*(buffer_input), *(buffer_output), *(buffer_compressed_size)},
-                                  0 /* 0 means from host*/);
-    m_q->finish();
+        buffer_output =
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outputSize, h_buf_out.data());
 
-    // Measure kernel execution time
-    auto kernel_start = std::chrono::high_resolution_clock::now();
+        buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t),
+                                                h_compressSize.data());
 
-    // Fire kernel execution
-    m_q->enqueueTask(*compress_kernel_zlib);
-    // Wait till kernels complete
-    m_q->finish();
+#ifndef FREE_RUNNING_KERNEL
+        buffer_checksum_data = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t),
+                                              h_checksum_data.data());
+#endif
 
-    auto kernel_end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
-    kernel_time_ns_1 += duration;
+        // Set kernel arguments
+        uint32_t narg = 0;
+#ifdef FREE_RUNNING_KERNEL
+        datamover_kernel->setArg(narg++, *buffer_input);
+        datamover_kernel->setArg(narg++, *buffer_output);
+        datamover_kernel->setArg(narg++, hostChunk_cu);
+        datamover_kernel->setArg(narg++, *buffer_compressed_size);
+#else
+        compress_kernel_zlib->setArg(narg++, *buffer_input);
+        compress_kernel_zlib->setArg(narg++, *buffer_output);
+        compress_kernel_zlib->setArg(narg++, *buffer_compressed_size);
+        compress_kernel_zlib->setArg(narg++, *buffer_checksum_data);
+        compress_kernel_zlib->setArg(narg++, hostChunk_cu);
+        compress_kernel_zlib->setArg(narg++, checksum_type);
+#endif
 
-    // Migrate memory - Map device to host buffers
-    m_q->enqueueMigrateMemObjects({*(buffer_output), *(buffer_compressed_size)}, CL_MIGRATE_MEM_OBJECT_HOST);
-    m_q->finish();
+// Migrate memory - Map host to device buffers
+#ifdef FREE_RUNNING_KERNEL
+        m_q->enqueueMigrateMemObjects({*(buffer_input), *(buffer_output), *(buffer_compressed_size)},
+                                      0 /* 0 means from host*/);
+#else
+        m_q->enqueueMigrateMemObjects(
+            {*(buffer_input), *(buffer_checksum_data), *(buffer_output), *(buffer_compressed_size)},
+            0 /* 0 means from host*/);
+#endif
+        m_q->finish();
 
-    uint32_t compressedSize = h_compressSize[0];
-    std::memcpy(out, h_buf_out.data(), compressedSize);
+        // Measure kernel execution time
+        auto kernel_start = std::chrono::high_resolution_clock::now();
 
-    // Buffer deleted
-    delete buffer_input;
-    delete buffer_output;
-    delete buffer_compressed_size;
+        // Fire kernel execution
+        for (auto z = 0; z < num_itr; z++) {
+#ifdef FREE_RUNNING_KERNEL
+            m_q->enqueueTask(*datamover_kernel);
+#ifdef DISABLE_FREE_RUNNING_KERNEL
+            m_q->enqueueTask(*compress_kernel_zlib);
+#endif
+#else
+            m_q->enqueueTask(*compress_kernel_zlib);
+#endif
+        }
+        // Wait till kernels complete
+        m_q->finish();
 
-    float throughput_in_mbps_1 = (float)input_size * 1000 / kernel_time_ns_1.count();
+        auto kernel_end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
+        kernel_time_ns_1 += duration;
+
+// Migrate memory - Map device to host buffers
+#ifdef FREE_RUNNING_KERNEL
+        m_q->enqueueMigrateMemObjects({*(buffer_output), *(buffer_compressed_size)}, CL_MIGRATE_MEM_OBJECT_HOST);
+#else
+        m_q->enqueueMigrateMemObjects({*(buffer_checksum_data), *(buffer_output), *(buffer_compressed_size)},
+                                      CL_MIGRATE_MEM_OBJECT_HOST);
+#endif
+        m_q->finish();
+
+        uint32_t compressedSize = h_compressSize[0];
+        std::memcpy(&out[outIdx], h_buf_out.data(), compressedSize);
+        outIdx += compressedSize;
+#ifdef GZIP_MODE
+#ifndef FREE_RUNNING_KERNEL
+        h_checksum_data[0] = ~h_checksum_data[0];
+#endif
+#endif
+        // Buffer deleted
+        delete buffer_input;
+        delete buffer_output;
+        delete buffer_compressed_size;
+#ifndef FREE_RUNNING_KERNEL
+        delete buffer_checksum_data;
+#endif
+    }
+
+#ifndef FREE_RUNNING_KERNEL
+    // checksum value
+    crc = h_checksum_data[0];
+    if (checksum_type) crc = ~crc;
+#endif
+
+    float throughput_in_mbps_1 = (float)input_size * 1000 * num_itr / kernel_time_ns_1.count();
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
-    return compressedSize;
+    return outIdx;
 }

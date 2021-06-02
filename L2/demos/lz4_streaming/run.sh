@@ -1,8 +1,7 @@
 #!/bin/bash
 EXE_FILE=$1
 LIB_PROJ_ROOT=$2
-XCLBIN_FILE_C=$3
-XCLBIN_FILE_D=$4
+XCLBIN_FILE=$3
 echo "XCL_MODE=${XCL_EMULATION_MODE}"
 if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] 
 then
@@ -14,7 +13,7 @@ then
     done
 
     echo -e "\n\n-----------Running both Compression and Decompression for large file-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D"
+    cmd1="$EXE_FILE -l ./test.list -xbin $XCLBIN_FILE"
     echo $cmd1
     $cmd1
 

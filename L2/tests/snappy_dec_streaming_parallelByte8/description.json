@@ -6,43 +6,51 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.snappy", 
+            "cmd_args": "-xbin BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.snappy", 
             "name": "generic launch for all flows"
         }
     ], 
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
-             ]
+                "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
+            ]
         }
     ], 
     "platform_blacklist": [
-        "zc", 
-        "vck"
+        "zc"
     ], 
     "platform_whitelist": [
         "u200", 
         "u250", 
-        "u50"
-    ], 
+        "u50", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+    "data": [
+        "PROJECT/sample.txt.snappy" 
+    ],   
     "host": {
         "host_exe": "xil_snappy_decompress_streaming", 
         "compiler": {
             "sources": [
-                "./src/host.cpp", 
-                "LIB_DIR/L2/tests/src/xil_snappy_streaming.cpp", 
+                "./src/host.cpp",
+                "LIB_DIR/common/libs/compress/snappyOCLHost.cpp", 
+                "LIB_DIR/common/libs/compress/snappyBase.cpp",
+                "LIB_DIR/common/libs/compress/snappyApp.cpp", 
+                "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/libs/compress/",
                 "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
+                "SNAPPY_STREAM",
                 "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"
             ]
@@ -51,6 +59,7 @@
     "v++": {
         "compiler": {
             "symbols": [
+                "SNAPPY_STREAM",
                 "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"
             ]
@@ -59,7 +68,7 @@
     "containers": [
         {
             "name": "decompress_streaming", 
-            "ldclflags": "--config PROJECT/decompress.ini", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
                     "name": "xilSnappyDecompressStream", 
@@ -71,8 +80,12 @@
                 }
             ]
         }
-    ], 
-    "output_files": "sample.txt.snappy.*", 
+    ],
+    "output_files": [
+            "sample.txt.snappy.*",
+            "sample_run.*",
+            "test.list"
+    ],        
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -102,5 +115,23 @@
             "vitis_hw_run"
         ], 
         "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
     }
 }

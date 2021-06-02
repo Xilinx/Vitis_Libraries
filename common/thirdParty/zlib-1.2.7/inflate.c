@@ -79,6 +79,7 @@
  *
  * The history for versions after 1.2.0 are in ChangeLog in zlib distribution.
  */
+#include "zlibFactory.hpp"
 #include "zutil.h"
 #include "inftrees.h"
 #include "inflate.h"
@@ -479,6 +480,83 @@ local int updatewindow(z_streamp strm, unsigned out) {
         bits -= bits & 7;  \
     } while (0)
 
+int ZEXPORT inflate_hw(z_streamp strm, int flush) {
+    zlibDriver* driver = zlibFactory::getInstance()->getDriverInstance(strm, XILINX_INFLATE);
+    driver->struct_update(strm, XILINX_DEFLATE);
+
+    // Use FPGA deflate
+    bool ret = driver->xilinxHwInflate(strm, flush);
+
+    if (ret) {
+        return Z_STREAM_END;
+    } else {
+        if (flush == Z_FINISH) {
+            return Z_BUF_ERROR;
+        }
+        return Z_OK;
+    }
+}
+
+void ZEXPORT checkHwEligibility(z_streamp strm) {
+    uint8_t hidx = 0;
+    zlibFactory* zfactObj = zlibFactory::getInstance();
+    if (zfactObj == NULL) {
+        return;
+    }
+
+    // Check precheck to evaluate if FPGA device is usable or not
+    zfactObj->xilinxPreChecks();
+    if (!(zfactObj->getXmode())) { // device not configured
+        return;
+    }
+    if (strm->next_in[hidx++] == 0x1F && strm->next_in[hidx++] == 0x8B) {
+        // set false :: No support for gzip right now
+        return;
+    } else {
+        hidx = 0;
+        // ZLIB Header Checks
+        // CMF
+        // FLG
+        uint8_t cmf = 0x78;
+        // 0x01: Fast Mode
+        // 0x5E: 1 to 5 levels
+        // 0x9C: Default compression: level 6
+        // 0xDA: High compression
+        std::vector<uint8_t> zlib_flags{0x01, 0x5E, 0x9C, 0xDA};
+        if (strm->next_in[hidx++] == cmf) {
+            uint8_t flg = strm->next_in[hidx++];
+            bool hchck = std::find(zlib_flags.cbegin(), zlib_flags.cend(), flg) == zlib_flags.cend();
+            if (hchck) {
+                // set false
+                return;
+            }
+        } else {
+            // set false
+            return;
+        }
+
+        uint8_t n_storedBlocks = 0;
+
+        for (int i = 0; i < 3; i++) {
+            if (strm->next_in[hidx++] == 0 && strm->next_in[hidx++] == 0 && strm->next_in[hidx++] == 0) {
+                hidx += 2;
+                n_storedBlocks += 1;
+            } else {
+                // set false
+                return;
+            }
+        }
+
+        if (n_storedBlocks == 3) {
+            // set true
+            zlibDriver* driver = zlibFactory::getInstance()->getDriverInstance(strm, XILINX_INFLATE);
+            driver->setDecompressEligibility(true);
+        }
+
+        // check for 0 length stored blocks
+    }
+    return;
+}
 /*
    inflate() uses a state machine to process as much input data and generate as
    much output data as possible before returning.  The state machine is
@@ -585,8 +663,17 @@ int ZEXPORT inflate(z_streamp strm, int flush) {
         (strm->next_in == Z_NULL && strm->avail_in != 0))
         return Z_STREAM_ERROR;
 
-
     state = (struct inflate_state FAR*)strm->state;
+#ifdef XILINX_CODE
+    if ((state->mode == HEAD) && (strm->avail_out >= 1024 * 32)) {
+        checkHwEligibility(strm);
+    }
+    zlibDriver* driver = zlibFactory::getInstance()->getDriverInstance(strm, XILINX_INFLATE, false);
+    if (driver->isDecompressEligible()) {
+        return inflate_hw(strm, flush);
+    }
+
+#endif
     if (state->mode == TYPE) state->mode = TYPEDO; /* skip check */
     LOAD();
     in = have;
@@ -1111,8 +1198,8 @@ int ZEXPORT inflate(z_streamp strm, int flush) {
 #endif
                                          ZSWAP32(hold)) != state->check) {
                         strm->msg = (char*)"incorrect data check";
-                        //state->mode = BAD;
-                        //break;
+                        state->mode = BAD;
+                        break;
                     }
                     INITBITS();
                     Tracev((stderr, "inflate:   check matches trailer\n"));
@@ -1171,12 +1258,22 @@ inf_leave:
 #if (VERBOSE_LEVEL >= 1)
     openlog("XILINX_INFLATE", LOG_PID, LOG_USER);
     syslog(LOG_INFO, "Input Chunk %d Output Chunk %d\n", strm->avail_in, strm->avail_out);
-    closelog(); 
+    closelog();
 #endif
     return ret;
 }
 
 int ZEXPORT inflateEnd(z_streamp strm) {
+#ifdef XILINX_CODE
+#ifdef ENABLE_INFLATE_XRM
+    zlibFactory::getInstance()->releaseZlibObj(strm);
+#endif
+    // Ver 1.0: ZLIB Only supported for FPGA Acceleration
+    // s->strm == 2 : GZip flow
+    // Singleton releases the
+    // strm,zlib <key, value> pair
+    zlibFactory::getInstance()->releaseDriverObj(strm);
+#endif
     struct inflate_state FAR* state;
     if (strm == Z_NULL || strm->state == Z_NULL || strm->zfree == (free_func)0) return Z_STREAM_ERROR;
     state = (struct inflate_state FAR*)strm->state;

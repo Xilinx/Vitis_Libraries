@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv "-f ${DESIGN_PATH}/sample.txt.zst -o ${DESIGN_PATH}/sample.txt"
+  cosim_design -disable_dependency_check -argv "-f ${DESIGN_PATH}/sample.txt.zst -o ${DESIGN_PATH}/sample.txt"
 }
 
 if {$VIVADO_SYN == 1} {

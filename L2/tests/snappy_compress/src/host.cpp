@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,117 +14,22 @@
  * limitations under the License.
  *
  */
-#include "snappy.hpp"
-#include <fstream>
-#include <vector>
-#include "cmdlineparser.h"
-
-static uint64_t getFileSize(std::ifstream& file) {
-    file.seekg(0, file.end);
-    uint64_t file_size = file.tellg();
-    file.seekg(0, file.beg);
-    return file_size;
-}
-
-void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string& compress_bin) {
-    // Xilinx SNAPPY object
-    xilSnappy xlz(compress_bin, 1, block_size);
-
-#ifdef VERBOSE
-    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
-#endif
-
-    std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
-    if (!inFile) {
-        std::cout << "Unable to open file";
-        exit(1);
-    }
-    uint64_t input_size = getFileSize(inFile);
-    inFile.close();
-
-    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
-    double len = input_size;
-    int order = 0;
-    while (len >= 1000) {
-        order++;
-        len = len / 1000;
-    }
-
-    std::string lz_compress_in = compress_mod;
-    std::string lz_compress_out = compress_mod;
-    lz_compress_out = lz_compress_out + ".snappy";
-
-#ifdef EVENT_PROFILE
-    auto total_start = std::chrono::high_resolution_clock::now();
-#endif
-    // Call SNAPPY compression
-    uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, 0);
-#ifdef EVENT_PROFILE
-    auto total_end = std::chrono::high_resolution_clock::now();
-    auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
-#endif
-
-#ifdef VERBOSE
-    std::cout.precision(3);
-    std::cout << std::fixed << std::setprecision(2) << std::endl
-              << "SNAPPY_CR\t\t:" << (double)input_size / enbytes << std::endl
-              << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
-              << "File Name\t\t:" << lz_compress_in << std::endl;
-    std::cout << "\n";
-    std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
-    len = enbytes;
-    order = 0;
-    while (len >= 1000) {
-        order++;
-        len = len / 1000;
-    }
-    std::cout << "Compressed file size(" << sizes[order] << ")\t\t:" << enbytes << std::endl;
-#endif
-
-#ifdef EVENT_PROFILE
-    std::cout << "Total Time (milli sec): " << total_time_ns.count() / 1000000 << std::endl;
-#endif
-}
+#include "snappyApp.hpp"
+#include "snappyOCLHost.hpp"
+#include <memory>
 
 int main(int argc, char* argv[]) {
-    sda::utils::CmdLineParser parser;
-    parser.addSwitch("--compress_xclbin", "-cx", "Compress XCLBIN", "");
-    parser.addSwitch("--compress", "-c", "Compress", "");
-    parser.addSwitch("--block_size", "-B", "Compress Block Size [0-64: 1-256: 2-1024: 3-4096]", "0");
-    parser.parse(argc, argv);
+    bool enable_profile = false;
+    compressBase::State flow = compressBase::COMPRESS;
+    compressBase::Level lflow = compressBase::SEQ;
 
-    std::string compress_bin = parser.value("compress_xclbin");
-    std::string compress_mod = parser.value("compress");
-    std::string block_size = parser.value("block_size");
+    // Driver class object
+    snappyApp d(argc, argv, lflow, enable_profile);
 
-    uint32_t bSize = 0;
-    // Block Size
-    if (!(block_size.empty())) {
-        bSize = atoi(block_size.c_str());
+    // Design class object creating and constructor invocation
+    std::unique_ptr<snappyOCLHost> snappy(
+        new snappyOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), d.getMCR(), enable_profile));
 
-        switch (bSize) {
-            case 0:
-                bSize = 64;
-                break;
-            case 1:
-                bSize = 256;
-                break;
-            case 2:
-                bSize = 1024;
-                break;
-            case 3:
-                bSize = 4096;
-                break;
-            default:
-                std::cout << "Invalid Block Size provided" << std::endl;
-                parser.printHelp();
-                exit(1);
-        }
-    } else {
-        // Default Block Size - 64KB
-        bSize = BLOCK_SIZE_IN_KB;
-    }
-
-    // "-c" - Compress Mode
-    if (!compress_mod.empty()) xilCompressTop(compress_mod, bSize, compress_bin);
+    // Run API to launch the compress or decompress engine
+    d.run(snappy.get());
 }

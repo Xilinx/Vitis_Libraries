@@ -1,7 +1,13 @@
 {
     "name": "Xilinx Snappy Dualcore Decompress HLS Test", 
     "description": "Test Design to validate Snappy Dualcore Decompress module", 
-    "flow": "hls", 
+    "flow": "hls",
+     "platform_whitelist": [
+        "u200", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ], 
+    "platform_blacklist": [],  
     "project": "snappy_decompress_test", 
     "solution": "sol1", 
     "clock": "3.3", 

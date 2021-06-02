@@ -4,45 +4,53 @@
         "Xilinx ZSTD Decompression for 128KB block since with 4 Byte data width"
     ], 
     "flow": "vitis", 
-    "platform_blacklist": [
-    ], 
+    "platform_blacklist": [], 
     "platform_whitelist": [
         "u200", 
         "u250", 
         "u50", 
-        "u280"
-    ], 
+        "u280", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+    "data": [
+        "PROJECT/sample.txt.zst" 
+    ],   
     "launch": [
         {
-            "cmd_args": "-dx BUILD/xilZstdDecompressStream.xclbin -d PROJECT/sample.txt.zst", 
+            "cmd_args": "-xbin BUILD/xilZstdDecompressStream.xclbin -d PROJECT/sample.txt.zst", 
             "name": "generic launch for all flows"
         }
     ], 
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
-             ]
+                "./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
+            ]
         }
     ], 
+    "config_make": "./config.mk", 
     "host": {
         "host_exe": "xil_zstd", 
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L2/tests/src/zstd.cpp", 
+                "LIB_DIR/common/libs/compress/zstdOCLHost.cpp",
+                "LIB_DIR/common/libs/compress/zstdApp.cpp",
+                "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
-                "LIB_DIR/common/libs/logger/logger.cpp" 
+                "LIB_DIR/common/libs/logger/logger.cpp"
             ], 
             "includepaths": [
+                "LIB_DIR/common/libs/compress/",
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/tests/src"
             ], 
             "symbols": [
                 "MULTIPLE_BYTES=4", 
-                "ZSTD_BLOCK_SIZE_KB=128" 
+                "ZSTD_BLOCK_SIZE_KB=128"
             ]
         }
     }, 
@@ -51,22 +59,25 @@
             "symbols": [
                 "INZSTD=1", 
                 "MULTIPLE_BYTES=4", 
-                "ZSTD_BLOCK_SIZE_KB=128" 
+                "ZSTD_BLOCK_SIZE_KB=128"
+            ], 
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
             ]
         }
     }, 
     "containers": [
         {
             "name": "xilZstdDecompressStream", 
-            "ldclflags": "--config PROJECT/opts.cfg", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
-                    "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
+                    "name": "xilGzipS2MM", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_s2mm.cpp"
                 }, 
                 {
-                    "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
+                    "name": "xilGzipMM2S", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_mm2s.cpp"
                 }, 
                 {
                     "name": "xilZstdDecompressStream", 
@@ -75,7 +86,9 @@
             ]
         }
     ], 
-    "output_files": "sample.txt.zst.*", 
+    "output_files": [
+           "sample.txt.zst.*"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -104,5 +117,23 @@
             "vitis_hw"
         ], 
         "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
     }
 }

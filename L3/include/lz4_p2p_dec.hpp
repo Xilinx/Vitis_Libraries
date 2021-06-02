@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,9 @@ class xfLz4 {
                                            std::vector<int>& fd_p2p_vec,
                                            std::vector<char*>& outVec,
                                            std::vector<uint64_t>& orgSizeVec,
-                                           std::vector<uint64_t>& inSizeVec4k,
-                                           bool enable_p2p);
+                                           std::vector<uint32_t>& inSizeVec4k,
+                                           bool enable_p2p,
+                                           uint8_t maxCR);
     ~xfLz4();
     static uint64_t get_file_size(std::ifstream& file) {
         file.seekg(0, file.end);
@@ -63,9 +64,9 @@ class xfLz4 {
     cl_device_id m_device;
     cl_command_queue ooo_q;
 
-    std::vector<std::string> unpacker_kernel_names = {"xilLz4Unpacker"};
+    std::vector<std::string> datamover_kernel_names = {"xilDecompDatamover"};
 
-    std::vector<std::string> decompress_kernel_names = {"xilLz4P2PDecompress"};
+    std::vector<std::string> decompress_kernel_names = {"xilLz4DecompressStream"};
 };
 
 #endif // _XFCOMPRESSION_LZ4_P2P_DEC_HPP_

@@ -11,14 +11,18 @@
         }
     ], 
     "platform_blacklist": [
-        "zc", 
-        "vck"
+        "zc"
     ], 
     "platform_whitelist": [
         "u200", 
         "u250", 
-        "u50"
-    ], 
+        "u50", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+     "data": [
+        "PROJECT/sample.txt" 
+    ],   
     "host": {
         "host_exe": "xil_checksum", 
         "compiler": {
@@ -26,8 +30,8 @@
                 "./src/host.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
-                "LIB_DIR/common/libs/logger/logger.cpp",
-                "LIB_DIR/common/thirdParty/zlib-1.2.7/adler32.c",
+                "LIB_DIR/common/libs/logger/logger.cpp", 
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/adler32.c", 
                 "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c"
             ], 
             "includepaths": [
@@ -81,5 +85,23 @@
             "vitis_hw"
         ], 
         "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
     }
 }

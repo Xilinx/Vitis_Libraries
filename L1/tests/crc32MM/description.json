@@ -3,11 +3,20 @@
     "description": "Test Design to validate Xilinx CRC32 module", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u200"
+        "u200", 
+        "vck190", 
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
+    "QoR_golden": {
+        "VV_LUT": "2882", 
+        "VV_FF": "4756", 
+        "VV_BRAM": "24", 
+        "VV_URAM": "0", 
+        "VV_AchievedClockPeriod": "2.815"
+    }, 
     "project": "crc32MM", 
     "solution": "sol1", 
     "clock": "3.3", 
