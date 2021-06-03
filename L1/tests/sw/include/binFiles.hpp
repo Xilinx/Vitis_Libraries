@@ -24,7 +24,7 @@
 
 using namespace std;
 
-size_t getBinBytes(const string filename) {
+inline size_t getBinBytes(const string filename) {
     ifstream file(filename, ios::binary);
     file.unsetf(ios::skipws);
     streampos fileSize;
