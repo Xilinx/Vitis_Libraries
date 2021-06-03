@@ -44,7 +44,7 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 
 # -- Project information -----------------------------------------------------
 
-project = "Vitis Graph Library"
+project = "Vitis Codec Library"
 copyright = '2021, Xilinx Inc.'
 author = 'Xilinx Inc.'
 

@@ -70,8 +70,8 @@ These are details for benchmark result and usage steps.
 .. toctree::
    :maxdepth: 1
 
-   jpegDecoder.rst
-   pikEnc.rst
+   benchmark/jpegDecoder.rst
+   benchmark/pikEnc.rst
    
 
 Test Overview

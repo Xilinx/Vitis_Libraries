@@ -1,5 +1,5 @@
 .. 
-   Copyright 2020 Xilinx, Inc.
+   Copyright 2019 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
    limitations under the License.
 
 
-*****************************
-API Document
-*****************************
+**************************************
+Design Internals
+**************************************
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
+   primitives/similarityOverview.rst
+   primitives/sortTopK.rst
 
-   L3_internal/api_func.rst
-   L3_internal/api_class.rst

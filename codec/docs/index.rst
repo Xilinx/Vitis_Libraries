@@ -40,7 +40,7 @@ Currently, this includes the following algorithm implementation:
    :caption: L1 User Guide
    :maxdepth: 3
 
-   guide_L1/api.rst
+   guide_L1/demo.rst
 
 .. toctree::
    :maxdepth: 2
@@ -51,7 +51,7 @@ Currently, this includes the following algorithm implementation:
    :caption: L2 User Guide
    :maxdepth: 3
 
-   guide_L2/api.rst
+   guide_L2/demo.rst
 
 .. toctree::
    :maxdepth: 2
