@@ -2,6 +2,7 @@
     "name": "Xilinx Gemm Block Stream Kernel Test",
     "description": "Xilinx XF_BLAS Test",
     "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
         "u250"

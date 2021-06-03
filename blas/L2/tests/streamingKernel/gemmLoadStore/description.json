@@ -2,6 +2,7 @@
     "name": "Xilinx XF_BLAS Gemm Load Store Test",
     "description": "Xilinx XF_BLAS Test",
     "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
         "xilinx_u250_gen3x16_xdma_3_1_202020_1"
