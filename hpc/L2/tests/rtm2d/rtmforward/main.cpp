@@ -22,7 +22,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include "fpga.hpp"
+#include "rtm2d.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 #include "assert.hpp"
@@ -68,14 +68,16 @@ int main(int argc, char** argv) {
     msg = "Image size must be multiple of " + to_string(RTM_parEntries);
     myAssert(l_width * l_height % RTM_parEntries == 0, msg);
 
-    AlignMem<RTM_pairType> p_snap;
-    AlignMem<RTM_dataType> p_upb;
+    host_buffer_t<RTM_pairType> p_snap;
+    host_buffer_t<RTM_dataType> p_upb;
     vector<RTM_dataType> p, pp, snap0, snap1, ref;
 
     p.resize(l_width * l_height);
     pp.resize(l_width * l_height);
 
-    FPGA fpga(l_xclbinFile);
+    FPGA fpga(l_deviceId);
+    fpga.xclbin(l_xclbinFile);
+
     ForwardKernel<RTM_dataType, RTM_order, RTM_nPE> fwd(&fpga, l_height, l_width, RTM_NZB, RTM_NXB, l_time, l_shot);
 
     fwd.loadData(filePath);
@@ -97,7 +99,7 @@ int main(int argc, char** argv) {
             readBin(filePath + "snap0.bin", sizeof(float) * l_width * l_height, snap0);
             readBin(filePath + "snap1.bin", sizeof(float) * l_width * l_height, snap1);
 
-            pass4 = compare<RTM_dataType>(l_width * RTM_order * l_time / 2, p_upb.ptr(), ref.data(), err4);
+            pass4 = compare<RTM_dataType>(l_width * RTM_order * l_time / 2, p_upb.data(), ref.data(), err4);
             cout << "There are in total " << err4 << " errors in upb v.s. ref" << endl;
 
             pass5 = compare<RTM_dataType>(l_width * l_height, pp.data(), snap0.data(), err5);

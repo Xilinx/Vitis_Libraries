@@ -1,5 +1,4 @@
 {
-    "gui": false,
     "name": "Xilinx XF_HPC MLP FCN 4CU Level 2 Test", 
     "description": "Xilinx XF_HPC MLP Test", 
     "flow": "vitis", 
@@ -27,6 +26,11 @@
             }
         }
     }, 
+    "pre_launch": [
+        {
+          "launch_cmd": "make dump_config"
+        }
+    ],
     "launch": [
         {
             "name": "generic launch for all flows", 
@@ -38,14 +42,14 @@
         "compiler": {
             "sources": [
                 "LIB_DIR/L2/src/sw/mlp/api_fcn_multiInstr.cpp",
-                "LIB_DIR/../blas/L2/src/sw/xcl2/xcl2.cpp"
+                "LIB_DIR/../blas/L2/src/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include/sw/mlp",
                 "LIB_DIR/../blas/L1/include/hw/xf_blas/helpers/utils",
-                "LIB_DIR/../blas/L2/include/sw/xcl2",
-                "LIB_DIR/../blas/L2/include/sw",
-                "LIB_DIR/../blas/L2/include"
+                "LIB_DIR/../blas/L2/include/xcl2",
+                "LIB_DIR/../blas/L2/include/memKernel/sw",
+                "LIB_DIR/../blas/L2/include/memKernel"
             ], 
             "options": "-O3"
         }
@@ -60,7 +64,8 @@
                 "LIB_DIR/../blas/L1/include/hw/xf_blas/gemm",
                 "LIB_DIR/../blas/L1/include/hw/xf_blas/helpers/utils",
                 "LIB_DIR/../blas/L2/include",
-                "LIB_DIR/../blas/L2/include/hw/xf_blas"
+                "LIB_DIR/../blas/L2/include/memKernel/",
+                "LIB_DIR/../blas/L2/include/memKernel/hw/xf_blas"
             ]
         }
     }, 
@@ -89,7 +94,7 @@
                 "max_memory_MB": 32768, 
                 "max_time_min": {
                     "vitis_hw_build": 940, 
-                    "vitis_hw_emu": 470, 
+                    "vitis_hw_emu": 600, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

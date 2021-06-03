@@ -23,7 +23,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include "fpga.hpp"
+#include "rtm3d.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 using namespace std;
@@ -70,7 +70,8 @@ int main(int argc, char** argv) {
     p.resize(l_cube);
     pp.resize(l_cube);
 
-    FPGA fpga(l_xclbinFile, l_deviceId);
+    FPGA fpga(l_deviceId);
+    fpga.xclbin(l_xclbinFile);
     ForwardKernel<RTM_dataType, RTM_order, RTM_nPEZ, RTM_nPEX> fwd(&fpga, l_z, l_y, l_x, RTM_NZB, RTM_NYB, RTM_NXB,
                                                                    l_time, l_shot);
 

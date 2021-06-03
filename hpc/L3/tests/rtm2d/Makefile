@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.2
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -84,11 +84,14 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/main.cpp
-CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+
+CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/hw/rtm2d
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/rtm2d
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw/rtm2d
 CXXFLAGS += -I$(XFLIB_DIR)/../blas/L1/tests/sw/include/
+CXXFLAGS += -I$(XFLIB_DIR)/../blas/L2/include/xcl2/
 LDFLAGS += -luuid -lxrt_coreutil
 
 ifeq ($(TARGET),sw_emu)
@@ -100,9 +103,9 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
-CXXFLAGS += -fmessage-length=0 -fopenmp
+CXXFLAGS += -fmessage-length=0 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
@@ -110,12 +113,10 @@ LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr 
 endif
 
 # ################### Setting package and image directory #######################
-EMBEDDED_PACKAGE_OUT = package_$(TARGET)
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := 
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+HOST_ARGS := $(BUILD_DIR)/rtm.xclbin $(BUILD_DIR)/data/
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -140,13 +141,13 @@ VPP_LDFLAGS_rtm += $(VPP_LDFLAGS_rtm_temp)
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/rtm.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/rtm.xclbin
 BINARY_CONTAINER_rtm_OBJS += $(TEMP_DIR)/rtmforward.xo
 BINARY_CONTAINER_rtm_OBJS += $(TEMP_DIR)/rtmbackward.xo
 
 # ######################### Setting Targets of Makefile ################################
 
--include ./params.mk
+-include params.mk
+
 .PHONY: all clean cleanall docs emconfig
 all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 

@@ -43,11 +43,21 @@ void fcn_ref(DenseMat<T>& p_A,
             }
             l_val += p_X.getVal(0, col);
             T l_entry = (T)(l_val);
-            // sigmoid
+#if MLP_RELU
+            if ((p_PReluVal & 0x01) == 0) {
+                if (l_entry < 0) {
+                    l_entry = 0;
+                }
+            }
+#elif MLP_TANSIG
+            if ((p_PReluVal & 0x01) == 0) {
+                l_entry = (T)2.0 / (T)(1.0 + (T)exp((T)-2.0 * l_entry)) - (T)1.0; // tansig
+            }
+#else
             if ((p_PReluVal & 0x01) == 0) {
                 l_entry = (T)1.0 / (T)(1.0 + (T)exp(-l_entry)); // sigmoid
-                // l_entry = (T)2.0 / (T)(1.0 + (T)exp((T)-2.0 * l_entry)) - (T)1.0; // tansig
             }
+#endif
             p_C.getVal(row, col) = l_entry;
         }
     }

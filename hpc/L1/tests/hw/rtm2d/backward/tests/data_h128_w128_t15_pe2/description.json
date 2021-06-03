@@ -1,5 +1,4 @@
 {
-    
     "clock": "3.3333", 
     "description": "", 
     "flow": "hls", 
@@ -8,7 +7,9 @@
     "part_whitelist": [], 
     "platform_blacklist": [], 
     "platform_whitelist": [
-        "u280"
+        "u280", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "project": "backward_data_h128_w128_t15_pe2_test", 
     "solution": "sol", 

@@ -239,8 +239,8 @@ class RTM3D : public Stencil3D<t_DataType, t_Order, t_MaxDimZ, t_MaxDimY, t_PEZ,
                  hls::stream<t_InType>& p_p1) {
 #pragma HLS DATAFLOW
         hls::stream<t_InType> l_p0, l_pp0, l_p1;
-        this->copy(p_p0, l_p0);
-        this->copy(p_pp0, l_pp0);
+        copy(this->m_cube, p_p0, l_p0);
+        copy(this->m_cube, p_pp0, l_pp0);
         this->propagate(p_v2dt2, p_vt, l_pp0, l_p0, p_pp1, l_p1);
         addSrc(p_src, l_p1, p_p1);
     }

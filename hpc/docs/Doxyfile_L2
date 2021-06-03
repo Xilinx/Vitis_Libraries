@@ -23,6 +23,7 @@
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ../L2/include/hw/ \
+                         ../L2/include/hw/cgSolver/ \
                          ../L2/include/hw/rtm2d/ \
                          ../L2/include/hw/rtm3d/ \
                          ../L2/include/hw/mlp/

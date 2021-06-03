@@ -79,6 +79,11 @@ ifndef XILINX_VIVADO
 $(error [ERROR]: g++ version older. Please use 5.0 or above)
 else
 CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
+ifeq ($(LD_LIBRARY_PATH),)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64
+else
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64:$(LD_LIBRARY_PATH)
+endif
 $(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
 endif
 endif
@@ -116,9 +121,6 @@ ifeq (,$(LD_LIBRARY_PATH))
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib
 else
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
 # check target

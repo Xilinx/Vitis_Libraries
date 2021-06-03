@@ -30,7 +30,7 @@ void top_f(STENCEIL_TYPE* s, const t_PairInType* p_img, t_PairInType* p_out, con
     for (int i = 0; i < N_INST; i++)
 #pragma HLS UNROLL
         s[i].propagate(l_v2dt2[i], l_v2dt2[i + 1], l_img[i], l_img[i + 1]);
-    xf::hpc::rtm::dataConsumer(l_cube, l_v2dt2[N_INST]);
+    xf::hpc::dataConsumer(l_cube, l_v2dt2[N_INST]);
     xf::blas::stream2mem<t_PairInType>(l_cube, l_img[N_INST], p_out);
 }
 

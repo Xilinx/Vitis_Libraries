@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2019 - 2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -30,6 +30,16 @@ used activation functions are also implemented.
    :maxdepth: 2
 
 .. include:: namespace_xf_hpc_mlp.rst
+
+CG Solver
+===========
+
+Some basic CG components are defined under the namespace **cg** 
+
+.. toctree::
+   :maxdepth: 2
+
+.. include:: namespace_xf_hpc_cg.rst
 
 Reverse Time Migration
 ==================================

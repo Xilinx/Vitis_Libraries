@@ -22,8 +22,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include "fpga.hpp"
-#include "types.hpp"
+#include "rtm2d.hpp"
 #include "utils.hpp"
 #include "assert.hpp"
 using namespace std;
@@ -68,8 +67,9 @@ int main(int argc, char** argv) {
     msg = "Image size must be multiple of " + to_string(RTM_parEntries);
     myAssert(l_width * l_height % RTM_parEntries == 0, msg);
 
-    AlignMem<RTM_pairType> p_snap(l_width * l_height), p_p, p_r;
-    AlignMem<RTM_dataType> p_upb(filePath + "upb.bin"), p_i;
+    host_buffer_t<RTM_pairType> p_snap(l_width * l_height), p_p, p_r;
+    host_buffer_t<RTM_dataType> p_upb, p_i;
+    readBin(filePath + "upb.bin", sizeof(RTM_dataType) * l_width * RTM_order * l_time / 2, p_upb);
     vector<RTM_dataType> p, pp, bp, bpp, pr, rr, upb, snap0, snap1, pref, ppref, rref, ref, imlocref, p_img;
 
     p.resize(l_width * l_height);
@@ -90,7 +90,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    FPGA fpga(l_xclbinFile);
+    FPGA fpga(l_deviceId);
+    fpga.xclbin(l_xclbinFile);
+
     BackwardKernel<RTM_dataType, RTM_order, RTM_nPE> bwd(&fpga, l_height, l_width, RTM_NZB, RTM_NXB, l_time, l_shot);
 
     bwd.loadData(filePath);
@@ -122,7 +124,7 @@ int main(int argc, char** argv) {
 
         readBin(filePath + "imloc.bin", sizeof(float) * l_imgX * l_imgZ, imlocref);
 
-        pass0 = compare<RTM_dataType>(l_imgX * l_imgZ, p_i.ptr(), imlocref.data(), err0);
+        pass0 = compare<RTM_dataType>(l_imgX * l_imgZ, p_i.data(), imlocref.data(), err0);
         cout << "There are in total " << err0 << " errors in imloc v.s. imlocref" << endl;
 
         pass1 = compare<RTM_dataType>(l_width * l_height, bp.data(), pref.data(), err1);

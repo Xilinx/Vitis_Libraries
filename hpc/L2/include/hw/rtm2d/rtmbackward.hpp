@@ -15,7 +15,9 @@
 */
 #include "xf_blas.hpp"
 #include "rtm.hpp"
+#include "streamOps.hpp"
 
+using namespace xf::hpc;
 using namespace xf::hpc::rtm;
 typedef RTM2D<RTM_dataType, RTM_order, RTM_maxDim, RTM_MaxB, RTM_nPE> RTM_TYPE;
 typedef RTM_TYPE::t_PairInType RTM_pairType;
@@ -93,7 +95,7 @@ void backward(RTM_TYPE sf[RTM_numBSMs],
         sf[i].backwardF(l_upb[i], l_pvt[i], l_pvt[i + 1], l_p[i], l_p[i + 1], l_cp[i],
                         (l_t + RTM_numBSMs - i) == p_T || p_T - 1 == (l_t + RTM_numBSMs - i));
     }
-    dataConsumer(l_num, l_pvt[RTM_numBSMs]);
+    xf::hpc::dataConsumer(l_num, l_pvt[RTM_numBSMs]);
     stream2wide<RTM_pairTypeWidth, RTM_multi>(l_sizeP, l_p[RTM_numBSMs], l_pout);
     xf::blas::stream2mem<RTM_interface>(l_sizeP, l_pout, p_p1);
 
@@ -115,7 +117,7 @@ void backward(RTM_TYPE sf[RTM_numBSMs],
         sr[i].backwardR(l_rec[i], l_rvt[i], l_rvt[i + 1], l_r[i], l_r[i + 1], l_cr[i]);
     }
 
-    dataConsumer(l_num, l_rvt[RTM_numBSMs]);
+    xf::hpc::dataConsumer(l_num, l_rvt[RTM_numBSMs]);
     stream2wide<RTM_pairTypeWidth, RTM_multi>(l_sizeP, l_r[RTM_numBSMs], l_rout);
     xf::blas::stream2mem<RTM_interface>(l_sizeP, l_rout, p_r1);
 

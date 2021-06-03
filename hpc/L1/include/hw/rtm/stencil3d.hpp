@@ -432,15 +432,6 @@ class Stencil3D { // column major
         merge(l_out0, l_out1, p_out);
     }
 
-    template <typename T>
-    void copy(hls::stream<T>& p_p0, hls::stream<T>& p_p1) {
-        for (int t = 0; t < this->m_cube; t++) {
-#pragma HLS PIPELINE
-            T l_val = p_p0.read();
-            p_p1.write(l_val);
-        }
-    }
-
     inline unsigned int getX() const {
 #pragma HLS INLINE
         return m_x;
