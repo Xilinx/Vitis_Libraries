@@ -1,17 +1,17 @@
 # Codec Library
 
-Codec Library is an open-sourced library written in C/C++ accelerating image processing including JPEG Decoder, WebP, Lepton, PIK and JPEG-XL. It now covers a level of acceleration: the module level(L1), the pre-defined kernel level(L2).
+Codec Library is an open-sourced library written in C/C++ accelerating image processing including 2 APIs, JPEG decoder and PIK encoder. It now covers a level of acceleration: the module level(L1) and the pre-defined kernel level(L2).
 
 ## Overview
 
 The algorithms implemented by Codec Library include:
 
-*  JPEG Decoder: "JPEG" stands for Joint Photographic Experts Group, the name of the committee that created the JPEG standard and also other still picture coding standards. The "Joint" stood for ISO TC97 WG8 and CCITT SGVIII.
-*  PIK Encoder: PIK is a raster-graphics file format that supports both lossy and lossless compression. It is designed to outperform existing raster formats and thus to become their universal replacement. PIK is the prototype of JPEG-XL and its compression quality is equal to JPEG-XL speed 6/7.
+*  API ‘jpegDec’: This API supports the ‘Sequential DCT-based mode’ of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodology. It can process 1 Huffman token and create up to 8 DCT coefficients within one cycle. It is also an easy-to-use decoder as it can directly parse the JPEG file header without help of software functions. 
+*  API ‘pikEnc’: This API is based on Google’s PIK, which was ‘chosen as the base framework for JPEG XL’. The pikEnc used the ‘fast mode’ of PIK encoder which can provide better encoding efficiency than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA architecture. It can proved higher throughput and lower latency compared to software-based solutions.
 
 ## Benchmark Result
 
-In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a good performance against several dataset, e.g. lena.png with latency of "value". For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/benchmarks/results.html).
+In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a good performance against several dataset, e.g. lena.png with latency of "value". For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/benchmark.html).
 
 
 ## Documentations
