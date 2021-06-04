@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
  */
 /**
  * @file xil_block_comp_datamover_kernel.cpp
- * @brief Source file for data mover kernel which streams data to compression streaming kernel.
+ * @brief Source file for data mover kernel which streams data to compression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
@@ -66,7 +67,8 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
 
 extern "C" {
 /**
- * @brief Data mover kernel top function for block based compression algorithms. It reads
+ * @brief Data mover kernel top function for block based compression algorithms.
+ * It reads
  *        data from memory and streams it to block compression kernel.
  *
  * @param in input stream

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@
 #define GMEM_BURST_SIZE 128
 #endif
 
-#ifndef GZIP_BLOCK_SIZE
-#define GZIP_BLOCK_SIZE (32 * 1024) // 32 KB
+#ifndef URAM_BUFFER
+#define URAM_BUFFER 1 // 0: BRAM; 1: URAM
 #endif
 
 #ifndef NUM_CORES
-#define NUM_CORES 4
+#define NUM_CORES 8 // Octacore by default
 #endif
 
 // Kernel top functions
@@ -61,9 +61,11 @@ extern "C" {
  * @param compressd_size compressed output size of each block
  * @param input_size input data size
  */
-void xilGzipMultiCoreCompressFull(const ap_uint<GMEM_DWIDTH>* in,
-                                  ap_uint<GMEM_DWIDTH>* out,
-                                  uint64_t* compressd_size,
-                                  uint64_t input_size);
+void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
+                      ap_uint<GMEM_DWIDTH>* out,
+                      uint32_t* compressd_size,
+                      uint32_t* checksumData,
+                      uint32_t input_size,
+                      bool checksumType);
 }
 #endif // _XFCOMPRESSION_GZIP_COMPRESS_MULTICORE_MM_HPP_

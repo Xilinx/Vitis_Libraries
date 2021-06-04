@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,36 +23,119 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
+#include "compress_utils.hpp"
 #include "hls_stream.h"
 
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 namespace xf {
 namespace compression {
 namespace details {
 
+template <int IN_DATAWIDTH>
+void receiveBuffer(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
+                   hls::stream<IntVectorStream_dt<IN_DATAWIDTH, 1> >& outStream,
+                   hls::stream<ap_uint<17> >& inputSize) {
+    IntVectorStream_dt<IN_DATAWIDTH, 1> outVal;
+
+buffer_top:
+    while (1) {
+        ap_uint<17> inSize = inputSize.read();
+        ap_uint<IN_DATAWIDTH> inVal = 0;
+        // proceed further if valid size
+        if (inSize == 0) break;
+        auto outSizeV = inSize;
+        outVal.strobe = 1;
+    buffer_assign:
+        for (auto i = 0; i < outSizeV; i++) {
+#pragma HLS PIPELINE II = 1
+            inVal = inStream.read();
+            outVal.data[0] = inVal;
+            outStream << outVal;
+        }
+        // Block end Condition
+        outVal.strobe = 0;
+        outStream << outVal;
+    }
+    // File end Condition
+    outVal.strobe = 0;
+    outStream << outVal;
+}
+
 template <int IN_DATAWIDTH, int OUT_DATAWIDTH>
-void passDownsizer(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
-                   hls::stream<uint32_t>& inSizeStream,
-                   hls::stream<ap_uint<OUT_DATAWIDTH> >& outStream) {
-    constexpr int c_factor = IN_DATAWIDTH / OUT_DATAWIDTH;
-    ap_uint<IN_DATAWIDTH> inBuffer = 0;
+void bufferDownsizer(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
+                     hls::stream<IntVectorStream_dt<OUT_DATAWIDTH, 1> >& outStream,
+                     hls::stream<ap_uint<17> >& inputSize) {
+    constexpr int16_t c_factor = IN_DATAWIDTH / OUT_DATAWIDTH;
+    constexpr int16_t c_outWord = OUT_DATAWIDTH / 8;
+    IntVectorStream_dt<OUT_DATAWIDTH, 1> outVal;
 
 downsizer_top:
-    for (uint32_t inSize = inSizeStream.read(); inSize != 0; inSize = inSizeStream.read()) {
-        uint32_t outSizeV = inSize;
+    while (1) {
+        ap_uint<17> inSize = inputSize.read();
+        ap_uint<IN_DATAWIDTH> inVal = 0;
+        ap_uint<17> cntr = 0;
+        // proceed further if valid size
+        if (inSize == 0) break;
+        auto outSizeV = ((inSize - 1) / c_outWord) + 1;
+        outVal.strobe = 1;
     downsizer_assign:
-        for (uint32_t itr = 0; itr < outSizeV; itr++) {
+        for (auto i = 0; i < outSizeV; i += c_outWord) {
 #pragma HLS PIPELINE II = 1
-            int idx = itr % c_factor;
-            if (idx == 0) inBuffer = inStream.read();
-            ap_uint<OUT_DATAWIDTH> tmpValue = inBuffer.range((idx + 1) * OUT_DATAWIDTH - 1, idx * OUT_DATAWIDTH);
-            outStream << tmpValue;
+            if (cntr % c_factor == 0) inVal = inStream.read();
+            outVal.data[0] = inVal.range(OUT_DATAWIDTH - 1, 0);
+            inVal >>= OUT_DATAWIDTH;
+            outStream << outVal;
+            cntr++;
         }
+        // Block end Condition
+        outVal.strobe = 0;
+        outStream << outVal;
     }
+    // File end Condition
+    outVal.strobe = 0;
+    outStream << outVal;
+}
+
+template <int IN_DATAWIDTH, int OUT_DATAWIDTH, int SIZE_DWIDTH = 4>
+void bufferDownsizer(hls::stream<ap_uint<IN_DATAWIDTH + SIZE_DWIDTH> >& inStream,
+                     hls::stream<IntVectorStream_dt<OUT_DATAWIDTH, 1> >& outStream) {
+    constexpr int16_t c_factor = IN_DATAWIDTH / OUT_DATAWIDTH;
+    constexpr int16_t c_outWord = OUT_DATAWIDTH / 8;
+    IntVectorStream_dt<OUT_DATAWIDTH, 1> outVal;
+
+downsizer_top:
+    while (1) {
+        ap_uint<SIZE_DWIDTH> dsize = 0;
+        auto inVal = inStream.read();
+        // proceed further if valid size
+        ap_uint<SIZE_DWIDTH> inSize = inVal.range(SIZE_DWIDTH - 1, 0);
+        if (inSize == 0) break;
+        auto outSizeV = ((inSize - 1) / c_outWord) + 1;
+        outVal.strobe = 1;
+    downsizer_assign:
+        while (inSize > 0) {
+#pragma HLS PIPELINE II = 1
+            outVal.data[0] = inVal.range(OUT_DATAWIDTH + SIZE_DWIDTH - 1, SIZE_DWIDTH);
+            inVal >>= OUT_DATAWIDTH;
+            outStream << outVal;
+            dsize += c_outWord;
+            if (dsize == outSizeV) {
+                inVal = inStream.read();
+                inSize = inVal.range(SIZE_DWIDTH - 1, 0);
+                dsize = 0;
+                outSizeV = ((inSize - 1) / c_outWord) + 1;
+            }
+        }
+        // Block end Condition
+        outVal.strobe = 0;
+        outStream << outVal;
+    }
+    // File end Condition
+    outVal.strobe = 0;
+    outStream << outVal;
 }
 
 template <int IN_DATAWIDTH, int OUT_DATAWIDTH>
@@ -104,6 +187,40 @@ downsizer_top:
         }
     }
     outSizeStream << 0;
+}
+
+template <int IN_DATAWIDTH, int OUT_DATAWIDTH, int SIZE_DWIDTH = 24>
+void streamDownSizerSize(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
+                         hls::stream<ap_uint<SIZE_DWIDTH> >& dataSizeStream,
+                         hls::stream<IntVectorStream_dt<OUT_DATAWIDTH, 1> >& outStream) {
+    constexpr int16_t c_factor = IN_DATAWIDTH / OUT_DATAWIDTH;
+    constexpr int16_t c_outWord = OUT_DATAWIDTH / 8;
+    ap_uint<IN_DATAWIDTH> inVal;
+    IntVectorStream_dt<OUT_DATAWIDTH, 1> outVal;
+    ap_uint<SIZE_DWIDTH> inSize = 0;
+
+downsizer_top:
+    for (auto inSize = dataSizeStream.read(); inSize > 0; inSize = dataSizeStream.read()) {
+        auto outSizeV = ((inSize - 1) / c_outWord) + 1;
+        outVal.strobe = 1;
+    downsizer_assign:
+        for (ap_uint<SIZE_DWIDTH> dsize = 0; dsize < outSizeV; ++dsize) {
+#pragma HLS PIPELINE II = 1
+            auto idx = dsize % c_factor;
+            if (idx == 0) {
+                inVal = inStream.read();
+            }
+            outVal.data[0] = inVal.range(OUT_DATAWIDTH - 1, 0);
+            inVal >>= OUT_DATAWIDTH;
+            outStream << outVal;
+        }
+        // Block end Condition
+        outVal.strobe = 0;
+        outStream << outVal;
+    }
+    // File end Condition
+    outVal.strobe = 0;
+    outStream << outVal;
 }
 
 template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>

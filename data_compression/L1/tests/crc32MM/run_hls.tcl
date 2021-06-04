@@ -1,5 +1,5 @@
 #
-# Copyright 2020 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv "${XF_PROJ_ROOT}/L1/tests/crc32MM/sample.txt"
+  cosim_design -disable_dependency_check -argv "${XF_PROJ_ROOT}/L1/tests/crc32MM/sample.txt"
 }
 
 if {$VIVADO_SYN == 1} {

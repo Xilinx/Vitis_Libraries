@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include "hls_stream.h"
 #include <ap_int.h>
@@ -572,7 +570,7 @@ inline void fseDecode(ap_uint<64> accword,
     const uint8_t c_bsBytes = c_BSWidth / 8;
 
     ap_uint<c_BSWidth> bitStream[(BLOCK_SIZE_KB * 1024) / c_bsBytes];
-#pragma HLS BIND_STORAGE variable = bitStream type = ram_t2p impl = bram
+#pragma HLS BIND_STORAGE variable = bitStream type = ram_t2p impl = uram
 
     uint8_t bitsInAcc = bytesInAcc * 8;
 
@@ -970,7 +968,7 @@ void hfdDataFeader(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
     const uint16_t c_BSWidth = BS_WIDTH;
     const uint16_t c_accRegWidth = c_streamWidth * 2;
     const int c_bsPB = c_BSWidth / 8;
-    const int c_bsUpperLim = (32 / c_bsPB) * 1024;
+    const int c_bsUpperLim = (((32 / c_bsPB) / 2) * 1024);
 
     ap_uint<c_BSWidth> bitStream[c_bsUpperLim];
 #pragma HLS BIND_STORAGE variable = bitStream type = ram_t2p impl = bram
@@ -1189,7 +1187,7 @@ void huffDecodeLitInternal(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
     hls::stream<ap_uint<c_BSWidth> > huffBitStream("huffBitStream");
     hls::stream<ap_uint<8> > validBitCntStream("validBitCntStream");
 #pragma HLS STREAM variable = huffBitStream depth = c_huffBSStreamDepth
-#pragma HLS STREAM variable = validByteCntStream depth = c_vbitCntStreamDepth
+#pragma HLS STREAM variable = validBitCntStream depth = c_vbitCntStreamDepth
 
 #pragma HLS DATAFLOW
 

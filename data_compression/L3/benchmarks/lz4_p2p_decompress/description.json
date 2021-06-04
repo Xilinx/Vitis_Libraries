@@ -16,9 +16,10 @@
         "u200", 
         "u250"
     ], 
+    "default_device": "samsung_u2",
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt", 
+            "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.lz4", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -49,7 +50,7 @@
                 "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
-                "PARALLEL_BLOCK=8", 
+                "PARALLEL_BLOCK=1", 
                 "C_COMPUTE_UNIT=1", 
                 "D_COMPUTE_UNIT=2", 
                 "OVERLAP_HOST_DEVICE"
@@ -59,29 +60,35 @@
     "v++": {
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=8"
+                "PARALLEL_BLOCK=1",
+                "MULTIPLE_BYTES=8"
+            ],
+         "includepaths": [
+               "LIB_DIR/L2/tests/src"
             ]
         }
     }, 
     "containers": [
         {
             "name": "decompress", 
-            "ldclflags": "--profile_kernel data:all:all:all", 
+            "ldclflags": "--config PROJECT/connectivity.cfg",
             "accelerators": [
                 {
-                    "name": "xilLz4P2PDecompress", 
-                    "location": "LIB_DIR/L2/src/lz4_p2p_decompress_kernel.cpp", 
-                    "num_compute_units": "1"
+                    "name": "xilLz4DecompressStream", 
+                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_stream.cpp", 
+                    "num_compute_units": "2"
                 }, 
                 {
-                    "name": "xilLz4Unpacker", 
-                    "location": "LIB_DIR/L2/src/lz4_unpacker_kernel.cpp", 
-                    "num_compute_units": "1"
+                    "name": "xilDecompDatamover", 
+                    "location": "LIB_DIR/L2/tests/src/block_decomp_multibyte_dm.cpp",
+                    "num_compute_units": "2"
                 }
             ]
         }
     ], 
-    "output_files": "sample.txt.lz4.*", 
+    "output_files": [
+           "sample.txt.lz4.*"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [

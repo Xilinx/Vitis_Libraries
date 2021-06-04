@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,21 @@
  */
 #include "lz4App.hpp"
 #include "lz4OCLHost.hpp"
+#include <memory>
 
 int main(int argc, char* argv[]) {
     bool enable_profile = false;
+    bool lz4_stream = false;
     compressBase::State flow = compressBase::DECOMPRESS;
+    compressBase::Level lflow = compressBase::SEQ;
     // Driver class object
-    lz4App d(argc, argv, enable_profile);
+    lz4App d(argc, argv, lflow, enable_profile);
 
     // Design class object creating and constructor invocation
     std::unique_ptr<lz4OCLHost> lz4(
-        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), enable_profile));
+        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), d.getMCR(), lz4_stream, enable_profile));
 
     // Run API to launch the compress or decompress engine
     d.run(lz4.get());
+    return 0;
 }

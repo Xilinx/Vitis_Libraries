@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,25 @@
 
 /**
  * @file block_comp_datamover_kernel.hpp
- * @brief Header for data mover kernel which streams data to compression streaming kernel.
+ * @brief Header for data mover kernel which streams data to compression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
 
+#include "axi_stream_utils.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
-#include "stream_upsizer.hpp"
 #include "stream_downsizer.hpp"
-#include "axi_stream_utils.hpp"
+#include "stream_upsizer.hpp"
 
 #include "ap_axi_sdata.h"
 #include "hls_stream.h"
 
 extern "C" {
 /**
- * @brief Data mover kernel top function for block based compression algorithms. It reads
+ * @brief Data mover kernel top function for block based compression algorithms.
+ * It reads
  *        data from memory and streams it to block compression kernel.
  *
  * @param in input stream

@@ -1,5 +1,5 @@
 /*
- *Copyright 2020 Xilinx, Inc. All rights reserved.
+ *Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,32 +42,44 @@ class compressApp {
     std::string m_outFile_name;
     bool m_list_flow{false};
     bool m_compress_decompress{false};
-    uint64_t m_inputsize;
+    size_t m_inputsize;
     uint64_t m_enbytes;
     uint64_t m_debytes;
+    uint16_t m_stdBSize = (1 << 15);
 
    public:
     sda::utils::CmdLineParser m_parser;
     std::string m_extn{".compressed"};
     bool m_enableProfile;
+    bool m_isSeq;
+
+    /** Switch flow
+     * true means compress,
+     * false means decompress
+     */
+    bool m_compress_flow;
+
     /**
      * @brief Initialize compressApp content
      *
      */
-    compressApp(const int argc, char** argv, bool enable_profile);
+    compressApp(const int argc, char** argv, bool is_seq, bool enable_profile);
     void parser(const int argc, char** argv);
     int validate(std::string& inFile, std::string& outFile);
     // Get Input Filename
-    std::string getXclbin(void);
-    uint8_t getDeviceId(void);
-    uint8_t getMCR(void);
+    std::string getXclbin(void) const;
+    uint8_t getDeviceId(void) const;
+    uint8_t getMCR(void) const;
+    std::string& getInFileName(void);
     void inputFilePreCheck(std::ifstream& inStream);
     void getListFilenames(std::string& filelist, std::vector<std::string>& fname_vec);
+    void printTestSummaryHeader();
+    void printTestSummaryFooter(const std::string& testFile);
     // -c -d -l -t
     void run(compressBase* b);
 
-    void runCompress(compressBase* b, const std::string);
+    void runCompress(compressBase* b, const std::string&);
 
-    void runDecompress(compressBase* b, const std::string);
+    void runDecompress(compressBase* b, const std::string&);
 };
 #endif // _XFCOMPRESSION_COMPRESS_APP_HPP_

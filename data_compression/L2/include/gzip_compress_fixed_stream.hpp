@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,11 @@ extern "C" {
  * huffman encoding for compression.
  *
  * @param inStream input raw data
- * @param inSizeStream input data size
  * @param outStream output compressed data
- * @param outSizeStream compressed output data size
+ * @param inSizeStream input data size
  */
 void xilGzipCompressFixedStreaming(hls::stream<ap_axiu<GMEM_IN_DWIDTH, 0, 0, 0> >& inStream,
                                    hls::stream<ap_axiu<GMEM_OUT_DWIDTH, 0, 0, 0> >& outStream,
-                                   hls::stream<ap_axiu<32, 0, 0, 0> >& inSizeStream,
-                                   hls::stream<ap_axiu<32, 0, 0, 0> >& outSizeStream);
+                                   hls::stream<ap_axiu<32, 0, 0, 0> >& inSizeStream);
 }
 #endif // _XFCOMPRESSION_GZIP_COMPRESS_FIXED_STREAM_HPP_

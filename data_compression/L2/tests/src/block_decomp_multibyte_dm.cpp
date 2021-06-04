@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 
 /**
  * @file xil_block_decomp_datamover_kernel.cpp
- * @brief Source file for data mover kernel which streams data to decompression streaming kernel.
+ * @brief Source file for data mover kernel which streams data to decompression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */

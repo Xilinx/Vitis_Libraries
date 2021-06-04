@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,22 +30,20 @@
 #define HISTORY_SIZE MAX_OFFSET
 #define PARALLEL_BYTES 8
 typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
+typedef ap_uint<(PARALLEL_BYTES * 8) + 8> uintS_t;
 
 void lz4DecompressEngineRun(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                            hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                            hls::stream<bool>& outStreamEoS,
+                            hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
                             hls::stream<uint32_t>& outSizeStream,
                             const uint32_t input_size)
 
 {
-    xf::compression::lz4DecompressEngine<PARALLEL_BYTES, HISTORY_SIZE>(inStream, outStream, outStreamEoS, outSizeStream,
-                                                                       input_size);
+    xf::compression::lz4DecompressEngine<PARALLEL_BYTES, HISTORY_SIZE>(inStream, outStream, outSizeStream, input_size);
 }
 
 int main(int argc, char* argv[]) {
     hls::stream<uintV_t> inStream("inStream");
-    hls::stream<uintV_t> outStream("decompressOut");
-    hls::stream<bool> outStreamEoS("decompressOut");
+    hls::stream<uintS_t> outStream("decompressOut");
     hls::stream<uint32_t> outStreamSize("decompressOut");
     uint32_t input_size;
 
@@ -65,7 +63,7 @@ int main(int argc, char* argv[]) {
     }
 
     // DECOMPRESSION CALL
-    lz4DecompressEngineRun(inStream, outStream, outStreamEoS, outStreamSize, comp_length);
+    lz4DecompressEngineRun(inStream, outStream, outStreamSize, comp_length);
 
     std::ofstream outFile;
     outFile.open(argv[2], std::fstream::binary | std::fstream::out);
@@ -78,11 +76,10 @@ int main(int argc, char* argv[]) {
     bool pass = true;
     uint32_t outSize = outStreamSize.read();
     uint32_t outCnt = 0;
-    uintV_t g;
-    for (bool outEoS = outStreamEoS.read(); outEoS == 0; outEoS = outStreamEoS.read()) {
-        // reading value from output stream
-        uintV_t o = outStream.read();
-
+    uintS_t g;
+    uintS_t o = outStream.read();
+    bool eosFlag = o.range((PARALLEL_BYTES + 1) * 8 - 1, PARALLEL_BYTES * 8);
+    while (!eosFlag) {
         // writing output file
         if ((outCnt + PARALLEL_BYTES) < outSize) {
             outFile.write((char*)&o, PARALLEL_BYTES);
@@ -109,8 +106,11 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+
+        // reading value from output stream
+        o = outStream.read();
+        eosFlag = o.range((PARALLEL_BYTES + 1) * 8 - 1, PARALLEL_BYTES * 8);
     }
-    uintV_t o = outStream.read();
     outFile.close();
     if (pass) {
         std::cout << "TEST PASSED" << std::endl;

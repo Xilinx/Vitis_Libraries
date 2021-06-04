@@ -13,27 +13,31 @@
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+                "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
             ]
         }
     ], 
     "platform_blacklist": [
-        "zc", 
-        "vck"
+        "zc"
     ], 
     "platform_whitelist": [
         "u200", 
         "u250", 
-        "u50"
-    ], 
+        "u50", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ],
+    "data": [
+        "PROJECT/sample.txt" 
+    ],   
     "host": {
         "host_exe": "xil_lz4", 
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/common/libs/lz4/lz4OCLHost.cpp",
-                "LIB_DIR/common/libs/lz4/lz4Base.cpp",
-                "LIB_DIR/common/libs/lz4/lz4App.cpp",
+                "LIB_DIR/common/libs/compress/lz4OCLHost.cpp",
+                "LIB_DIR/common/libs/compress/lz4Base.cpp",
+                "LIB_DIR/common/libs/compress/lz4App.cpp",
                 "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
@@ -44,7 +48,6 @@
                 "LIB_DIR/L2/tests/src/",
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/thirdParty/xxhash",
-                "LIB_DIR/common/libs/lz4/",
                 "LIB_DIR/common/libs/compress/"
             ], 
             "symbols": [
@@ -69,8 +72,12 @@
                 }
             ]
         }
-    ], 
-    "output_files": "sample.txt.*", 
+    ],
+    "output_files": [
+            "sample.txt.*",
+            "sample_run.*",
+            "test.list"
+    ],          
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -100,5 +107,23 @@
             "vitis_hw_run"
         ], 
         "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
     }
 }

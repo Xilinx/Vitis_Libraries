@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,8 @@
 
 #include "hls_stream.h"
 #include <ap_int.h>
-#include <fstream>
-#include <iostream>
-#include <stdlib.h>
-#include <string>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 #include "lz_compress.hpp"
 #include "lz_optional.hpp"
 #include "mm2s.hpp"

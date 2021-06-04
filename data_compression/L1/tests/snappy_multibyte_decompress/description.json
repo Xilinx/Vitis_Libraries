@@ -1,7 +1,13 @@
 {
     "name": "Xilinx Snappy Multibyte Decompress HLS Test", 
     "description": "Test Design to validate Snappy MultiByte Decompress module", 
-    "flow": "hls", 
+    "flow": "hls",
+    "platform_whitelist": [
+        "u200", 
+        "vck190", 
+        "aws-vu9p-f1"
+    ], 
+    "platform_blacklist": [],  
     "project": "snappy_decompress_test", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -11,6 +17,13 @@
             "snappy_decompress_test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
+    },
+    "QoR_golden": {
+        "VV_LUT": "6818",
+        "VV_FF": "5450",
+        "VV_BRAM": "0",
+        "VV_URAM": "4",
+        "VV_AchievedClockPeriod": "3.255"
     }, 
     "testbench": {
         "source": [
