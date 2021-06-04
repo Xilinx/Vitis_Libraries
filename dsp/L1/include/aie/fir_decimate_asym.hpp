@@ -177,7 +177,7 @@ class kernelFilterClass {
 
     // Constructor for reloadable coefficient designs
     // Calculates offsets required for coefficient reloads and m_kDecimateOffsets
-    kernelFilterClass() { setDecimateOffsets(); }
+    kernelFilterClass() : m_oldInTaps{} { setDecimateOffsets(); }
 
     // Constructor for static coefficient designs
     // Calculates m_kDecimateOffsets and writes coefficients to m_internalTaps

@@ -59,7 +59,7 @@ class matrix_mult_ref_graph : public graph {
         connect<window<TP_INPUT_WINDOW_VSIZE_A * sizeof(TT_DATA_A)> >(inA, m_firKernel.in[0]);
         connect<window<TP_INPUT_WINDOW_VSIZE_B * sizeof(TT_DATA_B)> >(inB, m_firKernel.in[1]);
         connect<window<(TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB) * (TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB) *
-                       sizeof(GET_TT_OUT(TT_DATA_A, TT_DATA_B))> >(m_firKernel.out[0], out);
+                       sizeof(outType_t<TT_DATA_A, TT_DATA_B>)> >(m_firKernel.out[0], out);
         printf("connected window");
         // Specify mapping constraints
         runtime<ratio>(m_firKernel) = 0.4;

@@ -154,13 +154,15 @@ inline void kernelMatMultClass<TT_DATA_A,
     constexpr unsigned int M = tilingScheme.Atile;
     constexpr unsigned int N = tilingScheme.ABtile;
     constexpr unsigned int K = tilingScheme.Btile;
+    constexpr unsigned int sizeTileA = M * N;
+    constexpr unsigned int sizeTileB = N * K;
+    constexpr unsigned int sizeTileC = M * K;
+    constexpr bool parrallelA = (M < TP_DIM_A);
+    constexpr bool parrallelB = (K < TP_DIM_B);
     using MMUL = aie::mmul<M, N, K, TT_DATA_A, TT_DATA_B, accType_t<TT_DATA_A, TT_DATA_B> >;
 
     const unsigned int numAReg = 2;
     const unsigned int numBReg = 2;
-    const unsigned int sizeTileA = M * N;
-    const unsigned int sizeTileB = N * K;
-    const unsigned int sizeTileC = M * K;
     // printf("M %d, N %d, K%d\n", M, N, K);
     // TT_DATA_A tiledWindowA[TP_DIM_A * TP_DIM_AB];
     // doTiling<M,N, TP_DIM_A, TP_DIM_AB, TP_DIM_A_LEADING>(inInterface.inWindowA, &tiledWindowA[0]);
@@ -189,7 +191,7 @@ inline void kernelMatMultClass<TT_DATA_A,
             TT_OUT* restrict pC1 = (TP_CASC_OUT == CASC_OUT_FALSE)
                                        ? tiledOutWindowPtr + ((AChunk * TP_DIM_B / K + 0) * sizeTileC)
                                        : nullptr;
-            TT_OUT* restrict pC2 = (TP_CASC_OUT == CASC_OUT_FALSE)
+            TT_OUT* restrict pC2 = (TP_CASC_OUT == CASC_OUT_FALSE && parrallelA)
                                        ? tiledOutWindowPtr + (((AChunk + 1) * TP_DIM_B / K + 0) * sizeTileC)
                                        : nullptr;
 
@@ -197,19 +199,31 @@ inline void kernelMatMultClass<TT_DATA_A,
                 chess_prepare_for_pipelining chess_loop_count((TP_DIM_B / K) / numBReg) // TP_DIM_B/K)
                 {
                     const TT_DATA_A* restrict pA1 = inputAPtr + ((AChunk * TP_DIM_AB / N + 0) * sizeTileA);
-                    const TT_DATA_A* restrict pA2 = inputAPtr + (((AChunk + 1) * TP_DIM_AB / N + 0) * sizeTileA);
+                    const TT_DATA_A* restrict pA2;
+                    if
+                        constexpr(parrallelA) { pA2 = inputAPtr + (((AChunk + 1) * TP_DIM_AB / N + 0) * sizeTileA); }
                     const TT_DATA_B* restrict pB1 = inputBPtr + ((0 * TP_DIM_B / K + BChunk) * sizeTileB);
-                    const TT_DATA_B* restrict pB2 = inputBPtr + ((0 * TP_DIM_B / K + (BChunk + 1)) * sizeTileB);
+                    const TT_DATA_B* restrict pB2;
+                    if
+                        constexpr(parrallelB) { pB2 = inputBPtr + ((0 * TP_DIM_B / K + (BChunk + 1)) * sizeTileB); }
 
                     aie::vector<TT_DATA_A, sizeTileA> A0 = aie::load_v<sizeTileA>(pA1);
                     pA1 += sizeTileA;
-                    aie::vector<TT_DATA_A, sizeTileA> A1 = aie::load_v<sizeTileA>(pA2);
-                    pA2 += sizeTileA;
+                    aie::vector<TT_DATA_A, sizeTileA> A1;
+                    if
+                        constexpr(parrallelA) {
+                            A1 = aie::load_v<sizeTileA>(pA2);
+                            pA2 += sizeTileA;
+                        }
 
                     aie::vector<TT_DATA_B, sizeTileB> B0 = aie::load_v<sizeTileB>(pB1);
                     pB1 += sizeTileB * TP_DIM_B / K;
-                    aie::vector<TT_DATA_B, sizeTileB> B1 = aie::load_v<sizeTileB>(pB2);
-                    pB2 += sizeTileB * TP_DIM_B / K;
+                    aie::vector<TT_DATA_B, sizeTileB> B1;
+                    if
+                        constexpr(parrallelB) {
+                            B1 = aie::load_v<sizeTileB>(pB2);
+                            pB2 += sizeTileB * TP_DIM_B / K;
+                        }
 
                     // initial muls
                     MMUL C00;
@@ -223,19 +237,29 @@ inline void kernelMatMultClass<TT_DATA_A,
                             // could also try to replae sizeTileC with MMUL::accum_type::size()   or just
                             // MMUL::accum_type::Elems
                             C00 = MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
-                            C01 = MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
-                            C10 = MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
-                            C11 = MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
+                            if
+                                constexpr(parrallelB) C01 = MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
+                            if
+                                constexpr(parrallelA) C10 = MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
+                            if
+                                constexpr(parrallelA && parrallelB) C11 =
+                                    MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
                             C00.mac(A0, B0);
-                            C01.mac(A0, B1);
-                            C10.mac(A1, B0);
-                            C11.mac(A1, B1);
+                            if
+                                constexpr(parrallelB) C01.mac(A0, B1);
+                            if
+                                constexpr(parrallelA) C10.mac(A1, B0);
+                            if
+                                constexpr(parrallelA && parrallelB) C11.mac(A1, B1);
                         }
                     else {
                         C00.mul(A0, B0);
-                        C01.mul(A0, B1);
-                        C10.mul(A1, B0);
-                        C11.mul(A1, B1);
+                        if
+                            constexpr(parrallelB) C01.mul(A0, B1);
+                        if
+                            constexpr(parrallelA) C10.mul(A1, B0);
+                        if
+                            constexpr(parrallelA && parrallelB) C11.mul(A1, B1);
                     }
 
                     //#pragma unroll((TP_DIM_AB/N -1))
@@ -247,22 +271,31 @@ inline void kernelMatMultClass<TT_DATA_A,
                             // print(B1,true,"B1: ");
                             A0 = aie::load_v<sizeTileA>(pA1);
                             pA1 += sizeTileA;
-                            A1 = aie::load_v<sizeTileA>(pA2);
-                            pA2 += sizeTileA;
+                            if
+                                constexpr(parrallelA) {
+                                    A1 = aie::load_v<sizeTileA>(pA2);
+                                    pA2 += sizeTileA;
+                                }
 
                             B0 = aie::load_v<sizeTileB>(pB1);
                             pB1 += sizeTileB * TP_DIM_B / K;
-                            B1 = aie::load_v<sizeTileB>(pB2);
-                            pB2 += sizeTileB * TP_DIM_B / K;
+                            if
+                                constexpr(parrallelB) {
+                                    B1 = aie::load_v<sizeTileB>(pB2);
+                                    pB2 += sizeTileB * TP_DIM_B / K;
+                                }
 
                             // print(C00.template to_vector<TT_OUT>(TP_SHIFT),true,"C00: ");
                             // print(C01.template to_vector<TT_OUT>(TP_SHIFT),true,"C01: ");
                             // print(C10.template to_vector<TT_OUT>(TP_SHIFT),true,"C10: ");
                             // print(C11.template to_vector<TT_OUT>(TP_SHIFT),true,"C11: ");
                             C00.mac(A0, B0);
-                            C01.mac(A0, B1);
-                            C10.mac(A1, B0);
-                            C11.mac(A1, B1);
+                            if
+                                constexpr(parrallelB) { C01.mac(A0, B1); }
+                            if
+                                constexpr(parrallelA) { C10.mac(A1, B0); }
+                            if
+                                constexpr(parrallelA && parrallelB) { C11.mac(A1, B1); }
                         }
 
                     // print(A0,true,"FinalA0: ");
@@ -280,18 +313,30 @@ inline void kernelMatMultClass<TT_DATA_A,
                         constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
                             aie::store_v(pC1, C00.template to_vector<TT_OUT>(TP_SHIFT));
                             pC1 += sizeTileC;
-                            aie::store_v(pC1, C01.template to_vector<TT_OUT>(TP_SHIFT));
-                            pC1 += sizeTileC;
-                            aie::store_v(pC2, C10.template to_vector<TT_OUT>(TP_SHIFT));
-                            pC2 += sizeTileC;
-                            aie::store_v(pC2, C11.template to_vector<TT_OUT>(TP_SHIFT));
-                            pC2 += sizeTileC;
+                            if
+                                constexpr(parrallelB) {
+                                    aie::store_v(pC1, C01.template to_vector<TT_OUT>(TP_SHIFT));
+                                    pC1 += sizeTileC;
+                                }
+                            if
+                                constexpr(parrallelA) {
+                                    aie::store_v(pC2, C10.template to_vector<TT_OUT>(TP_SHIFT));
+                                    pC2 += sizeTileC;
+                                }
+                            if
+                                constexpr(parrallelA && parrallelB) {
+                                    aie::store_v(pC2, C11.template to_vector<TT_OUT>(TP_SHIFT));
+                                    pC2 += sizeTileC;
+                                }
                         }
                     else {
                         writeincr(outInterface.outWindow, C00.to_accum());
-                        writeincr(outInterface.outWindow, C01.to_accum());
-                        writeincr(outInterface.outWindow, C10.to_accum());
-                        writeincr(outInterface.outWindow, C11.to_accum());
+                        if
+                            constexpr(parrallelB) { writeincr(outInterface.outWindow, C01.to_accum()); }
+                        if
+                            constexpr(parrallelA) { writeincr(outInterface.outWindow, C10.to_accum()); }
+                        if
+                            constexpr(parrallelA && parrallelB) { writeincr(outInterface.outWindow, C11.to_accum()); }
                     }
                 }
         }
@@ -341,7 +386,7 @@ void matrix_mult<TT_DATA_A,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN>::matMult(input_window<TT_DATA_A>* inWindowA,
                                        input_window<TT_DATA_B>* inWindowB,
-                                       output_window<GET_TT_OUT(TT_DATA_A, TT_DATA_B)>* outWindow) {
+                                       output_window<outType_t<TT_DATA_A, TT_DATA_B> >* outWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B> outInterface;
     inInterface.inWindowA = inWindowA;
@@ -391,7 +436,7 @@ void matrix_mult<TT_DATA_A,
                  TP_CASC_LEN>::matMult(input_window<TT_DATA_A>* inWindowA,
                                        input_window<TT_DATA_B>* inWindowB,
                                        input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                       output_window<GET_TT_OUT(TT_DATA_A, TT_DATA_B)>* outWindow) {
+                                       output_window<outType_t<TT_DATA_A, TT_DATA_B> >* outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B> outInterface;
     inInterface.inWindowA = inWindowA;

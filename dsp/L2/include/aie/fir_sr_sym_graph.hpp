@@ -564,6 +564,10 @@ class fir_sr_sym_graph<TT_DATA,
         }
     }
 };
+
+/**
+  * @endcond
+  */
 }
 }
 }

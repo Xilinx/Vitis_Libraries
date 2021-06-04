@@ -1661,6 +1661,7 @@ void fir_interpolate_hb<TT_DATA,
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
+    inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = broadcastWindow;
     this->filterKernel(inInterface, outInterface);
@@ -1701,6 +1702,7 @@ void fir_interpolate_hb<TT_DATA,
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
     inInterface.inWindowReverse = inWindowReverse;
+    inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = broadcastWindow;
     this->filterKernel(inInterface, outInterface);
@@ -1739,6 +1741,7 @@ void fir_interpolate_hb<TT_DATA,
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
+    inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = broadcastWindow;
     this->filterKernelRtp(inInterface, outInterface);
@@ -1779,6 +1782,7 @@ void fir_interpolate_hb<TT_DATA,
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
     inInterface.inWindowReverse = inWindowReverse;
+    inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = broadcastWindow;
     this->filterKernelRtp(inInterface, outInterface);

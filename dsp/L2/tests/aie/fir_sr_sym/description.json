@@ -1,6 +1,7 @@
 {
     "name": "Xilinx DSPLIB fir sr sym",
     "description": "",
+    "gui": "false",
     "flow": "versal",
     "platform_whitelist": [
         "vck190"

@@ -415,6 +415,9 @@ class fir_interpolate_fract_asym_graph : public graph {
     }
 };
 
+/**
+  * @cond NOCOMMENTS
+  */
 // Specialized template  using static coefficients, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -640,14 +643,15 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
         }
     }
 };
-}
-}
-}
-}
-}
+
 /**
   * @endcond
   */
+}
+}
+}
+}
+}
 
 #endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_GRAPH_HPP_
 

@@ -1,6 +1,7 @@
 {
     "name": "Xilinx DSPLIB widget real2complex",
     "description": "",
+    "gui": "false",
     "flow": "versal",
     "platform_whitelist": [
         "vck190"

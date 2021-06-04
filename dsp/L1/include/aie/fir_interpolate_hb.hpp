@@ -197,7 +197,7 @@ class kernelFilterClass {
     unsigned int get_m_kArch() { return m_kArch; };
 
     // Constructors
-    kernelFilterClass() {}
+    kernelFilterClass() : m_oldInTaps{} {}
 
     kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) { firReload(taps); };
 

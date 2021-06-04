@@ -72,7 +72,7 @@ static void doUnTile(T_D* restrict inPtr, T_D* outPtr) {
     constexpr unsigned minGranularity = (128 / 8) / sizeof(T_D);
     constexpr unsigned loadSize = (N >= minGranularity) ? N : minGranularity;
     constexpr unsigned minVBuffSizeforType = (512 / 8) / sizeof(T_D);
-    constexpr unsigned vectorSize = minVBuffSizeforType;
+    constexpr unsigned vectorSize = (minVBuffSizeforType > (inRow * inCol)) ? (inRow * inCol) : minVBuffSizeforType;
 
     // static_assert(N >= minGranularity, "Granularity is awkward");
     static_assert(vectorSize <= (1024 / 8) / sizeof(T_D), "calculated vector size too large for vector register.");
