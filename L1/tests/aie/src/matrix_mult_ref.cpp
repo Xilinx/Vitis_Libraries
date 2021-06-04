@@ -34,9 +34,9 @@ void matrix_mult_ref<TT_DATA_A,
                      TP_INPUT_WINDOW_VSIZE_A,
                      TP_INPUT_WINDOW_VSIZE_B>::mmult(input_window<TT_DATA_A>* inWindowA,
                                                      input_window<TT_DATA_B>* inWindowB,
-                                                     output_window<GET_TT_OUT(TT_DATA_A, TT_DATA_B)>* outWindow) {
-    // typename TT_OUT = GET_TT_OUT(TT_DATA_A,TT_DATA_B);
-    using TT_OUT = GET_TT_OUT(TT_DATA_A, TT_DATA_B);
+                                                     output_window<outType_t<TT_DATA_A, TT_DATA_B> >* outWindow) {
+    // typename TT_OUT = outType_t<TT_DATA_A,TT_DATA_B>;
+    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_OUT> accum;
     TT_DATA_A dA_in[TP_DIM_AB];

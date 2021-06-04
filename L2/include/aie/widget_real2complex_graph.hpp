@@ -93,17 +93,12 @@ class widget_real2complex_graph : public graph {
         connect<window<TP_WINDOW_VSIZE * sizeof(TT_OUT_DATA)> >(m_kernel.out[0], out);
     }; // constructor
 };
-/**
-  * @cond NOCOMMENTS
-  */
 }
 }
 }
 }
 } // namespace braces
-/**
-  * @endcond
-  */
+
 #endif //_DSPLIB_WIDGET_REAL2COMPLEX_GRAPH_HPP_
 
 /*  (c) Copyright 2020 Xilinx, Inc. All rights reserved.

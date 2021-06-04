@@ -346,6 +346,16 @@ inline void multiplyAcc(T_accRef<int32_t>& accum, int32_t data, int32_t coeff) {
     accum.real += (int64_t)data * coeff;
 };
 template <>
+inline void multiplyAcc(T_accRef<cint32_t>& accum, cint16_t data, int32_t coeff) {
+    accum.real += (int64_t)data.real * (int64_t)coeff;
+    accum.imag += (int64_t)data.imag * (int64_t)coeff;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint32_t>& accum, int32_t data, cint16_t coeff) {
+    accum.real += (int64_t)data * (int64_t)coeff.real;
+    accum.imag += (int64_t)data * (int64_t)coeff.imag;
+};
+template <>
 inline void multiplyAcc(T_accRef<cint32_t>& accum, cint32_t data, int16_t coeff) {
     accum.real += (int64_t)data.real * coeff;
     accum.imag += (int64_t)data.imag * coeff;

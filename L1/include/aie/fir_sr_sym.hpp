@@ -173,7 +173,7 @@ class kernelFilterClass {
     }
 
     // Constructors
-    kernelFilterClass() {}
+    kernelFilterClass() : m_oldInTaps{} {}
 
     void firReload(const TT_COEFF* taps) {
         TT_COEFF* tapsPtr = (TT_COEFF*)taps;

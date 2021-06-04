@@ -587,14 +587,15 @@ class fir_sr_asym_graph<TT_DATA,
         }
     }
 };
+
+/**
+  * @endcond
+  */
 }
 }
 }
 }
 } // namespace braces
-/**
-  * @endcond
-  */
 #endif //_DSPLIB_FIR_SR_ASYM_GRAPH_HPP_
 
 /*  (c) Copyright 2020 Xilinx, Inc. All rights reserved.

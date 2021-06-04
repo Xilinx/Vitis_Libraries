@@ -188,37 +188,67 @@ class matrix_mult_graph : public graph {
     // Tiling scheme doesn't change vs cascade or not.
     static constexpr typename middleMatMult::tilingStruct tilingScheme = middleMatMult::getTilingScheme();
 
+    // Forward compatible for batch window processing.
+    static constexpr unsigned int dimAPerKernel = (TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB);
+    static constexpr unsigned int dimBPerKernel = (TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB);
+
     using TilerClassA = tilerKernelClass<tilingScheme.Atile,
                                          tilingScheme.ABtile,
-                                         TP_DIM_A,
+                                         dimAPerKernel,
                                          (TP_DIM_AB / TP_CASC_LEN),
                                          TP_DIM_A_LEADING,
                                          TT_DATA_A>;
     using TilerClassB = tilerKernelClass<tilingScheme.ABtile,
                                          tilingScheme.Btile,
                                          (TP_DIM_AB / TP_CASC_LEN),
-                                         TP_DIM_B,
+                                         dimBPerKernel,
                                          TP_DIM_B_LEADING,
                                          TT_DATA_B>;
     using DetilerClassOut = untilerKernelClass<tilingScheme.Atile,
                                                tilingScheme.Btile,
-                                               TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB,
-                                               TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB,
+                                               dimAPerKernel,
+                                               dimBPerKernel,
                                                TP_DIM_OUT_LEADING,
-                                               GET_TT_OUT(TT_DATA_A, TT_DATA_B)>;
+                                               outType_t<TT_DATA_A, TT_DATA_B> >;
 
-    using TileAConditional =
-        ConditionalWidget<TP_ADD_TILING_A, (TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN) * sizeof(TT_DATA_A), TilerClassA>;
-    using TileBConditional =
-        ConditionalWidget<TP_ADD_TILING_B, (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN) * sizeof(TT_DATA_B), TilerClassB>;
-    using DetileOutConditional = ConditionalWidget<TP_ADD_DETILING_OUT,
-                                                   TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B /
-                                                       TP_DIM_AB * sizeof(GET_TT_OUT(TT_DATA_A, TT_DATA_B)),
-                                                   DetilerClassOut>;
+    static constexpr bool isRedundantTilerA =
+        (((TP_DIM_AB / TP_CASC_LEN) <= tilingScheme.ABtile) && (TP_DIM_A_LEADING == ROW_MAJOR));
+    static constexpr bool isRedundantTilerB =
+        ((dimBPerKernel <= tilingScheme.Btile) && (TP_DIM_B_LEADING == ROW_MAJOR));
+    static constexpr bool isRedundantTilerOut =
+        ((dimBPerKernel <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
+
+    using TileAConditional = ConditionalWidget<isRedundantTilerA ? 0 : TP_ADD_TILING_A,
+                                               (TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN) * sizeof(TT_DATA_A),
+                                               TilerClassA>;
+    using TileBConditional = ConditionalWidget<isRedundantTilerB ? 0 : TP_ADD_TILING_B,
+                                               (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN) * sizeof(TT_DATA_B),
+                                               TilerClassB>;
+    using DetileOutConditional =
+        ConditionalWidget<isRedundantTilerOut ? 0 : TP_ADD_DETILING_OUT,
+                          dimAPerKernel * dimBPerKernel * sizeof(outType_t<TT_DATA_A, TT_DATA_B>),
+                          DetilerClassOut>;
     /**
      * @brief This is the constructor function for the Matric Multiply graph.
      **/
     matrix_mult_graph() {
+        if (isRedundantTilerA && TP_ADD_TILING_A == 1) {
+            printf(
+                "WARNING: TP_ADD_TILING_A is true, but P_DIM_AB is small enough that tiling is not nessecary for this "
+                "configuration. TP_ADD_TILING_A will be ignored. \n");
+        }
+        if (isRedundantTilerB && TP_ADD_TILING_B == 1) {
+            printf(
+                "WARNING: TP_ADD_TILING_B is true, but P_DIM_B is small enough that tiling is not nessecary for this "
+                "configuration. TP_ADD_TILING_B will be ignored. \n");
+        }
+        if (isRedundantTilerOut && TP_ADD_DETILING_OUT == 1) {
+            printf(
+                "WARNING: TP_ADD_DETILING_OUT is true, but P_DIM_B is small enough that detiling is not nessecary for "
+                "this configuration. TP_ADD_DETILING_OUT will be ignored. \n");
+        }
+        printf("\n");
+
         // make input connections
         for (int i = 0; i < TP_CASC_LEN; i++) {
             if (i >= 1 && i < (TP_CASC_LEN - 1)) {
@@ -333,18 +363,43 @@ class matrix_mult_graph<TT_DATA_A,
                                                TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB,
                                                TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB,
                                                TP_DIM_OUT_LEADING,
-                                               GET_TT_OUT(TT_DATA_A, TT_DATA_B)>;
+                                               outType_t<TT_DATA_A, TT_DATA_B> >;
 
-    using TileAConditional =
-        ConditionalWidget<TP_ADD_TILING_A, TP_INPUT_WINDOW_VSIZE_A * sizeof(TT_DATA_A), TilerClassA>;
-    using TileBConditional =
-        ConditionalWidget<TP_ADD_TILING_B, TP_INPUT_WINDOW_VSIZE_B * sizeof(TT_DATA_B), TilerClassB>;
-    using DetileOutConditional = ConditionalWidget<TP_ADD_DETILING_OUT,
+    static constexpr bool isRedundantTilerA = ((TP_DIM_AB <= tilingScheme.ABtile) && (TP_DIM_A_LEADING == ROW_MAJOR));
+    static constexpr bool isRedundantTilerB =
+        ((TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB <= tilingScheme.Btile) && (TP_DIM_B_LEADING == ROW_MAJOR));
+    static constexpr bool isRedundantTilerOut =
+        ((TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
+
+    using TileAConditional = ConditionalWidget<isRedundantTilerA ? 0 : TP_ADD_TILING_A,
+                                               TP_INPUT_WINDOW_VSIZE_A * sizeof(TT_DATA_A),
+                                               TilerClassA>;
+    using TileBConditional = ConditionalWidget<isRedundantTilerB ? 0 : TP_ADD_TILING_B,
+                                               TP_INPUT_WINDOW_VSIZE_B * sizeof(TT_DATA_B),
+                                               TilerClassB>;
+    using DetileOutConditional = ConditionalWidget<isRedundantTilerOut ? 0 : TP_ADD_DETILING_OUT,
                                                    TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B /
-                                                       TP_DIM_AB * sizeof(GET_TT_OUT(TT_DATA_A, TT_DATA_B)),
+                                                       TP_DIM_AB * sizeof(outType_t<TT_DATA_A, TT_DATA_B>),
                                                    DetilerClassOut>;
     // constructor
     matrix_mult_graph() {
+        if (isRedundantTilerA && TP_ADD_TILING_A == 1) {
+            printf(
+                "WARNING: TP_ADD_TILING_A is true, but P_DIM_AB is small enough that tiling is not nessecary for this "
+                "configuration. TP_ADD_TILING_A will be ignored. \n");
+        }
+        if (isRedundantTilerB && TP_ADD_TILING_B == 1) {
+            printf(
+                "WARNING: TP_ADD_TILING_B is true, but P_DIM_B is small enough that tiling is not nessecary for this "
+                "configuration. TP_ADD_TILING_B will be ignored. \n");
+        }
+        if (isRedundantTilerOut && TP_ADD_DETILING_OUT == 1) {
+            printf(
+                "WARNING: TP_ADD_DETILING_OUT is true, but P_DIM_B is small enough that detiling is not nessecary for "
+                "this configuration. TP_ADD_DETILING_OUT will be ignored. \n");
+        }
+        printf("\n");
+
         m_matMult = kernel::create_object<MatMult>();
 
         tilerA = TileAConditional::create(inA[0], m_matMult.in[0]);

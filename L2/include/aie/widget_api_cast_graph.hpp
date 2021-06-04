@@ -124,17 +124,12 @@ class widget_api_cast_graph : public graph {
         }
     }; // constructor
 };
-/**
-  * @cond NOCOMMENTS
-  */
 }
 }
 }
 }
 } // namespace braces
-/**
-  * @endcond
-  */
+
 #endif //_DSPLIB_WIDGET_API_CAST_GRAPH_HPP_
 
 /*  (c) Copyright 2020 Xilinx, Inc. All rights reserved.

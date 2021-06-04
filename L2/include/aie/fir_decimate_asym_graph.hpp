@@ -345,6 +345,7 @@ class fir_decimate_asym_graph : public graph {
     kernel m_firKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+
     /**
       * @endcond
       */
@@ -387,6 +388,7 @@ class fir_decimate_asym_graph : public graph {
         }
     }
 };
+
 /**
   * @cond NOCOMMENTS
   */
@@ -416,16 +418,20 @@ class fir_decimate_asym_graph<TT_DATA,
    public:
     port<input> in;
     port<output> out;
+
     /**
       * @endcond
       */
+
     /**
      * A second window API of TP_INPUT_WINDOW_VSIZE/TP_DECIMATE_FACTOR samples of TT_DATA type.
      **/
     port<output> out2;
+
     /**
       * @cond NOCOMMENTS
       */
+
     kernel m_firKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
@@ -598,14 +604,15 @@ class fir_decimate_asym_graph<TT_DATA,
         }
     }
 };
+
+/**
+  * @endcond
+  */
 }
 }
 }
 }
 } // namespaces
-/**
-  * @endcond
-  */
 
 #endif // _DSPLIB_FIR_DECIMATE_ASYM_GRAPH_HPP_
 

@@ -204,7 +204,7 @@ class kernelFilterClass {
     unsigned int get_m_kArch() { return 0; }; // no distinct architectures yet
 
     // Constructors
-    kernelFilterClass() {}
+    kernelFilterClass() : m_oldInTaps{} {}
 
     kernelFilterClass(const TT_COEFF (&taps)[TP_FIR_LEN]) {
         // Loads taps/coefficients

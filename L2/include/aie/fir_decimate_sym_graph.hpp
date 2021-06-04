@@ -428,6 +428,10 @@ class fir_decimate_sym_graph : public graph {
     };
 }; // end of class
 
+/**
+ * @cond NOCOMMENTS
+ */
+
 // Specialized template for multiple kernels, single  input and static coefficients, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -501,9 +505,6 @@ class fir_decimate_sym_graph<TT_DATA,
     };
 }; // end of class
 
-/**
- * @cond NOCOMMENTS
- */
 // Specialized template for multiple kernels, dual input and static coefficients, single output
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -938,14 +939,15 @@ class fir_decimate_sym_graph<TT_DATA,
         }
     }
 };
-}
-}
-}
-}
-}
+
 /**
   * @endcond
   */
+}
+}
+}
+}
+}
 #endif // _DSPLIB_FIR_DECIMATE_SYM_GRAPH_HPP_
 
 /*  (c) Copyright 2020 Xilinx, Inc. All rights reserved.
