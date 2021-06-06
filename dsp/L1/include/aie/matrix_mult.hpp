@@ -28,9 +28,9 @@ The file holds the definition of the Matrix Multiply kernel class.
 // CEIL rounds x up to the next multiple of y, which may be x itself.
 #define CEIL(x, y) (((x + y - 1) / y) * y)
 // Whichever type has the largest size (will be more complicated in future)
-#ifndef GET_TT_OUT
-#define GET_TT_OUT(A, B) std::conditional_t<(sizeof(B) > sizeof(A)), B, A>
-#endif // GET_TT_OUT
+//#ifndef GET_TT_OUT
+//#define GET_TT_OUT(A,B) std::conditional_t<(sizeof(B) > sizeof(A)),B, A>
+//#endif //GET_TT_OUT
 #ifndef ROW_MAJOR
 #define ROW_MAJOR 0
 #endif // ROW_MAJOR
@@ -47,38 +47,45 @@ namespace matrix_mult {
 // TO BE MOVED:
 // IF input type
 struct no_port {};
-template <typename T_D, typename T_C>
+template <typename T_A, typename T_B>
 struct accType {
     using type = cacc48;
+};
+template <typename T_A, typename T_B>
+struct outType {
+    using type = cint16;
 };
 template <>
 struct accType<int16, int16> {
     using type = acc48;
 };
 template <>
-struct accType<cint16, cint16> {
-    using type = cacc48;
+struct outType<int16, int16> {
+    using type = int16;
 };
-template <>
-struct accType<int32, int32> {
-    using type = acc80;
-};
-template <>
-struct accType<cint32, cint32> {
-    using type = cacc80;
-};
-
 template <>
 struct accType<int16, cint16> {
     using type = cacc48;
+};
+template <>
+struct outType<int16, cint16> {
+    using type = cint16;
 };
 template <>
 struct accType<int16, cint32> {
     using type = cacc80;
 };
 template <>
+struct outType<int16, cint32> {
+    using type = cint32;
+};
+template <>
 struct accType<int16, int32> {
     using type = acc80;
+};
+template <>
+struct outType<int16, int32> {
+    using type = int32;
 };
 
 template <>
@@ -86,38 +93,98 @@ struct accType<cint16, int16> {
     using type = cacc48;
 };
 template <>
-struct accType<cint32, int16> {
-    using type = cacc80;
+struct outType<cint16, int16> {
+    using type = cint16;
 };
 template <>
-struct accType<int32, int16> {
-    using type = acc80;
+struct accType<cint16, cint16> {
+    using type = cacc48;
 };
-
+template <>
+struct outType<cint16, cint16> {
+    using type = cint16;
+};
 template <>
 struct accType<cint16, int32> {
     using type = cacc80;
+};
+template <>
+struct outType<cint16, int32> {
+    using type = cint32;
 };
 template <>
 struct accType<cint16, cint32> {
     using type = cacc80;
 };
 template <>
+struct outType<cint16, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct accType<int32, int16> {
+    using type = acc80;
+};
+template <>
+struct outType<int32, int16> {
+    using type = int32;
+};
+template <>
 struct accType<int32, cint16> {
     using type = cacc80;
 };
 template <>
-struct accType<cint32, cint16> {
-    using type = cacc80;
+struct outType<int32, cint16> {
+    using type = cint32;
 };
-
+template <>
+struct accType<int32, int32> {
+    using type = acc80;
+};
+template <>
+struct outType<int32, int32> {
+    using type = int32;
+};
 template <>
 struct accType<int32, cint32> {
     using type = cacc80;
 };
 template <>
+struct outType<int32, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct accType<cint32, int16> {
+    using type = cacc80;
+};
+template <>
+struct outType<cint32, int16> {
+    using type = cint32;
+};
+template <>
+struct accType<cint32, cint16> {
+    using type = cacc80;
+};
+template <>
+struct outType<cint32, cint16> {
+    using type = cint32;
+};
+template <>
 struct accType<cint32, int32> {
     using type = cacc80;
+};
+template <>
+struct outType<cint32, int32> {
+    using type = cint32;
+};
+template <>
+struct accType<cint32, cint32> {
+    using type = cacc80;
+};
+template <>
+struct outType<cint32, cint32> {
+    using type = cint32;
 };
 
 template <>
@@ -125,20 +192,38 @@ struct accType<float, float> {
     using type = accfloat;
 };
 template <>
+struct outType<float, float> {
+    using type = float;
+};
+template <>
 struct accType<cfloat, float> {
     using type = caccfloat;
+};
+template <>
+struct outType<cfloat, float> {
+    using type = cfloat;
 };
 template <>
 struct accType<float, cfloat> {
     using type = caccfloat;
 };
 template <>
+struct outType<float, cfloat> {
+    using type = cfloat;
+};
+template <>
 struct accType<cfloat, cfloat> {
     using type = caccfloat;
+};
+template <>
+struct outType<cfloat, cfloat> {
+    using type = cfloat;
 };
 
 template <typename T_D_A, typename T_D_B>
 using accType_t = typename accType<T_D_A, T_D_B>::type;
+template <typename T_D_A, typename T_D_B>
+using outType_t = typename outType<T_D_A, T_D_B>::type;
 
 template <bool T_CASC_IN, typename T_D_A, typename T_D_B>
 struct T_inputIF {
@@ -152,7 +237,7 @@ struct T_inputIF {
 template <bool T_CASC_OUT, typename T_D_A, typename T_D_B>
 struct T_outputIF {
     typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE,
-                              output_window<GET_TT_OUT(T_D_A, T_D_B)>,
+                              output_window<outType_t<T_D_A, T_D_B> >,
                               output_stream<accType_t<T_D_A, T_D_B> > >::type* restrict outWindow;
 };
 
@@ -212,7 +297,7 @@ template <typename TT_DATA_A,
 class kernelMatMultClass {
    protected:
     // Members defined here can be changed in derived classes to support customer inheritance.
-    using TT_OUT = GET_TT_OUT(TT_DATA_A, TT_DATA_B);
+    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
     // These will actually be the result of a constexpr function, depending on
     // how well the B data would fit into the A data. Or how awkward it is to
     // load the data due to LEADING_DIM.
@@ -423,7 +508,7 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
     // FIR
     void matMult(input_window<TT_DATA_A>* inWindowA,
                  input_window<TT_DATA_B>* inWindowB,
-                 output_window<GET_TT_OUT(TT_DATA_A, TT_DATA_B)>* restrict outWindow);
+                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -513,7 +598,7 @@ class matrix_mult<TT_DATA_A,
     void matMult(input_window<TT_DATA_A>* inWindowA,
                  input_window<TT_DATA_B>* inWindowB,
                  input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                 output_window<GET_TT_OUT(TT_DATA_A, TT_DATA_B)>* restrict outWindow);
+                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------

@@ -195,7 +195,7 @@ class kernelFilterClass {
     };
 
     // Constructor used for reloadable coefficients
-    kernelFilterClass() { setDecimateOffsets(); }
+    kernelFilterClass() : m_oldInTaps{} { setDecimateOffsets(); }
 
     // setDecimateOffsets
     void setDecimateOffsets() {

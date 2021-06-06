@@ -1,6 +1,7 @@
 {
     "name": "Xilinx DSPLIB widget api cast",
     "description": "",
+    "gui": "false",
     "flow": "versal",
     "platform_whitelist": [
         "vck190"
