@@ -26,7 +26,7 @@
 
 #include "ap_fixed.h"
 #include "hls_stream.h"
-#include "hls_math.h"
+#include "hw/math_helper.hpp"
 
 namespace xf {
 namespace solver {
@@ -43,8 +43,9 @@ union double_casting {
 template <typename T>
 void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::stream<T>& c_strm) {
 //	double zeta = (beta - alpha) / (2.0 * gamma);
-//	double ang_tan = sgn(zeta) / (hls::abs(zeta) + hls::sqrt(1.0 + (zeta*zeta)));//compute tan of angle
-//	double ang_cos = 1.0 / (hls::sqrt (1.0 + (ang_tan*ang_tan)));       //cos
+//	double ang_tan = sgn(zeta) / (xf::solver::internal::m::abs(zeta) + xf::solver::internal::m::sqrt(1.0 +
+//(zeta*zeta)));//compute tan of angle
+//	double ang_cos = 1.0 / (xf::solver::internal::m::sqrt (1.0 + (ang_tan*ang_tan)));       //cos
 //	double ang_sin = ang_cos*ang_tan;              // sin
 
 #pragma HLS inline off
@@ -88,8 +89,8 @@ void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::
     deno2 = deno * deno; // deno2 = 4*(m01)^2
     double m;
 #pragma HLS RESOURCE variable = m core = DAddSub_nodsp
-    m = deno2 + d2;              // m = (m00 - m11)^2 + 4*(m01)^2
-    double sqrtM = hls::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
+    m = deno2 + d2;                                  // m = (m00 - m11)^2 + 4*(m01)^2
+    double sqrtM = xf::solver::internal::m::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
     //////////////////
     // calculate M2
     dc.d = m;
@@ -108,8 +109,8 @@ void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::
     double tmpDivider = deno2 / tmpSum;
 #pragma HLS RESOURCE variable = tmpSub core = DAddSub_nodsp
     tmpSub = 1 - tmpDivider;
-    T c_right = hls::sqrt(tmpSub);
-    double tmp = hls::sqrt(tmpDivider);
+    T c_right = xf::solver::internal::m::sqrt(tmpSub);
+    double tmp = xf::solver::internal::m::sqrt(tmpDivider);
     T s_right = (((d > 0) && (deno > 0)) | ((d < 0) && (deno < 0))) ? tmp : -tmp;
 
     s_strm.write(s_right);
@@ -118,7 +119,8 @@ void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::
 //! calc the converge of next sweep
 template <typename T>
 void calc_converge(T alpha, T beta, T gamma, hls::stream<T>& conv_strm) {
-    T converge = hls::abs(gamma) / hls::sqrt(alpha * beta); // compute convergence
+    T converge =
+        xf::solver::internal::m::abs(gamma) / xf::solver::internal::m::sqrt(alpha * beta); // compute convergence
     conv_strm.write(converge);
 }
 
@@ -558,7 +560,7 @@ CALC_US:
         // add 2 -> 1
         accu_s = AUS_accu_tmp2[0] + AUS_accu_tmp2[1];
 
-        accu_s = hls::sqrt(accu_s);
+        accu_s = xf::solver::internal::m::sqrt(accu_s);
 #ifdef __SOLVER_DEBUG__
         std::cout << "accu_s = " << std::setprecision(15) << accu_s << std::endl;
 #endif

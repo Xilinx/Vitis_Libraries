@@ -27,7 +27,7 @@
 #ifndef _XF_SOLVER_GEQRF_H_
 #define _XF_SOLVER_GEQRF_H_
 
-#include "hls_math.h"
+#include "hw/math_helper.hpp"
 
 namespace xf {
 namespace solver {
@@ -199,13 +199,13 @@ loop_col:
 
         DataType accum = matrix[cIdx][i][cp] * matrix[cIdx][i][cp] + accum1;
 
-        DataType norm = hls::sqrt(accum);
+        DataType norm = xf::solver::internal::m::sqrt(accum);
 
         int sign = matrix[cIdx][i][cp] < 0 ? -1 : 1;
         matrix[cIdx][i][cp] -= sign * norm;
 
         DataType temp = matrix[cIdx][i][cp];
-        if (hls::fabs(temp) > epsilon) {
+        if (xf::solver::internal::m::fabs(temp) > epsilon) {
         loop_vScale:
             for (int k = 0; k < length; ++k) {
 #pragma HLS pipeline
@@ -223,12 +223,12 @@ loop_col:
         }
 
         DataType accumV = 1;
-        if (hls::fabs(temp) > epsilon) {
+        if (xf::solver::internal::m::fabs(temp) > epsilon) {
             accumV += accum1 / (temp * temp);
         }
 
         DataType beta = 0.0;
-        if (length > 1 && hls::fabs(accumV) > epsilon) {
+        if (length > 1 && xf::solver::internal::m::fabs(accumV) > epsilon) {
             beta = 2.0 / accumV;
         }
 

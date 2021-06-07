@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,11 +25,14 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "./kernel/kernel_pseudosqrt_0.cpp" -cflags "-D _USE_STRM_ -D _HLS_TEST_ -D KERNEL0 -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/../utils/L1/include/"
+add_files "./kernel/kernel_pseudosqrt_0.cpp" -cflags "-D _USE_STRM_ -D _HLS_TEST_ -D KERNEL0 -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/../utils/L1/include/ -I${XF_PROJ_ROOT}/L2/include/"
 add_files -tb "./host/test_pseudosqrt.cpp" -cflags "-D _USE_STRM_ -D _HLS_TEST_ -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/include/ -I ./host/ -I${XF_PROJ_ROOT}/../utils/L1/include/"
 set_top kernel_pseudosqrt_0
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

@@ -15,6 +15,7 @@
  */
 
 #include "kernel_pseudosqrt.hpp"
+#include "xf_solver_L1.hpp"
 
 #ifdef KERNEL0
 #ifdef _USE_STRM_
