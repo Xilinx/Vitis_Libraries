@@ -22,7 +22,7 @@
 #ifndef _XF_SOLVER_POTRF_HPP_
 #define _XF_SOLVER_POTRF_HPP_
 
-#include <hls_math.h>
+#include <hw/math_helper.hpp>
 #include <float.h>
 
 namespace xf {
@@ -112,7 +112,7 @@ Loop_add_3:
     if ((sub < 0) && (sub > -limit)) {
         tmp1_j = 0;
     } else {
-        tmp1_j = hls::sqrt(sub);
+        tmp1_j = xf::solver::internal::m::sqrt(sub);
     }
 #ifndef __SYNTHESIS__
 #ifdef _DEBUG_SOLVER_
@@ -168,7 +168,7 @@ Loop_col:
 template <typename T, int NMAX, int NCU>
 void potrf(int m, T* A, int lda, int& info) {
     if (NMAX == 1)
-        A[0] = hls::sqrt(A[0]);
+        A[0] = xf::solver::internal::m::sqrt(A[0]);
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
 #pragma HLS array_partition variable = matA cyclic factor = NCU

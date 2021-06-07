@@ -22,7 +22,7 @@
 #ifndef _XF_SOLVER_GETRF_
 #define _XF_SOLVER_GETRF_
 
-#include <hls_math.h>
+#include <hw/math_helper.hpp>
 
 namespace xf {
 namespace solver {
@@ -79,7 +79,7 @@ LoopSweeps:
 #pragma HLS pipeline
             int idcu = k % NCU;
             int idrow = k / NCU;
-            T absa = hls::abs(A[idcu][idrow][s]);
+            T absa = xf::solver::internal::m::abs(A[idcu][idrow][s]);
             if (absa > pmax) {
                 pmax = absa;
                 pidcu = idcu;
