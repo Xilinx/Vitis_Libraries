@@ -34,7 +34,7 @@ extern "C" void kernel_MCAsianAS_0(TEST_DT underlying,
 
 #pragma HLS INTERFACE s_axilite port = underlying bundle = control
 #pragma HLS INTERFACE s_axilite port = volatility bundle = control
-#pragma HLS INTERFACE s_axilite port = dividendTield bundle = control
+#pragma HLS INTERFACE s_axilite port = dividendYield bundle = control
 #pragma HLS INTERFACE s_axilite port = riskFreeRate bundle = control
 #pragma HLS INTERFACE s_axilite port = timeLength bundle = control
 #pragma HLS INTERFACE s_axilite port = strike bundle = control

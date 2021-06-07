@@ -30,6 +30,7 @@
 #include <chrono>
 #include "quanto_host.hpp"
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 /// @def Controls the data type used in the kernel
 #define KERNEL_DT float
@@ -97,6 +98,8 @@ int main(int argc, char* argv[]) {
     std::cout << "Quanto call Demo v1.0" << std::endl;
     std::cout << "*********************" << std::endl;
     std::cout << std::endl;
+
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 
     if (!validate_parameters(argc, argv)) {
         exit(1);
@@ -192,15 +195,19 @@ int main(int argc, char* argv[]) {
     cl::Device device = devices[0];
     cl_int err;
 
-    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue cq(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue cq(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
 
     // Load the binary file (using function from xcl2.cpp)
     cl::Program::Binaries bins = xcl::import_binary_file(xclbin_file);
 
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_cfGKEngine(program, "quanto_kernel", &err));
+    cl::Program program(context, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel krnl_cfGKEngine(program, "quanto_kernel", &err);
+    logger.logCreateKernel(err);
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
@@ -387,9 +394,7 @@ int main(int argc, char* argv[]) {
         ret = 1;
     }
 
-    if (!ret) {
-        std::cout << "PASS" << std::endl;
-    }
-
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return ret;
 }

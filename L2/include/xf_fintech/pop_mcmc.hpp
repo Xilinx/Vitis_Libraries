@@ -70,7 +70,6 @@ namespace internal {
 template <typename DT>
 DT TargetDist(DT x, DT temp_inv) {
 #pragma HLS inline
-#pragma HLS pipeline
     DT val, result, result_log;
     DT gam = 4;
     val = gam * (x * x - 1) * (x * x - 1);
@@ -275,7 +274,6 @@ SAMPLES_LOOP:
     SAMPLE_SWAP_LOOP:
         // Curent samples becoming previous samples in next step
         for (int n = 0; n < NCHAINS; n++) {
-#pragma HLS unroll
             chain[n] = chain_out[n];
         }
         internal::SampleEval<DT, NCHAINS>(chain, chain_out, gauss, gauss_next, uniformRNG, temp_inv_buff, sigma_buff);
@@ -283,7 +281,6 @@ SAMPLES_LOOP:
         x[t] = chain_out[0];
         // Replacing current gaussian proposal with the next one
         for (int n = 0; n < NCHAINS; n++) {
-#pragma HLS unroll
             gauss[n] = gauss_next[n];
         }
     } // end for sample loop

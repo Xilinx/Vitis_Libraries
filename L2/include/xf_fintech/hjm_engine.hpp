@@ -436,7 +436,7 @@ void hjmEngine(const unsigned tenors,
     DT presentFc[MAX_TENORS];
     DT riskNeutralDrift[MAX_TENORS];
     DT vols[hjmModelParams::N][MAX_TENORS];
-#pragma HLS ARRAY_PARTITION variable = vol dim = 1 complete
+#pragma HLS ARRAY_PARTITION variable = vols dim = 1 complete
 
     hjmPcaEngine<DT, MAX_TENORS, MAX_CURVES, PCA_NCU>(ratesIn, tenors, curves, riskNeutralDrift, vols, presentFc);
 

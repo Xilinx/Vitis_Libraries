@@ -21,6 +21,7 @@
 
 #include <math.h>
 #include "kernel_mceuropeanengine.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 class ArgParser {
    public:
@@ -56,6 +57,7 @@ int print_result(int cu_number, std::vector<double*>& out, double golden, double
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(European) Engine-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -98,15 +100,20 @@ int main(int argc, const char* argv[]) {
     }
     DtUsed max_diff = requiredTolerance;
 
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+
 #ifdef SW_EMU_TEST
     // hls::exp and hls::log have bug in multi-thread.
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE,
+                       &cl_err); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #else
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
 #endif
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
 
     std::cout << "Selected Device " << devName << "\n";
@@ -114,7 +121,8 @@ int main(int argc, const char* argv[]) {
     cl::Program::Binaries xclbins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
 
-    cl::Program program(context, devices, xclbins);
+    cl::Program program(context, devices, xclbins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     std::string krnl_name = "kernel_mc";
     cl_uint cu_number;
@@ -140,8 +148,9 @@ int main(int argc, const char* argv[]) {
 
     for (cl_uint i = 0; i < cu_number; ++i) {
         std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(i + 1) + "}";
-        krnl0[i] = cl::Kernel(program, krnl_full_name.c_str());
-        krnl1[i] = cl::Kernel(program, krnl_full_name.c_str());
+        krnl0[i] = cl::Kernel(program, krnl_full_name.c_str(), &cl_err);
+        krnl1[i] = cl::Kernel(program, krnl_full_name.c_str(), &cl_err);
+        logger.logCreateKernel(cl_err);
     }
     std::cout << "Kernel has been created\n";
 
@@ -259,9 +268,7 @@ int main(int argc, const char* argv[]) {
         err += print_result(cu_number, out_a, golden, max_diff);
     }
     err += print_result(cu_number, out_b, golden, max_diff);
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return err;
 }

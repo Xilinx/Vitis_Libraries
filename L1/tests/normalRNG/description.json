@@ -3,7 +3,9 @@
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 

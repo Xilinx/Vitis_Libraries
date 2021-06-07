@@ -29,6 +29,7 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "hwa_engine_kernel.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
@@ -74,6 +75,7 @@ int main(int argc, const char* argv[]) {
 
     std::cout << std::setprecision(10) << std::endl;
     std::cout << "\n----------------------HullWhite Analytic Engine (HWA)-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -235,30 +237,37 @@ int main(int argc, const char* argv[]) {
     TEST_DT* times_alloc = aligned_alloc<TEST_DT>(LEN);
 
     // platform related operations
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 #ifdef TEST_KRNL_0
-    cl::Kernel kernel_hwa_k0(program, "HWA_k0");
+    cl::Kernel kernel_hwa_k0(program, "HWA_k0", &cl_err);
+    logger.logCreateKernel(cl_err);
     std::cout << "hwa k0 kernel has been created" << std::endl;
 #endif
 
 #ifdef TEST_KRNL_1
-    cl::Kernel kernel_hwa_k1(program, "HWA_k1");
+    cl::Kernel kernel_hwa_k1(program, "HWA_k1", &cl_err);
+    logger.logCreateKernel(cl_err);
     std::cout << "hwa k1 kernel has been created" << std::endl;
 #endif
 
 #ifdef TEST_KRNL_2
-    cl::Kernel kernel_hwa_k2(program, "HWA_k2");
+    cl::Kernel kernel_hwa_k2(program, "HWA_k2", &cl_err);
+    logger.logCreateKernel(cl_err);
     std::cout << "hwa k2 kernel has been created" << std::endl;
 #endif
 
@@ -632,10 +641,9 @@ int main(int argc, const char* argv[]) {
     // overall test result
     if (failCnt > 0) {
         err = -1;
-        std::cout << "Test FAILED" << std::endl;
-    } else {
-        std::cout << "Test PASSED" << std::endl;
     }
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return err;
 }

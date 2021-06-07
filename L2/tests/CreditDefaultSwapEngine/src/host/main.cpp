@@ -26,6 +26,7 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "cds_engine_kernel.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
@@ -81,6 +82,7 @@ int main(int argc, const char* argv[]) {
 
     std::cout << std::setprecision(10) << std::endl;
     std::cout << "\n----------------------Credit Default Swap Engine (CDS)-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -134,21 +136,25 @@ int main(int argc, const char* argv[]) {
     TEST_DT* ratesHazard_alloc = aligned_alloc<TEST_DT>(HAZARDLEN);
     TEST_DT* timesHazard_alloc = aligned_alloc<TEST_DT>(HAZARDLEN);
 
+    cl_int cl_err;
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_cds(program, "CDS_kernel");
-    std::cout << "cds kernel has been created" << std::endl;
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel_cds(program, "CDS_kernel", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     for (int i = 0; i < IRLEN; i++) {
         ratesIR_alloc[i] = ratesIR[i];
@@ -301,10 +307,9 @@ int main(int argc, const char* argv[]) {
     // overall test result
     if (failCnt > 0) {
         err = -1;
-        std::cout << "Test FAILED" << std::endl;
-    } else {
-        std::cout << "Test PASSED" << std::endl;
     }
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return err;
 }

@@ -1008,7 +1008,7 @@ void MCAmericanEngine(DT underlying,
 
     // path generator instance used in Calibration process
     BSPathGenerator<DT, SF, SN, Antithetic> pathGenInst[UN_MAX][1];
-#pragma HLS array_partition variable = pathGenCalInst dim = 1
+#pragma HLS array_partition variable = pathGenInst dim = 1
 
     // path pricer instance used Calibration process
     PathPricer<sty_calib, DT, SF, SN, Antithetic> pathPriCalInst[UN_PATH][1];

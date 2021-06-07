@@ -82,25 +82,25 @@ void fd_kernel(ap_uint<512>* A,
                unsigned int N,
                ap_uint<512>* price) {
 #pragma HLS INTERFACE m_axi port = A offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = Ar offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = Ac offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = A1 offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = A2 offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = X1 offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = X2 offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = b offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = u0 offset = slave bundle = gmemm num_write_outstanding = 16 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 #pragma HLS INTERFACE m_axi port = price offset = slave bundle = gmemm num_write_outstanding = \
-    16 num_read_outstanding = 16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 125
+    16 num_read_outstanding = 16 max_write_burst_length = 16 max_read_burst_length = 16 depth = 16 latency = 64
 
 #pragma HLS INTERFACE s_axilite port = A bundle = control
 #pragma HLS INTERFACE s_axilite port = Ar bundle = control

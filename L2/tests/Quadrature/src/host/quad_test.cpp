@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 /// @def Controls the data type used in the kernel
 #define KERNEL_DT float
@@ -93,27 +94,21 @@ int main(int argc, char* argv[]) {
     // Host results (always double precision)
     KERNEL_DT* host_res = new KERNEL_DT[num];
 
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // get device
     std::cout << "Acquiring device ... " << std::endl;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // get context
-    std::cout << "Creating context" << std::endl;
     cl_int err;
     cl::Context ctx(device, NULL, NULL, NULL, &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create context" << std::endl;
-        return 1;
-    }
+    logger.logCreateContext(err);
 
     // create command queue
     std::cout << "Creating command queue" << std::endl;
     cl::CommandQueue q(ctx, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create command queue" << std::endl;
-        return 1;
-    }
+    logger.logCreateCommandQueue(err);
 
     // import and program the xclbin
     std::cout << "Programming device" << std::endl;
@@ -121,15 +116,9 @@ int main(int argc, char* argv[]) {
     cl::Program::Binaries bins = xcl::import_binary_file(xclbin_file);
     devices.resize(1);
     cl::Program program(ctx, devices, bins, NULL, &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create program" << std::endl;
-        return 1;
-    }
+    logger.logCreateProgram(err);
     cl::Kernel krnl(program, "quad_kernel", &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create kernel" << std::endl;
-        return 1;
-    }
+    logger.logCreateKernel(err);
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
@@ -239,5 +228,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "All tests PASS" << std::endl;
+    fail ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return fail;
 }

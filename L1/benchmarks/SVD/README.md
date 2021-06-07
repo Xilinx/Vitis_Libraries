@@ -1,71 +1,73 @@
 # Singular Value Decomposition (SVD)
-This is a benchmark of Singular Value Decomposition.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 
-## Prerequisites
+Overview
+========
+This is a benchmark of Singular Value Decomposition (SVD).  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
-- Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted
-- Xilinx runtime (XRT) installed
-- Xilinx Vitis 2019.2 installed and configured
+This example resides in ``L1/benchmarks/SVD`` directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.
 
-## Building
-The demonstration application and kernel is built using a command line Makefile flow.
 
-### Step 1 :
-Setup the build environment using the Vitis and XRT scripts:
+Executable Usage
+================
 
-            source <install path>/Vitis/2019.2/settings64.sh
-            source /opt/xilinx/xrt/setup.sh
+* **Work Directory(Step 1)**
 
-### Step 2 :
-Call the Makefile. For example:
+The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
 
-            make run_hw 
+    cd L1/benchmarks/SVD
 
-The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).  
+* **Build kernel(Step 2)**
 
-In the case of the software and hardware emulations, the Makefile will build and launch the host code as part of the run.  These can be rerun manually using the following pattern:
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
 
-            <host application> <xclbin>
+    source /opt/xilinx/Vitis/2021.1/settings64.sh
+    source /opt/xilinx/xrt/setenv.sh
+    export DEVICE=/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
+    export TARGET=hw
+    make run 
 
-For example example to run a prebuilt software emulation output (assuming the standard build directories):
+* **Run kernel(Step 3)**
 
-    ./bin_xilinx_u250_xdma_201830_1/host.exe -xclbin xclbin_xilinx_u250_xdma_201830_1_sw_emu/kernel_svd_0.xclbin
+To get the benchmark results, please run the following command.
 
-Assuming an Alveo U250 card with the XRT configured, the hardware build is run as follows:
+    ./build_dir.hw.xilinx_u250_xdma_201830_2/host.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/kernel_svd_0.xclbin 
 
-    ./bin_xilinx_u250_xdma_201830_1/host.exe -xclbin xclbin_xilinx_u250_xdma_201830_1_hw/kernel_svd_0.xclbin
 
-## Example Output
-for the testbench, process it via the kernel and compare to the expected result, displaying the case difference. For example:
-    Found Platform
-    Platform Name: Xilinx
-    Found Device=xilinx_u250_xdma_201830_1
-    INFO: Importing ./xclbin_xilinx_u250_xdma_201830_1_hw/kernel_svd_0.xclbin
-    Loading: './xclbin_xilinx_u250_xdma_201830_1_hw/kernel_svd_0.xclbin'
-    kernel has been created
-    finished data transfer from h2d
-    Kernel 0 done!
-    kernel execution time : 22 us
-    result correct
+Input Arguments:
+
+    Usage: test.exe    -[-xclbin -rep]
+           -xclbin     MCEuropeanEngine binary;
+
+* **Example output(Step 4)** 
+
+        Found Platform
+        Platform Name: Xilinx
+        Found Device=xilinx_u250_xdma_201830_2
+        INFO: Importing ./build_dir.hw.xilinx_u250_xdma_201830_2/kernel_svd_0.xclbin
+        Loading: './build_dir.hw.xilinx_u250_xdma_201830_2.xclbin'
+        kernel has been created
+        finished data transfer from h2d
+        Kernel 0 done!
+        kernel execution time : 22 us
+        result correct
     
-## Timing Performance
+
+Profiling 
+==========
 
 The timing performance of the 4x4 SVD is shown in the table below, where matrix size is 4 x 4, and FPGA frequency is 300MHz.
 
-|  platform                         |    Execution time (cold run)     |      Execution time (warm run)        |
-| --------------------------------- | -------------------------------- |---------------------------------------|
-| MKL Intel(R) Xeon(R) E5-2690 v3   |   N/A                            |   8 us                                |
-| FinTech on U250                   |   196 us                         |   22 us                               |
-| Accelaration Ratio                |   N/A                            |   0.36X                               |
+| Platform                          | Execution time (cold run) | Execution time (warm run)  |
+|-----------------------------------|---------------------------|----------------------------|
+| MKL Intel(R) Xeon(R) E5-2690 v3   |   N/A                     |   8 us                     |
+| FinTech on U250                   |   196 us                  |   22 us                    |
+| Accelaration Ratio                |   N/A                     |   0.36X                    |
 
-
-
-##  Resource Utilization
 
 The hardware resources are listed in the following table (vivado 18.3 report without platform).
 
-| primitive | BRAM | URAM | DSP  | FF     | LUT    |
-| --------- | ---- | ---- | ---- | ------ | ------ |
-|     SVD   |   9  |   0  | 126  |  46360 |  40313 |
+| Inmlemetation | BRAM | URAM | DSP  | FF     | LUT    |
+|---------------|------|------|------|--------|--------|
+|       SVD     |  9   |  0   | 126  | 46360  | 40313  |
 

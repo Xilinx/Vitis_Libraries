@@ -29,5 +29,4 @@ L2 Kernel User Guide
    overview.rst
    kernel_design.rst
    kernel_api.rst
-   kernel_benchmark.rst
    other_engines.rst

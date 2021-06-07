@@ -26,6 +26,7 @@
 
 #include "xcl2.hpp"
 #include "m76_host.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define STR1(x) #x
 #define STR(x) STR1(x)
@@ -245,6 +246,7 @@ int main(int argc, char** argv) {
     size_t bytes_out = sizeof(TEST_DT) * MAX_NUMBER_TESTS;
 
     //------------------------------ CPU ---------------------------------
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     std::cout << "CPU:" << std::endl;
     int n = 0;
     int index = 0;
@@ -296,7 +298,9 @@ int main(int argc, char** argv) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
     cl::CommandQueue cq(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
 
     // create the xclbin filename
     std::string mode = "hw";
@@ -311,8 +315,10 @@ int main(int argc, char** argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program, "m76_kernel");
+    cl::Program program(context, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel krnl(program, "m76_kernel", &err);
+    logger.logCreateKernel(err);
     auto import_time =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - t_start)
             .count();
@@ -385,12 +391,11 @@ int main(int argc, char** argv) {
     }
 
     int ret = 0;
-    if (!total_fails) {
-        std::cout << "PASS" << std::endl;
-    } else {
-        std::cout << "FAIL" << std::endl;
+    if (total_fails) {
         ret = 1;
     }
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return ret;
 }

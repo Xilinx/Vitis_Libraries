@@ -19,7 +19,6 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-
 **********************************
 Vitis Quantitative Finance Library
 **********************************
@@ -394,9 +393,9 @@ Setup the build environment using the Vitis and XRT scripts, and set the ``PLATF
 
 .. code-block:: bash
 
-    source <install path>/Vitis/2020.2/settings64.sh
-    source /opt/xilinx/xrt/setup.sh
-    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+    source <vitis_path>/Vitis/2021.1/settings64.sh
+    source <xrt_path>/xrt/setup.sh
+    export PLATFORM_REPO_PATHS=<platform_path>/platforms
 
 Design Flows
 ============
@@ -502,7 +501,7 @@ User applications can subsequently be built against this library as in the examp
 
 .. toctree::
    :caption: Library Overview 
-   :maxdepth: 1
+   :maxdepth: 2
 
    overview.rst
    rel.rst
@@ -519,11 +518,9 @@ User applications can subsequently be built against this library as in the examp
 
 
 .. toctree::
-   :caption: Benchmark Result
-   :maxdepth: 1
-
-   benchmark/benchmark.rst
+   :caption: Benchmark 
+   :maxdepth: 2
    
-
+   benchmark/benchmark.rst
 
 

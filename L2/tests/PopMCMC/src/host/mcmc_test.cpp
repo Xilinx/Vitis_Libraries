@@ -27,6 +27,8 @@
 #include <string>
 #include <sstream>
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
+
 //#include "mcmc_kernel.hpp"
 #define NUM_CHAINS 10
 #define KERNEL_DT double
@@ -55,6 +57,8 @@ int main(int argc, char* argv[]) {
     std::cout << "*************" << std::endl;
     std::cout << std::endl;
 
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+
     FILE* fp;
     unsigned int argIdx = 1;
     std::string xclbin_file(argv[argIdx++]);
@@ -80,15 +84,19 @@ int main(int argc, char* argv[]) {
     cl::Device device = devices[0];
     cl_int err;
 
-    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
 
     // Load the binary file (using function from xcl2.cpp)
     cl::Program::Binaries bins = xcl::import_binary_file(xclbin_file);
 
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_cf_mcmc(program, "mcmc_kernel", &err));
+    cl::Program program(context, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel krnl_cf_mcmc(program, "mcmc_kernel", &err);
+    logger.logCreateKernel(err);
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
@@ -150,11 +158,7 @@ int main(int argc, char* argv[]) {
     fclose(fp);
     std::cout << std::endl;
 
-    if (ret) {
-        std::cout << "FAIL" << std::endl;
-    } else {
-        std::cout << "PASS" << std::endl;
-    }
-
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return ret;
 }

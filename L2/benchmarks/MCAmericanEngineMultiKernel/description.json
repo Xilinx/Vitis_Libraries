@@ -24,7 +24,7 @@
             }, 
             "containers": [
                 {
-                    "ldclflags_mk": "--nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:2:MCAE_k2_1.MCAE_k2_2", 
+                    "ldclflags_mk": "--connectivity.nk MCAE_k0:1:MCAE_k0_1 --connectivity.nk MCAE_k1:1:MCAE_k1_1 --connectivity.nk MCAE_k2:2:MCAE_k2_1.MCAE_k2_2", 
                     "frequency": 300, 
                     "name": "MCAE_k"
                 }

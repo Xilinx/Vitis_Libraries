@@ -19,6 +19,7 @@
 #include "kernel_mceuropeanengine.hpp"
 #include "utils.hpp"
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define KN 1
@@ -70,6 +71,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(European) DIA "
                  "Engine----------------------\n";
 
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // input parameters (per asset)
     DtUsed underlying[NUM_ASSETS] = {
         163.69, // MMM
@@ -131,28 +133,32 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
     std::vector<cl::Device> deviceList;
     deviceList.push_back(device);
 
 #ifdef SW_EMU_TEST
     // hls::exp and hls::log have bug in multi-thread.
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &cl_err);
 #else
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
 #endif
+    logger.logCreateCommandQueue(cl_err);
 
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclbins = xcl::import_binary_file(xclbin_path);
-    cl::Program program(context, deviceList, xclbins);
+    cl::Program program(context, deviceList, xclbins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel0;
-    kernel0 = cl::Kernel(program, "kernel_mc_0");
-    std::cout << "Kernel has been created\n";
+    kernel0 = cl::Kernel(program, "kernel_mc_0", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     DtUsed* out0 = aligned_alloc<DtUsed>(OUTDEP);
     cl_mem_ext_ptr_t mext_out;
@@ -251,11 +257,10 @@ int main(int argc, const char* argv[]) {
     // quick fix to get pass/fail criteria
     int ret = 0;
     if (std::abs(optionValueDIA - expectedDIA) > 0.1) {
-        std::cout << "FAIL optionValueDIA = " << optionValueDIA << std::endl;
         ret = 1;
-    } else {
-        std::cout << "PASS" << std::endl;
     }
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return ret;
 }

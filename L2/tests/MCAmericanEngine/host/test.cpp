@@ -24,6 +24,8 @@
 #ifndef HLS_TEST
 #include "xcl2.hpp"
 #endif
+#include "xf_utils_sw/logger.hpp"
+
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
 class ArgParser {
@@ -119,6 +121,7 @@ struct TestSuite {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(American) Engine-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -198,12 +201,15 @@ int main(int argc, const char* argv[]) {
         run_num = 1;
     }
     // platform related operations
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
@@ -211,9 +217,10 @@ int main(int argc, const char* argv[]) {
     // xcl::import_binary_file("../xclbin/MCAE_u250_hw.xclbin");
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_MCAE_k0(program, "kernel_mcae_0");
-    std::cout << "kernel has been created" << std::endl;
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel_MCAE_k0(program, "kernel_mcae_0", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_o[3];
     mext_o[0] = {7, output_price, kernel_MCAE_k0()};
@@ -293,16 +300,17 @@ int main(int argc, const char* argv[]) {
     // notice that when the employed seed changes, the result also varies.
 
     TEST_DT diff = 0;
+    int ret = 0;
     for (int i = 0; i < run_num; i++) {
         std::cout << "output[" << i << "] = " << std::setprecision(12) << result[i] << ",   "
                   << "golden[" << i << "] = " << tests[i].result << std::endl;
         diff = std::fabs(result[i] - tests[i].result);
         if (diff > requiredTolerance) {
-            std::cout << "Output is wrong!" << std::endl;
-            return -1;
+            ret++;
         }
     }
-    std::cout << "All test points passed!" << std::endl;
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return 0;
 }
