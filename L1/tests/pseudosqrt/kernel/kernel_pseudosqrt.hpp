@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "xf_solver_L1.hpp"
+#ifndef __KERNEL_PSEUDOSQRT__
+#define __KERNEL_PSEUDOSQRT__
 #include <hls_stream.h>
+#include <ap_int.h>
 
 #define unrollNm1 4
 #define matSize 16
-#define DT double
-#define DTLen 8 * sizeof(DT)
-#define TO 2
+typedef double DT;
+const int DTLen = 8 * sizeof(DT);
+const int TO = 2;
 
 extern "C" void kernel_pseudosqrt_0(int nrows,
                                     hls::stream<ap_uint<DTLen * TO> >& matIn,
                                     hls::stream<ap_uint<DTLen * TO> >& matOut);
+#endif

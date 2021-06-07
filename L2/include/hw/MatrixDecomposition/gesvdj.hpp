@@ -21,7 +21,7 @@
 #define XF_SOLVER_SVDJ_H
 
 #include "ap_fixed.h"
-#include "hls_math.h"
+#include "hw/math_helper.hpp"
 
 #ifndef __SYNTHESIS__
 #include <iostream>
@@ -85,8 +85,8 @@ void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left
         deno2 = deno * deno; // deno2 = 4*(m01)^2
         T m;
 #pragma HLS RESOURCE variable = m core = DAddSub_nodsp
-        m = deno2 + d2;         // m = (m00 - m11)^2 + 4*(m01)^2
-        T sqrtM = hls::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
+        m = deno2 + d2;                             // m = (m00 - m11)^2 + 4*(m01)^2
+        T sqrtM = xf::solver::internal::m::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
 
         // calculate M2
         dc.d = m;
@@ -105,8 +105,8 @@ void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left
         T tmpDivider = deno2 / tmpSum;
 #pragma HLS RESOURCE variable = tmpSub core = DAddSub_nodsp
         tmpSub = 1 - tmpDivider;
-        m_c_right = hls::sqrt(tmpSub);
-        T tmp = hls::sqrt(tmpDivider);
+        m_c_right = xf::solver::internal::m::sqrt(tmpSub);
+        T tmp = xf::solver::internal::m::sqrt(tmpDivider);
         m_s_right = (((d > 0) && (deno > 0)) | ((d < 0) && (deno < 0))) ? tmp : -tmp;
         m_c_left = m_c_right;
         m_s_left = m_s_right;
@@ -1013,7 +1013,7 @@ While_Loop:
                     std::cout << "p1 = " << p1 << "  q1 = " << q1 << std::endl;
 #endif
 #endif
-                    if ((hls::abs(dataA[(p1 % UN)][q1 % UN][p1 / UN][q1 / UN]) > threshold)) {
+                    if ((xf::solver::internal::m::abs(dataA[(p1 % UN)][q1 % UN][p1 / UN][q1 / UN]) > threshold)) {
                         flag = 1;
                     }
                 }

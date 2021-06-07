@@ -62,6 +62,6 @@ Currently this includes the following operations for dense matrix
    :caption: Benchmark 
    :maxdepth: 2
    
-   benchmark/benchmark.rst
+   benchmark.rst
 
 
