@@ -27,6 +27,7 @@
 #include <sstream>
 #include <getopt.h>
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 typedef double TEST_DT;
 template <typename T>
@@ -100,6 +101,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\n*************"
               << "\nHJM Demo v" << DEMO_VERSION << "\n*************" << std::endl;
 
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     static struct option longOps[] = {{"help", no_argument, 0, 'h'},
                                       {"xclbin_loc", required_argument, 0, 'x'},
                                       {"data_in", required_argument, 0, 'd'},
@@ -193,15 +195,19 @@ int main(int argc, char* argv[]) {
     cl::Device device = devices[0];
     cl_int err;
 
-    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
 
     // Load the binary file (using function from xcl2.cpp)
     cl::Program::Binaries bins = xcl::import_binary_file(xclbinLoc);
 
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_hjm(program, KERNEL_NAME, &err));
+    cl::Program program(context, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel krnl_hjm(program, KERNEL_NAME, &err);
+    logger.logCreateKernel(err);
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
@@ -261,5 +267,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "ERROR with ZCB pricing! (Diff = " << diff << ")" << std::endl;
         error = 1;
     }
+    error ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+          : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return error;
 }

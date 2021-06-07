@@ -24,7 +24,7 @@
             }, 
             "containers": [
                 {
-                    "ldclflags_mk": "--nk scanTreeKernel:4:scanTreeKernel_1.scanTreeKernel_2.scanTreeKernel_3.scanTreeKernel_4", 
+                    "ldclflags_mk": "--connectivity.nk scanTreeKernel:4:scanTreeKernel_1.scanTreeKernel_2.scanTreeKernel_3.scanTreeKernel_4", 
                     "name": "scanTreeKernel"
                 }
             ]

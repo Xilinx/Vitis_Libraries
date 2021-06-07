@@ -13,6 +13,35 @@
     "platform_blacklist": [
         "zc"
     ], 
+    "platform_properties": {
+        "u200": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config LIB_DIR/L2/tests/CFBlackScholes/conn_u200.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config LIB_DIR/L2/tests/CFBlackScholes/conn_u250.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config LIB_DIR/L2/tests/CFBlackScholes/conn_u50.cfg"
+                    ]
+                }
+            }
+        }
+    },
     "host": {
         "host_exe": "bs_test.exe", 
         "compiler": {

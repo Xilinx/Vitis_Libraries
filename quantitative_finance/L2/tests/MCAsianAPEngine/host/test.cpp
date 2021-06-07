@@ -22,6 +22,7 @@
 
 #include <math.h>
 #include "kernel_MCAsianAPEngine.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 class ArgParser {
    public:
@@ -49,6 +50,8 @@ struct TestSuite {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(AsianAP) Engine-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -97,21 +100,26 @@ int main(int argc, const char* argv[]) {
                          {26, 1.7255070456},  {52, 1.7401553533},  {100, 1.7478303712}, {250, 1.7490291943},
                          {500, 1.7515113291}, {1000, 1.7537344885}};
 
+    int ret = 0;
 #ifdef HLS_TEST
     kernel_MCAsianAP_0(underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, outputs,
                        requiredTolerance, requiredSamples, timeSteps, maxSamples);
     std::cout << "output ====== " << outputs[0] << std::endl;
 #else
 
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
 #ifdef SW_EMU_TEST
     // hls::exp and hls::log have bug in multi-thread.
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE,
+                       &cl_err); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #else
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
 #endif
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
 
     std::cout << "Selected Device " << devName << "\n";
@@ -119,11 +127,12 @@ int main(int argc, const char* argv[]) {
     cl::Program::Binaries xclbins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
 
-    cl::Program program(context, devices, xclbins);
+    cl::Program program(context, devices, xclbins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel_asianAP;
-    kernel_asianAP = cl::Kernel(program, "kernel_MCAsianAP_0");
-    std::cout << "Kernel has been created\n";
+    kernel_asianAP = cl::Kernel(program, "kernel_MCAsianAP_0", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_out;
     mext_out = {7, outputs, kernel_asianAP()};
@@ -191,13 +200,13 @@ int main(int argc, const char* argv[]) {
                   << "golden[" << i << "] = " << tests[i].result << std::endl;
         diff = std::fabs(result[i] - tests[i].result);
         if (diff > requiredTolerance) {
-            std::cout << "Output is wrong!" << std::endl;
-            return -1;
+            ret++;
         }
     }
-    std::cout << "All test points passed!" << std::endl;
     std::cout << "Execution time " << tvdiff(&st_time, &end_time) / 1000 << " us" << std::endl;
 #endif
 
-    return 0;
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return ret;
 }

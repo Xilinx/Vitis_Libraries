@@ -40,6 +40,7 @@ class ArgParser {
 };
 
 int main(int argc, const char** argv) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     ArgParser parser(argc, argv);
     std::string xclbin_path;
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
@@ -50,11 +51,11 @@ int main(int argc, const char** argv) {
     double errA;
     benchmark_svd_functions(xclbin_path, errA);
 
+    int nerr = 0;
     if (errA > 0.0001) {
-        std::cout << "result false" << std::endl;
-        return -1;
-    } else {
-        std::cout << "result correct" << std::endl;
-        return 0;
+        nerr++;
     }
+    nerr ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return nerr;
 }

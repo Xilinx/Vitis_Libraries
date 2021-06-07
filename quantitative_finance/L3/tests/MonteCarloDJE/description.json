@@ -36,9 +36,9 @@
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L3/src/models/mc_european_dje/include"
             ], 
-	    "symbols": [
-		"DEVICE_PART=$(XDEVICE)"
-	    ], 
+            "symbols": [
+                "DEVICE_PART=$(XDEVICE)"
+            ], 
             "options": "-O3 "
         }
     }, 
@@ -70,8 +70,8 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 300, 
+                    "vitis_hw_build": 2160, 
+                    "vitis_hw_emu": 2160, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }
@@ -90,14 +90,14 @@
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel"
-	    ]
+            ]
         }
     }, 
     "launch": [
-	{
-               "name": "generic launch for all flows with build-time default card",
-               "cmd_args": "BUILD/kernel_mc_0.xclbin"
-	}
+        {
+            "name": "generic launch for all flows with build-time default card", 
+            "cmd_args": "BUILD/kernel_mc_0.xclbin"
+        }
     ], 
     "platform_properties": {
         "u250": {
@@ -114,13 +114,13 @@
                     "name": "generic launch for all flows for u50 card", 
                     "cmd_args": "BUILD/kernel_mc_0.xclbin u50"
                 }
-            ],
-	    "containers": [
-		{
-		    "ldclflags": "--vivado.param hd.enableClockTrackSelectionEnancement=1", 
-		    "name": "kernel_mc_0"
-		}
-	    ]
+            ], 
+            "containers": [
+                {
+                    "ldclflags": "--vivado.param hd.enableClockTrackSelectionEnancement=1", 
+                    "name": "kernel_mc_0"
+                }
+            ]
         }, 
         "u200": {
             "launch": [

@@ -23,6 +23,8 @@
 #define dataAN 4
 
 void benchmark_svd_functions(std::string xclbinName, double& errA) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int cl_err;
     // variables to measure time
     struct timeval tstart, tend;
     // platform related operations
@@ -30,15 +32,19 @@ void benchmark_svd_functions(std::string xclbinName, double& errA) {
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbinName);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_svd_0(program, "kernel_svd_0");
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel_svd_0(program, "kernel_svd_0", &cl_err);
+    logger.logCreateKernel(cl_err);
     std::cout << "kernel has been created" << std::endl;
 
     // associate input_data to host ddr bank

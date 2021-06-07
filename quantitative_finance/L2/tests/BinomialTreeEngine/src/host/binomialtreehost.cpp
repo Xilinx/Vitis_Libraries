@@ -32,6 +32,7 @@
 
 #include "binomialtree.hpp"
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 using namespace std;
 using namespace xf::fintech;
@@ -64,6 +65,7 @@ class ArgParser {
 
 int main(int argc, const char* argv[]) {
     // cmd parser
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     TEST_DT maxDelta = 0;
     TEST_DT tolerance = 0.02;
     ArgParser parser(argc, argv);
@@ -94,20 +96,20 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
 
     // enable out of order for BINOMIAL_TREE_CU_PER_KERNEL greater that 1
     cl::CommandQueue commandQ(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE,
                               &err);
+    logger.logCreateCommandQueue(err);
 
     cl::Program::Binaries bins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
     cl::Program program(context, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
 
-    if (err != CL_SUCCESS) {
-        return -1;
-    }
-
-    cl::Kernel binomialKernel(program, BINOMIAL_TREE_KERNEL_NAME);
+    cl::Kernel binomialKernel(program, BINOMIAL_TREE_KERNEL_NAME, &err);
+    logger.logCreateKernel(err);
     std::vector<xf::fintech::BinomialTreeInputDataType<TEST_DT>,
                 aligned_allocator<xf::fintech::BinomialTreeInputDataType<TEST_DT> > >
         inputData(BINOMIAL_TREE_MAX_OPTION_CALCULATIONS);
@@ -388,11 +390,10 @@ int main(int argc, const char* argv[]) {
 
     int ret = 0;
     if (maxDelta > tolerance) {
-        std::cout << "FAIL: maxDelta = " << maxDelta << std::endl;
         ret = 1;
-    } else {
-        std::cout << "PASS" << std::endl;
     }
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return ret;
 }

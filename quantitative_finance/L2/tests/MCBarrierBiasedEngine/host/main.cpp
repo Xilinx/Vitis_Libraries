@@ -22,6 +22,7 @@
 #ifndef HLS_TEST
 #include "xcl2.hpp"
 #endif
+#include "xf_utils_sw/logger.hpp"
 
 #define KN 1
 #define OUTDEP 1024
@@ -57,6 +58,7 @@ int printResult(float* out, float golden, float tol, int loopNum) {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(BarrierBias) Engine-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -148,16 +150,19 @@ int main(int argc, const char* argv[]) {
 
     printResult(outputs, expectedVal, maxErrorAllowed, loopNum);
 #endif
-
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
 #ifdef SW_EMU_TEST
     // hls::exp and hls::log have bug in multi-thread.
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE,
+                       &cl_err); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #else
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
 #endif
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
 
     std::cout << "Selected Device " << devName << "\n";
@@ -165,13 +170,14 @@ int main(int argc, const char* argv[]) {
     cl::Program::Binaries xclbins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
 
-    cl::Program program(context, devices, xclbins);
+    cl::Program program(context, devices, xclbins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel0[2];
     for (int i = 0; i < 2; ++i) {
-        kernel0[i] = cl::Kernel(program, "McBarrierBiasedEngine_k");
+        kernel0[i] = cl::Kernel(program, "McBarrierBiasedEngine_k", &cl_err);
     }
-    std::cout << "Kernel has been created\n";
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_out_a;
     cl_mem_ext_ptr_t mext_out_b;
@@ -275,9 +281,7 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "Execution time " << tvdiff(&st_time, &end_time) << std::endl;
     err += printResult(out0_b, expectedVal, maxErrorAllowed, loopNum);
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return err;
 }

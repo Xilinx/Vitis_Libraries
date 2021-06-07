@@ -26,7 +26,7 @@
             }, 
             "containers": [
                 {
-                    "ldclflags_mk": "--nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:1:MCAE_k2_1", 
+                    "ldclflags_mk": "--connectivity.nk MCAE_k0:1:MCAE_k0_1 --connectivity.nk MCAE_k1:1:MCAE_k1_1 --connectivity.nk MCAE_k2:1:MCAE_k2_1", 
                     "frequency": 300, 
                     "name": "MCAE_k"
                 }
@@ -45,7 +45,7 @@
             }, 
             "containers": [
                 {
-                    "ldclflags_mk": "--nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:1:MCAE_k2_1", 
+                    "ldclflags_mk": "--connectivity.nk MCAE_k0:1:MCAE_k0_1 --connectivity.nk MCAE_k1:1:MCAE_k1_1 --connectivity.nk MCAE_k2:1:MCAE_k2_1", 
                     "frequency": 300, 
                     "name": "MCAE_k"
                 }
@@ -64,7 +64,7 @@
             }, 
             "containers": [
                 {
-                    "ldclflags_mk": "--nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:1:MCAE_k2_1", 
+                    "ldclflags_mk": "--connectivity.nk MCAE_k0:1:MCAE_k0_1 --connectivity.nk MCAE_k1:1:MCAE_k1_1 --connectivity.nk MCAE_k2:1:MCAE_k2_1", 
                     "frequency": 300, 
                     "name": "MCAE_k"
                 }
@@ -142,13 +142,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
+                    "vitis_hw_build": 81920, 
+                    "vitis_hw_emu": 20480, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 720, 
+                    "vitis_hw_build": 960, 
                     "vitis_hw_emu": 300, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10

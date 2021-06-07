@@ -25,6 +25,7 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "mc_euro_k.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define LENGTH(a) (sizeof(a) / sizeof(a[0]))
 
@@ -48,6 +49,7 @@ class ArgParser {
 };
 
 int main(int argc, const char* argv[]) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -82,7 +84,7 @@ int main(int argc, const char* argv[]) {
     unsigned int requiredSamples = 40000;
     TEST_DT relative_err = 0.01;
     unsigned int maxSamples = 0;
-    unsigned int timeSteps = 1;
+    unsigned int timeSteps[] = {1, 10};
 
     TEST_DT goldens[] = {25.7561,   32.9468, 53.2671, 28.6606,    34.839,  54.3405, 35.447,      39.5876, 56.9929,
                          20.9081,   29.1095, 49.3851, 23.7934,    30.8919, 50.4131, 30.5703,     35.3988, 52.9576,
@@ -117,25 +119,30 @@ int main(int argc, const char* argv[]) {
         d_len = LENGTH(dividendYields);
         vol_len = LENGTH(volatilitys);
     }
+    int ret = 0;
 #ifndef HLS_TEST
     // do pre-process on CPU
     struct timeval start_time, end_time, test_time;
     // platform related operations
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     // cl::Program::Binaries xclBins = xcl::import_binary_file("../xclbin/MCAE_u250_hw.xclbin");
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_Engine(program, "mc_euro_k");
-    std::cout << "kernel has been created" << std::endl;
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel_Engine(program, "mc_euro_k", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_o[2];
     mext_o[0] = {8, outputs, kernel_Engine()};
@@ -172,19 +179,19 @@ int main(int argc, const char* argv[]) {
                                 // launch kernel and calculate kernel execution time
                                 std::cout << "kernel start------" << std::endl;
                                 gettimeofday(&start_time, 0);
-                                int j = 0;
-                                kernel_Engine.setArg(j++, underlying);
-                                kernel_Engine.setArg(j++, volatility);
-                                kernel_Engine.setArg(j++, dividendYield);
-                                kernel_Engine.setArg(j++, riskFreeRate);
-                                kernel_Engine.setArg(j++, timeLength);
-                                kernel_Engine.setArg(j++, strike);
-                                kernel_Engine.setArg(j++, optionType);
-                                kernel_Engine.setArg(j++, seed_buf);
-                                kernel_Engine.setArg(j++, output_buf);
-                                kernel_Engine.setArg(j++, requiredTolerance);
-                                kernel_Engine.setArg(j++, requiredSamples);
-                                kernel_Engine.setArg(j++, timeSteps);
+                                int a = 0;
+                                kernel_Engine.setArg(a++, underlying);
+                                kernel_Engine.setArg(a++, volatility);
+                                kernel_Engine.setArg(a++, dividendYield);
+                                kernel_Engine.setArg(a++, riskFreeRate);
+                                kernel_Engine.setArg(a++, timeLength);
+                                kernel_Engine.setArg(a++, strike);
+                                kernel_Engine.setArg(a++, optionType);
+                                kernel_Engine.setArg(a++, seed_buf);
+                                kernel_Engine.setArg(a++, output_buf);
+                                kernel_Engine.setArg(a++, requiredTolerance);
+                                kernel_Engine.setArg(a++, requiredSamples);
+                                kernel_Engine.setArg(a++, timeSteps[idx % 2]);
 
                                 q.enqueueTask(kernel_Engine, nullptr, nullptr);
 
@@ -196,7 +203,6 @@ int main(int argc, const char* argv[]) {
                                 q.finish();
                                 TEST_DT diff = std::fabs(outputs[0] - goldens[idx]) / underlying;
                                 if (diff > relative_err) {
-                                    std::cout << "Output is wrong!" << std::endl;
                                     if (optionType)
                                         std::cout << "Put option:\n";
                                     else
@@ -210,12 +216,12 @@ int main(int argc, const char* argv[]) {
                                               << "   tolerance:           " << requiredTolerance << "\n"
                                               << "   requaried samples:   " << requiredSamples << "\n"
                                               << "   maximum samples:     " << maxSamples << "\n"
-                                              << "   timesteps:           " << timeSteps << "\n"
+                                              << "   timesteps:           " << timeSteps[idx % 2] << "\n"
                                               << "   golden:              " << goldens[idx] << "\n";
-                                    std::cout << "Acutal value: " << outputs[idx]
-                                              << ", Expected value: " << goldens[idx] << std::endl;
+                                    std::cout << "Acutal value: " << outputs[0] << ", Expected value: " << goldens[idx]
+                                              << std::endl;
                                     std::cout << "error: " << diff << ", tolerance: " << relative_err << std::endl;
-                                    return -1;
+                                    ret++;
                                 }
                                 idx++;
                             }
@@ -238,12 +244,11 @@ int main(int argc, const char* argv[]) {
               riskFreeRate, // model parameter
               timeLength, strike,
               optionType, // option parameter
-              seeds, outputs, requiredTolerance, requiredSamples, timeSteps);
+              seeds, outputs, requiredTolerance, requiredSamples, timeSteps[0]);
 
     TEST_DT diff = std::fabs(outputs[0] - goldens[0]) / underlying;
     // comapre with golden result
     if (diff > relative_err) {
-        std::cout << "Output is wrong!" << std::endl;
         if (optionType)
             std::cout << "Put option:\n";
         else
@@ -257,13 +262,15 @@ int main(int argc, const char* argv[]) {
                   << "   tolerance:           " << requiredTolerance << "\n"
                   << "   requaried samples:   " << requiredSamples << "\n"
                   << "   maximum samples:     " << maxSamples << "\n"
-                  << "   timesteps:           " << timeSteps << "\n"
+                  << "   timesteps:           " << timeSteps[0] << "\n"
                   << "   golden:              " << goldens[0] << "\n";
         std::cout << "Acutal value: " << outputs[0] << ", Expected value: " << goldens[idx] << std::endl;
         std::cout << "error: " << diff << ", tolerance: " << relative_err << std::endl;
+        ret++;
     }
-    return -1;
 
 #endif
-    return 0;
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return ret;
 }
