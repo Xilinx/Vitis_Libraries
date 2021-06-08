@@ -2,11 +2,13 @@
     "name": "Xilinx Geo IP Test", 
     "description": "Geo information look up with IP", 
     "flow": "vitis", 
-    "platform_type": "pcie", 
+    "platform_type": "", 
     "platform_whitelist": [
         "u50", 
         "u200", 
-        "u250"
+        "u250", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [
         "zc"
@@ -38,14 +40,33 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
     }, 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/GeoIP_kernel.xclbin -csv PROJECT/data/test_geoip.csv", 
+            "cmd_args": " -xclbin BUILD/GeoIP_kernel.xclbin -csv PROJECT/test_geoip.csv", 
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
+    "data": [
+        "PROJECT/test_geoip.csv"
+    ],
     "host": {
         "host_exe": "host.exe", 
         "compiler": {
@@ -57,7 +78,8 @@
                 "host", 
                 "kernel", 
                 "LIB_DIR/L2/include/hw", 
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }

@@ -63,7 +63,8 @@
                 "PROJECT/ref_result/libmaxminddb/lib/include", 
                 "PROJECT/ref_result/rapidjson/rapidjson/include", 
                 "LIB_DIR/L1/include/sw", 
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }, 

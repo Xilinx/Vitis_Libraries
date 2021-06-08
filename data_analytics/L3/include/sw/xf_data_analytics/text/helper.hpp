@@ -32,6 +32,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "xf_utils_sw/logger.hpp"
 
 namespace xf {
 namespace data_analytics {
@@ -61,6 +62,7 @@ inline cl_int init_hardware(cl_context* context,
                             cl_command_queue_properties queue_props,
                             const int dev_index) {
     cl_int err;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 
     cl_uint platform_count = 0;
     err = clGetPlatformIDs(0, NULL, &platform_count);
@@ -87,12 +89,14 @@ inline cl_int init_hardware(cl_context* context,
         // device found.
         cl_context_properties ctx_prop[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[pid], 0};
         cl_context ctx = clCreateContext(ctx_prop, 1, device_id, NULL, NULL, &err);
+        logger.logCreateContext(err);
         if (err != CL_SUCCESS) {
             return err;
         }
         printf("INFO: initilized context.\n");
         // context ready.
         cl_command_queue q = clCreateCommandQueue(ctx, devices[dev_index], queue_props, &err);
+        logger.logCreateCommandQueue(err);
         if (err != CL_SUCCESS) {
             fprintf(stderr, "ERROR: Failed to create command queue.\n");
             return err;
@@ -112,10 +116,13 @@ inline cl_int init_hardware(cl_context* context,
 
 static cl_int load_binary(cl_program* program, cl_context context, cl_device_id device_id, const char* xclbin) {
     cl_int err;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+
     void* kernel_image = NULL;
     unsigned long size = read_binary_file(xclbin, &kernel_image);
     cl_program prog =
         clCreateProgramWithBinary(context, 1, &device_id, &size, (const unsigned char**)&kernel_image, NULL, &err);
+    logger.logCreateProgram(err);
     if (err != CL_SUCCESS) {
         return err;
     }

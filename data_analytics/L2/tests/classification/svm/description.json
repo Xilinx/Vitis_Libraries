@@ -40,6 +40,22 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
     }, 
     "launch": [
@@ -47,7 +63,7 @@
             "cmd_args": "-xclbin BUILD/svm.xclbin -in PROJECT/data/1000.csv -trn 999 -ten 100 -fn 28 -itrn 1 -bn 10", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
     "data": [
         "PROJECT/data/1000.csv"
     ], 
@@ -103,7 +119,7 @@
                     ]
                 }
             ], 
-            "frequency": 250.0, 
+            "frequency": 150.0, 
             "name": "svm"
         }
     ], 

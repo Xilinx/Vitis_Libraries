@@ -121,7 +121,7 @@ void readRECfg(unsigned int& cpgp_nm,
 #pragma HLS dataflow
     hls::stream<ap_uint<64> > cfg_strm("cfg_strm");
 #pragma HLS stream variable = cfg_strm depth = 32
-#pragma HLS resource variable = cfg_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = cfg_strm type = fifo impl = lutram
 
     // configurations from buffer to stream
     readFromExtMem(cfg_buff, cfg_strm);
@@ -485,19 +485,19 @@ void reExecMPU(ap_uint<16> cpgp_nm,
                hls::stream<bool>& o_e_strm) {
     ap_uint<32> msg_buff_0[PU_NM][MSG_LEN * 2];
 #pragma HLS array_partition variable = msg_buff_0 dim = 1
-#pragma HLS resource variable = msg_buff_0 core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = msg_buff_0 type = ram_t2p impl = bram
 
     ap_uint<32> msg_buff_1[PU_NM][MSG_LEN * 2];
 #pragma HLS array_partition variable = msg_buff_1 dim = 1
-#pragma HLS resource variable = msg_buff_1 core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = msg_buff_1 type = ram_t2p impl = bram
 
     ap_uint<16> mem_oft_buff_0[PU_NM][CPGP_NM * 2];
 #pragma HLS array_partition variable = mem_oft_buff_0 dim = 1
-#pragma HLS resource variable = mem_oft_buff_0 core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = mem_oft_buff_0 type = ram_t2p impl = bram
 
     ap_uint<16> mem_oft_buff_1[PU_NM][CPGP_NM * 2];
 #pragma HLS array_partition variable = mem_oft_buff_1 dim = 1
-#pragma HLS resource variable = mem_oft_buff_1 core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = mem_oft_buff_1 type = ram_t2p impl = bram
 
     ap_uint<16> msg_nm_h = len_strm.read();
     ap_uint<16> msg_nm_l = len_strm.read();
@@ -613,7 +613,7 @@ void reExec(ap_uint<16> cpgp_nm,
 #pragma HLS dataflow
     hls::stream<ap_uint<64> > msg_strm("msg_strm");
 #pragma HLS stream variable = msg_strm depth = 32
-#pragma HLS resource variable = msg_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = msg_strm type = fifo impl = lutram
 
     hls::stream<ap_uint<16> > len_strm("len_strm");
 #pragma HLS stream variable = len_strm depth = 32
@@ -643,7 +643,7 @@ void reExec(ap_uint<16> cpgp_nm,
  * @brief The reEngine executes the input messages with configured RE pattern.
  * The pattern is pre-compiled to a list of instructions and is provied by user through
  * the cfg_buff. Therefore, the reEngine which is based on the hardware regex-VM
- * is dynamically configurable. User could improve the throughput by increasing 
+ * is dynamically configurable. User could improve the throughput by increasing
  * the template parameter PU_NM to accelerate the matching process by sacrificing
  * the on-board resources.
  *
@@ -665,11 +665,11 @@ void reExec(ap_uint<16> cpgp_nm,
 template <int PU_NM, int INSTR_DEPTH, int CCLASS_NM, int CPGP_NM, int MSG_LEN, int STACK_SIZE>
 void reEngine(ap_uint<64>* cfg_in_buff, ap_uint<64>* msg_in_buff, ap_uint<16>* len_in_buff, ap_uint<32>* out_buff) {
     ap_uint<64> instr_buff[PU_NM][INSTR_DEPTH];
-#pragma HLS resource variable = instr_buff core = RAM_2P_URAM uram
+#pragma HLS bind_storage variable = instr_buff type = ram_2p impl = uram
 #pragma HLS array_partition variable = instr_buff dim = 1
 
     ap_uint<32> bitset_buff[PU_NM][CCLASS_NM * 8];
-#pragma HLS resource variable = bitset_buff core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = bitset_buff type = ram_2p impl = bram
 #pragma HLS array_partition variable = bitset_buff dim = 1
 
     unsigned int cpgp_nm = 0;

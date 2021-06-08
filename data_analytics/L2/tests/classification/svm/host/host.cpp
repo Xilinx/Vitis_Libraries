@@ -19,6 +19,8 @@
 #include "utils.hpp"
 #include <CL/cl_ext_xilinx.h>
 #include <xcl2.hpp>
+#include "xf_utils_sw/logger.hpp"
+
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
 #define XCL_BANK0 XCL_BANK(0)
@@ -86,25 +88,31 @@ int main(int argc, const char* argv[]) {
         bn_s = "1";
     }
     bn = std::stoi(bn_s);
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int cl_err;
     // Get CL devices.
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
     cl::CommandQueue q(context, device,
                        // CL_QUEUE_PROFILING_ENABLE);
-                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     std::vector<cl::Device> devices_h;
     devices_h.push_back(device);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel;
-    kernel = cl::Kernel(program, "SVM");
+    kernel = cl::Kernel(program, "SVM", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     // Allocate Memory in Host Memory
     ap_uint<64> samples_num = std::stoi(trn);
@@ -266,11 +274,7 @@ int main(int argc, const char* argv[]) {
     free(datasets);
     free(datasets_D);
 
-    if (ret != 0) {
-        std::cout << ret << " feature training result is beyond error interval" << std::endl;
-    } else {
-        std::cout << "check pass!" << std::endl;
-    }
-
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return ret;
 }

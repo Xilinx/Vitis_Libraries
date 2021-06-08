@@ -25,7 +25,7 @@
 
 #include <ap_int.h>
 #include <hls_stream.h>
-#include <hls_math.h>
+#include "xf_data_analytics/common/math_helper.hpp"
 #include "xf_data_analytics/common/enums.hpp"
 
 namespace xf {
@@ -556,14 +556,14 @@ class ll {
 #pragma HLS array_partition variable = MB dim = 1
 #pragma HLS array_partition variable = MB dim = 2
         if (RAMBuff == URAM) {
-#pragma HLS resource variable = MA core = RAM_2P_URAM
-#pragma HLS resource variable = MB core = RAM_2P_URAM
+#pragma HLS bind_storage variable = MA type = ram_2p impl = uram
+#pragma HLS bind_storage variable = MB type = ram_2p impl = uram
         } else if (RAMBuff == BRAM) {
-#pragma HLS resource variable = MA core = RAM_2P_BRAM
-#pragma HLS resource variable = MB core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = MA type = ram_2p impl = bram
+#pragma HLS bind_storage variable = MB type = ram_2p impl = bram
         } else if (RAMBuff == LUTRAM) {
-#pragma HLS resource variable = MA core = RAM_2P_LUTRAM
-#pragma HLS resource variable = MB core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = MA type = ram_2p impl = lutram
+#pragma HLS bind_storage variable = MB type = ram_2p impl = lutram
         }
     }
 
@@ -650,11 +650,11 @@ class sl {
 #pragma HLS array_partition variable = weight dim = 1
 #pragma HLS array_partition variable = weight dim = 3
         if (RAMWeight == URAM) {
-#pragma HLS resource variable = weight core = RAM_2P_URAM
+#pragma HLS bind_storage variable = weight type = ram_2p impl = uram
         } else if (RAMWeight == BRAM) {
-#pragma HLS resource variable = weight core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = weight type = ram_2p impl = bram
         } else if (RAMWeight == LUTRAM) {
-#pragma HLS resource variable = weight core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = weight type = ram_2p impl = lutram
         }
     }
 
@@ -1059,19 +1059,19 @@ class sl2 {
 #pragma HLS array_partition variable = weight dim = 2
 #pragma HLS array_partition variable = intercept dim = 1
         if (RAMWeight == URAM) {
-#pragma HLS resource variable = weight core = RAM_2P_URAM
+#pragma HLS bind_storage variable = weight type = ram_2p impl = uram
         } else if (RAMWeight == BRAM) {
-#pragma HLS resource variable = weight core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = weight type = ram_2p impl = bram
         } else if (RAMWeight == LUTRAM) {
-#pragma HLS resource variable = weight core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = weight type = ram_2p impl = lutram
         }
 
         if (RAMIntercept == URAM) {
-#pragma HLS resource variable = intercept core = RAM_2P_URAM
+#pragma HLS bind_storage variable = intercept type = ram_2p impl = uram
         } else if (RAMIntercept == BRAM) {
-#pragma HLS resource variable = intercept core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = intercept type = ram_2p impl = bram
         } else if (RAMIntercept == LUTRAM) {
-#pragma HLS resource variable = intercept core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = intercept type = ram_2p impl = lutram
         }
     }
 
@@ -1641,11 +1641,11 @@ class s_aggr {
 #pragma HLS inline
 #pragma HLS array_partition variable = sum dim = 1
         if (RAMSum == URAM) {
-#pragma HLS resource variable = sum core = RAM_2P_URAM
+#pragma HLS bind_storage variable = sum type = ram_2p impl = uram
         } else if (RAMSum == BRAM) {
-#pragma HLS resource variable = sum core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = sum type = ram_2p impl = bram
         } else if (RAMSum == LUTRAM) {
-#pragma HLS resource variable = sum core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = sum type = ram_2p impl = lutram
         }
     }
 
@@ -2050,22 +2050,22 @@ class scalingProcess {
 #pragma HLS array_partition variable = sqr dim = 1 complete
 #pragma HLS array_partition variable = scale dim = 1 complete
         if (RAMScaleBuff == URAM) {
-#pragma HLS resource variable = sum core = RAM_2P_URAM
-#pragma HLS resource variable = sqr core = RAM_2P_URAM
+#pragma HLS bind_storage variable = sum type = ram_2p impl = uram
+#pragma HLS bind_storage variable = sqr type = ram_2p impl = uram
         } else if (RAMScaleBuff == BRAM) {
-#pragma HLS resource variable = sum core = RAM_2P_BRAM
-#pragma HLS resource variable = sqr core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = sum type = ram_2p impl = bram
+#pragma HLS bind_storage variable = sqr type = ram_2p impl = bram
         } else if (RAMScaleBuff == LUTRAM) {
-#pragma HLS resource variable = sum core = RAM_2P_LUTRAM
-#pragma HLS resource variable = sqr core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = sum type = ram_2p impl = lutram
+#pragma HLS bind_storage variable = sqr type = ram_2p impl = lutram
         }
 
         if (RAMScaleFactor == URAM) {
-#pragma HLS resource variable = scale core = RAM_2P_URAM
+#pragma HLS bind_storage variable = scale type = ram_2p impl = uram
         } else if (RAMScaleFactor == BRAM) {
-#pragma HLS resource variable = scale core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = scale type = ram_2p impl = bram
         } else if (RAMScaleFactor == LUTRAM) {
-#pragma HLS resource variable = scale core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = scale type = ram_2p impl = lutram
         }
     }
 
@@ -2190,7 +2190,7 @@ class scalingProcess {
                         if (j == (L - 1)) {
                             MType tmp1 = regSqr * ptrTR;
                             MType tmp2 = regSum * regSum;
-                            scale[k][scaleCounter] = ptrTR / hls::sqrt(tmp1 - tmp2);
+                            scale[k][scaleCounter] = ptrTR / xf::data_analytics::internal::m::sqrt(tmp1 - tmp2);
                         }
                     }
                 }
@@ -2326,7 +2326,7 @@ class scalingProcess {
                         if (j == (L - 1)) {
                             MType tmp1 = regSqr * ptrTR;
                             MType tmp2 = regSum * regSum;
-                            scale[k][scaleCounter] = ptrTR / hls::sqrt(tmp1 - tmp2);
+                            scale[k][scaleCounter] = ptrTR / xf::data_analytics::internal::m::sqrt(tmp1 - tmp2);
                         }
                     }
                 }

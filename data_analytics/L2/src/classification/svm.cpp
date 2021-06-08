@@ -15,6 +15,7 @@
  */
 
 #include "xf_data_analytics/classification/svm_train.hpp"
+#include "xf_data_analytics/common/math_helper.hpp"
 
 namespace xf {
 namespace data_analytics {
@@ -74,20 +75,24 @@ void sink_stream(hls::stream<bool>& e_y_strm) {
 }
 
 template <typename MType, unsigned WD, unsigned StreamN, unsigned SampleDepth>
-void SVM_flow(internal::tagTableRandomLoader<512, WD, BURST_LEN, MType, ap_uint<WD> >& loader,
-              internal::s_aggr<MType, StreamN, SampleDepth, &funcB, 7, internal::URAM>& processor_agg,
-              MType weight_temp[1][StreamN][SampleDepth],
-              ap_uint<512>* ddr,
-              const ap_uint<64> offset,
-              const ap_uint<64> rows,
-              const ap_uint<64> cols,
-              const ap_uint<64> feature_num,
-              const float fraction,
-              const bool ifJump,
-              const ap_uint<32> bucketSize) {
+void SVM_flow(
+    xf::data_analytics::common::internal::tagTableRandomLoader<512, WD, BURST_LEN, MType, ap_uint<WD> >& loader,
+    xf::data_analytics::common::internal::
+        s_aggr<MType, StreamN, SampleDepth, &funcB, 7, xf::data_analytics::common::internal::URAM>& processor_agg,
+    MType weight_temp[1][StreamN][SampleDepth],
+    ap_uint<512>* ddr,
+    const ap_uint<64> offset,
+    const ap_uint<64> rows,
+    const ap_uint<64> cols,
+    const ap_uint<64> feature_num,
+    const float fraction,
+    const bool ifJump,
+    const ap_uint<32> bucketSize) {
     static const int axi_fifo_depth = BURST_LEN * 2;
-    static const int LatencyT = internal::sl2<MType, StreamN, SampleDepth, 1, 1, &funcA, &funcB, &funcC, 6,
-                                              internal::URAM, internal::URAM>::LatencyT;
+    static const int LatencyT =
+        xf::data_analytics::common::internal::sl2<MType, StreamN, SampleDepth, 1, 1, &funcA, &funcB, &funcC, 6,
+                                                  xf::data_analytics::common::internal::URAM,
+                                                  xf::data_analytics::common::internal::URAM>::LatencyT;
     static const int x2_fifo_depth = axi_fifo_depth * 2 + LatencyT + 128;
     hls::stream<MType> x_data[StreamN];
 #pragma HLS stream variable = x_data depth = axi_fifo_depth
@@ -112,7 +117,9 @@ void SVM_flow(internal::tagTableRandomLoader<512, WD, BURST_LEN, MType, ap_uint<
 #pragma HLS stream variable = eRetStrm depth = axi_fifo_depth
 #pragma HLS dataflow
 
-    internal::sl2<MType, StreamN, SampleDepth, 1, 1, &funcA, &funcB, &funcC, 6, internal::URAM, internal::URAM>
+    xf::data_analytics::common::internal::sl2<MType, StreamN, SampleDepth, 1, 1, &funcA, &funcB, &funcC, 6,
+                                              xf::data_analytics::common::internal::URAM,
+                                              xf::data_analytics::common::internal::URAM>
         processor;
 
     loader.sample(ddr, offset, rows, cols, fraction, ifJump, bucketSize, x_data, e_x_data_strm, x_data_1, e_data_strm,
@@ -199,7 +206,7 @@ mainloop:
         }
         DATA_TYPE weight_norm_diff = 0.0;
         DATA_TYPE weight_norm_new = 0.0;
-        const DATA_TYPE GRA = STEP_SIZE / (hls::sqrt(DATA_TYPE(i + 1.0)));
+        const DATA_TYPE GRA = STEP_SIZE / (xf::data_analytics::internal::m::sqrt(DATA_TYPE(i + 1.0)));
         const DATA_TYPE REG = GRA * REG_PARA;
         const DATA_TYPE REG_1 = 1.0 - REG;
 

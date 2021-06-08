@@ -21,6 +21,7 @@
 #include <CL/cl_ext_xilinx.h>
 #include <xcl2.hpp>
 #include "test.hpp"
+#include "xf_utils_sw/logger.hpp"
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
 #define XCL_BANK0 XCL_BANK(0)
@@ -67,6 +68,7 @@ const int dw = sizeof(DataType) * 8;
 const ap_uint<32> data_out_header_len = 1024;
 int main(int argc, const char* argv[]) {
     std::cout << "\n--------- RF Sampling Test ---------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 
     // cmd arg parser.
     ArgParser parser(argc, argv);
@@ -110,31 +112,37 @@ int main(int argc, const char* argv[]) {
         loopnum_str = "1";
     }
     int num_rep = std::stoi(loopnum_str);
+    cl_int cl_err;
     // Get CL devices.
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
     cl::CommandQueue q(context, device,
                        // CL_QUEUE_PROFILING_ENABLE);
-                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     std::vector<cl::Device> devices_h;
     devices_h.push_back(device);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel_sp_0[2];
 
     cl::Kernel kernel_tree_0[2];
 
     for (int i = 0; i < 2; i++) {
-        kernel_tree_0[i] = cl::Kernel(program, "DecisionTreeQT_0");
+        kernel_tree_0[i] = cl::Kernel(program, "DecisionTreeQT_0", &cl_err);
+        logger.logCreateKernel(cl_err);
 
-        kernel_sp_0[i] = cl::Kernel(program, "randomForestSP");
+        kernel_sp_0[i] = cl::Kernel(program, "randomForestSP", &cl_err);
+        logger.logCreateKernel(cl_err);
     }
 
     struct Paras paras;
@@ -333,12 +341,14 @@ int main(int argc, const char* argv[]) {
     q.finish();
 
     // check the result
+    int nerr = 0;
     for (int i = 0; i < num_rep; i++) {
         print_buf_result_data_t* d = (print_buf_result_data_t*)(cbd_ptr + i);
         int nodes_num = d->nodes_num;
         // golden nodes_num : 227
-        if (nodes_num != 227) return 1;
+        if (nodes_num != 227) nerr++;
     }
-    std::cout << "check pass!" << std::endl;
-    return 0;
+    nerr ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return nerr;
 }

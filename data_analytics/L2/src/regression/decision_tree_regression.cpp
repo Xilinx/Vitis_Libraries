@@ -424,7 +424,7 @@ void statisticAndCompute(hls::stream<ap_uint<WD> > dstrm[MAX_SPLITS_PARA + 1],
     ap_uint<WD * 4 + 32> num_in_cur_nfs_cat[MAX_SPLITS_1]
                                            [MAX_PARAS * LATENCY]; // right(var, avg), left(var, avg), count
 #pragma HLS array_partition variable = num_in_cur_nfs_cat dim = 1
-#pragma HLS resource variable = num_in_cur_nfs_cat core = RAM_2P_URAM
+#pragma HLS bind_storage variable = num_in_cur_nfs_cat type = ram_2p impl = uram
 #endif
 init_num_in_cur_nfs_cat:
     for (int i = 0; i < MAX_PARAS * LATENCY; i++) {
@@ -500,7 +500,7 @@ main_statistic:
     }
 
     ap_uint<WD * 4 + 32> num_in_cur_nfs_cat_merge[MAX_PARAS];
-#pragma HLS resource variable = num_in_cur_nfs_cat_merge core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = num_in_cur_nfs_cat_merge type = ram_2p impl = bram
 MERGE_SUM_LOOP:
     for (int j = 0; j < MAX_SPLITS_1; j++) {
     COMPUTE_ONE_SPLITS_LOOP:
@@ -541,9 +541,9 @@ MERGE_SUM_LOOP:
 #pragma HLS array_partition variable = clklogclk dim = 2 cyclic factor = 2
 #pragma HLS array_partition variable = crklogcrk dim = 2 cyclic factor = 2
 #pragma HLS array_partition variable = num_in_cur_nfs_cat_sum dim = 2 cyclic factor = 2
-#pragma HLS resource variable = clklogclk core = RAM_2P_URAM
-#pragma HLS resource variable = crklogcrk core = RAM_2P_URAM
-#pragma HLS resource variable = num_in_cur_nfs_cat_sum core = RAM_2P_URAM
+#pragma HLS bind_storage variable = clklogclk type = ram_2p impl = uram
+#pragma HLS bind_storage variable = crklogcrk type = ram_2p impl = uram
+#pragma HLS bind_storage variable = num_in_cur_nfs_cat_sum type = ram_2p impl = uram
 compute_gain_loop_init:
     for (int i = 0; i < PARA_NUM; i++) {
 #pragma HLS loop_tripcount min = PARA_NUM max = PARA_NUM avg = PARA_NUM
@@ -686,27 +686,27 @@ void decisionTreeFlow(ap_uint<512> data[DATASIZE],
 #pragma HLS dataflow
     hls::stream<ap_uint<WD> > dstrm_batch[_WAxi / WD];
 #pragma HLS stream variable = dstrm_batch depth = 128
-#pragma HLS resource variable = dstrm_batch core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dstrm_batch type = fifo impl = lutram
     hls::stream<bool> estrm_batch;
 #pragma HLS stream variable = estrm_batch depth = 128
-#pragma HLS resource variable = estrm_batch core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = estrm_batch type = fifo impl = lutram
 
     hls::stream<ap_uint<WD> > dstrm_batch_disp[_WAxi / WD];
 #pragma HLS stream variable = dstrm_batch_disp depth = 128
-#pragma HLS resource variable = dstrm_batch_disp core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dstrm_batch_disp type = fifo impl = lutram
     hls::stream<ap_uint<MAX_TREE_DEPTH> > nstrm_disp;
 #pragma HLS stream variable = nstrm_disp depth = 128
-#pragma HLS resource variable = nstrm_disp core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nstrm_disp type = fifo impl = lutram
 
     hls::stream<ap_uint<WD> > dstrm[MAX_SPLITS_PARA + 1];
 #pragma HLS stream variable = dstrm depth = 128
-#pragma HLS resource variable = dstrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dstrm type = fifo impl = lutram
     hls::stream<ap_uint<MAX_TREE_DEPTH> > nstrm;
 #pragma HLS stream variable = nstrm depth = 128
-#pragma HLS resource variable = nstrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nstrm type = fifo impl = lutram
     hls::stream<bool> estrm;
 #pragma HLS stream variable = estrm depth = 128
-#pragma HLS resource variable = estrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = estrm type = fifo impl = lutram
 
 Scan:
     xf::data_analytics::classification::axiVarColToStreams<64, _WAxi, WD>(data, 1, samples_num, features_num + 1,
@@ -788,7 +788,7 @@ extern "C" void DecisionTree(ap_uint<512> data[DATASIZE], ap_uint<512> configs[3
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	num_write_outstanding = 16 num_read_outstanding = 16 \
 	max_write_burst_length = 64 max_read_burst_length = 64 \
-	bundle = gmem0_1 port = config
+	bundle = gmem0_1 port = configs
 
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	num_write_outstanding = 16 num_read_outstanding = 16 \
@@ -796,7 +796,7 @@ extern "C" void DecisionTree(ap_uint<512> data[DATASIZE], ap_uint<512> configs[3
 	bundle = gmem0_2 port = tree
 
 #pragma HLS INTERFACE s_axilite port = data bundle = control
-#pragma HLS INTERFACE s_axilite port = config bundle = control
+#pragma HLS INTERFACE s_axilite port = configs bundle = control
 #pragma HLS INTERFACE s_axilite port = tree bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
     // clang-format on
@@ -841,7 +841,7 @@ init_features_splits_ids:
 
     struct NodeR<DataType> nodes[MAX_TREE_DEPTH_][MAX_NODES_NUM];
 #pragma HLS array_partition variable = nodes dim = 1
-#pragma HLS resource variable = nodes core = RAM_2P_URAM
+#pragma HLS bind_storage variable = nodes type = ram_2p impl = uram
 
     ap_uint<MAX_TREE_DEPTH_> layer_nodes_num[MAX_TREE_DEPTH_ + 1];
     ap_uint<MAX_TREE_DEPTH_> nodes_num = 0;
