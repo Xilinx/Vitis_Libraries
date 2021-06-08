@@ -13,6 +13,35 @@
     "platform_blacklist": [
         "zc"
     ], 
+    "platform_properties": {
+        "u200": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config LIB_DIR/L2/tests/M76Engine/conn_u200.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config LIB_DIR/L2/tests/M76Engine/conn_u250.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config LIB_DIR/L2/tests/M76Engine/conn_u50.cfg"
+                    ]
+                }
+            }
+        }
+    },
     "host": {
         "host_exe": "m76_test.exe", 
         "compiler": {
@@ -57,7 +86,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": true, 
         "jobs": [
             {
                 "index": 0, 
@@ -71,8 +100,8 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 300, 
+                    "vitis_hw_build": 2160, 
+                    "vitis_hw_emu": 600, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

@@ -25,6 +25,7 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "tree_engine_kernel.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 class ArgParser {
    public:
@@ -47,6 +48,7 @@ class ArgParser {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------Tree Bermudan (BK) Engine-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     std::string run_mode = "hw";
 #ifndef HLS_TEST
@@ -131,6 +133,7 @@ int main(int argc, const char* argv[]) {
     }
 
 #ifndef HLS_TEST
+    cl_int cl_err;
     // do pre-process on CPU
     struct timeval start_time, end_time, test_time;
     // platform related operations
@@ -138,19 +141,23 @@ int main(int argc, const char* argv[]) {
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
 #ifdef SW_EMU_TEST
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE,
+                       &cl_err); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #else
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
 #endif
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     // load xclbin
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     std::string krnl_name = "scanTreeKernel";
     cl_uint cu_number;
@@ -162,7 +169,8 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Kernel> krnl_TreeEngine(cu_number);
     for (cl_uint i = 0; i < cu_number; ++i) {
         std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(i + 1) + "}";
-        krnl_TreeEngine[i] = cl::Kernel(program, krnl_full_name.c_str());
+        krnl_TreeEngine[i] = cl::Kernel(program, krnl_full_name.c_str(), &cl_err);
+        logger.logCreateKernel(cl_err);
     }
 
     std::cout << "kernel has been created" << std::endl;
@@ -255,9 +263,7 @@ int main(int argc, const char* argv[]) {
     }
     std::cout << "NPV[" << 0 << "]= " << std::setprecision(15) << output[0][0]
               << " ,diff/NPV= " << (output[0][0] - golden) / golden << std::endl;
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return err;
 }

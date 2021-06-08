@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define NUM_ASSETS (10)
 #define NUM_PRICES (61)
@@ -189,6 +190,7 @@ int check_results(std::string s,
 }
 
 int main(int argc, char** argv) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     std::string xclbin_file(argv[1]);
     float target_return = 0.02;
     float risk_free_rate = 0.001;
@@ -242,20 +244,23 @@ int main(int argc, char** argv) {
     // get context
     std::cout << "Creating context" << std::endl;
     cl_int err;
-    OCL_CHECK(err, cl::Context ctx(device, NULL, NULL, NULL, &err));
+    cl::Context ctx(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
 
     // create command queue
     std::cout << "Creating command queue" << std::endl;
-    OCL_CHECK(
-        err, cl::CommandQueue q(ctx, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
+    cl::CommandQueue q(ctx, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
 
     // import and program the xclbin
     std::cout << "Programming device" << std::endl;
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     cl::Program::Binaries bins = xcl::import_binary_file(xclbin_file);
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program(ctx, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl(program, "po_kernel", &err));
+    cl::Program program(ctx, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel krnl(program, "po_kernel", &err);
+    logger.logCreateKernel(err);
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
@@ -351,8 +356,7 @@ int main(int argc, char** argv) {
     // kernel execution time
     std::cout << "Duration returned by profile API is " << (duration_ns * (1.0e-6)) << " ms" << std::endl;
 
-    if (!res) {
-        std::cout << "Test PASS" << std::endl;
-    }
+    res ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return res;
 }

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <getopt.h>
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define OCL_CHECK(error, call)                                                                   \
     call;                                                                                        \
@@ -38,6 +39,7 @@ static al_vec<unsigned> getFpgaSeeds() {
     return seeds;
 }
 
+xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 TEST_DT runFpga(const std::string& xclbinLoc, unsigned noPaths, TEST_DT rfX, TEST_DT rfY, TEST_DT rfAlpha) {
     al_vec<TEST_DT> gotPrice(1);
     al_vec<unsigned> seeds = getFpgaSeeds();
@@ -49,15 +51,19 @@ TEST_DT runFpga(const std::string& xclbinLoc, unsigned noPaths, TEST_DT rfX, TES
     cl::Device device = devices[0];
     cl_int err;
 
-    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
 
     // Load the binary file (using function from xcl2.cpp)
     cl::Program::Binaries bins = xcl::import_binary_file(xclbinLoc);
 
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_lmm(program, KRNL_NAME, &err));
+    cl::Program program(context, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
+    cl::Kernel krnl_lmm(program, KRNL_NAME, &err);
+    logger.logCreateKernel(err);
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
@@ -171,6 +177,7 @@ int main(int argc, char** argv) {
     std::cout << "Got price: " << price << std::endl;
 
     // If we are using default data, check against expected
+    int ret = 0;
     if (rfX == RFX_DEF && rfY == RFY_DEF && rfAlpha == RFALPHA_DEF) {
         std::cout << "*** Using default arguments ***" << std::endl;
         double epsilon;
@@ -182,12 +189,10 @@ int main(int argc, char** argv) {
         double diff = std::abs((double)((price - EXPECTED) / EXPECTED));
         std::cout << "Expected price = " << EXPECTED << " (diff = " << (diff * 100) << "%)" << std::endl;
         if (diff > epsilon) {
-            std::cout << "Fail with 1 errors." << std::endl;
-            return 1;
-        } else {
-            std::cout << "Pass validation." << std::endl;
-            return 0;
+            ret = 1;
         }
     }
-    return 0;
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return ret;
 }

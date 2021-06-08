@@ -25,6 +25,7 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "mcengine_top.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define LENGTH(a) (sizeof(a) / sizeof(a[0]))
 class ArgParser {
@@ -47,6 +48,7 @@ class ArgParser {
 };
 
 int main(int argc, const char* argv[]) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string mode;
@@ -127,12 +129,15 @@ int main(int argc, const char* argv[]) {
     // do pre-process on CPU
     struct timeval start_time, end_time, test_time;
     // platform related operations
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
@@ -140,9 +145,10 @@ int main(int argc, const char* argv[]) {
     // xcl::import_binary_file("../xclbin/MCAE_u250_hw.xclbin");
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_Engine(program, "MCCliquetEngine_k");
-    std::cout << "kernel has been created" << std::endl;
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel_Engine(program, "MCCliquetEngine_k", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_in_0;
     cl_mem_ext_ptr_t mext_in_1[2];
@@ -212,20 +218,20 @@ int main(int argc, const char* argv[]) {
                                     // launch kernel and calculate kernel execution time
                                     std::cout << "kernel start------" << std::endl;
                                     gettimeofday(&start_time, 0);
-                                    int j = 0;
-                                    kernel_Engine.setArg(j++, underlying);
-                                    kernel_Engine.setArg(j++, volatility);
-                                    kernel_Engine.setArg(j++, dividendYield);
-                                    kernel_Engine.setArg(j++, riskFreeRate);
-                                    kernel_Engine.setArg(j++, timeLength);
-                                    kernel_Engine.setArg(j++, strike);
-                                    kernel_Engine.setArg(j++, optionType);
-                                    kernel_Engine.setArg(j++, resetDates_buf[kk]);
-                                    kernel_Engine.setArg(j++, seed_buf);
-                                    kernel_Engine.setArg(j++, output_buf);
-                                    kernel_Engine.setArg(j++, requiredTolerance);
-                                    kernel_Engine.setArg(j++, timeSteps);
-                                    kernel_Engine.setArg(j++, requiredSamples);
+                                    int a = 0;
+                                    kernel_Engine.setArg(a++, underlying);
+                                    kernel_Engine.setArg(a++, volatility);
+                                    kernel_Engine.setArg(a++, dividendYield);
+                                    kernel_Engine.setArg(a++, riskFreeRate);
+                                    kernel_Engine.setArg(a++, timeLength);
+                                    kernel_Engine.setArg(a++, strike);
+                                    kernel_Engine.setArg(a++, optionType);
+                                    kernel_Engine.setArg(a++, resetDates_buf[kk]);
+                                    kernel_Engine.setArg(a++, seed_buf);
+                                    kernel_Engine.setArg(a++, output_buf);
+                                    kernel_Engine.setArg(a++, requiredTolerance);
+                                    kernel_Engine.setArg(a++, timeSteps);
+                                    kernel_Engine.setArg(a++, requiredSamples);
 
                                     q.enqueueTask(kernel_Engine, nullptr, nullptr);
 
@@ -255,9 +261,7 @@ int main(int argc, const char* argv[]) {
             }
         }
     }
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
-    return 0;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return err;
 }

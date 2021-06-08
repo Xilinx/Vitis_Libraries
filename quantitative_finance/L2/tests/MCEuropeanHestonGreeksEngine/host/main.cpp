@@ -24,6 +24,8 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "mcengine_top.hpp"
+#include "xf_utils_sw/logger.hpp"
+
 #define LENGTH(a) (sizeof(a) / sizeof(a[0]))
 
 class ArgParser {
@@ -56,6 +58,8 @@ int main(int argc, const char* argv[]) {
     }
     // Allocate Memory in Host Memory
     ap_uint<32>* seed = aligned_alloc<ap_uint<32> >(8 * 2);
+
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 
     // -------------setup k0 params---------------
     int timeSteps = 100;
@@ -110,21 +114,25 @@ int main(int argc, const char* argv[]) {
     // do pre-process on CPU
     struct timeval start_time, end_time, test_time;
     // platform related operations
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     // cl::Program::Binaries xclBins = xcl::import_binary_file("../xclbin/MCAE_u250_hw.xclbin");
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel MCEHGEngine(program, "MCEHGEngine_k0");
-    std::cout << "kernel has been created" << std::endl;
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel MCEHGEngine(program, "MCEHGEngine_k0", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_o[2];
     mext_o[0] = {16, outputs, MCEHGEngine()};
@@ -192,9 +200,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "theta: " << outputs[0] << ", rho: " << outputs[1] << ", delta: " << outputs[2]
               << ", gamma: " << outputs[3] << ", MV_kappa: " << outputs[4] << ", MV_theta: " << outputs[5]
               << ", MV_KHI: " << outputs[6] << ", MV_VO: " << outputs[7] << std::endl;
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
-    return 0;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return err;
 }

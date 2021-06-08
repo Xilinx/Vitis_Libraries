@@ -128,6 +128,7 @@ int MCEuropean::createOCLObjects(Device* device) {
     /////////////////////////
     // Create KERNEL Objects
     /////////////////////////
+    cl::Kernel m_pKernel(*m_pProgram, KERNEL_NAMES[0], &cl_retval);
     if (cl_retval == CL_SUCCESS) {
         for (i = 0; i < NUM_KERNELS; i++) {
             m_pKernels[i] = new cl::Kernel(*m_pProgram, KERNEL_NAMES[i], &cl_retval);
@@ -167,17 +168,17 @@ int MCEuropean::createOCLObjects(Device* device) {
     switch (deviceType) {
         case Device::DeviceType::U200:
             for (i = 0; i < NUM_KERNELS; i++) {
-                m_hwBufferOptions[i] = {XCL_MEM_DDR_BANK1, m_hostOutputBuffers[i], 0};
+                m_hwBufferOptions[i] = {8, m_hostOutputBuffers[i], m_pKernel()};
             }
-            m_hwSeed = {XCL_MEM_DDR_BANK1, m_hostSeed, 0};
+            m_hwSeed = {7, m_hostSeed, m_pKernel()};
             break;
 
         default:
         case Device::DeviceType::U250:
             for (i = 0; i < NUM_KERNELS; i++) {
-                m_hwBufferOptions[i] = {XCL_MEM_DDR_BANK0, m_hostOutputBuffers[i], 0};
+                m_hwBufferOptions[i] = {8, m_hostOutputBuffers[i], m_pKernel()};
             }
-            m_hwSeed = {XCL_MEM_DDR_BANK0, m_hostSeed, 0};
+            m_hwSeed = {7, m_hostSeed, m_pKernel()};
             break;
     }
 

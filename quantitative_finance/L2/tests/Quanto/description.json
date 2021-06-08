@@ -13,6 +13,35 @@
     "platform_blacklist": [
         "zc"
     ], 
+    "platform_properties": {
+        "u200": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }
+    },
     "testinfo": {
         "disable": false, 
         "jobs": [

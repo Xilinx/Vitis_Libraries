@@ -6,6 +6,7 @@
 #include "xcl2.hpp"
 #include "test_data.hpp"
 #include "quad_hcf_engine_def.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define TEST_TOLERANCE 0.001
 
@@ -19,6 +20,7 @@ static int check(TEST_DT act, TEST_DT exp) {
 }
 
 int main(int argc, char* argv[]) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     std::string xclbin_file(argv[1]);
     TEST_DT integration_tolerance = 0.0001;
     if (argc == 3) {
@@ -62,18 +64,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Creating context" << std::endl;
     cl_int err;
     cl::Context ctx(device, NULL, NULL, NULL, &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create context" << std::endl;
-        return 1;
-    }
+    logger.logCreateContext(err);
 
     // create command queue
     std::cout << "Creating command queue" << std::endl;
     cl::CommandQueue cq(ctx, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create command queue" << std::endl;
-        return 1;
-    }
+    logger.logCreateCommandQueue(err);
 
     // import and program the xclbin
     std::cout << "Programming device" << std::endl;
@@ -82,17 +78,11 @@ int main(int argc, char* argv[]) {
     cl::Program::Binaries bins = xcl::import_binary_file(xclbin_file);
     devices.resize(1);
     cl::Program program(ctx, devices, bins, NULL, &err);
+    logger.logCreateProgram(err);
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     long long t_program = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create program" << std::endl;
-        return 1;
-    }
     cl::Kernel krnl(program, "quad_hcf_kernel", &err);
-    if (err != CL_SUCCESS) {
-        std::cout << "ERROR: failed to create kernel" << std::endl;
-        return 1;
-    }
+    logger.logCreateKernel(err);
 
     // memory objects
     std::cout << "Allocating memory objects" << std::endl;
@@ -181,11 +171,10 @@ int main(int argc, char* argv[]) {
     std::cout << "    mem from device = " << t_mem_from_device << " us" << std::endl;
 
     int ret = 0;
-    if (!fails) {
-        std::cout << "TEST PASS" << std::endl;
-    } else {
-        std::cout << "FAIL" << std::endl;
+    if (fails) {
         ret = 1;
     }
+    ret ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return ret;
 }

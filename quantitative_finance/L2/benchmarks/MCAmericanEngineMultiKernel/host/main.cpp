@@ -24,6 +24,7 @@
 #include "MCAE_kernel.hpp"
 #include "ap_int.h"
 #include "utils.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 class ArgParser {
    public:
@@ -46,6 +47,7 @@ class ArgParser {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(American) Engine-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
@@ -132,17 +134,20 @@ int main(int argc, const char* argv[]) {
 #else
 
     struct timeval start_time, end_time;
+    cl_int cl_err;
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
 #ifdef SW_EMU_TEST
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &cl_err);
 #else
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
 #endif
+    logger.logCreateCommandQueue(cl_err);
 
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
@@ -151,15 +156,18 @@ int main(int argc, const char* argv[]) {
     // xcl::import_binary_file("../xclbin/MCAE_u250_hw.xclbin");
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel_MCAE_k0[2];
-    kernel_MCAE_k0[0] = cl::Kernel(program, "MCAE_k0");
-    kernel_MCAE_k0[1] = cl::Kernel(program, "MCAE_k0");
+    kernel_MCAE_k0[0] = cl::Kernel(program, "MCAE_k0", &cl_err);
+    kernel_MCAE_k0[1] = cl::Kernel(program, "MCAE_k0", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl::Kernel kernel_MCAE_k1[2];
-    kernel_MCAE_k1[0] = cl::Kernel(program, "MCAE_k1");
-    kernel_MCAE_k1[1] = cl::Kernel(program, "MCAE_k1");
+    kernel_MCAE_k1[0] = cl::Kernel(program, "MCAE_k1", &cl_err);
+    kernel_MCAE_k1[1] = cl::Kernel(program, "MCAE_k1", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     std::string krnl_name = "MCAE_k2";
     cl_uint cu_number;
@@ -190,8 +198,9 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Kernel> kernel_MCAE_k2_b(cu_number);
     for (cl_uint i = 0; i < cu_number; ++i) {
         std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(i + 1) + "}";
-        kernel_MCAE_k2_a[i] = cl::Kernel(program, krnl_full_name.c_str());
-        kernel_MCAE_k2_b[i] = cl::Kernel(program, krnl_full_name.c_str());
+        kernel_MCAE_k2_a[i] = cl::Kernel(program, krnl_full_name.c_str(), &cl_err);
+        kernel_MCAE_k2_b[i] = cl::Kernel(program, krnl_full_name.c_str(), &cl_err);
+        logger.logCreateKernel(cl_err);
     }
 
     std::cout << "kernel has been created" << std::endl;
@@ -383,6 +392,7 @@ int main(int argc, const char* argv[]) {
     else
         std::cout << "Pass validation." << std::endl;
 #endif
-
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return err;
 }

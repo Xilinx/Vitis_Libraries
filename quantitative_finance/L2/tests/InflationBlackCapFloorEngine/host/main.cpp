@@ -24,6 +24,7 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "inflation_capfloor_engine_kernel.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 class ArgParser {
    public:
@@ -60,6 +61,7 @@ int main(int argc, const char* argv[]) {
     DT* output = aligned_alloc<DT>(1);
 
     // -------------setup k0 params---------------
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     int err = 0;
     DT minErr = 10e-10;
 
@@ -99,21 +101,25 @@ int main(int argc, const char* argv[]) {
     // do pre-process on CPU
     struct timeval start_time, end_time, test_time;
     // platform related operations
+    cl_int cl_err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     // cl::Program::Binaries xclBins = xcl::import_binary_file("../xclbin/MCAE_u250_hw.xclbin");
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_InflationEngine(program, "INFLATION_k0");
-    std::cout << "kernel has been created" << std::endl;
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel_InflationEngine(program, "INFLATION_k0", &cl_err);
+    logger.logCreateKernel(cl_err);
 
     cl_mem_ext_ptr_t mext_o[4];
     mext_o[0] = {10, output, kernel_InflationEngine()};
@@ -169,9 +175,7 @@ int main(int argc, const char* argv[]) {
     DT out = output[0];
     if (std::fabs(out - golden) > minErr) err++;
     std::cout << "NPV= " << out << " ,diff/NPV= " << (out - golden) / golden << std::endl;
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return err;
 }

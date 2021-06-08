@@ -91,7 +91,7 @@
                     "name": "kernel_mc_0"
                 }
             ], 
-            "ldclflags": "--nk kernel_mc_0:1:kernel_mc_0", 
+            "ldclflags": "--connectivity.nk kernel_mc_0:1:kernel_mc_0", 
             "frequency": 300.0, 
             "name": "mc_european_dowjones"
         }

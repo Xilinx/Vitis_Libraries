@@ -142,6 +142,18 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/CFBlackScholes/src/kernel
 
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+VPP_FLAGS += --config $(XFLIB_DIR)/L2/tests/CFBlackScholes/conn_u200.cfg
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(XFLIB_DIR)/L2/tests/CFBlackScholes/conn_u250.cfg
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(XFLIB_DIR)/L2/tests/CFBlackScholes/conn_u50.cfg
+endif
+
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/bs_kernel.xclbin
 BINARY_CONTAINER_bs_kernel_OBJS += $(TEMP_DIR)/bs_kernel.xo

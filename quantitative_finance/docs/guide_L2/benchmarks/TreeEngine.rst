@@ -20,33 +20,124 @@
    :xlnxdocumenttype: Tutorials
 
 
+.. _guide_l2_benchmark_TreeEngine_
+
 *************************************************
-Benchmark of Tree Engine
+Benchmark of TreeEngine
 *************************************************
 
 Overview
 ========
-This is a benchmark based on tree structure using the Xilinx Vitis environment to compare with QuantLib, where the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian, and the Instrument supports multiple Instruments, including swaption, swap, capfloor, callablebond. It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a serial of benchmark based on tree structure using the Xilinx Vitis environment to compare with QuantLib, where the Instrument supports multiple instruments, including swaption, swap, capfloor, callablebond, the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian. It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+
+These examples reside in ``L2/benchmarks/TreeEngine`` directory. Take `TreeSwaptionEngineHWMOdel` as example, the tutorial bellow provides a step-by-step guide that covers commands for build and runging kernel.
 
 
-Highlights
+Executable Usage
+================
+
+* **Work Directory(Step 1)**
+
+The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
+
+.. code-block:: bash
+
+   cd L2/benchmarks/TreeEngine/TreeSwaptionEngineHWModel
+
+* **Build kernel(Step 2)**
+
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+
+.. code-block:: bash
+
+   source /opt/xilinx/Vitis/2021.1/settings64.sh
+   source /opt/xilinx/xrt/setenv.sh
+   export DEVICE=/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
+   export TARGET=hw
+   make run 
+
+* **Run kernel(Step 3)**
+
+To get the benchmark results, please run the following command.
+
+.. code-block:: bash
+
+   ./build_dir.hw.xilinx_u250_xdma_201830_2/host.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/scanTreeKernel.xclbin 
+
+Input Arguments:
+
+.. code-block:: bash
+
+   Usage: test.exe    -[-xclbin ]
+          -xclbin     TreeEngine binary;
+
+
+* **Example output(Step 4)** 
+
+.. code-block:: bash
+   
+   ----------------------Tree Bermudan (HW) Engine-----------------
+   timestep=50
+   Found Platform
+   Platform Name: Xilinx
+   Found Device=xilinx_u250_xdma_201830_2
+   INFO: Importing xclbin_xilinx_u250_xdma_201830_2_hw/scanTreeKernel.xclbin
+   Loading: 'xclbin_xilinx_u250_xdma_201830_2_hw/scanTreeKernel.xclbin'
+   kernel has been created
+   kernel start------
+   kernel end------
+   FPGA Execution time: 0.28ms
+   NPV= 13.1903146433444 ,diff/NPV= -1.30631162395178e-14
+
+
+.. _TreeEngine_Profiling:
+Profiling 
 ==========
-the benchmarks include 2 parts: TreeSwaptionEngineHWModel and TreeHWModelEngine.
 
+The application scenarios in this case is:
+
+.. _tab_TreeEngine_input_parameter:
+
+.. table:: Application Scenarios
+
+    +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    | Instrument | Model     | type | index |      fixedRate        |   timestep  | initSize |        a             |       sigma           |  flatRate  |        x0             | nominal | spread |
+    +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    | Swaption   | HWModel   |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.055228873373796609 | 0.0061062754654949824 | 0.04875825 |       0.0             | 1000.0  |   0.0  |
+    |            +-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    |            | BKModel   |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.043389447297063261 | 0.12074597086680797   | 0.04875825 |       0.0             | 1000.0  |   0.0  |  
+    |            +-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    |            | CIRModel  |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.043389447297063261 | 0.068963597413997324  | 0.04875825 | 0.18580295883843218   | 1000.0  |   0.0  |
+    |            +-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    |            | ECIRModel |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.043389447297063261 | 0.015974847434765481  | 0.04875825 | 0.50137133948380941   | 1000.0  |   0.0  |
+    |            +-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    |            | VModel    |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.16046325834281869  | 0.0037370022855109613 | 0.04875825 | 0.0079988201434896891 | 1000.0  |   0.0  |
+    |            +-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    |            | G2Model   |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.050055733653096922 | 0.0094424342056787739 | 0.04875825 |       0.0             | 1000.0  |   0.0  |
+    +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    | Swap       | HWModel   |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.055228873373796609 | 0.0061062754654949824 | 0.04875825 |       0.0             | 1000.0  |   0.0  |
+    +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    | CapFloor   | HWModel   |   0  |   1   |  0.049995924285639641 | 50/100/1000 |   12     | 0.055228873373796609 | 0.0061062754654949824 | 0.04875825 |       0.0             | 1000.0  |   0.0  |
+    +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+    | Callable   | HWModel   |   0  |   1   |  0.0465               | 50/100/1000 |   6      | 0.03                 | 0.01                  | 0.055      |       0.0             | 100.0   |   0.0  |
+    +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
+
+
+the benchmarks include 2 parts: TreeSwaptionEngine based on different Rate Model, different Instrument based on HullWhite Rate Model.
 Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, 8 cores per procssor and 2 threads per core.
 
 TreeSwaptionEngine
 ------------------
-The performance of the TreeEngine based on the swaption and different models is shown in the table below.
+The performance of the TreeSwaptionEngine based on HullWhite and other different rate models are shown in the table below.
 
-.. _tab_performance1:
+.. _tab_TreeSwaptionEngine_Execution_Time:
 
-.. table:: performance based on swaption
+.. table:: Performance Comparison: TreeSwaptionEngine with different Rate Model
    :align: center
 
    +------------+------------------------+--------------------------------+
    |            |                        | Timesteps                      |
-   | Model      | platform               +-------+-------+-------+--------+
+   | Rate Model | platform               +-------+-------+-------+--------+
    |            |                        | 50    | 100   | 500   | 1000   |
    +------------+------------------------+-------+-------+-------+--------+
    |            | Baseline (ms)          | 1.0   | 4.8   | 353.9 | 2493.5 | 
@@ -87,13 +178,13 @@ The performance of the TreeEngine based on the swaption and different models is 
    +------------+------------------------+-------+-------+-------+--------+
 
 
-TreeHWModelEngine
------------------
-The performance of the TreeEngine based on the HullWhite model and different instruments is shown in the table below.
+TreeEngine Based on HullWhite Rate Model
+------------------------------------------
+The performance comparison of the diffferent TreeEngine Instruments based on the HullWhite rate model are shown in the table below.
 
-.. _tab_performance2:
+.. _tab_TreeEngineHWModel_Execution_Time:
 
-.. table:: performance based HullWhite
+.. table:: Performance Comparison: Different TreeEngine Instruments with HullWhite Mode
    :align: center
 
    +------------+------------------------+--------------------------------+
@@ -127,16 +218,11 @@ The performance of the TreeEngine based on the HullWhite model and different ins
    +------------+------------------------+-------+-------+-------+--------+
 
 
+The resource utilization and performance of TreeEngine on U250 FPGA card are listed in the following tables.
 
+.. _tab_TreeEngine_resource:
 
-
-Profiling
-=================
-The resource utilization and performance of Engine on U250 FPGA card is listed in the following tables.
-
-.. _tab_MCAE_resource:
-
-.. table:: Resource utilization report on U250
+.. table:: Resource utilization report of TreeEngine APIs on U250
     :align: center
 
     +-------------------------------+-------+---------+--------+---------+----------+---------+-------------+

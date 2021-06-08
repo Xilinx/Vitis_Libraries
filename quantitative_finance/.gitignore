@@ -24,3 +24,7 @@ L3/examples/api/output/MCAE_u250_hw.xclbin
 /L3/tests/HestonFD/output/hestonfd_test_harness
 /.vs/slnx.sqlite-journal
 /L3/examples/MonteCarlo/output/mc_example
+reports
+emconfig.json
+build_dir*
+_x_temp*

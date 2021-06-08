@@ -138,6 +138,17 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 endif
 
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+VPP_FLAGS += --config $(XFLIB_DIR)/L2/tests/M76Engine/conn_u200.cfg
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(XFLIB_DIR)/L2/tests/M76Engine/conn_u250.cfg
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(XFLIB_DIR)/L2/tests/M76Engine/conn_u50.cfg
+endif
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 

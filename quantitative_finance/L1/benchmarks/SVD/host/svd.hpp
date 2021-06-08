@@ -18,6 +18,7 @@
 
 #include "util.hpp"
 #include "xcl2.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 //! store kernel execution results to a csv file
 void generate_output_file(int run, double* output_data, int output_size, std::string operation, std::string file_path);
