@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @file dut.h
- *
- * @brief This file contains top function of test case.
- */
+
 #ifndef _LOUVAIN_COLORING_H_
 #define _LOUVAIN_COLORING_H_
 
 #include "louvain_modularity.hpp"
 #include "louvain_samecolor.hpp"
+#include "kernel_renumber.hpp"
 #include <ap_fixed.h>
 #include <ap_int.h>
 #include <hls_math.h>
@@ -1045,6 +1042,67 @@ MOVE:
     // clean up
     free(colorPtr);
 #endif
+}
+
+// Reference public parallel algorithm: https://arxiv.org/pdf/1410.1237.pdf
+
+/**
+ * @brief Level2: louvain kernel implement
+ *
+ * @param config0 table for the int64 parameter of louvain, numVertex, numColor, total iteration times and so on.
+ * @param config1 table for the double parameter of louvain, epsilon, constant_recip, modularity and so on.
+ * @param offsets CSR data offset array.
+ * @param indices CSR data index array.
+ * @param weights CSR data weight array, support type float.
+ * @param colorAxi color result before ordered.
+ * @param colorInx color result of vertexes before louvain phase.
+ * @param cidPrev pingpang buffer of community id (cid) for all vertex
+ * @param cidSizePrev pingpang buffer of size of community for all cid
+ * @param totPrev pingpang buffer of tot of community for all cid
+ * @param cidCurr pingpang buffer of community id (cid) for all vertex
+ * @param cidSizeCurr pingpang buffer of size of community for all cid
+ * @param totCurr pingpang buffer of tot of community for all cid
+ * @param cidSizeUpdate buffer for update
+ * @param totUpdate buffer for update
+ * @param cWeight community weight of all cid
+ * @param offsetsDup duplicate of offset for fast pruning
+ * @param indicesDup duplicate of index for fast pruning
+ * @param flag pingpang buffer of pruning flag
+ * @param flagUpdate pingpang buffer of pruning flag
+ */
+inline void kernelLouvainTop(int64_t* config0,
+                             DWEIGHT* config1,
+                             ap_uint<CSRWIDTHS>* offsets,
+                             ap_uint<CSRWIDTHS>* indices,
+                             ap_uint<CSRWIDTHS>* weights,
+                             ap_uint<COLORWIDTHS>* colorAxi,
+                             ap_uint<COLORWIDTHS>* colorInx,
+                             ap_uint<DWIDTHS>* cidPrev,
+                             ap_uint<DWIDTHS>* cidSizePrev,
+                             ap_uint<DWIDTHS>* totPrev,
+                             ap_uint<DWIDTHS>* cidCurr,
+                             ap_uint<DWIDTHS>* cidSizeCurr,
+                             ap_uint<DWIDTHS>* totCurr,
+                             ap_uint<DWIDTHS>* cidSizeUpdate,
+                             ap_uint<DWIDTHS>* totUpdate,
+                             ap_uint<DWIDTHS>* cWeight,
+                             ap_uint<CSRWIDTHS>* offsetsDup,
+                             ap_uint<CSRWIDTHS>* indicesDup,
+                             ap_uint<8>* flag,
+                             ap_uint<8>* flagUpdate) {
+    // clang-format off
+    DWEIGHT constant_recip = 0;
+
+    // clang-format on
+    xf::graph::initComm<DWEIGHT, DWIDTHS, VERTEXS, EDGES>(config0[0], config0[3], offsets, weights, cidPrev, cidCurr,
+                                                          cidSizePrev, totPrev, constant_recip);
+
+    xf::graph::louvainWithColoring<DWEIGHT, DWIDTHS, CSRWIDTHS, COLORWIDTHS, VERTEXS, EDGES, DEGREES, COLORS>(
+        config0[0], config0[1], 0, config1[0], constant_recip, offsets, indices, weights, colorAxi, colorInx, cidPrev,
+        cidSizePrev, totPrev, cidCurr, cidSizeCurr, totCurr, cidSizeUpdate, totUpdate, cWeight, offsetsDup, indicesDup,
+        flag, flagUpdate, config0[2], config1[1]);
+
+    xf::graph::renumberClusters_ghost<DWIDTHS, VERTEXS>(config0[0], config0[4], config0[5], cidPrev, cidSizePrev);
 }
 
 } // graph

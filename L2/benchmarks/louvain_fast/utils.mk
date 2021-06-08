@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,18 +25,18 @@ DEBUG := no
 #'estimate' for estimate report generation
 #'system' for system report generation
 ifneq ($(REPORT), no)
-VPP_LDFLAGS += --report estimate
-VPP_LDFLAGS += --report system
+LDCLFLAGS += --report estimate
+LDCLFLAGS += --report system
 endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-VPP_LDFLAGS += --profile_kernel data:all:all:all
+LDCLFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
-VPP_LDFLAGS += --dk protocol:all:all:all
+LDCLFLAGS += --dk protocol:all:all:all
 endif
 
 #Check environment setup
@@ -76,15 +76,10 @@ CXX := g++
 ifeq ($(HOST_ARCH), x86)
 ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
 ifndef XILINX_VIVADO
-$(error [ERROR]: g++ version too old. Please use 5.0 or above)
+$(error [ERROR]: g++ version older. Please use 5.0 or above)
 else
 CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
-ifeq ($(LD_LIBRARY_PATH),)
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64
-else
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64:$(LD_LIBRARY_PATH)
-endif
-$(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
+$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
 endif
 endif
 else ifeq ($(HOST_ARCH), aarch64)
@@ -117,18 +112,10 @@ ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 endif
 
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
-ifeq ($(HOST_ARCH), x86)
 ifeq (,$(LD_LIBRARY_PATH))
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib
 else
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-else # aarch64
-ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(SYSROOT)/usr/lib 
-else
-LD_LIBRARY_PATH := $(SYSROOT)/usr/lib:$(LD_LIBRARY_PATH) 
-endif
 endif
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)

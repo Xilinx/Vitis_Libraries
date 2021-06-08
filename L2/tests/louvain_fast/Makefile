@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.4
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -20,8 +20,9 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -29,14 +30,22 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
-	$(ECHO) "      Command to run application in emulation or on board."
+	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to build xclbin application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<x86>"
+	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to build host application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
 # ##################### Setting up default value of TARGET ##########################
@@ -137,8 +146,7 @@ HOST_ARGS :=  -x $(BUILD_DIR)/kernel_louvain.xclbin -f 3 -c -o -m 10000 -prun $(
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --hls.jobs 8
-VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
+VPP_FLAGS += --jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u50_u280.cfg
 endif
@@ -167,7 +175,7 @@ BINARY_CONTAINER_kernel_louvain_OBJS += $(TEMP_DIR)/kernel_louvain.xo
 DATA_DIR += $(CUR_DIR)/data
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
 host: check_xrt check_sysroot $(EXE_FILE)
@@ -187,7 +195,7 @@ $(TEMP_DIR)/kernel_louvain.xo: $(XFLIB_DIR)/L2/tests/louvain_fast/kernel/kernel_
 
 $(BUILD_DIR)/kernel_louvain.xclbin: $(BINARY_CONTAINER_kernel_louvain_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_louvain $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_louvain) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_louvain $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_louvain) -o '$@' $(+)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################

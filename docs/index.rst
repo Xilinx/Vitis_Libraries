@@ -101,7 +101,7 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
    :caption: Benchmark 
    :maxdepth: 1 
 
-   results.rst
+   benchmark.rst
 
 Indices and tables
 ------------------

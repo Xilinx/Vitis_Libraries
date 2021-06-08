@@ -25,7 +25,7 @@
 #include <vector>
 #include <limits>
 #include <unordered_map>
-
+#include <algorithm>
 #include "generalSimilarityKernel.hpp"
 
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
