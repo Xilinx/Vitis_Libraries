@@ -10,13 +10,13 @@ The algorithms implemented by Vitis Graph Library include:
 - Centrality analysis: PageRank.
 - Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).
 - Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
-- Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
-- Search: Breadth First Search.
+- Community Detection: Louvain Modularity (New for 2021.1), Label Propagation and Triangle Count.
+- Search: Breadth First Search and 2-Hop Search (New for 2021.1).
 - Graph Format: Calculate Degree and Format Convert between CSR and CSC.
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/results.html).
+In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/benchmark.html).
 
 ## Software level API
 
