@@ -32,13 +32,26 @@ constexpr unsigned int makeUnTileShuffleOffsets(
     const unsigned tileSize = (M * N);
     const unsigned tilesPerVector = vectorSize / tileSize;
     const unsigned mIncr = N;
+    const unsigned nIncr = 1;
+    const unsigned tileIncr = tileSize;
+
+    const unsigned nLaneIncr = (leadingDim == ROW_MAJOR) ? 1 : M;
+    const unsigned tileLaneIncr =
+        (leadingDim == ROW_MAJOR)
+            ? N
+            : tileSize; // if rowMajor just continue N  across tiles, otherwise treat each tile indendantly.
+    const unsigned mLaneIncr = (leadingDim == ROW_MAJOR) ? N * tilesPerVector : 1; // if row major, we're trying to get
+                                                                                   // as many columns contiguous so rows
+                                                                                   // are furthest apart. if col_major,
+                                                                                   // rows are stored contiguously
+
     unsigned long int ret = 0;
     // rowMajor
     for (unsigned mIndex = 0; mIndex < M; ++mIndex) {
         for (unsigned tileIndex = 0; tileIndex < tilesPerVector; ++tileIndex) {
             for (unsigned nIndex = 0; nIndex < N; ++nIndex) {
-                const unsigned laneIndex = nIndex + tileIndex * N + mIndex * N * tilesPerVector;
-                const unsigned sampleIndex = nIndex + tileIndex * tileSize + mIndex * mIncr;
+                const unsigned laneIndex = nIndex * nLaneIncr + tileIndex * tileLaneIncr + mIndex * mLaneIncr;
+                const unsigned sampleIndex = nIndex * nIncr + tileIndex * tileSize + mIndex * mIncr;
 
                 if (laneIndex < 8 && !hiLo) {
                     ret += sampleIndex << (4 * (laneIndex % 8));
@@ -108,7 +121,8 @@ static void doUnTile(T_D* restrict inPtr, T_D* outPtr) {
     const unsigned outerLoopCount = (leadingDim == ROW_MAJOR) ? vectorsPerCol : vectorsPerRow;
     const unsigned innerLoopCount = (leadingDim == ROW_MAJOR) ? vectorsPerRow : vectorsPerCol;
 
-    const unsigned innerLoopIncr = (leadingDim == ROW_MAJOR) ? colsPerVector * M : rowsPerVector * N;
+    const unsigned innerLoopIncr = (leadingDim == ROW_MAJOR) ? colsPerVector * M : rowsPerVector * inCol;
+    const unsigned outerLoopIncr = (leadingDim == ROW_MAJOR) ? rowsPerVector * inCol : colsPerVector * M;
 
     const unsigned outerDimPerVector = (leadingDim == ROW_MAJOR) ? rowsPerVector : colsPerVector;
     const unsigned innerDimPerVector = (leadingDim == ROW_MAJOR) ? colsPerVector : rowsPerVector;
@@ -128,8 +142,8 @@ static void doUnTile(T_D* restrict inPtr, T_D* outPtr) {
                                               ? (rowsPerVector < M)
                                                     ? (((outerDimIdx * rowsPerVector) % M) * N) +
                                                           (((outerDimIdx * rowsPerVector) / M) * (inCol * M))
-                                                    : outerDimIdx * rowsPerVector * inCol
-                                              : outerDimIdx * colsPerVector;
+                                                    : outerDimIdx * outerLoopIncr
+                                              : outerDimIdx * outerLoopIncr;
             for (unsigned innerDimIdx = 0; innerDimIdx < innerLoopCount; ++innerDimIdx)
                 chess_loop_count((innerLoopCount)) chess_prepare_for_pipelining {
                     const unsigned ptrInnerBase = innerDimIdx * innerLoopIncr;
@@ -151,9 +165,13 @@ static void doUnTile(T_D* restrict inPtr, T_D* outPtr) {
                                 (loadSize <= N * M)
                                     ?
                                     // potenially could do something different for loadSize<N
+                                    // previously was inCol * M for outerTile increment - changed to go to the next tile
+                                    // out of simplicity.
                                     loadSize * (loadIdx % ((M * N) / loadSize)) +
-                                        (loadIdx / ((M * N) / loadSize)) * (inCol * M)
-                                    : loadSize * loadIdx; // unlikely
+                                        (loadIdx / ((M * N) / loadSize)) * (M * N)
+                                    : // within one tile, just load the whole tile. outwith that tile, move to the next
+                                      // tile. - This could be simplied to just loadSize * idx
+                                    loadSize * loadIdx; // unlikely
 
                         const unsigned loadPtr = innerLoadPtr + ptrInnerBase + ptrOuterBase;
 

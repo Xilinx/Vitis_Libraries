@@ -326,15 +326,15 @@ class fir_sr_asym_graph : public graph {
       * @cond NOCOMMENTS
       */
     kernel m_firKernels[TP_CASC_LEN];
-    // access function to return pointer to array of cascaded kernels for internal use
-    //    kernel (&getKernels())[TP_CASC_LEN] {return m_firKernels;}
-
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-
     /**
       * @endcond
       */
+
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+     **/
+
+    kernel* getKernels() { return m_firKernels; };
 
     /**
      * @brief This is the constructor function for the Asymmetric Single Rate FIR graph.

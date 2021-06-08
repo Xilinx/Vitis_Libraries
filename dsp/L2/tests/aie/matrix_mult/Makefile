@@ -95,6 +95,7 @@ PERL ?= perl
 SDCARD := sd_card
 EMU_DIR := $(SDCARD)/data/emulation
 endif
+include config.mk
 # Setting customized_params in aiecompiler
 TAG ?= UUT
 UUT_KERNEL ?= matrix_mult
@@ -175,6 +176,19 @@ UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PRE
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
+HOST_SRCS += $(CUR_DIR)//host.cpp
+HOST_SRCS += $(CUR_DIR)//Work/ps/c_rts/aie_control_xrt.cpp
+
+CXXFLAGS += -D__PS_ENABLE_AIE__
+CXXFLAGS += -I$(SYSROOT)/usr/include/xrt/
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/aie
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/aie/common/inc
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/aie
+CXXFLAGS += -I$(XFLIB_DIR)/L1/tests/aie/inc
+CXXFLAGS += -I$(XFLIB_DIR)/L1/tests/aie/src
+CXXFLAGS += -I$(CUR_DIR)/
+LDFLAGS += -L$(SYSROOT)/usr/lib/
+LDFLAGS += --sysroot=$(SYSROOT)
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XILINX_VITIS_AIETOOLS)/include
 CXXFLAGS += -Wno-int-to-pointer-cast
@@ -211,7 +225,7 @@ endif
 
 # ######################### Host compiler global settings ############################
 CXXFLAGS += -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-CXXFLAGS += -fmessage-length=0 
+CXXFLAGS += -fmessage-length=0 --sysroot=$(SYSROOT)
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 LDFLAGS += -L$(SYSROOT)/usr/lib -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.o $(LDXRT) -lxilinxopencl -lpthread -lc -lrt -ldl -lcrypt -lstdc++ -lxrt++ -lxrt_coreutil
 
@@ -224,7 +238,8 @@ else
 K_IMAGE := $(EDGE_COMMON_SW)/Image
 endif
 
-EXE_NAME := EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+EXE_NAME := host.elf
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -232,24 +247,33 @@ VPP_FLAGS += --hls.jobs 8
 VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 
+VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include/hw
+VPP_FLAGS += -I$(CUR_DIR)//kernel
+VPP_FLAGS += -I$(CUR_DIR)/
 
+mm2s_VPP_FLAGS +=  
+bmm2s_VPP_FLAGS +=  
+s2mm_VPP_FLAGS +=  
 
 
 # Kernel args
 
 # ############################ Declaring Binary Containers ##########################
+
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.xclbin
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/mm2s.xo
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/bmm2s.xo
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/s2mm.xo
 AIE_CONTAINERS := ./libadf.a
 AIE_CONTAINER_OBJS := $(AIE_CONTAINERS)
 
 # ######################### Setting Targets of Makefile ################################
 .PHONY: pre_build
 pre_build:
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE_A) $(P_INPUT_WINDOW_VSIZE_A) $(NITER_UUT) 1 $(STIM_TYPE_A)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE_B) $(P_INPUT_WINDOW_VSIZE_B) $(NITER_UUT) 2 $(STIM_TYPE_B)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(P_INPUT_WINDOW_VSIZE_A) $(NITER_UUT) 1 $(STIM_TYPE_A)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(P_INPUT_WINDOW_VSIZE_B) $(NITER_UUT) 2 $(STIM_TYPE_B)
-	TARGET=x86sim UUT_KERNEL=matrix_mult_ref UUT_SIM_FILE=./data/ref_output.txt make x86sim TARGET=x86sim TAG=REF
-	make cleanall
+	make -f $(CUR_DIR)/golden.mk GOLDEN_CUR_DIR=$(CUR_DIR) GOLDEN_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE_A=$(INPUT_FILE_A) P_INPUT_WINDOW_VSIZE_A=$(P_INPUT_WINDOW_VSIZE_A) STIM_TYPE_A=$(STIM_TYPE_A) INPUT_FILE_B=$(INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_B=$(P_INPUT_WINDOW_VSIZE_B) STIM_TYPE_B=$(STIM_TYPE_B) NITER_UUT=$(NITER_UUT) XF$(XFLIB_DIR)=$(XF$(XFLIB_DIR)) LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) LOC_INPUT_FILE_B=$(LOC_INPUT_FILE_B)
+	make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/../utils/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
+DATA_DIR += $(CUR_DIR)//data/
 
 .PHONY: all clean cleanall docs emconfig
 ifeq ($(HOST_ARCH), x86)
@@ -283,11 +307,27 @@ x86sim: $(AIE_CONTAINERS)
 
 # ################## Setting Rules for AIE (Building Kernels) ####################
 
-$(AIE_CONTAINERS): $(XFLIB_DIR)/L2/tests/aie/matrix_mult/test.cpp
+$(AIE_CONTAINERS): $(CUR_DIR)//test.cpp
 	$(ECHO) "Compiling: libsdf.a"
 	mkdir -p $(BUILD_DIR)
 	$(AIECXX) $(libsdf.a_AIE_CXXFLAGS) $(AIE_CXXFLAGS) $^
+$(TEMP_DIR)/mm2s.xo: $(CUR_DIR)/kernel/mm2s.cpp
+	$(ECHO) "Compiling Kernel: mm2s"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(mm2s_VPP_FLAGS) $(VPP_FLAGS) -k mm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
+$(TEMP_DIR)/bmm2s.xo: $(CUR_DIR)/kernel/bmm2s.cpp
+	$(ECHO) "Compiling Kernel: bmm2s"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(bmm2s_VPP_FLAGS) $(VPP_FLAGS) -k bmm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
+$(TEMP_DIR)/s2mm.xo: $(CUR_DIR)/kernel/s2mm.cpp
+	$(ECHO) "Compiling Kernel: s2mm"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(s2mm_VPP_FLAGS) $(VPP_FLAGS) -k s2mm -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 
+
+$(BUILD_DIR)/kernel_pkg.xclbin: $(BINARY_CONTAINER_kernel_OBJS) $(AIE_CONTAINER_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS) -o '$@' $^
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
@@ -354,7 +394,8 @@ endif
 endif
 
 # ######################### Preparing sdcard folder ##############################
-SD_FILES := run_script.sh
+EMBEDDED_EXEC_SCRIPT = run_script.sh
+SD_FILES += $(EMBEDDED_EXEC_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += emconfig.json
 SD_FILES += $(DATA_FILE)
@@ -374,7 +415,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
@@ -384,7 +427,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> run_script.sh
 	@echo 'exit $$return_code' >> run_script.sh
 	chmod a+rx run_script.sh
-	$(VPP) -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES)  --package.out_dir $(EMBEDDED_PACKAGE_OUT) --package.rootfs $(EDGE_COMMON_SW)/rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) --package.defer_aie_run --package.out_dir $(EMBEDDED_PACKAGE_OUT) --package.rootfs $(EDGE_COMMON_SW)/rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 

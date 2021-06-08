@@ -1,12 +1,12 @@
-.. 
-   Copyright 2019 Xilinx, Inc.
-  
+..
+   Copyright 2021 Xilinx, Inc.
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,12 +22,26 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-2020.2
-------
+***********************
+   2021.1
+***********************
+
+The 2021.1 release introduces the AI Engine DSP library, which contains DSP building blocks in the form of AI Engine graphs. These are:
+- FFT,
+- FIR,
+- Matrix Multiply,
+- I/O Widgets.
+
+***********************
+   2020.2
+***********************
 
 Revised the APIs to fully support Vitis HLS.
 
-2020.1
-------
 
-The 1.0 release introduces L1 HLS primitives for Discrete Fourier Transform for 1-D and 2-D input data. 
+
+***********************
+2020.1
+***********************
+
+The 1.0 release introduces L1 HLS primitives for Discrete Fourier Transform for 1-D and 2-D input data.

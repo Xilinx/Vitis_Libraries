@@ -633,8 +633,8 @@ change the setting of environment variable **TA_PATH** to point to the installat
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 The example discussed above is also provided as an example and available at the following path : ``REPO_PATH/dsp/L1/examples/1Dfix_impluse`` it can be simulated, synthesized or co-simulated as follows:
@@ -750,8 +750,8 @@ change the setting of environment variable **TA_PATH** to point to the installat
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 The example discussed above is also provided as an example and available at the following path : ``REPO_PATH/dsp/L1/examples/1Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
@@ -768,8 +768,8 @@ To launch an individual test first it is required to setup environment for lanch
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the environment settings are done an individual test can be launched by going to test folder (any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/1dfft`` that has a Makefile is a test) and running the make command :
@@ -783,8 +783,8 @@ Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the te
 .. code-block:: bash
 
    export TA_PATH="LOCAL VITIS INSTALL PATH"	
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the install paths are setup, launch the bash script named ``run_all_cosim_tests.sh`` to run all the tests.

@@ -218,6 +218,14 @@ class create_casc_kernel<1,
  *         frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512. Any value below 4 or
  *         greater than log2(TP_POINT_SIZE) is considered illegal. When this occurs the top byte of the
  *         output header will be set to 1 and the output samples will be set to 0 for a frame of TP_POINT_SIZE
+ * @tparam TP_WINDOW_VSIZE is an unsigned intered which describes the number of samples in the input window.
+ *         By default, TP_WINDOW_SIZE is set ot match TP_POINT_SIZE.
+ *         TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case
+ *         multiple FFT iterations will be performed on a given input window, resulting in multiple
+ *         iterations of output samples, reducing the numer of times the kernel needs to be triggered to
+ *         process a given number of input data samples.
+ *         As a result, the overheads inferred during kernel triggering are reduced and overall performance
+ *         is increased.
   **/
 template <typename TT_DATA,
           typename TT_TWIDDLE,

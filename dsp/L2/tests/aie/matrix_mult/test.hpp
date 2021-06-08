@@ -33,8 +33,13 @@ class test_graph : public graph {
    private:
    public:
 #ifdef USING_UUT
+#ifdef USING_PL_MOVER
+    port<input> inA[1];
+    port<input> inB[1];
+#else
     port<input> inA[P_CASC_LEN];
     port<input> inB[P_CASC_LEN];
+#endif
 #else
     port<input> inA;
     port<input> inB;
@@ -59,6 +64,7 @@ class test_graph : public graph {
         printf(QUOTE(T_DATA_A) QUOTE(T_DATA_B));
         printf("\n");
         printf("\n");
+
         namespace dsplib = xf::dsp::aie;
 
         dsplib::blas::matrix_mult::UUT_GRAPH<T_DATA_A, T_DATA_B, P_DIM_A, P_DIM_AB, P_DIM_B, P_SHIFT, P_ROUND_MODE,
@@ -71,15 +77,19 @@ class test_graph : public graph {
 // Size of window in Bytes.
 // broadcast
 #ifdef USING_UUT
+#ifdef USING_PL_MOVER
+        connect<>(inA[0], mmultGraph.inA[0]);
+        connect<>(inB[0], mmultGraph.inB[0]);
+#else
         for (int i = 0; i < P_CASC_LEN; i++) {
             connect<>(inA[i], mmultGraph.inA[i]);
             connect<>(inB[i], mmultGraph.inB[i]);
         }
+#endif
 #else
         connect<>(inA, mmultGraph.inA);
         connect<>(inB, mmultGraph.inB);
 #endif
-
         connect<>(mmultGraph.out, out);
 
         printf("========================\n");

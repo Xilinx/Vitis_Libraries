@@ -145,7 +145,7 @@ class kernelFilterClass {
         m_kVOutSize; // loop length, given that <m_kVOutSize> samples are output per iteration of loop
     unsigned int m_kDecimateOffsets, m_kDecimateOffsetsHi; // hi is for int16/int16 only.
 
-    // Constants for coeff reload
+    // Coefficient Load Size - number of samples in 256-bits
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     TT_COEFF chess_storage(% chess_alignof(v8cint16))
         m_oldInTaps[CEIL(TP_FIR_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
@@ -163,7 +163,7 @@ class kernelFilterClass {
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
     TT_COEFF chess_storage(% chess_alignof(v8cint16))
-        m_internalTaps[CEIL(TP_FIR_RANGE_LEN, kMaxColumns)]; // Filter taps/coefficients
+        m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)]; // Filter taps/coefficients
 
     // Filter implementation functions
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
@@ -177,11 +177,11 @@ class kernelFilterClass {
 
     // Constructor for reloadable coefficient designs
     // Calculates offsets required for coefficient reloads and m_kDecimateOffsets
-    kernelFilterClass() : m_oldInTaps{} { setDecimateOffsets(); }
+    kernelFilterClass() : m_oldInTaps{}, m_internalTaps{} { setDecimateOffsets(); }
 
     // Constructor for static coefficient designs
     // Calculates m_kDecimateOffsets and writes coefficients to m_internalTaps
-    kernelFilterClass(const TT_COEFF (&taps)[TP_FIR_LEN]) {
+    kernelFilterClass(const TT_COEFF (&taps)[TP_FIR_LEN]) : m_internalTaps{} {
         setDecimateOffsets();
         // Loads taps/coefficients
         firReload(taps);

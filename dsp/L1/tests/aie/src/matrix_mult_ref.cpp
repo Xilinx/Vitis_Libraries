@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "matrix_mult_ref.hpp"
 #include "fir_ref_utils.hpp"
 
@@ -122,7 +123,9 @@ void matrix_mult_ref<TT_DATA_A,
                 roundAcc(TP_RND, shift, accum);
                 saturateAcc(accum);
                 accum_srs = castAcc(accum);
-                window_writeincr((output_window<TT_OUT>*)outWindow, accum_srs);
+                // window_writeincr((output_window<TT_OUT> *)outWindow, accum_srs) ;
+                window_write((output_window<TT_OUT>*)outWindow, accum_srs);
+                window_incr((output_window<TT_OUT>*)outWindow, (TP_DIM_OUT_LEADING == ROW_MAJOR) ? 1 : TP_DIM_A);
                 // Revert data pointer by the amount we've incremented
                 window_decr(inWindowB, (matBPostABDimDecr));
                 // revert A back to start of row
@@ -131,6 +134,9 @@ void matrix_mult_ref<TT_DATA_A,
             // Point A one row forward
             window_incr(inWindowA, matAPostBDimIncr);
             window_incr(inWindowB, matBPostBDimIncr);
+            if (TP_DIM_OUT_LEADING == COL_MAJOR) {
+                window_incr((output_window<TT_OUT>*)outWindow, (-(int)TP_DIM_A * TP_DIM_B) + 1);
+            }
         }
         if (num_matrix_A < num_matrix_B && num_matrix_A == 1) {
             // Fixed_A - Move it back to the start
