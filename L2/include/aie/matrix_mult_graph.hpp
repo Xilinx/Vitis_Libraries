@@ -153,10 +153,15 @@ class matrix_mult_graph : public graph {
     kernel tilerA[TP_CASC_LEN];
     kernel tilerB[TP_CASC_LEN];
     // Access function
-    kernel* getKernels() { return m_MatmultKernels; };
     /**
       * @endcond
       */
+
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+     **/
+
+    kernel* getKernels() { return m_MatmultKernels; };
 
     // Empty type for a fallback to avoid redundant instantiations from the compiler in x86
     struct no_kernel {};

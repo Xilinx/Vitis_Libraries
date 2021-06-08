@@ -166,15 +166,16 @@ class kernelFilterClass {
                                                              // one load on zig and one on zag, i.e. =2 for 1024bit
                                                              // buffers, =1 for 512 bit buffers.
 
+    // Coefficient Load Size - number of samples in 256-bits
+    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
+
     // Lower polyphase taps internal storage. Initialised to zeros.
     TT_COEFF chess_storage(% chess_alignof(v16int16))
-        m_internalTapsFSA[CEIL((TP_FIR_LEN + 1) / 4 + 1, kMaxColumns)]; // Filter taps/coefficients
+        m_internalTapsFSA[CEIL((TP_FIR_LEN + 1) / 4 + 1, m_kCoeffLoadSize)]; // Filter taps/coefficients
     TT_COEFF chess_storage(% chess_alignof(v16int16)) m_phaseTwoTap[kMaxColumns] = {
         nullElem<TT_COEFF>()}; // note, the array is initializeed, causing extra instructions during initialiation.
     int16 m_ctShift;           // Upshift Center tap
 
-    // Constants for coefficient reload
-    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_oldInTaps[CEIL(
         (TP_FIR_LEN + 1) / 4 + 1, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool m_coeffnEq;                                  // Are coefficients sets equal?
@@ -197,9 +198,9 @@ class kernelFilterClass {
     unsigned int get_m_kArch() { return m_kArch; };
 
     // Constructors
-    kernelFilterClass() : m_oldInTaps{} {}
+    kernelFilterClass() : m_oldInTaps{}, m_internalTapsFSA{} {}
 
-    kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) { firReload(taps); };
+    kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) : m_internalTapsFSA{} { firReload(taps); };
 
     void firReload(const TT_COEFF* taps) {
         TT_COEFF* tapsPtr = (TT_COEFF*)taps;

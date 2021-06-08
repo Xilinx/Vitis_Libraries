@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx 2D FFT Fixed Reference Design", 
     "description": "", 
     "flow": "vitis", 

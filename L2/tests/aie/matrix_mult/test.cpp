@@ -6,6 +6,16 @@
 xf::dsp::aie::testcase::test_graph matMult;
 
 #ifdef USING_UUT
+#ifdef USING_PL_MOVER
+//need explicit port name, so we can connect in hw.
+PLIO* in1 = new PLIO("DataIn1", adf::plio_32_bits, QUOTE(INPUT_FILE_A));
+PLIO* in2 = new PLIO("DataIn2", adf::plio_32_bits, QUOTE(INPUT_FILE_B));
+PLIO* out1 = new PLIO("DataOut1", adf::plio_32_bits, QUOTE(OUTPUT_FILE));
+
+simulation::platform<2, 1> platform(in1, in2, out1);
+connect<> net0A(platform.src[0], matMult.inA[0]);
+connect<> net0B(platform.src[1], matMult.inB[0]);
+#else
 const unsigned numInputs = P_CASC_LEN * 2;
 // simulation::platform<numInputs,1> platform(INPUT_FILES_A , "data/inputB_0.txt", "data/inputB_1.txt",
 // QUOTE(OUTPUT_FILE));
@@ -55,15 +65,17 @@ std::array<connect<>*, numInputs> net = [] {
     }
     return ret;
 }();
+#endif
+
 #else
 simulation::platform<2, 1> platform(QUOTE(INPUT_FILE_A), QUOTE(INPUT_FILE_B), QUOTE(OUTPUT_FILE));
-
 connect<> net0A(platform.src[0], matMult.inA);
 connect<> net0B(platform.src[1], matMult.inB);
 #endif
 
 connect<> outNet(matMult.out, platform.sink[0]);
 
+#if defined(__AIESIM__) || defined(__X86SIM__)
 int main(void) {
     printf("\n");
     // printf("%s %s\n", INPUT_FILES_A );
@@ -92,6 +104,7 @@ int main(void) {
 
     return 0;
 }
+#endif
 
 /*  (c) Copyright 2014 - 2019 Xilinx, Inc. All rights reserved.
 

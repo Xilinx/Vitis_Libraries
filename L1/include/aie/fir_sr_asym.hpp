@@ -133,11 +133,14 @@ class kernelFilterClass {
     static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0,
                   "ERROR: TP_INPUT_WINDOW_VSIZE must be an integer multiple of the number of lanes for this data type");
 
+    // Coefficient Load Size - number of samples in 256-bits
+    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
+
     // The coefficients array must include zero padding up to a multiple of the number of columns
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    TT_COEFF chess_storage(% chess_alignof(v16int16)) m_internalTaps[CEIL(TP_FIR_RANGE_LEN, kMaxColumns)];
+    TT_COEFF chess_storage(% chess_alignof(v16int16)) m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)];
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     // Implementations
@@ -145,8 +148,6 @@ class kernelFilterClass {
     void filterIncLoads(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     void filterZigZag(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
-    // Constants for coeff reload
-    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     TT_COEFF chess_storage(% chess_alignof(v8cint16))
         m_oldInTaps[CEIL(TP_FIR_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool m_coeffnEq;                                     // Are coefficients sets equal?
@@ -156,13 +157,13 @@ class kernelFilterClass {
     unsigned int get_m_kArch() { return m_kArch; };
 
     // Constructor
-    kernelFilterClass(const TT_COEFF (&taps)[TP_FIR_LEN]) {
+    kernelFilterClass(const TT_COEFF (&taps)[TP_FIR_LEN]) : m_internalTaps{} {
         // Loads taps/coefficients
         firReload(taps);
     }
 
     // Constructors
-    kernelFilterClass() : m_oldInTaps{} {}
+    kernelFilterClass() : m_oldInTaps{}, m_internalTaps{} {}
 
     void firReload(const TT_COEFF* taps) {
         TT_COEFF* tapsPtr = (TT_COEFF*)taps;

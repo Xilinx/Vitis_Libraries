@@ -167,7 +167,7 @@ class kernelFilterClass {
     static_assert(sizeof(TT_DATA) * m_kLanes <= m_kZbuffSize,
                   "ERROR: Invalid assumption in archtecture. Can't fit enough data into selected (Z) buffer.");
 
-    // Constants for coeff reload
+    // Coefficient Load Size - number of samples in 256-bits
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     TT_COEFF chess_storage(% chess_alignof(v8cint16))
         m_oldInTaps[CEIL(TP_FIR_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding

@@ -2,7 +2,7 @@
 #define _DSPLIB_WIDGET_API_CAST_GRAPH_HPP_
 /*
 The file captures the definition of the 'L2' graph level class for
-the Single Rate Asymmetrical FIR library element.
+the API Cast Widget library element.
 */
 /**
  * @file widget_api_cast_graph.hpp
@@ -26,13 +26,21 @@ using namespace adf;
 // widget_api_cast_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @brief widget_api_cast is a Asymmetric Single Rate FIR filter
+ * @brief widget_api_cast is a design to change the interface between connected components.
+ *        This component is able to change the stream interface to window interface and vice-versa.
+ *        In addition, multiple input stream ports may be defined, as well as multiple copies of the window output.
  *
- * These are the templates to configure the Asymmetric Single Rate FIR class.
+ * These are the templates to configure the Widget API Cast class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the function. This is a typename and must be one
  *         of the following:
  *         int16, cint16, int32, cint32, float, cfloat.
+ * @tparam TP_IN_API defines the input interface type.
+ *         0 = Window, 1 = Stream
+ * @tparam TP_OUT_API defines the output interface type.
+ *         0 = Window, 1 = Stream
+ * @tparam TP_NUM_INPUTS describes the number of input stream interfaces to be processed.
+ *         When 2 inputs are configured, whe data will be read sequentially from each.
  * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API
  *         used if either input or output is a window.
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
@@ -84,11 +92,16 @@ class widget_api_cast_graph : public graph {
     kernel m_kernel;
 
     // Access function for AIE synthesizer
-    kernel* getKernels() { return &m_kernel; };
 
     /**
       * @endcond
       */
+
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+     **/
+
+    kernel* getKernels() { return &m_kernel; };
 
     /**
      * @brief This is the constructor function for the Widget API Cast graph.

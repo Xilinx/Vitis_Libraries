@@ -1,0 +1,185 @@
+*******************
+Using the Examples
+*******************
+
+=================================================
+Compiling and Simulating Using the Example Design
+=================================================
+
+TODO: Add examples to xf_dsp repository
+
+A Makefile is included with the example design. It is located inside the `L2/examples/fir_129t_sym/` directory. Use the following steps to compile, simulate and verify the example design using the Makefile.
+
+1. Compile the example design.
+
+   .. code-block::
+
+        >> make compile
+
+2. Simulate the example design.
+
+   .. code-block::
+
+        >> make sim
+
+   This generates the file `output.txt` in the `aiesimulator_output/data` directory.
+
+3. To compare the output results with the golden reference, extract samples from output.txt, then perform a diff with respect to the reference using the following command.
+
+   .. code-block::
+
+        >> make check_op
+
+4. Display the status summary with.
+
+   .. code-block::
+
+        >> make get_status
+
+   This populates the status.txt file. Review this file to get the status.
+
+   .. note::
+
+        All of the preceding steps are performed in sequence using the following command:
+
+        .. code-block::
+
+            >> make all
+
+==================================================================
+Using the Vitis Unified Software Platform to Run an Example Design
+==================================================================
+
+This section briefly describes how to create, build, and simulate a library element example using the Xilinx Vitis™ integrated design environment (IDE).
+
+Steps for Creating the Example Project in the Vitis IDE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+DSPLib examples can contain a pre-packaged Vitis project (in compressed format) in the `L2/examples/<example_name>/vitis` folder. These can be imported into the Vitis IDE in a few steps. The following example shows how to import the `Fir129Example_system` project.
+
+1. Set the environment variable DSPLIB_ROOT. This must be set to the path to your directory where DSPLib is installed.
+
+   .. code-block::
+
+        setenv DSPLIB_ROOT <your-install-directory/dsplib>
+
+2. Type vitis to launch the Vitis IDE, and create a new workspace.
+
+3. Select **File → Import → Vitis project** exported zip file.
+
+4. Click **Next** and browse to `L2/examples/fir_129t_sym/vitis` and select the ZIP file.
+
+5. Set the correct path to the VCK190 platform file directory.
+
+   a. In the Vitis IDE, expand the **Fir129Example [ aiengine ]** project and double-click the `Fir129Example.prj` file.
+
+   b. On the **Platform Invalid** prompt, select **Add platform to repository**.
+
+      |image7|
+
+   c. Navigate to the installed xck190 platform file (.xpfm).
+
+      .. note:: The VCK190 base platform must be downloaded from the Xilinx lounge.
+
+6. Set the Active configuration to **Emulation-AIE** for the design.
+
+   a. Right-click the **Fir129Example [ aiengine ]** and select **C/C++ Build Settings → Manage Configurations → Select Emulation-AIE → Set Active**.
+
+      |image8|
+
+   b. Click **OK**.
+
+   c. Select **Apply and Close**.
+
+7. Build the project by right-clicking the **Fir129Example [ aiengine]** project and select **Build Project**.
+
+8. Perform simulation after the project is built by right-clicking the **Fir129Example [ aiengine ]** project and select **Run As → 1. Launch AIE Emulator**
+
+   |image9|
+
+9. After simulation is complete, navigate to **Fir129Example [ aiengine] → Emulation-AIE → aiesimulator_output → data** and compare output.txt with the fir_out_ref.txt file in the data folder.
+
+==============
+Other Examples
+==============
+
+There are a collection of other examples available in the `L2/examples` directory. Each has a readme file, explaining what it is and details the step-by-step instructions.
+
+====================
+Example Graph Coding
+====================
+
+The following example can be used as a template for graph coding:
+
+test.h
+~~~~~~
+
+.. code-block::
+
+        #include <adf.h>
+        #include "fir_sr_sym_graph.hpp"
+
+        #define FIR129_LENGTH 129
+        #define FIR129_SHIFT 15
+        #define FIR129_ROUND_MODE 0
+        #define FIR129_INPUT_SAMPLES 256
+
+        using namespace adf ;
+        namespace testcase {
+            class test_kernel: public graph {
+                private:
+                // FIR coefficients
+                std::vector<int16> m_taps = std::vector<int16>{-1, -3, 3, -1, -3, 6, -1, -7, 9, -1, -12, 14, 1, -20, 19, 5, -31, 26, 12, -45, 32, 23, -63, 37, 40, -86, 40, 64, -113, 39, 96, -145, 33, 139, -180, 17, 195, -218, -9, 266, -258, -53, 357, -299, -118, 472, -339, -215, 620, -376, -360, 822,
+                -409, -585, 1118, -437, -973, 1625, -458, -1801, 2810, -470, -5012, 10783,
+                25067};
+                //FIR Graph class
+                xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph<cint16, int16,
+                FIR129_LENGTH, FIR129_SHIFT, FIR129_ROUND_MODE, FIR129_INPUT_SAMPLES>
+                firGraph;
+                public:
+                port<input> in;
+                port<output> out;
+                // Constructor - with FIR graph class initialization
+                test_kernel():firGraph(m_taps) {
+                    // Make connections
+                    // Size of window in Bytes.
+                    // Margin gets automatically added within the FIR graph class.
+                    // Margin equals to FIR length rounded up to nearest multiple of 32
+                    Bytes.
+                    connect<>(in, firGraph.in);
+                    connect<>(firGraph.out, out);
+                };
+            };
+        };
+
+.. code-block::
+
+        #include "test.h"
+
+        simulation::platform<1,1> platform("data/input.txt", "data/output.txt");
+        testcase::test_kernel filter ;
+
+        connect<> net0(platform.src[0], filter.in);
+        connect<> net1(filter.out, platform.sink[0]);
+
+        int main(void) {
+            filter.init() ;
+            filter.run() ;
+            filter.end() ;
+            return 0 ;
+        }
+
+
+.. |image1| image:: ./media/image1.png
+.. |image2| image:: ./media/image2.png
+.. |image3| image:: ./media/image4.png
+.. |image4| image:: ./media/image2.png
+.. |image5| image:: ./media/image2.png
+.. |image6| image:: ./media/image2.png
+.. |image7| image:: ./media/image5.jpeg
+.. |image8| image:: ./media/image6.jpeg
+.. |image9| image:: ./media/image7.jpeg
+.. |image10| image:: ./media/image2.png
+.. |image11| image:: ./media/image2.png
+.. |image12| image:: ./media/image2.png
+.. |image13| image:: ./media/image2.png
