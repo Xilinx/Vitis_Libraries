@@ -28,3 +28,5 @@ The profiling in this documentation is based on U250, and the tool version is Vi
    internals/SGD.rst
    internals/svm.rst
    internals/reEngine.rst
+   internals/geoip.rst
+   internals/twoGramPredicate.rst

@@ -26,7 +26,7 @@
 
 #include <ap_int.h>
 #include <hls_stream.h>
-#include <hls_math.h>
+#include "xf_data_analytics/common/math_helper.hpp"
 
 namespace xf {
 namespace data_analytics {
@@ -667,7 +667,7 @@ void trainWriteOut(const int num_of_class,
                 double lh = numer / denom;
 
                 f_cast<double> cc1;
-                cc1.f = hls::log(lh);
+                cc1.f = xf::data_analytics::internal::m::log(lh);
                 o_d0_strm[p].write(cc1.i);
             }
         }
@@ -681,7 +681,7 @@ void trainWriteOut(const int num_of_class,
         double prior = (double)Ny(95, 64) / (double)term_sum(63, 32);
 
         f_cast<double> cc1;
-        cc1.f = hls::log(prior);
+        cc1.f = xf::data_analytics::internal::m::log(prior);
         tmp[c % PU] = cc1.i;
 
         if (c % PU == PU - 1) {
@@ -901,7 +901,7 @@ void treeCluster(const int num_of_class,
     }
 #else
     ap_uint<64> tmp_vector[GRP_NM][3][1024 / GRP_NM];
-#pragma HLS RESOURCE variable = tmp_vector core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = tmp_vector type = ram_2p impl = lutram
 #pragma HLS array_partition variable = tmp_vector complete dim = 1
 #pragma HLS array_partition variable = tmp_vector complete dim = 2
 
@@ -1408,9 +1408,9 @@ void naiveBayesTrain(const int num_of_class,
 
     ap_uint<72> lh_vector[PU][DEPTH_URAM];
     ap_uint<96> prior_vector[PU + 1][DEPTH_BRAM];
-#pragma HLS RESOURCE variable = lh_vector core = RAM_2P_URAM
+#pragma HLS bind_storage variable = lh_vector type = ram_2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = lh_vector complete dim = 1
-#pragma HLS RESOURCE variable = prior_vector core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = prior_vector type = ram_2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = prior_vector complete dim = 1
 
 #endif
@@ -1478,14 +1478,14 @@ void naiveBayesPredict(const int num_of_class,
 #else
 
     ap_uint<72> lh_vector[GRP_NM][256 / GRP_NM][4096];
-#pragma HLS RESOURCE variable = lh_vector core = RAM_2P_URAM
+#pragma HLS bind_storage variable = lh_vector type = ram_2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = lh_vector complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = lh_vector complete dim = 2
     ap_uint<64> prior_vector[GRP_NM][1024 / GRP_NM];
-#pragma HLS RESOURCE variable = prior_vector core = RAM_1P_LUTRAM
+#pragma HLS bind_storage variable = prior_vector type = ram_1p impl = lutram
 #pragma HLS ARRAY_PARTITION variable = prior_vector complete dim = 1
     ap_uint<64> result_vector[GRP_NM][1024 / GRP_NM];
-#pragma HLS RESOURCE variable = result_vector core = RAM_2P_LUTRAM
+#pragma HLS bind_storage variable = result_vector type = ram_2p impl = lutram
 #pragma HLS array_partition variable = result_vector complete dim = 1
 
 #endif

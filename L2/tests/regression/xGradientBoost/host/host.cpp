@@ -21,6 +21,7 @@
 #include <xcl2.hpp>
 #endif
 #include "host.hpp"
+#include "xf_utils_sw/logger.hpp"
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
 #define XCL_BANK0 XCL_BANK(0)
@@ -43,6 +44,7 @@
 int main(int argc, const char* argv[]) {
     //
     std::cout << "\n--------- Decision Tree Test ---------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 
 #ifndef HLS_TEST
     // cmd arg parser.
@@ -173,25 +175,30 @@ int main(int argc, const char* argv[]) {
                                data);
 
 #ifndef HLS_TEST
+    cl_int cl_err;
     // Get CL devices.
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
     cl::CommandQueue q(context, device,
                        // CL_QUEUE_PROFILING_ENABLE);
-                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                       CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     std::vector<cl::Device> devices_h;
     devices_h.push_back(device);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     cl::Kernel kernel;
-    kernel = cl::Kernel(program, "DecisionTree");
+    kernel = cl::Kernel(program, "DecisionTree", &cl_err);
+    logger.logCreateKernel(cl_err);
 
 #ifdef USE_DDR
     cl_mem_ext_ptr_t mext_data = {XCL_BANK0, data, 0};
@@ -278,6 +285,8 @@ int main(int argc, const char* argv[]) {
 
     // check tree by computing precision and recall
     int check = precisonAndRecall(testsets, test_num, features_num, nodes);
+    check ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+          : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
 
     return check;
 }

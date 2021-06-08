@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.3
+# makefile-generator v1.0.4
 #
 
 # ####################################### Help Section #####################################
@@ -20,9 +20,8 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -30,22 +29,14 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "      Command to run application in emulation or on board."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make host HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
 # ##################### Setting up default value of TARGET ##########################
@@ -66,7 +57,9 @@ endif
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
 ifneq ($(findstring u50, $(DEVICE)), u50)
+ifneq ($(findstring aws-vu9p-f1, $(DEVICE)), aws-vu9p-f1)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
 endif
 endif
 endif
@@ -96,6 +89,7 @@ CXXFLAGS += -I$(CUR_DIR)//host
 CXXFLAGS += -I$(CUR_DIR)//re_compile/lib/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 LDFLAGS += -L$(CUR_DIR)//re_compile/lib/lib
 LDFLAGS += -lonig
 LDFLAGS += -lxfcompile
@@ -103,6 +97,7 @@ LDFLAGS +=
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 LDFLAGS +=
 
@@ -116,13 +111,13 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
 
 # ################### Setting package and image directory #######################
@@ -144,7 +139,8 @@ endif
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --jobs 8
+VPP_FLAGS += --hls.jobs 8
+VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 
@@ -168,6 +164,8 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_LDFLAGS_reEngineKernel += --config $(CUR_DIR)/conn_u50.cfg
 endif
 
+# Kernel args
+
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/reEngineKernel.xclbin
@@ -179,13 +177,25 @@ pre_build:
 	make -C $(CUR_DIR)/re_compile
 
 .PHONY: all clean cleanall docs emconfig
-all: pre_build check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifeq ($(HOST_ARCH), x86)
+all: pre_build check_version check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all: pre_build check_version check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: pre_build check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host: pre_build  check_xrt $(EXE_FILE)
+else
+host: pre_build  check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: pre_build check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp pre_build check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp pre_build check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: pre_build xclbin
@@ -194,29 +204,37 @@ build: pre_build xclbin
 $(TEMP_DIR)/reEngineKernel.xo: $(CUR_DIR)//kernel/re_engine_kernel.cpp
 	$(ECHO) "Compiling Kernel: reEngineKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(reEngineKernel_VPP_FLAGS) $(VPP_FLAGS) -k reEngineKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(reEngineKernel_VPP_FLAGS) $(VPP_FLAGS) -k reEngineKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+
 $(BUILD_DIR)/reEngineKernel.xclbin: $(BINARY_CONTAINER_reEngineKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+
 $(BUILD_DIR)/reEngineKernel.xclbin: $(BINARY_CONTAINER_reEngineKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+
 $(BUILD_DIR)/reEngineKernel.xclbin: $(BINARY_CONTAINER_reEngineKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
 else 
 $(BUILD_DIR)/reEngineKernel.xclbin: $(BINARY_CONTAINER_reEngineKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
 endif
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -240,7 +258,7 @@ cleanh:
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ start_simulation.sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 

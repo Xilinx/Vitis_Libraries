@@ -169,7 +169,7 @@ void axiVarColToStreams(ap_uint<_WAxi>* ddr,
                         hls::stream<bool>& eData) {
     static const int fifo_depth = _BurstLen * 2;
     hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS resource variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = fifo impl = lutram
 #pragma HLS stream variable = vec_strm depth = fifo_depth
 #pragma HLS dataflow
     internal::read_raw<_WAxi, _BurstLen, _WData>(ddr, offset, rows, cols, vec_strm);

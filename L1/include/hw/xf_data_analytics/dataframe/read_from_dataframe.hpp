@@ -482,11 +482,11 @@ void readToObjStrm(int field_nm,
                    hls::stream<Object>& obj_strm) {
     hls::stream<bool> null_strm[1 << W];
 #pragma HLS STREAM variable = null_strm depth = 64
-#pragma HLS BIND_STORAGE variable = null_strm type = fifo impl = autosrl
+#pragma HLS BIND_STORAGE variable = null_strm type = fifo impl
 
     hls::stream<bool> bool_strm[1 << W];
 #pragma HLS stream variable = bool_strm depth = 64
-#pragma HLS BIND_STORAGE variable = bool_strm type = fifo impl = autosrl
+#pragma HLS BIND_STORAGE variable = bool_strm type = fifo impl
 
     hls::stream<int> field_id_strm;
 #pragma HLS stream variable = field_id_strm depth = 16

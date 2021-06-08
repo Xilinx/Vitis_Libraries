@@ -398,12 +398,14 @@ ErrCode logAnalyzer::analyze_all(uint64_t* cfg_buff,
         }
     }
     // create kernel
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     std::vector<std::vector<cl_kernel> > re_krnls(3);
     for (int i = 0; i < 3; ++i) {
         re_krnls[i].resize(re_cu_num);
         for (cl_uint c = 0; c < re_cu_num; ++c) {
             std::string krnl_full_name = re_krnl_name + ":{" + re_krnl_name + "_" + std::to_string(c + 1) + "}";
             re_krnls[i][c] = clCreateKernel(prg, krnl_full_name.c_str(), &err);
+            logger.logCreateKernel(err);
             if (err != CL_SUCCESS) {
                 fprintf(stderr, "ERROR: failed to create re kernel[%d].\n", c + 1);
                 return DEV_ERR;
@@ -417,6 +419,7 @@ ErrCode logAnalyzer::analyze_all(uint64_t* cfg_buff,
             for (cl_uint c = 0; c < geo_cu_num; ++c) {
                 std::string krnl_full_name = geo_krnl_name + ":{" + geo_krnl_name + "_" + std::to_string(c + 1) + "}";
                 geo_krnls[i][j * geo_cu_num + c] = clCreateKernel(prg, krnl_full_name.c_str(), &err);
+                logger.logCreateKernel(err);
                 if (err != CL_SUCCESS) {
                     fprintf(stderr, "ERROR: failed to create geo kernel[%d].\n", c + 1);
                     return DEV_ERR;
@@ -431,6 +434,7 @@ ErrCode logAnalyzer::analyze_all(uint64_t* cfg_buff,
             for (cl_uint c = 0; c < wj_cu_num; ++c) {
                 std::string krnl_full_name = wj_krnl_name + ":{" + wj_krnl_name + "_" + std::to_string(c + 1) + "}";
                 wj_krnls[i][j * wj_cu_num + c] = clCreateKernel(prg, krnl_full_name.c_str(), &err);
+                logger.logCreateKernel(err);
                 if (err != CL_SUCCESS) {
                     fprintf(stderr, "ERROR: failed to create wj kernel[%d].\n", c + 1);
                     return DEV_ERR;

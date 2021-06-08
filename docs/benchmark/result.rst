@@ -37,6 +37,22 @@ It supports software and hardware emulation as well as running hardware accelera
     | 1. The baseline version run on Intel(R) Xeon(R) CPU E5-2690 v4, clocked at 2.60GHz.
     | 2. The baseline version is a single thread program.
 
+
+Duplicate Record Match
+~~~~~~~~~~~~~~~~~~~~~~
+
+The case `L2/demos/text/dup_match` is to achieve the function of duplicate recoed matching, which includes modules such as Index, Predicate, Pair, Score, Cluster, etc.
+It supports software and hardware emulation as well as running hardware accelerators on the Alveo U50.
+
+- Input file: Randomly generate 10,000,000 lines (about 1GB) of csv file similar to `L2/demos/text/dup_match/data/test.csv` as test input file.
+- The Demo execute time 8,215.56 s.
+- Baseline (Dedupe Python: `https://github.com/dedupeio/dedupe`) execute time 35,030.751 s
+- Accelaration Ratio: 5.1X
+
+.. note::
+   | 1. The baseline version run on Intel(R) Xeon(R) CPU E5-2690 v4, clocked at 2.60GHz.
+   | 2. The training result of Baseline includes `self.predicate=((TfidfNGramCanopyPredicate: (0.8, Site name), TfidfTextCanopyPredicate: (0.8, Address)), (SimplePredicate: (alphaNumericPredicate, Site name), TfidfTextCanopyPredicate: (0.8, Site name)), (SimplePredicate: (wholeFieldPredicate, Site name), SimplePredicate: (wholeFieldPredicate, Zip)))`.
+
 ML Performance
 ==============
 

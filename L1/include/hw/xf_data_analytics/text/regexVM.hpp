@@ -190,7 +190,7 @@ void regexVM(ap_uint<32>* bitSetBuff,
     ap_uint<16> opaddr = 0;
     // internal stack
     ap_uint<54> stack_buff[STACK_SIZE];
-#pragma HLS resource variable = stack_buff core = RAM_2P_URAM uram
+#pragma HLS bind_storage variable = stack_buff type = ram_2p impl = uram
     // stack pointer
     unsigned int stk = 0;
     // stack type
@@ -655,7 +655,7 @@ void regexVM_opt(ap_uint<32>* bitSetBuff,
     ap_uint<16> n_opaddr = 1;
     // internal stack
     ap_uint<54> stack_buff[STACK_SIZE];
-#pragma HLS resource variable = stack_buff core = RAM_2P_URAM uram
+#pragma HLS bind_storage variable = stack_buff type = ram_2p impl = uram
     // stack pointer
     unsigned int stk = 0;
     // stack type

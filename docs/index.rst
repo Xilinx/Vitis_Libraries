@@ -48,7 +48,7 @@
    :caption: Benchmark Result
    :maxdepth: 1
 
-   benchmark/result.rst
+   benchmark.rst
 
 Index
 -----

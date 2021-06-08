@@ -69,7 +69,7 @@ void kmeansPredict(hls::stream<ap_uint<sizeof(DType) * 8> > sampleStrm[PDV],
     ap_uint<sizeof(DType) * 8 * PDV> centers[PCU][UramDepth]; // = {0};
 #pragma HLS array_partition variable = centers complete dim = 1
 //#pragma HLS array_partition variable = centers complete dim = 2
-#pragma HLS RESOURCE variable = centers core = RAM_2P_URAM
+#pragma HLS bind_storage variable = centers type = ram_2p impl = uram
     copyToLocal(kcenters, centers);
     xf::data_analytics::clustering::kMeansPredict<DType, D, K, UramDepth, PCU, PDV>(
         sampleStrm, endSampleStrm, centers, dims, kcluster, tagStrm, endTagStrm);
@@ -233,7 +233,7 @@ int test() {
     ap_uint<sizeof(DType) * 8> centers[PCU][PDV][UramDepth] = {0};
 #pragma HLS array_partition variable = centers complete dim = 1
 #pragma HLS array_partition variable = centers complete dim = 2
-#pragma HLS RESOURCE variable = centers core = XPM_MEMORY uram
+#pragma HLS bind_storage variable = centers impl = uram
     hls::stream<ap_uint<32> > tagStrm;
     hls::stream<bool> endTagStrm;
 

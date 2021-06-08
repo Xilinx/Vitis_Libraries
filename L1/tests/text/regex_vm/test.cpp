@@ -45,11 +45,11 @@ void dut(unsigned int bitset[BIT_SET_SIZE],
          unsigned int str_len,
          ap_uint<2> out[1],
          ap_uint<16> offset_buff[CAP_GRP_SIZE * 2]) {
-#pragma HLS resource variable = bitset core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = bitset type = ram_t2p impl = bram
 //#pragma HLS resource variable = instr_buff core = RAM_2P_URAM uram
-#pragma HLS resource variable = instr_buff core = RAM_T2P_BRAM
-#pragma HLS resource variable = msg_buff core = RAM_T2P_BRAM
-#pragma HLS resource variable = offset_buff core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = instr_buff type = ram_t2p impl = bram
+#pragma HLS bind_storage variable = msg_buff type = ram_t2p impl = bram
+#pragma HLS bind_storage variable = offset_buff type = ram_t2p impl = bram
     // initialize buffer
     for (int i = 0; i < 2 * CAP_GRP_SIZE; ++i) {
         offset_buff[i] = -1;

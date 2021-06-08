@@ -47,6 +47,7 @@ struct Object : private ap_uint<88> {
     ap_uint<16> get_id() { return ap_uint<88>::range(79, 64); }
     ap_uint<4> get_valid() { return ap_uint<88>::range(83, 80); }
     ap_uint<4> get_type() { return ap_uint<88>::range(87, 84); }
+    ap_uint<88> get_all() { return ap_uint<88>::range(87, 0); }
 };
 
 } // end of dataframe namespace

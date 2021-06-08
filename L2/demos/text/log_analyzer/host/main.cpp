@@ -129,6 +129,7 @@ int refComp(std::string ref_path, uint8_t* out_value) {
 
 int main(int argc, const char* argv[]) {
     std::cout << "----------------------log analyzer----------------" << std::endl;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // command argument parser
     x_utils::ArgParser parser(argc, argv);
 
@@ -227,9 +228,7 @@ int main(int argc, const char* argv[]) {
         printf("write result from in-memory buffer to disk\n");
         store_dt(out_path, out_buff);
     }
-    if (err)
-        std::cout << "Fail with " << err << " errors." << std::endl;
-    else
-        std::cout << "Pass validation." << std::endl;
+    err ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return err;
 }

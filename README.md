@@ -107,6 +107,11 @@ Here, `TARGET` decides the FPGA binary type
 - `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 
 
+## Benchmark Result
+
+In `L2/benchmarks` and `L2/demo`, these Kernels are built into xclbins targeting Alveo U200/U250/U50. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/data_analytics/2021.1/benchmark/benchmark.html).
+
+
 ## License
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).

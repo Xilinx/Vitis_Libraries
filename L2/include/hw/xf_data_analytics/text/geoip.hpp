@@ -563,7 +563,7 @@ class GeoIP {
      */
     GeoIP() {
 #pragma HLS inline
-#pragma HLS resource variable = ipHigh16Arr core = RAM_T2P_URAM
+#pragma HLS bind_storage variable = ipHigh16Arr type = ram_t2p impl = uram
 #ifndef __SYNTHESIS__
         std::cout << "GeoIP constructor\n";
 #endif
@@ -630,22 +630,22 @@ class GeoIP {
 #pragma HLS dataflow
         hls::stream<ap_uint<32> > ipStrm("ipStrm");
 #pragma HLS stream variable = ipStrm depth = N
-#pragma HLS resource variable = ipStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ipStrm type = fifo impl = lutram
         hls::stream<ap_uint<16> > ipLow16Strm("ipLow16Strm");
 #pragma HLS stream variable = ipLow16Strm depth = N
-#pragma HLS resource variable = ipLow16Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ipLow16Strm type = fifo impl = lutram
         hls::stream<ap_uint<64> > addrStrm("addrStrm");
 #pragma HLS stream variable = addrStrm depth = N
-#pragma HLS resource variable = addrStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrStrm type = fifo impl = lutram
         hls::stream<ap_uint<64> > baseIDStrm("baseIDStrm");
 #pragma HLS stream variable = baseIDStrm depth = N
-#pragma HLS resource variable = baseIDStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = baseIDStrm type = fifo impl = lutram
         hls::stream<ap_uint<64> > addrStrm1("addrStrm1");
 #pragma HLS stream variable = addrStrm1 depth = N
-#pragma HLS resource variable = addrStrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrStrm1 type = fifo impl = lutram
         hls::stream<ap_uint<64> > baseIDStrm1("baseIDStrm1");
 #pragma HLS stream variable = baseIDStrm1 depth = N
-#pragma HLS resource variable = baseIDStrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = baseIDStrm1 type = fifo impl = lutram
         hls::stream<ap_uint<16> > ipLow16Strm2("ipLow16Strm2");
 #pragma HLS stream variable = ipLow16Strm2 depth = N
         hls::stream<ap_uint<64> > addrStrm2("addrStrm2");
@@ -657,22 +657,22 @@ class GeoIP {
 
         hls::stream<ap_uint<64> > addrStrm3("addrStrm3");
 #pragma HLS stream variable = addrStrm3 depth = N
-#pragma HLS resource variable = addrStrm3 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrStrm3 type = fifo impl = lutram
         hls::stream<ap_uint<32> > addrNumStrm("addrNumStrm");
 #pragma HLS stream variable = addrNumStrm depth = N
-#pragma HLS resource variable = addrNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrNumStrm type = fifo impl = lutram
         hls::stream<bool> addrNumEndStrm("addrNumEndStrm");
 #pragma HLS stream variable = addrNumEndStrm depth = N
-#pragma HLS resource variable = addrNumEndStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrNumEndStrm type = fifo impl = lutram
         hls::stream<ap_uint<512> > netLow21Strm("netLow21Strm");
 #pragma HLS stream variable = netLow21Strm depth = N
-#pragma HLS resource variable = netLow21Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = netLow21Strm type = fifo impl = lutram
         hls::stream<ap_uint<512> > headStrm("headStrm");
 #pragma HLS stream variable = headStrm depth = N
-#pragma HLS resource variable = headStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = headStrm type = fifo impl = lutram
         hls::stream<ap_uint<32> > idStrm("idStrm");
 #pragma HLS stream variable = idStrm depth = N
-#pragma HLS resource variable = idStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = idStrm type = fifo impl = lutram
         // read data from DDR/HBM
         arr2Strm(len, ipIn, ipStrm);
 
@@ -720,22 +720,22 @@ class GeoIP {
 #pragma HLS dataflow
         hls::stream<ap_uint<32> > ipStrm("ipStrm");
 #pragma HLS stream variable = ipStrm depth = N
-#pragma HLS resource variable = ipStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ipStrm type = fifo impl = lutram
         hls::stream<ap_uint<16> > ipLow16Strm("ipLow16Strm");
 #pragma HLS stream variable = ipLow16Strm depth = N
-#pragma HLS resource variable = ipLow16Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ipLow16Strm type = fifo impl = lutram
         hls::stream<ap_uint<64> > addrStrm("addrStrm");
 #pragma HLS stream variable = addrStrm depth = N
-#pragma HLS resource variable = addrStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrStrm type = fifo impl = lutram
         hls::stream<ap_uint<64> > baseIDStrm("baseIDStrm");
 #pragma HLS stream variable = baseIDStrm depth = N
-#pragma HLS resource variable = baseIDStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = baseIDStrm type = fifo impl = lutram
         hls::stream<ap_uint<64> > addrStrm1("addrStrm1");
 #pragma HLS stream variable = addrStrm1 depth = N
-#pragma HLS resource variable = addrStrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrStrm1 type = fifo impl = lutram
         hls::stream<ap_uint<64> > baseIDStrm1("baseIDStrm1");
 #pragma HLS stream variable = baseIDStrm1 depth = N
-#pragma HLS resource variable = baseIDStrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = baseIDStrm1 type = fifo impl = lutram
         hls::stream<ap_uint<16> > ipLow16Strm2("ipLow16Strm2");
 #pragma HLS stream variable = ipLow16Strm2 depth = N
         hls::stream<ap_uint<64> > addrStrm2("addrStrm2");
@@ -747,23 +747,23 @@ class GeoIP {
 
         hls::stream<ap_uint<64> > addrStrm3("addrStrm3");
 #pragma HLS stream variable = addrStrm3 depth = N
-#pragma HLS resource variable = addrStrm3 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrStrm3 type = fifo impl = lutram
         hls::stream<ap_uint<32> > addrNumStrm("addrNumStrm");
 #pragma HLS stream variable = addrNumStrm depth = 1024
-#pragma HLS resource variable = addrNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrNumStrm type = fifo impl = lutram
         hls::stream<bool> addrNumEndStrm("addrNumEndStrm");
 #pragma HLS stream variable = addrNumEndStrm depth = 1024
-#pragma HLS resource variable = addrNumEndStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = addrNumEndStrm type = fifo impl = lutram
         hls::stream<ap_uint<512> > netLow21Strm("netLow21Strm");
 #pragma HLS stream variable = netLow21Strm depth = 1024
-#pragma HLS resource variable = netLow21Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = netLow21Strm type = fifo impl = lutram
         hls::stream<ap_uint<512> > headStrm("headStrm");
 
 #pragma HLS stream variable = headStrm depth = N
-#pragma HLS resource variable = headStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = headStrm type = fifo impl = lutram
         hls::stream<ap_uint<32> > idStrm("idStrm");
 #pragma HLS stream variable = idStrm depth = N
-#pragma HLS resource variable = idStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = idStrm type = fifo impl = lutram
         // arr2Strm(len, ipIn, ipStrm);
         hls::stream<uint64> msgStrm("msgStrm");
 #pragma HLS stream variable = msgStrm depth = 1024
@@ -775,7 +775,7 @@ class GeoIP {
 #pragma HLS stream variable = ipOffsetStrm depth = N
 
         hls::stream<ap_uint<192> > ipStrStrm("ipStrStrm");
-#pragma HLS stream variable = ipStStrm depth = N
+#pragma HLS stream variable = ipStrStrm depth = N
         //        hls::stream<ap_uint<16> > ipOffset2Strm("ipOffset2Strm");
         //#pragma HLS stream variable = ipOffset2Strm depth = N
         // read message from DDR/HBM
