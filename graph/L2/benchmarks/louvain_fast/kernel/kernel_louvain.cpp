@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,12 +125,7 @@ extern "C" void kernel_louvain(int64_t* config0,
 #pragma HLS INTERFACE s_axilite port = flagUpdate bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    xf::graph::initComm<DWEIGHT, DWIDTHS, VERTEXS, EDGES>(config0[0], config0[3], offsets, weights, cidPrev, cidCurr,
-                                                          cidSizePrev, totPrev, constant_recip);
-
-    xf::graph::louvainWithColoring<DWEIGHT, DWIDTHS, CSRWIDTHS, COLORWIDTHS, VERTEXS, EDGES, DEGREES,
-                                   COLORS>( // config0[2], config1[0]
-        config0[0], config0[1], 0, config1[0], constant_recip, offsets, indices, weights, colorAxi, colorInx, cidPrev,
-        cidSizePrev, totPrev, cidCurr, cidSizeCurr, totCurr, cidSizeUpdate, totUpdate, cWeight, offsetsDup, indicesDup,
-        flag, flagUpdate, config0[2], config1[1]);
+    xf::graph::kernelLouvainTop(config0, config1, offsets, indices, weights, colorAxi, colorInx, cidPrev, cidSizePrev,
+                                totPrev, cidCurr, cidSizeCurr, totCurr, cidSizeUpdate, totUpdate, cWeight, offsetsDup,
+                                indicesDup, flag, flagUpdate);
 }

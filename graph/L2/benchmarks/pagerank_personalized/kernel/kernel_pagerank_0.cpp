@@ -61,79 +61,79 @@ extern "C" void kernel_pagerank_0(int nrows,
     const int OffChipLatency = 36; // 64;
 
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = sourceID latency = \
-    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthOffset
+    OffChipLatency num_read_outstanding = 16 max_read_burst_length = 32 depth = depthOffset
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem1 port = offsetCSC latency = \
-    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthOffset
+    OffChipLatency num_read_outstanding = 16 max_read_burst_length = 32 depth = depthOffset
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem2 port = orderUnroll latency =          \
-    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 num_write_outstanding = \
-        32 max_write_burst_length = 32 depth = depOffset
+    OffChipLatency num_read_outstanding = 16 max_read_burst_length = 32 num_write_outstanding = \
+        16 max_write_burst_length = 32 depth = depOffset
 
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem3 port = indiceCSC latency = \
-    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthEdge
+    OffChipLatency num_read_outstanding = 16 max_read_burst_length = 32 depth = depthEdge
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem4 port = weightCSC latency = \
-    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthEdge
+    OffChipLatency num_read_outstanding = 16 max_read_burst_length = 32 depth = depthEdge
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem5 port = degreeCSR latency = AxiLatency num_read_outstanding = \
-    256 max_read_burst_length = 2 num_write_outstanding = 256 max_write_burst_length = 2 depth = depthOffset
+    32 max_read_burst_length = 2 num_write_outstanding = 32 max_write_burst_length = 2 depth = depthOffset
 
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem6 port = cntValFull0 latency =          \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem6 port = cntValFull0 latency =         \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem7 port = buffPing0 latency =            \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem7 port = buffPing0 latency =           \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem8 port = buffPong0 latency =            \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem8 port = buffPong0 latency =           \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem9 port = cntValFull1 latency =          \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem9 port = cntValFull1 latency =         \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem10 port = buffPing1 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem10 port = buffPing1 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem11 port = buffPong1 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
-        2 max_write_burst_length = 32 depth = depthVertex
-
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem12 port = cntValFull2 latency =         \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
-        2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem13 port = buffPing2 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
-        2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem14 port = buffPong2 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
-        2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem15 port = cntValFull3 latency =         \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
-        2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem16 port = buffPing3 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
-        2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem17 port = buffPong3 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem11 port = buffPong1 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
 
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem18 port = cntValFull4 latency =         \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem12 port = cntValFull2 latency =        \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem19 port = buffPing4 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem13 port = buffPing2 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem20 port = buffPong4 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem14 port = buffPong2 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem21 port = cntValFull5 latency =         \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem15 port = cntValFull3 latency =        \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem22 port = buffPing5 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem16 port = buffPing3 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem23 port = buffPong5 latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem17 port = buffPong3 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = depthVertex
 
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem7 port = resultInfo latency =           \
-    OffChipLatency num_read_outstanding = 256 max_read_burst_length = 2 num_write_outstanding = \
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem18 port = cntValFull4 latency =        \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
+        2 max_write_burst_length = 32 depth = depthVertex
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem19 port = buffPing4 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
+        2 max_write_burst_length = 32 depth = depthVertex
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem20 port = buffPong4 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
+        2 max_write_burst_length = 32 depth = depthVertex
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem21 port = cntValFull5 latency =        \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
+        2 max_write_burst_length = 32 depth = depthVertex
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem22 port = buffPing5 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
+        2 max_write_burst_length = 32 depth = depthVertex
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem23 port = buffPong5 latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
+        2 max_write_burst_length = 32 depth = depthVertex
+
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem7 port = resultInfo latency =          \
+    OffChipLatency num_read_outstanding = 32 max_read_burst_length = 2 num_write_outstanding = \
         2 max_write_burst_length = 32 depth = 2
 
 #pragma HLS INTERFACE s_axilite port = sourceID bundle = control
@@ -227,7 +227,7 @@ extern "C" void kernel_pagerank_0(int nrows,
     OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthOffset
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem2 port = orderUnroll latency =          \
     OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 num_write_outstanding = \
-       32 max_write_burst_length = 32 depth = depthOffset
+        32 max_write_burst_length = 32 depth = depthOffset
 
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem3 port = indiceCSC latency = \
     OffChipLatency num_read_outstanding = 32 max_read_burst_length = 32 depth = depthEdge

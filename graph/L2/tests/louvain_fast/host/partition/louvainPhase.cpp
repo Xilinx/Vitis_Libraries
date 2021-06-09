@@ -244,8 +244,8 @@ double PhaseLoop_CommPostProcessing_par(GLV* pglv_orig,
     time1 = omp_get_wtime();
     time_renum = time1;
     graphNew* Gnew;
-    numClusters = renumberClustersContiguously_ghost(pglv_iter->C, pglv_iter->G->numVertices, pglv_iter->NVl);
-    printf("Number of unique clusters: %ld\n", numClusters);
+    // numClusters = renumberClustersContiguously_ghost(pglv_iter->C, pglv_iter->G->numVertices, pglv_iter->NVl);
+    printf("Number of unique clusters ghost: %ld\n", numClusters);
     time_renum = omp_get_wtime() - time_renum;
 
     time_C = omp_get_wtime();
@@ -290,7 +290,7 @@ double PhaseLoop_CommPostProcessing(GLV* pglv_orig,
     time1 = omp_get_wtime();
     time_renum = time1;
     graphNew* Gnew;
-    numClusters = renumberClustersContiguously(pglv_iter->C, pglv_iter->G->numVertices);
+    // numClusters = renumberClustersContiguously(pglv_iter->C, pglv_iter->G->numVertices);
     printf("Number of unique clusters: %ld\n", numClusters);
     time_renum = omp_get_wtime() - time_renum;
 
@@ -739,7 +739,7 @@ void inline PhaseLoop_MapHostBuff_prune(long NV,
                                         std::vector<cl_mem_ext_ptr_t>& mext_in,
                                         cl::Context& context,
                                         KMemorys_host_prune& buff_host) {
-    buff_host.config0 = aligned_alloc<int64_t>(4); // zyl
+    buff_host.config0 = aligned_alloc<int64_t>(6); // zyl
     buff_host.config1 = aligned_alloc<DWEIGHT>(4);
     buff_host.offsets = aligned_alloc<int>(NV + 1);
     buff_host.indices = aligned_alloc<int>(NE_mem_1);
@@ -836,7 +836,7 @@ void inline PhaseLoop_MapClBuff_prune(long NV,
     int flag_RW = CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE;
     int flag_RD = CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY;
 
-    buff_cl.db_config0 = cl::Buffer(context, flag_RW, sizeof(int64_t) * (4), &mext_in[0]); // zyl
+    buff_cl.db_config0 = cl::Buffer(context, flag_RW, sizeof(int64_t) * (6), &mext_in[0]); // zyl
     buff_cl.db_config1 = cl::Buffer(context, flag_RW, sizeof(DWEIGHT) * (4), &mext_in[1]);
 
     buff_cl.db_offsets = cl::Buffer(context, flag_RD, sizeof(int) * (NV + 1), &mext_in[2]);
@@ -970,6 +970,7 @@ void PhaseLoop_UsingFPGA_Post_par_prune(long vertexNum,
 }
 
 double PhaseLoop_UsingFPGA_Prep_Init_buff_host_prune(int numColors,
+                                                     long NVl,
                                                      graphNew* G,
                                                      long* M,
                                                      double opts_C_thresh,
@@ -1027,7 +1028,8 @@ double PhaseLoop_UsingFPGA_Prep_Init_buff_host_prune(int numColors,
     buff_host.config0[1] = numColors;
     buff_host.config0[2] = 0;
     buff_host.config0[3] = edgeNum;
-    // buff_host.config0[4] = 0;//zyl totItr? 0?
+    buff_host.config0[4] = 0;   // renumber numClusters
+    buff_host.config0[5] = NVl; // ghost number
 
     buff_host.config1[0] = opts_C_thresh;
     buff_host.config1[1] = currMod;
@@ -1386,12 +1388,15 @@ double PhaseLoop_UsingFPGA_Prep_Read_buff_host_prune(long vertexNum,
                                                      // output
                                                      long* C,
                                                      int& eachItr,
-                                                     double& currMod) {
+                                                     double& currMod,
+                                                     long& numClusters) {
     double time1 = omp_get_wtime();
     // updating
     eachItrs = buff_host.config0[2];
     eachItr = buff_host.config0[2];
     currMod = buff_host.config1[1];
+    numClusters = buff_host.config0[4];
+
     for (int i = 0; i < vertexNum; i++) {
         C[i] = (long)buff_host.cidPrev[i];
     }
@@ -1708,6 +1713,7 @@ void ConsumingOnePhase_prune(GLV* pglv_iter,
                              cl::CommandQueue& q,
                              int& eachItrs,
                              double& currMod,
+                             long& numClusters,
                              double& eachTimeInitBuff,
                              double& eachTimeReadBuff) {
     std::vector<cl::Memory> ob_in;
@@ -1718,8 +1724,9 @@ void ConsumingOnePhase_prune(GLV* pglv_iter,
     kernel_evt1[0].resize(1);
 
     bool isLargeEdge = pglv_iter->G->numEdges > (MAXNV / 2);
-    eachTimeInitBuff = PhaseLoop_UsingFPGA_Prep_Init_buff_host_prune(
-        pglv_iter->numColors, pglv_iter->G, pglv_iter->M, opts_C_thresh, currMod, pglv_iter->colors, buff_host);
+    eachTimeInitBuff =
+        PhaseLoop_UsingFPGA_Prep_Init_buff_host_prune(pglv_iter->numColors, pglv_iter->NVl, pglv_iter->G, pglv_iter->M,
+                                                      opts_C_thresh, currMod, pglv_iter->colors, buff_host);
 
     PhaseLoop_UsingFPGA_1_KernelSetup_prune(isLargeEdge, kernel_louvain, ob_in, ob_out, buff_cl);
     std::cout << "\t\PhaseLoop_UsingFPGA_1_KernelSetup Device Available: "
@@ -1742,7 +1749,7 @@ void ConsumingOnePhase_prune(GLV* pglv_iter,
               << std::endl; // << device.getInfo<CL_DEVICE_AVAILABLE>() << std::endl;
 
     eachTimeReadBuff = PhaseLoop_UsingFPGA_Prep_Read_buff_host_prune(pglv_iter->NV, buff_host, eachItrs, pglv_iter->C,
-                                                                     eachItrs, currMod);
+                                                                     eachItrs, currMod, numClusters);
 }
 void runLouvainWithFPGA_demo_par_core_prune(bool hasGhost,
                                             int id_dev,
@@ -1796,7 +1803,6 @@ void runLouvainWithFPGA_demo_par_core_prune(bool hasGhost,
     logger.logCreateProgram(err);
     cl::Kernel kernel_louvain(program, "kernel_louvain", &err);
     logger.logCreateKernel(err);
-    printf("INFO: kernel has been created\n");
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
     logger.logCreateCommandQueue(err);
     timePrePre_xclbin = omp_get_wtime() - timePrePre_xclbin;
@@ -1863,7 +1869,7 @@ void runLouvainWithFPGA_demo_par_core_prune(bool hasGhost,
         {
             eachTimeE2E_2[phase - 1] = omp_get_wtime();
             ConsumingOnePhase_prune(pglv_iter, opts_C_thresh, buff_cl, buff_host, kernel_louvain, q,
-                                    eachItrs[phase - 1], currMod, eachTimeInitBuff[phase - 1],
+                                    eachItrs[phase - 1], currMod, numClusters, eachTimeInitBuff[phase - 1],
                                     eachTimeReadBuff[phase - 1]);
             eachTimeE2E_2[phase - 1] = omp_get_wtime() - eachTimeE2E_2[phase - 1];
         }
