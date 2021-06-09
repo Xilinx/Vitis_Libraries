@@ -1,4 +1,5 @@
 {
+    "gui": false,
     "name": "Xilinx Log Analyzer Demo", 
     "description": "Xilinx Log Analyzer Demo", 
     "flow": "vitis", 
@@ -44,7 +45,6 @@
             "build_cmd": "make -C PROJECT/re_compile; make -C PROJECT/ref_result/libmaxminddb; make -C PROJECT/ref_result/rapidjson"
         }
     ], 
-    "gui": false, 
     "host": {
         "host_exe": "test.exe", 
         "compiler": {

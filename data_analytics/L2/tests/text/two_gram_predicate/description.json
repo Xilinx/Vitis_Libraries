@@ -1,4 +1,5 @@
 {
+    "gui": false,
     "name": "Xilinx Two Gram Predicate Test", 
     "description": "2-Gram Predicate based on inverted index", 
     "flow": "vitis", 

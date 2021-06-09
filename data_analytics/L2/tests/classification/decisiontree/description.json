@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx Decision Tree Classification Training", 
     "description": "", 
     "flow": "vitis", 
