@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx Ridge Regression Training", 
     "description": "", 
     "flow": "vitis", 
