@@ -217,10 +217,10 @@ class kernelFilterClass {
     unsigned int get_m_kArchZigZag() { return m_kArchZigZag; };
 
     // Constructor used for reloadable coefficients
-    kernelFilterClass() : m_oldInTaps{} {}
+    kernelFilterClass() : m_oldInTaps{}, m_phaseOneTaps{} {}
 
     // Constractor used for static coefficients
-    kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) { firReload(taps); }
+    kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) : m_phaseOneTaps{} { firReload(taps); }
 
     void firReload(const TT_COEFF* taps) {
         TT_COEFF* tapsPtr = (TT_COEFF*)taps;

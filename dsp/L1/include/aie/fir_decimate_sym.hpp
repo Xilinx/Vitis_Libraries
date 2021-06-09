@@ -148,14 +148,16 @@ class kernelFilterClass {
 
     static_assert(TP_NUM_OUTPUTS > 0 && TP_NUM_OUTPUTS <= 2, "ERROR: only single or dual outputs are supported.");
 
+    // v8cint16 is a convenient 256b type. This line also initialized the array to zero to ensure zero padding.
+    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
+
     // The coefficients array must include zero padding up to a multiple of the number of columns
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    TT_COEFF m_internalTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor, kMaxColumns)];
+    TT_COEFF chess_storage(% chess_alignof(v8cint16))
+        m_internalTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
 
-    // v8cint16 is a convenient 256b type. This line also initialized the array to zero to ensure zero padding.
-    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_oldInTaps[CEIL(
         (TP_FIR_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool m_coeffnEq;                                            // Are coefficients sets equal?
@@ -175,8 +177,6 @@ class kernelFilterClass {
     unsigned int get_m_kArch() { return m_kArch; };
 
     // FIR
-
-    // FIR
     void filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
@@ -189,13 +189,13 @@ class kernelFilterClass {
                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
     // Constructor
-    kernelFilterClass(const TT_COEFF (&taps)[((TP_FIR_LEN + 1) / kSymmetryFactor)]) {
+    kernelFilterClass(const TT_COEFF (&taps)[((TP_FIR_LEN + 1) / kSymmetryFactor)]) : m_internalTaps{} {
         setDecimateOffsets();
         firReload(taps);
     };
 
     // Constructor used for reloadable coefficients
-    kernelFilterClass() : m_oldInTaps{} { setDecimateOffsets(); }
+    kernelFilterClass() : m_oldInTaps{}, m_internalTaps{} { setDecimateOffsets(); }
 
     // setDecimateOffsets
     void setDecimateOffsets() {

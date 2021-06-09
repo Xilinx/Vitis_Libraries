@@ -60,6 +60,9 @@
 #ifndef OUTPUT_FILE
 #define OUTPUT_FILE "data/output.txt"
 #endif
+#ifndef REF_OUTPUT_FILE
+#define REF_OUTPUT_FILE "data/ref_output.txt"
+#endif
 
 #ifndef NITER
 #define NITER 1

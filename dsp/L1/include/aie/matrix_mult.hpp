@@ -22,8 +22,8 @@ The file holds the definition of the Matrix Multiply kernel class.
 #include "fir_utils.hpp"
 #include "matrix_mult_traits.hpp"
 
-//#include "matrix_mult_tiler.hpp"
-//#include "matrix_mult_untiler.hpp"
+#include "matrix_mult_tiler.hpp"
+#include "matrix_mult_untiler.hpp"
 
 // CEIL rounds x up to the next multiple of y, which may be x itself.
 #define CEIL(x, y) (((x + y - 1) / y) * y)

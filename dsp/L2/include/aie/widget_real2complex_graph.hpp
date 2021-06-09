@@ -2,7 +2,7 @@
 #define _DSPLIB_WIDGET_REAL2COMPLEX_GRAPH_HPP_
 /*
 The file captures the definition of the 'L2' graph level class for
-the Single Rate Asymmetrical FIR library element.
+the Real to Complex Widget library element.
 */
 /**
  * @file widget_real2complex_graph.hpp
@@ -72,11 +72,15 @@ class widget_real2complex_graph : public graph {
     kernel m_kernel;
 
     // Access function for AIE synthesizer
-    kernel* getKernels() { return &m_kernel; };
-
     /**
       * @endcond
       */
+
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+     **/
+
+    kernel* getKernels() { return &m_kernel; };
 
     /**
      * @brief This is the constructor function for the Widget API Cast graph.
