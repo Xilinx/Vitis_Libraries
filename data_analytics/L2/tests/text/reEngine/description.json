@@ -1,4 +1,5 @@
 {
+    "gui": false, 
     "name": "Xilinx reEngine Test", 
     "description": "Xilinx Regex Engine Test", 
     "flow": "vitis", 
@@ -99,7 +100,6 @@
 	    "build_cmd": "make -C PROJECT/re_compile"
 	}
     ], 
-    "gui": false, 
     "host": {
         "host_exe": "test.exe", 
         "compiler": {

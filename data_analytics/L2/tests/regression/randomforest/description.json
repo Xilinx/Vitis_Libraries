@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx Random Forest Regression Training", 
     "description": "", 
     "flow": "vitis", 
