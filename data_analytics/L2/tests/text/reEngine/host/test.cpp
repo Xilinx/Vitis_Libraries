@@ -15,7 +15,7 @@ extern "C" {
 #else
 #include "re_engine_kernel.hpp"
 #endif
-
+#include "xf_utils_sw/logger.hpp"
 #define MAX_MSG_SZ 1600000
 #define MAX_MSG_NM 60000
 #define INSTRUC_SIZE 65536
@@ -164,7 +164,7 @@ int compare_result(unsigned int cpgp_num, unsigned int msg_nm, uint32_t* ref, un
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n-----------Test RE-Engine------------\n";
-
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // command argument parser
     ArgParser parser(argc, argv);
 
@@ -285,19 +285,23 @@ int main(int argc, const char* argv[]) {
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "Error: xclbin path must be set!\n";
     }
+    cl_int cl_err;
     // Get device
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // create context and command queue
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
     std::string krnl_name = "reEngineKernel";
     cl_uint cu_number;
@@ -308,7 +312,8 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Kernel> kernel(cu_number);
     for (cl_uint i = 0; i < cu_number; ++i) {
         std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(i + 1) + "}";
-        kernel[i] = cl::Kernel(program, krnl_full_name.c_str());
+        kernel[i] = cl::Kernel(program, krnl_full_name.c_str(), &cl_err);
+        logger.logCreateKernel(cl_err);
     }
     for (cl_uint i = 0; i < cu_number - 1; ++i) {
         uint32_t* out_buff = aligned_alloc<uint32_t>((cpgp_num + 1) * msg_nm);
@@ -388,7 +393,7 @@ int main(int argc, const char* argv[]) {
     }
 #endif
     // check result
-    return compare_result(cpgp_num, msg_nm - 2, ref_result, out_buff_vec[0]);
+    int nerr = compare_result(cpgp_num, msg_nm - 2, ref_result, out_buff_vec[0]);
     // free buffer
     delete[] cfg_buff;
     delete[] bitset, delete[] ref_result;
@@ -400,4 +405,7 @@ int main(int argc, const char* argv[]) {
     delete[] len_buff;
     delete[] cpgp_name_offt;
     delete[] cpgp_name_val;
+    nerr ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    return nerr;
 }

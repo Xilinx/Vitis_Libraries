@@ -5,7 +5,8 @@
     "flow": "vitis", 
     "platform_whitelist": [
         "u250", 
-        "u50"
+        "u50", 
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [], 
     "platform_properties": {
@@ -40,6 +41,22 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
     }, 
     "launch": [
@@ -47,10 +64,10 @@
             "cmd_args": "-xclbin BUILD/decision_tree.xclbin -in PROJECT/data -trn 1000 -ten 100 -fn 26", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
     "data": [
-        "PROJECT/data/test.txt",
-        "PROJECT/data/train.txt",
+        "PROJECT/data/test.txt", 
+        "PROJECT/data/train.txt", 
         "PROJECT/data/config.txt"
     ], 
     "host": {
@@ -109,7 +126,7 @@
                     ]
                 }
             ], 
-            "frequency": 250.0, 
+            "frequency": 150.0, 
             "name": "decision_tree"
         }
     ], 

@@ -4,8 +4,9 @@
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u250", 
-        "u50"
+        "xilinx_u250_xdma_201830_2", 
+        "u50", 
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [], 
     "platform_properties": {
@@ -40,6 +41,22 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
     }, 
     "launch": [
@@ -47,12 +64,12 @@
             "cmd_args": "-xclbin BUILD/rf_v0.xclbin -in PROJECT/data -trn 1000 -ten 100 -fn 26 -cn 2 -ln 2", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
     "data": [
-        "PROJECT/data/test.txt",
-        "PROJECT/data/train.txt",
+        "PROJECT/data/test.txt", 
+        "PROJECT/data/train.txt", 
         "PROJECT/data/config.txt"
-    ],
+    ], 
     "host": {
         "host_exe": "test_rf.exe", 
         "compiler": {
@@ -131,7 +148,7 @@
                     ]
                 }
             ], 
-            "frequency": 250.0, 
+            "frequency": 150.0, 
             "name": "rf_v0"
         }
     ], 

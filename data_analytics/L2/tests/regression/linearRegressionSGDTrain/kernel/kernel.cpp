@@ -23,7 +23,7 @@ extern "C" void linearLeastSquareSGDTrain(ap_uint<512>* input, ap_uint<512>* out
     max_write_burst_length = 2 max_read_burst_length = 32 \
     bundle = gmem0_0 port = input
 
-#pragma HLS INTERFACE m_axi offset slave latency = 64 \
+#pragma HLS INTERFACE m_axi offset = slave latency = 64 \
     num_write_outstanding = 32 num_read_outstanding = 2 \
     max_write_burst_length = 32 max_read_burst_length = 2 \
     bundle = gmem0_1 port = output

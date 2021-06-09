@@ -25,6 +25,7 @@
 #include <cstring>
 #include "xf_data_analytics/text/reEngine_config.hpp"
 #include "xf_data_analytics/text/helper.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 namespace xf {
 namespace data_analytics {

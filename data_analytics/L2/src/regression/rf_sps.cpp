@@ -22,6 +22,7 @@
 #include "xf_data_analytics/classification/decision_tree_L2.hpp"
 #endif
 #include "xf_utils_hw/stream_to_axi.hpp"
+#include "xf_data_analytics/common/math_helper.hpp"
 #define MAX_OUTER_FEAS MAX_FEAS_
 #define MAX_INNER_FEAS MAX_FEAS_
 #define MAX_SPLITS MAX_SPLITS_
@@ -178,9 +179,9 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm;
         hls::stream<ap_uint<_WData> > dataStrm;
 
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifo_depth
-#pragma HLS resource variable = dataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm depth = fifo_depth
 
 #pragma HLS dataflow
@@ -595,7 +596,7 @@ class RandForestImp {
                             hls::stream<bool>& eDataStrm) {
         const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS resource variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = fifo impl = lutram
 #pragma HLS stream variable = vec_strm depth = fifo_depth
 #pragma HLS dataflow
         read_raw(ddr, nread, realOffset, vec_strm);
@@ -617,7 +618,7 @@ class RandForestImp {
                    hls::stream<bool>& eAxiCfgStrm,
                    hls::stream<bool>& ifDropStrm) {
         if (ifJump) {
-            float log1MF = hls::log(1 - fraction);
+            float log1MF = xf::data_analytics::internal::m::log(1 - fraction);
 
             bool e = false;
             ap_uint<32> start = 0;
@@ -627,7 +628,7 @@ class RandForestImp {
                 ap_ufixed<33, 0> ftmp = rng.next();
                 ftmp[0] = 1;
                 float tmp = ftmp;
-                int jump = hls::log(tmp) / log1MF;
+                int jump = xf::data_analytics::internal::m::log(tmp) / log1MF;
                 ap_uint<32> nextstart = start + jump * bucketSize;
                 ap_uint<32> nextrows;
 
@@ -922,7 +923,7 @@ class RandForestImp {
         FType splits_dups[MAX_INNER_FEAS][4][MAX_SPLITS];
 #pragma HLS array_partition variable = splits_dups dim = 1 complete
 #pragma HLS array_partition variable = splits_dups dim = 2 complete
-#pragma HLS resource variable = splits_dups core = RAM_2P_URAM
+#pragma HLS bind_storage variable = splits_dups type = ram_2p impl = uram
         for (ap_uint<8> i = 0; i < features_num_in; i++) {
             for (ap_uint<8> j = 0; j < numSplits_in[i]; j++) {
                 for (ap_uint<8> k = 0; k < 4; k++) {
@@ -1056,36 +1057,36 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm_w;
         hls::stream<ap_uint<8> > nb_strm_w;
 
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
-#pragma HLS resource variable = dataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm_t depth = fifo_depth
-#pragma HLS resource variable = eDataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm_t depth = fifo_depth
 
-#pragma HLS resource variable = vecStrm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm_w type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm_w depth = fifo_depth
-#pragma HLS resource variable = nb_strm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nb_strm_w type = fifo impl = lutram
 #pragma HLS stream variable = nb_strm_w depth = fifo_depth
 
 #pragma HLS dataflow
@@ -1127,36 +1128,36 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm_w;
         hls::stream<ap_uint<8> > nb_strm_w;
 
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
-#pragma HLS resource variable = dataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm_t depth = fifo_depth
-#pragma HLS resource variable = eDataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm_t depth = fifo_depth
 
-#pragma HLS resource variable = vecStrm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm_w type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm_w depth = fifo_depth
-#pragma HLS resource variable = nb_strm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nb_strm_w type = fifo impl = lutram
 #pragma HLS stream variable = nb_strm_w depth = fifo_depth
 
 #pragma HLS dataflow
@@ -1203,39 +1204,39 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm_w;
         hls::stream<ap_uint<8> > nb_strm_w;
 
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
-#pragma HLS resource variable = dataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm_t depth = fifo_depth
-#pragma HLS resource variable = eDataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm_t depth = fifo_depth
-#pragma HLS resource variable = dataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm depth = fifo_depth
-#pragma HLS resource variable = eDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm depth = fifo_depth
-#pragma HLS resource variable = vecStrm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm_w type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm_w depth = fifo_depth
-#pragma HLS resource variable = nb_strm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nb_strm_w type = fifo impl = lutram
 #pragma HLS stream variable = nb_strm_w depth = fifo_depth
 
 #pragma HLS dataflow
@@ -1285,39 +1286,39 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm_w;
         hls::stream<ap_uint<8> > nb_strm_w;
 
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
-#pragma HLS resource variable = dataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm_t depth = fifo_depth
-#pragma HLS resource variable = eDataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm_t depth = fifo_depth
-#pragma HLS resource variable = dataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm depth = fifo_depth
-#pragma HLS resource variable = eDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm depth = fifo_depth
-#pragma HLS resource variable = vecStrm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm_w type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm_w depth = fifo_depth
-#pragma HLS resource variable = nb_strm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nb_strm_w type = fifo impl = lutram
 #pragma HLS stream variable = nb_strm_w depth = fifo_depth
 
 #pragma HLS dataflow
@@ -1354,22 +1355,22 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm_w;
         hls::stream<ap_uint<8> > nb_strm_w;
 
-#pragma HLS resource variable = vecStrm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm_w type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm_w depth = fifo_depth
-#pragma HLS resource variable = nb_strm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nb_strm_w type = fifo impl = lutram
 #pragma HLS stream variable = nb_strm_w depth = fifo_depth
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifo_depth
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 2
 
-#pragma HLS resource variable = dataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm_t depth = fifo_depth
-#pragma HLS resource variable = eDataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm_t depth = fifo_depth
-#pragma HLS resource variable = dataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm depth = fifo_depth
-#pragma HLS resource variable = eDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm depth = fifo_depth
 
 #pragma HLS dataflow
@@ -1404,22 +1405,22 @@ class RandForestImp {
         hls::stream<ap_uint<_WAxi> > vecStrm_w;
         hls::stream<ap_uint<8> > nb_strm_w;
 
-#pragma HLS resource variable = vecStrm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm_w type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm_w depth = fifo_depth
-#pragma HLS resource variable = nb_strm_w core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nb_strm_w type = fifo impl = lutram
 #pragma HLS stream variable = nb_strm_w depth = fifo_depth
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifo_depth
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 2
 
-#pragma HLS resource variable = dataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm_t depth = fifo_depth
-#pragma HLS resource variable = eDataStrm_t core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm_t type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm_t depth = fifo_depth
-#pragma HLS resource variable = dataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dataStrm type = fifo impl = lutram
 #pragma HLS stream variable = dataStrm depth = fifo_depth
-#pragma HLS resource variable = eDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = eDataStrm depth = fifo_depth
 #pragma HLS dataflow
         readRaw(ddr, offset, start, rows, cols, vecStrm, firstShiftStrm);
@@ -1436,9 +1437,9 @@ class RandForestImp {
         static const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<MAX_INNER_FEAS> > featureSubStrm;
         hls::stream<bool> eFeatureSubStrm;
-#pragma HLS resource variable = featureSubStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = featureSubStrm type = fifo impl = lutram
 #pragma HLS stream variable = featureSubStrm depth = fifo_depth
-#pragma HLS resource variable = eFeatureSubStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eFeatureSubStrm type = fifo impl = lutram
 #pragma HLS stream variable = eFeatureSubStrm depth = fifo_depth
 #pragma HLS dataflow
         genFeatureSubsets(features_num, fraction_1, featureSubStrm, eFeatureSubStrm);

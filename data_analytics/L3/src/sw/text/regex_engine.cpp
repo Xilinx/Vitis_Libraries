@@ -473,12 +473,14 @@ ErrCode RegexEngine::match_all(const uint64_t* msg_buff,
         }
     }
     // create kernel
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     std::vector<std::vector<cl_kernel> > krnls(2);
     for (int i = 0; i < 2; ++i) {
         krnls[i].resize(cu_num);
         for (cl_uint c = 0; c < cu_num; ++c) {
             std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(c + 1) + "}";
             krnls[i][c] = clCreateKernel(prg, krnl_full_name.c_str(), &err);
+            logger.logCreateKernel(err);
             if (err != CL_SUCCESS) {
                 fprintf(stderr, "ERROR: failed to create kernel[%d].\n", c + 1);
                 return DEV_ERR;

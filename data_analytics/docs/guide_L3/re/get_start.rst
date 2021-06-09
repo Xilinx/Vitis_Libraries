@@ -43,6 +43,21 @@ Builds the ``libxfcompile.so`` (the software compiler) simply by:
 
 After the build is complete, ``libxfcompile.so`` should be available in ``L3/tests/re_test/re_compile/lib/lib``.
 
+Limitation
+----------
+
+We only support the ``match`` process in the hardware design, the return values should be a group of the start/end offset pairs if zero or more characters at the beginning of the string match the regular expression pattern.
+
+The difference between ``match`` and ``search`` can be explained as:
+
+.. NOTE::
+    Pattern: "app"
+
+    String: "Pineapple"
+
+    Match result: Mismatch [-1, -1]
+
+    Search result: Match [4, 7]
 
 Example Usage
 =============

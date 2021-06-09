@@ -67,10 +67,11 @@ int check_result(std::string pattern,
         end = str + strlen((char*)str);
         start = str;
         range = end;
-        r = onig_search(reg, str, end, start, range, region, ONIG_OPTION_NONE);
+        // match-only processing
+        r = onig_match(reg, str, end, start, region, ONIG_OPTION_NONE);
         // compare with actual result
-        // match
-        if (r == 0) {
+        // match (match length returned)
+        if (r >= 0) {
             if (out_buff[i * (cpgp_nm + 1)] == 1) {
                 for (int j = 0; j < cpgp_nm; ++j) {
                     if (region->beg[j] != out_buff[i * (cpgp_nm + 1) + j + 1] % 65536 ||
@@ -173,6 +174,7 @@ int load_dat(
 }
 int main(int argc, const char* argv[]) {
     std::cout << "----------------------log analytics with regex----------------" << std::endl;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // command argument parser
     // TODO use new argument parser from Utility library.
     xf::data_analytics::text::details::ArgParser parser(argc, argv);
@@ -219,7 +221,18 @@ int main(int argc, const char* argv[]) {
     xf::data_analytics::text::re::ErrCode err_code;
     // compile pattern
     err_code = reInst.compile(pattern);
-    if (err_code != 0) return -1;
+    if (err_code != 0) {
+        if (err_code == xf::data_analytics::text::re::INSTR_NM_ERR) {
+            std::cerr << "ERROR: exceeeding maximum number of instructions\n";
+        } else if (err_code == xf::data_analytics::text::re::CCLASS_NM_ERR) {
+            std::cerr << "ERROR: exceeeding maximum number of character classes\n";
+        } else if (err_code == xf::data_analytics::text::re::CPGP_NM_ERR) {
+            std::cerr << "ERROR: exceeeding maximum number of capturing groups\n";
+        } else {
+            std::cerr << "ERROR: pattern is not valid or not supported by hardware regex-VM\n";
+        }
+        return -1;
+    }
 
     // get capture group number
     uint16_t cpgp_nm = reInst.getCpgpNm();
@@ -236,6 +249,7 @@ int main(int argc, const char* argv[]) {
         std::cerr << "ERROR: " << out_path << " cannot be opened for write.\n";
         return -1;
     }
+    int nerr = 0;
     while (!log_file.eof() && (limit_ln == -1 || lnm < limit_ln)) {
         // load data
         if (load_dat(log_file, msg_buff, offt_buff, len_buff, lnm, limit_ln) == -1) {
@@ -251,16 +265,14 @@ int main(int argc, const char* argv[]) {
             // write data to disk
             store_dat(out_file, out_buff, lnm, cpgp_nm);
             // if check is open, check the result with golden
-            int r = check_result(pattern, msg_buff, offt_buff, len_buff, out_buff, lnm, cpgp_nm);
-            if (r == -1) {
-                fprintf(stderr, "ERROR: result mismatch\n");
-            } else {
-                fprintf(stdout, "SUCCESS: result match\n");
-            }
+            nerr = check_result(pattern, msg_buff, offt_buff, len_buff, out_buff, lnm, cpgp_nm);
         }
     }
     log_file.close();
     out_file.close();
-    std::quick_exit(0);
-    return 0;
+    // std::quick_exit(0);
+    nerr ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+
+    return nerr;
 }

@@ -24,7 +24,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <new>
-
+#include "xf_utils_sw/logger.hpp"
 #define MSTR_(m) #m
 #define MSTR(m) MSTR_(m)
 

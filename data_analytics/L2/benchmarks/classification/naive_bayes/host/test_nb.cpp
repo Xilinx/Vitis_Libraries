@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <vector>
+#include "xf_utils_sw/logger.hpp"
 
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
@@ -136,6 +137,7 @@ int load_dat(std::vector<ap_uint<64> >& dataset, const std::string& file_name) {
 
 int main(int argc, const char* argv[]) {
     std::cout << "\n---------------------Multinomial Training Test of Naive Bayes-----------------\n";
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
 
     // cmd parser
     ArgParser parser(argc, argv);
@@ -217,20 +219,25 @@ int main(int argc, const char* argv[]) {
 
 #ifndef HLS_TEST
     struct timeval start_time, end_time;
+    cl_int cl_err;
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel(program, "naiveBayesTrain_kernel");
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
+    cl::Kernel kernel(program, "naiveBayesTrain_kernel", &cl_err);
+    logger.logCreateKernel(cl_err);
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[3];
@@ -360,5 +367,7 @@ int main(int argc, const char* argv[]) {
     free(buf_out0);
     free(buf_out1);
 
+    nerror ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+           : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return nerror;
 }

@@ -17,6 +17,7 @@
 #include <sys/time.h>
 #include <new>
 #include <cstdlib>
+#include <algorithm>
 
 #ifndef HLS_TEST
 #include <xcl2.hpp>
@@ -30,6 +31,7 @@
 #include <iostream>
 #include "eval.hpp"
 #include "iris.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #ifdef HLS_TEST
 extern "C" void kmeansKernel(ap_uint<512> inputData[(1 << 20) + 100], ap_uint<512> centers[1 << 20]);
@@ -85,6 +87,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 #endif
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     // set repeat time
     int num_rep = 1;
     std::string num_str;
@@ -223,21 +226,26 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Host map buffer has been allocated and set.\n";
 #ifndef HLS_TEST
+    cl_int cl_err;
     // Get CL devices.
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Create context and command queue for selected device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &cl_err);
+    logger.logCreateContext(cl_err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &cl_err);
+    logger.logCreateCommandQueue(cl_err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Selected Device " << devName << "\n";
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &cl_err);
+    logger.logCreateProgram(cl_err);
 
-    cl::Kernel kernel0(program, "kmeansKernel");
+    cl::Kernel kernel0(program, "kmeansKernel", &cl_err);
+    logger.logCreateKernel(cl_err);
 
 #ifdef USE_DDR
     cl_mem_ext_ptr_t mext_in;
@@ -352,5 +360,7 @@ int main(int argc, char* argv[]) {
     free(gtag);
 
 #endif
+    res ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+        : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     return res;
 }

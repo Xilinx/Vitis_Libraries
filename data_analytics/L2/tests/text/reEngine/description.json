@@ -6,7 +6,8 @@
     "platform_whitelist": [
         "u200",
         "u250", 
-        "u50"
+        "u50",
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [
         "zc"
@@ -110,7 +111,8 @@
                 "PROJECT/host", 
                 "PROJECT/re_compile/lib/include", 
                 "LIB_DIR/L1/include/sw", 
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }, 

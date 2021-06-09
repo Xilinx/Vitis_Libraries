@@ -474,19 +474,19 @@ void closestCenter(hls::stream<ap_uint<sizeof(DT) * 8> > sampleStrm[DV],
     const int DEPTH = 64;
     hls::stream<DT> psStrm[KU];
 #pragma HLS STREAM variable = psStrm depth = DEPTH
-#pragma HLS resource variable = psStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = psStrm type = fifo impl = lutram
 
     hls::stream<bool> ePsStrm;
 #pragma HLS STREAM variable = ePsStrm depth = DEPTH
-#pragma HLS resource variable = ePsStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ePsStrm type = fifo impl = lutram
 
     hls::stream<DT> distStrm[KU];
 #pragma HLS STREAM variable = distStrm depth = DEPTH
-#pragma HLS resource variable = distStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = distStrm type = fifo impl = lutram
 
     hls::stream<bool> eDistStrm;
 #pragma HLS STREAM variable = eDistStrm depth = DEPTH
-#pragma HLS resource variable = eDistStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eDistStrm type = fifo impl = lutram
     // distance
     computingDistance<DT, Dim, Kcluster, uramDepth, KU, DV>(sampleStrm, endSampleStrm, centers, dims, kcluster,
                                                             distStrm, eDistStrm);
@@ -528,10 +528,10 @@ void kMeansPredictImp(hls::stream<ap_uint<sizeof(DT) * 8> > sampleStrm[DV],
 #pragma HLS dataflow
     hls::stream<ap_uint<sizeof(DT) * 8> > repSmpStrm[DV];
 #pragma HLS STREAM variable = repSmpStrm depth = DEPTH
-#pragma HLS resource variable = repSmpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = repSmpStrm type = fifo impl = lutram
     hls::stream<bool> endRepSmpStrm;
 #pragma HLS STREAM variable = endRepSmpStrm depth = DEPTH
-#pragma HLS resource variable = endRepSmpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = endRepSmpStrm type = fifo impl = lutram
 
 #if !defined(__SYNTHESIS__) && XF_DATA_ANALYTICS_DEBUG == 1
     std::cout << "starting cluster" << std::endl;

@@ -30,6 +30,7 @@
 #include "xf_data_analytics/common/stream_local_processing.hpp"
 #include "xf_data_analytics/common/table_sample.hpp"
 #include "xf_data_analytics/common/enums.hpp"
+#include "xf_data_analytics/common/math_helper.hpp"
 
 namespace xf {
 namespace data_analytics {
@@ -103,7 +104,7 @@ MType funcAssign(MType op) {
 
 template <typename MType>
 MType funcExp(MType op) {
-    return hls::exp(op);
+    return xf::data_analytics::internal::m::exp(op);
 }
 
 template <typename MType,
@@ -184,7 +185,7 @@ class linearLeastSquareGradientProcessor {
                   MType stepSize,
                   MType regVal,
                   bool withIntercept) {
-        MType thisIterStepSize = stepSize / hls::sqrt(MType(iterationIndex));
+        MType thisIterStepSize = stepSize / xf::data_analytics::internal::m::sqrt(MType(iterationIndex));
         MType shrinkVal = thisIterStepSize * regVal;
         MType newNorm = 0;
         MType diffNorm = 0;
@@ -261,7 +262,7 @@ class linearLeastSquareGradientProcessor {
                   MType stepSize,
                   MType regVal,
                   bool withIntercept) {
-        MType thisIterStepSize = stepSize / hls::sqrt(MType(iterationIndex));
+        MType thisIterStepSize = stepSize / xf::data_analytics::internal::m::sqrt(MType(iterationIndex));
         MType newNorm = 0;
         MType diffNorm = 0;
         // update weight
@@ -320,7 +321,7 @@ class linearLeastSquareGradientProcessor {
 
     bool simpleUpdate(
         ap_uint<32> iterationIndex, ap_uint<32> cols, MType tolerance, MType stepSize, bool withIntercept) {
-        MType thisIterStepSize = (-stepSize) / hls::sqrt(MType(iterationIndex));
+        MType thisIterStepSize = (-stepSize) / xf::data_analytics::internal::m::sqrt(MType(iterationIndex));
         MType newNorm = 0;
         MType diffNorm = 0;
         // update weight

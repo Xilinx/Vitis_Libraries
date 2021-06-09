@@ -26,7 +26,7 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 #include <utils/x_hls_utils.h>
-#include <hls_math.h>
+#include "xf_data_analytics/common/math_helper.hpp"
 #include "xf_data_analytics/common/stream_local_processing.hpp"
 
 namespace xf {
@@ -187,9 +187,9 @@ class tableLoader {
         static const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<_WAxi> > vecStrm;
         hls::stream<ap_uint<32> > firstShiftStrm;
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifo_depth
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 2
 #pragma HLS dataflow
         readRaw(ddr, offset, start, rows, cols, vecStrm, firstShiftStrm);
@@ -421,9 +421,9 @@ class tagTableLoader {
         static const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<_WAxi> > vecStrm;
         hls::stream<ap_uint<32> > firstShiftStrm;
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifo_depth
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 2
 #pragma HLS dataflow
         readRaw(ddr, offset, start, rows, cols, vecStrm, firstShiftStrm);
@@ -444,9 +444,9 @@ class tagTableLoader {
         static const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<_WAxi> > vecStrm;
         hls::stream<ap_uint<32> > firstShiftStrm;
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifo_depth
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 2
 #pragma HLS dataflow
         readRaw(ddr, offset, start, rows, cols, vecStrm, firstShiftStrm);
@@ -543,10 +543,10 @@ class MT19937 {
 
     MT19937() {
 #pragma HLS inline
-#pragma HLS RESOURCE variable = mt_even_0 core = RAM_T2P_BRAM
-#pragma HLS RESOURCE variable = mt_even_1 core = RAM_T2P_BRAM
-#pragma HLS RESOURCE variable = mt_odd_0 core = RAM_T2P_BRAM
-#pragma HLS RESOURCE variable = mt_odd_1 core = RAM_T2P_BRAM
+#pragma HLS bind_storage variable = mt_even_0 type = ram_t2p impl = bram
+#pragma HLS bind_storage variable = mt_even_1 type = ram_t2p impl = bram
+#pragma HLS bind_storage variable = mt_odd_0 type = ram_t2p impl = bram
+#pragma HLS bind_storage variable = mt_odd_1 type = ram_t2p impl = bram
     }
 
     /**
@@ -740,7 +740,7 @@ class tableRandomLoader {
                             hls::stream<bool>& eDataStrm) {
         const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS resource variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = fifo impl = lutram
 #pragma HLS stream variable = vec_strm depth = fifo_depth
 #pragma HLS dataflow
         read_raw(ddr, nread, realOffset, vec_strm);
@@ -762,7 +762,7 @@ class tableRandomLoader {
                    hls::stream<bool>& eAxiCfgStrm,
                    hls::stream<bool>& ifDropStrm) {
         if (ifJump) {
-            float log1MF = hls::log(1 - fraction);
+            float log1MF = xf::data_analytics::internal::m::log(1 - fraction);
 
             bool e = false;
             ap_uint<32> start = 0;
@@ -772,7 +772,7 @@ class tableRandomLoader {
                 ap_ufixed<33, 0> ftmp = rng.next();
                 ftmp[0] = 1;
                 float tmp = ftmp;
-                int jump = hls::log(tmp) / log1MF;
+                int jump = xf::data_analytics::internal::m::log(tmp) / log1MF;
                 ap_uint<32> nextstart = start + jump * bucketSize;
                 ap_uint<32> nextrows;
 
@@ -935,27 +935,27 @@ class tableRandomLoader {
         hls::stream<bool> ifDropStrm;
         hls::stream<ap_uint<_WData> > interDataStrm[_WAxi / _WData];
         hls::stream<bool> eInterDataStrm;
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
-#pragma HLS stream variable = eeInterDataStrm depth = fifo_depth
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
+#pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
         genRandom(rows, cols, offset, bucketSize, ifJump, fraction, nreadStrm, realOffsetStrm, firstShiftStrm,
                   tailBatchStrm, batchNumStrm, nOpStrm, eAxiCfgStrm, ifDropStrm);
@@ -1066,7 +1066,7 @@ class tagTableRandomLoader {
                             hls::stream<bool>& eDataStrm) {
         const int fifo_depth = _BurstLen * 2;
         hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS resource variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = fifo impl = lutram
 #pragma HLS stream variable = vec_strm depth = fifo_depth
 #pragma HLS dataflow
         read_raw(ddr, nread, realOffset, vec_strm);
@@ -1089,7 +1089,7 @@ class tagTableRandomLoader {
                    hls::stream<bool>& eAxiCfgStrm,
                    hls::stream<bool>& ifDropStrm) {
         if (ifJump) {
-            float log1MF = hls::log(1 - fraction);
+            float log1MF = xf::data_analytics::internal::m::log(1 - fraction);
             bool e = false;
             ap_uint<32> start = 0;
             ap_uint<32> full_batch = (_WAxi / _WData);
@@ -1104,7 +1104,7 @@ class tagTableRandomLoader {
                 ap_ufixed<33, 0> ftmp = rng.next();
                 ftmp[0] = 1;
                 float tmp = ftmp;
-                int jump = hls::log(tmp) / log1MF;
+                int jump = xf::data_analytics::internal::m::log(tmp) / log1MF;
                 ap_uint<32> nextstart = start + jump * bucketSize;
                 ap_uint<32> nextrows;
 
@@ -1347,30 +1347,30 @@ class tagTableRandomLoader {
         hls::stream<bool> ifDropStrm;
         hls::stream<ap_uint<_WData> > interDataStrm[_WAxi / _WData];
         hls::stream<bool> eInterDataStrm;
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm1 type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm1 depth = 4
-#pragma HLS resource variable = tailBatchStrm2 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm2 type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm2 depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
 #pragma HLS array_partition variable = interDataStrm dim = 1 complete
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
-#pragma HLS stream variable = eeInterDataStrm depth = fifo_depth
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
+#pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
         genRandom(rows, cols, offset, bucketSize, ifJump, fraction, nreadStrm, realOffsetStrm, firstShiftStrm,
                   tailBatchStrm1, tailBatchStrm2, batchNumStrm, nOpStrm, eAxiCfgStrm, ifDropStrm);
@@ -1406,30 +1406,30 @@ class tagTableRandomLoader {
         hls::stream<bool> ifDropStrm;
         hls::stream<ap_uint<_WData> > interDataStrm[_WAxi / _WData];
         hls::stream<bool> eInterDataStrm;
-#pragma HLS resource variable = nreadStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nreadStrm type = fifo impl = lutram
 #pragma HLS stream variable = nreadStrm depth = 4
-#pragma HLS resource variable = realOffsetStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = realOffsetStrm type = fifo impl = lutram
 #pragma HLS stream variable = realOffsetStrm depth = 4
-#pragma HLS resource variable = firstShiftStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = firstShiftStrm type = fifo impl = lutram
 #pragma HLS stream variable = firstShiftStrm depth = 4
-#pragma HLS resource variable = tailBatchStrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm1 type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm1 depth = 4
-#pragma HLS resource variable = tailBatchStrm2 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tailBatchStrm2 type = fifo impl = lutram
 #pragma HLS stream variable = tailBatchStrm2 depth = 4
-#pragma HLS resource variable = batchNumStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = batchNumStrm type = fifo impl = lutram
 #pragma HLS stream variable = batchNumStrm depth = 4
-#pragma HLS resource variable = nOpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = nOpStrm type = fifo impl = lutram
 #pragma HLS stream variable = nOpStrm depth = 4
-#pragma HLS resource variable = eAxiCfgStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = eAxiCfgStrm type = fifo impl = lutram
 #pragma HLS stream variable = eAxiCfgStrm depth = 4
 
-#pragma HLS resource variable = ifDropStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ifDropStrm type = fifo impl = lutram
 #pragma HLS stream variable = ifDropStrm depth = fifo_depth
 #pragma HLS array_partition variable = interDataStrm dim = 1 complete
-#pragma HLS resource variable = interDataStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = interDataStrm type = fifo impl = lutram
 #pragma HLS stream variable = interDataStrm depth = fifo_depth
-#pragma HLS resource variable = eInterDataStrm core = FIFO_LUTRAM
-#pragma HLS stream variable = eeInterDataStrm depth = fifo_depth
+#pragma HLS bind_storage variable = eInterDataStrm type = fifo impl = lutram
+#pragma HLS stream variable = eInterDataStrm depth = fifo_depth
 
         genRandom(rows, cols, offset, bucketSize, ifJump, fraction, nreadStrm, realOffsetStrm, firstShiftStrm,
                   tailBatchStrm1, tailBatchStrm2, batchNumStrm, nOpStrm, eAxiCfgStrm, ifDropStrm);
@@ -1460,7 +1460,7 @@ class tupleRandomLoader {
         ap_uint<64> totalRead = (nums + N - 1) / N;
 
         if (ifJump) {
-            float log1MF = hls::log(1 - fraction);
+            float log1MF = xf::data_analytics::internal::m::log(1 - fraction);
 
             bool e = false;
             ap_uint<64> start = 0;
@@ -1470,7 +1470,7 @@ class tupleRandomLoader {
                 ap_ufixed<33, 0> ftmp = rng.next();
                 ftmp[0] = 1;
                 float tmp = ftmp;
-                int jump = hls::log(tmp) / log1MF;
+                int jump = xf::data_analytics::internal::m::log(tmp) / log1MF;
 
                 ap_uint<64> nextOffset = start + jump * bucketSize;
                 ap_uint<64> nextrows;

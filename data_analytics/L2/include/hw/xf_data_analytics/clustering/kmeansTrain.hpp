@@ -150,7 +150,7 @@ void axiVarColToStreams(ap_uint<WAxi>* ddr,
                         hls::stream<bool>& eData) {
     static const int fifoDepth = BurstLen * 2;
     hls::stream<ap_uint<WAxi> > vecStrm;
-#pragma HLS resource variable = vecStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vecStrm type = fifo impl = lutram
 #pragma HLS stream variable = vecStrm depth = fifoDepth
 #pragma HLS dataflow
     kmeansScan::readRaw<WAxi, BurstLen, WData>(ddr, offset, rows, cols, vecStrm);
@@ -242,34 +242,34 @@ void scanAndStoreCenters(ap_uint<512>* data,
     const int sn = 512 / sz;
     hls::stream<ap_uint<sizeof(DT) * 8> > centerStrm[512 / 8 / sizeof(DT)];
 #pragma HLS STREAM variable = centerStrm depth = DEPTH
-#pragma HLS resource variable = centerStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = centerStrm type = fifo impl = lutram
     hls::stream<bool> endCenterStrm;
 #pragma HLS STREAM variable = endCenterStrm depth = DEPTH
-#pragma HLS resource variable = endCenterStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = endCenterStrm type = fifo impl = lutram
 
     hls::stream<ap_uint<sz> > dpStrm[sn];
 #pragma HLS stream variable = dpStrm depth = 4
-#pragma HLS resource variable = dpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dpStrm type = fifo impl = lutram
 
     hls::stream<bool> edpStrm[sn];
 #pragma HLS stream variable = edpStrm depth = 4
-#pragma HLS resource variable = edpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = edpStrm type = fifo impl = lutram
 
     hls::stream<ap_uint<sz * DV> > vStrm;
 #pragma HLS stream variable = vStrm depth = 4
-#pragma HLS resource variable = vStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vStrm type = fifo impl = lutram
 
     hls::stream<bool> evStrm;
 #pragma HLS stream variable = evStrm depth = 4
-#pragma HLS resource variable = evStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = evStrm type = fifo impl = lutram
 
     hls::stream<ap_uint<sz> > newStrm[DV];
 #pragma HLS stream variable = newStrm depth = 4
-#pragma HLS resource variable = newStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = newStrm type = fifo impl = lutram
 
     hls::stream<bool> enewStrm;
 #pragma HLS stream variable = enewStrm depth = 4
-#pragma HLS resource variable = enewStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = enewStrm type = fifo impl = lutram
 
 #if !defined(__SYNTHESIS__) && XF_DATA_ANALYTICS_DEBUG == 1
     std::cout << "start to scan centers" << std::endl;
@@ -505,27 +505,27 @@ void convertPort(hls::stream<ap_uint<sz> > sampleStrm[sn],
 
     hls::stream<ap_uint<sz> > dpStrm[sn];
 #pragma HLS stream variable = dpStrm depth = 4
-#pragma HLS resource variable = dpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = dpStrm type = fifo impl = lutram
 
     hls::stream<bool> edpStrm[sn];
 #pragma HLS stream variable = edpStrm depth = 4
-#pragma HLS resource variable = edpStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = edpStrm type = fifo impl = lutram
 
     hls::stream<ap_uint<sz * DV> > vStrm;
 #pragma HLS stream variable = vStrm depth = 4
-#pragma HLS resource variable = vStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vStrm type = fifo impl = lutram
 
     hls::stream<bool> evStrm;
 #pragma HLS stream variable = evStrm depth = 4
-#pragma HLS resource variable = evStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = evStrm type = fifo impl = lutram
 
     hls::stream<ap_uint<sz * DV> > rvStrm[2];
 #pragma HLS stream variable = rvStrm depth = 4
-#pragma HLS resource variable = rvStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = rvStrm type = fifo impl = lutram
 
     hls::stream<bool> ervStrm[2];
 #pragma HLS stream variable = ervStrm depth = 4
-#pragma HLS resource variable = ervStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ervStrm type = fifo impl = lutram
 
     if (DV == sn) {
         // duplicate
@@ -658,30 +658,30 @@ void kMeansTrainIter(ap_uint<512>* data,
 #pragma HLS dataflow
     hls::stream<ap_uint<sizeof(DT) * 8> > sampleStrm[sn];
 #pragma HLS STREAM variable = sampleStrm depth = DEPTH
-#pragma HLS resource variable = sampleStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = sampleStrm type = fifo impl = lutram
     hls::stream<bool> endSampleStrm;
 #pragma HLS STREAM variable = endSampleStrm depth = DEPTH
-#pragma HLS resource variable = endSampleStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = endSampleStrm type = fifo impl = lutram
     hls::stream<ap_uint<sizeof(DT) * 8> > s1Strm[DV];
 #pragma HLS STREAM variable = s1Strm depth = DEPTH
-#pragma HLS resource variable = s1Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = s1Strm type = fifo impl = lutram
     hls::stream<bool> es1Strm;
 #pragma HLS STREAM variable = es1Strm depth = DEPTH
-#pragma HLS resource variable = es1Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = es1Strm type = fifo impl = lutram
 
     hls::stream<ap_uint<sizeof(DT) * 8> > s2Strm[DV];
 #pragma HLS STREAM variable = s2Strm depth = DEPTH2
-#pragma HLS resource variable = s2Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = s2Strm type = fifo impl = lutram
     hls::stream<bool> es2Strm;
 #pragma HLS STREAM variable = es2Strm depth = DEPTH2
-#pragma HLS resource variable = es2Strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = es2Strm type = fifo impl = lutram
 
     hls::stream<ap_uint<32> > tagStrm;
 #pragma HLS STREAM variable = tagStrm depth = 4
-#pragma HLS resource variable = tagStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = tagStrm type = fifo impl = lutram
     hls::stream<bool> endTagStrm;
 #pragma HLS STREAM variable = endTagStrm depth = 4
-#pragma HLS resource variable = endTagStrm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = endTagStrm type = fifo impl = lutram
     // sample in DDR --> 8-double/16-float streams
     //                           |
     //                          \|/            s1Strm
@@ -743,9 +743,9 @@ void kMeansTrainImp(ap_uint<512>* data, ap_uint<512>* kcenters) {
     DT eps;
     ap_uint<sizeof(DT) * 8 * DV> centers[KU][uramDepth];
 #pragma HLS array_partition variable = centers complete dim = 1
-#pragma HLS RESOURCE variable = centers core = RAM_2P_URAM // uram
+#pragma HLS bind_storage variable = centers type = ram_2p impl = uram // uram
     ap_uint<sizeof(DT) * 8 * DV> betterCenters[KU][uramDepth];
-#pragma HLS RESOURCE variable = betterCenters core = RAM_2P_URAM // uram
+#pragma HLS bind_storage variable = betterCenters type = ram_2p impl = uram // uram
     // parser dynamic configures
     parser<DT>(data[0], nsample, dims, kcluster, maxIter, eps);
     // scan initial centers to local memory

@@ -3,10 +3,12 @@
     "name": "Xilinx Kmeans Training", 
     "description": "", 
     "flow": "vitis", 
-    "platform_type": "pcie", 
+    "platform_type": "", 
     "platform_whitelist": [
         "u250", 
-        "u50"
+        "u50", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [
         "zc"
@@ -43,6 +45,22 @@
                     ]
                 }
             }
+        }, 
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
         }
     }, 
     "launch": [
@@ -52,7 +70,7 @@
         }
     ], 
     "host": {
-        "host_exe": "hostexe", 
+        "host_exe": "host.exe", 
         "compiler": {
             "sources": [
                 "host/main.cpp", 
@@ -131,6 +149,7 @@
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
+            "vitis_hw_build", 
             "vitis_hw_run"
         ], 
         "category": "canary"

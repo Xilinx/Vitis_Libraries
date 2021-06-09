@@ -171,7 +171,7 @@ int main() {
             field_nm++;
         }
     } else {
-        printf("Open %s failed\n", file_path);
+        printf("Open %s failed\n", file_path.c_str());
         return -1;
     }
     std::cout << "field_nm = " << field_nm << std::endl;

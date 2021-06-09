@@ -198,7 +198,7 @@ void decisionTreePredict(hls::stream<ap_uint<WD> > dstrm_batch[MAX_FEA_NUM],
 #else
     struct Node<MType> nodes[(MAX_TREE_DEPTH + 1) / 2 + 1][MAX_NODES_NUM];
 #pragma HLS array_partition variable = nodes dim = 1
-#pragma HLS resource variable = nodes core = RAM_2P_URAM
+#pragma HLS bind_storage variable = nodes type = ram_2p impl = uram
 #endif
     internal::getTree<MType, MAX_TREE_DEPTH>(treeStrm, treeTag, nodes);
     internal::getPredictions<MType, WD, MAX_FEA_NUM, MAX_TREE_DEPTH, MAX_CAT_BITS>(dstrm_batch, estrm_batch, nodes,

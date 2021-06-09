@@ -78,17 +78,17 @@ extern "C" void naiveBayesTrain_kernel(const int num_of_class,
                                        ap_uint<512>* buf_out0,
                                        ap_uint<512>* buf_out1) {
 // clang-format off
-#pragma HLS INTERFACE m_axi offset slave latency = 64 \
+#pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	   num_write_outstanding = 2 num_read_outstanding = 32 \
 	   max_write_burst_length = 2 max_read_burst_length = 32 \
 	   bundle = gmem0_0 port = buf_in
 
-#pragma HLS INTERFACE m_axi offset slave latency = 64 \
+#pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	   num_write_outstanding = 32 num_read_outstanding = 2 \
 	   max_write_burst_length = 32 max_read_burst_length = 2 \
 	   bundle = gmem0_1 port = buf_out0
 
-#pragma HLS INTERFACE m_axi offset slave latency = 64 \
+#pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	   num_write_outstanding = 32 num_read_outstanding = 2 \
 	   max_write_burst_length = 32 max_read_burst_length = 2 \
 	   bundle = gmem0_2 port = buf_out1
