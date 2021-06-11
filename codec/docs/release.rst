@@ -22,10 +22,12 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+Codec Library is an open-sourced library written in C/C++ accelerating image processing including JPEG decoder and pik encoder. It now covers a level of acceleration: the module level(L1) and the pre-defined kernel level(L2).
+
 1.0
 ----
 
 The 1.0 release provides a range of algorithm, includes:
 
-- JPEG Decoder: "JPEG" stands for Joint Photographic Experts Group, the name of the committee that created the JPEG standard and also other still picture coding standards. 
-- PIK Encoder: PIK is the prototype of JPEG XL, which is a raster-graphics file format supporting both lossy and lossless compression. It is designed to outperform existing raster formats and thus to become their universal replacement.
+- JPEG Decoder: This API supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.  
+- pik Encoder: This API is based on Google's PIK, which was 'chosen as the base framework for JPEG XL'. The pikEnc is based on the 'fast mode' of PIK which can provide better encoding efficnty than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. It can proved higher throughput and lower latency compared to software-based solutions.  

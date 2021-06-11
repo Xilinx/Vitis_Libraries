@@ -4195,6 +4195,7 @@ void kernel2Wrapper(ap_uint<AXI_SZ> config[MAX_NUM_CONFIG],
 
     Config config_dev[8];
 #pragma HLS ARRAY_PARTITION variable = config_dev complete dim = 1
+#pragma HLS DISAGGREGATE variable = config_dev
 
 #ifdef DEBUG
     std::cout << "==================Kernel2 Start================" << std::endl;

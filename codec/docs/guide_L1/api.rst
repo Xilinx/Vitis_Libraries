@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2020 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,5 +21,5 @@ API Document
 .. toctree::
    :maxdepth: 2
 
-   ../rst_L2/namespace_xf_graph.rst
+   ../rst_L1/namespace_xf_codec.rst
    :start-after: FunctionSection

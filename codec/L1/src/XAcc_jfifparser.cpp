@@ -27,7 +27,7 @@
 #define B_SHORT(v1, v2) ((((int)v1) << 8) + ((int)v2))
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 
 inline void readBytes(int& j, const int& cnt, int& r, int& c) {
@@ -583,22 +583,32 @@ void decoder_jpg_top(ap_uint<AXI_WIDTH>* ptr,
 }
 
 } // namespace details
-} // namespace image
-} // namespace xf
 
 // ------------------------------------------------------------
+/**
+ * @brief Level 2 : kernel for jfif parser + huffman decoder
+ *
+ * @tparam CH_W size of data path in dataflow region, in bit.
+ *         when CH_W is 16, the decoder could decode one symbol per cycle in about 99% cases.
+ *         when CH_W is 8 , the decoder could decode one symbol per cycle in about 80% cases, but use less resource.
+ *
+ * @param datatoDDR the pointer to DDR.
+ * @param size the total bytes to be read from DDR.
+ * @param img_info information to recovery the image.
+ * @param hls_compInfo the component info used to generate the decOutput.
+ * @param block_strm the stream of coefficients in block,23:is_rst, 22:is_endblock,21~16:bpos,15~0:block val
+ * @param rtn the flag of the jfif parser succeed
+ * @param rtn2 the flag of the decode succeed
+ */
+void kernelParserDecoderTop(ap_uint<AXI_WIDTH>* datatoDDR,
+                            const int size,
 
-// @brief Level 2 : kernel for jfif parser + huffman decoder
-
-void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
-                           const int size,
-
-                           xf::image::img_info& img_info,
-                           xf::image::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR],
-                           hls::stream<ap_uint<24> >& block_strm,
-                           int& rtn,
-                           bool& rtn2,
-                           xf::image::decOutput* pout) {
+                            xf::codec::img_info& img_info,
+                            xf::codec::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR],
+                            hls::stream<ap_uint<24> >& block_strm,
+                            int& rtn,
+                            bool& rtn2,
+                            xf::codec::decOutput* pout) {
     // clang-format off
 		//uint64_t max_pix = MAX_NUM_PIX;//for 8K*8K
 		const uint64_t max_pix = MAX_DEC_PIX;//for 800*800
@@ -642,7 +652,7 @@ void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
 
     // Functions to parser the header before the data burst load from DDR
     //----------------------------------------------------------
-    xf::image::details::parser_jpg_top(datatoDDR, size, r, c, dht_tbl1, ac_val, ac_huff_start_code, ac_huff_start_addr,
+    xf::codec::details::parser_jpg_top(datatoDDR, size, r, c, dht_tbl1, ac_val, ac_huff_start_code, ac_huff_start_addr,
                                        dc_val, dc_huff_start_code, dc_huff_start_addr, hls_cmp, left, img_info, hls_mbs,
                                        hls_cmpnfo, rtn, pout);
 
@@ -650,7 +660,7 @@ void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
 
     // Functions to decode the huffman code to non(Inverse quantization+IDCT) block coefficient
     //----------------------------------------------------------
-    xf::image::details::decoder_jpg_top(ptr, left, c, dht_tbl1, // dht_tbl2,
+    xf::codec::details::decoder_jpg_top(ptr, left, c, dht_tbl1, // dht_tbl2,
                                         ac_val, ac_huff_start_code, ac_huff_start_addr, dc_val, dc_huff_start_code,
                                         dc_huff_start_addr, hls_cmp, hls_mbs, img_info, rtn2, rst_cnt, block_strm);
 
@@ -659,4 +669,27 @@ void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
         fprintf(stderr, "Warning: parser the bad case input file! \n");
     }
 #endif
+}
+} // namespace codec
+} // namespace xf
+
+void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
+                           const int size,
+
+                           xf::codec::img_info& img_info,
+                           xf::codec::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR],
+                           hls::stream<ap_uint<24> >& block_strm,
+                           int& rtn,
+                           bool& rtn2,
+                           xf::codec::decOutput* pout) {
+    // clang-format off
+		//uint64_t max_pix = MAX_NUM_PIX;//for 8K*8K
+		const uint64_t max_pix = MAX_DEC_PIX;//for 800*800
+		const uint64_t burst_lenth = BURST_LENTH;
+		#pragma HLS INTERFACE m_axi port = datatoDDR depth = max_pix offset = slave bundle = gmem_in2 \
+		latency = 125 max_read_burst_length = burst_lenth
+		#pragma HLS INTERFACE s_axilite port=datatoDDR      bundle=control
+		#pragma HLS INTERFACE s_axilite port=return         bundle=control
+    // clang-format on
+    kernelParserDecoderTop(datatoDDR, size, img_info, hls_cmpnfo, block_strm, rtn, rtn2, pout);
 }

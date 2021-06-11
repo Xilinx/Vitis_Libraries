@@ -21,6 +21,5 @@ Design Internals
 .. toctree::
    :maxdepth: 1
 
-   primitives/similarityOverview.rst
-   primitives/sortTopK.rst
+   IPs/jpegHuffmanDecoder.rst
 

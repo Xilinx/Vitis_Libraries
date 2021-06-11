@@ -82,7 +82,7 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L2/demos/jpegDec/host/test_decoder.cpp
-HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cc
+HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/hw/jpegDec
 CXXFLAGS += -I$(XFLIB_DIR)/L2/demos/jpegDec/host
 CXXFLAGS += -I$(XFLIB_DIR)/L2/demos/jpegDec/kernel

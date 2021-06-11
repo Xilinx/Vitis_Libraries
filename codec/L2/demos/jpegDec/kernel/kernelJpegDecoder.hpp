@@ -25,7 +25,18 @@
 #include "XAcc_jfifparser.hpp"
 #include "XAcc_idct.hpp"
 // ------------------------------------------------------------
-// @brief Level 2 : kernel for jfif parser + huffman decoder + iQ_iDCT
+/**
+ * @brief Level 2 : kernel for jfif parser + huffman decoder + iQ_iDCT
+ *
+ * @tparam CH_W size of data path in dataflow region, in bit.
+ *         when CH_W is 16, the decoder could decode one symbol per cycle in about 99% cases.
+ *         when CH_W is 8 , the decoder could decode one symbol per cycle in about 80% cases, but use less resource.
+ *
+ * @param jpeg_pointer the input jpeg to be read from DDR.
+ * @param size the total bytes to be read from DDR.
+ * @param yuv_mcu_pointer the output yuv to DDR in mcu order.
+ * @param info information of the image, maybe use in the recovery image.
+ */
 // a.input the jpg 420/422/444 baseline file
 // b.output the as the 8x8 's Column scan order YUV (0~255), like [Y*allpixels,U*0.5*allpixels, V*0.5*allpixels], and
 // image infos
