@@ -30,11 +30,12 @@
 
 #include "utils_XAcc_jpeg.hpp"
 #include "axi_to_stream.hpp"
+#include "utils/x_hls_utils.h"
 
 // ------------------------------------------------------------
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 // ------------------------------------------------------------
 /**
@@ -104,7 +105,7 @@ inline void hls_next_mcupos2(hls::stream<ap_uint<24> >& block_strm,
 // ------------------------------------------------------------
 
 } // namespace details
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 //**************************************
@@ -112,7 +113,7 @@ inline void hls_next_mcupos2(hls::stream<ap_uint<24> >& block_strm,
 #define DEVLI(s, n) ((s) == 0 ? (n) : (((n) >= (1 << ((s)-1))) ? (n) : (n) + 1 - (1 << (s))))
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 
 // ------------------------------------------------------------
@@ -584,7 +585,7 @@ DECODE_LOOP:
             } else {
                 val_i = 0;
             }
-            block_tmp = DEVLI(val_len, val_i);
+            block_tmp = DEVLI(val_len, reg(val_i));
         }
 
         bool eob = !freeze_out && ac && ((run_len | val_len) == 0);
@@ -825,7 +826,7 @@ void mcu_decoder(
 #pragma HLS DATAFLOW
 
     // clang-format off
-	    hls::stream<xf::image::sos_data> huff_sos_strm;
+	    hls::stream<xf::codec::sos_data> huff_sos_strm;
 	#pragma HLS DATA_PACK variable = huff_sos_strm
 	#pragma HLS RESOURCE  variable = huff_sos_strm core = FIFO_LUTRAM
 	#pragma HLS STREAM    variable = huff_sos_strm depth = 32
@@ -834,9 +835,9 @@ void mcu_decoder(
 	#pragma HLS STREAM    variable = sign_no_huff depth = 1
     // clang-format on
 
-    xf::image::details::pick_huff_data(image_strm, eof_strm, rst_cnt, sign_no_huff, huff_sos_strm);
+    xf::codec::details::pick_huff_data(image_strm, eof_strm, rst_cnt, sign_no_huff, huff_sos_strm);
 
-    xf::image::details::Huffman_decoder(huff_sos_strm, sign_no_huff, dht_tbl1, ac_value_buckets, ac_huff_start_code,
+    xf::codec::details::Huffman_decoder(huff_sos_strm, sign_no_huff, dht_tbl1, ac_value_buckets, ac_huff_start_code,
                                         ac_huff_start_addr, dc_value_buckets, dc_huff_start_code, dc_huff_start_addr,
                                         hls_cmp,
 #ifndef __SYNTHESIS__
@@ -846,6 +847,6 @@ void mcu_decoder(
 }
 
 } // namespace details
-} // namespace image
+} // namespace codec
 } // namespace xf
 #endif

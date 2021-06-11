@@ -127,16 +127,16 @@ class ArgParser {
 // ------------------------------------------------------------
 // for tmp application and reorder
 int16_t* hls_block = (int16_t*)malloc(sizeof(int16_t) * MAX_NUM_COLOR * MAXCMP_BC * 64);
-xf::image::idct_out_t* yuv_row_pointer = (uint8_t*)malloc(sizeof(uint8_t) * MAX_NUM_COLOR * MAXCMP_BC * 64);
+xf::codec::idct_out_t* yuv_row_pointer = (uint8_t*)malloc(sizeof(uint8_t) * MAX_NUM_COLOR * MAXCMP_BC * 64);
 
 // ------------------------------------------------------------
 // input strm_iDCT_x8[8] is the row of block yuv in mcu order of sample
 // output image_height*image_width*Y ... image_height*image_width*U ... image_height*image_width*V 0a to form a file to
 // show the picture
 void rebuild_raw_yuv(std::string file_name,
-                     xf::image::bas_info* bas_info,
+                     xf::codec::bas_info* bas_info,
                      int hls_bc[MAX_NUM_COLOR],
-                     // hls::stream<xf::image::idct_out_t >   strm_iDCT_x8[8],
+                     // hls::stream<xf::codec::idct_out_t >   strm_iDCT_x8[8],
                      ap_uint<64>* yuv_mcu_pointer) {
     std::string fn = file_name.substr(0, file_name.find(".")) + ".raw";
     FILE* f = fopen(fn.c_str(), "wb");
@@ -145,7 +145,7 @@ void rebuild_raw_yuv(std::string file_name,
         std::cerr << "ERROR: " << fn << " cannot be opened for binary write." << std::endl;
     }
 
-    xf::image::idct_out_t* yuv_mcu_pointer_pix = (uint8_t*)malloc(sizeof(uint8_t) * bas_info->all_blocks * 64);
+    xf::codec::idct_out_t* yuv_mcu_pointer_pix = (uint8_t*)malloc(sizeof(uint8_t) * bas_info->all_blocks * 64);
 
     int cnt = 0;
     int cnt_row = 0;
@@ -172,7 +172,7 @@ write_mcu_raw_data:
         std::cerr << "ERROR: " << fn << " cannot be opened for binary write." << std::endl;
     }
 
-    xf::image::COLOR_FORMAT fmt = bas_info->format;
+    xf::codec::COLOR_FORMAT fmt = bas_info->format;
 
     int dpos[MAX_NUM_COLOR]; // the dc position of the pointer
     for (int cmp = 0; cmp < MAX_NUM_COLOR; cmp++) {
@@ -199,7 +199,7 @@ LOOP_write_yuv_buffer:
                     }
                 } // end block
 
-                if (fmt == xf::image::C420) { // 420 mbs= 0 1 2 3 0 0
+                if (fmt == xf::codec::C420) { // 420 mbs= 0 1 2 3 0 0
 
                     if (mbs == 0) {
                         if (cmp != 0 && (dpos[cmp] % bas_info->axi_width[1] == bas_info->axi_width[1] - 1)) {
@@ -218,7 +218,7 @@ LOOP_write_yuv_buffer:
                             dpos[cmp] -= block_width * 8 - 1;
                         }
                     }
-                } else if (fmt == xf::image::C422) { // 422 mbs 0 1 0 0
+                } else if (fmt == xf::codec::C422) { // 422 mbs 0 1 0 0
                     if (mbs == 0) {
                         if (cmp != 0 && (dpos[cmp] % bas_info->axi_width[1] == bas_info->axi_width[1] - 1)) {
                             dpos[cmp] += 1 + bas_info->axi_width[1] * (8 - 1);
@@ -274,9 +274,9 @@ LOOP_write_v:
 }
 
 // ------------------------------------------------------------
-void rebuild_infos(xf::image::img_info& img_info,
-                   xf::image::cmp_info cmp_info[MAX_NUM_COLOR],
-                   xf::image::bas_info& bas_info,
+void rebuild_infos(xf::codec::img_info& img_info,
+                   xf::codec::cmp_info cmp_info[MAX_NUM_COLOR],
+                   xf::codec::bas_info& bas_info,
                    int& rtn,
                    int& rtn2,
                    ap_uint<32> infos[1024]) {
@@ -304,7 +304,7 @@ void rebuild_infos(xf::image::img_info& img_info,
         bas_info.axi_width[i] = *(infos + 21 + i);
     }
     int format = *(infos + 24);
-    bas_info.format = (xf::image::COLOR_FORMAT)format;
+    bas_info.format = (xf::codec::COLOR_FORMAT)format;
     for (int i = 0; i < MAX_NUM_COLOR; i++) {
 #pragma HLS PIPELINE II = 1
         bas_info.hls_mbs[i] = *(infos + 25 + i);
@@ -379,9 +379,6 @@ int main(int argc, const char* argv[]) {
                      "'-JPEGFile' to specified it. \n";
     }
 
-    // Variables to measure time
-    struct timeval startE2E, endE2E;
-    gettimeofday(&startE2E, 0);
 
     ///// declaration
 
@@ -402,11 +399,15 @@ int main(int argc, const char* argv[]) {
         return err;
     }
 
+    // Variables to measure time
+    struct timeval startE2E, endE2E;
+    gettimeofday(&startE2E, 0);
+    
     // To test SYNTHESIS top
     hls::stream<ap_uint<24> > block_strm;
-    xf::image::cmp_info cmp_info[MAX_NUM_COLOR];
-    xf::image::img_info img_info;
-    xf::image::bas_info bas_info;
+    xf::codec::cmp_info cmp_info[MAX_NUM_COLOR];
+    xf::codec::img_info img_info;
+    xf::codec::bas_info bas_info;
     img_info.hls_cs_cmpc = 0; // init
 
     // 0: decode jfif successful
@@ -423,7 +424,7 @@ int main(int argc, const char* argv[]) {
     uint16_t hls_mcuv;
     uint8_t hls_cs_cmpc;
     hls::stream<ap_uint<5> > idx_coef;
-    hls::stream<xf::image::idct_out_t> strm_iDCT_x8[8];
+    hls::stream<xf::codec::idct_out_t> strm_iDCT_x8[8];
 
     // L2 top
     kernelJpegDecoder((ap_uint<CH_W>*)jpeg_pointer, (int)size,

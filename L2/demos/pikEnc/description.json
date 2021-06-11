@@ -116,7 +116,7 @@
                 "LIB_DIR/L2/demos/pikEnc/host/encode_order.cc",
                 "LIB_DIR/L2/demos/pikEnc/host/pik_codec_common.cc",
                 "LIB_DIR/L2/demos/pikEnc/host/host_dev.cc", 
-                "LIB_DIR/ext/xcl2/xcl2.cc",
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
 
 
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/lcms/src/cmsalpha.cpp",

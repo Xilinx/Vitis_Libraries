@@ -32,7 +32,7 @@
 #include "XAcc_jpegdecoder.hpp"
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 // ------------------------------------------------------------
 /**
@@ -121,11 +121,11 @@ inline void decoder_jpg_top(ap_uint<AXI_WIDTH>* ptr,
                             hls::stream<ap_uint<24> >& block_strm);
 
 } // namespace details
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 // ------------------------------------------------------------
-/**
+/*
 * @brief Level 2 : kernel for jfif parser + huffman decoder
 *
 * @tparam CH_W size of data path in dataflow region, in bit.
@@ -141,18 +141,18 @@ inline void decoder_jpg_top(ap_uint<AXI_WIDTH>* ptr,
 */
 void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
                            const int size,
-                           xf::image::img_info& img_info,
-                           xf::image::cmp_info hls_cmpnfo[MAX_NUM_COLOR],
+                           xf::codec::img_info& img_info,
+                           xf::codec::cmp_info hls_cmpnfo[MAX_NUM_COLOR],
                            hls::stream<ap_uint<24> >& block_strm,
                            int& rtn,
                            int& rtn2,
-                           xf::image::bas_info* bas_info);
+                           xf::codec::bas_info* bas_info);
 
 // ------------------------------------------------------------
 #define B_SHORT(v1, v2) ((((int)v1) << 8) + ((int)v2))
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 
 inline void readBytes(int& j, const int& cnt, int& r, int& c) {
@@ -703,14 +703,14 @@ inline void decoder_jpg_top(ap_uint<AXI_WIDTH>* ptr,
     xf::common::utils_hw::axi_to_char_stream<BURST_LENTH, AXI_WIDTH, CHType>(ptr, image_strm, eof_strm, sz,
                                                                              (int)column);
 
-    xf::image::details::mcu_decoder(image_strm, eof_strm, dht_tbl1, ac_value_buckets, ac_huff_start_code,
+    xf::codec::details::mcu_decoder(image_strm, eof_strm, dht_tbl1, ac_value_buckets, ac_huff_start_code,
                                     ac_huff_start_addr, dc_value_buckets, dc_huff_start_code, dc_huff_start_addr,
                                     hls_cmp, img_info.hls_cs_cmpc, hls_mbs, img_info.hls_mcuh, img_info.hls_mcuc, rtn2,
                                     rst_cnt, block_strm);
 }
 
 } // namespace details
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 #endif

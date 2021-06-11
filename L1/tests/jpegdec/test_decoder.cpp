@@ -127,7 +127,7 @@ int main(int argc, const char* argv[]) {
 
     // call SYNTHESIS top
     hls::stream<ap_uint<24> > block_strm;
-    xf::image::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR];
+    xf::codec::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR];
     uint8_t hls_mbs[MAX_NUM_COLOR];
 
     // 0: decode jfif successful
@@ -143,8 +143,8 @@ int main(int argc, const char* argv[]) {
     uint16_t hls_mcuh;
     uint16_t hls_mcuv;
     uint8_t hls_cs_cmpc;
-    xf::image::img_info imgInfo;
-    xf::image::decOutput pout;
+    xf::codec::img_info imgInfo;
+    xf::codec::decOutput pout;
     imgInfo.hls_cs_cmpc = 0; // init
     // L1 top
     // parser_jpg_top((ap_uint<CH_W>*)datatoDDR, (int)size, hls_mcuc, hls_cmpnfo, block_strm, rtn);
@@ -185,7 +185,7 @@ int main(int argc, const char* argv[]) {
         printf("Info: Ready to decode next input file!\n");
     }
 
-    xf::image::details::hls_next_mcupos2(block_strm, hls_block, hls_sfv, hls_sfh, hls_mbs, hls_bch[0], hls_bc[0],
+    xf::codec::details::hls_next_mcupos2(block_strm, hls_block, hls_sfv, hls_sfh, hls_mbs, hls_bch[0], hls_bc[0],
                                          imgInfo.hls_mcuc, imgInfo.hls_cs_cmpc, rtn2, status);
 
     int k_dpos[3];
