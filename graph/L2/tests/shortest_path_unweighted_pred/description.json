@@ -32,7 +32,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/shortestPath_top.xclbin -o LIB_DIR/L2/tests/shortest_path_unweighted_pred/data/data-csr-offset.mtx -c LIB_DIR/L2/tests/shortest_path_unweighted_pred/data/data-csr-indicesweights.mtx -g LIB_DIR/L2/tests/shortest_path_unweighted_pred/data/data-golden.sssp.mtx", 
+            "cmd_args": " -xclbin BUILD/shortestPath_top.xclbin -o PROJECT/data/data-csr-offset.mtx -c PROJECT/data/data-csr-indicesweights.mtx -g PROJECT/data/data-golden.sssp.mtx", 
             "name": "generic launch for all flows"
         }
     ], 

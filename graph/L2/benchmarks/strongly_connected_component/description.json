@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx Strongly Connected Components Benchmark", 
     "description": "", 
     "flow": "vitis", 
