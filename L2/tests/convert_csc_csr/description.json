@@ -1,5 +1,5 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx Convert Csc Csr Test", 
     "description": "", 
     "flow": "vitis", 

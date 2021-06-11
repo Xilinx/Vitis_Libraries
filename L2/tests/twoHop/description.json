@@ -22,7 +22,7 @@
     },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/twoHop_kernel.xclbin --offset ./data/data-csr-offset.mtx --index ./data/data-csr-indicesweights.mtx --pair ./data/data-pair.mtx --golden ./data/data-golden.twoHop.mtx", 
+            "cmd_args": " -xclbin BUILD/twoHop_kernel.xclbin --offset PROJECT/data/data-csr-offset.mtx --index PROJECT/data/data-csr-indicesweights.mtx --pair PROJECT/data/data-pair.mtx --golden PROJECT/data/data-golden.twoHop.mtx", 
             "name": "generic launch for all flows"
         }
     ], 
