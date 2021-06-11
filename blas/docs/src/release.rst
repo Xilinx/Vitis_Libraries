@@ -34,3 +34,9 @@ Release Note
 The 1.0 release introduces HLS primitives for BLAS (Basic Linear Algebra Subroutines) operations. 
 These primitives are implemented with HLS::stream interfaces to allow them to operate in parallel
 with other hardware components. 
+
+2.0
+----
+
+The 2.0 release introduces Kernel for BLAS operations.
+Also software APIs are now using the XRT (Xilinx Runtime library) Native APIs.
