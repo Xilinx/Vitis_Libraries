@@ -32,12 +32,19 @@
     ], 
     "launch": [
         {
-            "cmd_args": " -x BUILD/kernel_louvain.xclbin -f 3 -c -o -m 10000 -prun LIB_DIR/L2/tests/louvain_fast/data/example-wt.txt", 
-            "name": "generic launch for all flows"
+            "cmd_args": " -x BUILD/kernel_louvain.xclbin -f 3 -c -o -m 10000 -prun PROJECT/data/example-wt.txt", 
+            "name": "generic launch for all flows",
+            "ld_library_path": [
+                                "$(LD_LIBRARY_PATH)",
+                                "$(XILINX_XRT)/lib"
+                               ] 
         }
     ], 
     "host": {
-        "host_exe": "host.exe", 
+        "host_exe": "host.exe",
+        "linker": {
+            "options": "-lgomp"
+        },
         "compiler": {
             "sources": [
                 "LIB_DIR/L2/tests/louvain_fast/host/driverForGraphClustering.cpp", 
