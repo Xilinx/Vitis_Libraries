@@ -28,15 +28,15 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-1.0
-----
+2020.1
+-------
 
 The 1.0 release introduces HLS primitives for BLAS (Basic Linear Algebra Subroutines) operations. 
 These primitives are implemented with HLS::stream interfaces to allow them to operate in parallel
 with other hardware components. 
 
-2.0
-----
+2021.1
+-------
 
-The 2.0 release introduces Kernel for BLAS operations.
-Also software APIs are now using the XRT (Xilinx Runtime library) Native APIs.
+The 2021.1 release introduces L2 kernels for GEMM and GEMV. 
+It also introduces L3 APIs based on the XRT (Xilinx Runtime library) Native APIs.
