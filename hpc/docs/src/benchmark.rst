@@ -156,7 +156,7 @@ Set up Python environment with :doc:`Python environment setup guide <../pyenvgui
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2020.2/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2021.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 

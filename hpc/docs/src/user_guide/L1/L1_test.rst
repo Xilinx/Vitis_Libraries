@@ -35,12 +35,12 @@ Please deactivate xf_hpc environment after testing.
 2. Set up Vitis_hls environment
 =================================
 Please navigate to directory L1/tests, and change the setting of environment variable 
-**TA_PATH** to point to the installation path of your Vitis 2020.2, 
+**TA_PATH** to point to the installation path of your Vitis 2021.1, 
 and run following command to set up Vivado_hls environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
    source ${XILINX_VITIS}/settings64.sh
 
 3. Test L1 primitives

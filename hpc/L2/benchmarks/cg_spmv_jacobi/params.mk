@@ -26,7 +26,7 @@ maxIter = 5000
 tol=1e-12
 mtxName = ted_B
 
-HOST_ARGS += ${maxIter} ${tol} ${sigPath} ${dataPath} $(mtxName) ${devicdID}
+HOST_ARGS += ${maxIter} ${tol} ${sigPath} ${dataPath} $(mtxName) ${deviceID}
 
 data_gen:
 	rm -rf ${sigPath}

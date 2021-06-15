@@ -41,9 +41,9 @@ copyright = '2019, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
 # The short X.Y version
-version = '2020.2'
+version = '2021.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2020.2'
+release = 'v2021.1'
 
 
 # -- General configuration ---------------------------------------------------

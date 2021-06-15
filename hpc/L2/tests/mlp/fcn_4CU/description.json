@@ -78,7 +78,7 @@
                 {
                     "name": "fcnKernel", 
                     "location": "LIB_DIR/L2/src/hw/mlp/fcnKernel.cpp", 
-                    "frequency": 270 
+                    "frequency": 250 
                 }
             ]
         }

@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.3
+# makefile-generator v1.0.4
 #
 
 # ####################################### Help Section #####################################
@@ -20,9 +20,8 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -30,22 +29,14 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "      Command to run application in emulation or on board."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make host HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
 # ##################### Setting up default value of TARGET ##########################
@@ -117,7 +108,8 @@ HOST_ARGS := $(BUILD_DIR)/fcn.xclbin 32 32 32 32 32 32 32 1 0 1 0 A B C X
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --jobs 8
+VPP_FLAGS += --hls.jobs 8
+VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u250.cfg
 endif
@@ -132,7 +124,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include/memKernel/
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L2/include/memKernel/hw/xf_blas
 
-fcnKernel_VPP_FLAGS += --hls.clock 270000000:fcnKernel
+fcnKernel_VPP_FLAGS += --hls.clock 250000000:fcnKernel
 VPP_LDFLAGS_fcn += --kernel_frequency 250
 
 
@@ -149,7 +141,7 @@ BINARY_CONTAINER_fcn_OBJS += $(TEMP_DIR)/fcnKernel.xo
 
 -include ./params.mk
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
 host: check_xrt check_sysroot $(EXE_FILE)
@@ -184,11 +176,12 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 # ###############Setting Essential Checks And Running Rules For Vitis Flow #############
 run: all
-	XCL_EMULATION_MODE=$(TARGET) make dump_config
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	XCL_EMULATION_MODE=$(TARGET) make dump_config
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
+	make dump_config
 	$(EXE_FILE) $(HOST_ARGS)
 endif
 
