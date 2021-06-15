@@ -50,7 +50,7 @@ if {$COSIM == 1} {
 }
 
 if {$VIVADO_SYN == 1} {
-  export_design -flow syn -rtl verilog
+#export_design -flow syn -rtl verilog
 }
 
 if {$VIVADO_IMPL == 1} {

@@ -31,10 +31,10 @@
 #include "XAcc_jpegdecoder.hpp"
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 // ------------------------------------------------------------
-/**
+/*
  * @brief Level 1 : parser the jfif register for the jepg decoder
  *
  * @tparam CH_W size of data path in dataflow region, in bit.
@@ -79,7 +79,7 @@ void parser_jpg_top(ap_uint<AXI_WIDTH>* datatoDDR,
                     decOutput* pout);
 
 // ------------------------------------------------------------
-/**
+/*
  * @brief Level 1 : decode all mcu with burst read data from DDR
  *
  * @tparam CH_W size of data path in dataflow region, in bit.
@@ -118,31 +118,41 @@ void decoder_jpg_top(ap_uint<AXI_WIDTH>* ptr,
                      hls::stream<ap_uint<24> >& block_strm);
 
 } // namespace details
-} // namespace image
-} // namespace xf
 
 // ------------------------------------------------------------
 /**
-* @brief Level 2 : kernel for jfif parser + huffman decoder
-*
-* @tparam CH_W size of data path in dataflow region, in bit.
-*         when CH_W is 16, the decoder could decode one symbol per cycle in about 99% cases.
-*         when CH_W is 8 , the decoder could decode one symbol per cycle in about 80% cases, but use less resource.
-*
-* @param datatoDDR the pointer to DDR.
-* @param size the total bytes to be read from DDR.
-* @param hls_mcuc total mcu.
-* @param hls_cmpnfo the component info used to generate the decOutput.
-* @param block_strm the stream of coefficients in block,23:is_rst, 22:is_endblock,21~16:bpos,15~0:block val
-* @param rtn the flag of the decode succeed
-*/
+ * @brief Level 2 : kernel for jfif parser + huffman decoder
+ *
+ * @tparam CH_W size of data path in dataflow region, in bit.
+ *         when CH_W is 16, the decoder could decode one symbol per cycle in about 99% cases.
+ *         when CH_W is 8 , the decoder could decode one symbol per cycle in about 80% cases, but use less resource.
+ *
+ * @param datatoDDR the pointer to DDR.
+ * @param size the total bytes to be read from DDR.
+ * @param img_info information to recovery the image.
+ * @param hls_compInfo the component info used to generate the decOutput.
+ * @param block_strm the stream of coefficients in block,23:is_rst, 22:is_endblock,21~16:bpos,15~0:block val
+ * @param rtn the flag of the jfif parser succeed
+ * @param rtn2 the flag of the decode succeed
+ */
+void kernelParserDecoderTop(ap_uint<AXI_WIDTH>* datatoDDR,
+                            const int size,
+                            xf::codec::img_info& img_info,
+                            xf::codec::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR],
+                            hls::stream<ap_uint<24> >& block_strm,
+                            int& rtn,
+                            bool& rtn2,
+                            xf::codec::decOutput* pout);
+
+} // namespace codec
+} // namespace xf
 void kernel_parser_decoder(ap_uint<AXI_WIDTH>* datatoDDR,
                            const int size,
-                           xf::image::img_info& img_info,
-                           xf::image::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR],
+                           xf::codec::img_info& img_info,
+                           xf::codec::hls_compInfo hls_cmpnfo[MAX_NUM_COLOR],
                            hls::stream<ap_uint<24> >& block_strm,
                            int& rtn,
                            bool& rtn2,
-                           xf::image::decOutput* pout);
+                           xf::codec::decOutput* pout);
 
 #endif

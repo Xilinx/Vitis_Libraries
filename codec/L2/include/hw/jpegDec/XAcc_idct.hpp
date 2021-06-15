@@ -27,8 +27,8 @@
 #include "XAcc_jpegdecoder.hpp"
 
 namespace xf {
-namespace image {
-
+namespace codec {
+namespace details {
 // ------------------------------------------------------------
 enum {
     w1 = 2841, // 2048*sqrt(2)*cos(1*pi/16)
@@ -51,7 +51,6 @@ enum {
 typedef int idct25_t;
 typedef ap_int<24> idctm_t;
 
-namespace details {
 // ------------------------------------------------------------
 /**
  * @brief Level 1 : decode all mcu with burst read data from DDR
@@ -494,10 +493,10 @@ void mcu_reorder(hls::stream<ap_uint<24> >& block_strm,
 #pragma HLS DATAFLOW
 
     // clang-format off
-	    hls::stream< xf::image::idct_in_t >  str_rast_x8[8];
+	    hls::stream< idct_in_t >  str_rast_x8[8];
 #pragma HLS STREAM 			      	variable=str_rast_x8 depth=128
 #pragma HLS ARRAY_PARTITION 		variable=str_rast_x8 complete dim=0
-		hls::stream<xf::image::idctm_t> strm_intermed[8][8];
+		hls::stream<idctm_t> strm_intermed[8][8];
 #pragma HLS STREAM 				  variable=strm_intermed depth=16
 #pragma HLS ARRAY_PARTITION 	  variable=strm_intermed complete dim=0
         idct_in_t coef_mcu[6][64];
@@ -679,10 +678,11 @@ void decoder_jpg_full_top(ap_uint<_WAxi>* ptr,
 
     // clang-format off
     hls::stream<ap_uint<24> > block_strm;
-#pragma HLS STREAM        variable = block_strm depth = 1024
+#pragma HLS STREAM   variable = block_strm depth = 1024
+#pragma HLS BIND_STORAGE variable = block_strm type = ram_2p impl = bram
     // clang-format on
 
-    xf::image::details::mcu_decoder(image_strm, eof_strm, dht_tbl1, // dht_tbl3, dht_tbl4,
+    xf::codec::details::mcu_decoder(image_strm, eof_strm, dht_tbl1, // dht_tbl3, dht_tbl4,
                                     ac_value_buckets, ac_huff_start_code, ac_huff_start_addr, dc_value_buckets,
                                     dc_huff_start_code, dc_huff_start_addr, hls_cmp, img_info.hls_cs_cmpc, hls_mbs,
                                     img_info.hls_mcuh, img_info.hls_mcuc, rtn2, rst_cnt, block_strm);
@@ -690,17 +690,120 @@ void decoder_jpg_full_top(ap_uint<_WAxi>* ptr,
     hls::stream<idct_out_t> strm_iDCT_x8[8];
 #pragma HLS stream variable = strm_iDCT_x8 depth = 256
 #pragma HLS ARRAY_PARTITION variable = strm_iDCT_x8 complete dim = 0
+#pragma HLS BIND_STORAGE variable = strm_iDCT_x8 type = ram_2p impl = bram
 
     // Functions to reorder the mcu block from only effective coefficient to real coefficient
     // Then zigzag to raster scan, iQ,iDCT and shift form (-128~127) to (0~255)
     //----------------------------------------------------------
-    xf::image::details::mcu_reorder(block_strm, q_tables, bas_info, strm_iDCT_x8); // idx_coef,
+    xf::codec::details::mcu_reorder(block_strm, q_tables, bas_info, strm_iDCT_x8); // idx_coef,
 
     burstWrite<64>(yuv_mcu_pointer, strm_iDCT_x8, bas_info.all_blocks);
 }
 
 } // namespace details
-} // namespace image
-} // namespace xf
 
+
+// ------------------------------------------------------------
+/**
+ * @brief Level 2 : kernel implement for jfif parser + huffman decoder + iQ_iDCT
+ *
+ * @tparam CH_W size of data path in dataflow region, in bit.
+ *         when CH_W is 16, the decoder could decode one symbol per cycle in about 99% cases.
+ *         when CH_W is 8 , the decoder could decode one symbol per cycle in about 80% cases, but use less resource.
+ *
+ * @param jpeg_pointer the input jpeg to be read from DDR.
+ * @param size the total bytes to be read from DDR.
+ * @param yuv_mcu_pointer the output yuv to DDR in mcu order.
+ * @param info information of the image, maybe use in the recovery image.
+ */
+// a.input the jpg 420/422/444 baseline file
+// b.output the as the 8x8 's Column scan order YUV (0~255), like [Y*allpixels,U*0.5*allpixels, V*0.5*allpixels], and
+// image infos
+// c.Fault tolerance: If the picture's format is incorrect, error codes will directly end the kernel
+// and wait for the input of the next image. Error codes cloud help to position at which decoding stage does the error
+// occur
+// d.performance: input throughput: 150MB/s~300MB/s(1symbol/clk), output 1~1.6GB/s (max 8B/clk),
+// frequency 250MHz for kernel, for only huffman core 286MHz by vivado 2018.3
+
+inline void kernelJpegDecoderTop(ap_uint<AXI_WIDTH>* jpeg_pointer,
+                                  const int size,
+                                  ap_uint<64>* yuv_mcu_pointer,
+                                  ap_uint<32>* infos) {
+    // clang-format off
+
+	//for jfif parser
+    int r = 0, c = 0;
+    int left = 0;
+    ap_uint<12> hls_cmp;
+    uint8_t hls_mbs[MAX_NUM_COLOR] = {0};
+#pragma HLS ARRAY_PARTITION variable = hls_mbs  complete
+
+    //for reset of the decoder
+    uint32_t rst_cnt;
+    int rtn;
+    int rtn2;
+
+    //tables
+	uint8_t 						   q_tables[2][8][8];
+#pragma HLS ARRAY_PARTITION variable = q_tables  dim = 3
+    uint16_t 					       dht_tbl1[2][2][1 << DHT1];
+#pragma HLS ARRAY_PARTITION variable = dht_tbl1 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = dht_tbl1 complete dim = 2
+
+	uint8_t ac_value_buckets  [2][ 165 ];//every val relative with the huffman codes
+	HCODE_T ac_huff_start_code[2][AC_N]; // the huff_start_code<65535
+	int16_t ac_huff_start_addr[2][16];   // the addr of the val huff_start_addr<256
+	uint8_t dc_value_buckets  [2][ 12 ]; //every val relative with the huffman codes
+	HCODE_T dc_huff_start_code[2][DC_N]; // the huff_start_code<65535
+	int16_t dc_huff_start_addr[2][16];   // the addr of the val huff_start_addr<256
+//#pragma HLS RESOURCE 		variable = ac_huff_start_code core = RAM_2P_LUTRAM
+#pragma HLS ARRAY_PARTITION variable = ac_huff_start_code complete dim = 2
+//#pragma HLS RESOURCE 		variable = dc_huff_start_code core = RAM_2P_LUTRAM
+#pragma HLS ARRAY_PARTITION variable = dc_huff_start_code complete dim = 2
+
+#pragma HLS RESOURCE variable = ac_huff_start_addr  core = RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable = ac_value_buckets 	core = RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable = dc_huff_start_addr  core = RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable = dc_value_buckets 	core = RAM_2P_LUTRAM
+
+	// image infos for multi-applications
+    xf::codec::img_info img_info;
+    xf::codec::cmp_info cmp_info[MAX_NUM_COLOR];
+    xf::codec::bas_info bas_info;
+    img_info.hls_cs_cmpc = 0;//init
+
+    // Functions to parser the header before the data burst load from DDR
+    //----------------------------------------------------------
+    xf::codec::details::parser_jpg_top(jpeg_pointer, size, r, c, dht_tbl1,
+    								   ac_value_buckets, ac_huff_start_code, ac_huff_start_addr,
+                                       dc_value_buckets, dc_huff_start_code, dc_huff_start_addr,
+									   hls_cmp, left,
+									   hls_mbs, q_tables, rtn,
+									   img_info, cmp_info, bas_info);
+
+    ap_uint<AXI_WIDTH>* ptr = jpeg_pointer + r;
+
+    // Functions to decode the huffman code to non(Inverse quantization+IDCT) block coefficient
+    //----------------------------------------------------------
+    xf::codec::details::decoder_jpg_full_top(ptr, left, c, dht_tbl1,
+											 ac_value_buckets, ac_huff_start_code, ac_huff_start_addr,
+											 dc_value_buckets, dc_huff_start_code, dc_huff_start_addr,
+											 hls_cmp, hls_mbs, q_tables, img_info, bas_info,
+											 rtn2, rst_cnt, yuv_mcu_pointer);
+											 //strm_iDCT_x8);//idx_coef,
+
+    // Functions to copy image infos from struct to pointer for axi master
+    //----------------------------------------------------------
+    xf::codec::details::copyInfo(img_info, cmp_info, bas_info, rtn, rtn2, infos);
+
+// clang-format on
+#ifndef __SYNTHESIS__
+    if (rtn || (rtn2)) {
+        fprintf(stderr, "Warning: parser the bad case input file! \n");
+    }
+#endif
+}
+
+} // namespace codec
+} // namespace xf
 #endif

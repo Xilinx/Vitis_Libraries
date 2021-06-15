@@ -83,9 +83,8 @@ typedef ap_uint<14> HCODE_T;
 #define MAXCMP_BC (1036800)
 
 namespace xf {
-namespace image {
+namespace codec {
 // ------------------------------------------------------------
-#if 1
 // input width AXI_WIDTH = 16, means the decoder cloud process 16bits per cycle, in max speed
 // output width OUT_WIDTH = 64,means the decoder meigrate 8 Bytes of YUV per cycle, a faster design to be explore.
 #define AXI_WIDTH (16)
@@ -140,14 +139,13 @@ const short hls_icos_base_8192_scaled[64] = {
     -4433,  10703, -10703, 4433,  2260, -6436, 9633,   -11363, 11363, -9633, 6436,   -2260,
 };
 
-#endif
 // ------------------------------------------------------------
 
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 namespace xf {
-namespace image {
+namespace codec {
 
 // ------------------------------------------------------------
 struct hls_huff_DHT {
@@ -183,7 +181,7 @@ struct cmp_info {
     int bch; // block count horizontal (interleaved)
     int bc;  // block count (all) (interleaved)
 };
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 #endif

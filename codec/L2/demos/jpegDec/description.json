@@ -4,9 +4,8 @@
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u200",
-        "u250",
-        "u50"
+        "u50",
+        "u280"
     ], 
     "platform_blacklist": [
         "zc"
@@ -49,8 +48,12 @@
     },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/kernelJpegDecoder.xclbin -JPEGFile images/android.jpg", 
-            "name": "generic launch for all flows"
+            "cmd_args": " -xclbin BUILD/kernelJpegDecoder.xclbin -JPEGFile PROJECT/images/t0.jpg", 
+            "name": "generic launch for all flows",
+            "ld_library_path": [
+                          "$(LD_LIBRARY_PATH)",
+                          "$(XILINX_XRT)/lib"
+                               ] 
         }
     ], 
     "host": {
@@ -58,7 +61,7 @@
         "compiler": {
             "sources": [
                 "LIB_DIR/L2/demos/jpegDec/host/test_decoder.cpp", 
-                "LIB_DIR/ext/xcl2/xcl2.cc"
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include/hw/jpegDec", 

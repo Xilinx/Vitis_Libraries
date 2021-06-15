@@ -83,7 +83,7 @@ typedef ap_uint<14> HCODE_T;
 #define MAXCMP_BC (1036800)
 
 namespace xf {
-namespace image {
+namespace codec {
 // ------------------------------------------------------------
 #if 1
 #define AXI_WIDTH (16)
@@ -122,11 +122,11 @@ struct decOutput {
 #endif
 // ------------------------------------------------------------
 
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 namespace xf {
-namespace image {
+namespace codec {
 
 // ------------------------------------------------------------
 struct hls_huff_DHT {
@@ -162,7 +162,7 @@ struct hls_compInfo {
     int bch; // block count horizontal (interleaved)
     int bc;  // block count (all) (interleaved)
 };
-} // namespace image
+} // namespace codec
 } // namespace xf
 
 // ------------------------------------------------------------
@@ -198,7 +198,7 @@ void top_mcu_decoder(
 // ------------------------------------------------------------
 
 namespace xf {
-namespace image {
+namespace codec {
 namespace details {
 // ------------------------------------------------------------
 /**
@@ -262,6 +262,6 @@ void hls_next_mcupos2(hls::stream<ap_uint<24> >& block_strm,
 // ------------------------------------------------------------
 
 } // namespace details
-} // namespace image
+} // namespace codec
 } // namespace xf
 #endif
