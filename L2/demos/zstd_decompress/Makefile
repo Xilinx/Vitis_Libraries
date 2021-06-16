@@ -123,6 +123,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src
 
 VPP_FLAGS += -DINZSTD=1 -DMULTIPLE_BYTES=4 -DZSTD_BLOCK_SIZE_KB=32 
 
@@ -142,13 +143,25 @@ BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilZstdDecompressSt
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifeq ($(HOST_ARCH), x86)
+all:  check_version check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all:  check_version check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host:   check_xrt $(EXE_FILE)
+else
+host:   check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp  check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp  check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: xclbin
@@ -173,7 +186,12 @@ $(BUILD_DIR)/xilZstdDecompressStream.xclbin: $(BINARY_CONTAINER_xilZstdDecompres
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -199,7 +217,7 @@ cleanh:
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ start_simulation.sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 

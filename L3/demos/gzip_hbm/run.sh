@@ -35,28 +35,28 @@ echo -e "\n\n-----------ZLIB Flow-----------\n"
     echo $cmd1
     $cmd1
 
-echo -e "\n\n-----------GZIP Flow (-sx option)-----------\n"
-    cmd2="$EXE_FILE -sx $BIN_PATH -t sample.txt"
+echo -e "\n\n-----------GZIP Flow (-xbin option)-----------\n"
+    cmd2="$EXE_FILE -xbin $BIN_PATH -t sample.txt"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------GZIP Compress list of files -----------\n"
-    cmd2="$EXE_FILE -sx $BIN_PATH -cfl ./test.list"
+    cmd2="$EXE_FILE -xbin $BIN_PATH -cfl ./test.list"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------ZLIB Compress list of files -----------\n"
-    cmd2="$EXE_FILE -sx $BIN_PATH -cfl ./test.list -zlib 1"
+    cmd2="$EXE_FILE -xbin $BIN_PATH -cfl ./test.list -zlib 1"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------GZIP Decompress list of files -----------\n"
-    cmd2="$EXE_FILE -sx $BIN_PATH -dfl ./gzip_test_decomp.list"
+    cmd2="$EXE_FILE -xbin $BIN_PATH -dfl ./gzip_test_decomp.list"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------ZLIB Decompress list of files -----------\n"
-    cmd2="$EXE_FILE -sx $BIN_PATH -dfl ./zlib_test_decomp.list"
+    cmd2="$EXE_FILE -xbin $BIN_PATH -dfl ./zlib_test_decomp.list"
     echo $cmd2
     $cmd2
 fi

@@ -27,6 +27,7 @@
 #include <cassert>
 #include <iomanip>
 #include "xcl2.hpp"
+#include "compressBase.hpp"
 #include "lz4Base.hpp"
 
 /**
@@ -63,7 +64,7 @@ class lz4OCLHost : public lz4Base {
                const std::string& binaryFileName,
                uint8_t device_id,
                uint32_t block_size_kb,
-               uint8_t mcr,
+               bool lz4_stream,
                bool enable_profile = false);
 
     /**
@@ -73,7 +74,8 @@ class lz4OCLHost : public lz4Base {
      * @param out output byte sequence
      * @param actual_size input size
      */
-    uint64_t compressEngine(uint8_t* in, uint8_t* out, size_t actual_size);
+    uint64_t compressEngineSeq(uint8_t* in, uint8_t* out, size_t input_size);
+    uint64_t compressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t input_size);
 
     /**
      * @brief Decompress sequential.
@@ -82,8 +84,8 @@ class lz4OCLHost : public lz4Base {
      * @param out output byte sequence
      * @param actual_size input size
      */
-    uint64_t decompressEngine(uint8_t* in, uint8_t* out, size_t actual_size);
-
+    uint64_t decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input_size);
+    uint64_t decompressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t input_size);
     /**
      * @brief Release host/device and OpenCL setup
      */
@@ -92,15 +94,17 @@ class lz4OCLHost : public lz4Base {
    private:
     std::string m_xclbin;
     bool m_enableProfile;
-    uint8_t m_deviceId;
-    uint8_t m_mcr;
+    uint32_t m_deviceId;
     size_t m_inputSize;
+    bool m_lz4Stream;
     enum State m_flow;
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q;
     cl::Kernel* compress_kernel_lz4;
+    cl::Kernel* compress_data_mover_kernel;
     cl::Kernel* decompress_kernel_lz4;
+    cl::Kernel* decompress_data_mover_kernel;
 
     std::chrono::system_clock::time_point kernel_start;
     std::chrono::system_clock::time_point kernel_end;
@@ -110,22 +114,22 @@ class lz4OCLHost : public lz4Base {
     // Compression related
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in;
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_out;
-    std::vector<uint32_t, aligned_allocator<uint8_t> > h_blksize;
-    std::vector<uint32_t, aligned_allocator<uint8_t> > h_compressSize;
-
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_buf_decompressSize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_blksize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_compressSize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_decSize;
+   
     // Device buffers
     cl::Buffer* buffer_input;
     cl::Buffer* buffer_output;
+    cl::Buffer* bufferOutputSize;
     cl::Buffer* buffer_compressed_size;
     cl::Buffer* buffer_block_size;
+    cl::Buffer* buffer_dec_size;
 
     // Decompression related
     std::vector<uint32_t> m_blkSize;
     std::vector<uint32_t> m_compressSize;
-
-    // Kernel names
-    std::vector<std::string> compress_kernel_names = {"xilLz4Compress"};
-    std::vector<std::string> decompress_kernel_names = {"xilLz4Decompress"};
 };
 
 #endif // _XFCOMPRESSION_LZ4_OCL_HPP_

@@ -155,13 +155,25 @@ BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilLz4Decompress.xo
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifeq ($(HOST_ARCH), x86)
+all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host:   check_xrt $(EXE_FILE)
+else
+host:   check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp  check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp  check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: xclbin
@@ -182,7 +194,12 @@ $(BUILD_DIR)/compress_decompress.xclbin: $(BINARY_CONTAINER_compress_decompress_
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 

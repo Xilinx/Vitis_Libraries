@@ -7,9 +7,9 @@
    :keywords: Vitis, Library, Data Compression, Xilinx, Zlib, LZ4, Snappy, ZLIB, Zstd, FPGA Benchmark, Compression Benchmark
    :description: This page provides benchmarking results of various Vitis Data Compression Applications. Results include throughput and FPGA resources.
 
-=================
-Benchmark Results
-=================
+==========
+Benchmark
+==========
 
 Datasets
 ````````
@@ -66,6 +66,57 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 | `ZStd Full File Streaming <L2/zstd_decompress.html>`__ (Single Engine with Datawidth: 32bit)                            |     463  MB/s     |  232MHz  |  22K    |  52   |  4   |
 +-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
-.. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
-.. [*] GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
-.. [*] ZStd Streaming: Full Standard support with limited Window Size upto 128KB.
+.. [*] 1. The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput. 
+      2. GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
+      3. ZStd Streaming: Full Standard support with limited Window Size upto 128KB.
+
+
+Test Overview
+`````````````
+Here are benchmarks of the Vitis Data Compression Library using the Vitis environment. 
+
+Vitis Data Compression Library
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* **Download code**
+
+These data_compression benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+
+.. code-block:: bash
+
+   git clone https://github.com/Xilinx/Vitis_Libraries.git 
+   cd Vitis_Libraries
+   git checkout master
+   cd data_compression
+
+* **Setup environment**
+
+Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
+
+.. code-block:: bash
+
+   source <Vitis_Intstalled_Path>/installs/lin64/Vitis/2020.2/settings64.sh
+   source <Vitis_Installed_Path>/xbb/xrt/packages/setup.sh
+   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+   export LD_LIBRARY_PATH=$XILINX_VITIS/lib/lnx64.o/Default/:$LD_LIBRARY_PATH
+
+* **Build Instructions**
+
+Execute the following commands to compile and test run the applications.
+
+.. code-block:: bash
+      
+   $ make run TARGET=hw
+
+   hw: run on actual hardware
+
+By default, the target device is set as Alveo U200. In order to target a different
+device, use the  ``DEVICE`` argument. For example:
+
+.. code-block:: bash
+
+    make run TARGET=hw DEVICE=<new_device.xpfm>
+
+.. NOTE::
+   Build instructions explained in this section are common for all the
+   applications to run on actual hardware. The generated executable names may differ.

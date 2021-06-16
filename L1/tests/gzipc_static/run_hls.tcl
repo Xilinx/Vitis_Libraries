@@ -39,6 +39,7 @@ open_solution -reset $SOLN
 
 set_part $XPART
 create_clock -period $CLKP
+config_dataflow -start_fifo_depth 32 -scalar_fifo_depth 32 -task_level_fifo_depth 32
 
 if {$CSIM == 1} {
   csim_design -argv "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.gz"

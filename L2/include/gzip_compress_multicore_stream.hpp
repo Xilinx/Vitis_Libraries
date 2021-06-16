@@ -51,6 +51,10 @@
 #define NUM_CORES 8 // Octacore by default
 #endif
 
+#ifndef BLOCKSIZE_IN_KB
+#define BLOCKSIZE_IN_KB 32 // 32KB by default
+#endif
+
 // Kernel top functions
 extern "C" {
 /**

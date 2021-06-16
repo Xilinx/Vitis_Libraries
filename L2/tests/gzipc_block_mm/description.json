@@ -10,6 +10,13 @@
             "name": "generic launch for all flows"
         }
     ],
+    "post_launch": [
+        {
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+             ]
+        }
+    ], 
     "platform_blacklist": [
         "zc", 
         "vck"
@@ -50,9 +57,6 @@
         "compiler": {
             "includepaths": [
                  "LIB_DIR/../security/L1/include"
-            ],
-            "symbols": [
-                "NUM_CORES=4"
             ]
         }
     }, 

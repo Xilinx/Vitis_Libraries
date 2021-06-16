@@ -22,12 +22,14 @@ int main(int argc, char* argv[]) {
     bool enable_profile = true;
     bool enable_p2p = ENABLE_P2P;
     compressBase::State flow = compressBase::DECOMPRESS;
+    compressBase::Level lflow = compressBase::SEQ;
+
     // Driver class object
-    snappyApp d(argc, argv, enable_profile);
+    snappyApp d(argc, argv, lflow, enable_profile);
     // Design class object creating and constructor invocation
     std::unique_ptr<snappyOCLHost> snappy(new snappyOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(),
-                                                            d.getMCR(), enable_profile, enable_p2p));
+                                                            enable_profile, enable_p2p));
     // Run API to launch the compress or decompress engine
-    d.run(snappy.get());
+    d.run(snappy.get(), d.getMCR());
     return 0;
 }

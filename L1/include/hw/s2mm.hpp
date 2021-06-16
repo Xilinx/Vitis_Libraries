@@ -25,11 +25,9 @@
  */
 #include "compress_utils.hpp"
 #include "hls_stream.h"
-#include "iostream"
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 #include "stream_upsizer.hpp"
 
 #define GET_DIFF_IF_BIG(x, y) (x > y) ? (x - y) : 0
@@ -69,7 +67,6 @@ template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
 void stream2MM(ap_uint<DATAWIDTH>* out,
                uint32_t* checksumData,
                hls::stream<ap_uint<32> >& checksumStream,
-               hls::stream<bool>& checksumEos,
                hls::stream<ap_uint<DATAWIDTH> >& inStream,
                hls::stream<bool>& endOfStream,
                hls::stream<OUTSIZE_DT>& outSize,
@@ -102,9 +99,7 @@ s2mm:
     output_size[0] = outSize.read();
 
     // write checksum value to DDR
-    bool eosFlag = checksumEos.read();
-    if (!eosFlag) checksumData[0] = checksumStream.read();
-    eosFlag = checksumEos.read();
+    checksumData[0] = checksumStream.read();
 }
 
 template <int BURST_SIZE, int DATAWIDTH, int NUM_BLOCK>
@@ -486,35 +481,6 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
     bool eos = endOfStream[0].read();
 }
 
-template <int DATAWIDTH, int BURST_SIZE>
-void s2mmEosStreamSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH + 8> >& inStream) {
-    /**
-     * @brief This module reads DATAWIDTH data from stream based on
-     * size stream and writes the data to DDR.
-     *
-     * @tparam DATAWIDTH width of data bus
-     * @tparam BURST_SIZE burst size of the data transfers
-     * @param out output memory address
-     * @param inStream input stream
-     * @param endOfStream stream to indicate end of data stream
-     * @param outSize output data size
-     */
-
-    bool eos = false;
-    ap_uint<DATAWIDTH + 8> dummy = 0;
-s2mm_eos_simple:
-    for (int j = 0; eos == false; j += BURST_SIZE) {
-        for (int i = 0; i < BURST_SIZE; i++) {
-#pragma HLS PIPELINE II = 1
-            ap_uint<DATAWIDTH + 8> inValue = (eos == true) ? dummy : inStream.read();
-            bool eos_tmp = (eos == true) ? true : inValue.range(DATAWIDTH + 7, DATAWIDTH);
-            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH - 1, 0);
-            out[j + i] = outValue;
-            eos = eos_tmp;
-        }
-    }
-}
-
 template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
 void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
                    hls::stream<ap_uint<DATAWIDTH> >& inStream,
@@ -551,6 +517,69 @@ void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
     }
 }
 
+template <int DATAWIDTH, int BURST_SIZE>
+void s2mmEosStreamSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH + 8> >& inStream) {
+    /**
+     * @brief This module reads DATAWIDTH data from stream based on
+     * size stream and writes the data to DDR.
+     *
+     * @tparam DATAWIDTH width of data bus
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @param out output memory address
+     * @param inStream input stream
+     * @param endOfStream stream to indicate end of data stream
+     * @param outSize output data size
+     */
+
+    bool eos = false;
+    ap_uint<DATAWIDTH + 8> dummy = 0;
+s2mm_eos_simple:
+    for (int j = 0; eos == false; j += BURST_SIZE) {
+        for (int i = 0; i < BURST_SIZE; i++) {
+#pragma HLS PIPELINE II = 1
+            ap_uint<DATAWIDTH + 8> inValue = (eos == true) ? dummy : inStream.read();
+            bool eos_tmp = (eos == true) ? true : inValue.range(DATAWIDTH + 7, DATAWIDTH);
+            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH - 1, 0);
+            out[j + i] = outValue;
+            eos = eos_tmp;
+        }
+    }
+}
+
+template <int DATAWIDTH, int BURST_SIZE>
+void s2mmWithSize(ap_uint<DATAWIDTH>* out,
+                  hls::stream<ap_uint<DATAWIDTH + 8> >& inStream,
+                  const uint32_t index,
+                  uint32_t* decSize,
+                  hls::stream<uint32_t>& decSizeStream) {
+    /**
+     * @brief This module reads DATAWIDTH data from stream based on
+     * size stream and writes the data to DDR.
+     *
+     * @tparam DATAWIDTH width of data bus
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @param out output memory address
+     * @param inStream input stream
+     * @param endOfStream stream to indicate end of data stream
+     * @param outSize output data size
+     */
+
+    bool eos = false;
+    ap_uint<DATAWIDTH + 8> dummy = 0;
+s2mmWithSize:
+    for (int j = 0; eos == false; j += BURST_SIZE) {
+        for (int i = 0; i < BURST_SIZE; i++) {
+#pragma HLS PIPELINE II = 1
+            ap_uint<DATAWIDTH + 8> inValue = (eos == true) ? dummy : inStream.read();
+            bool eos_tmp = (eos == true) ? true : inValue.range(DATAWIDTH + 7, DATAWIDTH);
+            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH - 1, 0);
+            out[j + i] = outValue;
+            eos = eos_tmp;
+        }
+    }
+    decSize[index] = decSizeStream.read();
+}
+
 template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
 void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
                    hls::stream<ap_uint<DATAWIDTH> >& inStream,
@@ -564,15 +593,16 @@ void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
      * @tparam DATAWIDTH width of data bus
      * @tparam BURST_SIZE burst size of the data transfers
      * @param out output memory address
-     * @param output_idx output index
      * @param inStream input stream
      * @param endOfStream stream to indicate end of data stream
      * @param outSize output data size
+     * @param output_size output size memory address
      */
     bool eos = false;
     ap_uint<DATAWIDTH> dummy = 0;
-s2mm_eos_simple:
+s2mm_eos_outer:
     for (int j = 0; eos == false; j += BURST_SIZE) {
+    s2mm_eos_inner:
         for (int i = 0; i < BURST_SIZE; i++) {
 #pragma HLS PIPELINE II = 1
             ap_uint<DATAWIDTH> tmp = (eos == true) ? dummy : inStream.read();
@@ -581,7 +611,8 @@ s2mm_eos_simple:
             eos = eos_tmp;
         }
     }
-    output_size[0] = outSize.read();
+    OUTSIZE_DT tmp = outSize.read();
+    if (tmp) output_size[0] = tmp;
 }
 
 template <int DATAWIDTH>

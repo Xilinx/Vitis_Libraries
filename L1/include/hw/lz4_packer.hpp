@@ -29,8 +29,6 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <iostream>
 
 #include "mm2s.hpp"
 #include "s2mm.hpp"

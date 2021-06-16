@@ -10,6 +10,13 @@
             "name": "generic launch for all flows"
         }
     ],
+    "post_launch": [
+        {
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+             ]
+        }
+    ], 
     "config_make": "./config.mk",
     "platform_blacklist": [
         "zc", 
@@ -47,12 +54,18 @@
         }
     }, 
     "v++": {
+        "build_datafiles": [
+            "PROJECT/hls.cfg"
+        ], 
         "compiler": {
             "includepaths": [
                 "LIB_DIR/../security/L1/include"
             ],
             "symbols": [
                 "GZIP_STREAM"
+            ], 
+            "clflags": [
+                "--config PROJECT/hls.cfg"
             ]
         }
     }, 

@@ -30,9 +30,6 @@
 #include "zlib_compress_details.hpp"
 #include "checksum_wrapper.hpp"
 
-#define NUM_BLOCKS 8
-#define URAM_BUFFERS 0 // 0: BRAMS; 1: URAMS
-
 const int c_streamWidth = 64;
 
 typedef ap_uint<c_streamWidth> data_t;
@@ -46,11 +43,9 @@ void gzipcMulticoreMM(hls::stream<data_t>& inStream,
                       hls::stream<bool>& outStreamEoS,
                       hls::stream<uint32_t>& outSizeStream,
                       hls::stream<ap_uint<32> >& checksumOutStream,
-                      hls::stream<bool>& checksumOutEos,
                       hls::stream<ap_uint<2> >& checksumTypeStream) {
-    xf::compression::gzipMulticoreCompression<NUM_BLOCKS, URAM_BUFFERS>(
-        inStream, inSizeStream, checksumInitStream, outStream, outStreamEoS, outSizeStream, checksumOutStream,
-        checksumOutEos, checksumTypeStream);
+    xf::compression::gzipMulticoreCompression(inStream, inSizeStream, checksumInitStream, outStream, outStreamEoS,
+                                              outSizeStream, checksumOutStream, checksumTypeStream);
 }
 
 int main(int argc, char* argv[]) {
@@ -151,7 +146,7 @@ int main(int argc, char* argv[]) {
 
     // COMPRESSION CALL
     gzipcMulticoreMM(inStream, inStreamSize, checksumInitStream, outStream, outStreamEoS, outStreamSize,
-                     checksumOutStream, checksumOutEos, checksumTypeStream);
+                     checksumOutStream, checksumTypeStream);
 
     uint32_t outIdx = 0;
     for (bool outEoS = outStreamEoS.read(); outEoS == 0; outEoS = outStreamEoS.read()) {
@@ -180,9 +175,7 @@ int main(int argc, char* argv[]) {
 
     // read checksum value
     ap_uint<32> checksumValue;
-    bool eosFlag = checksumOutEos.read();
-    if (!eosFlag) checksumValue = checksumOutStream.read();
-    eosFlag = checksumOutEos.read();
+    checksumValue = checksumOutStream.read();
 
     uint8_t crc_byte = 0;
     uint32_t crc_val = checksumValue;

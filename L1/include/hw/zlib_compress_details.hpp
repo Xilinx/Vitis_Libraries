@@ -25,13 +25,8 @@
  */
 
 #include <ap_int.h>
-#include <fstream>
-#include <iostream>
-#include <stdlib.h>
-#include <string>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "compress_utils.hpp"
 #include "zlib_specs.hpp"
@@ -73,76 +68,67 @@ void dataDuplicator(hls::stream<IntVectorStream_dt<8, PARALLEL_BYTES> >& inStrea
                     hls::stream<ap_uint<32> >& checksumInitStream,
                     hls::stream<ap_uint<PARALLEL_BYTES * 8> >& checksumOutStream,
                     hls::stream<ap_uint<5> >& checksumSizeStream,
-                    hls::stream<bool>& checksumOutEos,
-                    hls::stream<bool>& fileEos,
                     hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> >& coreStream) {
     constexpr int incr = DWIDTH / 8;
 
-    for (bool eosFile = fileEos.read(); eosFile == false; eosFile = fileEos.read()) {
-        // Checksum initial data
-        if (STRATEGY == 0) {
-            checksumInitStream << ~0;
-        } else {
-            checksumInitStream << 0;
-        }
-
-        checksumOutEos << false;
-
-    duplicator:
-        while (1) {
-            IntVectorStream_dt<8, PARALLEL_BYTES> tmpVal = inStream.read();
-            // Last will be high if strobe is 0
-            bool last = (tmpVal.strobe == 0);
-            ap_uint<DWIDTH + SIZE_DWIDTH> outVal = 0;
-            // First SIZE_DWIDTH bits will be no. of valid bytes
-            outVal.range(SIZE_DWIDTH - 1, 0) = tmpVal.strobe;
-            // Checksum requires the parallel valid bytes
-            checksumSizeStream << (ap_uint<5>)tmpVal.strobe;
-            // Data parallel write
-            for (auto i = SIZE_DWIDTH, j = 0; i < (DWIDTH + SIZE_DWIDTH); i += incr) {
-#pragma HLS UNROLL
-                outVal.range(i + 7, i) = tmpVal.data[j++];
-            }
-            // Core Data Stream
-            coreStream << outVal;
-            if (last) break;
-            // Checksum Data Stream
-            checksumOutStream << outVal.range(DWIDTH + SIZE_DWIDTH - 1, SIZE_DWIDTH);
-        }
+    // Checksum initial data
+    if (STRATEGY == 0) {
+        checksumInitStream << ~0;
+    } else {
+        checksumInitStream << 0;
     }
-    checksumOutEos << true;
+
+duplicator:
+    while (1) {
+        IntVectorStream_dt<8, PARALLEL_BYTES> tmpVal = inStream.read();
+        // Last will be high if strobe is 0
+        bool last = (tmpVal.strobe == 0);
+        ap_uint<DWIDTH + SIZE_DWIDTH> outVal = 0;
+        // First SIZE_DWIDTH bits will be no. of valid bytes
+        outVal.range(SIZE_DWIDTH - 1, 0) = tmpVal.strobe;
+        // Checksum requires the parallel valid bytes
+        checksumSizeStream << (ap_uint<5>)tmpVal.strobe;
+        // Data parallel write
+        for (auto i = SIZE_DWIDTH, j = 0; i < (DWIDTH + SIZE_DWIDTH); i += incr) {
+#pragma HLS UNROLL
+            outVal.range(i + 7, i) = tmpVal.data[j++];
+        }
+        // Core Data Stream
+        coreStream << outVal;
+        if (last) break;
+        // Checksum Data Stream
+        checksumOutStream << outVal.range(DWIDTH + SIZE_DWIDTH - 1, SIZE_DWIDTH);
+    }
 }
 
 template <int DWIDTH = 64, int PARALLEL_BYTES = 8>
 void dataDuplicator(hls::stream<ap_uint<DWIDTH> >& inStream,
                     hls::stream<uint32_t>& inSizeStream,
                     hls::stream<ap_uint<PARALLEL_BYTES * 8> >& checksumOutStream,
-                    hls::stream<bool>& checksumStreamEos,
-                    hls::stream<ap_uint<32> >& checksumSizeStream,
+                    hls::stream<ap_uint<5> >& checksumSizeStream,
                     hls::stream<ap_uint<DWIDTH> >& coreStream,
                     hls::stream<uint32_t>& coreSizeStream) {
-    constexpr int incr = DWIDTH / 8;
+    constexpr int c_parallelByte = DWIDTH / 8;
     uint32_t inputSize = inSizeStream.read();
 
-    checksumSizeStream << inputSize;
     coreSizeStream << inputSize;
 
-    // sending 0 and 1 first based on checksum protocol
-    checksumStreamEos << 0;
-    checksumStreamEos << 1;
-
-    uint32_t inSize = (inputSize - 1) / incr + 1;
+    uint32_t inSize = (inputSize - 1) / c_parallelByte + 1;
+    bool inSizeMod = (inputSize % c_parallelByte == 0);
 
 duplicator:
     for (uint32_t i = 0; i < inSize; i++) {
 #pragma HLS PIPELINE II = 1
         ap_uint<DWIDTH> inValue = inStream.read();
+        auto c_size = (i == inSize - 1) && !inSizeMod ? (inputSize % c_parallelByte) : c_parallelByte;
+        checksumSizeStream << c_size;
         checksumOutStream << inValue;
         coreStream << inValue;
     }
+    checksumSizeStream << 0;
 }
 
-template <int FREQ_DWIDTH = 32, int DWIDTH = 64, int NUM_BLOCKS = 4, int BLOCK_SIZE = 32768, int MIN_BLCK_SIZE = 64>
+template <int FREQ_DWIDTH = 32, int DWIDTH = 64, int NUM_BLOCKS = 8, int BLOCK_SIZE = 32768, int MIN_BLCK_SIZE = 64>
 void multicoreDistributor(hls::stream<ap_uint<DWIDTH> >& inStream,
                           hls::stream<uint32_t>& inSizeStream,
                           hls::stream<ap_uint<DWIDTH> >& strdStream,
@@ -187,7 +173,7 @@ void multicoreDistributor(hls::stream<ap_uint<DWIDTH> >& inStream,
 template <class SIZE_DT = uint64_t,
           int DWIDTH = 64,
           int SIZE_DWIDTH = 4,
-          int NUM_BLOCKS = 4,
+          int NUM_BLOCKS = 8,
           int BLOCK_SIZE = 32768,
           int MIN_BLCK_SIZE = 64,
           int STRATEGY = 0>
@@ -196,103 +182,99 @@ void multicoreDistributor(hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> >& inStream,
                           hls::stream<ap_uint<DWIDTH> >& strdStream,
                           hls::stream<ap_uint<16> >& strdSizeStream,
                           hls::stream<bool>& blckEosStream,
-                          hls::stream<bool>& fileEos,
+                          hls::stream<ap_uint<4> >& coreIdxStream,
                           hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> > distStream[NUM_BLOCKS]) {
     constexpr int c_incr = DWIDTH / 8;
     constexpr int c_factor = (MIN_BLCK_SIZE + c_incr) / c_incr;
     constexpr int c_storedDepth = 2 * c_factor;
-    ap_uint<4> core = 0;
+    static ap_uint<4> core = 0;
+    coreIdxStream << core;
 
-    while (1) {
-        if (fileEos.read()) {
-            break;
-        }
-        SIZE_DT readSize = 0;
-        SIZE_DT writeSize = 0;
-        ap_uint<16> strdCntr = 0;
-        ap_uint<SIZE_DWIDTH> strobe = 0;
-        bool last = false;
+    SIZE_DT readSize = 0;
+    SIZE_DT writeSize = 0;
+    ap_uint<16> strdCntr = 0;
+    ap_uint<SIZE_DWIDTH> strobe = 0;
+    bool last = false;
 
-        hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> > storedBufferStream;
+    hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> > storedBufferStream;
 #pragma HLS STREAM variable = storedBufferStream depth = c_storedDepth
 
-    init_loop:
-        for (uint8_t i = 0; i < c_factor && !last; i++) {
+init_loop:
+    for (uint8_t i = 0; i < c_factor && !last; i++) {
+#pragma HLS PIPELINE II = 1
+        ap_uint<DWIDTH + SIZE_DWIDTH> tmpVal = inStream.read();
+        strobe = tmpVal.range(SIZE_DWIDTH - 1, 0);
+        last = (strobe == 0);
+        readSize += strobe;
+        storedBufferStream << tmpVal;
+    }
+
+distributor:
+    while (!last) {
+        core %= NUM_BLOCKS;
+        blckEosStream << false;
+
+        for (uint32_t i = 0; i < BLOCK_SIZE && !last; i += c_incr) {
 #pragma HLS PIPELINE II = 1
             ap_uint<DWIDTH + SIZE_DWIDTH> tmpVal = inStream.read();
-            strobe = tmpVal.range(SIZE_DWIDTH - 1, 0);
-            last = (strobe == 0);
+            ap_uint<SIZE_DWIDTH> strobe = tmpVal.range(SIZE_DWIDTH - 1, 0);
             readSize += strobe;
+            last = (strobe == 0);
+            ap_uint<DWIDTH + SIZE_DWIDTH> tmp = storedBufferStream.read();
+            distStream[core] << tmp;
+            strdCntr += tmp.range(SIZE_DWIDTH - 1, 0);
+            writeSize += tmp.range(SIZE_DWIDTH - 1, 0);
             storedBufferStream << tmpVal;
         }
 
-    distributor:
-        while (!last) {
-            core %= NUM_BLOCKS;
-            blckEosStream << false;
-
-            for (uint32_t i = 0; i < BLOCK_SIZE && !last; i += c_incr) {
-#pragma HLS PIPELINE II = 1
-                ap_uint<DWIDTH + SIZE_DWIDTH> tmpVal = inStream.read();
-                ap_uint<SIZE_DWIDTH> strobe = tmpVal.range(SIZE_DWIDTH - 1, 0);
-                readSize += strobe;
-                last = (strobe == 0);
-                ap_uint<DWIDTH + SIZE_DWIDTH> tmp = storedBufferStream.read();
-                distStream[core] << tmp;
-                strdCntr += tmp.range(SIZE_DWIDTH - 1, 0);
-                writeSize += tmp.range(SIZE_DWIDTH - 1, 0);
-                storedBufferStream << tmpVal;
-            }
-
-            if (!last) {
-                distStream[core] << 0;
-                strdCntr = 0;
-                core++;
-            }
-        }
-
-        blckEosStream << true;
-        bool onlyOnce = true;
-        bool endBlck = true;
-        for (; writeSize != readSize && strdCntr != 0;) {
-#pragma HLS PIPELINE II = 1
-            ap_uint<SIZE_DWIDTH + DWIDTH> tmpVal = storedBufferStream.read();
-            distStream[core] << tmpVal;
-            strdCntr += tmpVal.range(SIZE_DWIDTH - 1, 0);
-            writeSize += tmpVal.range(SIZE_DWIDTH - 1, 0);
-            if (strdCntr == BLOCK_SIZE) {
-                endBlck = false;
-                strdCntr = 0;
-            }
-        }
-
-        if (!endBlck) {
-            if (readSize == writeSize)
-                distStream[core] << storedBufferStream.read();
-            else
-                distStream[core] << 0;
-            core++;
-        } else if (endBlck && strdCntr > 0) {
-            distStream[core] << storedBufferStream.read();
+        if (!last) {
+            distStream[core] << 0;
+            strdCntr = 0;
             core++;
         }
-
-        for (; (writeSize != readSize && strdCntr == 0) || onlyOnce;) {
-#pragma HLS PIPELINE II = 1
-            if (onlyOnce) {
-                strdSizeStream << (readSize - writeSize);
-                onlyOnce = false;
-                if (readSize == writeSize) break;
-            }
-            ap_uint<SIZE_DWIDTH + DWIDTH> tmpVal = storedBufferStream.read();
-            strdStream << tmpVal.range(SIZE_DWIDTH + DWIDTH - 1, SIZE_DWIDTH);
-            writeSize += tmpVal.range(SIZE_DWIDTH - 1, 0);
-            if (readSize == writeSize) storedBufferStream.read();
-        }
-
-        // Total Input Size for GZIP only
-        if (STRATEGY == 0) fileSizeStream << writeSize;
     }
+
+    blckEosStream << true;
+    bool onlyOnce = true;
+    bool endBlck = true;
+    for (; writeSize != readSize && strdCntr != 0;) {
+#pragma HLS PIPELINE II = 1
+        ap_uint<SIZE_DWIDTH + DWIDTH> tmpVal = storedBufferStream.read();
+        distStream[core] << tmpVal;
+        strdCntr += tmpVal.range(SIZE_DWIDTH - 1, 0);
+        writeSize += tmpVal.range(SIZE_DWIDTH - 1, 0);
+        if (strdCntr == BLOCK_SIZE) {
+            endBlck = false;
+            strdCntr = 0;
+        }
+    }
+
+    if (!endBlck) {
+        if (readSize == writeSize)
+            distStream[core] << storedBufferStream.read();
+        else
+            distStream[core] << 0;
+        core++;
+    } else if (endBlck && strdCntr > 0) {
+        distStream[core] << storedBufferStream.read();
+        core++;
+    }
+
+    for (; (writeSize != readSize && strdCntr == 0) || onlyOnce;) {
+#pragma HLS PIPELINE II = 1
+        if (onlyOnce) {
+            strdSizeStream << (readSize - writeSize);
+            onlyOnce = false;
+            if (readSize == writeSize) break;
+        }
+        ap_uint<SIZE_DWIDTH + DWIDTH> tmpVal = storedBufferStream.read();
+        strdStream << tmpVal.range(SIZE_DWIDTH + DWIDTH - 1, SIZE_DWIDTH);
+        writeSize += tmpVal.range(SIZE_DWIDTH - 1, 0);
+        if (readSize == writeSize) storedBufferStream.read();
+    }
+
+    // Total Input Size for GZIP only
+    if (STRATEGY == 0) fileSizeStream << writeSize;
 
 ip_terminate_data:
     for (uint8_t i = 0; i < NUM_BLOCKS; i++) {
@@ -300,7 +282,7 @@ ip_terminate_data:
     }
 }
 
-template <int DWIDTH = 64, int SIZE_DWIDTH = 4, int NUM_BLOCKS = 4, int BLOCK_SIZE = 32768, int MIN_BLCK_SIZE = 64>
+template <int DWIDTH = 64, int SIZE_DWIDTH = 4, int NUM_BLOCKS = 8, int BLOCK_SIZE = 32768, int MIN_BLCK_SIZE = 64>
 void multicoreMerger(hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> > inStream[NUM_BLOCKS],
                      hls::stream<ap_uint<DWIDTH> >& strdStream,
                      hls::stream<ap_uint<16> >& strdSizeStream,
@@ -395,149 +377,133 @@ void gzipZlibPackerEngine(hls::stream<ap_uint<68> > inStream[NUM_BLOCKS],
                           hls::stream<ap_uint<16> >& strdSizeStream,
                           hls::stream<uint32_t>& fileSizeStream,
                           hls::stream<ap_uint<32> >& checksumStream,
-                          hls::stream<bool>& checksumStreamEos,
-                          hls::stream<bool>& fileEos,
+                          hls::stream<ap_uint<4> >& coreIdxStream,
                           hls::stream<bool>& blckEosStream) {
     ap_uint<68> tmpVal = 0;
-    ap_uint<4> core = 0;
+    ap_uint<4> core = coreIdxStream.read();
 
-    while (1) {
-        if (fileEos.read()) {
-            checksumStreamEos.read();
-            break;
-        }
-        // Header Handling
-        if (STRATEGY == 0) { // GZIP
-            tmpVal.range(67, 0) = 0x0000000008088B1F8;
-            packedStream << tmpVal;
-            tmpVal.range(67, 0) = 0x007803004;
-            packedStream << tmpVal;
-        } else { // ZLIB
-            tmpVal.range(67, 0) = 0x01782;
-            packedStream << tmpVal;
-        }
-
-    // Compressed Data Handling
-    blckHandler:
-        for (bool blckEos = blckEosStream.read(); blckEos == false; blckEos = blckEosStream.read()) {
-            core %= NUM_BLOCKS;
-            bool blockDone = false;
-            for (; blockDone == false;) {
-#pragma HLS PIPELINE II = 1
-                ap_uint<68> inVal = inStream[core].read();
-                blockDone = (inVal.range(3, 0) == 0);
-                if (blockDone) break;
-                packedStream << inVal;
-            }
-            core++;
-        }
-
-        // Stored Block Header
-        ap_uint<16> sizeVal = strdSizeStream.read();
-        bool strdFlg = (sizeVal != 0);
-        if (strdFlg) {
-            tmpVal = ~sizeVal;
-            tmpVal <<= 16;
-            tmpVal.range(15, 0) = sizeVal;
-            tmpVal <<= 12;
-            tmpVal.range(11, 0) = 5;
-            packedStream << tmpVal;
-        }
-
-    // Stored Block
-    strdBlck:
-        for (uint16_t size = 0; size < sizeVal; size += 8) {
-#pragma HLS PIPELINE II = 1
-            uint8_t rSize = 8;
-            if (rSize + size > sizeVal) rSize = sizeVal - size;
-            tmpVal.range(3, 0) = rSize;
-            tmpVal.range(67, 4) = strdStream.read();
-            packedStream << tmpVal;
-        }
-
-        // Checksum Data
-        while (1) {
-            bool eos = checksumStreamEos.read();
-            // Last Block Data
-            tmpVal.range(67, 0) = 0xffff0000015;
-            packedStream << tmpVal;
-
-            tmpVal.range(67, 4) = checksumStream.read();
-            tmpVal.range(3, 0) = 4;
-            packedStream << tmpVal;
-            // Input Size Data
-            if (STRATEGY == 0) {
-                tmpVal.range(67, 4) = fileSizeStream.read();
-                tmpVal.range(3, 0) = 4;
-                packedStream << tmpVal;
-            }
-            tmpVal = 0;
-            packedStream << tmpVal;
-            if (!eos) break;
-        }
+    // Header Handling
+    if (STRATEGY == 0) { // GZIP
+        tmpVal.range(67, 0) = 0x0000000008088B1F8;
+        packedStream << tmpVal;
+        tmpVal.range(67, 0) = 0x007803004;
+        packedStream << tmpVal;
+    } else { // ZLIB
+        tmpVal.range(67, 0) = 0x01782;
+        packedStream << tmpVal;
     }
+
+// Compressed Data Handling
+blckHandler:
+    for (bool blckEos = blckEosStream.read(); blckEos == false; blckEos = blckEosStream.read()) {
+        core %= NUM_BLOCKS;
+        bool blockDone = false;
+        for (; blockDone == false;) {
+#pragma HLS PIPELINE II = 1
+            ap_uint<68> inVal = inStream[core].read();
+            blockDone = (inVal.range(3, 0) == 0);
+            if (blockDone) break;
+            packedStream << inVal;
+        }
+        core++;
+    }
+
+    // Stored Block Header
+    ap_uint<16> sizeVal = strdSizeStream.read();
+    bool strdFlg = (sizeVal != 0);
+    if (strdFlg) {
+        tmpVal = ~sizeVal;
+        tmpVal <<= 16;
+        tmpVal.range(15, 0) = sizeVal;
+        tmpVal <<= 12;
+        tmpVal.range(11, 0) = 5;
+        packedStream << tmpVal;
+    }
+
+// Stored Block
+strdBlck:
+    for (uint16_t size = 0; size < sizeVal; size += 8) {
+#pragma HLS PIPELINE II = 1
+        uint8_t rSize = 8;
+        if (rSize + size > sizeVal) rSize = sizeVal - size;
+        tmpVal.range(3, 0) = rSize;
+        tmpVal.range(67, 4) = strdStream.read();
+        packedStream << tmpVal;
+    }
+
+    // Checksum Data
+    // Last Block Data
+    tmpVal.range(67, 0) = 0xffff0000015;
+    packedStream << tmpVal;
+
+    tmpVal.range(67, 4) = checksumStream.read();
+    tmpVal.range(3, 0) = 4;
+    packedStream << tmpVal;
+    // Input Size Data
+    if (STRATEGY == 0) {
+        tmpVal.range(67, 4) = fileSizeStream.read();
+        tmpVal.range(3, 0) = 4;
+        packedStream << tmpVal;
+    }
+    tmpVal = 0;
+    packedStream << tmpVal;
+
     for (auto i = 0; i < NUM_BLOCKS; i++) inStream[i].read();
 }
 
 template <int DWIDTH = 64, int SIZE_DWIDTH = 4>
 void bytePacker(hls::stream<ap_uint<DWIDTH + SIZE_DWIDTH> >& inStream,
-                hls::stream<IntVectorStream_dt<8, DWIDTH / 8> >& outStream,
-                hls::stream<bool>& fileEos) {
+                hls::stream<IntVectorStream_dt<8, DWIDTH / 8> >& outStream) {
     constexpr int incr = DWIDTH / 8;
     constexpr uint8_t factor = DWIDTH / 8;
     ap_uint<2 * DWIDTH> inputWindow;
 
-    while (1) {
-        if (fileEos.read()) {
-            break;
-        }
-        ap_uint<4> inputIdx = 0;
-        bool packerDone = false;
-        IntVectorStream_dt<8, DWIDTH / 8> outVal;
-        outVal.strobe = incr;
+    ap_uint<4> inputIdx = 0;
+    bool packerDone = false;
+    IntVectorStream_dt<8, DWIDTH / 8> outVal;
+    outVal.strobe = incr;
 
-    multicorePacker:
-        for (; packerDone == false;) {
+multicorePacker:
+    for (; packerDone == false;) {
 #pragma HLS PIPELINE II = 1
-            assert((inputIdx + factor) <= 2 * (DWIDTH / 8));
-            ap_uint<SIZE_DWIDTH + DWIDTH> inVal = inStream.read();
+        assert((inputIdx + factor) <= 2 * (DWIDTH / 8));
+        ap_uint<SIZE_DWIDTH + DWIDTH> inVal = inStream.read();
 
-            uint8_t inSize = inVal.range(SIZE_DWIDTH - 1, 0);
-            packerDone = (inSize == 0);
-            inputWindow.range((inputIdx + factor) * 8 - 1, inputIdx * 8) =
-                inVal.range(SIZE_DWIDTH + DWIDTH - 1, SIZE_DWIDTH);
+        uint8_t inSize = inVal.range(SIZE_DWIDTH - 1, 0);
+        packerDone = (inSize == 0);
+        inputWindow.range((inputIdx + factor) * 8 - 1, inputIdx * 8) =
+            inVal.range(SIZE_DWIDTH + DWIDTH - 1, SIZE_DWIDTH);
 
-            inputIdx += inSize;
+        inputIdx += inSize;
 
-            for (uint16_t k = 0, j = 0; k < DWIDTH; k += incr) {
+        for (uint16_t k = 0, j = 0; k < DWIDTH; k += incr) {
 #pragma HLS UNROLL
-                outVal.data[j++] = inputWindow.range(k + 7, k);
-            }
-
-            if (inputIdx >= factor) {
-                outStream << outVal;
-                inputWindow >>= DWIDTH;
-                inputIdx -= factor;
-            }
+            outVal.data[j++] = inputWindow.range(k + 7, k);
         }
 
-        // writing last bytes
-        if (inputIdx) {
-            for (uint16_t i = 0, j = 0; i < DWIDTH; i += incr) {
-#pragma HLS UNROLL
-                outVal.data[j++] = inputWindow.range(i + 7, i);
-            }
-            outVal.strobe = inputIdx;
+        if (inputIdx >= factor) {
             outStream << outVal;
-        } else {
-            // send end of stream data
-            outVal.strobe = 0;
-            outStream << outVal;
+            inputWindow >>= DWIDTH;
+            inputIdx -= factor;
         }
+    }
+
+    // writing last bytes
+    if (inputIdx) {
+        for (uint16_t i = 0, j = 0; i < DWIDTH; i += incr) {
+#pragma HLS UNROLL
+            outVal.data[j++] = inputWindow.range(i + 7, i);
+        }
+        outVal.strobe = inputIdx;
+        outStream << outVal;
+    } else {
+        // send end of stream data
+        outVal.strobe = 0;
+        outStream << outVal;
     }
 }
 
-template <int NUM_BLOCK = 4, int MAX_FREQ_DWIDTH = 24>
+template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
 void zlibTreegenScheduler(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77InTree[NUM_BLOCK],
                           hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& lz77OutTree,
                           hls::stream<uint8_t>& outIdxNum) {
@@ -575,7 +541,47 @@ void zlibTreegenScheduler(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > l
     outIdxNum << 0xFF;
 }
 
-template <int NUM_BLOCK = 4>
+template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
+void zlibTreegenScheduler(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77InTree[NUM_BLOCK],
+                          hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& lz77OutTree,
+                          hls::stream<ap_uint<4> >& coreIdxStream,
+                          hls::stream<uint8_t>& outIdxNum) {
+    constexpr int c_litDistCodeCnt = 286 + 30;
+    ap_uint<NUM_BLOCK> is_pending;
+    bool eos_tmp[NUM_BLOCK];
+    for (uint8_t i = 0; i < NUM_BLOCK; i++) {
+        is_pending.range(i, i) = 1;
+        eos_tmp[i] = false;
+    }
+    bool read_flag = true;
+    IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> inVal;
+    ap_uint<4> core = coreIdxStream.read();
+    while (is_pending) {
+        for (uint8_t i = core; i < NUM_BLOCK + core; i++) {
+            ap_uint<4> j = i % NUM_BLOCK;
+            if (eos_tmp[j] == false) {
+                inVal = lz77InTree[j].read();
+                read_flag = false;
+            }
+            bool eos = eos_tmp[j] ? eos_tmp[j] : (inVal.strobe == 0);
+            is_pending.range(j, j) = eos ? 0 : 1;
+            eos_tmp[j] = eos;
+            if (!eos) {
+                outIdxNum << j;
+                for (uint16_t k = 0; k < c_litDistCodeCnt; k++) {
+                    if (read_flag) inVal = lz77InTree[j].read();
+                    lz77OutTree << inVal;
+                    read_flag = true;
+                }
+            }
+        }
+    }
+    inVal.strobe = 0;
+    lz77OutTree << inVal;
+    outIdxNum << 0xFF;
+}
+
+template <int NUM_BLOCK = 8>
 void zlibTreegenDistributor(hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[NUM_BLOCK],
                             hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> >& hufSerialCodeStream,
                             hls::stream<uint8_t>& inIdxNum) {
@@ -606,20 +612,35 @@ tgndst_send_eos:
     }
 }
 
-template <int NUM_BLOCK = 4, int MAX_FREQ_DWIDTH = 24>
+template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
 void zlibTreegenStreamWrapper(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77Tree[NUM_BLOCK],
                               hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[NUM_BLOCK]) {
 #pragma HLS dataflow
-    constexpr int c_litDistCodeCnt = 286 + 30;
-    constexpr int c_depthlitDistStream = (NUM_BLOCK + 1) * c_litDistCodeCnt;
     hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77SerialTree("lz77SerialTree");
     hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufSerialCodeStream("hufSerialCodeStream");
     hls::stream<uint8_t> idxNum("idxNum");
-#pragma HLS STREAM variable = lz77SerialTree depth = c_depthlitDistStream
-#pragma HLS STREAM variable = hufSerialCodeStream depth = c_depthlitDistStream
+#pragma HLS STREAM variable = lz77SerialTree depth = 4
+#pragma HLS STREAM variable = hufSerialCodeStream depth = 4
 #pragma HLS STREAM variable = idxNum depth = 32
 
     zlibTreegenScheduler<NUM_BLOCK, MAX_FREQ_DWIDTH>(lz77Tree, lz77SerialTree, idxNum);
+    zlibTreegenStream<MAX_FREQ_DWIDTH, 0>(lz77SerialTree, hufSerialCodeStream);
+    zlibTreegenDistributor<NUM_BLOCK>(hufCodeStream, hufSerialCodeStream, idxNum);
+}
+
+template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
+void zlibTreegenStreamWrapper(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77Tree[NUM_BLOCK],
+                              hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[NUM_BLOCK],
+                              hls::stream<ap_uint<4> >& coreIdxStream) {
+#pragma HLS dataflow
+    hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77SerialTree("lz77SerialTree");
+    hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufSerialCodeStream("hufSerialCodeStream");
+    hls::stream<uint8_t> idxNum("idxNum");
+#pragma HLS STREAM variable = lz77SerialTree depth = 4
+#pragma HLS STREAM variable = hufSerialCodeStream depth = 4
+#pragma HLS STREAM variable = idxNum depth = 16
+
+    zlibTreegenScheduler<NUM_BLOCK, MAX_FREQ_DWIDTH>(lz77Tree, lz77SerialTree, coreIdxStream, idxNum);
     zlibTreegenStream<MAX_FREQ_DWIDTH, 0>(lz77SerialTree, hufSerialCodeStream);
     zlibTreegenDistributor<NUM_BLOCK>(hufCodeStream, hufSerialCodeStream, idxNum);
 }

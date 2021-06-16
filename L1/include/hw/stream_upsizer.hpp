@@ -30,51 +30,10 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 namespace xf {
 namespace compression {
 namespace details {
-
-template <int IN_WIDTH, int OUT_WIDTH>
-void passUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
-                 hls::stream<bool>& inStreamEos,
-                 hls::stream<ap_uint<OUT_WIDTH> >& outStream,
-                 hls::stream<uint32_t>& outSizeStream,
-                 hls::stream<bool>& inFileEos,
-                 hls::stream<bool>& outFileEos) {
-    /************ NOTE: TO BE DEPRECATED ************/
-    constexpr int c_upsizeFactor = OUT_WIDTH / IN_WIDTH;
-
-    while (1) {
-        bool eosFile = inFileEos.read();
-        outFileEos << eosFile;
-        if (eosFile == true) break;
-
-        ap_uint<OUT_WIDTH> outBuffer = 0;
-        ap_uint<IN_WIDTH> inValue = inStream.read();
-        uint32_t byteIdx = 0;
-        uint32_t byteIdxTotal = 0;
-    stream_upsizer:
-        for (bool eos_flag = inStreamEos.read(); eos_flag == false; eos_flag = inStreamEos.read()) {
-#pragma HLS PIPELINE II = 1
-            if (byteIdx == c_upsizeFactor) {
-                outStream << outBuffer;
-                byteIdx = 0;
-            }
-            outBuffer.range((byteIdx + 1) * IN_WIDTH - 1, byteIdx * IN_WIDTH) = inValue;
-            inValue = inStream.read();
-            byteIdx++;
-            byteIdxTotal++;
-        }
-
-        if (byteIdx) {
-            outStream << outBuffer;
-        }
-        outSizeStream << byteIdxTotal;
-    }
-    outSizeStream << 0;
-}
 
 template <int D_WIDTH>
 void sendBuffer(hls::stream<IntVectorStream_dt<D_WIDTH, 1> >& inStream,

@@ -34,7 +34,7 @@ class snappyApp : public compressApp {
      * @brief Initialize snappyApp content
      *
      */
-    snappyApp(const int argc, char** argv, bool enable_profile = false);
+    snappyApp(const int argc, char** argv, bool is_seq, bool enable_profile = false);
     /**
      * @brief snappy block size
      *

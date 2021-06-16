@@ -24,3 +24,6 @@ ifeq ($(TARGET),$(filter $(TARGET), sw_emu))
 	CXXFLAGS += -DDISABLE_FREE_RUNNING_KERNEL
 	VPP_FLAGS += -DDISABLE_FREE_RUNNING_KERNEL
 endif
+ifeq ($(findstring u50, $(DEVICE)), u50)
+     VPP_LDFLAGS_compress += --config $(CUR_DIR)/conn_u50.cfg
+endif   
