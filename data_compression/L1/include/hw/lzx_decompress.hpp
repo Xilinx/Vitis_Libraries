@@ -30,7 +30,6 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 namespace xf {
 namespace compression {
@@ -54,10 +53,10 @@ void lzxDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
 #pragma HLS STREAM variable = offsetStream depth = 32
 #pragma HLS STREAM variable = matchlenStream depth = 32
 
-#pragma HLS RESOURCE variable = litlenStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = litStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = offsetStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = matchlenStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = matchlenStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     lz4MultiByteDecompress<PARALLEL_BYTES>(inStream, litlenStream, litStream, offsetStream, matchlenStream,

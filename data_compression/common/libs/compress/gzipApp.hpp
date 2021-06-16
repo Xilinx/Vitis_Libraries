@@ -31,7 +31,7 @@ class gzipApp : public compressApp {
      * @brief Initialize gzipApp content
      *
      */
-    gzipApp(const int argc, char** argv, bool enable_profile = false);
+    gzipApp(const int argc, char** argv, bool is_seq, bool enable_profile = false);
 
     /**
      *

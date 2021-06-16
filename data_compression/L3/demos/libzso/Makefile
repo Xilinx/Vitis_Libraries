@@ -323,7 +323,7 @@ xlibz_SRCS = $(ZLIBDIR)/xlibz.cpp
 
 CXXFLAGS += -std=c++11 -fmessage-length=0 \
 		-DXDEVICE=$(XDEVICE) \
-	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread \
+	    -Wall -Wno-unknown-pragmas -Wno-unused-label \
 		-Wno-unused-function
 CXXFLAGS += -O3	   
 
@@ -331,7 +331,7 @@ ifeq ($(ENABLE_XRM), yes)
 CXXFLAGS += -I/opt/xilinx/xrm/include
 endif
 
-LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
+LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL 
 LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing
 LDFLAGS += -Wno-unused-function
 
@@ -437,8 +437,6 @@ endif
 
 RUN_ENV += export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)
 RUN_ENV += export XILINX_LIBZ_XCLBIN=$(XCLBIN_FILE)
-RUN_ENV += export XILINX_LIBZ_DEFLATE_BUFFER_SIZE=0
-RUN_ENV += export XILINX_LIBZ_INFLATE_BUFFER_SIZE=0
 RUN_ENV += export XRT_INI_PATH=$(PWD)/xrt.ini
 
 run: xclbin lib host $(EMU_CONFIG)

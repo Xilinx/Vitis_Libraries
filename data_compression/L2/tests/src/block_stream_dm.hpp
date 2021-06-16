@@ -19,7 +19,7 @@
 #define _XFCOMPRESSION_BLOCK_STREAM_DM_HPP_
 
 /**
- * @file block_datamover_kernel.hpp
+ * @file block_stream_dm.hpp
  * @brief Header for data mover kernel which streams data to a streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
@@ -28,13 +28,12 @@
 #include "hls_stream.h"
 #include <ap_int.h>
 
+#include "axi_stream_utils.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
-#include "axi_stream_utils.hpp"
 
-#include <stdio.h>
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
 
 #define GMEM_DWIDTH 64
 
@@ -60,7 +59,6 @@ void xilDataMover(uintDataWidth* in,
                   uintDataWidth* out,
                   uint32_t input_size,
                   uint32_t* compressed_size,
-                  uint32_t numItr,
                   hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& instream_orig,
                   hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outstream_dest);
 }

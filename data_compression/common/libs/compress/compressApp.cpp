@@ -104,21 +104,70 @@ void compressApp::parser(int argc, char** argv) {
 }
 
 // compressApp Constructor: parse CLI opions and set the driver class memebr variables
-compressApp::compressApp(int argc, char** argv, bool enable_profile) {
+compressApp::compressApp(int argc, char** argv, bool is_seq, bool enable_profile) {
     m_enableProfile = enable_profile;
+    m_isSeq = is_seq;
     m_parser.addSwitch("--compress", "-c", "Compress", "");
     m_parser.addSwitch("--decompress", "-d", "Decompress", "");
     m_parser.addSwitch("--test", "-t", "Xilinx compress & Decompress", "");
     m_parser.addSwitch("--compress_list", "-cfl", "Compress List of Input Files", "");
     m_parser.addSwitch("--decompress_list", "-dfl", "Decompress List of compressed Input Files", "");
     m_parser.addSwitch("--test_list", "-l", "Xilinx Compress & Decompress on Input Files", "");
-    m_parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
+    m_parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
     m_parser.addSwitch("--xclbin", "-xbin", "XCLBIN", "");
     m_parser.addSwitch("--device_id", "-id", "Device ID", "0");
 }
 
+void compressApp::printTestSummaryHeader() {
+    if (m_compress_flow) {
+        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "                     Xilinx Compress" << std::endl;
+        std::cout << "--------------------------------------------------------------" << std::endl;
+    } else {
+        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "                     Xilinx Decompress" << std::endl;
+        std::cout << "--------------------------------------------------------------" << std::endl;
+    }
+    if (m_list_flow) {
+        (m_isSeq) ? std::cout << "KT(MBps)\t" : std::cout << "E2E(MBps)\t";
+        (m_compress_flow) ? std::cout << "CR\t" : std::cout << "";
+        std::cout << "File Size(MB)\tFile Name" << std::endl;
+    } else {
+        (m_isSeq) ? std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:"
+                  : std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
+    }
+}
+
+void compressApp::printTestSummaryFooter(const std::string& testFile) {
+    double input_size = m_inputsize;
+    std::string fileUnit = getFileSizeUnit(input_size);
+    if (m_list_flow) {
+        (m_compress_flow) ? std::cout << "\t\t" << (double)m_inputsize / m_enbytes : std::cout << "";
+        std::cout << "\t" << std::fixed << std::setprecision(3);
+        (m_compress_flow) ? std::cout << (double)m_inputsize / 1000000 << "\t\t" << testFile
+                          : std::cout << "\t" << (double)m_inputsize / 1000000 << "\t\t" << testFile;
+        std::cout << std::endl;
+    } else {
+        (m_compress_flow)
+            ? std::cout << std::endl
+                        << "CR\t\t\t:" << (double)m_inputsize / m_enbytes << std::fixed << std::setprecision(3)
+            : std::cout << "\t";
+        std::cout << std::endl;
+        std::cout << "File Size(" << fileUnit << ")\t\t:" << input_size << std::endl;
+        std::cout << "File Name\t\t:";
+        std::cout << testFile;
+        std::cout << "\n";
+        std::cout << "Output Location: " << m_outFile_name.c_str() << std::endl;
+        double enbytes = m_enbytes;
+        fileUnit = getFileSizeUnit(enbytes);
+        (m_compress_flow) ? std::cout << "Compressed file size(" << fileUnit << ")\t\t:" << enbytes : std::cout << "\t";
+        std::cout << std::endl;
+    }
+}
+
 // compressApp run API: entry point of the program
-void compressApp::run(compressBase* b) {
+void compressApp::run(compressBase* b, uint16_t maxCR) {
+    b->m_maxCR = maxCR;
     if (!m_uncompressed_file.empty()) {
         runCompress(b, m_uncompressed_file);
     }
@@ -132,14 +181,8 @@ void compressApp::run(compressBase* b) {
             m_uncompressed_filelist = m_filelist;
         }
         m_list_flow = true;
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "                     Xilinx Compress" << std::endl;
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        if (m_enableProfile) {
-            std::cout << "E2E(MBps)\tCR\t\tFile Size(MB)\t\tFile Name" << std::endl;
-        } else {
-            std::cout << "KT(MBps)\tCR\t\tFile Size(MB)\t\tFile Name" << std::endl;
-        }
+        m_compress_flow = true;
+        printTestSummaryHeader();
         std::vector<std::string> filename_vec;
         getListFilenames(m_uncompressed_filelist, filename_vec);
         for (auto file_itr : filename_vec) {
@@ -152,15 +195,8 @@ void compressApp::run(compressBase* b) {
             m_compressed_filelist = m_filelist;
         }
         m_list_flow = true;
-
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "                     Xilinx Decompress" << std::endl;
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        if (m_enableProfile) {
-            std::cout << "E2E(MBps)\tFile Size(MB)\tFile Name" << std::endl;
-        } else {
-            std::cout << "KT(MBps)\tFile Size(MB)\tFile Name" << std::endl;
-        }
+        m_compress_flow = false;
+        printTestSummaryHeader();
         std::vector<std::string> filename_vec;
         getListFilenames(m_compressed_filelist, filename_vec);
         for (auto file_itr : filename_vec) {
@@ -191,7 +227,7 @@ void compressApp::run(compressBase* b) {
 }
 
 // File Compression API
-void compressApp::runCompress(compressBase* b, const std::string m_uncompressed_file) {
+void compressApp::runCompress(compressBase* b, const std::string& m_uncompressed_file) {
     std::ifstream inFile(m_uncompressed_file, std::ifstream::binary);
     inputFilePreCheck(inFile);
     double input_size = m_inputsize;
@@ -202,16 +238,12 @@ void compressApp::runCompress(compressBase* b, const std::string m_uncompressed_
 
     inFile.read(reinterpret_cast<char*>(in.data()), m_inputsize);
     inFile.close();
+    m_compress_flow = true;
     if (!m_list_flow) {
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "                     Xilinx Compress" << std::endl;
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        if (m_enableProfile)
-            std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
-        else
-            std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
+        printTestSummaryHeader();
     }
     std::string fileUnit = getFileSizeUnit(input_size);
+    std::string uncompressed_file = m_uncompressed_file;
     m_outFile_name = m_uncompressed_file;
     m_outFile_name += m_extn;
 
@@ -225,22 +257,8 @@ void compressApp::runCompress(compressBase* b, const std::string m_uncompressed_
         exit(1);
     }
     outFile.write((char*)out.data(), m_enbytes);
-    if (m_list_flow) {
-        std::cout << "\t\t" << (double)m_inputsize / m_enbytes << "\t\t" << std::fixed << std::setprecision(3)
-                  << (double)m_inputsize / 1000000 << "\t\t\t" << m_uncompressed_file << std::endl;
-    } else {
-        std::cout << std::endl
-                  << "CR\t\t\t:" << (double)m_inputsize / m_enbytes << std::endl
-                  << std::fixed << std::setprecision(3) << "File Size(" << fileUnit << ")\t\t:" << input_size
-                  << std::endl
-                  << "File Name\t\t:" << m_uncompressed_file << std::endl;
-        std::cout << "\n";
-        std::cout << "Output Location: " << m_outFile_name.c_str() << std::endl;
-        double enbytes = m_enbytes;
-        fileUnit = getFileSizeUnit(enbytes);
 
-        std::cout << "Compressed file size(" << fileUnit << ")\t\t:" << enbytes << std::endl;
-    }
+    printTestSummaryFooter(uncompressed_file);
     // Close file
     outFile.close();
     if (m_compress_decompress) {
@@ -250,7 +268,7 @@ void compressApp::runCompress(compressBase* b, const std::string m_uncompressed_
 }
 
 // File Decompress API
-void compressApp::runDecompress(compressBase* b, const std::string m_compressed_file) {
+void compressApp::runDecompress(compressBase* b, const std::string& m_compressed_file) {
     std::ifstream inFile(m_compressed_file, std::ifstream::binary);
     inputFilePreCheck(inFile);
     double input_size = m_inputsize;
@@ -262,17 +280,12 @@ void compressApp::runDecompress(compressBase* b, const std::string m_compressed_
     inFile.read((char*)in.data(), m_inputsize);
     inFile.close();
     std::string fileUnit = getFileSizeUnit(input_size);
+    std::string compressed_file = m_compressed_file;
     m_outFile_name = m_compressed_file;
     m_outFile_name += ".orig";
-
+    m_compress_flow = false;
     if (!m_list_flow) {
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "                     Xilinx Decompress" << std::endl;
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        if (m_enableProfile)
-            std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
-        else
-            std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
+        printTestSummaryHeader();
     }
     // Invoking design class virtaul decompress api
     m_debytes = b->xilDecompress(in.data(), out.data(), m_inputsize);
@@ -282,18 +295,7 @@ void compressApp::runDecompress(compressBase* b, const std::string m_compressed_
     outFile.write((char*)out.data(), m_debytes);
     // Close file
     outFile.close();
-    if (m_list_flow) {
-        std::cout << std::fixed << std::setprecision(3) << "\t\t" << (double)m_inputsize / 1000000 << "\t\t"
-                  << m_compressed_file << std::endl;
-
-    } else {
-        std::cout << std::endl
-                  << "File Size(" << fileUnit << ")\t\t:" << input_size << std::endl
-                  << "File Name\t\t:" << m_compressed_file << std::endl;
-        std::cout << "\n";
-        std::cout << "Output Location: " << m_outFile_name.c_str() << std::endl;
-    }
-
+    printTestSummaryFooter(compressed_file);
     if (m_compress_decompress) {
         int ret = validate(m_golden_file, m_outFile_name);
         if (ret == 0) {

@@ -191,10 +191,6 @@ typedef struct {
         exit(EXIT_FAILURE);                                     \
     }
 
-#define DELETE_OBJ(buffer)     \
-    if (buffer) delete buffer; \
-    buffer = nullptr;
-
 // Aligned allocator for ZLIB
 template <typename T>
 struct zlib_aligned_allocator {
@@ -339,7 +335,6 @@ class gzipOCLHost : public gzipBase {
                 const bool is_Seq = false,
                 uint8_t device_id = 0,
                 bool enable_profile = false,
-                uint16_t maxCr = MAX_CR_DEFAULT,
                 uint8_t decKerType = FULL,
                 uint8_t dflow = XILINX_GZIP,
                 bool freeRunKernel = false);

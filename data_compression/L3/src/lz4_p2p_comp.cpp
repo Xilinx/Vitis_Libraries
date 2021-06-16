@@ -308,9 +308,6 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         compress_kernel_lz4->setArg(narg++, inSizeVec[i]);
         compressKernelVec.push_back(compress_kernel_lz4);
 
-        uint32_t offset = 0;
-        uint32_t tail_bytes = 0;
-        tail_bytes = 1;
         uint32_t no_blocks_calc = (inSizeVec[i] - 1) / (m_BlockSizeInKb * 1024) + 1;
 
         // K2 Set Kernel arguments

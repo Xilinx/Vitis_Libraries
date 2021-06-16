@@ -52,7 +52,7 @@ constexpr int c_windowSize = ZSTD_BLOCK_SIZE_KB * 1024;
 constexpr int c_blockSize = ZSTD_BLOCK_SIZE_KB * 1024;
 
 #ifndef MIN_BLCK_SIZE
-#define MIN_BLCK_SIZE 1024
+#define MIN_BLCK_SIZE 128
 #endif
 
 // Kernel top functions

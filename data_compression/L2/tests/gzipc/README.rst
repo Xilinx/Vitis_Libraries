@@ -11,8 +11,8 @@ The binary host file generated is named as "**xil_gzip**" and it is present in `
 Executable Usage
 ----------------
 
-1. To execute single file for compression 	          : ``./build/xil_gzip -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <file_name>``
-2. To execute multiple files for compression    : ``./build/xil_gzip -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -l <files.list>``
+1. To execute single file for compression 	    : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <file_name>``
+2. To execute multiple files for compression    : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -cfl <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 
@@ -20,13 +20,15 @@ The usage of the generated executable is as follows:
 
 .. code-block:: bash
  
-   Usage: application.exe -[-h-c-l-cx-B]
+   Usage: application.exe -[-h-c-l-xbin-B]
           --help,           -h      Print Help Options
-          --xclbin,         -cx     XCLBIN                                               Default: [compress]
+          --xclbin,         -xbin   XCLBIN                                               Default: [compress]
           --compress,       -c      Compress
-          --file_list,      -l      List of Input Files
-          --block_size,     -B      Compress Block Size [0-32: 1-64: 2-1024: 3-4096]     Default: [0]
- 
+          --file_list,      -cfl    Compress List of Input Files
+          --max_cr,         -mcr    Maximum CR    
+          --device_id,      -id     Device ID                                       Default: [0]
+          --zlib,           -zlib   [0:GZip, 1:Zlib]                                Default: [0]
+
 Results
 -------
 
@@ -34,13 +36,13 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx GZip Compress/Decompress
-kernels. The final Fmax achieved is 285MHz 
+kernels. The final Fmax achieved is 279MHz 
 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   49.7K 3K     51.7K  67    72    
+Compress   49.8K 3.3K   52.5K 62    72    
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

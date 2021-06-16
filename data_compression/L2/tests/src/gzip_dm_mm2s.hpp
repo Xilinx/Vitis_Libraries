@@ -27,14 +27,14 @@
 
 #include "ap_axi_sdata.h"
 
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
-#include <ap_int.h>
 #include "hls_stream.h"
 #include "mm2s.hpp"
 #include "stream_downsizer.hpp"
 #include "zlib_specs.hpp"
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
 
@@ -46,7 +46,8 @@ const int c_inStreamDwidth = 16;
 
 extern "C" {
 /**
- * @brief Gzip data mover:Data Mover kernel top function. It reads data from memory and streams it
+ * @brief Gzip data mover:Data Mover kernel top function. It reads data from
+ * memory and streams it
  *  to gzip decompression kernel.
  *
  * @param in input memory pointer

@@ -12,14 +12,14 @@ combination with software APIs to derive end application that can be directly
 deployed or creation of shared library that can be integrated with external
 applications.
 
-Demo examples for **Zlib** and **Lz4** applications are available in the ``L3/demos/`` directory.
+Demo examples for **Gzip** and **Lz4** applications are available in the ``L3/demos/`` directory.
 
 .. toctree::
    :maxdepth: 1
    :caption: List of Demos
 
    lz4_app.rst
-   zlib_app.rst
+   gzip_app.rst
 
 Environment Setup
 =================

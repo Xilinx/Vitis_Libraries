@@ -16,7 +16,8 @@
  */
 /**
  * @file zlib_dm_rd.cpp
- * @brief Source for data reader kernel for reading decompressed data from zlib decompression streaming kernel.
+ * @brief Source for data reader kernel for reading decompressed data from zlib
+ * decompression streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
@@ -60,10 +61,10 @@ void streamDataK2dmSync(hls::stream<ap_uint<STREAMDWIDTH> >& out,
         if (last) {
             uint32_t allignedData = (uint32_t)(outSize % readBlockSize);
             if (allignedData == 0) {
-                outSize =
-                    (outSize == 0)
-                        ? 1
-                        : readBlockSize + 1; // write 1 extra size if last block has the size equal to readBlockSize
+                outSize = (outSize == 0) ? 1 : readBlockSize + 1; // write 1 extra size
+                                                                  // if last block has
+                                                                  // the size equal to
+                                                                  // readBlockSize
 
                 bytEos << 0;
                 out << 0;

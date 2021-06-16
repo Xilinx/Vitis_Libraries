@@ -13,17 +13,17 @@ then
     done
 
     echo -e "\n\n-----------Running both Compression and Decompression for large file-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -xbin $XCLBIN_FILE"
+    cmd1="$EXE_FILE -l ./test.list -mcr 20 -xbin $XCLBIN_FILE"
     echo $cmd1
     $cmd1
 
 echo -e "\n\n-----------Block Size: 256Kb-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -xbin $XCLBIN_FILE -B 1"
+    cmd1="$EXE_FILE -l ./test.list -mcr 20 -xbin $XCLBIN_FILE -B 1"
     echo $cmd1
     $cmd1
 
 echo -e "\n\n-----------Block Size: 1024Kb-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -xbin $XCLBIN_FILE -B 2"
+    cmd1="$EXE_FILE -l ./test.list -mcr 20 -xbin $XCLBIN_FILE -B 2"
     echo $cmd1
     $cmd1
 fi

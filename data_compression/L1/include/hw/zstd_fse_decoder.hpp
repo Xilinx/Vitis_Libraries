@@ -26,8 +26,6 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include "hls_stream.h"
 #include <ap_int.h>

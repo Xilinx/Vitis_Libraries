@@ -890,6 +890,212 @@ size_t xfZlib::decompress(uint8_t* in, uint8_t* out, size_t input_size, size_t m
     }
 }
 
+size_t xfZlib::inflate_buffer(xlibData* strm,
+                              int last_block,
+                              size_t& input_size,
+                              size_t& output_size,
+                              bool& last_data,
+                              bool last_buffer,
+                              const std::string& cu_id) {
+    cl_int err;
+    bool actionDone = false;
+    std::string compress_kname = cu_id;
+    if (m_token == nullptr) {
+        // Returns first token
+        m_token = strtok((char*)(cu_id.c_str()), "_");
+    }
+    char* val;
+    auto fixed_hbuf_size = HOST_BUFFER_SIZE;
+
+    // Keep printing tokens while one of the
+    // delimiters present in str[].
+    while (m_token != NULL) {
+        val = strtok(NULL, "_");
+        if (val == NULL) break;
+        m_token = val;
+    }
+    if (m_decompressKernel == NULL) {
+        uint8_t kidx = m_kidx;
+        std::string decompress_kname =
+            stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + m_token + "}";
+        OCL_CHECK(err, m_decompressKernel = new cl::Kernel(*m_program, decompress_kname.c_str(), &err));
+        OCL_CHECK(err, err = m_dec_q->enqueueTask(*(m_decompressKernel), NULL, NULL));
+    }
+
+    if (m_dataReaderKernel == NULL) {
+        std::string data_reader_kname = data_reader_kernel_name + ":{" + data_reader_kernel_name + "_" + m_token + "}";
+        OCL_CHECK(err, m_dataReaderKernel = new cl::Kernel(*m_program, data_reader_kname.c_str(), &err));
+    }
+
+    if (m_dataWriterKernel == NULL) {
+        std::string data_writer_kname = data_writer_kernel_name + ":{" + data_writer_kernel_name + "_" + m_token + "}";
+        OCL_CHECK(err, m_dataWriterKernel = new cl::Kernel(*m_program, data_writer_kname.c_str(), &err));
+        if (!isSlaveBridge()) {
+            OCL_CHECK(err, err = m_wr_q->enqueueMigrateMemObjects({*(buffer_status)}, 0, NULL, NULL));
+        } else {
+            h_decStatus =
+                (uint32_t*)m_memMgrDecS2MM->create_host_buffer(CL_MEM_READ_ONLY, sizeof(uint32_t), &(buffer_status));
+            if (h_decStatus == nullptr) {
+                release();
+                m_err_code = true;
+            } else {
+                h_decStatus[0] = 0;
+            }
+        }
+    }
+
+    if (input_size) {
+        if (write_buffer == nullptr) {
+            auto buffer = m_memMgrDecMM2S->createBuffer(fixed_hbuf_size); // buffer
+            write_buffer = buffer;
+        }
+
+        if (write_buffer) {
+            // Do accumulation
+            // Do copy of data from m_info->in_buf to write_buffer->h_buf_in
+            // set write_buffer to null if you reach 1MB
+            if (input_size + this->m_inputSize > this->m_bufSize) {
+                std::memcpy(write_buffer->h_buf_in + this->m_inputSize, strm->in_buf,
+                            this->m_bufSize - this->m_inputSize);
+                strm->in_buf += (this->m_bufSize - this->m_inputSize);
+                input_size -= (this->m_bufSize - this->m_inputSize);
+                this->m_inputSize += (this->m_bufSize - this->m_inputSize);
+            } else if (input_size != 0) {
+                std::memcpy(write_buffer->h_buf_in + this->m_inputSize, strm->in_buf, input_size);
+                this->m_inputSize += input_size;
+                input_size = 0;
+            }
+
+            if (last_block && input_size == 0) last_buffer = true;
+
+            if ((this->m_inputSize == this->m_bufSize) || last_buffer) {
+                m_wbready = true;
+            }
+            actionDone = true;
+        }
+
+        if (m_wbready) {
+            m_wbready = false;
+            auto buffer = write_buffer;
+            write_buffer = nullptr;
+            uint32_t cBufSize = this->m_inputSize;
+            uint32_t isLast = last_buffer;
+            this->m_inputSize -= (this->m_inputSize > output_size) ? output_size : this->m_inputSize;
+
+            // set kernel arguments
+            OCL_CHECK(err, err = m_dataWriterKernel->setArg(0, *(buffer->buffer_input)));
+            OCL_CHECK(err, err = m_dataWriterKernel->setArg(1, cBufSize));
+            OCL_CHECK(err, err = m_dataWriterKernel->setArg(2, isLast));
+
+            // enqueue data migration to kernel
+            if (!(isSlaveBridge())) {
+                OCL_CHECK(err, err = m_wr_q->enqueueMigrateMemObjects({*(buffer->buffer_input)}, 0, NULL, NULL));
+            }
+
+            // enqueue the writer kernel dependent on corresponding bufffer migration
+            OCL_CHECK(err, err = m_wr_q->enqueueTask(*(m_dataWriterKernel), NULL, &(buffer->cmp_event)));
+
+            cl_int err;
+            OCL_CHECK(err, err = buffer->cmp_event.setCallback(CL_COMPLETE, xf::compression::event_decompressWrite_cb,
+                                                               (void*)buffer));
+            actionDone = true;
+        }
+    }
+
+    if (!m_decompressStatus) {
+        auto buffer_1 = m_memMgrDecS2MM->createBuffer(output_size); // buffer
+        if (buffer_1 != NULL) {
+            uint32_t inputSize = output_size;
+            // set consistent buffer size to be read
+            OCL_CHECK(err, err = m_dataReaderKernel->setArg(0, *(buffer_1->buffer_zlib_output)));
+            OCL_CHECK(err, err = m_dataReaderKernel->setArg(1, *(buffer_1->buffer_compress_size)));
+            OCL_CHECK(err, err = m_dataReaderKernel->setArg(2, *(buffer_status)));
+            OCL_CHECK(err, err = m_dataReaderKernel->setArg(3, inputSize));
+
+            // enqueue reader kernel
+            OCL_CHECK(err, err = m_rd_q->enqueueTask(*(m_dataReaderKernel), NULL, &(buffer_1->cmp_event)));
+
+            if (!(isSlaveBridge())) {
+                std::vector<cl::Event> cmpEvents = {buffer_1->cmp_event};
+                OCL_CHECK(err,
+                          err = m_rd_q->enqueueMigrateMemObjects(
+                              {*(buffer_1->buffer_zlib_output), *(buffer_1->buffer_compress_size), *(buffer_status)},
+                              CL_MIGRATE_MEM_OBJECT_HOST, &(cmpEvents), &(buffer_1->rd_event)));
+                cl_int err;
+                OCL_CHECK(err, err = buffer_1->rd_event.setCallback(CL_COMPLETE, xf::compression::event_decompress_cb,
+                                                                    (void*)buffer_1));
+            } else {
+                cl_int err;
+                OCL_CHECK(err, err = buffer_1->cmp_event.setCallback(CL_COMPLETE, xf::compression::event_decompress_cb,
+                                                                     (void*)buffer_1));
+            }
+        }
+    }
+
+    if ((m_memMgrDecMM2S->peekBuffer() != NULL) && (m_memMgrDecMM2S->peekBuffer()->is_finish())) {
+        m_memMgrDecMM2S->getBuffer();
+    }
+
+    if (m_rbready) {
+        size_t retSize = 0;
+        // Do the data copy chunk by chunk
+        // Set readbuffer to null once full copy is done
+        // Transfer data in sizes of avail out until it turns zero
+        if (m_compSize > strm->output_size) {
+            std::memcpy(strm->out_buf, read_buffer->h_buf_zlibout + m_compSizePending, strm->output_size);
+            m_compSize -= strm->output_size;
+            retSize = strm->output_size;
+            strm->total_out += strm->output_size;
+            strm->out_buf += strm->output_size;
+            m_compSizePending += strm->output_size;
+            strm->output_size = 0;
+        } else {
+            std::memcpy(strm->out_buf, read_buffer->h_buf_zlibout + m_compSizePending, m_compSize);
+            strm->output_size = strm->output_size - m_compSize;
+            strm->total_out += m_compSize;
+            strm->out_buf += m_compSize;
+            retSize = m_compSize;
+            m_compSizePending = strm->output_size;
+            m_compSize = 0;
+        }
+        if (m_compSize == 0) {
+            read_buffer = nullptr;
+            m_rbready = false;
+            m_compSizePending = 0;
+        }
+        last_data = (m_decompressStatus) ? true : false;
+        return retSize;
+    }
+
+    if ((m_memMgrDecS2MM->peekBuffer() != NULL) && (m_memMgrDecS2MM->peekBuffer()->is_finish()) &&
+        (m_rbready == false)) {
+        buffers* buffer;
+        buffer = m_memMgrDecS2MM->getBuffer();
+
+        m_decompressStatus = (isSlaveBridge()) ? h_decStatus[0] : h_dcompressStatus[0];
+        m_compSize = buffer->h_compressSize[0];
+        read_buffer = buffer;
+        m_rbready = true;
+        assert(output_size >= m_compSize);
+        actionDone = true;
+    }
+
+    if ((actionDone == false) && (m_memMgrDecS2MM->isPending() == true)) {
+        // wait for a queue to finish to save CPU cycles
+        auto buffer = m_memMgrDecS2MM->peekBuffer();
+        if (buffer != NULL) {
+            if (!isSlaveBridge())
+                buffer->rd_event.wait();
+            else
+                buffer->cmp_event.wait();
+        }
+        actionDone = true;
+    }
+
+    last_data = false;
+    return 0;
+}
+
 size_t xfZlib::inflate_buffer(uint8_t* in,
                               uint8_t* out,
                               size_t& input_size,
@@ -917,14 +1123,12 @@ size_t xfZlib::inflate_buffer(uint8_t* in,
             stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + token + "}";
         OCL_CHECK(err, m_decompressKernel = new cl::Kernel(*m_program, decompress_kname.c_str(), &err));
         OCL_CHECK(err, err = m_dec_q->enqueueTask(*(m_decompressKernel), NULL, NULL));
-    }
 
-    if (m_dataReaderKernel == NULL) {
+        // Reader kernel
         std::string data_reader_kname = data_reader_kernel_name + ":{" + data_reader_kernel_name + "_" + token + "}";
         OCL_CHECK(err, m_dataReaderKernel = new cl::Kernel(*m_program, data_reader_kname.c_str(), &err));
-    }
 
-    if (m_dataWriterKernel == NULL) {
+        // Writer kernel
         std::string data_writer_kname = data_writer_kernel_name + ":{" + data_writer_kernel_name + "_" + token + "}";
         OCL_CHECK(err, m_dataWriterKernel = new cl::Kernel(*m_program, data_writer_kname.c_str(), &err));
         if (!isSlaveBridge()) {
@@ -952,6 +1156,7 @@ size_t xfZlib::inflate_buffer(uint8_t* in,
 
             uint32_t cBufSize = inputSize;
             uint32_t isLast = last_buffer;
+
             // set kernel arguments
             OCL_CHECK(err, err = m_dataWriterKernel->setArg(0, *(buffer->buffer_input)));
             OCL_CHECK(err, err = m_dataWriterKernel->setArg(1, cBufSize));
@@ -1083,13 +1288,238 @@ inline void xfZlib::readDeviceBuffer(void) {
 }
 
 size_t xfZlib::deflate_buffer(
+    xlibData* strm, int flush, size_t& input_size, bool& last_data, const std::string& cu_id) {
+    bool initialize_checksum = false;
+    bool actionDone = false;
+
+    auto fixed_hbuf_size = HOST_BUFFER_SIZE;
+    cl_int err;
+    std::string compress_kname;
+    if (m_compressFullKernel == NULL) {
+        // Random: Use kernel name directly and let XRT
+        // decide the CU connection based on HBM bank
+        compress_kname = compress_kernel_names[1];
+        OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
+        initialize_checksum = true;
+    }
+
+    bool checksum_type = false;
+    if (m_zlibFlow) {
+        if (initialize_checksum) h_buf_checksum_data.data()[0] = 1;
+        checksum_type = false;
+    } else {
+        if (initialize_checksum) h_buf_checksum_data.data()[0] = ~0;
+        checksum_type = true;
+    }
+    buffers* lastBuffer = m_memMgrCmp->getLastBuffer();
+
+    if (input_size) {
+        if (write_buffer == nullptr) {
+            auto buffer = m_memMgrCmp->createBuffer(fixed_hbuf_size);
+            write_buffer = buffer;
+        }
+
+        if (write_buffer) {
+            // Do accumulation
+            // Do copy of data from m_info->in_buf to write_buffer->h_buf_in
+            // set write_buffer to null if you reach 1MB
+            if (input_size + this->m_inputSize > this->m_bufSize) {
+                std::memcpy(write_buffer->h_buf_in + this->m_inputSize, strm->in_buf,
+                            this->m_bufSize - this->m_inputSize);
+                strm->in_buf += (this->m_bufSize - this->m_inputSize);
+                input_size -= (this->m_bufSize - this->m_inputSize);
+                this->m_inputSize += (this->m_bufSize - this->m_inputSize);
+            } else if (input_size != 0) {
+                std::memcpy(write_buffer->h_buf_in + this->m_inputSize, strm->in_buf, input_size);
+                this->m_inputSize += input_size;
+                input_size = 0;
+            }
+
+            if ((this->m_inputSize == this->m_bufSize) || flush) {
+                m_wbready = true;
+            }
+        }
+
+        if (m_wbready) {
+            m_wbready = false;
+            auto buffer = write_buffer;
+            write_buffer = nullptr;
+            if (lastBuffer == buffer) lastBuffer = NULL;
+            uint32_t inSize = this->m_inputSize;
+            buffer->store_size = 0;
+            this->m_inputSize = 0;
+
+            int narg = 0;
+            // Set kernel arguments
+            m_compressFullKernel->setArg(narg++, *(buffer->buffer_input));
+            m_compressFullKernel->setArg(narg++, *(buffer->buffer_zlib_output));
+            m_compressFullKernel->setArg(narg++, *(buffer->buffer_compress_size));
+            m_compressFullKernel->setArg(narg++, *buffer_checksum_data);
+            m_compressFullKernel->setArg(narg++, inSize);
+            m_compressFullKernel->setArg(narg++, checksum_type);
+
+            // Migrate memory - Map host to device buffers
+            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer->buffer_input)}, 0 /* 0 means from host*/,
+                                                                   NULL, &(buffer->wr_event)));
+            std::vector<cl::Event> wrEvents = {buffer->wr_event};
+
+            if (initialize_checksum) {
+                OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects(
+                                   {*(buffer_checksum_data)}, 0 /* 0 means from host*/, NULL, &(buffer->chk_wr_event)));
+                wrEvents.push_back(buffer->chk_wr_event);
+            }
+
+            if (lastBuffer != NULL) {
+                int status = -1;
+                cl_int ret = lastBuffer->cmp_event.getInfo<int>(CL_EVENT_COMMAND_EXECUTION_STATUS, &status);
+                if (ret == 0 && status != 0) {
+                    wrEvents.push_back(lastBuffer->cmp_event);
+                }
+            }
+
+            std::vector<cl::Event> cmpEvents;
+            // kernel write events update
+            // LZ77 Compress Fire Kernel invocation
+            OCL_CHECK(err, err = m_def_q->enqueueTask({*(m_compressFullKernel)}, &(wrEvents), &(buffer->cmp_event)));
+
+            cmpEvents = {buffer->cmp_event};
+
+            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer->buffer_compress_size)},
+                                                                   CL_MIGRATE_MEM_OBJECT_HOST, &(cmpEvents),
+                                                                   &(buffer->rd_event)));
+            cl_int err;
+            OCL_CHECK(err, err = buffer->rd_event.setCallback(CL_COMPLETE, xf::compression::event_compress_cb,
+                                                              (void*)buffer));
+            input_size = 0;
+            actionDone = true;
+        }
+    }
+
+    // Check if compression is done if so initiate output buffer transfer
+    // from device to host
+    if ((m_memMgrCmp->peekBuffer() != NULL) && (m_memMgrCmp->peekBuffer()->is_finish())) {
+        auto buffer = m_memMgrCmp->peekBuffer();
+        if (buffer->copy_done == false) {
+            buffer->compress_finish = false;
+            uint32_t compSize = (buffer->h_compressSize)[0];
+
+            // Read data based on the size
+            m_def_q->enqueueReadBuffer(*(buffer->buffer_zlib_output), CL_FALSE, 0, compSize, &buffer->h_buf_zlibout[0],
+                                       nullptr, &(buffer->rd_event));
+
+            cl_int err;
+            // Call back tracks rd_event associated with enqueueReadBuffer and
+            // in case of completion it updates the compress and copy_data
+            // status, which will be used to identify availability of zlib
+            // output in host buffer and local buffer memcpy initiated later on
+            OCL_CHECK(err, err = buffer->rd_event.setCallback(CL_COMPLETE, xf::compression::event_copydone_cb,
+                                                              (void*)buffer));
+            actionDone = true;
+        }
+    }
+
+    if (m_rbready) {
+        size_t retSize = 0;
+        // Do the data copy chunk by chunk
+        // Set readbuffer to null once full copy is done
+        // Transfer data in sizes of avail out until it turns zero
+        if (m_compSize >= strm->output_size) {
+            std::memcpy(strm->out_buf, read_buffer->h_buf_zlibout + m_compSizePending, strm->output_size);
+            m_compSize -= strm->output_size;
+            retSize = strm->output_size;
+            strm->total_out += strm->output_size;
+            strm->out_buf += strm->output_size;
+            m_compSizePending += strm->output_size;
+            strm->output_size = 0;
+        } else {
+            std::memcpy(strm->out_buf, read_buffer->h_buf_zlibout + m_compSizePending, m_compSize);
+            strm->output_size = strm->output_size - m_compSize;
+            strm->total_out += m_compSize;
+            strm->out_buf += m_compSize;
+            retSize = m_compSize;
+            m_compSizePending = strm->output_size;
+            m_compSize = 0;
+        }
+        if (m_compSize == 0) {
+            read_buffer = nullptr;
+            m_rbready = false;
+            m_compSizePending = 0;
+        }
+        if ((m_memMgrCmp->isPending() == false) && (m_rbready == false)) {
+            last_data = true;
+        } else {
+            last_data = false;
+        }
+
+        if (last_data) {
+            OCL_CHECK(err,
+                      err = m_def_q->enqueueMigrateMemObjects({*(buffer_checksum_data)}, CL_MIGRATE_MEM_OBJECT_HOST));
+            OCL_CHECK(err, err = m_def_q->finish());
+
+            m_checksum = h_buf_checksum_data.data()[0];
+            if (checksum_type) m_checksum = ~m_checksum;
+
+            long int lBlk = 0xffff000001;
+            std::memcpy(strm->out_buf, &lBlk, 5);
+            strm->output_size -= 5;
+            strm->total_out += 5;
+            strm->out_buf += 5;
+            retSize += 5;
+
+            strm->out_buf[0] = m_checksum >> 24;
+            strm->out_buf[1] = m_checksum >> 16;
+            strm->out_buf[2] = m_checksum >> 8;
+            strm->out_buf[3] = m_checksum;
+
+            strm->output_size -= 4;
+            strm->total_out += 4;
+            strm->out_buf += 4;
+            retSize += 4;
+        }
+
+        return retSize;
+    }
+
+    if ((m_memMgrCmp->peekBuffer() != NULL) && (m_memMgrCmp->peekBuffer()->is_copyfinish()) && (m_rbready == false)) {
+        buffers* buffer;
+        buffer = m_memMgrCmp->getBuffer();
+        if (buffer != NULL) {
+            actionDone = true;
+            m_compSize = (buffer->h_compressSize)[0];
+            // Set read buffer so that
+            // read buffer will ensure compressed data
+            // goes out in chunks
+            read_buffer = buffer;
+            m_rbready = true;
+            // handle checksum for next iteration
+            if (checksum_type) h_buf_checksum_data.data()[0] = ~h_buf_checksum_data.data()[0];
+        }
+    }
+
+    if ((actionDone == false) && (m_memMgrCmp->isPending() == true)) {
+        // wait for a queue to finish to save CPU cycles
+        auto buffer = m_memMgrCmp->peekBuffer();
+        if (buffer != NULL) {
+            buffer->rd_event.wait();
+        }
+    }
+
+    if ((m_memMgrCmp->isPending() == false) && (m_rbready == false)) {
+        last_data = true;
+    } else {
+        last_data = false;
+    }
+    return 0;
+}
+
+size_t xfZlib::deflate_buffer(
     uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, const std::string& cu_id) {
     cl_int err;
     bool initialize_checksum = false;
     std::string compress_kname;
 
     if (m_compressFullKernel == NULL) {
-        if (!(isSlaveBridge())) {
+        if (!m_islibz) {
             compress_kname = compress_kernel_names[1] + ":{" + cu_id + "}";
         } else {
             compress_kname = compress_kernel_names[1];

@@ -62,6 +62,9 @@
             "symbols": [
                 "PARALLEL_BLOCK=1",
                 "MULTIPLE_BYTES=8"
+            ],
+         "includepaths": [
+               "LIB_DIR/L2/tests/src"
             ]
         }
     }, 

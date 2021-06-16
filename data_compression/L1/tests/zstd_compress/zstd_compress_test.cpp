@@ -32,6 +32,7 @@
 #define PARALLEL_BYTES_READ 4
 #define ZSTD_BLOCK_SIZE 32768
 #define WINDOW_SIZE ZSTD_BLOCK_SIZE
+#define MIN_BLOCK_SIZE 64
 #define PARALLEL_HUFFMAN_UNITS 1
 #define PARALLEL_LITERALS 4
 #define MIN_MATCH_LEN 3
@@ -46,7 +47,7 @@ uint64_t getFileSize(std::ifstream& file) {
 }
 
 void compressFile(hls::stream<IntVectorStream_dt<8, 1> >& inStream, hls::stream<IntVectorStream_dt<8, 4> >& outStream) {
-    xf::compression::zstdCompressCore<ZSTD_BLOCK_SIZE, WINDOW_SIZE>(inStream, outStream);
+    xf::compression::zstdCompressCore<ZSTD_BLOCK_SIZE, WINDOW_SIZE, MIN_BLOCK_SIZE>(inStream, outStream);
 }
 
 void validateFile(std::string& fileName, std::string& cmpFileName) {
@@ -72,19 +73,11 @@ void validateFile(std::string& fileName, std::string& cmpFileName) {
     hls::stream<IntVectorStream_dt<8, 1> > inStream("inStream");
     hls::stream<IntVectorStream_dt<8, 4> > outStream("outStream");
     // write input file block by block for 32KB block size
-    // uint16_t bIdx = 0;
     IntVectorStream_dt<8, 1> inVal;
     inVal.strobe = 1;
     for (int i = 0; i < inputSize; ++i) {
         origFile.read((char*)inVal.data, 1);
         inStream << inVal;
-        /*++bIdx;
-        if (bIdx == ZSTD_BLOCK_SIZE) {
-                bIdx = 0;
-            inVal.strobe = 0;
-                inStream << inVal;
-                inVal.strobe = 1;
-        }*/
     }
     // End of file/all data
     inVal.strobe = 0;
@@ -100,14 +93,11 @@ void validateFile(std::string& fileName, std::string& cmpFileName) {
         outV.range(15, 8) = outVal.data[1];
         outV.range(23, 16) = outVal.data[2];
         outV.range(31, 24) = outVal.data[3];
-        //        for (uint8_t i = 0; i < outVal.strobe; ++i) printf("%u. bsv: %x\n", outputSize + i,
-        //        (uint8_t)outVal.data[i]);
         outCmpFile.write((char*)&outV, (int)(outVal.strobe));
         outputSize += outVal.strobe;
     }
     printf("Output file size: %d\n", outputSize);
     outCmpFile.close();
-    // printf("Done !!");
 }
 
 int main(int argc, char* argv[]) {

@@ -96,12 +96,10 @@ int main(int argc, char* argv[]) {
             }
             inStream << inData;
         }
-    }
 
-    // Compression Call
-    gzipcMulticoreStreaming(inStream, outStream);
+        // Compression Call
+        gzipcMulticoreStreaming(inStream, outStream);
 
-    for (int z = 0; z < numItr; z++) {
         uint32_t byteCounter = 0;
         // 1st file
         out_dT val;

@@ -17,7 +17,8 @@
 
 /**
  * @file xil_block_decomp_datamover_kernel.cpp
- * @brief Source file for data mover kernel which streams data to decompression streaming kernel.
+ * @brief Source file for data mover kernel which streams data to decompression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */

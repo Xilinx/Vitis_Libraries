@@ -21,8 +21,10 @@
 int main(int argc, char* argv[]) {
     bool enable_profile = false;
     compressBase::State flow = compressBase::DECOMPRESS;
+    compressBase::Level lflow = compressBase::SEQ;
+
     // Driver class object
-    zstdApp d(argc, argv, enable_profile);
+    zstdApp d(argc, argv, lflow, enable_profile);
 
     // Design class object creating and constructor invocation
     std::unique_ptr<zstdOCLHost> zstd(

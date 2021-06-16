@@ -9,11 +9,11 @@
     "part_whitelist": [], 
     "part_blacklist": [],
      "QoR_golden": {
-          "VV_LUT": "50232", 
-          "VV_FF": "51443",
-          "VV_BRAM": "227",
-          "VV_URAM": "64",
-          "VV_AchievedClockPeriod": "3.593"
+          "VV_LUT": "49875", 
+          "VV_FF": "52540",
+          "VV_BRAM": "129",
+          "VV_URAM": "72",
+          "VV_AchievedClockPeriod": "3.627"
     },  
     "project": "gzip_compress_test", 
     "solution": "sol1", 

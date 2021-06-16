@@ -51,11 +51,19 @@ class compressApp {
     sda::utils::CmdLineParser m_parser;
     std::string m_extn{".compressed"};
     bool m_enableProfile;
+    bool m_isSeq;
+
+    /** Switch flow
+     * true means compress,
+     * false means decompress
+     */
+    bool m_compress_flow;
+
     /**
      * @brief Initialize compressApp content
      *
      */
-    compressApp(const int argc, char** argv, bool enable_profile);
+    compressApp(const int argc, char** argv, bool is_seq, bool enable_profile);
     void parser(const int argc, char** argv);
     int validate(std::string& inFile, std::string& outFile);
     // Get Input Filename
@@ -65,11 +73,13 @@ class compressApp {
     std::string& getInFileName(void);
     void inputFilePreCheck(std::ifstream& inStream);
     void getListFilenames(std::string& filelist, std::vector<std::string>& fname_vec);
+    void printTestSummaryHeader();
+    void printTestSummaryFooter(const std::string& testFile);
     // -c -d -l -t
-    void run(compressBase* b);
+    void run(compressBase* b, uint16_t maxCR = MAX_CR_DEFAULT);
 
-    void runCompress(compressBase* b, const std::string);
+    void runCompress(compressBase* b, const std::string&);
 
-    void runDecompress(compressBase* b, const std::string);
+    void runDecompress(compressBase* b, const std::string&);
 };
 #endif // _XFCOMPRESSION_COMPRESS_APP_HPP_

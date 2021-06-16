@@ -20,15 +20,18 @@
 
 int main(int argc, char* argv[]) {
     bool enable_profile = false;
+    bool lz4_stream = false;
     compressBase::State flow = compressBase::DECOMPRESS;
+    compressBase::Level lflow = compressBase::SEQ;
+
     // Driver class object
-    lz4App d(argc, argv, enable_profile);
+    lz4App d(argc, argv, lflow, enable_profile);
 
     // Design class object creating and constructor invocation
     std::unique_ptr<lz4OCLHost> lz4(
-        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), d.getMCR(), enable_profile));
+        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), lz4_stream, enable_profile));
 
     // Run API to launch the compress or decompress engine
-    d.run(lz4.get());
+    d.run(lz4.get(), d.getMCR());
     return 0;
 }

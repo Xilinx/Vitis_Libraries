@@ -44,6 +44,6 @@ void xilGzipComp(hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& inaxistream,
 #endif
 
 #pragma HLS dataflow
-    xf::compression::gzipMulticoreCompressAxiStream<NUM_CORES, STRTGY, URAM_BUFFER>(inaxistream, outaxistream);
+    xf::compression::gzipMulticoreCompressAxiStream<BLOCKSIZE_IN_KB, NUM_CORES, STRTGY>(inaxistream, outaxistream);
 }
 }

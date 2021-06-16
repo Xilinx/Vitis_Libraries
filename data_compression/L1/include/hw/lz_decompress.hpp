@@ -29,7 +29,6 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 namespace xf {
 namespace compression {

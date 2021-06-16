@@ -16,7 +16,8 @@
  */
 /**
  * @file zlib_dm_wr.cpp
- * @brief Source for data writer kernel for streaming data to zlib decompression streaming kernel.
+ * @brief Source for data writer kernel for streaming data to zlib decompression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */

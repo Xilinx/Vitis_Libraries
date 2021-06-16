@@ -30,6 +30,7 @@
 #define LOW_OFFSET 1
 #define MAX_OFFSET (32 * 1024)
 #define HISTORY_SIZE MAX_OFFSET
+#define LL_MODEL false
 
 #define HUFFMAN_TYPE xf::compression::FIXED
 
@@ -48,8 +49,8 @@ void gzipMultiByteDecompressEngineRun(hls::stream<in_t>& inStream,
 {
     const int c_decoderType = (int)HUFFMAN_TYPE;
 
-    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, HISTORY_SIZE>(inStream, inEos,
-                                                                                                outStream);
+    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, LL_MODEL, HISTORY_SIZE>(
+        inStream, inEos, outStream);
 }
 
 void validateFile(std::string& fileName, std::string& originalFileName) {

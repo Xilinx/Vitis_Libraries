@@ -24,16 +24,16 @@
 #ifndef _XFCOMPRESSION_XIL_SNAPPY_STREAMING_HPP_
 #define _XFCOMPRESSION_XIL_SNAPPY_STREAMING_HPP_
 
+#include "xcl2.hpp"
 #include <assert.h>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <stdint.h>
-#include <vector>
 #include <math.h>
-#include <time.h>
+#include <stdint.h>
 #include <string>
-#include <fstream>
-#include "xcl2.hpp"
+#include <time.h>
+#include <vector>
 // This extension file is required for stream APIs
 #include <CL/cl_ext_xilinx.h>
 
@@ -193,8 +193,8 @@ class xfSnappyStreaming {
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in;
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_out;
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_buf_decompressSize;
-    std::vector<uint32_t, aligned_allocator<uint8_t> > h_blksize;
-    std::vector<uint32_t, aligned_allocator<uint8_t> > h_compressSize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_blksize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_compressSize;
 
     // Device buffers
     cl::Buffer* buffer_input;

@@ -28,15 +28,13 @@ snappyOCLHost::snappyOCLHost(enum State flow,
                              const std::string& binaryFileName,
                              uint8_t device_id,
                              uint32_t block_size_kb,
-                             uint8_t max_cr,
                              bool enable_profile,
                              bool enable_p2p)
     : m_xclbin(binaryFileName),
       m_enableProfile(enable_profile),
+      m_enableP2P(enable_p2p),
       m_deviceId(device_id),
-      m_flow(flow),
-      m_maxCR(max_cr),
-      m_enableP2P(enable_p2p) {
+      m_flow(flow) {
     m_BlockSizeInKb = block_size_kb;
 
     h_buf_in.resize(HOST_BUFFER_SIZE);

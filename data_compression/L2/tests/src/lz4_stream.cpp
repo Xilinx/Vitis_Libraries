@@ -203,7 +203,8 @@ uint64_t xfLz4Streaming::compressStream(uint8_t* in, uint8_t* out, uint64_t inpu
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
-    // sequentially copy block sized buffers to kernel and wait for them to finish before enqueueing
+    // sequentially copy block sized buffers to kernel and wait for them to finish
+    // before enqueueing
     for (uint32_t blkIndx = 0, bufIndx = 0; blkIndx < total_block_count; blkIndx++, bufIndx += host_buffer_size) {
         // current block input size
         uint32_t c_input_size = host_buffer_size;

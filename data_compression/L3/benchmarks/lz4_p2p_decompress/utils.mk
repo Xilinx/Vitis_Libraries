@@ -39,14 +39,17 @@ ifeq ($(DEBUG), yes)
 VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
-#Check environment setup
+#Checks for XILINX_XRT
+ifeq ($(HOST_ARCH), x86)
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
+endif
+else
 ifndef XILINX_VITIS
   XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
 endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
 endif
 
 #Checks for Device Family
@@ -68,6 +71,13 @@ check_sysroot:
 ifneq ($(HOST_ARCH), x86)
 ifndef SYSROOT
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+
+check_version:
+ifneq (, $(shell which git))
+ifneq (,$(wildcard $(XFLIB_DIR)/.git))
+	@cd $(XFLIB_DIR) && git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -n 1 && cd -
 endif
 endif
 
@@ -112,8 +122,10 @@ endif
 
 .PHONY: check_xrt
 check_xrt:
+ifeq ($(HOST_ARCH), x86)
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
+endif
 endif
 
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
@@ -129,9 +141,6 @@ LD_LIBRARY_PATH := $(SYSROOT)/usr/lib
 else
 LD_LIBRARY_PATH := $(SYSROOT)/usr/lib:$(LD_LIBRARY_PATH) 
 endif
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
 # check target

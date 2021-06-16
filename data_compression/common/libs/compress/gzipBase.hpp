@@ -50,9 +50,6 @@ const auto BLOCK_SIZE_IN_KB = 64;
  */
 const auto MAX_NUMBER_BLOCKS = (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024));
 
-// Max CR
-constexpr auto MAX_CR_DEFAULT = 20;
-
 /**
  *  gzipBase class. Class containing methods for GZIP
  * compression and decompression to be executed on host side.
@@ -73,7 +70,6 @@ class gzipBase : public compressBase {
     int m_windowbits = 15;
     std::chrono::system_clock::time_point total_start;
     std::chrono::system_clock::time_point total_end;
-    uint16_t m_mcr = MAX_CR_DEFAULT;
 
    public:
     enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };

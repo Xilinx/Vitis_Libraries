@@ -38,11 +38,11 @@ typedef struct {
     ap_uint<4> bitlen; // code bit-length
 } HuffmanTable;
 
-template <int DWIDTH = 16>
+template <int OF_DWIDTH = 16, int ML_DWIDTH = 8, int LL_DWIDTH = OF_DWIDTH>
 struct __attribute__((packed)) Sequence_dt {
-    ap_uint<DWIDTH> litlen;
-    ap_uint<DWIDTH> matlen;
-    ap_uint<DWIDTH> offset;
+    ap_uint<LL_DWIDTH> litlen;
+    ap_uint<ML_DWIDTH> matlen;
+    ap_uint<OF_DWIDTH> offset;
 };
 
 enum xfBlockType_t { RAW_BLOCK = 0, RLE_BLOCK, CMP_BLOCK, INVALID_BLOCK };
@@ -113,6 +113,16 @@ const uint32_t c_bitMask[32] = {0,         1,          3,          7,         0x
                                 0x1FFFFF,  0x3FFFFF,   0x7FFFFF,   0xFFFFFF,  0x1FFFFFF, 0x3FFFFFF, 0x7FFFFFF,
                                 0xFFFFFFF, 0x1FFFFFFF, 0x3FFFFFFF, 0x7FFFFFFF};
 
+const ap_uint<4> c_hufFixedBlen[256] = {
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+    9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+    9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+    9, 9, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8};
+const uint8_t c_hufFixedBlenCnt[3] = {24, 120, 112};
+
 const uint32_t c_litlenDeltaCode = 19;
 const uint32_t c_matlenDeltaCode = 36;
 
@@ -120,8 +130,19 @@ const uint32_t c_rtbTable[8] = {0, 473195, 504333, 520860, 550000, 700000, 75000
 
 inline uint8_t bitsUsed31(uint32_t x) {
 #pragma HLS INLINE
-    // return (uint8_t)(31 - __builtin_clz(x));
     return (uint8_t)(__builtin_clz(x) ^ 31);
+}
+
+template <int DWIDTH = 16>
+inline uint8_t getLLCode(ap_uint<DWIDTH> litlen) {
+#pragma HLS INLINE
+    return (litlen > 63) ? bitsUsed31((uint32_t)litlen) + c_litlenDeltaCode : c_litlenCode[litlen];
+}
+
+template <int DWIDTH = 16>
+inline uint8_t getMLCode(ap_uint<DWIDTH> matlen) {
+#pragma HLS INLINE
+    return (matlen > 127) ? bitsUsed31((uint32_t)matlen) + c_matlenDeltaCode : c_matlenCode[matlen];
 }
 
 /* Testing data */

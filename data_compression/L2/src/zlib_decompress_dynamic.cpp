@@ -29,6 +29,7 @@ void xilDecompressDynamic(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistreamd,
 #pragma HLS interface axis port = outaxistreamd
 
     // Call for decompression
-    xf::compression::inflateMultiByte<DECODER_TYPE, MULTIPLE_BYTES, c_historySize>(inaxistreamd, outaxistreamd);
+    xf::compression::inflateMultiByte<DECODER_TYPE, MULTIPLE_BYTES, LL_MODEL, c_historySize>(inaxistreamd,
+                                                                                             outaxistreamd);
 }
 }

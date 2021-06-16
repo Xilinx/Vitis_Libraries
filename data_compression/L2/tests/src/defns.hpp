@@ -21,24 +21,25 @@
  * @file defns.hpp
  * @brief Header for including common header files
  *
- * This file is part of Vitis Data Compression Library host code for snappy compression.
+ * This file is part of Vitis Data Compression Library host code for snappy
+ * compression.
  */
 
-#include <iostream>
-#include <cstring>
-#include <string>
-#include <fstream>
 #include <cassert>
-#include <cstdlib>
 #include <cstdio>
-#include <stdbool.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iostream>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <string>
+#include <time.h>
 #include <vector>
 //#include "xil_snappy_config.h"
-#include <sys/stat.h>
 #include "xcl2.hpp"
 #include <iomanip>
+#include <sys/stat.h>
 
 #endif // _XFCOMPRESSION_DEFNS_HPP_
