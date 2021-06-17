@@ -18,23 +18,24 @@
  * @file zlib_stream.hpp
  * @brief Header for ZLIB host functionality
  *
- * This file is part of Vitis Data Compression Library host code for lz4 compression.
+ * This file is part of Vitis Data Compression Library host code for lz4
+ * compression.
  */
 
 #ifndef _XFCOMPRESSION_ZLIB_COMPRESS_HPP_
 #define _XFCOMPRESSION_ZLIB_COMPRESS_HPP_
 
+#include "xcl2.hpp"
 #include <cassert>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <stdint.h>
-#include <vector>
 #include <math.h>
-#include <time.h>
+#include <stdint.h>
 #include <string>
-#include <fstream>
-#include "xcl2.hpp"
 #include <thread>
+#include <time.h>
+#include <vector>
 
 /**
  * Maximum host buffer used to operate per kernel invocation

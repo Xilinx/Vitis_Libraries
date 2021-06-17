@@ -375,7 +375,6 @@ int main(int argc, char* argv[]) {
         }
         auto compress_API_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration<double, std::nano>(compress_API_end - compress_API_start);
-        auto duration_ms = std::chrono::duration<double, std::milli>(compress_API_end - compress_API_start);
         compress_API_time_ns_1 = duration;
         float throughput_in_mbps_1 =
             (float)input_size * num_iter * fname_vec.size() * 1000 / compress_API_time_ns_1.count();

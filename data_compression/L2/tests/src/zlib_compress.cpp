@@ -14,12 +14,12 @@
  * limitations under the License.
  *
  */
-#include "zlib.h"
 #include "zlib_compress.hpp"
-#include <fcntl.h>  /* For O_RDWR */
-#include <unistd.h> /* For open(), creat() */
+#include "zlib.h"
+#include <fcntl.h> /* For O_RDWR */
 #include <sys/stat.h>
-auto crc = 0; // CRC32 value
+#include <unistd.h> /* For open(), creat() */
+auto crc = 0;       // CRC32 value
 #ifdef GZIP_MODE
 extern unsigned long crc32(unsigned long crc, const unsigned char* buf, uint32_t len);
 #endif
@@ -417,10 +417,10 @@ uint64_t xfZlib::compressFull(uint8_t* in, uint8_t* out, uint64_t input_size) {
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
-    auto num_itr = 0;
+    auto num_itr = 1;
 #ifdef FREE_RUNNING_KERNEL
     host_buffer_size = input_size;
-    num_itr = xcl::is_emulation() ? 1 : (0x40000000 / input_size);
+    num_itr = xcl::is_emulation() ? 10 : (0x40000000 / input_size);
 #endif
 
     uint32_t outIdx = 0;
@@ -454,7 +454,6 @@ uint64_t xfZlib::compressFull(uint8_t* in, uint8_t* out, uint64_t input_size) {
         datamover_kernel->setArg(narg++, *buffer_output);
         datamover_kernel->setArg(narg++, hostChunk_cu);
         datamover_kernel->setArg(narg++, *buffer_compressed_size);
-        datamover_kernel->setArg(narg++, num_itr);
 #else
         compress_kernel_zlib->setArg(narg++, *buffer_input);
         compress_kernel_zlib->setArg(narg++, *buffer_output);
@@ -478,15 +477,17 @@ uint64_t xfZlib::compressFull(uint8_t* in, uint8_t* out, uint64_t input_size) {
         // Measure kernel execution time
         auto kernel_start = std::chrono::high_resolution_clock::now();
 
-// Fire kernel execution
+        // Fire kernel execution
+        for (auto z = 0; z < num_itr; z++) {
 #ifdef FREE_RUNNING_KERNEL
-        m_q->enqueueTask(*datamover_kernel);
+            m_q->enqueueTask(*datamover_kernel);
 #ifdef DISABLE_FREE_RUNNING_KERNEL
-        m_q->enqueueTask(*compress_kernel_zlib);
+            m_q->enqueueTask(*compress_kernel_zlib);
 #endif
 #else
-        m_q->enqueueTask(*compress_kernel_zlib);
+            m_q->enqueueTask(*compress_kernel_zlib);
 #endif
+        }
         // Wait till kernels complete
         m_q->finish();
 

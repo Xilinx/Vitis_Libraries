@@ -17,7 +17,8 @@
 
 /**
  * @file zstd_datamover.cpp
- * @brief Source file for data mover kernel which streams data to decompression streaming kernel.
+ * @brief Source file for data mover kernel which streams data to decompression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
@@ -31,7 +32,8 @@ void streamDataDm2k(hls::stream<ap_uint<STREAMDWIDTH> >& in,
                     hls::stream<ap_axiu<STREAMDWIDTH, 0, 0, 0> >& inStream_dm,
                     uint32_t inputSize) {
     /**
-     * @brief Write N-bit wide data of given size from hls stream to kernel axi stream.
+     * @brief Write N-bit wide data of given size from hls stream to kernel axi
+     * stream.
      *        N is passed as template parameter.
      *
      * @tparam STREAMDWIDTH stream data width

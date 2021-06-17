@@ -105,14 +105,10 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
-
-ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
-endif
 
 # ################### Setting package and image directory #######################
 
@@ -135,6 +131,8 @@ VPP_FLAGS += -DMULTIPLE_BYTES=8 -DZSTD_BLOCK_SIZE_KB=32
 VPP_LDFLAGS_xilZstdCompressStream_temp := --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_xilZstdCompressStream += $(VPP_LDFLAGS_xilZstdCompressStream_temp)
 
+# Kernel args
+
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/xilZstdCompressStream.xclbin
@@ -144,13 +142,25 @@ BINARY_CONTAINER_xilZstdCompressStream_OBJS += $(TEMP_DIR)/xilZstdDataMover.xo
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifeq ($(HOST_ARCH), x86)
+all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host:   check_xrt $(EXE_FILE)
+else
+host:   check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp  check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp  check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: xclbin
@@ -159,11 +169,11 @@ build: xclbin
 $(TEMP_DIR)/xilZstdCompress.xo: $(XFLIB_DIR)/L2/src/zstd_compress_stream.cpp
 	$(ECHO) "Compiling Kernel: xilZstdCompress"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(xilZstdCompress_VPP_FLAGS) $(VPP_FLAGS) -k xilZstdCompress -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(xilZstdCompress_VPP_FLAGS) $(VPP_FLAGS) -k xilZstdCompress -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 $(TEMP_DIR)/xilZstdDataMover.xo: $(XFLIB_DIR)/L2/tests/src/zstd_datamover.cpp
 	$(ECHO) "Compiling Kernel: xilZstdDataMover"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(xilZstdDataMover_VPP_FLAGS) $(VPP_FLAGS) -k xilZstdDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(xilZstdDataMover_VPP_FLAGS) $(VPP_FLAGS) -k xilZstdDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 
 $(BUILD_DIR)/xilZstdCompressStream.xclbin: $(BINARY_CONTAINER_xilZstdCompressStream_OBJS)
 	mkdir -p $(BUILD_DIR)
@@ -171,7 +181,12 @@ $(BUILD_DIR)/xilZstdCompressStream.xclbin: $(BINARY_CONTAINER_xilZstdCompressStr
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -205,7 +220,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) ./sample.txt.* 
+	-$(RMDIR) $(CUR_DIR)/sample.txt.*
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

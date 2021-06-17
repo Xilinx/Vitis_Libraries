@@ -35,6 +35,11 @@
 #define DECODER_TYPE c_dynamicDecoder
 #endif
 
+// by default disable low latency model
+#ifndef LL_MODEL
+#define LL_MODEL false
+#endif
+
 #define LZ_MAX_OFFSET_LIMIT 32768
 #define LOW_OFFSET 10
 

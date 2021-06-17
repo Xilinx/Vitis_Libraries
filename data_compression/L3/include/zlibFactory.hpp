@@ -31,19 +31,28 @@ class zlibFactory {
     std::vector<cl::Device> m_deviceCount;
     std::vector<cl::Context*> m_deviceContext;
     std::vector<cl::Program*> m_deviceProgram;
+
     // Common platform / device
     // exists throughout the process
     cl_context_properties m_platform;
     cl::Device m_device;
+    cl::Context* m_context;
+    cl::Program* m_program;
 
     // Various opencl devices
     std::vector<cl::Device> m_ndevices;
+
+    bool createContext(void);
+    bool loadBinary(void);
 
     // Private constructor
     zlibFactory();
 
     // PreCheck flag --> FPGA/CPU
     bool m_xMode = true;
+
+    // XCLBIN container
+    std::vector<uint8_t> m_binVec;
 
     std::mutex m_mutex;
     void lock() { m_mutex.lock(); }

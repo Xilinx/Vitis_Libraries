@@ -31,7 +31,7 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/common/libs/compress/lz4StreamOCLHost.cpp",
+                "LIB_DIR/common/libs/compress/lz4OCLHost.cpp",
                 "LIB_DIR/common/libs/compress/lz4Base.cpp",
                 "LIB_DIR/common/libs/compress/lz4App.cpp",
                 "LIB_DIR/common/libs/compress/compressApp.cpp",
@@ -57,7 +57,7 @@
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=1", 
-                "MULTIPLE_BYTES=8"
+                "MULTIPLE_BYTES=8" 
             ]
         }
     }, 

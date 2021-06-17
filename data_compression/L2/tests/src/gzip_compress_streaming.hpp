@@ -18,20 +18,21 @@
  * @file gzip_compress_streaming.hpp
  * @brief Header for gzip host functionality
  *
- * This file is part of Vitis Data Compression Library host code for gzip compression.
+ * This file is part of Vitis Data Compression Library host code for gzip
+ * compression.
  */
 
 #ifndef _XFCOMPRESSION_GZIP_COMPRESS_STREAMING_HPP_
 #define _XFCOMPRESSION_GZIP_COMPRESS_STREAMING_HPP_
-#include <fstream>
+#include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <unistd.h>
 #include <vector>
 #include <xcl2.hpp>
-#include <cassert>
-#include <iomanip>
 
 /**
  * Maximum host buffer used to operate per kernel invocation

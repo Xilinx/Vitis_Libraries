@@ -15,11 +15,11 @@
  *
  */
 #include "zlib.hpp"
-#include <fcntl.h>  /* For O_RDWR */
-#include <unistd.h> /* For open(), creat() */
-#include <sys/stat.h>
 #include "zlib.h"
-auto crc = 0; // CRC32 value
+#include <fcntl.h> /* For O_RDWR */
+#include <sys/stat.h>
+#include <unistd.h> /* For open(), creat() */
+auto crc = 0;       // CRC32 value
 extern unsigned long crc32(unsigned long crc, const unsigned char* buf, uint32_t len);
 int fd_p2p_c_in = 0;
 const int RESIDUE_4K = 4096;
@@ -330,7 +330,8 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow, uint8_t d_ty
     // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
-    // std::string binaryFile = xcl::find_binary_file(device_name,binaryFileName.c_str());
+    // std::string binaryFile =
+    // xcl::find_binary_file(device_name,binaryFileName.c_str());
     // cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     auto fileBuf = xcl::read_binary_file(binaryFileName);
     cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
@@ -453,7 +454,8 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
     uint32_t dcmpSize = 0;
     cl::Buffer* buffer_out[BUFCNT];
     cl::Buffer* buffer_size[BUFCNT];
-    cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
+    cl::Buffer* buffer_status; // single common buffer to capture the
+                               // decompression status by kernel
     for (int i = 0; i < BUFCNT; i++) {
         buffer_out[i] =
             new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_zlibout[i].data());
@@ -485,7 +487,8 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
                 outSize = h_dcompressSize[cbf_idx].data();
                 raw_size = *outSize;
                 outP = h_dbuf_zlibout[cbf_idx].data();
-                // if output data size is multiple of buffer size, then (buffer_size + 1) is sent by reader kernel
+                // if output data size is multiple of buffer size, then (buffer_size +
+                // 1) is sent by reader kernel
                 if (raw_size > bufSize) {
                     --raw_size;
                 }
@@ -497,11 +500,12 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
 
                 if (dcmpSize > max_outbuf_size) {
                     std::cout << "\n" << std::endl;
-                    std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                    std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during "
+                                 "decompression \033[0m \n"
                               << std::endl;
-                    std::cout
-                        << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
-                        << std::endl;
+                    std::cout << "\x1B[35mUse -mcr option to increase the maximum "
+                                 "compression ratio (Default: 10) \033[0m \n"
+                              << std::endl;
                     std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
                     exit(1);
                 }
@@ -846,7 +850,8 @@ uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint
     uint8_t cunits = (uint8_t)C_COMPUTE_UNIT;
     uint8_t queue_idx = 0;
 overlap:
-    for (uint32_t brick = 0, itr = 0; brick < total_chunks; /*brick += C_COMPUTE_UNIT,*/ itr++, flag = !flag) {
+    for (uint32_t brick = 0, itr = 0; brick < total_chunks;
+         /*brick += C_COMPUTE_UNIT,*/ itr++, flag = !flag) {
         if (cunits > 1)
             queue_idx = flag * OVERLAP_BUF_COUNT;
         else
@@ -904,7 +909,8 @@ overlap:
                     tail_block_size = block_size;
                     sizeOfChunk[brick + cu] -= block_size;
                 } else {
-                    //////printme("sizeofChunk %d block_size %d cu %d \n", sizeOfChunk[brick+cu], block_size, cu);
+                    //////printme("sizeofChunk %d block_size %d cu %d \n",
+                    /// sizeOfChunk[brick+cu], block_size, cu);
                     (h_blksize[cu][flag]).data()[idxblk++] = block_size;
                 }
             }

@@ -25,8 +25,6 @@
 
 #include "hls_stream.h"
 #include <ap_int.h>
-#include <iostream>
-#include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
 
@@ -75,163 +73,38 @@ void s2mm32(hls::stream<ap_uint<32> >& inStream, hls::stream<bool>& inStreamEos,
  * @param crcInitStrm initialize crc32 value
  * @param inStrm input messages to be checked
  * @param inPackLenStrm effetive lengths of input message pack, 1~W. 0 means end of message
- * @param endInPackLenStrm end flag of inPackLenStrm, 1 "false" for 1 message, 1 "true" means no message anymore.
  * @param outStrm crc32 result to output
- * @param endOutStrm end flag of outStrm
  */
 template <int W>
 void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
            hls::stream<ap_uint<8 * W> >& inStrm,
            hls::stream<ap_uint<5> >& inPackLenStrm,
-           hls::stream<bool>& endInPackLenStrm,
-           hls::stream<ap_uint<32> >& outStrm,
-           hls::stream<bool>& endOutStrm) {
-#pragma HLS array_partition variable = xf::security::internal::table dim = 1 block factor = W
-    while (1) {
-        if (endInPackLenStrm.read()) break;
-        ap_uint<5> inPackLen = inPackLenStrm.read();
-
-        ap_uint<32> crc = crcInitStrm.read();
-        ap_uint<8 * W> in_data;
-        if (W == 1) {
-            while (inPackLen == W) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = 100 min = 100
-                in_data = inStrm.read();
-                inPackLen = inPackLenStrm.read();
-                crc = (crc >> 8) ^ xf::security::internal::table[0][crc(7, 0) ^ in_data];
-            }
-        } else if (W == 2) {
-            while (inPackLen == W) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = 100 min = 100
-                in_data = inStrm.read();
-                inPackLen = inPackLenStrm.read();
-                ap_uint<16> inTmp = in_data ^ crc(15, 0);
-                crc = crc(31, 16) ^ xf::security::internal::table[0][inTmp(15, 8)];
-                crc ^= xf::security::internal::table[1][inTmp(7, 0)];
-            }
-            if (inPackLen != 0) {
-                in_data = inStrm.read();
-                crc = (crc >> 8) ^ xf::security::internal::table[0][crc(7, 0) ^ in_data.range(7, 0)];
-                inPackLen = inPackLenStrm.read();
-            }
-        } else {
-            while (inPackLen == W) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = 100 min = 100
-                in_data = inStrm.read();
-                inPackLen = inPackLenStrm.read();
-                const int NUM = W / 4;
-                ap_uint<32> inTmp[NUM];
-                for (int j = 0; j < NUM; j++) {
-                    if (j == 0)
-                        inTmp[j] = in_data(31 + 32 * j, 32 * j) ^ crc;
-                    else
-                        inTmp[j] = in_data(31 + 32 * j, 32 * j);
-                }
-                crc = xf::security::internal::table[0][inTmp[W / 4 - 1](31, 24)];
-                for (int j = 1; j < W; j++) {
-                    int index = j / 4;
-                    int offset = j % 4;
-                    crc ^= xf::security::internal::table[j][inTmp[W / 4 - 1 - index](31 - offset * 8, 24 - offset * 8)];
-                }
-            }
-
-            if (inPackLen != 0) {
-                for (ap_uint<5> i = 0; i < inPackLen; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = W min = W
-                    if (i == 0) in_data = inStrm.read();
-                    crc = (crc >> 8) ^ xf::security::internal::table[0][crc(7, 0) ^ in_data.range(7 + 8 * i, 8 * i)];
-                }
-                inPackLen = inPackLenStrm.read();
-            }
-        }
-        if (crc) {
-            outStrm.write(~crc);
-            endOutStrm.write(false);
-        }
-    }
-    endOutStrm.write(true);
+           hls::stream<ap_uint<32> >& outStrm) {
+    hls::stream<bool> endInPackLenStrm;
+    hls::stream<bool> endOutStrm;
+#pragma HLS STREAM variable = endInPackLenStrm depth = 4
+#pragma HLS STREAM variable = endOutStrm depth = 4
+    endInPackLenStrm << false;
+    endInPackLenStrm << true;
+    xf::security::crc32<W>(crcInitStrm, inStrm, inPackLenStrm, endInPackLenStrm, outStrm, endOutStrm);
+    endOutStrm.read();
+    endOutStrm.read();
 }
 
 template <int W>
 void adler32(hls::stream<ap_uint<32> >& adlerStrm,
              hls::stream<ap_uint<W * 8> >& inStrm,
              hls::stream<ap_uint<5> >& inPackLenStrm,
-             hls::stream<bool>& endInPackLenStrm,
-             hls::stream<ap_uint<32> >& outStrm,
-             hls::stream<bool>& endOutStrm) {
-    while (1) {
-        if (endInPackLenStrm.read()) break;
-        ap_uint<32> adler = adlerStrm.read();
-        ap_uint<5> inPackLen = inPackLenStrm.read();
-
-        ap_uint<32> s1 = adler & 0xffff;
-        ap_uint<32> s2 = ((adler >> 16) & 0xffff);
-        ap_uint<W * 8> inData;
-
-        while (inPackLen == W) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = 100 min = 100
-            inPackLen = inPackLenStrm.read();
-            inData = inStrm.read();
-            ap_uint<12> sTmp[W];
-#pragma HLS array_partition variable = sTmp dim = 1
-            for (int i = 0; i < W; i++) {
-#pragma HLS unroll
-                sTmp[i] = 0;
-                for (int j = 0; j <= i; j++) {
-                    sTmp[i] += inData(j * 8 + 7, j * 8);
-                }
-            }
-
-            s2 += s1 * W;
-
-            if (W == 16) {
-                s2 += xf::security::internal::treeAdd<12, 4>::f(sTmp);
-            } else if (W == 8) {
-                s2 += xf::security::internal::treeAdd<12, 3>::f(sTmp);
-            } else if (W == 4) {
-                s2 += xf::security::internal::treeAdd<12, 2>::f(sTmp);
-            } else if (W == 2) {
-                s2 += xf::security::internal::treeAdd<12, 1>::f(sTmp);
-            } else if (W == 1) {
-                s2 += xf::security::internal::treeAdd<12, 0>::f(sTmp);
-            }
-
-            for (int j = 0; j <= W; j++) {
-                if (s2 >= xf::security::internal::BASE[W - j]) {
-                    s2 -= xf::security::internal::BASE[W - j];
-                    break;
-                }
-            }
-
-            s1 += sTmp[W - 1];
-            if (s1 >= xf::security::internal::BASE[0]) s1 -= xf::security::internal::BASE[0];
-        }
-
-        if (inPackLen != 0) {
-            for (int j = 0; j < inPackLen; j++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = W min = W
-                if (j == 0) inData = inStrm.read();
-                s1 += inData(j * 8 + 7, j * 8);
-                if (s1 >= xf::security::internal::BASE[0]) s1 -= xf::security::internal::BASE[0];
-                s2 += s1;
-                if (s2 >= xf::security::internal::BASE[0]) s2 -= xf::security::internal::BASE[0];
-            }
-            inPackLen = inPackLenStrm.read();
-        }
-
-        if (s1 || s2) {
-            ap_uint<32> res = (s2 << 16) + s1;
-            outStrm.write(res);
-            endOutStrm.write(false);
-        }
-    }
-    endOutStrm.write(true);
+             hls::stream<ap_uint<32> >& outStrm) {
+    hls::stream<bool> endInPackLenStrm;
+    hls::stream<bool> endOutStrm;
+#pragma HLS STREAM variable = endInPackLenStrm depth = 4
+#pragma HLS STREAM variable = endOutStrm depth = 4
+    endInPackLenStrm << false;
+    endInPackLenStrm << true;
+    xf::security::adler32<W>(adlerStrm, inStrm, inPackLenStrm, endInPackLenStrm, outStrm, endOutStrm);
+    endOutStrm.read();
+    endOutStrm.read();
 }
 
 } // End namespace details
@@ -301,12 +174,19 @@ void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
 template <int W>
 void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
                 hls::stream<ap_uint<8 * W> >& inStrm,
-                hls::stream<ap_uint<32> >& inLenStrm,
-                hls::stream<bool>& endInStrm,
+                hls::stream<ap_uint<5> >& inLenStrm,
                 hls::stream<ap_uint<32> >& outStrm,
-                hls::stream<bool>& endOutStrm,
                 hls::stream<ap_uint<2> >& checksumTypeStrm) {
+    // Internal EOS Streams
+    hls::stream<bool> endInStrm;
+    hls::stream<bool> endOutStrm;
+#pragma HLS STREAM variable = endInStrm depth = 4
+#pragma HLS STREAM variable = endOutStrm depth = 4
+
+checksum_loop:
     for (ap_uint<2> checksumType = checksumTypeStrm.read(); checksumType != 3; checksumType = checksumTypeStrm.read()) {
+        endInStrm << false;
+        endInStrm << true;
         // CRC
         if (checksumType == 1) {
             xf::security::crc32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
@@ -315,6 +195,8 @@ void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
         else {
             xf::security::adler32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
         }
+        endOutStrm.read();
+        endOutStrm.read();
     }
 }
 

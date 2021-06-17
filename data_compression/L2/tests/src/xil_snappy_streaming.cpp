@@ -147,7 +147,10 @@ uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name,
     } else { // Standard Snappy flow
         // Build Java based snappy source code
         std::string command =
-            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -c " + inFile_name;
+            "java -cp "
+            "\".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6."
+            "jar\" MainClass -c " +
+            inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -181,7 +184,8 @@ uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_s
 
     // copy input to input buffer
     // std::memcpy(h_buf_in.data(), in, input_size);
-    // sequentially copy block sized buffers to kernel and wait for them to finish before enqueueing
+    // sequentially copy block sized buffers to kernel and wait for them to finish
+    // before enqueueing
     for (uint32_t blkIndx = 0, bufIndx = 0; blkIndx < total_block_count; blkIndx++, bufIndx += host_buffer_size) {
         // current block input size
         uint32_t c_input_size = host_buffer_size;
@@ -313,7 +317,10 @@ uint64_t xfSnappyStreaming::decompressFile(std::string& inFile_name,
     } else {
         // Use standard snappy compress/decompress below
         std::string command =
-            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -d " + inFile_name;
+            "java -cp "
+            "\".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6."
+            "jar\" MainClass -d " +
+            inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -356,7 +363,10 @@ uint32_t xfSnappyStreaming::decompressFileFull(
     } else {
         // Use standard snappy compress/decompress below
         std::string command =
-            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -d " + inFile_name;
+            "java -cp "
+            "\".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6."
+            "jar\" MainClass -d " +
+            inFile_name;
         system(command.c_str());
         return 0;
     }

@@ -52,47 +52,13 @@ size_t gzipBase::writeHeader(uint8_t* out) {
         out[outIdx + 1] = (uint8_t)(header);
         outIdx += 2;
     } else {
-        const uint16_t c_format_0 = 31;
-        const uint16_t c_format_1 = 139;
-        const uint16_t c_variant = 8;
-        const uint16_t c_real_code = 8;
-        const uint16_t c_opcode = 3;
+        long int magic_headers = 0x0000000008088B1F;
+        std::memcpy(out + outIdx, &magic_headers, 8);
+        outIdx += 8;
 
-        // 2 bytes of magic header
-        out[outIdx++] = c_format_0;
-        out[outIdx++] = c_format_1;
-
-        // 1 byte Compression method
-        out[outIdx++] = c_variant;
-
-        // 1 byte flags
-        uint8_t flags = 0;
-        flags |= c_real_code;
-        out[outIdx++] = flags;
-
-        // 4 bytes file modification time in unit format
-        unsigned long time_stamp = 0;
-        struct stat istat;
-        const char* file = m_inFileName.c_str();
-        stat(m_inFileName.c_str(), &istat);
-        time_stamp = istat.st_mtime;
-        out[outIdx++] = time_stamp;
-        out[outIdx++] = time_stamp >> 8;
-        out[outIdx++] = time_stamp >> 16;
-        out[outIdx++] = time_stamp >> 24;
-
-        // 1 byte extra flag (depend on compression method)
-        uint8_t deflate_flags = 0;
-        out[outIdx++] = deflate_flags;
-
-        // 1 byte OPCODE - 0x03 for Unix
-        out[outIdx++] = c_opcode;
-
-        // Dump file name
-        for (int i = 0; file[i] != '\0'; i++) {
-            out[outIdx++] = file[i];
-        }
-        out[outIdx++] = 0;
+        long int osheader = 0x00780300;
+        std::memcpy(out + outIdx, &osheader, 4);
+        outIdx += 4;
     }
 
     return outIdx;
@@ -121,12 +87,6 @@ size_t gzipBase::writeFooter(uint8_t* out, size_t compressSize, uint32_t checksu
         out[outIdx++] = ifile_size >> 8;
         out[outIdx++] = ifile_size >> 16;
         out[outIdx++] = ifile_size >> 24;
-
-        out[outIdx++] = 0;
-        out[outIdx++] = 0;
-        out[outIdx++] = 0;
-        out[outIdx++] = 0;
-        out[outIdx++] = 0;
     }
     return outIdx;
 }
@@ -235,10 +195,10 @@ uint64_t gzipBase::xilDecompress(uint8_t* in, uint8_t* out, uint64_t input_size)
 
     if (m_isSeq) {
         // Decompression Engine multiple cus.
-        debytes = decompressEngineSeq(in, out, input_size, input_size * m_mcr);
+        debytes = decompressEngineSeq(in, out, input_size, input_size * m_maxCR);
     } else {
         // Decompression Engine multiple cus.
-        debytes = decompressEngine(in, out, input_size, input_size * m_mcr);
+        debytes = decompressEngine(in, out, input_size, input_size * m_maxCR);
     }
     return debytes;
 }

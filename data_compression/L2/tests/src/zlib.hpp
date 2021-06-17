@@ -19,17 +19,17 @@
 
 #pragma once
 
-#include <iomanip>
-#include <iostream>
-#include <stdint.h>
-#include <vector>
-#include <math.h>
-#include <time.h>
-#include <string>
-#include <fstream>
 #include "xcl2.hpp"
 #include "zlib_specs.hpp"
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <stdint.h>
+#include <string>
 #include <thread>
+#include <time.h>
+#include <vector>
 
 #pragma once
 

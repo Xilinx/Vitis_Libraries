@@ -20,24 +20,25 @@
 
 /**
  * @file gzip_block_comp_dm.hpp
- * @brief Header for data mover kernel which streams data to compression streaming kernel.
+ * @brief Header for data mover kernel which streams data to compression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
 
+#include "axi_stream_utils.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
-#include "stream_upsizer.hpp"
 #include "stream_downsizer.hpp"
-#include "axi_stream_utils.hpp"
+#include "stream_upsizer.hpp"
 
 #include "ap_axi_sdata.h"
 #include "hls_stream.h"
 #include <ap_int.h>
 
-#include <stdio.h>
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #ifndef GMEM_IN_DWIDTH
 #define GMEM_IN_DWIDTH 8
@@ -49,7 +50,8 @@
 
 extern "C" {
 /**
- * @brief Data mover kernel top function for decompression kernel implementations.
+ * @brief Data mover kernel top function for decompression kernel
+ * implementations.
  *        It reads data from memory and streams it to target kernel.
  *
  * @param in                input stream

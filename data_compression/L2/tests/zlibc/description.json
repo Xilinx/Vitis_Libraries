@@ -1,15 +1,22 @@
 {
-    "name": "Xilinx ZLIB Streaming Octacore Compression", 
+    "name": "Xilinx Zlib Streaming Octacore Compression", 
     "description": [
-        "Xilinx Zlib Streaming Octacore Compression with 32 KB block size"
+        "Xilinx Zlib Streaming Octa core Compression"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt -zlib 1", 
             "name": "generic launch for all flows"
         }
     ],
+    "post_launch": [
+        {
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+             ]
+        }
+    ], 
     "config_make": "./config.mk",
     "platform_blacklist": [
         "zc", 
@@ -25,30 +32,41 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L2/tests/src/zlib_compress.cpp", 
+                "LIB_DIR/common/libs/compress/gzipOCLHost.cpp", 
+                "LIB_DIR/common/libs/compress/gzipBase.cpp", 
+                "LIB_DIR/common/libs/compress/gzipApp.cpp", 
+                "LIB_DIR/common/libs/compress/compressApp.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
-                "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c"
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/adler32.c"
             ], 
             "includepaths": [
                 "LIB_DIR/L2/tests/src/",
                 "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/libs/compress/",
                 "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "symbols": [
-                "FREE_RUNNING_KERNEL"
+                "GZIP_STREAM"
             ]
         }
     }, 
     "v++": {
+        "build_datafiles": [
+            "PROJECT/hls.cfg"
+        ], 
         "compiler": {
             "includepaths": [
                 "LIB_DIR/../security/L1/include"
             ],
             "symbols": [
-                "STRTGY=1",
-                "GZIP_STREAM"
+                "GZIP_STREAM",
+                "STRTGY=1"
+            ], 
+            "clflags": [
+                "--config PROJECT/hls.cfg"
             ]
         }
     }, 
@@ -67,10 +85,12 @@
                 }
             ]
         }
-    ], 
+    ],
     "output_files": [
-           "sample.txt.*"
-    ], 
+            "sample.txt.*",
+            "sample_run.*",
+            "test.list"
+    ],          
     "testinfo": {
         "disable": false, 
         "jobs": [

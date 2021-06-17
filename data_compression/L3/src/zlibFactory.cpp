@@ -10,6 +10,78 @@ zlibFactory* zlibFactory::getInstance(void) {
     return &instance;
 }
 
+bool zlibFactory::createContext(void) {
+    cl_int err;
+    cl::Context* context = nullptr;
+
+    // Create OpenCL context
+    cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, m_platform, 0};
+    OCL_CHECK(err, context = new cl::Context(m_device, props, nullptr, nullptr, &err));
+    if (err) {
+        return true;
+    } else {
+        this->m_deviceContext.push_back(context);
+        return false;
+    }
+}
+
+bool zlibFactory::loadBinary(void) {
+    cl_int err;
+    cl::Program* program = nullptr;
+    std::ifstream bin_file(this->m_u50_xclbin.c_str(), std::ifstream::binary);
+    if (bin_file.fail()) {
+        std::cerr << this->m_u50_xclbin.c_str() << " Unable to open binary file" << std::endl;
+        bin_file.close();
+        return true;
+    } else {
+        // Fill the m_binVec
+        bin_file.seekg(0, bin_file.end);
+        auto nb = bin_file.tellg();
+        bin_file.seekg(0, bin_file.beg);
+        m_binVec.resize(nb);
+        bin_file.read(reinterpret_cast<char*>(m_binVec.data()), nb);
+
+        cl::Program::Binaries bins{{m_binVec.data(), m_binVec.size()}};
+        bin_file.close();
+
+        program = new cl::Program(*this->m_deviceContext.back(), {m_device}, bins, NULL, &err);
+        if (err != CL_SUCCESS) {
+            delete program;
+            m_binVec.clear();
+            std::string devName;
+            m_device.getInfo(CL_DEVICE_NAME, &devName);
+            std::cerr << "Programming \"" << devName << "\" Failed !!"
+                      << " Trying Full Xclbin !" << std::endl;
+            auto fullXclbin = std::string(c_installRootDir) + c_hardXclbinPath;
+            std::ifstream binFileFull(fullXclbin.c_str(), std::ifstream::binary);
+            if (binFileFull.fail()) {
+                std::cerr << "XCLBIN2: Unable to open binary file " << fullXclbin << std::endl;
+                return true;
+            } else {
+                binFileFull.seekg(0, binFileFull.end);
+                auto nb = binFileFull.tellg();
+                binFileFull.seekg(0, binFileFull.beg);
+                m_binVec.resize(nb);
+                binFileFull.read(reinterpret_cast<char*>(m_binVec.data()), nb);
+                cl::Program::Binaries binsFull{{m_binVec.data(), m_binVec.size()}};
+                binFileFull.close();
+
+                program = new cl::Program(*this->m_deviceContext.back(), {m_device}, binsFull, NULL, &err);
+                if (err != CL_SUCCESS) {
+                    delete program;
+                    return true;
+                } else {
+                    this->m_deviceProgram.push_back(program);
+                    return false;
+                }
+            }
+        } else {
+            this->m_deviceProgram.push_back(program);
+            return false;
+        }
+    }
+}
+
 void zlibFactory::xilinxPreChecks(void) {
     lock();
     if (this->m_PreCheckStatus) {
@@ -84,70 +156,21 @@ void zlibFactory::xilinxPreChecks(void) {
                     cl_context_properties temp = (cl_context_properties)(platforms[idx])();
                     this->m_platform = temp;
 
-                    // Create OpenCL context
-                    cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, this->m_platform, 0};
-
+                    // Find out valid devices
                     int deviceCount = this->m_ndevices.size();
-                    this->m_deviceCount.resize(deviceCount);
-                    this->m_deviceContext.resize(deviceCount);
-                    this->m_deviceProgram.resize(deviceCount);
                     for (int i = 0; i < deviceCount; i++) {
-                        this->m_deviceCount[i] = this->m_ndevices[i];
-                        OCL_CHECK(err, this->m_deviceContext[i] =
-                                           new cl::Context(this->m_deviceCount[i], props, NULL, NULL, &err));
-                        if (err) this->m_xMode = false;
+                        m_device = this->m_ndevices[i];
 
-                        std::ifstream bin_file(this->m_u50_xclbin.c_str(), std::ifstream::binary);
-                        if (bin_file.fail()) {
-                            std::cerr << "XCLBIN1: Unable to open binary file" << std::endl;
-                            this->m_xMode = false;
-                            bin_file.close();
-                        } else {
-                            bin_file.seekg(0, bin_file.end);
-                            auto nb = bin_file.tellg();
-                            bin_file.seekg(0, bin_file.beg);
+                        // Create Context
+                        auto err_context = createContext();
+                        m_xMode = err_context ? false : true;
+                        if (err_context) continue;
 
-                            std::vector<uint8_t> buf;
-                            buf.resize(nb);
-                            bin_file.read(reinterpret_cast<char*>(buf.data()), nb);
+                        auto err_bin = loadBinary();
+                        m_xMode = err_bin ? false : true;
 
-                            cl::Program::Binaries bins{{buf.data(), buf.size()}};
-                            bin_file.close();
-                            // Try to load light weight XCLBIN
-                            // If it fails then load full XCLBIN
-                            this->m_deviceProgram[i] =
-                                new cl::Program(*this->m_deviceContext[i], {this->m_deviceCount[i]}, bins, NULL, &err);
-                            if (err != CL_SUCCESS) {
-                                if (this->m_deviceProgram[i]) {
-                                    delete this->m_deviceProgram[i];
-                                    this->m_deviceProgram[i] = nullptr;
-                                }
-                                // Open Full XCLBIN
-                                std::ifstream bin_file((std::string(c_installRootDir) + c_hardFullXclbinPath),
-                                                       std::ifstream::binary);
-                                if (bin_file.fail()) {
-                                    std::cerr << "XCLBIN2: Unable to open binary file" << std::endl;
-                                    this->m_xMode = false;
-                                    bin_file.close();
-                                } else {
-                                    bin_file.seekg(0, bin_file.end);
-                                    auto nb = bin_file.tellg();
-                                    bin_file.seekg(0, bin_file.beg);
-                                    buf.clear();
-                                    buf.resize(nb);
-                                    bin_file.read(reinterpret_cast<char*>(buf.data()), nb);
-                                    cl::Program::Binaries bins{{buf.data(), buf.size()}};
-                                    // Load full XCLBIN
-                                    this->m_deviceProgram[i] = new cl::Program(
-                                        *this->m_deviceContext[i], {this->m_deviceCount[i]}, bins, NULL, &err);
-                                    if (err != CL_SUCCESS) {
-                                        std::cerr << "Failed to program the device " << std::endl;
-                                        this->m_xMode = false;
-                                        bin_file.close();
-                                    }
-                                    bin_file.close();
-                                }
-                            }
+                        if (m_xMode) {
+                            this->m_deviceCount.push_back(m_device);
                         }
                     }
                 }
@@ -176,7 +199,7 @@ zlibDriver* zlibFactory::getDriverInstance(z_streamp strm, int flow, bool init) 
         // If it exists the return
         ret = iterator->second;
     } else {
-        zlibDriver* driver = new zlibDriver(strm, this->m_platform, this->m_u50_xclbin, flow, this->m_ndevices,
+        zlibDriver* driver = new zlibDriver(strm, this->m_platform, this->m_u50_xclbin, flow, this->m_deviceCount,
                                             this->m_deviceContext, this->m_deviceProgram, init);
         if (driver->getErrStatus()) {
             ret = nullptr;

@@ -36,6 +36,7 @@ add_files -tb gzip_compress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I
 set_top gzipcMulticoreStreaming
 
 open_solution -reset $SOLN
+config_dataflow -start_fifo_depth 32 -scalar_fifo_depth 32 -task_level_fifo_depth 32
 
 set_part $XPART
 create_clock -period $CLKP

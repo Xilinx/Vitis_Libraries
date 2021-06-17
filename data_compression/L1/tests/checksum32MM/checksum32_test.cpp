@@ -43,9 +43,9 @@ void hls_checksum32MM(const ap_uint<PARALLEL_BYTE * 8>* in,
                       ap_uint<32> inputSize,
                       const bool checksumType) {
 #pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem depth = c_size
-#pragma HLS INTERFACE m_axi port = inChecksumData offset = slave bundle = gmem depth = 2
+#pragma HLS INTERFACE m_axi port = checksumData offset = slave bundle = gmem depth = 2
 #pragma HLS INTERFACE s_axilite port = in bundle = control
-#pragma HLS INTERFACE s_axilite port = inChecksumData bundle = control
+#pragma HLS INTERFACE s_axilite port = checksumData bundle = control
 #pragma HLS INTERFACE s_axilite port = inputSize bundle = control
 #pragma HLS INTERFACE s_axilite port = checksumType bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control

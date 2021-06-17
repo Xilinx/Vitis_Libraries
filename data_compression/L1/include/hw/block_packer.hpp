@@ -29,8 +29,6 @@
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <iostream>
 
 #include "block_packer.hpp"
 

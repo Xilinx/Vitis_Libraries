@@ -86,15 +86,20 @@ include ./config.mk
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/src/zlib_compress.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/gzipOCLHost.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/gzipBase.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/gzipApp.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/compressApp.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
-CXXFLAGS += -DSTATIC_MODE -DFREE_RUNNING_KERNEL
+CXXFLAGS += -DGZIP_STREAM
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/zlib-1.2.7
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
@@ -118,7 +123,7 @@ CXXFLAGS += -I$(CUR_DIR)/src/
 
 EXE_NAME := xil_zlib
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -cx $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/sample.txt
+HOST_ARGS := -xbin $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/sample.txt -zlib 1
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -130,7 +135,8 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
-VPP_FLAGS += -DSTRTGY=1 -DSTATIC_MODE -DGZIP_STREAM 
+VPP_FLAGS += --config $(CUR_DIR)/hls.cfg
+VPP_FLAGS += -DGZIP_STREAM -DSTRTGY=1 -DSTATIC_MODE 
 
 # Kernel linker flags
 VPP_LDFLAGS_compress_temp := --config $(CUR_DIR)/connectivity.cfg
@@ -147,13 +153,25 @@ BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilDataMover.xo
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifeq ($(HOST_ARCH), x86)
+all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host:   check_xrt $(EXE_FILE)
+else
+host:   check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp  check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp  check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: xclbin
@@ -174,7 +192,12 @@ $(BUILD_DIR)/compress.xclbin: $(BINARY_CONTAINER_compress_OBJS)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -188,8 +211,10 @@ run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 else
 	$(EXE_FILE) $(HOST_ARGS)
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 endif
 
 # ################################# Cleaning Rules ##################################
@@ -206,7 +231,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) $(CUR_DIR)/sample.txt.* 
+	-$(RMDIR) $(CUR_DIR)/sample.txt.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

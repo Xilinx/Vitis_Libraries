@@ -27,13 +27,13 @@
 
 #include "ap_axi_sdata.h"
 
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
-#include <ap_int.h>
 #include "hls_stream.h"
 #include "s2mm.hpp"
 #include "zlib_specs.hpp"
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
 
@@ -44,7 +44,8 @@ extern "C" {
  * @param out output memory pointer
  * @param encoded_size decompressed size output
  * @param read_block_size Block size to be read
- * @param intream input axi stream (512-bit wide data stream read by this kernel)
+ * @param intream input axi stream (512-bit wide data stream read by this
+ * kernel)
  *
  */
 

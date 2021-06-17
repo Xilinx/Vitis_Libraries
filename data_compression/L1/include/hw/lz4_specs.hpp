@@ -49,7 +49,7 @@ const auto MAGIC_BYTE_1 = 4;
 const auto MAGIC_BYTE_2 = 34;
 const auto MAGIC_BYTE_3 = 77;
 const auto MAGIC_BYTE_4 = 24;
-const auto FLG_BYTE = 104;
+const auto FLG_BYTE = 100;
 
 /**
  * This value is used to set

@@ -761,10 +761,13 @@ void parseFramesAndBlocks(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
 
     // 14 because of magic number + frame header
     const uint8_t numWidth = 14 / PARALLEL_BYTE + 1;
-    ap_uint<128> inputWindow;
+    ap_uint<192> inputWindow;
     bool lastInputWord = false;
     uint8_t inputIdx = 0;
     ap_uint<4> istb;
+    uint32_t readBytes = 0;
+    uint32_t nextFrameData = 0;
+
 // parse all frames and exit when there is no data to read in inStream
 parseFrames_main_loop:
     while (!lastInputWord) {
@@ -774,10 +777,9 @@ parseFrames_main_loop:
         uint64_t frameContentSize = 0;
         uint32_t contentCheckSum = 0;
         uint32_t blockMaxSize = 0;
-        uint32_t readBytes = 0;
         uint32_t processedBytes = 0;
 
-        for (uint8_t i = 0; i < numWidth; i++) {
+        for (uint8_t i = readBytes; i < (numWidth * PARALLEL_BYTE); i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
             istb = inStrobe.read();
             if (istb == 0) { // 0 data here means data ends here and there is no more frames to decode
@@ -785,7 +787,7 @@ parseFrames_main_loop:
                 ap_uint<c_parallelBit> dummyVal = inStream.read();
                 break;
             } else {
-                inputWindow.range((i + 1) * c_parallelBit - 1, i * c_parallelBit) = inStream.read();
+                inputWindow.range((i + PARALLEL_BYTE) * 8 - 1, i * 8) = inStream.read();
                 readBytes += PARALLEL_BYTE;
             }
         }
@@ -827,13 +829,16 @@ parseFrames_main_loop:
                         input = inStream.read();
                     }
                     uint32_t remBytes = (PARALLEL_BYTE * iterLim) - skfRemBytes;
-                    uint32_t nextFrameData = (PARALLEL_BYTE - remBytes);
+                    nextFrameData = (PARALLEL_BYTE - remBytes);
                     input >>= remBytes * 8;
                     inputWindow.range(nextFrameData * 8 - 1, 0) = input;
-                    inputIdx = nextFrameData;
+                    inputIdx = 0;
+                    readBytes = nextFrameData;
                 }
             }
             continue;
+            //} else {
+            //  nextFrameData = 0;
         }
         /* Frame_Header format
          * <Frame_Header_Descriptor><Window_Descriptor><Dictionary_Id><Frame_Content_Size>
@@ -981,6 +986,7 @@ parseFrames_main_loop:
             }
         }
         inputIdx = 0;
+        readBytes = validBytes;
     }
     blockValidStream << 0;
 }

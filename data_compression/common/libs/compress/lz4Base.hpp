@@ -27,6 +27,7 @@
 #include <cassert>
 #include <iomanip>
 #include <cstring>
+#include <vector>
 #include "lz4_specs.hpp"
 #include "compressBase.hpp"
 
@@ -48,10 +49,18 @@ const auto BLOCK_SIZE_IN_KB = 64;
  */
 const auto MAX_NUMBER_BLOCKS = (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024));
 
+// Kernel names
+const std::vector<std::string> compress_kernel_names = {"xilLz4Compress", "xilLz4CompressStream"};
+const std::vector<std::string> decompress_kernel_names = {"xilLz4Decompress", "xilLz4DecompressStream"};
+
+const std::string compress_dm_kernel_name = "xilCompDatamover";
+const std::string decompress_dm_kernel_name = "xilDecompDatamover";
+
 /**
  *  lz4Base class. Class containing methods for LZ4
  * compression and decompression to be executed on host side.
  */
+
 class lz4Base : public compressBase {
     uint64_t xilCompress(uint8_t* in, uint8_t* out, size_t input_size) override { return input_size; }
 
@@ -75,7 +84,7 @@ class lz4Base : public compressBase {
          * @param compress out stream
          */
 
-    void writeFooter(uint8_t* out);
+    void writeFooter(uint8_t* in, uint8_t* out);
 
     /**
          * @brief Header Reader

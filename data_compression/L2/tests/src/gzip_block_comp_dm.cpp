@@ -17,7 +17,8 @@
 
 /**
  * @file gzip_block_comp_dm.cpp
- * @brief Source file for data mover kernel which streams data to decompression streaming kernel.
+ * @brief Source file for data mover kernel which streams data to decompression
+ * streaming kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
@@ -33,7 +34,8 @@ void streamDataDm2kSize(hls::stream<ap_uint<STREAMDWIDTH> >& in,
                         hls::stream<ap_axiu<32, 0, 0, 0> >& inStreamSize_dm,
                         uint32_t inputSize) {
     /**
-     * @brief Write N-bit wide data of given size from hls stream to kernel axi stream.
+     * @brief Write N-bit wide data of given size from hls stream to kernel axi
+     * stream.
      *        N is passed as template parameter.
      *
      * @tparam STREAMDWIDTH stream data width

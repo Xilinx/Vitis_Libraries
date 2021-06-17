@@ -26,13 +26,8 @@
 
 #include "hls_stream.h"
 #include <ap_int.h>
-#include <fstream>
-#include <iostream>
-#include <stdlib.h>
-#include <string>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 #include "lz_compress.hpp"
 #include "lz_optional.hpp"
 #include "mm2s.hpp"
