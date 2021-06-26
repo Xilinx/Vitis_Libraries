@@ -5,7 +5,7 @@
     "platform_type": "", 
     "platform_whitelist": [
         "u200", 
-        "u250", 
+        "xilinx_u250_xdma_201830_2", 
         "u50", 
         "aws-vu9p-f1"
     ], 

@@ -22,6 +22,16 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+
+2021.1
+------
+
+The 2021.1 release provide Two-Gram text analytics:
+
+* Two Gram Predicate (TGP) is a search of the inverted index with a term of 2 characters. 
+  For a dataset that established an inverted index, it can find the matching id in each record in the inverted index.
+
+
 2020.2
 ------
 
