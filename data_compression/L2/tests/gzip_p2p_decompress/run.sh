@@ -8,7 +8,7 @@ then
     cp $LIB_PROJ_ROOT/common/data/sample.txt .
   
     echo -e "\n\n----------Comparing files after Decompression---------\n"
-    cmd1=$(diff sample.txt sample.txt.gz.*)
+    cmd1=$(diff data/sample.txt data/sample.txt.gz.*)
     if [ $? -eq 0 ]
      then
         echo "files are the same"

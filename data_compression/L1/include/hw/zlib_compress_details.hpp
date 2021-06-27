@@ -105,29 +105,27 @@ template <int DWIDTH = 64, int PARALLEL_BYTES = 8>
 void dataDuplicator(hls::stream<ap_uint<DWIDTH> >& inStream,
                     hls::stream<uint32_t>& inSizeStream,
                     hls::stream<ap_uint<PARALLEL_BYTES * 8> >& checksumOutStream,
-                    hls::stream<bool>& checksumStreamEos,
-                    hls::stream<ap_uint<32> >& checksumSizeStream,
+                    hls::stream<ap_uint<5> >& checksumSizeStream,
                     hls::stream<ap_uint<DWIDTH> >& coreStream,
                     hls::stream<uint32_t>& coreSizeStream) {
-    constexpr int incr = DWIDTH / 8;
+    constexpr int c_parallelByte = DWIDTH / 8;
     uint32_t inputSize = inSizeStream.read();
 
-    checksumSizeStream << inputSize;
     coreSizeStream << inputSize;
 
-    // sending 0 and 1 first based on checksum protocol
-    checksumStreamEos << 0;
-    checksumStreamEos << 1;
-
-    uint32_t inSize = (inputSize - 1) / incr + 1;
+    uint32_t inSize = (inputSize - 1) / c_parallelByte + 1;
+    bool inSizeMod = (inputSize % c_parallelByte == 0);
 
 duplicator:
     for (uint32_t i = 0; i < inSize; i++) {
 #pragma HLS PIPELINE II = 1
         ap_uint<DWIDTH> inValue = inStream.read();
+        auto c_size = (i == inSize - 1) && !inSizeMod ? (inputSize % c_parallelByte) : c_parallelByte;
+        checksumSizeStream << c_size;
         checksumOutStream << inValue;
         coreStream << inValue;
     }
+    checksumSizeStream << 0;
 }
 
 template <int FREQ_DWIDTH = 32, int DWIDTH = 64, int NUM_BLOCKS = 8, int BLOCK_SIZE = 32768, int MIN_BLCK_SIZE = 64>

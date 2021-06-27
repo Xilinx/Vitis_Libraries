@@ -8,7 +8,7 @@ Xilinx Snappy Multibyte Decompress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-snappy_decompress_test 6818  5450  0    4 
-==================== ===== ===== ==== ==== 
+====================== ===== ===== ==== ==== 
+Module                 LUT   FF    BRAM URAM 
+snappy_decompress_test 5453  4883  0    4 
+====================== ===== ===== ==== ==== 

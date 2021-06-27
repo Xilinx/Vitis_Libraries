@@ -55,7 +55,7 @@ size_t gzipBase::writeHeader(uint8_t* out) {
         long int magic_headers = 0x0000000008088B1F;
         std::memcpy(out + outIdx, &magic_headers, 8);
         outIdx += 8;
-        
+
         long int osheader = 0x00780300;
         std::memcpy(out + outIdx, &osheader, 4);
         outIdx += 4;
@@ -195,10 +195,10 @@ uint64_t gzipBase::xilDecompress(uint8_t* in, uint8_t* out, uint64_t input_size)
 
     if (m_isSeq) {
         // Decompression Engine multiple cus.
-        debytes = decompressEngineSeq(in, out, input_size, input_size * m_mcr);
+        debytes = decompressEngineSeq(in, out, input_size, input_size * m_maxCR);
     } else {
         // Decompression Engine multiple cus.
-        debytes = decompressEngine(in, out, input_size, input_size * m_mcr);
+        debytes = decompressEngine(in, out, input_size, input_size * m_maxCR);
     }
     return debytes;
 }

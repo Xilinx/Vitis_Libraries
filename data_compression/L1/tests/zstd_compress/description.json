@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [],
     "QoR_golden": {
-       "VV_LUT": "22044",
-       "VV_FF": "19777",
-       "VV_BRAM": "96", 
-       "VV_URAM": "8", 
-       "VV_AchievedClockPeriod": "3.222"
+       "VV_LUT": "28819",
+       "VV_FF": "31834",
+       "VV_BRAM": "97", 
+       "VV_URAM": "14", 
+       "VV_AchievedClockPeriod": "3.295"
     },
     "project": "zstd_compress", 
     "solution": "sol1", 

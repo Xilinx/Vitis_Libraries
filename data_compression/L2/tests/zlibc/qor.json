@@ -12,7 +12,7 @@
 			"PipelineType": "none",
 			"check_latency": "true",
 			"check_warning": "true",
-			"FMax" : "283 MHz"
+			"FMax" : "282 MHz"
 		}
 		]
 	}

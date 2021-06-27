@@ -1,12 +1,13 @@
 {
-    "name": "Xilinx Snappy Dualcore Decompress", 
+    "name": "Xilinx Snappy Dualcore Decompress",
+    "gui": false, 
     "description": [
         "Snappy-Streaming Dualcore Decompression"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-dx BUILD/dualcore_decompress_streaming.xclbin -d PROJECT/sample.txt.snappy", 
+            "cmd_args": "-dx BUILD/dualcore_decompress_streaming.xclbin -d PROJECT/data/sample.txt.snappy", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -29,7 +30,8 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt.snappy" 
+        "PROJECT/data/sample.txt",
+        "PROJECT/data/sample.txt.snappy" 
     ],   
     "host": {
         "host_exe": "xsnappy_decompress_streaming", 
@@ -78,7 +80,7 @@
             ]
         }
     ], 
-    "output_files": "sample.txt.snappy.*", 
+    "output_files": "data/sample.txt.snappy.*", 
     "testinfo": {
         "disable": false, 
         "jobs": [

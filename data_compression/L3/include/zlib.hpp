@@ -113,6 +113,7 @@ typedef struct {
     uint8_t* out_buf;
     uint64_t input_size;
     uint64_t output_size;
+    uint32_t total_out;
     int level;
     int strategy;
     int window_bits;
@@ -318,6 +319,9 @@ class xfZlib {
     size_t deflate_buffer(
         uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, const std::string& cu);
 
+    // Extra copy API
+    size_t deflate_buffer(xlibData* strm, int flush, size_t& input_size, bool& last_data, const std::string& cu);
+
     /**
          * @brief This method does the overlapped execution of decompression
          * where data transfers and kernel computation are overlapped
@@ -336,6 +340,13 @@ class xfZlib {
                           bool& last_data,
                           bool last_buffer,
                           const std::string& cu_id);
+    size_t inflate_buffer(xlibData* strm,
+                          int last_block,
+                          size_t& input_size,
+                          size_t& output_size,
+                          bool& last_data,
+                          bool last_buffer,
+                          const std::string& cu);
 
     /**
      * @brief This method does serial execution of decompression
@@ -479,12 +490,22 @@ class xfZlib {
     bool m_isGzip = 0; // Zlib=0, Gzip=1
     uint32_t m_checksum = 0;
     uint32_t m_decompressStatus = 0;
+    char* m_token = nullptr;
     m_threadStatus m_checksumStatus = IDLE;
     std::thread* m_thread_checksum;
     bool m_lastData = false;
     bool m_actionDone = false;
     bool m_checksum_type = false;
     std::string m_kernelName;
+    buffers* write_buffer = nullptr;
+    buffers* read_buffer = nullptr;
+    uint32_t m_inputSize = 0;
+    uint32_t m_outputputSize = 0;
+    bool m_wbready = false;
+    bool m_rbready = false;
+    uint32_t m_bufSize = uint32_t(HOST_BUFFER_SIZE);
+    size_t m_compSize = 0;
+    size_t m_compSizePending = 0;
 
     void gzip_headers(std::string& inFile, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes);
     void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes);

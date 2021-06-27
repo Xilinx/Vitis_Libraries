@@ -76,7 +76,7 @@ class compressApp {
     void printTestSummaryHeader();
     void printTestSummaryFooter(const std::string& testFile);
     // -c -d -l -t
-    void run(compressBase* b);
+    void run(compressBase* b, uint16_t maxCR = MAX_CR_DEFAULT);
 
     void runCompress(compressBase* b, const std::string&);
 

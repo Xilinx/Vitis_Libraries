@@ -1,12 +1,12 @@
 {
-    "name": "Xilinx Zlib Streaming Octacore Compression", 
+    "name": "Xilinx Zlib Streaming 32KB Compression", 
     "description": [
-        "Xilinx Zlib Streaming Octa core Compression"
+        "Xilinx Zlib Streaming 32KB Compression"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt -zlib 1", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt -zlib 1", 
             "name": "generic launch for all flows"
         }
     ],
@@ -55,7 +55,8 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/hls.cfg"
+            "PROJECT/hls.cfg",
+            "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
             "includepaths": [
@@ -87,7 +88,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.*",
+            "data/sample.txt.*",
             "sample_run.*",
             "test.list"
     ],          

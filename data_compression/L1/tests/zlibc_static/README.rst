@@ -1,14 +1,14 @@
-Xilinx GZIP Quadcore Compress Streaming 32KB AXI Test
-=====================================================
+Xilinx ZLIB 32KB Static Compress Streaming AXI Test
+===================================================
 
-**Description:** Test Design to validate Streaming GZIP quadcore compression
+**Description:** Test Design to validate Streaming ZLIB 32KB static compression
 
-**Top Function:** gzipQuadcoreCompStreaming
+**Top Function:** zlibcMulticoreStreaming
 
 Results
 -------
 
-==================== ====== ====== ====== ====== 
-Module                LUT     FF    BRAM  URAM
-zlib_compress_test   35764   35949  88    64
-==================== ====== ====== ====== ====== 
+==================== ===== ===== ==== ==== 
+Module               LUT   FF    BRAM URAM 
+zlib_compress_test   33174 36772 82   64 
+==================== ===== ===== ==== ==== 

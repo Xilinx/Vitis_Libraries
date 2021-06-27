@@ -10,5 +10,5 @@ Results
 
 ==================== ===== ===== ==== ==== 
 Module               LUT   FF    BRAM URAM 
-gzip_decompress_test 7102  5340  1    2 
+gzip_decompress_test 6847  5276  1    2 
 ==================== ===== ===== ==== ==== 

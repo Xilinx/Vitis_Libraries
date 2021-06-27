@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx GZip Quadcore Compression (XRT Host)", 
+    "name": "Xilinx GZip 32KB Compression (XRT Host)", 
     "description": [
-        "Xilinx Gzip Quadcore  Compression (XRT Host) with 32 KB block size"
+        "Xilinx Gzip Compression (XRT Host) with 32 KB block size"
     ], 
     "flow": "vitis", 
     "launch": [

@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [], 
     "QoR_golden": {
-        "VV_LUT": "2882", 
-        "VV_FF": "4756", 
+        "VV_LUT": "2947", 
+        "VV_FF": "4516", 
         "VV_BRAM": "24", 
         "VV_URAM": "0", 
-        "VV_AchievedClockPeriod": "2.815"
+        "VV_AchievedClockPeriod": "2.737"
     }, 
     "project": "crc32MM", 
     "solution": "sol1", 

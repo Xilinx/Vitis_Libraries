@@ -158,7 +158,7 @@ endif
 
 EXE_NAME := xil_gzip
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -dx $(BUILD_DIR)/decompress_stream.xclbin -d $(CUR_DIR)/sample.txt.gz
+HOST_ARGS := -dx $(BUILD_DIR)/decompress_stream.xclbin -d $(CUR_DIR)/data/sample.txt.gz
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -194,13 +194,13 @@ BINARY_CONTAINER_decompress_stream_OBJS += $(TEMP_DIR)/xilGzipMM2S.xo
 BINARY_CONTAINER_decompress_stream_OBJS += $(TEMP_DIR)/xilDecompress.xo
 
 # ######################### Setting Targets of Makefile ################################
-DATA_FILE += $(CUR_DIR)//sample.txt.gz
+DATA_FILE += $(CUR_DIR)//data/sample.txt.gz
 
 .PHONY: all clean cleanall docs emconfig
 ifeq ($(HOST_ARCH), x86)
-all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all:  check_version check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 else
-all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+all:  check_version check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
 endif
 
 .PHONY: host
@@ -288,7 +288,7 @@ PACKAGE_FILES += emconfig.json
 PACKAGE_FILES += $(DATA_FILE)
 SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
 SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+sd_card: host xclbin emconfig
 ifneq ($(HOST_ARCH), x86)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(EMBEDDED_PACKAGE_OUT)
@@ -299,7 +299,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
@@ -319,7 +321,7 @@ cleanh:
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ start_simulation.sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
@@ -327,7 +329,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) $(CUR_DIR)/sample.txt.gz.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
+	-$(RMDIR) $(CUR_DIR)/data/sample.txt.gz.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

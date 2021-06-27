@@ -5,3 +5,10 @@ Xilinx LZ4 Compress HLS Test
 
 **Top Function:** lz4CompressEngineRun
 
+Results
+-------
+
+==================== ===== ===== ==== ==== 
+Module               LUT   FF    BRAM URAM 
+lz4_compress_test    2816  3214  10   6 
+==================== ===== ===== ==== ==== 

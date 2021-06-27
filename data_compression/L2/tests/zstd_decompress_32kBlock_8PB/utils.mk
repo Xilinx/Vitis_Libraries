@@ -74,6 +74,13 @@ ifndef SYSROOT
 endif
 endif
 
+check_version:
+ifneq (, $(shell which git))
+ifneq (,$(wildcard $(XFLIB_DIR)/.git))
+	@cd $(XFLIB_DIR) && git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -n 1 && cd -
+endif
+endif
+
 #Checks for g++
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
@@ -134,9 +141,6 @@ LD_LIBRARY_PATH := $(SYSROOT)/usr/lib
 else
 LD_LIBRARY_PATH := $(SYSROOT)/usr/lib:$(LD_LIBRARY_PATH) 
 endif
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
 # check target

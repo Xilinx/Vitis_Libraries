@@ -1,6 +1,6 @@
 {
-    "name": "Xilinx GZIP Octacore Compress Streaming 32KB AXI Test", 
-    "description": "Test Design to validate Streaming GZIP Octacore compression", 
+    "name": "Xilinx GZIP Compress Streaming 32KB AXI Test", 
+    "description": "Test Design to validate Streaming GZIP 32KB static compression", 
     "flow": "hls", 
     "platform_whitelist": [
         "u200", 
@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [],
     "QoR_golden": {
-        "VV_LUT": "35482", 
-        "VV_FF": "35686",
-        "VV_BRAM": "93",
-        "VV_URAM": "64",
-        "VV_AchievedClockPeriod": "3.659"
+        "VV_LUT": "32806", 
+        "VV_FF": "36539",
+        "VV_BRAM": "154",
+        "VV_URAM": "48",
+        "VV_AchievedClockPeriod": "3.241"
     },
     "project": "gzip_compress_test", 
     "solution": "sol1", 

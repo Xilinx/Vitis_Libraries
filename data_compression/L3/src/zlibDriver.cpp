@@ -226,19 +226,13 @@ bool zlibDriver::getZlibInstance(void) {
     bool ret = false;
     if (this->m_flow == XILINX_DEFLATE) {
         if (this->m_xlz == nullptr) {
-#ifdef ENABLE_DEFLATE_XRM
             this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, COMP_ONLY, this->m_context, this->m_program,
                                      this->m_deviceid, XILINX_ZLIB, this->m_bank);
-#else
-            this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, COMP_ONLY, this->m_context, this->m_program,
-                                     this->m_deviceid, XILINX_ZLIB, this->m_bank);
-#endif
             if (this->m_xlz->error_code()) {
                 ret = true;
             }
         }
     } else if (this->m_flow == XILINX_INFLATE) {
-        // If not create it
         this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, DECOMP_ONLY, this->m_context, this->m_program,
                                  this->m_deviceid, XILINX_ZLIB);
         if (this->m_xlz->error_code()) {
@@ -258,82 +252,86 @@ bool zlibDriver::xilinxHwDeflate(z_streamp strm, int flush) {
         err = this->getZlibInstance();
         if (err) this->m_status = true;
     }
+
+    bool last_data = false;
+    bool ret_flag = false;
+    bool breakLoop = false;
+    bool last_buffer = false;
+    size_t enbytes = 0;
     uint32_t adler32 = 0;
+    uint32_t cpyAvailOut = strm->avail_out;
+
+    while (((this->m_info.input_size != 0) || flush) && (strm->avail_out != 0)) {
+        this->m_xlz->set_checksum(strm->adler);
+        size_t inputSize = this->m_info.input_size;
+
+        enbytes = this->m_xlz->deflate_buffer(&this->m_info, flush, inputSize, last_data, this->m_kernel_instance);
+        this->m_outputSize += enbytes;
+        this->m_info.input_size = inputSize;
+
+        adler32 = this->m_xlz->get_checksum();
+
+        if (this->m_outputSize > 0) {
+            strm->avail_out = strm->avail_out - this->m_outputSize;
+            strm->total_out += this->m_outputSize;
+            strm->next_out += this->m_outputSize;
+            this->m_outputSize = 0;
+
+            if (last_data) break;
+        }
+        if (this->m_outputSize == 0) {
+            if (last_data) break;
+        }
+    }
+    strm->avail_in = this->m_info.input_size;
+    strm->adler = adler32;
+    unlock();
+
+    if (last_data && strm->avail_out != 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Call to HW Inflate
+bool zlibDriver::xilinxHwInflate(z_streamp strm, int flush) {
     size_t enbytes = 0;
 
     bool last_data = false;
 
-    while ((this->m_info.input_size != 0 || flush) && (strm->avail_out != 0)) {
-        bool last_buffer = false;
-        if (this->m_info.input_size + this->m_inputSize >= this->m_bufSize) {
-            std::memcpy(this->m_deflateInput + this->m_inputSize, this->m_info.in_buf,
-                        this->m_bufSize - this->m_inputSize);
-            this->m_info.in_buf += (this->m_bufSize - this->m_inputSize);
-            this->m_info.input_size -= (this->m_bufSize - this->m_inputSize);
-            this->m_inputSize += (this->m_bufSize - this->m_inputSize);
-        } else if (this->m_info.input_size != 0) {
-            std::memcpy(this->m_deflateInput + this->m_inputSize, this->m_info.in_buf, this->m_info.input_size);
-            this->m_inputSize += this->m_info.input_size;
-            this->m_info.input_size = 0;
-        }
-        if (flush != Z_NO_FLUSH && this->m_info.input_size == 0) last_buffer = true;
-        // Set adler value
-        this->m_xlz->set_checksum(strm->adler);
-        size_t inputSize = this->m_inputSize;
-        // Call compression_buffer API
-        if (last_buffer && (this->m_outputSize < this->m_bufSize)) {
-            enbytes = this->m_xlz->deflate_buffer(this->m_deflateInput, this->m_deflateOutput + this->m_outputSize,
-                                                  inputSize, last_data, last_buffer, this->m_kernel_instance);
-            this->m_outputSize += enbytes;
-            this->m_inputSize = inputSize;
-        } else if ((inputSize >= this->m_bufSize)) {
-            while (inputSize != 0) {
-                enbytes = this->m_xlz->deflate_buffer(this->m_deflateInput, this->m_deflateOutput + this->m_outputSize,
-                                                      inputSize, last_data, last_buffer, this->m_kernel_instance);
-                this->m_outputSize += enbytes;
-            }
-            this->m_inputSize = 0;
-        }
-        adler32 = this->m_xlz->get_checksum();
+    if (m_info.input_size >= 9) {
+        long int lastblock = 0;
+        std::memcpy((unsigned char*)(&lastblock), m_info.in_buf + (m_info.input_size - 9), 5);
+        if (lastblock == 0xffff000001) last_block = true;
+    } else {
+        //        last_block = true;
+    }
+    bool last_buffer = false;
+    while (((this->m_info.input_size != 0) || last_block) && (strm->avail_out != 0)) {
+        if (last_block && this->m_info.input_size == 0) last_buffer = true;
+        size_t inputSize = this->m_info.input_size;
+        size_t outputSize = m_bufSize;
 
+        enbytes = this->m_xlz->inflate_buffer(&this->m_info, last_block, inputSize, outputSize, last_data, last_buffer,
+                                              this->m_kernel_instance);
+        this->m_outputSize += enbytes;
+        this->m_info.input_size = inputSize;
         if (this->m_outputSize > 0) {
-            if (flush == Z_FINISH && last_data && enbytes > 0) {
-                long int last_block = 0xffff000001;
-                // zlib special block based on Z_SYNC_FLUSH
-                std::memcpy(&(this->m_deflateOutput[this->m_outputSize]), &last_block, 5);
-                this->m_outputSize += 5;
+            strm->avail_out = strm->avail_out - this->m_outputSize;
+            strm->total_out += this->m_outputSize;
+            strm->next_out += this->m_outputSize;
+            this->m_outputSize = 0;
 
-                this->m_deflateOutput[this->m_outputSize] = adler32 >> 24;
-                this->m_deflateOutput[this->m_outputSize + 1] = adler32 >> 16;
-                this->m_deflateOutput[this->m_outputSize + 2] = adler32 >> 8;
-                this->m_deflateOutput[this->m_outputSize + 3] = adler32;
-                this->m_outputSize += 4;
-            }
-            if (this->m_outputSize > strm->avail_out) {
-                std::memcpy(strm->next_out, this->m_deflateOutput, strm->avail_out);
-                this->m_outputSize -= strm->avail_out;
-                std::memmove(this->m_deflateOutput, this->m_deflateOutput + strm->avail_out, this->m_outputSize);
-                strm->total_out += strm->avail_out;
-                strm->next_out += strm->avail_out;
-                strm->avail_out = 0;
-            } else {
-                std::memcpy(strm->next_out, this->m_deflateOutput, this->m_outputSize);
-                strm->avail_out = strm->avail_out - this->m_outputSize;
-                strm->total_out += this->m_outputSize;
-                strm->next_out += this->m_outputSize;
-                this->m_outputSize = 0;
-                if (last_data) break;
-            }
+            if (last_data) break;
         }
         if (this->m_outputSize == 0) {
             if (last_data) break;
         }
     }
 
-    strm->avail_in = this->m_info.input_size;
+    strm->avail_in = m_info.input_size;
 
-    strm->adler = adler32;
-    unlock();
     if (last_data && strm->avail_out != 0) {
         return true;
     } else
@@ -358,80 +356,6 @@ uint64_t zlibDriver::xilinxHwUncompress(z_streamp strm, int cu) {
     }
 #endif
     return this->m_info.output_size;
-}
-
-// Call to HW Inflate
-bool zlibDriver::xilinxHwInflate(z_streamp strm, int flush) {
-    size_t enbytes = 0;
-
-    bool last_data = false;
-
-    if (m_info.input_size >= 9) {
-        long int lastblock = 0;
-        std::memcpy((unsigned char*)(&lastblock), m_info.in_buf + (m_info.input_size - 9), 5);
-        if (lastblock == 0xffff000001) last_block = true;
-    } else {
-        //        last_block = true;
-    }
-
-    while ((m_info.input_size != 0 || last_block) && (strm->avail_out != 0)) {
-        bool last_buffer = false;
-        if (m_info.input_size + m_inputSize >= m_bufSize) {
-            std::memcpy(m_inflateInput + m_inputSize, m_info.in_buf, m_bufSize - m_inputSize);
-            m_info.in_buf += (m_bufSize - m_inputSize);
-            m_info.input_size -= (m_bufSize - m_inputSize);
-            m_inputSize += (m_bufSize - m_inputSize);
-        } else if (m_info.input_size != 0) {
-            std::memcpy(m_inflateInput + m_inputSize, m_info.in_buf, m_info.input_size);
-            m_inputSize += m_info.input_size;
-            m_info.input_size = 0;
-        }
-        if (last_block && m_info.input_size == 0) last_buffer = true;
-        size_t inputSize = m_inputSize;
-        size_t outputSize = m_bufSize;
-        // Call compression_buffer API
-        if (last_buffer && (m_outputSize < m_bufSize)) {
-            enbytes = m_xlz->inflate_buffer(m_inflateInput, m_inflateOutput + m_outputSize, inputSize, outputSize,
-                                            last_data, last_buffer, m_kernel_instance);
-            m_outputSize += enbytes;
-            m_inputSize = inputSize;
-        } else if ((inputSize >= m_bufSize)) {
-            while ((inputSize != 0) && (m_outputSize < m_bufSize)) {
-                enbytes = m_xlz->inflate_buffer(m_inflateInput, m_inflateOutput + m_outputSize, inputSize, outputSize,
-                                                last_data, last_buffer, m_kernel_instance);
-                m_outputSize += enbytes;
-            }
-            m_inputSize = inputSize;
-        }
-
-        if (m_outputSize > 0) {
-            if (m_outputSize > strm->avail_out) {
-                std::memcpy(strm->next_out, m_inflateOutput, strm->avail_out);
-                m_outputSize -= strm->avail_out;
-                std::memmove(m_inflateOutput, m_inflateOutput + strm->avail_out, m_outputSize);
-                strm->total_out += strm->avail_out;
-                strm->next_out += strm->avail_out;
-                strm->avail_out = 0;
-            } else {
-                std::memcpy(strm->next_out, m_inflateOutput, m_outputSize);
-                strm->avail_out = strm->avail_out - m_outputSize;
-                strm->total_out += m_outputSize;
-                strm->next_out += m_outputSize;
-                m_outputSize = 0;
-                if (last_data) break;
-            }
-        }
-        if (m_outputSize == 0) {
-            if (last_data) break;
-        }
-    }
-
-    strm->avail_in = m_info.input_size;
-
-    if (last_data && strm->avail_out != 0) {
-        return true;
-    } else
-        return false;
 }
 
 void zlibDriver::copyData(z_streamp strm) {

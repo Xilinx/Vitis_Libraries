@@ -100,6 +100,7 @@ void zstdHuffmanEncoder(hls::stream<IntVectorStream_dt<8, 1> >& inValStream,
 
     while (true) {
         ap_uint<16> streamSizes[4] = {0, 0, 0, 0};
+#pragma HLS ARRAY_PARTITION variable = streamSizes complete
         uint16_t hIdx = 0;
         // pre-read value to check strobe
         auto inVal = inValStream.read();
@@ -126,7 +127,7 @@ void zstdHuffmanEncoder(hls::stream<IntVectorStream_dt<8, 1> >& inValStream,
             streamSizes[si].range(15, 8) = inVal.data[0];
         }
     // Parallel read 8 * INSTANCES bits of input
-    // Parallel encode to INSTACNCES output streams
+    // Parallel encode to INSTANCES output streams
     encode_lit_streams:
         for (uint8_t si = 0; si < streamCnt; ++si) {
             auto streamSize = streamSizes[si];
@@ -268,15 +269,14 @@ norm_tbl_outer_loop:
         auto inVal = inFreqStream.read();
         if (inVal.strobe == 0) break;
         seqCnt = inVal.data[0];
+        noSeq = (seqCnt == 0);
     // last sequence
     read_last_seq:
         for (uint8_t i = 0; i < 3; ++i) {
 #pragma HLS PIPELINE II = 1
             inVal = inFreqStream.read();
             lastSeq[i] = inVal.data[0];
-            if (inVal.data[0] > 0) noSeq = false;
         }
-        if (seqCnt > 1) noSeq = false;
     calc_norm_outer:
         for (uint8_t k = 0; k < 4; ++k) {
         init_norm_table:
@@ -665,7 +665,7 @@ read_fse_tables:
     return false;
 }
 
-template <int BITSTREAM_DWIDTH = 64>
+template <int BITSTREAM_DWIDTH = 32>
 inline void fseEncodeSymbol(uint8_t symbol,
                             ap_uint<36>* fseStateBitsTable,
                             uint16_t* fseNextStateTable,
@@ -673,7 +673,9 @@ inline void fseEncodeSymbol(uint8_t symbol,
                             ap_uint<BITSTREAM_DWIDTH>& bitstream,
                             uint8_t& bitCount,
                             bool isInit) {
+#pragma HLS INLINE
     // encode a symbol using fse table
+    // This version of function is best for literal header encoding
     constexpr uint32_t c_oneBy15Lsh = ((uint32_t)1 << 15);
     ap_uint<36> stateBitVal = fseStateBitsTable[symbol];
     uint32_t deltaBits = (uint32_t)(stateBitVal.range(19, 0));
@@ -695,19 +697,48 @@ inline void fseEncodeSymbol(uint8_t symbol,
     fseState = fseNextStateTable[nxIdx];
 }
 
+template <int OUT_DWIDTH = 16, int IS_INIT = 0>
+inline void fseEncodeSymbol(uint8_t symbol,
+                            ap_uint<36>* fseStateBitsTable,
+                            uint16_t* fseNextStateTable,
+                            uint16_t& fseState,
+                            ap_uint<OUT_DWIDTH>& outWord,
+                            ap_uint<5>& bitCount) {
+#pragma HLS INLINE
+    // encode a symbol using fse table
+    // This version of function is best for sequence encoding
+    constexpr uint32_t c_oneBy15Lsh = ((uint32_t)1 << 15);
+    ap_uint<36> stateBitVal = fseStateBitsTable[symbol];
+    uint32_t deltaBits = (uint32_t)(stateBitVal.range(19, 0));
+    int16_t findState = (int16_t)(stateBitVal.range(35, 20));
+    uint32_t nbBits;
+    uint16_t stVal;
+    if (IS_INIT) {
+        nbBits = (deltaBits + c_oneBy15Lsh) >> 16;
+        stVal = (nbBits << 16) - deltaBits;
+    } else {
+        nbBits = (uint32_t)(deltaBits + fseState) >> 16;
+        stVal = fseState;
+        // write bits to bitstream
+        outWord = (ap_uint<OUT_DWIDTH>)(stVal & c_bitMask[nbBits]);
+        bitCount = nbBits;
+    }
+    // store current state
+    uint32_t nxIdx = (stVal >> nbBits) + findState;
+    fseState = fseNextStateTable[nxIdx];
+}
+
 void fseEncodeLitHeader(hls::stream<IntVectorStream_dt<4, 1> >& hufWeightStream,
                         hls::stream<IntVectorStream_dt<36, 1> >& fseLitTableStream,
                         hls::stream<IntVectorStream_dt<8, 2> >& encodedOutStream) {
     // fse encoding of huffman header for encoded literals
-    constexpr uint32_t c_oneBy15Lsh = ((uint32_t)1 << 15);
     IntVectorStream_dt<8, 2> outVal;
     ap_uint<36> fseStateBitsTable[256];
     uint16_t fseNextStateTable[256];
     ap_uint<4> hufWeights[256];
-    int blk_n = 0;
+
 fse_lit_encode_outer:
     while (true) {
-        blk_n++;
         uint8_t tableLog;
         uint16_t maxSymbol;
         uint16_t maxFreq;
@@ -745,8 +776,6 @@ fse_lit_encode_outer:
                 // write to output stream
                 outVal.data[0] = bitstream.range(7, 0);
                 outVal.data[1] = bitstream.range(15, 8);
-                // outVal.data[2] = bitstream.range(23, 16);
-                // outVal.data[3] = bitstream.range(31, 24);
                 encodedOutStream << outVal;
                 bitstream >>= 16;
                 bitCount -= 16;
@@ -772,9 +801,6 @@ fse_lit_encode_outer:
             // write to output stream
             outVal.data[0] = bitstream.range(7, 0);
             outVal.data[1] = bitstream.range(15, 8);
-            // outVal.data[2] = bitstream.range(23, 16);
-            // outVal.data[3] = bitstream.range(31, 24);
-            // outVal.strobe = ((remBytes > 2) ? 2 : remBytes);
             outVal.strobe = ((remBytes > 1) ? 2 : 1);
             encodedOutStream << outVal;
             bitstream >>= 16;
@@ -792,18 +818,77 @@ fse_lit_encode_outer:
 }
 
 template <int MAX_FREQ_DWIDTH>
-void fseEncodeSequences(hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& inSeqStream,
-                        hls::stream<IntVectorStream_dt<36, 1> >& fseSeqTableStream,
-                        hls::stream<IntVectorStream_dt<8, 4> >& encodedOutStream) {
-    // fse encoding of reversed sequences stream
-    IntVectorStream_dt<8, 4> outVal;
+void fseGetSeqCodes(hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& inSeqStream,
+                    hls::stream<DSVectorStream_dt<Sequence_dt<6>, 1> >& seqCodeStream,
+                    hls::stream<bool>& noSeqFlagStream,
+                    hls::stream<ap_uint<33> >& extCodewordStream,
+                    hls::stream<ap_uint<8> >& extBitlenStream) {
+    // get sequence, code and code bit-lengths
+    DSVectorStream_dt<Sequence_dt<6>, 1> seqCode;
+    ap_uint<33> extCodeword;
+    ap_uint<8> extBitlen;
+fse_get_seq_codes_main:
+    while (true) {
+        auto nextSeq = inSeqStream.read();
+        if (nextSeq.strobe == 0) break;
+        seqCode.strobe = 1;
+        // check for noSeq condition
+        if (nextSeq.data[0].litlen == 0 && nextSeq.data[0].matlen == 0 && nextSeq.data[0].offset == 0) {
+            // read strobe zero value, since no sequence is present
+            nextSeq = inSeqStream.read();
+            noSeqFlagStream << 1;
+        } else {
+            noSeqFlagStream << 0;
+        // Send sequence codes and extra bit-lengths with extra codewords
+        fetch_sequence_codes:
+            while (nextSeq.strobe > 0) {
+#pragma HLS PIPELINE II = 1
+                auto inSeq = nextSeq;
+                // Read next sequence
+                nextSeq = inSeqStream.read();
+                // process current sequence
+                seqCode.data[0].litlen = getLLCode(inSeq.data[0].litlen);
+                seqCode.data[0].matlen = getMLCode(inSeq.data[0].matlen);
+                seqCode.data[0].offset = bitsUsed31(inSeq.data[0].offset);
+                // get bits for adding to bitstream
+                uint8_t llBits = c_extraBitsLL[seqCode.data[0].litlen];
+                uint8_t mlBits = c_extraBitsML[seqCode.data[0].matlen];
+                uint8_t ofBits = seqCode.data[0].offset;
+                // get masked extra bit values
+                ap_uint<33> excLL = inSeq.data[0].litlen & c_bitMask[llBits];
+                ap_uint<33> excML = inSeq.data[0].matlen & c_bitMask[mlBits];
+                ap_uint<33> excOF = inSeq.data[0].offset & c_bitMask[ofBits];
+                // get combined extra codeword
+                extCodeword = (excOF << (mlBits + llBits)) + (excML << llBits) + excLL;
+                extBitlen = ofBits + mlBits + llBits;
+                // write information to next units
+                seqCodeStream << seqCode;
+                extCodewordStream << extCodeword;
+                extBitlenStream << extBitlen;
+            }
+            // End of block in case of valid sequence block
+            seqCode.strobe = 0;
+            seqCodeStream << seqCode;
+        }
+    }
+}
+
+void fseEncodeSeqCodes(hls::stream<IntVectorStream_dt<36, 1> >& fseSeqTableStream,
+                       hls::stream<DSVectorStream_dt<Sequence_dt<6>, 1> >& seqCodeStream,
+                       hls::stream<bool>& noSeqFlagStream,
+                       hls::stream<IntVectorStream_dt<28, 1> >& seqFseWordStream,
+                       hls::stream<ap_uint<5> >& wordBitlenStream) {
+    // Encode sequence codes
+    // Internal tables
     ap_uint<36> fseStateBitsTableLL[512];
     uint16_t fseNextStateTableLL[512];
     ap_uint<36> fseStateBitsTableML[512];
     uint16_t fseNextStateTableML[512];
     ap_uint<36> fseStateBitsTableOF[256];
     uint16_t fseNextStateTableOF[256];
-fse_lit_encode_outer:
+    // out word having D-WIDTH = (9 (max tableLog) * 3) + 1(end bit)
+    IntVectorStream_dt<28, 1> fseOutWord;
+fse_encode_seq_main:
     while (true) {
         uint8_t tableLogLL, tableLogML, tableLogOF;
         uint16_t maxSymbolLL, maxSymbolML, maxSymbolOF;
@@ -812,162 +897,165 @@ fse_lit_encode_outer:
         // read FSE encoding tables for litlen, matlen, offset
         bool noData = readFseTable(fseSeqTableStream, fseStateBitsTableLL, fseNextStateTableLL, tableLogLL, maxFreqLL);
         if (noData) break;
-        // if (inSeq.strobe == 0) break;
         readFseTable(fseSeqTableStream, fseStateBitsTableOF, fseNextStateTableOF, tableLogOF, maxFreqOF);
         readFseTable(fseSeqTableStream, fseStateBitsTableML, fseNextStateTableML, tableLogML, maxFreqML);
-
-        auto inSeq = inSeqStream.read();
-        // check for noSeq condition
-        if (inSeq.data[0].litlen == 0 && inSeq.data[0].matlen == 0 && inSeq.data[0].offset == 0) {
-            // read strobe zero value, since no sequence is present
-            inSeq = inSeqStream.read();
-            continue;
-        }
-        Sequence_dt<8> seqCode;
-        seqCode.litlen = getLLCode<16>(inSeq.data[0].litlen);
-        seqCode.matlen = getMLCode<8>(inSeq.data[0].matlen);
-        seqCode.offset = bitsUsed31((uint32_t)inSeq.data[0].offset);
-        // read and encode sequences
-        // uint16_t seqCnt = 1;
+        // Check for no sequence condition
+        auto noSeq = noSeqFlagStream.read();
+        if (noSeq) continue;
+        // read and fse encode sequence codes
         uint16_t llPrevStateVal, mlPrevStateVal, ofPrevStateVal;
-        bool isInit[3] = {true, true, true};
-        ap_uint<64> bitstream = 0;
-        uint8_t bitCount = 0;
-        int outCnt = 0;
-        outVal.strobe = 4;
-        // intialize states for offset -> matlen -> litlen
-        fseEncodeSymbol((uint8_t)(seqCode.offset), fseStateBitsTableOF, fseNextStateTableOF, ofPrevStateVal, bitstream,
-                        bitCount, true);
-        fseEncodeSymbol((uint8_t)(seqCode.matlen), fseStateBitsTableML, fseNextStateTableML, mlPrevStateVal, bitstream,
-                        bitCount, true);
-        fseEncodeSymbol((uint8_t)(seqCode.litlen), fseStateBitsTableLL, fseNextStateTableLL, llPrevStateVal, bitstream,
-                        bitCount, true);
-        // add bits to bitstream
-
-        uint32_t llBits = c_extraBitsLL[seqCode.litlen];
-        uint32_t mlBits = c_extraBitsML[seqCode.matlen];
-        uint8_t ofBits = seqCode.offset;
-
-        bitstream |= ((uint64_t)(inSeq.data[0].litlen & c_bitMask[llBits]) << bitCount);
-        bitCount += llBits;
-        bitstream |= ((uint64_t)(inSeq.data[0].matlen & c_bitMask[mlBits]) << bitCount);
-        bitCount += mlBits;
-        bitstream |= ((uint64_t)(inSeq.data[0].offset & c_bitMask[ofBits]) << bitCount);
-        bitCount += ofBits;
-
-        // write bitstream to output
-        if (bitCount > 31) {
-            // write to output stream
-            outVal.data[0] = bitstream.range(7, 0);
-            outVal.data[1] = bitstream.range(15, 8);
-            outVal.data[2] = bitstream.range(23, 16);
-            outVal.data[3] = bitstream.range(31, 24);
-            encodedOutStream << outVal;
-            bitstream >>= 32;
-            bitCount -= 32;
-            outCnt += 4;
-        }
-
-    encode_sequences:
-        while (inSeq.strobe > 0) {
+        ap_uint<9> outWordLL, outWordML, outWordOF;
+        ap_uint<5> bitsLL, bitsML, bitsOF;
+        // Initialise fse states for first sequence set
+        auto seqCode = seqCodeStream.read();
+        uint8_t llCode = (uint8_t)seqCode.data[0].litlen;
+        uint8_t ofCode = (uint8_t)seqCode.data[0].offset;
+        uint8_t mlCode = (uint8_t)seqCode.data[0].matlen;
+        // Initialization does not write any output
+        fseEncodeSymbol<9, 1>(ofCode, fseStateBitsTableOF, fseNextStateTableOF, ofPrevStateVal, outWordOF, bitsOF);
+        fseEncodeSymbol<9, 1>(mlCode, fseStateBitsTableML, fseNextStateTableML, mlPrevStateVal, outWordML, bitsML);
+        fseEncodeSymbol<9, 1>(llCode, fseStateBitsTableLL, fseNextStateTableLL, llPrevStateVal, outWordLL, bitsLL);
+        uint8_t tableLogSum = tableLogOF + tableLogML + tableLogLL;
+        ap_uint<28> endMark = (1 << tableLogSum);
+        ap_uint<5> fseBitCnt = 0;
+        fseOutWord.strobe = 1;
+    fse_encode_seq_codes:
+        for (seqCode = seqCodeStream.read(); seqCode.strobe > 0; seqCode = seqCodeStream.read()) {
 #pragma HLS PIPELINE II = 1
-            // read the seq and code values
-            inSeq = inSeqStream.read();
-            if (inSeq.strobe == 0) break;
-            seqCode.litlen = getLLCode<16>(inSeq.data[0].litlen);
-            seqCode.matlen = getMLCode<8>(inSeq.data[0].matlen);
-            seqCode.offset = bitsUsed31((uint32_t)inSeq.data[0].offset);
-            uint8_t llCode = seqCode.litlen;
-            uint8_t ofCode = seqCode.offset;
-            uint8_t mlCode = seqCode.matlen;
-            llBits = c_extraBitsLL[llCode];
-            mlBits = c_extraBitsML[mlCode];
-            int8_t ofBits = ofCode;
-            // encode codes in order offset -> matlen -> litlen, isInit[0] is always false, used just for the sake of
-            // argument
-            fseEncodeSymbol(ofCode, fseStateBitsTableOF, fseNextStateTableOF, ofPrevStateVal, bitstream, bitCount,
-                            false);
-            fseEncodeSymbol(mlCode, fseStateBitsTableML, fseNextStateTableML, mlPrevStateVal, bitstream, bitCount,
-                            false);
-            fseEncodeSymbol(llCode, fseStateBitsTableLL, fseNextStateTableLL, llPrevStateVal, bitstream, bitCount,
-                            false);
-            // push bitstream
-            if (bitCount > 31) {
-                // write to output stream
-                outVal.data[0] = bitstream.range(7, 0);
-                outVal.data[1] = bitstream.range(15, 8);
-                outVal.data[2] = bitstream.range(23, 16);
-                outVal.data[3] = bitstream.range(31, 24);
-                encodedOutStream << outVal;
-                bitstream >>= 32;
-                bitCount -= 32;
-                outCnt += 4;
-            }
-            // printf("ll: %u, llc: %u, mlc: %u, ofc: %u\n", (uint16_t)inSeq.data[0].litlen, llCode, mlCode, ofCode);
-
-            // encode literal length
-            bitstream |= ((uint64_t)(inSeq.data[0].litlen & c_bitMask[llBits]) << bitCount);
-            bitCount += llBits;
-
-            // encode match length
-            bitstream |= ((uint64_t)(inSeq.data[0].matlen & c_bitMask[mlBits]) << bitCount);
-            bitCount += mlBits;
-
-            // encode offset
-            uint64_t ofM = inSeq.data[0].offset & c_bitMask[ofBits];
-            bitstream |= ofM << bitCount;
-            bitCount += ofBits;
-
-            // push bitstream
-            if (bitCount > 31) {
-                // write to output stream
-                outVal.data[0] = bitstream.range(7, 0);
-                outVal.data[1] = bitstream.range(15, 8);
-                outVal.data[2] = bitstream.range(23, 16);
-                outVal.data[3] = bitstream.range(31, 24);
-                encodedOutStream << outVal;
-                bitstream >>= 32;
-                bitCount -= 32;
-                outCnt += 4;
-            }
-            //++seqCnt;
+            uint8_t ofCode = (uint8_t)seqCode.data[0].offset;
+            uint8_t mlCode = (uint8_t)seqCode.data[0].matlen;
+            uint8_t llCode = (uint8_t)seqCode.data[0].litlen;
+            fseEncodeSymbol<9, 0>(ofCode, fseStateBitsTableOF, fseNextStateTableOF, ofPrevStateVal, outWordOF, bitsOF);
+            fseEncodeSymbol<9, 0>(mlCode, fseStateBitsTableML, fseNextStateTableML, mlPrevStateVal, outWordML, bitsML);
+            fseEncodeSymbol<9, 0>(llCode, fseStateBitsTableLL, fseNextStateTableLL, llPrevStateVal, outWordLL, bitsLL);
+            // Prepare output
+            fseOutWord.data[0] =
+                ((ap_uint<28>)outWordLL << (bitsOF + bitsML)) + ((ap_uint<28>)outWordML << bitsOF) + outWordOF;
+            fseBitCnt = bitsOF + bitsML + bitsLL;
+            // Write output to stream
+            seqFseWordStream << fseOutWord;
+            wordBitlenStream << fseBitCnt;
         }
         // encode last sequence states
-        bitstream |= ((uint64_t)(mlPrevStateVal & c_bitMask[tableLogML]) << bitCount);
-        bitCount += tableLogML;
-        bitstream |= ((uint64_t)(ofPrevStateVal & c_bitMask[tableLogOF]) << bitCount);
-        bitCount += tableLogOF;
-        bitstream |= ((uint64_t)(llPrevStateVal & c_bitMask[tableLogLL]) << bitCount);
-        bitCount += tableLogLL;
-        // mark end by adding 1-bit "1"
-        bitstream |= (uint64_t)1 << bitCount;
-        ++bitCount;
-        // max remaining biCount can be 31 + 8 + 8 + 9 + 1 = 57 bits => 8 bytes
-        int8_t remBytes = (int8_t)((bitCount + 7) / 8);
-    // write bitstream to output
-    write_rem_bytes:
-        while (remBytes > 0) {
+        outWordML = mlPrevStateVal & c_bitMask[tableLogML];
+        outWordOF = ofPrevStateVal & c_bitMask[tableLogOF];
+        outWordLL = llPrevStateVal & c_bitMask[tableLogLL];
+        // prepare last output
+        fseOutWord.data[0] = ((ap_uint<28>)outWordLL << (tableLogOF + tableLogML)) +
+                             ((ap_uint<18>)outWordOF << tableLogML) + outWordML + endMark;
+        fseBitCnt = 1 + tableLogSum;
+        // write last valid output for this block
+        seqFseWordStream << fseOutWord;
+        wordBitlenStream << fseBitCnt;
+        // End of block
+        fseOutWord.strobe = 0;
+        seqFseWordStream << fseOutWord;
+    }
+    // End of all data
+    fseOutWord.strobe = 0;
+    seqFseWordStream << fseOutWord;
+}
+
+template <int MAX_FREQ_DWIDTH>
+void seqFseBitPacker(hls::stream<IntVectorStream_dt<28, 1> >& seqFseWordStream,
+                     hls::stream<ap_uint<5> >& fseWordBitlenStream,
+                     hls::stream<ap_uint<33> >& extCodewordStream,
+                     hls::stream<ap_uint<8> >& extBitlenStream,
+                     hls::stream<IntVectorStream_dt<8, 6> >& encodedOutStream,
+                     hls::stream<ap_uint<MAX_FREQ_DWIDTH> >& seqEncSizeStream) {
+    // generate fse bitstream for sequences
+    IntVectorStream_dt<8, 6> outVal;
+
+seq_fse_bitPack_outer:
+    while (true) {
+        auto seqFseWord = seqFseWordStream.read();
+        if (seqFseWord.strobe == 0) break;
+        // local buffer
+        ap_uint<96> bitstream = 0;
+        int8_t bitCount = 0;
+        ap_uint<MAX_FREQ_DWIDTH> outCnt = 0;
+        // 4 bytes in an output word
+        outVal.strobe = 6;
+    // pack fse bitstream
+    seq_fse_bit_packing:
+        for (; seqFseWord.strobe > 0; seqFseWord = seqFseWordStream.read()) {
 #pragma HLS PIPELINE II = 1
+            // add extra bit word and then fse word
+            // Read input
+            auto extWord = (ap_uint<96>)extCodewordStream.read();
+            auto extBlen = extBitlenStream.read();
+            auto fseWord = (ap_uint<96>)seqFseWord.data[0];
+            auto fseBlen = fseWordBitlenStream.read();
+
+            bitstream += ((ap_uint<96>)fseWord << (extBlen + bitCount)) + ((ap_uint<96>)extWord << bitCount);
+            bitCount += (extBlen + fseBlen);
+            // push bitstream
+            if (bitCount > 47) {
+                // write to output stream
+                outVal.data[0] = bitstream.range(7, 0);
+                outVal.data[1] = bitstream.range(15, 8);
+                outVal.data[2] = bitstream.range(23, 16);
+                outVal.data[3] = bitstream.range(31, 24);
+                outVal.data[4] = bitstream.range(39, 32);
+                outVal.data[5] = bitstream.range(47, 40);
+                encodedOutStream << outVal;
+                bitstream >>= 48;
+                bitCount -= 48;
+                outCnt += 6;
+            }
+        }
+        // write remaining bitstream
+        if (bitCount) {
             // write to output stream
             outVal.data[0] = bitstream.range(7, 0);
             outVal.data[1] = bitstream.range(15, 8);
             outVal.data[2] = bitstream.range(23, 16);
             outVal.data[3] = bitstream.range(31, 24);
-            outVal.strobe = ((remBytes > 4) ? 4 : remBytes);
+            outVal.data[4] = bitstream.range(39, 32);
+            outVal.data[5] = bitstream.range(47, 40);
+            outVal.strobe = (uint8_t)((bitCount + 7) / 8);
             encodedOutStream << outVal;
-            bitstream >>= 32;
-            bitCount -= 32;
-            remBytes -= 4;
             outCnt += outVal.strobe;
         }
+        // send size of encoded sequence bitstream
+        seqEncSizeStream << outCnt;
+        // end of block
         outVal.strobe = 0;
         encodedOutStream << outVal;
     }
-    // dump last strobe 0 data
-    // fseSeqTableStream.read();
-    inSeqStream.read();
+    // end of all data
     outVal.strobe = 0;
     encodedOutStream << outVal;
+}
+
+template <int MAX_FREQ_DWIDTH>
+void fseEncodeSequences(hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& inSeqStream,
+                        hls::stream<IntVectorStream_dt<36, 1> >& fseSeqTableStream,
+                        hls::stream<IntVectorStream_dt<8, 6> >& encodedOutStream,
+                        hls::stream<ap_uint<MAX_FREQ_DWIDTH> >& seqEncSizeStream) {
+    // internal streams
+    hls::stream<DSVectorStream_dt<Sequence_dt<6>, 1> > seqCodeStream("seqCodeStream");
+    hls::stream<bool> noSeqFlagStream("noSeqFlagStream");
+    hls::stream<ap_uint<33> > extCodewordStream("extCodewordStream");
+    hls::stream<ap_uint<8> > extBitlenStream("extBitlenStream");
+    hls::stream<IntVectorStream_dt<28, 1> > seqFseWordStream("seqFseWordStream");
+    hls::stream<ap_uint<5> > wordBitlenStream("wordBitlenStream");
+
+#pragma HLS STREAM variable = seqCodeStream depth = 4
+#pragma HLS STREAM variable = noSeqFlagStream depth = 4
+#pragma HLS STREAM variable = extCodewordStream depth = 16
+#pragma HLS STREAM variable = extBitlenStream depth = 16
+#pragma HLS STREAM variable = seqFseWordStream depth = 4
+#pragma HLS STREAM variable = wordBitlenStream depth = 4
+
+#pragma HLS dataflow
+
+    fseGetSeqCodes<MAX_FREQ_DWIDTH>(inSeqStream, seqCodeStream, noSeqFlagStream, extCodewordStream, extBitlenStream);
+
+    fseEncodeSeqCodes(fseSeqTableStream, seqCodeStream, noSeqFlagStream, seqFseWordStream, wordBitlenStream);
+
+    seqFseBitPacker<MAX_FREQ_DWIDTH>(seqFseWordStream, wordBitlenStream, extCodewordStream, extBitlenStream,
+                                     encodedOutStream, seqEncSizeStream);
 }
 
 } // details

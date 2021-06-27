@@ -48,7 +48,6 @@ class snappyOCLHost : public snappyBase {
                   const std::string& binaryFileName,
                   uint8_t device_id,
                   uint32_t block_size_kb,
-                  uint8_t max_cr,
                   bool enable_profile = false,
                   bool enable_p2p = 0);
 
@@ -104,7 +103,6 @@ class snappyOCLHost : public snappyBase {
     uint8_t m_deviceId;
     size_t m_inputSize;
     enum State m_flow;
-    uint8_t m_maxCR;
 
     cl::Program* m_program;
     cl::Context* m_context;

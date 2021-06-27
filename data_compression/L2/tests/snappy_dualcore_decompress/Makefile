@@ -154,7 +154,7 @@ endif
 
 EXE_NAME := xsnappy_decompress_streaming
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -dx $(BUILD_DIR)/dualcore_decompress_streaming.xclbin -d $(CUR_DIR)/sample.txt.snappy
+HOST_ARGS := -dx $(BUILD_DIR)/dualcore_decompress_streaming.xclbin -d $(CUR_DIR)/data/sample.txt.snappy
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -189,13 +189,14 @@ BINARY_CONTAINER_dualcore_decompress_streaming_OBJS += $(TEMP_DIR)/xilSnappyDeco
 BINARY_CONTAINER_dualcore_decompress_streaming_OBJS += $(TEMP_DIR)/xilDecompDatamover.xo
 
 # ######################### Setting Targets of Makefile ################################
-DATA_FILE += $(CUR_DIR)//sample.txt.snappy
+DATA_FILE += $(CUR_DIR)//data/sample.txt
+DATA_FILE += $(CUR_DIR)//data/sample.txt.snappy
 
 .PHONY: all clean cleanall docs emconfig
 ifeq ($(HOST_ARCH), x86)
-all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all:  check_version check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 else
-all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+all:  check_version check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
 endif
 
 .PHONY: host
@@ -279,7 +280,7 @@ PACKAGE_FILES += emconfig.json
 PACKAGE_FILES += $(DATA_FILE)
 SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
 SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+sd_card: host xclbin emconfig
 ifneq ($(HOST_ARCH), x86)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(EMBEDDED_PACKAGE_OUT)
@@ -290,7 +291,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
@@ -310,7 +313,7 @@ cleanh:
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ start_simulation.sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
@@ -318,7 +321,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) $(CUR_DIR)/s $(CUR_DIR)/a $(CUR_DIR)/m $(CUR_DIR)/p $(CUR_DIR)/l $(CUR_DIR)/e $(CUR_DIR)/. $(CUR_DIR)/t $(CUR_DIR)/x $(CUR_DIR)/t $(CUR_DIR)/. $(CUR_DIR)/s $(CUR_DIR)/n $(CUR_DIR)/a $(CUR_DIR)/p $(CUR_DIR)/p $(CUR_DIR)/y $(CUR_DIR)/. $(CUR_DIR)/* 
+	-$(RMDIR) $(CUR_DIR)/d $(CUR_DIR)/a $(CUR_DIR)/t $(CUR_DIR)/a $(CUR_DIR)// $(CUR_DIR)/s $(CUR_DIR)/a $(CUR_DIR)/m $(CUR_DIR)/p $(CUR_DIR)/l $(CUR_DIR)/e $(CUR_DIR)/. $(CUR_DIR)/t $(CUR_DIR)/x $(CUR_DIR)/t $(CUR_DIR)/. $(CUR_DIR)/s $(CUR_DIR)/n $(CUR_DIR)/a $(CUR_DIR)/p $(CUR_DIR)/p $(CUR_DIR)/y $(CUR_DIR)/. $(CUR_DIR)/* 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

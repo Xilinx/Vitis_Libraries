@@ -10,5 +10,5 @@ Results
 
 ==================== ===== ===== ==== ==== 
 Module               LUT   FF    BRAM URAM 
-lz4_decompress_test  543   612   32   0 
+lz4_decompress_test  703   591   32   0 
 ==================== ===== ===== ==== ==== 

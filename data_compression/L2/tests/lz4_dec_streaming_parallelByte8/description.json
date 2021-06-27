@@ -28,7 +28,8 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt.lz4" 
+        "PROJECT/data/sample.txt",
+        "PROJECT/data/sample.txt.lz4" 
     ],   
     "host": {
         "host_exe": "xil_lz4_decompress_streaming", 
@@ -82,7 +83,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.lz4.*",
+            "data/sample.txt.lz4.*",
             "sample_run.*",
             "test.list"
     ],        

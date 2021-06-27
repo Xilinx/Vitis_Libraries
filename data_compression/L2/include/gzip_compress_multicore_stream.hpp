@@ -40,7 +40,7 @@
 #endif
 
 #ifndef URAM_BUFFER
-#define URAM_BUFFER 1 // 0: BRAM; 1: URAM
+#define URAM_BUFFER 0 // 0: BRAM; 1: URAM
 #endif
 
 #ifndef STRTGY
@@ -49,6 +49,10 @@
 
 #ifndef NUM_CORES
 #define NUM_CORES 8 // Octacore by default
+#endif
+
+#ifndef BLOCKSIZE_IN_KB
+#define BLOCKSIZE_IN_KB 32 // 32KB by default
 #endif
 
 // Kernel top functions

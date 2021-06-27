@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [], 
     "QoR_golden": {
-        "VV_LUT": "325", 
-        "VV_FF": "217", 
+        "VV_LUT": "242", 
+        "VV_FF": "203", 
         "VV_BRAM": "0", 
         "VV_URAM": "0", 
-        "VV_AchievedClockPeriod": "2.617"
+        "VV_AchievedClockPeriod": "2.430"
     }, 
     "project": "adler32", 
     "solution": "sol1", 

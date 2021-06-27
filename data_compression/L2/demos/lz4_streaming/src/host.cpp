@@ -28,9 +28,9 @@ int main(int argc, char* argv[]) {
 
     // Design class object creating and constructor invocation
     std::unique_ptr<lz4OCLHost> lz4(
-        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), d.getMCR(), lz4_stream, enable_profile));
+        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), lz4_stream, enable_profile));
 
     // Run API to launch the compress or decompress engine
-    d.run(lz4.get());
+    d.run(lz4.get(), d.getMCR());
     return 0;
 }

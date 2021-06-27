@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/sample.txt.gz", 
+            "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/data/sample.txt.gz", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -29,7 +29,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt.gz" 
+        "PROJECT/data/sample.txt.gz" 
     ],   
     "host": {
         "host_exe": "xil_gzip", 
@@ -87,7 +87,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.gz.*",
+            "data/sample.txt.gz.*",
             "sample_run.*",
             "test.list"
     ],          

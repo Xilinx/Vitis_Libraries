@@ -42,12 +42,12 @@
 #define GMEM_BURST_SIZE 128
 #endif
 
-#ifndef URAM_BUFFER
-#define URAM_BUFFER 1 // 0: BRAM; 1: URAM
-#endif
-
 #ifndef NUM_CORES
 #define NUM_CORES 8 // Octacore by default
+#endif
+
+#ifndef BLOCKSIZE_IN_KB
+#define BLOCKSIZE_IN_KB 32
 #endif
 
 // Kernel top functions

@@ -8,7 +8,7 @@ Xilinx ZSTD compress HLS Test
 Results
 -------
 
-==================== ====== ====== ====== ==== 
-Module                LUT    FF     BRAM  URAM 
-zstd_compress         22044  19777  96    8
-==================== ====== ====== ====== ====
+==================== ===== ===== ==== ==== 
+Module               LUT   FF    BRAM URAM 
+zstd_compress        28819 31834 97   14 
+==================== ===== ===== ==== ==== 

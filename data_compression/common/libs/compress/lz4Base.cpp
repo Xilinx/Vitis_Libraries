@@ -65,17 +65,25 @@ uint8_t lz4Base::writeHeader(uint8_t* out) {
 
     if ((m_BlockSizeInKb * 1024) > input_size) m_HostBufferSize = m_BlockSizeInKb * 1024;
 
-    size_t temp_buff[10] = {FLG_BYTE,         block_size_header, input_size,       input_size >> 8,  input_size >> 16,
-                            input_size >> 24, input_size >> 32,  input_size >> 40, input_size >> 48, input_size >> 56};
-
-    // xxhash is used to calculate hash value
-    uint32_t xxh = XXH32(temp_buff, 10, 0);
+    uint8_t temp_buff[10] = {FLG_BYTE,
+                             (uint8_t)block_size_header,
+                             (uint8_t)input_size,
+                             (uint8_t)(input_size >> 8),
+                             (uint8_t)(input_size >> 16),
+                             (uint8_t)(input_size >> 24),
+                             (uint8_t)(input_size >> 32),
+                             (uint8_t)(input_size >> 40),
+                             (uint8_t)(input_size >> 48),
+                             (uint8_t)(input_size >> 56)};
 
     if (m_addContentSize) {
         memcpy(&out[fileIdx], &temp_buff[2], 8);
         fileIdx += 8;
         m_frameByteCount += 8;
     }
+
+    // xxhash is used to calculate hash value
+    uint32_t xxh = (m_addContentSize) ? XXH32(temp_buff, 10, 0) : XXH32(temp_buff, 2, 0);
 
     //  Header CRC
     out[fileIdx++] = (uint8_t)(xxh >> 8);
@@ -84,9 +92,16 @@ uint8_t lz4Base::writeHeader(uint8_t* out) {
     return fileIdx;
 }
 
-void lz4Base::writeFooter(uint8_t* out) {
+void lz4Base::writeFooter(uint8_t* in, uint8_t* out) {
     uint32_t* zero_ptr = 0;
     memcpy(out, &zero_ptr, 4);
+    out += 4;
+    m_frameByteCount += 4;
+
+    size_t input_size = m_InputSize;
+    // xxhash is used to calculate content checksum value
+    uint32_t xxh = XXH32(in, input_size, 0);
+    memcpy(out, &xxh, 4);
     out += 4;
     m_frameByteCount += 4;
 }
@@ -107,7 +122,7 @@ uint8_t lz4Base::readHeader(uint8_t* in) {
         }
     }
 
-    // Header Checksum
+    // FLG Byte
     c = in[fileIdx++];
 
     // Check if block size is 64 KB
@@ -131,19 +146,20 @@ uint8_t lz4Base::readHeader(uint8_t* in) {
             break;
     }
 
-    // Original size
-    size_t original_size = 0;
+    if (FLG_BYTE == 104) {
+        // Original size
+        size_t original_size = 0;
 
-    memcpy(&original_size, &in[fileIdx], 8);
+        memcpy(&original_size, &in[fileIdx], 8);
 
-    // file size(8) + 1 byte header read
-    fileIdx += 9;
+        // file size(8)
+        fileIdx += 8;
+    }
+
+    // Header Checksum
+    c = in[fileIdx++];
 
     m_HostBufferSize = (m_BlockSizeInKb * 1024) * MAX_NUMBER_BLOCKS;
-
-    if ((m_BlockSizeInKb * 1024) > original_size) m_HostBufferSize = m_BlockSizeInKb * 1024;
-
-    m_ActualSize = original_size;
 
     return fileIdx;
 }

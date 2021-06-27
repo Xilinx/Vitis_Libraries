@@ -208,7 +208,7 @@ void zstdLz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
             metaStream << metaVal;
             litCntStream << (isRLE ? (FREQ_DT)(litTotal + 1) : litTotal);
             // printf("litCount: %u, seqCnt: %u\n", (uint16_t)litTotal, (uint16_t)seqCnt);
-            if (seqCnt == 0) seqCnt = 1;
+            // if (seqCnt == 0) seqCnt = 1;
             outLitFreqVal.strobe = 1;
             outSeqFreqVal.strobe = 1;
         write_lit_freq:
@@ -301,8 +301,8 @@ void getLitSequences(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
 #pragma HLS STREAM variable = metaStream depth = 8
 
     // LZ77 compress
-    xf::compression::lzCompress<BLOCK_SIZE, uint32_t, MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream,
-                                                                                                 compressedStream);
+    xf::compression::lzCompress<BLOCK_SIZE, uint32_t, MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT, 1>(
+        inStream, compressedStream, 0);
     // improve CR and generate clean sequences
     xf::compression::lzBooster<MAX_MATCH_LEN>(compressedStream, boosterStream);
     // separate literals from sequences and generate literal frequencies

@@ -152,7 +152,7 @@ endif
 
 EXE_NAME := xil_zstd
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -xbin $(BUILD_DIR)/xilZstdDecompressStream.xclbin -d $(CUR_DIR)/sample.txt.zst
+HOST_ARGS := -xbin $(BUILD_DIR)/xilZstdDecompressStream.xclbin -d $(CUR_DIR)/data/sample.txt.zst
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -189,8 +189,8 @@ BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilGzipMM2S.xo
 BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilZstdDecompressStream.xo
 
 # ######################### Setting Targets of Makefile ################################
-DATA_FILE += $(CUR_DIR)//sample.txt
-DATA_FILE += $(CUR_DIR)//sample.txt.zst
+DATA_FILE += $(CUR_DIR)//data/sample.txt
+DATA_FILE += $(CUR_DIR)//data/sample.txt.zst
 
 .PHONY: all clean cleanall docs emconfig
 ifeq ($(HOST_ARCH), x86)
@@ -295,7 +295,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
@@ -323,7 +325,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) $(CUR_DIR)/sample.txt.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
+	-$(RMDIR) $(CUR_DIR)/data/sample.txt.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

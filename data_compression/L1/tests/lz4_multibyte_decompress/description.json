@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [], 
     "QoR_golden": {
-        "VV_LUT": "5370", 
-        "VV_FF": "4159", 
+        "VV_LUT": "4654", 
+        "VV_FF": "3978", 
         "VV_BRAM": "0", 
         "VV_URAM": "4", 
-        "VV_AchievedClockPeriod": "3.357"
+        "VV_AchievedClockPeriod": "3.218"
     }, 
     "project": "lz4_decompress_test", 
     "solution": "sol1", 

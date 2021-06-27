@@ -7,7 +7,14 @@
         "vck190", 
         "aws-vu9p-f1"
     ], 
-    "platform_blacklist": [],  
+    "platform_blacklist": [], 
+    "QoR_golden": {
+          "VV_LUT": "9379", 
+          "VV_FF": "8117",
+          "VV_BRAM": "0",
+          "VV_URAM": "16",
+          "VV_AchievedClockPeriod": "3.369"
+    },   
     "project": "snappy_decompress_test", 
     "solution": "sol1", 
     "clock": "3.3", 

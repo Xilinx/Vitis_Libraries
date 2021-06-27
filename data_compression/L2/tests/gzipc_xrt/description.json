@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx GZip Streaming Octacore Compression", 
+    "name": "Xilinx GZip Streaming 32KB Compression", 
     "description": [
-        "Xilinx Gzip Streaming Octa core Compression"
+        "Xilinx Gzip Streaming 32KB Compression"
     ], 
     "flow": "vitis", 
     "launch": [
@@ -55,7 +55,8 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../security/L1/include"
+                "LIB_DIR/../security/L1/include",
+                "LIB_DIR/L2/tests/src"
             ],
             "symbols": [
                 "GZIP_STREAM"

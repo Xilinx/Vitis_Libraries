@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx GZip Streaming Octacore Compression for Performance Measurement", 
+    "name": "Xilinx GZip Streaming Compression for Performance Measurement", 
     "description": [
-        "Xilinx Gzip Streaming Octa core Compression"
+        "Xilinx Gzip Streaming Compression for performance measurement"
     ], 
     "flow": "vitis", 
     "launch": [
@@ -56,11 +56,13 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/hls.cfg"
+            "PROJECT/hls.cfg",
+            "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../security/L1/include"
+                "LIB_DIR/../security/L1/include",
+                "LIB_DIR/L2/tests/src"
             ],
             "symbols": [
                 "GZIP_STREAM"

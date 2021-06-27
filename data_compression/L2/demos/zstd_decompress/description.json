@@ -15,7 +15,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/xilZstdDecompressStream.xclbin -d PROJECT/sample.txt.zst", 
+            "cmd_args": "-xbin BUILD/xilZstdDecompressStream.xclbin -d PROJECT/data/sample.txt.zst", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -27,8 +27,8 @@
         }
     ],
     "data": [
-        "PROJECT/sample.txt",
-        "PROJECT/sample.txt.zst"                                                 
+        "PROJECT/data/sample.txt",
+        "PROJECT/data/sample.txt.zst"                                                 
     ],   
     "host": {
         "host_exe": "xil_zstd", 
@@ -87,7 +87,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.*",
+            "data/sample.txt.*",
             "sample_run.*",
             "test.list"
     ],          

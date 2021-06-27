@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/sample.txt.snappy", 
+            "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/data/sample.txt.snappy", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -28,7 +28,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt.snappy" 
+        "PROJECT/data/sample.txt.snappy" 
     ],   
     "host": {
         "host_exe": "xil_snappy", 
@@ -74,7 +74,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.snappy.*",
+            "data/sample.txt.snappy.*",
             "sample_run.*",
             "test.list"
     ],        

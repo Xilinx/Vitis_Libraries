@@ -10,5 +10,5 @@ Results
 
 ==================== ===== ===== ==== ==== 
 Module               LUT   FF    BRAM URAM 
-snappy_compress_test 5889  3887  4    6 
+snappy_compress_test 2811  3181  8    6 
 ==================== ===== ===== ==== ==== 

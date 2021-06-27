@@ -64,7 +64,6 @@ class lz4OCLHost : public lz4Base {
                const std::string& binaryFileName,
                uint8_t device_id,
                uint32_t block_size_kb,
-               uint8_t mcr,
                bool lz4_stream,
                bool enable_profile = false);
 
@@ -98,7 +97,6 @@ class lz4OCLHost : public lz4Base {
     uint32_t m_deviceId;
     size_t m_inputSize;
     bool m_lz4Stream;
-    uint8_t m_mcr;
     enum State m_flow;
     cl::Program* m_program;
     cl::Context* m_context;
@@ -117,8 +115,9 @@ class lz4OCLHost : public lz4Base {
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in;
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_out;
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_buf_decompressSize;
-    std::vector<uint32_t, aligned_allocator<uint8_t> > h_blksize;
-    std::vector<uint32_t, aligned_allocator<uint8_t> > h_compressSize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_blksize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_compressSize;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_decSize;
 
     // Device buffers
     cl::Buffer* buffer_input;
@@ -126,6 +125,7 @@ class lz4OCLHost : public lz4Base {
     cl::Buffer* bufferOutputSize;
     cl::Buffer* buffer_compressed_size;
     cl::Buffer* buffer_block_size;
+    cl::Buffer* buffer_dec_size;
 
     // Decompression related
     std::vector<uint32_t> m_blkSize;

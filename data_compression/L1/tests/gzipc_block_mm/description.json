@@ -1,6 +1,6 @@
 {
-    "name": "Xilinx GZIP Octacore Compress Memory Mapped HLS Test", 
-    "description": "Test Design to validate Memory Mapped GZIP Octacore compression", 
+    "name": "Xilinx GZIP 32KB Compress Memory Mapped HLS Test", 
+    "description": "Test Design to validate Memory Mapped GZIP 32KB compression", 
     "flow": "hls", 
     "platform_whitelist": [
         "u200", 
@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [],
     "QoR_golden": {
-        "VV_LUT": "50232",
-        "VV_FF": "51443",
-        "VV_BRAM": "277",
-        "VV_URAM": "64",
-        "VV_AchievedClockPeriod": "3.653" 
+        "VV_LUT": "49345",
+        "VV_FF": "49974",
+        "VV_BRAM": "124",
+        "VV_URAM": "72",
+        "VV_AchievedClockPeriod": "3.408" 
     },
     "project": "gzip_compress_test", 
     "solution": "sol1", 

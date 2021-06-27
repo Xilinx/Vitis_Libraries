@@ -30,7 +30,7 @@ Requirements
 Software Platform
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis 2020.2 and later, and
+This library is designed to work with Vitis 2021.1 and later, and
 therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4
@@ -56,7 +56,7 @@ Setup the build environment using the Vitis and XRT scripts:
 
 ::
 
-       $ source <install path>/Vitis/2020.2/settings64.sh
+       $ source <install path>/Vitis/2021.1/settings64.sh
        $ source /opt/xilinx/xrt/setup.sh
        $ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 

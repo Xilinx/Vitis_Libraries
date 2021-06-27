@@ -329,7 +329,6 @@ class gzipOCLHost : public gzipBase {
                 const bool is_Seq = false,
                 uint8_t device_id = 0,
                 bool enable_profile = false,
-                uint16_t maxCr = MAX_CR_DEFAULT,
                 uint8_t decKerType = FULL,
                 uint8_t dflow = XILINX_GZIP,
                 bool freeRunKernel = false);

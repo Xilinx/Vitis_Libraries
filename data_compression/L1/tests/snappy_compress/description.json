@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [], 
     "QoR_golden": {
-        "VV_LUT": "2760", 
-        "VV_FF": "3065", 
+        "VV_LUT": "2811", 
+        "VV_FF": "3181", 
         "VV_BRAM": "8", 
         "VV_URAM": "6", 
-        "VV_AchievedClockPeriod": "2.968"
+        "VV_AchievedClockPeriod": "2.842"
     }, 
     "project": "snappy_compress_test", 
     "solution": "sol1", 

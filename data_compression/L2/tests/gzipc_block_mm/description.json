@@ -1,12 +1,12 @@
 {
-    "name": "Xilinx GZip Quadcore Compression", 
+    "name": "Xilinx GZip 32KB Compression", 
     "description": [
-        "Xilinx Gzip Quadcore  Compression with 32 KB block size"
+        "Xilinx Gzip Compression with 32 KB block size"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt", 
             "name": "generic launch for all flows"
         }
     ],
@@ -28,7 +28,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt" 
+        "PROJECT/data/sample.txt" 
     ],   
     "host": {
         "host_exe": "xil_gzip", 
@@ -61,9 +61,6 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/../security/L1/include"
-            ], 
-            "symbols": [
-                "NUM_CORES=4"
             ]
         }
     }, 
@@ -79,7 +76,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.*",
+            "data/sample.txt.*",
             "sample_run.*",
             "test.list"
     ],          

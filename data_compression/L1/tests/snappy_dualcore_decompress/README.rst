@@ -5,3 +5,10 @@ Xilinx Snappy Dualcore Decompress HLS Test
 
 **Top Function:** snappyDecompressEngineRun
 
+Results
+-------
+
+====================== ===== ===== ==== ==== 
+Module                 LUT   FF    BRAM URAM 
+snappy_decompress_test 9379  8117  0    16 
+====================== ===== ===== ==== ==== 

@@ -1,5 +1,6 @@
 {
-    "name": "Xilinx GZIP Decompression Low Latency", 
+    "name": "Xilinx GZIP Decompression Low Latency",
+    "gui": false, 
     "description": [
         "GZip Decompression Multiple Bytes 8"
     ], 

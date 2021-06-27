@@ -154,7 +154,7 @@ endif
 
 EXE_NAME := xil_lz4_streaming
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -xbin $(BUILD_DIR)/compress_decompress_streaming.xclbin -t $(CUR_DIR)/sample.txt
+HOST_ARGS := -xbin $(BUILD_DIR)/compress_decompress_streaming.xclbin -t $(CUR_DIR)/data/sample.txt
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -166,8 +166,11 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src
+
 xilLz4CompressStream_VPP_FLAGS += -DPARALLEL_BLOCK=8
 xilLz4DecompressStream_VPP_FLAGS += -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8
+
 
 # Kernel linker flags
 VPP_LDFLAGS_compress_decompress_streaming_temp := --config $(CUR_DIR)/connectivity.cfg
@@ -190,7 +193,7 @@ BINARY_CONTAINER_compress_decompress_streaming_OBJS += $(TEMP_DIR)/xilLz4Decompr
 BINARY_CONTAINER_compress_decompress_streaming_OBJS += $(TEMP_DIR)/xilDecompDatamover.xo
 
 # ######################### Setting Targets of Makefile ################################
-DATA_FILE += $(CUR_DIR)//sample.txt
+DATA_FILE += $(CUR_DIR)//data/sample.txt
 
 .PHONY: all clean cleanall docs emconfig
 ifeq ($(HOST_ARCH), x86)
@@ -288,7 +291,7 @@ PACKAGE_FILES += emconfig.json
 PACKAGE_FILES += $(DATA_FILE)
 SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
 SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+sd_card: host xclbin emconfig
 ifneq ($(HOST_ARCH), x86)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(EMBEDDED_PACKAGE_OUT)
@@ -299,7 +302,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
@@ -327,7 +332,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) $(CUR_DIR)/sample.txt.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
+	-$(RMDIR) $(CUR_DIR)/data/sample.txt.* $(CUR_DIR)/sample_run.* $(CUR_DIR)/test.list 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

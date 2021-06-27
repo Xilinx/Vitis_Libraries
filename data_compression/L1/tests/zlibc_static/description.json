@@ -1,6 +1,6 @@
 {
-    "name": "Xilinx ZLIB Octacore Static Compress Streaming AXI Test", 
-    "description": "Test Design to validate Streaming ZLIB Octacore compression", 
+    "name": "Xilinx ZLIB 32KB Static Compress Streaming AXI Test", 
+    "description": "Test Design to validate Streaming ZLIB 32KB static compression", 
     "flow": "hls", 
     "platform_whitelist": [
         "u200"
@@ -9,11 +9,11 @@
     "part_whitelist": [], 
     "part_blacklist": [],
     "QoR_golden": {
-        "VV_LUT": "35764",
-        "VV_FF": "35949",
-        "VV_BRAM": "88", 
+        "VV_LUT": "33174",
+        "VV_FF": "36772",
+        "VV_BRAM": "82", 
         "VV_URAM": "64", 
-        "VV_AchievedClockPeriod": "3.497"
+        "VV_AchievedClockPeriod": "3.279"
     },
     "project": "zlib_compress_test", 
     "solution": "sol1", 

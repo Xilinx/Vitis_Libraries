@@ -29,6 +29,9 @@
 #include "xcl2.hpp"
 #include "compressBase.hpp"
 
+#ifndef ENABLE_P2P
+#define ENABLE_P2P 0
+#endif
 /**
  *
  *  Maximum host buffer used to operate per kernel invocation

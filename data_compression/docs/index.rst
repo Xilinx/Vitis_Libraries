@@ -37,12 +37,12 @@ compression acceleration are also provided with the library for easy
 on-boarding.
 
 
-
 .. toctree::
    :maxdepth: 1
    :caption: Library Overview
    
    source/overview.rst
+   source/release.rst
 
 .. toctree::
 	:maxdepth: 2
@@ -57,4 +57,4 @@ on-boarding.
 	:caption: Benchmark Results
 	:maxdepth: 1
 	
-	source/results.rst
+	benchmark.rst

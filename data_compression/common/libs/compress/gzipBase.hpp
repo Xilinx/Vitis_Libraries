@@ -50,9 +50,6 @@ const auto BLOCK_SIZE_IN_KB = 64;
  */
 const auto MAX_NUMBER_BLOCKS = (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024));
 
-// Max CR
-constexpr auto MAX_CR_DEFAULT = 20;
-
 // Enums for
 enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
 enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
@@ -86,7 +83,6 @@ class gzipBase : public compressBase {
     int m_windowbits = 15;
     std::chrono::system_clock::time_point total_start;
     std::chrono::system_clock::time_point total_end;
-    uint16_t m_mcr = MAX_CR_DEFAULT;
 
    public:
     enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };

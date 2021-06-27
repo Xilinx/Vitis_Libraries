@@ -275,7 +275,6 @@ gzipOCLHost::gzipOCLHost(enum State flow,
                          const bool is_seq,
                          uint8_t device_id,
                          bool enable_profile,
-                         uint16_t maxcr,
                          uint8_t deckerneltype,
                          uint8_t dflow,
                          bool freeRunKernel) {
@@ -283,11 +282,9 @@ gzipOCLHost::gzipOCLHost(enum State flow,
     m_cdflow = flow;
     m_enableProfile = enable_profile;
     m_deviceid = device_id;
-    m_max_cr = 20;
     m_zlibFlow = (enum design_flow)dflow;
     m_kidx = deckerneltype;
     m_pending = 0;
-    m_mcr = maxcr;
     m_isSeq = is_seq;
     m_freeRunKernel = freeRunKernel;
     m_inFileName = uncompfilename;
@@ -615,7 +612,7 @@ uint64_t gzipOCLHost::decompressEngineSeq(
     uint32_t isLast = 1;
     const uint32_t lim_4gb = (uint32_t)(((uint64_t)1024 * 1024 * 1024) - 2); // 4GB limit on output size
     uint32_t outBufferSize = 0;
-
+    h_dcompressStatus.data()[0] = 0;
     if (max_outbuf_size > lim_4gb) {
         outBufferSize = lim_4gb;
     } else {
@@ -636,7 +633,7 @@ uint64_t gzipOCLHost::decompressEngineSeq(
     cl::Buffer* buffer_size =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), dbuf_outSize.data());
     cl::Buffer* buffer_status =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t), h_dcompressStatus.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t), h_dcompressStatus.data());
 
     uint8_t kidx = m_kidx;
     std::string cu_id = std::to_string((cu + 1));
@@ -659,13 +656,18 @@ uint64_t gzipOCLHost::decompressEngineSeq(
     data_reader_kernel.setArg(2, *(buffer_status));
     data_reader_kernel.setArg(3, outBufferSize);
 
+    uint32_t decmpSizeIdx = 0;
+    h_dcompressStatus.data()[0] = 0;
+
     // Copy input data
     std::memcpy(dbuf_in.data(), in, inBufferSize); // must be equal to input_size
     OCL_CHECK(err, err = m_q_wr[0]->enqueueMigrateMemObjects({*(buffer_dec_input)}, 0, NULL, NULL));
     m_q_wr[0]->finish();
 
-    // start parallel reader kernel enqueue thread
-    uint32_t decmpSizeIdx = 0;
+    OCL_CHECK(err, err = m_q_rd[0]->enqueueMigrateMemObjects({*(buffer_status)}, 0, NULL, NULL));
+    m_q_rd[0]->finish();
+
+// start parallel reader kernel enqueue thread
 #ifdef FREE_RUNNING_KERNEL
     // enqueue data movers
     m_q_rd[0]->enqueueTask(data_reader_kernel);
@@ -732,6 +734,7 @@ uint64_t gzipOCLHost::decompressEngineSeq(
     }
     float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
     // free the cl buffers
     delete buffer_dec_input;
     delete buffer_dec_zlib_output;
@@ -1176,11 +1179,10 @@ size_t gzipOCLHost::compressEngineSeq(
     std::string compress_kname = compress_kernel_names[2];
 #endif
     OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
-    auto c_inputSize = HOST_BUFFER_SIZE;
+    auto c_inputSize = input_size;
     auto num_itr = 1;
 
     if (this->is_freeRunKernel()) {
-        c_inputSize = input_size;
         if (c_inputSize < 0x40000000) {
             num_itr = xcl::is_emulation() ? 1 : (0x40000000 / input_size);
         }
@@ -1217,92 +1219,89 @@ size_t gzipOCLHost::compressEngineSeq(
     auto enbytes = 0;
     auto outIdx = 0;
     // Process the data serially
-    for (uint32_t inIdx = 0; inIdx < input_size; inIdx += c_inputSize) {
-        uint32_t buf_size = c_inputSize;
-        if (inIdx + buf_size > input_size) buf_size = input_size - inIdx;
+    uint32_t buf_size = c_inputSize;
 
-        // Copy input data
-        std::memcpy(h_input_buffer.data(), &in[inIdx], buf_size);
+    // Copy input data
+    std::memcpy(h_input_buffer.data(), in, buf_size);
 
-        // Set kernel arguments
-        int narg = 0;
+    // Set kernel arguments
+    int narg = 0;
 
-        if (this->is_freeRunKernel()) {
-            datamover_kernel->setArg(narg++, *buffer_input);
-            datamover_kernel->setArg(narg++, *buffer_output);
-            datamover_kernel->setArg(narg++, buf_size);
+    if (this->is_freeRunKernel()) {
+        datamover_kernel->setArg(narg++, *buffer_input);
+        datamover_kernel->setArg(narg++, *buffer_output);
+        datamover_kernel->setArg(narg++, buf_size);
 #ifdef PERF_DM
-            datamover_kernel->setArg(narg++, num_itr);
+        datamover_kernel->setArg(narg++, num_itr);
 #endif
-            datamover_kernel->setArg(narg++, *buffer_cSize);
-        } else {
-            m_compressFullKernel->setArg(narg++, *(buffer_input));
-            m_compressFullKernel->setArg(narg++, *(buffer_output));
-            m_compressFullKernel->setArg(narg++, *(buffer_cSize));
-            m_compressFullKernel->setArg(narg++, *(buffer_checksum_data));
-            m_compressFullKernel->setArg(narg++, buf_size);
-            m_compressFullKernel->setArg(narg++, checksum_type);
-        }
+        datamover_kernel->setArg(narg++, *buffer_cSize);
+    } else {
+        m_compressFullKernel->setArg(narg++, *(buffer_input));
+        m_compressFullKernel->setArg(narg++, *(buffer_output));
+        m_compressFullKernel->setArg(narg++, *(buffer_cSize));
+        m_compressFullKernel->setArg(narg++, *(buffer_checksum_data));
+        m_compressFullKernel->setArg(narg++, buf_size);
+        m_compressFullKernel->setArg(narg++, checksum_type);
+    }
 
-        if (this->is_freeRunKernel()) {
-            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_input), *(buffer_output), *(buffer_cSize)},
-                                                                   0 /* 0 means from host*/));
-        } else {
-            // Transfer the data to device
-            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_input), *(buffer_checksum_data)}, 0,
-                                                                   nullptr, nullptr));
-        }
+    if (this->is_freeRunKernel()) {
+        OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_input), *(buffer_output), *(buffer_cSize)},
+                                                               0 /* 0 means from host*/));
+    } else {
+        // Transfer the data to device
+        OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_input), *(buffer_checksum_data)}, 0, nullptr,
+                                                               nullptr));
+    }
 
-        m_def_q->finish();
-        auto kernel_start = std::chrono::high_resolution_clock::now();
+    m_def_q->finish();
+    auto kernel_start = std::chrono::high_resolution_clock::now();
 
 #ifndef PERF_DM
-        for (auto z = 0; z < num_itr; z++) {
+    for (auto z = 0; z < num_itr; z++) {
 #endif
-            if (this->is_freeRunKernel()) {
-                m_def_q->enqueueTask(*datamover_kernel);
+        if (this->is_freeRunKernel()) {
+            m_def_q->enqueueTask(*datamover_kernel);
 #ifdef DISABLE_FREE_RUNNING_KERNEL
-                m_def_q->enqueueTask(*m_compressFullKernel);
+            m_def_q->enqueueTask(*m_compressFullKernel);
 #endif
-            } else {
-                OCL_CHECK(err, err = m_def_q->enqueueTask(*m_compressFullKernel));
-            }
-#ifndef PERF_DM
-        }
-#endif
-
-        m_def_q->finish();
-
-        auto kernel_stop = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration<double, std::nano>(kernel_stop - kernel_start);
-        kernel_time_ns_1 += duration;
-
-        // Transfer the data from device to host
-        OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_cSize)}, CL_MIGRATE_MEM_OBJECT_HOST));
-        m_def_q->finish();
-        BOOST_ASSERT_MSG(h_compressSize[0] < unsigned(output_size),
-                         "\x1B[35m xGzip Error: Output Buffer Size is not sufficient \033[0m ");
-
-        if (this->is_freeRunKernel()) {
-            // Transfer the data from device to host
-            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_output)}, CL_MIGRATE_MEM_OBJECT_HOST));
         } else {
-            // Transfer the data from device to host
-            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_output), *(buffer_checksum_data)},
-                                                                   CL_MIGRATE_MEM_OBJECT_HOST));
+            OCL_CHECK(err, err = m_def_q->enqueueTask(*m_compressFullKernel));
         }
-        m_def_q->finish();
+#ifndef PERF_DM
+    }
+#endif
 
-        auto compSize = h_compressSize[0];
-        std::memcpy(out + outIdx, &h_output_buffer[0], compSize);
-        enbytes += compSize;
-        outIdx += compSize;
+    m_def_q->finish();
 
-        if (!is_freeRunKernel()) {
-            // This handling required only for zlib
-            // This is for next iteration
-            if (checksum_type) h_buf_checksum_data.data()[0] = ~h_buf_checksum_data.data()[0];
-        }
+    auto kernel_stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::nano>(kernel_stop - kernel_start);
+    kernel_time_ns_1 += duration;
+
+    // Transfer the data from device to host
+    OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_cSize)}, CL_MIGRATE_MEM_OBJECT_HOST));
+    m_def_q->finish();
+    BOOST_ASSERT_MSG(h_compressSize[0] < unsigned(output_size),
+                     "\x1B[35m xGzip Error: Output Buffer Size is not sufficient \033[0m ");
+
+    if (this->is_freeRunKernel()) {
+        // Transfer the data from device to host
+        OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_output)}, CL_MIGRATE_MEM_OBJECT_HOST));
+    } else {
+        // Transfer the data from device to host
+        OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer_output), *(buffer_checksum_data)},
+                                                               CL_MIGRATE_MEM_OBJECT_HOST));
+    }
+    m_def_q->finish();
+
+    auto compSize = h_compressSize[0];
+    std::memcpy(out + outIdx, &h_output_buffer[0], compSize);
+    enbytes += compSize;
+    outIdx += compSize;
+
+    if (!is_freeRunKernel()) {
+        // This handling required only for zlib
+        // This is for next iteration
+        if (checksum_type) h_buf_checksum_data.data()[0] = ~h_buf_checksum_data.data()[0];
     }
     m_def_q->finish();
     float throughput_in_mbps_1 = (float)input_size * 1000 * num_itr / kernel_time_ns_1.count();

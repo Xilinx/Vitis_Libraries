@@ -19,11 +19,11 @@
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
     },
     "QoR_golden": {
-        "VV_LUT": "6818",
-        "VV_FF": "5450",
+        "VV_LUT": "5453",
+        "VV_FF": "4883",
         "VV_BRAM": "0",
         "VV_URAM": "4",
-        "VV_AchievedClockPeriod": "3.255"
+        "VV_AchievedClockPeriod": "3.263"
     }, 
     "testbench": {
         "source": [

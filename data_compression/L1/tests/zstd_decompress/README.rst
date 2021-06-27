@@ -10,5 +10,5 @@ Results
 
 ==================== ===== ===== ==== ==== 
 Module               LUT   FF    BRAM URAM 
-zstd_decompress      21211 15892 103  4 
+zstd_decompress      28073 20766 36   5 
 ==================== ===== ===== ==== ==== 

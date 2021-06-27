@@ -24,16 +24,14 @@ lz4OCLHost::lz4OCLHost(enum State flow,
                        const std::string& binaryFileName,
                        uint8_t device_id,
                        uint32_t block_size_kb,
-                       uint8_t mcr,
                        bool lz4_stream,
                        bool enable_profile)
     : m_xclbin(binaryFileName),
       m_enableProfile(enable_profile),
       m_deviceId(device_id),
       m_lz4Stream(lz4_stream),
-      m_mcr(mcr),
       m_flow(flow) {
-    (m_lz4Stream) ? m_addContentSize = false : m_addContentSize = true;
+    (m_lz4Stream) ? m_addContentSize = false : m_addContentSize = false;
 
     m_BlockSizeInKb = block_size_kb;
 
@@ -118,7 +116,7 @@ uint64_t lz4OCLHost::xilCompress(uint8_t* in, uint8_t* out, size_t input_size) {
     }
     // lz4 frame formatting
     out = out + enbytes;
-    writeFooter(out);
+    writeFooter(in, out);
     enbytes += m_frameByteCount;
     return enbytes;
 }
@@ -130,18 +128,6 @@ uint64_t lz4OCLHost::xilDecompress(uint8_t* in, uint8_t* out, size_t input_size)
     } else {
         in += readHeader(in);
         m_InputSize = input_size - 15;
-    }
-    if (m_ActualSize > m_mcr * input_size) {
-        std::cout << "\n" << std::endl;
-        std::cout << "\x1B[35mExceeded output buffer size during "
-                     "decompression \033[0m \n"
-                  << std::endl;
-        std::cout << "\x1B[35mUse -mcr option to increase the maximum "
-                     "compression ratio (Default: 10) \033[0m \n"
-                  << std::endl;
-        std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
-        delete this;
-        exit(EXIT_FAILURE);
     }
 
     uint64_t debytes;
@@ -426,20 +412,18 @@ uint64_t lz4OCLHost::compressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t i
 
 // Core Decompress Engine API including kernel header processing
 uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input_size) {
-    size_t original_size = m_ActualSize;
     size_t host_buffer_size = m_HostBufferSize;
     uint32_t max_num_blks = (host_buffer_size) / (m_BlockSizeInKb * 1024);
     h_buf_in.resize(host_buffer_size);
     h_buf_out.resize(host_buffer_size);
-    h_blksize.resize(max_num_blks);
+    h_decSize.resize(max_num_blks);
     h_compressSize.resize(max_num_blks);
 
     m_compressSize.reserve(max_num_blks);
-    m_blkSize.reserve(max_num_blks);
 
+    // Maximum allowed outbuffer size, if it exceeds then exit
+    uint32_t c_max_outbuf = input_size * m_maxCR;
     uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
-    // Total number of blocks exists for this file
-    uint32_t total_block_cnt = (original_size - 1) / block_size_in_bytes + 1;
     uint32_t block_cntr = 0;
     uint32_t done_block_cntr = 0;
 
@@ -453,14 +437,14 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
     // To handle uncompressed blocks
     bool compressBlk = false;
 
-    for (uint64_t outIdx = 0; outIdx < original_size; outIdx += host_buffer_size) {
+    for (; inIdx < input_size;) {
         compute_cu = 0;
         uint64_t chunk_size = host_buffer_size;
 
         // Figure out the chunk size for each compute unit
         hostChunk_cu = 0;
-        if (outIdx + (chunk_size) > original_size) {
-            hostChunk_cu = original_size - (outIdx);
+        if (inIdx + (chunk_size) > input_size) {
+            hostChunk_cu = input_size - (inIdx);
             compute_cu++;
         } else {
             hostChunk_cu = chunk_size;
@@ -478,14 +462,11 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
         buf_size = 0;
         bufblocks = 0;
         total_size = 0;
-        for (uint64_t cIdx = 0; cIdx < hostChunk_cu; cIdx += block_size_in_bytes, nblocks++, total_size += block_size) {
-            if (block_cntr == (total_block_cnt - 1)) {
-                block_size = original_size - done_block_cntr * block_size_in_bytes;
-            } else {
-                block_size = block_size_in_bytes;
-            }
+        for (uint64_t cIdx = 0; cIdx < hostChunk_cu; nblocks++, total_size += block_size) {
+            block_size = block_size_in_bytes;
             std::memcpy(&compressed_size, &in[inIdx], 4);
             inIdx += 4;
+            cIdx += 4;
 
             uint32_t tmp = compressed_size;
             tmp >>= 24;
@@ -508,28 +489,17 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
                 }
             }
             // Fill original block size and compressed size
-            m_blkSize.data()[nblocks] = block_size;
             m_compressSize.data()[nblocks] = compressed_size;
-            // If compressed size is less than original block size
-            if (compressed_size < block_size) {
-                h_compressSize.data()[bufblocks] = compressed_size;
-                h_blksize.data()[bufblocks] = block_size;
-                std::memcpy(&(h_buf_in.data()[buf_size]), &in[inIdx], compressed_size);
-                inIdx += compressed_size;
-                buf_size += block_size;
-                bufblocks++;
-                compressBlk = true;
-            } else if (compressed_size == block_size) {
-                // No compression block
-                std::memcpy(&(out[outIdx + cIdx]), &in[inIdx], block_size);
-                inIdx += block_size;
-            } else {
-                assert(0);
-            }
+            h_compressSize.data()[bufblocks] = compressed_size;
+            std::memcpy(&(h_buf_in.data()[buf_size]), &in[inIdx], compressed_size);
+            inIdx += compressed_size;
+            cIdx += compressed_size;
+            buf_size += block_size;
+            bufblocks++;
+            compressBlk = true;
             block_cntr++;
             done_block_cntr++;
         }
-        assert(total_size <= original_size);
 
         if (nblocks == 1 && compressed_size == block_size) break;
         if (compressBlk) {
@@ -538,10 +508,10 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, buf_size, h_buf_in.data());
 
             buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size, h_buf_out.data());
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size * 2, h_buf_out.data());
 
-            buffer_block_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                               sizeof(uint32_t) * bufblocks, h_blksize.data());
+            buffer_dec_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                             sizeof(uint32_t) * bufblocks, h_decSize.data());
 
             buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                                                     sizeof(uint32_t) * bufblocks, h_compressSize.data());
@@ -550,14 +520,13 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
             uint32_t narg = 0;
             decompress_kernel_lz4->setArg(narg++, *(buffer_input));
             decompress_kernel_lz4->setArg(narg++, *(buffer_output));
-            decompress_kernel_lz4->setArg(narg++, *(buffer_block_size));
+            decompress_kernel_lz4->setArg(narg++, *(buffer_dec_size));
             decompress_kernel_lz4->setArg(narg++, *(buffer_compressed_size));
             decompress_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
             decompress_kernel_lz4->setArg(narg++, bufblocks);
 
             std::vector<cl::Memory> inBufVec;
             inBufVec.push_back(*(buffer_input));
-            inBufVec.push_back(*(buffer_block_size));
             inBufVec.push_back(*(buffer_compressed_size));
             // Migrate memory - Map host to device buffers
             m_q->enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/);
@@ -579,6 +548,7 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
             }
 
             std::vector<cl::Memory> outBufVec;
+            outBufVec.push_back(*(buffer_dec_size));
             outBufVec.push_back(*(buffer_output));
             // Migrate memory - Map device to host buffers
             m_q->enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
@@ -586,23 +556,28 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
         }
         uint32_t bufIdx = 0;
         for (uint32_t bIdx = 0; bIdx < nblocks; bIdx++) {
-            uint32_t block_size = m_blkSize.data()[bIdx];
-            uint32_t compressed_size = m_compressSize.data()[bIdx];
-            if (compressed_size < block_size) {
-                std::memcpy(&out[output_idx], &h_buf_out.data()[bufIdx], block_size);
-                output_idx += block_size;
-                bufIdx += block_size;
-                total_decomression_size += block_size;
-            } else if (compressed_size == block_size) {
-                output_idx += block_size;
+            uint32_t block_size = h_decSize.data()[bIdx];
+            if ((output_idx + block_size) > c_max_outbuf) {
+                std::cout << "\n" << std::endl;
+                std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                          << std::endl;
+                std::cout
+                    << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
+                    << std::endl;
+                std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
+                exit(1);
             }
+            std::memcpy(&out[output_idx], &h_buf_out.data()[bufIdx], block_size);
+            output_idx += block_size;
+            bufIdx += block_size;
+            total_decomression_size += block_size;
         }
 
         if (compressBlk) {
             // Delete device buffers
             delete (buffer_input);
             delete (buffer_output);
-            delete (buffer_block_size);
+            delete (buffer_dec_size);
             delete (buffer_compressed_size);
         }
     } // Top - Main loop ends here
@@ -610,14 +585,14 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
         float throughput_in_mbps_1 = (float)input_size * 1000 / kernel_time_ns_1.count();
         std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     }
-    return original_size;
+    return total_decomression_size;
 
 } // End of decompress
 
 uint64_t lz4OCLHost::decompressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t input_size) {
     std::vector<uint32_t, aligned_allocator<uint32_t> > decompressSize;
-    uint32_t outputSize = (input_size * 6) + 16;
-    cl::Buffer* bufferOutputSize;
+    uint32_t outputSize = (input_size * m_maxCR) + 16;
+    // cl::Buffer* bufferOutputSize;
     // Index calculation
     h_buf_in.resize(input_size);
     h_buf_out.resize(outputSize);
@@ -674,9 +649,9 @@ uint64_t lz4OCLHost::decompressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t
         std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     }
 
-    delete buffer_input;
+    delete (buffer_input);
     buffer_input = nullptr;
-    delete buffer_output;
+    delete (buffer_output);
     buffer_output = nullptr;
     h_buf_in.clear();
     h_buf_out.clear();

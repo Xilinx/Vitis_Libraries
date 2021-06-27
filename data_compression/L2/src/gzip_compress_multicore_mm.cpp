@@ -39,18 +39,16 @@ void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
                       uint32_t* checksumData,
                       uint32_t input_size,
                       bool checksumType) {
-#pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem max_read_burst_length = 128
-#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem max_write_burst_length = 128
+    constexpr int c_gmem_dwidth = GMEM_DWIDTH;
+#pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem max_widen_bitwidth = \
+    c_gmem_dwidth max_read_burst_length = 64
+#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem max_write_burst_length = 64
 #pragma HLS INTERFACE m_axi port = compressd_size offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = checksumData offset = slave bundle = gmem
-#pragma HLS INTERFACE s_axilite port = in bundle = control
-#pragma HLS INTERFACE s_axilite port = out bundle = control
-#pragma HLS INTERFACE s_axilite port = compressd_size bundle = control
-#pragma HLS INTERFACE s_axilite port = checksumData bundle = control
-#pragma HLS INTERFACE s_axilite port = input_size bundle = control
-#pragma HLS INTERFACE s_axilite port = checksumType bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
+#pragma HLS INTERFACE s_axilite port = input_size
+#pragma HLS INTERFACE s_axilite port = checksumType
 #pragma HLS INTERFACE ap_ctrl_chain port = return
+#pragma HLS dataflow
 
     hls::stream<ap_uint<GMEM_DWIDTH> > mm2sStream;
     hls::stream<uint32_t> mm2sSizeStream;
@@ -58,7 +56,6 @@ void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
     hls::stream<ap_uint<2> > checksumTypeStream;
 
     hls::stream<ap_uint<32> > checksumOutStream;
-    hls::stream<bool> checksumOutEos;
     hls::stream<ap_uint<GMEM_DWIDTH> > outStream;
     hls::stream<bool> outEos;
     hls::stream<uint32_t> outSizeStream;
@@ -70,7 +67,6 @@ void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
 #pragma HLS STREAM variable = outStream depth = 4
 #pragma HLS STREAM variable = outEos depth = 4
 #pragma HLS STREAM variable = checksumOutStream depth = 4
-#pragma HLS STREAM variable = checksumOutEos depth = 4
 #pragma HLS STREAM variable = outSizeStream depth = 4
 
 #pragma HLS BIND_STORAGE variable = mm2sStream type = FIFO impl = SRL
@@ -79,15 +75,14 @@ void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
 #pragma HLS BIND_STORAGE variable = outEos type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = outSizeStream type = FIFO impl = SRL
 
-#pragma HLS dataflow
     xf::compression::details::mm2Stream<GMEM_DWIDTH, GMEM_BURST_SIZE>(
         in, mm2sStream, checksumInitStream, checksumData, input_size, mm2sSizeStream, checksumType, checksumTypeStream);
 
-    xf::compression::gzipMulticoreCompression<NUM_CORES, URAM_BUFFER>(
+    xf::compression::gzipMulticoreCompression<BLOCKSIZE_IN_KB, NUM_CORES>(
         mm2sStream, mm2sSizeStream, checksumInitStream, outStream, outEos, outSizeStream, checksumOutStream,
-        checksumOutEos, checksumTypeStream);
+        checksumTypeStream);
 
     xf::compression::details::stream2MM<GMEM_DWIDTH, GMEM_BURST_SIZE, uint32_t>(
-        out, checksumData, checksumOutStream, checksumOutEos, outStream, outEos, outSizeStream, compressd_size);
+        out, checksumData, checksumOutStream, outStream, outEos, outSizeStream, compressd_size);
 }
 }

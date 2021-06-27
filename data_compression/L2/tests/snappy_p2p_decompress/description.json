@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.snappy", 
+            "cmd_args": "-xbin BUILD/decompress_streaming.xclbin -d PROJECT/data/sample.txt.snappy", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -30,7 +30,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt.snappy" 
+        "PROJECT/data/sample.txt.snappy" 
     ],   
     "config_make": "./config.mk", 
     "platform_properties": {
@@ -87,10 +87,12 @@
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/libs/compress/",
-                "LIB_DIR/common/thirdParty/xxhash"
+                "LIB_DIR/common/thirdParty/xxhash",
+                "LIB_DIR/L2/tests/src"
             ],
             "symbols": [
-                  "SNAPPY_STREAM"
+                  "SNAPPY_STREAM",
+                  "ENABLE_P2P=0"
             ]    
         }
     }, 
@@ -100,6 +102,9 @@
                 "SNAPPY_STREAM",
                 "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"
+            ],
+            "includepaths" : [
+                "L2/tests/src/"
             ]
         }
     }, 
@@ -120,6 +125,7 @@
         }
     ], 
     "output_files": [
+           "data/*.orig",
            "*.orig"
     ],     
     "testinfo": {

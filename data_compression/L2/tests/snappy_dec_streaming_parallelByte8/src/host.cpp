@@ -27,8 +27,8 @@ int main(int argc, char* argv[]) {
     snappyApp d(argc, argv, lflow, enable_profile);
     // Design class object creating and constructor invocation
     std::unique_ptr<snappyOCLHost> snappy(
-        new snappyOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), d.getMCR(), enable_profile));
+        new snappyOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), enable_profile));
     // Run API to launch the compress or decompress engine
-    d.run(snappy.get());
+    d.run(snappy.get(), d.getMCR());
     return 0;
 }

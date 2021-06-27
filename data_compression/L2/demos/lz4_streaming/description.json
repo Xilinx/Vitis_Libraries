@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/compress_decompress_streaming.xclbin -t PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress_decompress_streaming.xclbin -t PROJECT/data/sample.txt", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -28,7 +28,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt"                                                                                                                                                        
+        "PROJECT/data/sample.txt"                                                                                
     ],   
     "host": {
         "host_exe": "xil_lz4_streaming", 
@@ -50,7 +50,14 @@
                 "LIB_DIR/common/libs/compress/"
             ] 
         }
-    }, 
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/src"
+            ]   
+        }
+    },
     "containers": [
         {
             "name": "compress_decompress_streaming", 
@@ -78,7 +85,7 @@
         }
     ], 
     "output_files": [
-            "sample.txt.*",
+            "data/sample.txt.*",
             "sample_run.*",
             "test.list"
     ], 

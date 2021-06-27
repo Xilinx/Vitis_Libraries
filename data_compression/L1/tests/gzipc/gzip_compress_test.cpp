@@ -29,7 +29,6 @@
 #include "zlib_compress.hpp"
 
 #define GMEM_DWIDTH 64
-#define NUM_BLOCKS 8
 typedef ap_axiu<GMEM_DWIDTH, 0, 0, 0> in_dT;
 typedef ap_axiu<GMEM_DWIDTH, 0, 0, 0> out_dT;
 typedef ap_axiu<32, 0, 0, 0> size_dT;
@@ -42,7 +41,7 @@ void gzipcMulticoreStreaming(hls::stream<in_dT>& inStream, hls::stream<out_dT>& 
 #pragma HLS INTERFACE ap_ctrl_none port = return
 
 #pragma HLS DATAFLOW
-    xf::compression::gzipMulticoreCompressAxiStream<NUM_BLOCKS>(inStream, outStream);
+    xf::compression::gzipMulticoreCompressAxiStream(inStream, outStream);
 }
 
 int main(int argc, char* argv[]) {

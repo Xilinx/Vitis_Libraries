@@ -25,8 +25,8 @@ compression and decompression.
 
 .. code-block:: bash
 
-   Tested Tool: 2020.2 
-   Tested XRT: 2020.2
+   Tested Tool: 2021.1 
+   Tested XRT: 2021.1
    Tested XSA: xilinx_u200_xdma_201830_2
 
 

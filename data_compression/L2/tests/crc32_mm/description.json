@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/crc32.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-cx BUILD/crc32.xclbin -c PROJECT/data/sample.txt", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -21,7 +21,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt" 
+        "PROJECT/data/sample.txt" 
     ],   
     "host": {
         "host_exe": "xil_crc32", 

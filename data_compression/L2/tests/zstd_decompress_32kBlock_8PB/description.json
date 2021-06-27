@@ -14,11 +14,11 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt.zst" 
+        "PROJECT/data/sample.txt.zst" 
     ],   
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/xilZstdDecompressStream.xclbin -d PROJECT/sample.txt.zst", 
+            "cmd_args": "-xbin BUILD/xilZstdDecompressStream.xclbin -d PROJECT/data/sample.txt.zst", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -87,7 +87,7 @@
         }
     ], 
     "output_files": [
-           "sample.txt.zst.*"
+           "data/sample.txt.zst.*"
     ], 
     "testinfo": {
         "disable": false, 

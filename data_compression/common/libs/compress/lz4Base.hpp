@@ -84,7 +84,7 @@ class lz4Base : public compressBase {
          * @param compress out stream
          */
 
-    void writeFooter(uint8_t* out);
+    void writeFooter(uint8_t* in, uint8_t* out);
 
     /**
          * @brief Header Reader

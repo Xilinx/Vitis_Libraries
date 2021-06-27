@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/checksum.xclbin -c PROJECT/sample.txt -t 0", 
+            "cmd_args": "-cx BUILD/checksum.xclbin -c PROJECT/data/sample.txt -t 0", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -21,7 +21,7 @@
         "aws-vu9p-f1"
     ],
      "data": [
-        "PROJECT/sample.txt" 
+        "PROJECT/data/sample.txt" 
     ],   
     "host": {
         "host_exe": "xil_checksum", 

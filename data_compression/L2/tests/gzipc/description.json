@@ -1,12 +1,12 @@
 {
-    "name": "Xilinx GZip Streaming Octacore Compression", 
+    "name": "Xilinx GZip Streaming 32KB Compression", 
     "description": [
-        "Xilinx Gzip Streaming Octa core Compression"
+        "Xilinx Gzip Streaming 32KB Compression"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt", 
             "name": "generic launch for all flows"
         }
     ],
@@ -29,7 +29,7 @@
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/sample.txt" 
+        "PROJECT/data/sample.txt" 
     ],   
     "host": {
         "host_exe": "xil_gzip", 
@@ -59,11 +59,13 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/hls.cfg"
+            "PROJECT/hls.cfg",
+            "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../security/L1/include"
+                "LIB_DIR/../security/L1/include",
+                "LIB_DIR/L2/tests/src"
             ], 
             "symbols": [
                 "GZIP_STREAM"
@@ -90,7 +92,7 @@
         }
     ],
     "output_files": [
-            "sample.txt.*",
+            "data/sample.txt.*",
             "sample_run.*",
             "test.list"
     ],          

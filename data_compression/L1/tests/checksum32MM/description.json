@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [], 
     "QoR_golden": {
-        "VV_LUT": "3842", 
-        "VV_FF": "6389", 
+        "VV_LUT": "3593", 
+        "VV_FF": "5658", 
         "VV_BRAM": "24", 
         "VV_URAM": "0", 
-        "VV_AchievedClockPeriod": "2.927"
+        "VV_AchievedClockPeriod": "3.060"
     }, 
     "project": "checksum32MM", 
     "solution": "sol1", 

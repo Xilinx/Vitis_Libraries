@@ -26,7 +26,6 @@ gzipXrtHost::gzipXrtHost(enum State flow,
                          const bool is_seq,
                          uint8_t device_id,
                          bool enable_profile,
-                         uint16_t maxcr,
                          uint8_t decKernelType,
                          uint8_t dflow,
                          bool freeRunKernel) {
@@ -40,7 +39,6 @@ gzipXrtHost::gzipXrtHost(enum State flow,
     m_uuid = m_device.load_xclbin(xclbin);
     m_isSeq = is_seq;
     m_freeRunKernel = freeRunKernel;
-    m_mcr = maxcr;
     m_inFileName = uncompFileName;
     if (m_zlibFlow) {
         m_checksum = 1;

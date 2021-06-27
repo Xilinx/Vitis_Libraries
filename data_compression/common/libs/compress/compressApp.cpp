@@ -113,7 +113,7 @@ compressApp::compressApp(int argc, char** argv, bool is_seq, bool enable_profile
     m_parser.addSwitch("--compress_list", "-cfl", "Compress List of Input Files", "");
     m_parser.addSwitch("--decompress_list", "-dfl", "Decompress List of compressed Input Files", "");
     m_parser.addSwitch("--test_list", "-l", "Xilinx Compress & Decompress on Input Files", "");
-    m_parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
+    m_parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
     m_parser.addSwitch("--xclbin", "-xbin", "XCLBIN", "");
     m_parser.addSwitch("--device_id", "-id", "Device ID", "0");
 }
@@ -166,7 +166,8 @@ void compressApp::printTestSummaryFooter(const std::string& testFile) {
 }
 
 // compressApp run API: entry point of the program
-void compressApp::run(compressBase* b) {
+void compressApp::run(compressBase* b, uint16_t maxCR) {
+    b->m_maxCR = maxCR;
     if (!m_uncompressed_file.empty()) {
         runCompress(b, m_uncompressed_file);
     }

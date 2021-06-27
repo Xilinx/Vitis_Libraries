@@ -30,6 +30,8 @@
     if (buffer) delete buffer; \
     buffer = nullptr;
 
+constexpr auto MAX_CR_DEFAULT = 20;
+
 class compressBase {
    public:
     enum State { COMPRESS, DECOMPRESS, BOTH };
@@ -42,6 +44,8 @@ class compressBase {
     virtual uint64_t xilDecompress(uint8_t* in, uint8_t* out, size_t input_size) = 0;
 
     virtual ~compressBase(){};
+
+    uint16_t m_maxCR;
 };
 
 #endif // _XFCOMPRESSION_COMPRESS_BASE_HPP_
