@@ -15,8 +15,10 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_bilateral_filter_config.h"
 #include "xcl2.hpp"
+#include "xf_bilateral_filter_config.h"
+
+#include <time.h>
 
 int main(int argc, char** argv) {
     cv::Mat in_img, out_img, ocv_ref, in_img_gau;
@@ -58,8 +60,24 @@ int main(int argc, char** argv) {
 
     std::cout << " sigma_color: " << sigma_color << " sigma_space: " << sigma_space << std::endl;
 
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
     // OpenCV bilateral filter function
     cv::bilateralFilter(in_img, ocv_ref, FILTER_WIDTH, sigma_color, sigma_space, cv::BORDER_REPLICATE);
+
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
 
     cv::imwrite("output_ocv.png", ocv_ref);
 
@@ -110,12 +128,13 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
-                                            CL_TRUE,             // blocking call
-                                            0,                   // buffer offset in bytes
-                                            image_in_size_bytes, // Size in bytes
-                                            in_img.data,         // Pointer to the data to copy
-                                            nullptr, &event));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
+                                       CL_TRUE,             // blocking call
+                                       0,                   // buffer offset in bytes
+                                       image_in_size_bytes, // Size in bytes
+                                       in_img.data,         // Pointer to the data to copy
+                                       nullptr, &event));
 
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));
@@ -144,5 +163,9 @@ int main(int argc, char** argv) {
     if (err_per > 0.0f) {
         return 1;
     }
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
     return 0;
 }

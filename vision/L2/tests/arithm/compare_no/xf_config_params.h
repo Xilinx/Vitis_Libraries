@@ -32,5 +32,5 @@
 
 // OpenCV reference macros
 #define CV_FUNCT_NAME compare
-#define CV_EXTRA_ARG CV_CMP_NE
+#define CV_EXTRA_ARG cv::CMP_NE
 #define FUNCT_COMPARE

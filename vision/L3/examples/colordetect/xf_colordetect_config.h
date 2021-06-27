@@ -17,15 +17,15 @@
 #ifndef _XF_COLORDETECT_CONFIG_H_
 #define _XF_COLORDETECT_CONFIG_H_
 
-#include "hls_stream.h"
 #include "ap_int.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
+#include "imgproc/xf_bgr2hsv.hpp"
 #include "imgproc/xf_channel_combine.hpp"
 #include "imgproc/xf_colorthresholding.hpp"
-#include "imgproc/xf_bgr2hsv.hpp"
-#include "imgproc/xf_erosion.hpp"
 #include "imgproc/xf_dilation.hpp"
+#include "imgproc/xf_erosion.hpp"
 //#include "xf_config_params.h"
 
 //#define MAXCOLORS 3

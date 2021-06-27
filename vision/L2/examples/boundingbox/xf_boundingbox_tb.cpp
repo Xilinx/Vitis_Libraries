@@ -21,8 +21,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <opencv/cv.h>
-#include <opencv/cxcore.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 #include <pthread.h>
 #include <time.h>
 #include <stdlib.h>

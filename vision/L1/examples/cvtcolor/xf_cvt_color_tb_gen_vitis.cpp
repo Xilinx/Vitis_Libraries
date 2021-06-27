@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGBA);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGBA);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGBA);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGBA);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -292,7 +292,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -336,7 +336,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -438,7 +438,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], -1);
@@ -468,7 +468,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], -1);
@@ -498,7 +498,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
     cvtcolor_bgr2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -787,7 +787,7 @@ int main(int argc, char** argv) {
     cvtcolor_iyuv2rgba(_imgInput0, _imgInput1, _imgInput2, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGBA2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGBA2BGR);
 
     cv::imwrite("out_RGBA.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -831,7 +831,7 @@ int main(int argc, char** argv) {
     cvtcolor_iyuv2rgb(_imgInput0, _imgInput1, _imgInput2, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -1003,7 +1003,7 @@ int main(int argc, char** argv) {
     cvtcolor_nv122rgba(_imgInput0, _imgInput1, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGBA2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGBA2BGR);
 
     cv::imwrite("out_RGBA.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -1104,7 +1104,7 @@ int main(int argc, char** argv) {
     cvtcolor_nv122rgb(_imgInput0, _imgInput1, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -1363,7 +1363,7 @@ int main(int argc, char** argv) {
     cvtcolor_nv212rgba(_imgInput0, _imgInput1, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGBA2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGBA2BGR);
 
     cv::imwrite("out_RGBA.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -1400,7 +1400,7 @@ int main(int argc, char** argv) {
     cvtcolor_nv212rgb(_imgInput0, _imgInput1, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -1795,7 +1795,7 @@ int main(int argc, char** argv) {
     cvtcolor_uyvy2rgba(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGBA2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGBA2BGR);
 
     cv::imwrite("out_RGBA.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -1825,7 +1825,7 @@ int main(int argc, char** argv) {
     cvtcolor_uyvy2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2056,7 +2056,7 @@ int main(int argc, char** argv) {
     cvtcolor_yuyv2rgba(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGBA2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGBA2BGR);
 
     cv::imwrite("out_RGBA.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2086,7 +2086,7 @@ int main(int argc, char** argv) {
     cvtcolor_yuyv2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2160,7 +2160,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
-    cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
+    cvtColor(imgInput0, imgInput0, cv::COLOR_BGR2RGB);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
@@ -2233,7 +2233,7 @@ int main(int argc, char** argv) {
     cvtcolor_gray2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2350,7 +2350,7 @@ int main(int argc, char** argv) {
     cvtcolor_xyz2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2467,7 +2467,7 @@ int main(int argc, char** argv) {
     cvtcolor_ycrcb2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2584,7 +2584,7 @@ int main(int argc, char** argv) {
     cvtcolor_hls2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);
@@ -2701,7 +2701,7 @@ int main(int argc, char** argv) {
     cvtcolor_hsv2rgb(_imgInput0, _imgOutput0);
 
     imgOutput0.data = (unsigned char*)_imgOutput0;
-    cvtColor(imgOutput0, imgOutput0, CV_RGB2BGR);
+    cvtColor(imgOutput0, imgOutput0, cv::COLOR_RGB2BGR);
 
     cv::imwrite("out_RGB.png", imgOutput0);
     cv::Size S0(WIDTH, HEIGHT);

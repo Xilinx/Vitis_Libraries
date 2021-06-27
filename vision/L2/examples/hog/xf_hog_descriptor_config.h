@@ -17,11 +17,14 @@
 #ifndef _XF_HOG_DESCRIPTOR_CONFIG_H_
 #define _XF_HOG_DESCRIPTOR_CONFIG_H_
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 #include "imgproc/xf_hog_descriptor.hpp"
 #include "xf_config_params.h"
+
+// Set the function for reference
+#define __XF_BENCHMARK 1
 
 /* set the various hog parameters */
 #define XF_WIN_STRIDE 8
@@ -33,7 +36,8 @@
 
 #define OUT_T1 ap_uint16_t
 
-// Various parameters used for testing purpose and template usages, not to be edited
+// Various parameters used for testing purpose and template usages, not to be
+// edited
 #define XF_NOVCPB (XF_BLOCK_HEIGHT / XF_CELL_HEIGHT)                // number of vertical cells per block
 #define XF_NOHCPB (XF_BLOCK_WIDTH / XF_CELL_WIDTH)                  // number of horizontal cells per block
 #define XF_NOBPB (XF_NO_OF_BINS * XF_NOHCPB * XF_NOVCPB)            // number of bins per block

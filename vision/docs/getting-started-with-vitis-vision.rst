@@ -19,11 +19,11 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis™ 2020.2 or later version and the
+#. Valid installation of Vitis™ 2021.1 or later version and the
    corresponding licenses.
 #. Install the Vitis Vision libraries, if you intend to use libraries
    compiled differently than what is provided in Vitis.
-#. Install the card for which the platform is supported in Vitis 2020.2 or
+#. Install the card for which the platform is supported in Vitis 2021.1 or
    later versions.
 #. If targeting an embedded platform, set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
@@ -34,7 +34,7 @@ Prerequisites
 #. libOpenCL.so must be installed if not present along with the
    platform.
 
-.. note:: All Vitis Vision functions were tested against OpenCV version - 3.4
+.. note:: All Vitis Vision functions were tested against OpenCV version - 4.4.0
 
 Vitis Design Methodology
 =========================
@@ -254,8 +254,7 @@ Interface pointer widths
 Minimum pointer widths for different configurations is shown in the
 following table:
 
-.. table:: Table . Minimum and maximum pointer widths for different mat
-types
+.. table:: Table . Minimum and maximum pointer widths for different Mat types
 
    +-----------------+-----------------+-----------------+-----------------+
    | MAT type        | Parallelism     | Min PTR_WIDTH   | Max PTR_WIDTH   |
@@ -558,13 +557,14 @@ commands to setup the basic environment:
 
    $ cd <path to the folder where makefile is present>
    $ source <path to the Vitis installation folder>/Vitis/<version number>/settings64.sh
-   $ source <path to Xilinx_xrt>/setup.sh
    $ export DEVICE=<path-to-platform-directory>/<platform>.xpfm
 
 For PCIe devices, set the following:
 
 .. code:: c
 
+   $ source <path to Xilinx_xrt>/setup.sh
+   
    $ export OPENCV_INCLUDE=< path-to-opencv-include-folder >
    
    $ export OPENCV_LIB=< path-to-opencv-lib-folder >

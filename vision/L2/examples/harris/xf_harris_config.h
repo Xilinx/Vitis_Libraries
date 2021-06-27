@@ -17,12 +17,15 @@
 #ifndef _XF_HARRIS_CONFIG_H_
 #define _XF_HARRIS_CONFIG_H_
 
-#include "hls_stream.h"
 #include "ap_int.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
 #include "features/xf_harris.hpp"
+#include "hls_stream.h"
 #include "xf_config_params.h"
+
+// Set the function for reference
+#define __XF_BENCHMARK 1
 
 #define CH_TYPE XF_GRAY
 #define INPUT_PTR_WIDTH 64

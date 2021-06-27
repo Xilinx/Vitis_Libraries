@@ -6121,7 +6121,7 @@ void hsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
 }
 
 ///////////////////////////////////////////////////////RGB2UYVY////////////////////////////////////////////////////////////////////
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC, int iTC>
 void xfrgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                 unsigned short int height,
@@ -6224,13 +6224,13 @@ void rgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
            " 1,2,4,8 pixel parallelism is supported  ");
 #endif
     xfrgb2uyvy<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC)))), XF_NPIXPERCYCLE(NPC)>(_src, _dst, _src.rows, _src.cols);
 }
 //////////////////////////////////////////////////////end of
 /// RGB2UYVY//////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////RGB2YUYV////////////////////////////////////////////////////////////////////
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC, int iTC>
 void xfrgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                 unsigned short int height,
@@ -6319,13 +6319,13 @@ void rgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
            " 1,2,4,8 pixel parallelism is supported  ");
 #endif
     xfrgb2yuyv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC)))), XF_NPIXPERCYCLE(NPC)>(_src, _dst, _src.rows, _src.cols);
 }
 //////////////////////////////////////////////////////end of
 /// RGB2YUYV//////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////RGB2BGR////////////////////////////////////////////////////////////////////
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC, int iTC>
 void xfrgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                unsigned short int height,
@@ -6387,7 +6387,7 @@ void rgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
            " 1,2,4,8 pixel parallelism is supported  ");
 #endif
     xfrgb2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-              ((COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+              ((COLS >> (XF_NPIXPERCYCLE(NPC)))), XF_NPIXPERCYCLE(NPC)>(_src, _dst, _src.rows, _src.cols);
 }
 //////////////////////////////////////////////////////end of
 /// RGB2BGR//////////////////////////////////////////////////////////////
@@ -6831,7 +6831,7 @@ void nv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
 /// NV212YUYV//////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////BGR2UYVY////////////////////////////////////////////////////////////////////
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC, int iTC>
 void xfbgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                 unsigned short int height,
@@ -6935,13 +6935,13 @@ void bgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
            " 1,2,4,8 pixel parallelism is supported  ");
 #endif
     xfbgr2uyvy<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC)))), XF_NPIXPERCYCLE(NPC)>(_src, _dst, _src.rows, _src.cols);
 }
 //////////////////////////////////////////////////////end of
 /// BGR2UYVY//////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////BGR2YUYV////////////////////////////////////////////////////////////////////
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC, int iTC>
 void xfbgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                 unsigned short int height,
@@ -7030,12 +7030,12 @@ void bgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
            " 1,2,4,8 pixel parallelism is supported  ");
 #endif
     xfbgr2yuyv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC)))), XF_NPIXPERCYCLE(NPC)>(_src, _dst, _src.rows, _src.cols);
 }
 ////////////////////////////////////////////////////////end of
 /// BGR2YUYV//////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////BGR2RGB////////////////////////////////////////////////////////////////////
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC, int iTC>
 void xfbgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                unsigned short int height,
@@ -7099,7 +7099,7 @@ void bgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
            " 1,2,4,8 pixel parallelism is supported  ");
 #endif
     xfbgr2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-              (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+              (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC)))), XF_NPIXPERCYCLE(NPC)>(_src, _dst, _src.rows, _src.cols);
 }
 //////////////////////////////////////////////////////end of
 /// BGR2RGB//////////////////////////////////////////////////////////////

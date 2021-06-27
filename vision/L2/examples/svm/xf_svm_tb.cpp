@@ -22,7 +22,7 @@
  * 	 main function: SVM core
  *****************************************************************************/
 int main(int argc, char** argv) {
-    std::vector<int16_t> in_1(IN_ARRAY_SIZE_1 * IN_ARRAY_SIZE_1), in_2(IN_ARRAY_SIZE_2 * IN_ARRAY_SIZE_2);
+    float in_1[IN_ARRAY_SIZE_1], in_2[IN_ARRAY_SIZE_2];
 
     float a = 0, bias = 0.567;
 
@@ -31,6 +31,9 @@ int main(int argc, char** argv) {
         float temp1 = a;
         float temp2 = 0.2 - a;
 
+        if (temp1 >= 1) temp1 = 0.99;
+        if (temp2 >= 1) temp2 = 0.99;
+
         in_1[i] = temp1 * pow(2, IN_FRAC_BITS_1);
         in_2[i] = temp2 * pow(2, IN_FRAC_BITS_2);
 
@@ -38,18 +41,18 @@ int main(int argc, char** argv) {
     }
 
     // Allocate data for the kernel outputs:
-    int32_t out_result = 0;
+    int64_t out_result = 0;
     unsigned char out_frac = 0;
 
     // OpenCL section:
     std::vector<uint16_t> svm_params = {INDEX_ARR_1, INDEX_ARR_2, IN_FRAC_BITS_1, IN_FRAC_BITS_2,
                                         NO_OF_KERNEL_ELEMENTS};
 
-    size_t input_1_size_bytes = in_1.size() * sizeof(int16_t);
-    size_t input_2_size_bytes = in_2.size() * sizeof(int16_t);
+    size_t input_1_size_bytes = IN_ARRAY_SIZE_1 * sizeof(float);
+    size_t input_2_size_bytes = IN_ARRAY_SIZE_2 * sizeof(float);
     size_t vec_in_size_bytes = svm_params.size() * sizeof(uint16_t);
     size_t out_frac_size_bytes = sizeof(unsigned char);
-    size_t out_result_size_bytes = sizeof(int32_t);
+    size_t out_result_size_bytes = sizeof(int64_t);
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -95,14 +98,14 @@ int main(int argc, char** argv) {
                                             CL_TRUE,            // blocking call
                                             0,                  // buffer offset in bytes
                                             input_1_size_bytes, // Size in bytes
-                                            in_1.data(),        // Pointer to the data to copy
+                                            in_1,               // Pointer to the data to copy
                                             nullptr, &event));
 
     OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage2,    // buffer on the FPGA
                                             CL_TRUE,            // blocking call
                                             0,                  // buffer offset in bytes
                                             input_2_size_bytes, // Size in bytes
-                                            in_2.data(),        // Pointer to the data to copy
+                                            in_2,               // Pointer to the data to copy
                                             nullptr, &event));
 
     OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inVecParams, // buffer on the FPGA
@@ -135,14 +138,38 @@ int main(int argc, char** argv) {
 
     // Calculate the bias fix for the result:
     int bias_fix = bias * pow(2, out_frac);
-    out_result += bias_fix;
+    long int resultFIX_bias = out_result + bias_fix;
 
     // Calculate the reference result:
-    float float_res_fix = out_result / pow(2, out_frac);
+    float float_res_fix = (double)resultFIX_bias / pow(2, out_frac);
 
-    std::cout << "INFO: Results verification:" << std::endl;
-    std::cout << "\tHLS fixed point output = " << out_result << std::endl;
-    std::cout << "\tHLS fix -> fl output = " << float_res_fix << std::endl;
+    // OpenCV reference function
+    cv::Mat A(cv::Size(1, IN_ARRAY_SIZE_1), CV_16S);
+    std::memcpy(A.data, in_1, IN_ARRAY_SIZE_1 * sizeof(ap_int<16>));
+    cv::Mat B(cv::Size(1, IN_ARRAY_SIZE_1), CV_16S);
+    std::memcpy(B.data, in_2, IN_ARRAY_SIZE_1 * sizeof(ap_int<16>));
+    long int ocv_fix = (A.dot(B));
+    long int ocv_fix_bias = (ocv_fix + bias_fix);
+    float ocv_fl = (double)ocv_fix_bias / cv::pow(2, out_frac);
+
+    std::cout << "hls fix: " << (long int)resultFIX_bias << std::endl;
+    std::cout << "ocv fix: " << ocv_fix << std::endl;
+
+    std::cout << "HLS float: " << float_res_fix << std::endl;
+    std::cout << "OCV float: " << ocv_fl << std::endl;
+
+    // Error computation
+    float diff = abs(abs(float_res_fix) - abs(ocv_fl));
+    // std::cout << "HLS fixed point output: " << resultFIX << std::endl;
+
+    std::cout << "Absolute difference: " << diff << std::endl;
+
+    if (diff > 0.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return EXIT_FAILURE;
+    }
+
+    std::cout << "Test Passed .... !!!" << std::endl;
 
     return 0;
 }

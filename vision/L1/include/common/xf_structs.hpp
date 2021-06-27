@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <type_traits>
 
 namespace xf {
 namespace cv {
@@ -424,7 +425,13 @@ Scalar<N, T> Scalar<N, T>::operator/(Scalar<N, T> s) {
 //----------------------------------------------------------------------------------------------------//
 // Template class of Mat
 //----------------------------------------------------------------------------------------------------//
-template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
+#if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
+static constexpr int _XFCVDEPTH_DEFAULT = 2;
+#else
+static constexpr int _XFCVDEPTH_DEFAULT = -1;
+#endif
+
+template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
 class Mat {
    public:
     unsigned char allocatedFlag; // flag to mark memory allocation in this class
@@ -435,12 +442,15 @@ class Mat {
     // NPC
 
     typedef XF_TNAME(T, NPC) DATATYPE;
-
-#if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
-    hls::stream<DATATYPE, XFCVDEPTH> data;
-#else
-    DATATYPE* data;
-#endif
+    using _DATATTYPE = typename std::conditional<
+        (XFCVDEPTH < 0),
+        DATATYPE*,                 // Case of Memory Mapped pointer
+        typename std::conditional< // Case of Stream
+            (XFCVDEPTH == 0),
+            hls::stream<DATATYPE>,           // Case of default Dtream depth or user can override outside
+            hls::stream<DATATYPE, XFCVDEPTH> // Case of Stream depth specified
+            >::type>::type;
+    _DATATTYPE data;
 
     Mat(); // default constructor
     Mat(Size _sz);
@@ -455,10 +465,95 @@ class Mat {
     //  XF_TNAME(T, XF_NPPC1) operator() (unsigned int r, unsigned int c);
     //  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned
     //  int ch);
-    XF_TNAME(T, NPC) read(int index);
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    void alloc_data() {
+#ifndef __SYNTHESIS__
+        data = (DATATYPE*)malloc(size * sizeof(DATATYPE));
+
+        if (data == NULL) {
+            fprintf(stderr, "\nFailed to allocate memory\n");
+        } else {
+            allocatedFlag = 1;
+        }
+#endif
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    void alloc_data() {
+        // This is a stream
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    void free_data() {
+        if (data != NULL) {
+#ifndef __SYNTHESIS__
+            free(data);
+#endif
+        }
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    void free_data() {}
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    void copyData(const Mat& src) {
+        for (int i = 0; i < (rows * ((cols + NPC - 1) >> XF_BITSHIFT(NPC))); ++i) {
+            data[i] = src.data[i];
+        }
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    void copyData(const Mat& src) {
+        // This is a stream
+        assert(0);
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    void assignDataPtr(void* _data) {
+        data = (DATATYPE*)_data;
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    void assignDataPtr(void* _data) {
+        // This is a stream
+        assert(0);
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    XF_TNAME(T, NPC)
+    read(int index) {
+        return data[index];
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    XF_TNAME(T, NPC)
+    read(int index) {
+        return data.read();
+    }
     float read_float(int index);
-    void write(int index, XF_TNAME(T, NPC) val);
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    void write(int index, XF_TNAME(T, NPC) val) {
+        data[index] = val;
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    void write(int index, XF_TNAME(T, NPC) val) {
+        data.write(val);
+    }
     void write_float(int index, float val);
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D >= 0)>::type* = nullptr>
+    void init(int _rows, int _cols, void* _data) {
+        init(_rows, _cols);
+        copyTo(_data);
+    }
+
+    template <int D = XFCVDEPTH, typename std::enable_if<(D < 0)>::type* = nullptr>
+    void init(int _rows, int _cols, void* _data) {
+        init(_rows, _cols, false);
+        assignDataPtr(_data);
+    }
 
     void init(int _rows, int _cols, bool allocate = true);
     void copyTo(void* fromData);
@@ -510,88 +605,17 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::init(int _rows, int _cols, bool
     size = _rows * ((_cols + NPPC - 1) >> XF_BITSHIFT(NPPC));
 
     if (allocate) {
-#ifndef __SYNTHESIS__
-        data = (DATATYPE*)malloc(size * sizeof(DATATYPE));
-
-        if (data == NULL) {
-            fprintf(stderr, "\nFailed to allocate memory\n");
-        } else {
-            allocatedFlag = 1;
-        }
-#endif
+        alloc_data();
     }
 }
 
-/*
-template <int T, int ROWS, int COLS, int NPC>
-inline XF_TNAME(T, XF_NPPC1) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int
-r, unsigned int c) {
-
-    XF_TNAME(T, XF_NPPC1) pix_val;
-
-    unsigned int mask      = 0xFFFFFFFF;
-    unsigned int npc_c     = c >> (XF_BITSHIFT(NPC));
-    unsigned int npc_cols  = cols >> (XF_BITSHIFT(NPC));
-    unsigned int pix_idx   = c & ~(mask << (XF_BITSHIFT(NPC)));
-
-#ifdef __SDSVHLS__
-    unsigned int bit_width= XF_DTPIXELDEPTH(T, NPC);
-
-    pix_val = data[(r*npc_cols) + npc_c].range((pix_idx+1)*bit_width-1,
-pix_idx*bit_width);
-#else
-    unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) / XF_CHANNELS(T,NPC);
-
-    for (int ch=0; ch < XF_CHANNELS(T,NPC); ch++) {
-       pix_val.range((ch+1)*pix_depth-1, ch*pix_depth) = data[r*npc_cols +
-npc_c].chnl[ch].range((pix_idx+1)*pix_depth-1, pix_idx*pix_depth);
-    }
-#endif
-
-    return pix_val;
-}
-
-template <int T, int ROWS, int COLS, int NPC>
-inline XF_CTUNAME(T, NPC) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int r,
-unsigned int c, unsigned int ch) {
-
-    XF_CTUNAME(T, NPC) pix_val;
-
-    unsigned int mask      = 0xFFFFFFFF;
-    unsigned int npc_c     = c >> (XF_BITSHIFT(NPC));
-    unsigned int npc_cols  = cols >> (XF_BITSHIFT(NPC));
-    unsigned int pix_idx   = c & ~(mask << (XF_BITSHIFT(NPC)));
-
-#ifdef __SDSVHLS__
-    unsigned int bit_width = XF_DTPIXELDEPTH(T, NPC);
-    unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) / XF_CHANNELS(T, NPC);
-
-    pix_val = data[(r*npc_cols) + npc_c].range(pix_idx*bit_width +
-(ch+1)*pix_depth - 1, pix_idx*bit_width +
-ch*pix_depth); #else unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) /
-XF_CHANNELS(T, NPC);
-
-    pix_val = data[r*npc_cols + npc_c].chnl[ch].range((pix_idx+1)*pix_depth-1,
-pix_idx*pix_depth);
-#endif
-
-    return pix_val;
-}
- */
 /*Copy constructor definition*/
 template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH>
 inline Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::Mat(const Mat& src) {
     init(src.rows, src.cols);
 
-//	for(int i =0; i< (rows*(cols>>(XF_BITSHIFT(NPC))));++i){
 #ifndef __SYNTHESIS__
-    for (int i = 0; i < (rows * ((cols + NPC - 1) >> XF_BITSHIFT(NPC))); ++i) {
-        data[i] = src.data[i];
-    }
-#else
-//  for (int i = 0; i < (rows * ((cols + NPC - 1) >> XF_BITSHIFT(NPC))); ++i) {
-//      data[i] = src.read(i);
-//  }
+    copyData(src);
 #endif
 }
 
@@ -603,20 +627,11 @@ inline Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::o
     }
 
     // Cleaning up old data memory if any
-    if (data != NULL) {
-#ifndef __SYNTHESIS__
-        free(data);
-#endif
-    }
-
+    free_data();
     allocatedFlag = 0;
 
     init(src.rows, src.cols);
-
-    //	for(int i =0; i< (rows*(cols>>(XF_BITSHIFT(NPC))));++i){
-    for (int i = 0; i < (rows * ((cols + NPC - 1) >> XF_BITSHIFT(NPC))); ++i) {
-        data[i] = src.data[i];
-    }
+    copyData(src);
 
     return *this;
 }
@@ -634,15 +649,9 @@ template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(int _rows, int _cols, void* _data) {
 // clang-format off
 #pragma HLS inline
-// clang-format on
+    // clang-format on
 
-#if defined __SDA_MEM_MAP__ //(__SDSCC__)  && defined (__SYNTHESIS__)
-    init(_rows, _cols, false);
-    data = (DATATYPE*)_data;
-#else
-    init(_rows, _cols);
-    copyTo(_data);
-#endif
+    init(_rows, _cols, _data);
 }
 
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
@@ -664,15 +673,6 @@ inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(Size _sz) {
 }
 
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
-inline XF_TNAME(T, NPPC) Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::read(int index) {
-#if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
-    return data.read();
-#else
-    return data[index];
-#endif
-}
-
-template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline float Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::read_float(int index) {
     union int2float {
         unsigned I;
@@ -684,91 +684,11 @@ inline float Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::read_float(int index) {
 }
 
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
-inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::write(int index, XF_TNAME(T, NPPC) val) {
-#if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
-    data.write(val);
-#else
-    data[index] = val;
-#endif
-}
-
-template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::write_float(int index, float float_val) {
     float val = float_val;
     ap_uint<32>* val_out = (ap_uint<32>*)(&val);
     write(index, *val_out);
 }
-
-// template <int T, int ROWS, int COLS, int NPPC>
-// inline void Mat<T, ROWS, COLS, NPPC>::copyTo(void* _input) {
-//    #pragma HLS inline
-//
-//    XF_PTSNAME(T, NPPC)* input = (XF_PTSNAME(T, NPPC)*)_input;
-//    XF_CTUNAME(T, NPPC) in_val;
-//
-//    //	int packcols  = cols >> XF_BITSHIFT(NPPC); 		//Total
-//    columns
-//    after
-//    considering parallelism
-//    int pixdepth = XF_PIXELWIDTH(T, NPPC);          // Total bits that make up
-//    the pixel
-//    int bitdepth = pixdepth / XF_CHANNELS(T, NPPC); // Total bits that make up
-//    each channel of the pixel
-//    int nppc = XF_NPIXPERCYCLE(NPPC);
-//
-//    /*	for (int r=0; r < rows; r++) {
-//            for (int c=0; c < packcols; c++) {
-//                    for (int p=0; p < nppc; p++) {
-//                            for (int ch=0; ch < XF_CHANNELS(T,NPPC); ch++) {
-//
-//                                    if (T == XF_32FC1) {
-//                                            in_val = float2ap_uint<
-//                                            ap_uint<32> >(input[XF_CHANNELS(T,
-// NPPC)*((r*packcols + c)*nppc + p) + ch]); } else { in_val =
-// input[XF_CHANNELS(T, NPPC)*((r*packcols + c)*nppc + p) +
-// ch];
-//                                    }
-//#ifdef __SDSVHLS__
-//                                    data[r*packcols +
-//                                    c].range((p*pixdepth)+(ch+1)*bitdepth-1,
-//                                    (p*pixdepth)+ch*bitdepth)
-//= in_val; #else data[r*packcols + c].chnl[p][ch] = in_val; #endif
-//                            }
-//                    }
-//            }
-//    }
-//     */
-//    int ncpr = ((cols + NPPC - 1) >> XF_BITSHIFT(NPPC));
-//    for (int r = 0; r < rows; r++) {
-//        for (int c = 0; c < ncpr; c++) {
-//            for (int p = 0; p < nppc; p++) {
-//                for (int ch = 0; ch < XF_CHANNELS(T, NPPC); ch++) {
-//                    if ((c << XF_BITSHIFT(NPPC) + p) < cols) {
-//                        if (T == XF_32FC1) {
-//                            in_val = float2ap_uint<ap_uint<32> >(
-//                                input[XF_CHANNELS(T, NPPC) * ((r * cols + c) *
-//                                nppc + p) + ch]);
-//                        } else {
-//                            in_val = input[XF_CHANNELS(T, NPPC) * ((r * cols +
-//                            c) * nppc + p) + ch];
-//                        }
-//                    } else {
-//                        in_val = 0;
-//                    }
-//
-//#ifdef __SDSVHLS__
-//                    data[r * ncpr + c].range((p * pixdepth) + (ch + 1) *
-//                    bitdepth - 1, (p * pixdepth) + ch * bitdepth)
-//                    =
-//                        in_val;
-//#else
-//                    data[r * ncpr + c].chnl[p][ch] = in_val;
-//#endif
-//                }
-//            }
-//        } // c
-//    }     // r
-//}
 
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyTo(void* _input) {
@@ -787,6 +707,7 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyTo(void* _input) {
     for (int r = 0; r < rows; r++) {
         for (int c = 0; c < packcols; c++) {
             for (int p = 0; p < nppc; p++) {
+                DATATYPE out_val;
                 for (int ch = 0; ch < XF_CHANNELS(T, NPPC); ch++) {
                     if (T == XF_32FC1) {
                         in_val = float2ap_uint<ap_uint<32> >(
@@ -795,9 +716,9 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyTo(void* _input) {
                         in_val = input[XF_CHANNELS(T, NPPC) * ((r * packcols + c) * nppc + p) + ch];
                     }
 
-                    data[r * packcols + c].range((p * pixdepth) + (ch + 1) * bitdepth - 1,
-                                                 (p * pixdepth) + ch * bitdepth) = in_val;
+                    out_val.range((p * pixdepth) + (ch + 1) * bitdepth - 1, (p * pixdepth) + ch * bitdepth) = in_val;
                 }
+                write((r * packcols + c), out_val);
             }
         }
     }
@@ -827,10 +748,11 @@ inline unsigned char* Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyFrom() {
 
     for (int r = 0; r < rows; r++) {
         for (int c = 0; c < cols; c++) {
+            DATATYPE in_val = read(xf_ptr);
             for (int ch = 0; ch < XF_CHANNELS(T, NPPC); ch++) {
                 for (int b = 0; b < cv_nbytes; ++b) {
-                    value[cv_ptr++] = data[xf_ptr].range((xf_npc_idx * pixdepth) + (ch * bitdepth) + (b + 1) * 8 - 1,
-                                                         (xf_npc_idx * pixdepth) + (ch * bitdepth) + b * 8);
+                    value[cv_ptr++] = in_val.range((xf_npc_idx * pixdepth) + (ch * bitdepth) + (b + 1) * 8 - 1,
+                                                   (xf_npc_idx * pixdepth) + (ch * bitdepth) + b * 8);
                 }
             }
             if (xf_npc_idx == nppc - 1) {
@@ -888,12 +810,14 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::convertTo(Mat<DST_T, ROWS, COLS
             int OUT_STEP = XF_PIXELDEPTH(XF_DEPTH(DST_T, NPPC));
             int in_shift = 0;
             int out_shift = 0;
+            DATATYPE in_val = read((i * cols >> (XF_BITSHIFT(NPPC))) + j);
+            DATATYPE out_val;
 
             for (int k = 0; k < (1 << (XF_BITSHIFT(NPPC))); k++) {
 #ifdef __SDSVHLS__
-                in_pix = data[(i * cols >> (XF_BITSHIFT(NPPC))) + j].range(in_shift + IN_STEP - 1, in_shift);
+                in_pix = in_val.range(in_shift + IN_STEP - 1, in_shift);
 #else
-                in_pix = data[(i * cols >> (XF_BITSHIFT(NPPC))) + j].chnl[k][0];
+                in_pix = in_val.chnl[k][0];
 #endif
 
                 if (otype == XF_CONVERT_16U_TO_8U || otype == XF_CONVERT_16S_TO_8U || otype == XF_CONVERT_32S_TO_8U ||
@@ -919,14 +843,15 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::convertTo(Mat<DST_T, ROWS, COLS
 
                 out_pix = tmp_out_pix.range(out_shift + OUT_STEP - 1, out_shift);
 #ifdef __SDSVHLS__
-                dst.data[(i * cols >> (XF_BITSHIFT(NPPC))) + j].range(out_shift + OUT_STEP - 1, out_shift) = out_pix;
+                out_val.range(out_shift + OUT_STEP - 1, out_shift) = out_pix;
 #else
-                dst.data[(i * cols >> (XF_BITSHIFT(NPPC))) + j].chnl[k][0] = out_pix;
+                out_val.chnl[k][0] = out_pix;
 #endif
 
                 in_shift = in_shift + IN_STEP;
                 out_shift = out_shift + OUT_STEP;
             }
+            write(((i * cols >> (XF_BITSHIFT(NPPC))) + j), out_val);
         }
     }
 }
@@ -934,8 +859,8 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::convertTo(Mat<DST_T, ROWS, COLS
 template <int SRC_T, int ROWS, int COLS, int NPC, int XFCVDEPTH>
 Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH>::~Mat() {
 #ifndef __SYNTHESIS__
-    if (data != NULL && allocatedFlag == 1) {
-        free(data);
+    if (allocatedFlag == 1) {
+        free_data();
     }
 #endif
 }
@@ -964,7 +889,7 @@ struct log2<1> {
  * processed per cycle.
  *
  */
-template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
 class MMIter : public Mat<T, ROWS, COLS, NPC, XFCVDEPTH> {
    public:
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::data;
@@ -994,7 +919,9 @@ class MMIter : public Mat<T, ROWS, COLS, NPC, XFCVDEPTH> {
     int loopbound() { return rows * cols_npc_aligned(cols); }
 
     static int addrbound(int rows, int cols) {
-        return ((rows * cols * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >> (log2<PTR_WIDTH>::cvalue);
+        ap_uint<16> rows_int16 = rows;
+        ap_uint<16> cols_int16 = cols;
+        return ((rows_int16 * cols_int16 * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >> (log2<PTR_WIDTH>::cvalue);
     }
 
     MMIter() : Mat<T, ROWS, COLS, NPC, XFCVDEPTH>() {}
@@ -1002,18 +929,19 @@ class MMIter : public Mat<T, ROWS, COLS, NPC, XFCVDEPTH> {
     MMIter(int _rows, int _cols) : Mat<T, ROWS, COLS, NPC, XFCVDEPTH>(_rows, _cols) {}
 };
 
-template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
-class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
+#define _MMITER MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+class MMIterIn : public _MMITER {
    public:
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::data;
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::rows;
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::cols;
 
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::XF_BITS_PER_CLOCK;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::ADDRBOUND;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::COLS_BOUND_PER_NPC;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::LAST_BLK_PXL_WIDTH;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::LOOPBOUND;
+    using _MMITER::XF_BITS_PER_CLOCK;
+    using _MMITER::ADDRBOUND;
+    using _MMITER::COLS_BOUND_PER_NPC;
+    using _MMITER::LAST_BLK_PXL_WIDTH;
+    using _MMITER::LOOPBOUND;
 
    private:
     static void Axi2AxiStream(ap_uint<PTR_WIDTH>* din,
@@ -1045,8 +973,9 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
         }
     }
 
+    template <int DEPTH>
     static void AxiStream2MatStream(hls::stream<ap_uint<PTR_WIDTH> >& din,
-                                    hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
+                                    hls::stream<ap_uint<XF_BITS_PER_CLOCK>, DEPTH>& dout,
                                     int rows,
                                     int cols_bound_per_npc,
                                     int last_blk_width,
@@ -1057,9 +986,8 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
             stride_bound_per_npc = cols_bound_per_npc;
             strideBased_last_blk_width = last_blk_width;
         } else {
-            stride_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(stride);
-            strideBased_last_blk_width =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(stride, stride_bound_per_npc);
+            stride_bound_per_npc = _MMITER::cols_npc_aligned(stride);
+            strideBased_last_blk_width = _MMITER::last_blk_pxl_width(stride, stride_bound_per_npc);
         }
 
         int rd_cnt = 0;
@@ -1106,7 +1034,8 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
         }
     }
 
-    static void MatStream2Mat(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& din,
+    template <int DEPTH>
+    static void MatStream2Mat(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, DEPTH>& din,
                               ap_uint<XF_BITS_PER_CLOCK>* dout,
                               int rows,
                               int cols_bound_per_npc) {
@@ -1125,13 +1054,14 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
     static void AxiStream2Mat(hls::stream<ap_uint<PTR_WIDTH> >& din,
                               hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
                               int rows = ROWS,
-                              int cols = COLS) {
+                              int cols = COLS,
+                              int stride = -1) {
 // clang-format off
 #pragma HLS DATAFLOW
         // clang-format on
-        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
-        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
-        AxiStream2MatStream(din, dout, rows, cols_bound_per_npc, last_blk_width);
+        int cols_bound_per_npc = _MMITER::cols_npc_aligned(cols);
+        int last_blk_width = _MMITER::last_blk_pxl_width(cols, cols_bound_per_npc);
+        AxiStream2MatStream(din, dout, rows, cols_bound_per_npc, last_blk_width, stride);
     }
 
     static void AxiStream2Mat(hls::stream<ap_uint<PTR_WIDTH> >& din,
@@ -1142,9 +1072,9 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
 // clang-format off
 #pragma HLS DATAFLOW
         // clang-format on
-        hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH> ldata;
-        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
-        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        hls::stream<ap_uint<XF_BITS_PER_CLOCK> > ldata;
+        int cols_bound_per_npc = _MMITER::cols_npc_aligned(cols);
+        int last_blk_width = _MMITER::last_blk_pxl_width(cols, cols_bound_per_npc);
         AxiStream2MatStream(din, ldata, rows, cols_bound_per_npc, last_blk_width, stride);
         MatStream2Mat(ldata, dout, rows, cols_bound_per_npc);
     }
@@ -1158,8 +1088,6 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
 #pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
-        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
 
         int cols_tmp;
         if (stride == -1)
@@ -1167,34 +1095,23 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
         else
             cols_tmp = stride;
 
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
         Axi2AxiStream(din, ldata, axibound);
-        AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width, stride);
+        AxiStream2Mat(ldata, dout, rows, cols, stride);
     }
 
     static void Axi2Mat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& din,
                         hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
                         int rows = ROWS,
-                        int cols = COLS,
-                        int stride = -1) {
+                        int cols = COLS) {
 // clang-format off
 #pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
-        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
 
-        int cols_tmp;
-        if (stride == -1)
-            cols_tmp = cols;
-        else
-            cols_tmp = stride;
-
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols);
         Axi2AxiStream(din, ldata, axibound);
-        AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
+        AxiStream2Mat(ldata, dout, rows, cols);
     }
 
     static void Axi2Mat(
@@ -1210,8 +1127,7 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
         else
             cols_tmp = stride;
 
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
         Axi2AxiStream(din, ldata, axibound);
         AxiStream2Mat(ldata, dout, rows, cols, stride);
     }
@@ -1224,31 +1140,25 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
 #pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols);
         Axi2AxiStream(din, ldata, axibound);
         AxiStream2Mat(ldata, dout, rows, cols);
     }
 
    public:
-    MMIterIn(ap_uint<PTR_WIDTH>* d) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() { Axi2Mat(d, data); }
+    MMIterIn(ap_uint<PTR_WIDTH>* d) : _MMITER() { Axi2Mat(d, data); }
 
-    MMIterIn(ap_uint<PTR_WIDTH>* d, int _rows, int _cols) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {
+    MMIterIn(ap_uint<PTR_WIDTH>* d, int _rows, int _cols) : _MMITER(_rows, _cols) { Axi2Mat(d, data, rows, cols); }
+
+    MMIterIn(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& d) : _MMITER() { Axi2Mat(d, data); }
+
+    MMIterIn(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& d, int _rows, int _cols) : _MMITER(_rows, _cols) {
         Axi2Mat(d, data, rows, cols);
     }
 
-    MMIterIn(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& d) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() {
-        Axi2Mat(d, data);
-    }
+    MMIterIn(hls::stream<ap_uint<PTR_WIDTH> >& d) : _MMITER() { AxiStream2Mat(d, data); }
 
-    MMIterIn(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& d, int _rows, int _cols)
-        : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {
-        Axi2Mat(d, data, rows, cols);
-    }
-
-    MMIterIn(hls::stream<ap_uint<PTR_WIDTH> >& d) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() { AxiStream2Mat(d, data); }
-
-    MMIterIn(hls::stream<ap_uint<PTR_WIDTH> >& d, int _rows, int _cols)
-        : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {
+    MMIterIn(hls::stream<ap_uint<PTR_WIDTH> >& d, int _rows, int _cols) : _MMITER(_rows, _cols) {
         AxiStream2Mat(d, data, rows, cols);
     }
 
@@ -1266,28 +1176,34 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
         Axi2Mat(srcPtr, dstMat.data, dstMat.rows, dstMat.cols, stride);
     }
 
+    static void Array2xfMat(
+        ap_uint<PTR_WIDTH>* srcPtr, ap_uint<XF_BITS_PER_CLOCK>* dstPtr, int rows, int cols, int stride = -1) {
+        Axi2Mat(srcPtr, dstPtr, rows, cols, stride);
+    }
+
     static void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr,
                               xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& dstMat) {
         Axi2Mat(srcPtr, dstMat.data, dstMat.rows, dstMat.cols);
     }
 };
 
-template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int FILLZERO = 1, int XFCVDEPTH = 2>
-class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int FILLZERO = 1, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+class MMIterOut : public _MMITER {
    public:
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::data;
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::rows;
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::cols;
 
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::XF_BITS_PER_CLOCK;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::ADDRBOUND;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::COLS_BOUND_PER_NPC;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::LAST_BLK_PXL_WIDTH;
-    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH>::LOOPBOUND;
+    using _MMITER::XF_BITS_PER_CLOCK;
+    using _MMITER::ADDRBOUND;
+    using _MMITER::COLS_BOUND_PER_NPC;
+    using _MMITER::LAST_BLK_PXL_WIDTH;
+    using _MMITER::LOOPBOUND;
 
    private:
+    template <int DEPTH>
     static void Mat2MatStream(ap_uint<XF_BITS_PER_CLOCK>* din,
-                              hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
+                              hls::stream<ap_uint<XF_BITS_PER_CLOCK>, DEPTH>& dout,
                               int rows,
                               int cols_bound_per_npc) {
         int i;
@@ -1302,26 +1218,28 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
         }
     }
 
-    static void MatStream2AxiStream(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& din,
+    template <int DEPTH>
+    static void MatStream2AxiStream(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, DEPTH>& din,
                                     hls::stream<ap_uint<PTR_WIDTH> >& dout,
                                     int rows,
                                     int cols_bound_per_npc,
                                     int last_blk_width,
                                     int stride = -1) {
-        int strideBased_cols_bound_per_npc;
+        ap_uint<16> strideBased_cols_bound_per_npc;
         if (stride == -1 || FILLZERO == 0) {
             strideBased_cols_bound_per_npc = cols_bound_per_npc;
         } else {
-            strideBased_cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(stride);
+            strideBased_cols_bound_per_npc = _MMITER::cols_npc_aligned(stride);
         }
 
         ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled = 0; // valid bits remaining in current buffer
         ap_uint<PTR_WIDTH> localbuffer = 0;
-        int i;
-        int j;
+        ap_uint<16> i;
+        ap_uint<16> rows_int16 = rows;
+        ap_uint<16> j;
 
     MMIterOutRow:
-        for (i = 0; i < rows; i++) {
+        for (i = 0; i < rows_int16; i++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
@@ -1373,8 +1291,8 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
 // clang-format off
 #pragma HLS DATAFLOW
         // clang-format on
-        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
-        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        int cols_bound_per_npc = _MMITER::cols_npc_aligned(cols);
+        int last_blk_width = _MMITER::last_blk_pxl_width(cols, cols_bound_per_npc);
         MatStream2AxiStream(din, dout, rows, cols_bound_per_npc, last_blk_width, stride);
     }
 
@@ -1386,9 +1304,9 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
 // clang-format off
 #pragma HLS DATAFLOW
         // clang-format on
-        hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH> ldata;
-        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
-        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        hls::stream<ap_uint<XF_BITS_PER_CLOCK> > ldata;
+        int cols_bound_per_npc = _MMITER::cols_npc_aligned(cols);
+        int last_blk_width = _MMITER::last_blk_pxl_width(cols, cols_bound_per_npc);
         Mat2MatStream(din, ldata, rows, cols_bound_per_npc);
         MatStream2AxiStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width, stride);
     }
@@ -1441,17 +1359,14 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
             cols_tmp = stride;
 
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
 
         Mat2AxiStream(din, ldata, rows, cols, stride);
         if (FILLZERO == 1)
             AxiStream2Axi(ldata, dout, axibound);
         else {
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row = _MMITER::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row = _MMITER::addrbound(1, stride);
             for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
                 AxiStream2Axi(ldata, dout + offset, axibound_1row);
             }
@@ -1471,17 +1386,14 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
             cols_tmp = stride;
 
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
 
         Mat2AxiStream(din, ldata, rows, cols, stride);
         if (FILLZERO == 1)
             AxiStream2Axi(ldata, dout, axibound);
         else {
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row = _MMITER::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row = _MMITER::addrbound(1, stride);
 
             for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
                 AxiStream2Axi(ldata, dout + offset, axibound_1row);
@@ -1505,17 +1417,14 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
             cols_tmp = stride;
 
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
 
         Mat2AxiStream(din, ldata, rows, cols, stride);
         if (FILLZERO == 1)
             AxiStream2Axi(ldata, dout, axibound);
         else {
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row = _MMITER::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row = _MMITER::addrbound(1, stride);
             for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
                 AxiStream2Axi(ldata, dout + offset, axibound_1row);
             }
@@ -1538,17 +1447,14 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
             cols_tmp = stride;
 
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
-            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
         Mat2AxiStream(din, ldata, rows, cols, stride);
 
         if (FILLZERO == 1)
             AxiStream2Axi(ldata, dout, axibound);
         else {
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
-            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
-                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row = _MMITER::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row = _MMITER::addrbound(1, stride);
             for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
                 AxiStream2Axi(ldata, dout + offset, axibound_1row);
             }
@@ -1556,9 +1462,9 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
     }
 
    public:
-    MMIterOut() : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() {}
+    MMIterOut() : _MMITER() {}
 
-    MMIterOut(int _rows, int _cols) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {}
+    MMIterOut(int _rows, int _cols) : _MMITER(_rows, _cols) {}
 
     inline static void write(hls::stream<ap_uint<XF_BITS_PER_CLOCK> >& dout,
                              ap_uint<XF_BITS_PER_CLOCK>& val,
@@ -1590,6 +1496,11 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
                             ap_uint<PTR_WIDTH>* dstPtr,
                             int stride = -1) {
         Mat2Axi(srcMat.data, dstPtr, srcMat.rows, srcMat.cols, stride);
+    }
+
+    static void xfMat2Array(
+        ap_uint<XF_BITS_PER_CLOCK>* srcPtr, ap_uint<PTR_WIDTH>* dstPtr, int rows, int cols, int stride = -1) {
+        Mat2Axi(srcPtr, dstPtr, rows, cols, stride);
     }
 
     static void xfMat2axiStrm(xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat,

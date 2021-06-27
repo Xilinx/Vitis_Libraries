@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "opencv/cv.h"
-#include "opencv/highgui.h"
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
 void demosaicImage(cv::Mat cfa_output, cv::Mat& output_image, int code) {

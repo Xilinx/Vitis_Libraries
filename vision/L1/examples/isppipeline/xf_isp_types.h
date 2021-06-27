@@ -53,6 +53,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "imgproc/xf_colorcorrectionmatrix.hpp"
 #include "imgproc/xf_black_level.hpp"
 #include "imgproc/xf_aec.hpp"
+#include "imgproc/xf_cvt_color.hpp"
+#include "imgproc/xf_cvt_color_1.hpp"
+#include "imgproc/xf_gammacorrection.hpp"
 
 #define S_DEPTH 4096
 
@@ -66,7 +69,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define IN_DATA_WIDTH _DATA_WIDTH_(XF_SRC_T, XF_NPPC)
 //#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_DST_T, XF_NPPC)
-#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_LTM_T, XF_NPPC)
+//#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_LTM_T, XF_NPPC)
+#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_16UC1, XF_NPPC)
 
 #define AXI_WIDTH_IN _BYTE_ALIGN_(IN_DATA_WIDTH)
 #define AXI_WIDTH_OUT _BYTE_ALIGN_(OUT_DATA_WIDTH)
@@ -87,8 +91,15 @@ typedef hls::stream<OutVideoStrmBus_t> OutVideoStrm_t;
 
 #if T_8U
 #define HIST_SIZE 256
-#else
+#endif
+#if T_10U
 #define HIST_SIZE 1024
+#endif
+#if T_12U
+#define HIST_SIZE 4096
+#endif
+#if T_16U
+#define HIST_SIZE 4096
 #endif
 
 #define BLACK_LEVEL 32
@@ -106,6 +117,13 @@ typedef struct {
 // Prototype
 // --------------------------------------------------------------------
 // top level function for HW synthesis
-void ISPPipeline_accel(
-    uint16_t width, uint16_t height, uint16_t bayer_phase, InVideoStrm_t& s_axis_video, OutVideoStrm_t& m_axis_video);
+void ISPPipeline_accel(uint16_t width,
+                       uint16_t height,
+                       InVideoStrm_t& s_axis_video,
+                       OutVideoStrm_t& m_axis_video,
+                       uint16_t rgain,
+                       uint16_t bgain,
+                       unsigned char r_lut[256 * 3],
+                       unsigned char mode_reg,
+                       uint16_t pawb);
 #endif //_XF_ISP_TYPES_H_

@@ -36,48 +36,48 @@ Class Definition
 
 .. code:: c
 
-	template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
-	class Mat {
-	   public:
-		unsigned char allocatedFlag; // flag to mark memory allocation in this class
-		int rows, cols, size;        // actual image size
+    template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
+    class Mat {
+       public:
+        unsigned char allocatedFlag; // flag to mark memory allocation in this class
+        int rows, cols, size;        // actual image size
 
-		typedef XF_TNAME(T, NPC) DATATYPE;
+        typedef XF_TNAME(T, NPC) DATATYPE;
 
-	#if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
-		hls::stream<DATATYPE, XFCVDEPTH> data;
-	#else
-		DATATYPE* data;
-	#endif
+    #if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
+        hls::stream<DATATYPE, XFCVDEPTH> data;
+    #else
+        DATATYPE* data;
+    #endif
 
-		Mat(); // default constructor
-		Mat(Size _sz);
-		Mat(int _rows, int _cols);
-		Mat(int _size, int _rows, int _cols);
-		Mat(int _rows, int _cols, void* _data);
-		Mat(const Mat&); // copy constructor
+        Mat(); // default constructor
+        Mat(Size _sz);
+        Mat(int _rows, int _cols);
+        Mat(int _size, int _rows, int _cols);
+        Mat(int _rows, int _cols, void* _data);
+        Mat(const Mat&); // copy constructor
 
-		~Mat();
+        ~Mat();
 
-		Mat& operator=(const Mat&); // Assignment operator
-		//  XF_TNAME(T, XF_NPPC1) operator() (unsigned int r, unsigned int c);
-		//  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned int ch);
-		XF_TNAME(T, NPC) read(int index);
-		float read_float(int index);
-		void write(int index, XF_TNAME(T, NPC) val);
-		void write_float(int index, float val);
+        Mat& operator=(const Mat&); // Assignment operator
+        //  XF_TNAME(T, XF_NPPC1) operator() (unsigned int r, unsigned int c);
+        //  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned int ch);
+        XF_TNAME(T, NPC) read(int index);
+        float read_float(int index);
+        void write(int index, XF_TNAME(T, NPC) val);
+        void write_float(int index, float val);
 
-		void init(int _rows, int _cols, bool allocate = true);
-		void copyTo(void* fromData);
-		unsigned char* copyFrom();
+        void init(int _rows, int _cols, bool allocate = true);
+        void copyTo(void* fromData);
+        unsigned char* copyFrom();
 
-		const int type() const;
-		const int depth() const;
-		const int channels() const;
+        const int type() const;
+        const int depth() const;
+        const int channels() const;
 
-		template <int DST_T>
-		void convertTo(Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH>& dst, int otype, double alpha = 1, double beta = 0);
-	};
+        template <int DST_T>
+        void convertTo(Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH>& dst, int otype, double alpha = 1, double beta = 0);
+    };
 
 .. rubric:: Parameter Descriptions
 
@@ -280,21 +280,21 @@ class:
    +-------------+-----------------+--------------------+-----------------+
    | XF_8UC4     | 8               | Unsigned           | 4               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_10UC1    | 8               | Unsigned           | 1               |
+   | XF_10UC1    | 10              | Unsigned           | 1               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_10UC2    | 8               | Unsigned           | 2               |
+   | XF_10UC2    | 10              | Unsigned           | 2               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_10UC3    | 8               | Unsigned           | 3               |
+   | XF_10UC3    | 10              | Unsigned           | 3               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_10UC4    | 8               | Unsigned           | 4               |
+   | XF_10UC4    | 10              | Unsigned           | 4               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_12UC1    | 8               | Unsigned           | 1               |
+   | XF_12UC1    | 12              | Unsigned           | 1               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_12UC2    | 8               | Unsigned           | 2               |
+   | XF_12UC2    | 12              | Unsigned           | 2               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_12UC3    | 8               | Unsigned           | 3               |
+   | XF_12UC3    | 12              | Unsigned           | 3               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_12UC4    | 8               | Unsigned           | 4               |
+   | XF_12UC4    | 12              | Unsigned           | 4               |
    +-------------+-----------------+--------------------+-----------------+
    | XF_16UC1    | 16              | Unsigned           | 1               |
    +-------------+-----------------+--------------------+-----------------+
@@ -733,15 +733,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 .. table:: Table accumulate Function Resource Utilization Summary
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         | 62 | 55  | 12  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |389 | 285 | 61  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         | 62 | 55  | 12  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |389 | 285 | 61  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 The following table summarizes the resource utilization in different
@@ -751,13 +751,13 @@ Xczu9eg-ffvb1156-1-i-es1, to process 4K 3 Channel image.
 .. table:: Table 16. accumulate Function Resource Utilization Summary
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |207 | 72  | 32  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |207 | 72  | 32  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -769,15 +769,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table 17. accumulate Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. rubric:: Deviation from OpenCV
 
@@ -863,15 +863,15 @@ image.
 
 .. table:: Table accumulateSquare Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         | 71 | 52  | 14  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 8         |401 | 247 | 48  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         | 71 | 52  | 14  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 8         |401 | 247 | 48  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 The following table summarizes the resource utilization in different
@@ -881,13 +881,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4K 3 Channel image.
 .. table:: Table accumulateSquare Function Resource Utilization Summary
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 3         |227 | 86  | 37  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 3         |227 | 86  | 37  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 
@@ -901,15 +901,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 .. table:: Table accumulateSquare Function Performance Estimate Summary
 
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.6              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.6              |
+    +-----------------------------+------------------+
 
 .. rubric:: Deviation from OpenCV
 
@@ -1120,23 +1120,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table 27. AddS Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 100                         | 101                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 52                          | 185                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 20                          | 45                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 100                         | 101                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 52                          | 185                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 20                          | 45                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -1148,21 +1148,21 @@ image.
 
 .. table:: Table 28. AddS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _addweighted:
 
-Addweighted
-===========
+Add Weighted
+=============
 
 The addweighted function calculates a weighted sum of two input images
 src1, src2 and generates the result in dst.
@@ -1228,23 +1228,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 .. table:: Table 30. Addweighted Function Resource Utilization Summary
 
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 11                          | 25                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 903                         | 680                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 851                         | 1077                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 187                         | 229                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 11                          | 25                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 903                         | 680                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 851                         | 1077                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 187                         | 229                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 
@@ -1258,21 +1258,21 @@ image.
 
 .. table:: Table 31. Addweighted Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _autoexposurecorrection:
 
-Autoexposurecorrection
-======================
+Auto Exposure Correction
+=========================
 
 Auto exposure correction improves contrast and brightness of the image and also corrects the exposure of the input frame. The algorithm uses luminence histogram equalization to improve overall exposure and contrast of the image.
 Luminence (V) is extracted after converting input image to HSV color space. Once the algorthm is applied the image is converted back to RGB color space.
@@ -1345,19 +1345,20 @@ different configurations, as generated using Vitis HLS 2020.2 tool, to process a
 
 .. table:: Table AEC Function Performance Estimate Summary
 
-+--------------------+-------------------------+---------------------------------------------+
-|   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
-|                    |   (MHz)                 | **Max (ms)**                                |
-+====================+=========================+=============================================+
-| 1 pixel            | 300                     | 7                                           |
-+--------------------+-------------------------+---------------------------------------------+
-| 2 pixel            | 300                     | 3.7                                         |
-+--------------------+-------------------------+---------------------------------------------+
+    +--------------------+-------------------------+---------------------------------------------+
+    |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+    |                    |   (MHz)                 | **Max (ms)**                                |
+    +====================+=========================+=============================================+
+    | 1 pixel            | 300                     | 7                                           |
+    +--------------------+-------------------------+---------------------------------------------+
+    | 2 pixel            | 300                     | 3.7                                         |
+    +--------------------+-------------------------+---------------------------------------------+
 
 
 .. _autowhitebalance:
-Autowhitebalance
-=================
+
+Auto White Balance
+===================
 **Grayworld whitebalancing algorithm:**
 
 This algorithm scales the values of pixels based on a gray-world assumption which states that the average of all channels should result in a gray image.
@@ -1376,8 +1377,9 @@ A simple white balance algorithm that works by independently stretching each of 
 
 
 .. code:: c
-	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
-	void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+
+    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
+    void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
                   uint32_t histogram[3][HIST_SIZE],
                   float thresh,
@@ -1385,28 +1387,29 @@ A simple white balance algorithm that works by independently stretching each of 
                   float inputMax,
                   float outputMin,
                   float outputMax)
-	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE, int S_DEPTH = 2>
-	void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                  
+    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE, int S_DEPTH = 2>
+    void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& dst,
                       uint32_t histogram[3][HIST_SIZE],
                       float thresh,
                       float inputMin,
                       float inputMax,
                       float outputMin,
-                      float outputMax) 	
+                      float outputMax)     
 
-.. rubric:: API Syntax for Grayworld white balance	
+.. rubric:: API Syntax for Grayworld white balance    
 
-.. code:: c	
+.. code:: c    
 
-	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
-	void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
+    void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                     float thresh,
                     int i_gain[3])
-					
-	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int S_DEPTH = 2>
-	void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+                    
+    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int S_DEPTH = 2>
+    void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& src2,
                    float thresh,
                    int i_gain[3])
@@ -1432,13 +1435,13 @@ The following table describes the template and the function parameters.
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   WB_TYPE     | White balance type. Supported types are Gray world and simple.                                                               |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
-	|   HIST_SIZE   | Histogram size.                                                                                                              |
+    |   HIST_SIZE   | Histogram size.                                                                                                              |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   Src1        | Input image.                                                                                                                 |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   Src2        | Input image.                                                                                                                 |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
-	|   histogram   | Histogram array for the Simple AWB.                                                                                          |
+    |   histogram   | Histogram array for the Simple AWB.                                                                                          |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   i_gain      | Gain values for gray-world AWB.                                                                                              |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -1481,23 +1484,23 @@ different configurations, as generated using Vitis HLS 2020.1 tool for the Xilin
 
 .. table:: Table Autowhitebalance Function Performance Estimate Summary
 
-+--------------------+-------------------------+---------------------------------------------+
-|   Operating Mode   |   Operating Frequency   |   Latency Estimate                          |
-|                    |                         |                                             |
-|                    |   (MHz)                 |                                             |
-+                    +                         +---------------------------------------------+
-|                    |                         | **Max (ms)**                                |
-+====================+=========================+=============================================+
-| 1 pixel            | 300                     | 55.2 for still image(27.9 for video stream) |
-+--------------------+-------------------------+---------------------------------------------+
-| 2 pixel            | 300                     | 28 for still image(14.2 for video stream)   |
-+--------------------+-------------------------+---------------------------------------------+
+    +--------------------+-------------------------+---------------------------------------------+
+    |   Operating Mode   |   Operating Frequency   |   Latency Estimate                          |
+    |                    |                         |                                             |
+    |                    |   (MHz)                 |                                             |
+    +                    +                         +---------------------------------------------+
+    |                    |                         | **Max (ms)**                                |
+    +====================+=========================+=============================================+
+    | 1 pixel            | 300                     | 55.2 for still image(27.9 for video stream) |
+    +--------------------+-------------------------+---------------------------------------------+
+    | 2 pixel            | 300                     | 28 for still image(14.2 for video stream)   |
+    +--------------------+-------------------------+---------------------------------------------+
 
 
 .. _badpixelcorrection:
 
-Badpixelcorrection
-===================
+Bad Pixel Correction
+=====================
 
 An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. The Badpixelcorrection module removes the defective pixels in the image using below operation.
 
@@ -1507,7 +1510,7 @@ If the middle pixel value is lesser than minimum neighborhood value, will consid
 
 .. code:: c
 
-template<int TYPE, int ROWS, int COLS, int NPPC=1, int BORDER_T=XF_BORDER_CONSTANT, int USE_URAM=0>void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC> &_src,xf::cv::Mat<TYPE, ROWS, COLS, NPPC> &_dst)
+    template<int TYPE, int ROWS, int COLS, int NPPC=1, int BORDER_T=XF_BORDER_CONSTANT, int USE_URAM=0>void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC> &_src,xf::cv::Mat<TYPE, ROWS, COLS, NPPC> &_dst)
 
 The following table describes the template and the function parameters.
 
@@ -1750,17 +1753,17 @@ for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to progress a grayscale HD
 
 .. table:: Table bilateralFilter Resource Utilization Summary
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
-+                +                +                           +------------------+-----------+-------+-------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |
-+================+================+===========================+==================+===========+=======+=======+
-| 1 Pixel        | 3x3            | 300                       | 6                | 22        | 4934  | 4293  |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+
-|                | 5x5            | 300                       | 12               | 30        | 5481  | 4943  |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+
-|                | 7x7            | 300                       | 37               | 48        | 7084  | 6195  |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
+    +                +                +                           +------------------+-----------+-------+-------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |
+    +================+================+===========================+==================+===========+=======+=======+
+    | 1 Pixel        | 3x3            | 300                       | 6                | 22        | 4934  | 4293  |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+
+    |                | 5x5            | 300                       | 12               | 30        | 5481  | 4943  |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+
+    |                | 7x7            | 300                       | 37               | 48        | 7084  | 6195  |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
 
 
 The following table summarizes the resource utilization of the kernel in
@@ -1770,17 +1773,17 @@ for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to progress a 4K 3 channel image.
 .. table:: Table bilateralFilter Resource Utilization Summary
 
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
-+                +                +                           +------------------+-----------+-------+-------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |
-+================+================+===========================+==================+===========+=======+=======+
-| 1 Pixel        | 3x3            | 300                       | 12               | 32        | 8342  | 7442  |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+
-|                | 5x5            | 300                       | 27               | 57        | 10663 | 8857  |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+
-|                | 7x7            | 300                       | 49               | 107       | 12870 | 12181 |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
+    +                +                +                           +------------------+-----------+-------+-------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |
+    +================+================+===========================+==================+===========+=======+=======+
+    | 1 Pixel        | 3x3            | 300                       | 12               | 32        | 8342  | 7442  |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+
+    |                | 5x5            | 300                       | 27               | 57        | 10663 | 8857  |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+
+    |                | 7x7            | 300                       | 49               | 107       | 12870 | 12181 |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -1793,19 +1796,19 @@ image.
 
 .. table:: Table 35. bilateralFilter Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+
-| Operating Mode              | Filter Size      | Latency Estimate |
-+                             +                  +------------------+
-|                             |                  | 300 MHz          |
-+                             +                  +------------------+
-|                             |                  | Max Latency (ms) |
-+=============================+==================+==================+
-| 1 pixel                     | 3x3              | 7.18             |
-+                             +------------------+------------------+
-|                             | 5x5              | 7.20             |
-+                             +------------------+------------------+
-|                             | 7x7              | 7.22             |
-+-----------------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+
+    | Operating Mode              | Filter Size      | Latency Estimate |
+    +                             +                  +------------------+
+    |                             |                  | 300 MHz          |
+    +                             +                  +------------------+
+    |                             |                  | Max Latency (ms) |
+    +=============================+==================+==================+
+    | 1 pixel                     | 3x3              | 7.18             |
+    +                             +------------------+------------------+
+    |                             | 5x5              | 7.20             |
+    +                             +------------------+------------------+
+    |                             | 7x7              | 7.22             |
+    +-----------------------------+------------------+------------------+
 
 
 .. rubric:: Deviation from OpenCV
@@ -1914,30 +1917,30 @@ image.
 
 .. table:: Table 38. convertTo Function Resource Utilization Summary For `XF_CONVERT_8U_TO_16S` Conversion
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |581 | 523 | 119 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 8         |963 | 1446| 290 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |581 | 523 | 119 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 8         |963 | 1446| 290 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 
 .. table:: Table 39. convertTo Function Resource Utilization Summary For `XF_CONVERT_16U_TO_8U` Conversion
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |591 | 541 | 124 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 8         |915 | 1500| 308 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |591 | 541 | 124 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 8         |915 | 1500| 308 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 
@@ -1951,15 +1954,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 .. table:: Table 40. convertTo Function Performance Estimate Summary
 
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.69             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.69             |
+    +-----------------------------+------------------+
 
 
 .. _bitwise-and:
@@ -2031,15 +2034,15 @@ image.
 .. table:: Table 42. bitwise_and Function Resource Utilization Summary
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |62  | 44  | 10  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |59  | 72  | 13  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |62  | 44  | 10  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |59  | 72  | 13  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 
@@ -2050,13 +2053,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3Channel image.
 .. table:: Table 43. bitwise_and Function Resource Utilization Summary
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 
@@ -2070,15 +2073,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 .. table:: Table 44. bitwise_and Function Performance Estimate Summary
 
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _bitwise-not:
@@ -2145,15 +2148,15 @@ image.
 Table 46. bitwise_not Function Resource Utilization Summary
 
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |97  | 78  | 20  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |88  | 97  | 21  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |97  | 78  | 20  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |88  | 97  | 21  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 The following table summarizes the resource utilization in different
@@ -2162,13 +2165,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3Channel image.
 
 .. table:: Table 47. bitwise_not Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 ... rubric:: Performance Estimate
@@ -2180,15 +2183,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table 48. bitwise_not Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _bitwise-or:
 
@@ -2258,15 +2261,15 @@ image.
 
 .. table:: Table 50. bitwise_or Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |62  | 44  | 10  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |59  | 72  | 13  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |62  | 44  | 10  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |59  | 72  | 13  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the
@@ -2274,13 +2277,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3Channel image
 
 .. table:: Table 51. bitwise_or Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -2292,15 +2295,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table 52. bitwise_or Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _bitwise-xor:
 
@@ -2373,15 +2376,15 @@ image:
 
 .. table:: Table 54. bitwise_xor Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |62  | 44  | 10  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |59  | 72  | 13  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |62  | 44  | 10  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |59  | 72  | 13  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 
@@ -2394,13 +2397,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4k Channel image
 
 .. table:: Table 55. bitwise_xor Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |155 | 61  | 22  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 The following table summarizes the performance in different
@@ -2410,15 +2413,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image:
 .. table:: Table 56. bitwise_xor Function Performance Estimate Summary
 
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 
@@ -2512,7 +2515,7 @@ The following table summarizes a performance estimate of the kernel in different
     +--------------------+-------------------------+---------------------------------------------+
     | 2 pixel            | 300                     | 3.6                                         |
     +--------------------+-------------------------+---------------------------------------------+
-	
+    
 
 .. _box-filter:
 
@@ -2574,46 +2577,46 @@ The following table summarizes the resource utilization of the kernel in differe
 
 .. table:: Table 58. boxFilter Function Resource Utilization Summary
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                        |   
-+                +                +                           +------------------+-----------+-------+-------+--------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |  CLB   |
-+================+================+===========================+==================+===========+=======+=======+========+
-| 1 Pixel        | 3x3            | 300                       | 3                | 1         | 545   | 519   |  104   |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
-|                | 5x5            | 300                       | 5                | 1         | 876   | 870   |  189   |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
-|                | 7x7            | 300                       | 7                | 1         | 1539  | 1506  |  300   |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
-| 8 Pixel        | 3x3            | 150                       | 6                | 8         | 1002  | 1368  |  264   |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
-|                | 5x5            | 150                       | 10               | 8         | 1576  | 3183  |  611   |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
-|                | 7x7            | 150                       | 14               | 8         | 2414  | 5018  |  942   |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                        |   
+    +                +                +                           +------------------+-----------+-------+-------+--------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |  CLB   |
+    +================+================+===========================+==================+===========+=======+=======+========+
+    | 1 Pixel        | 3x3            | 300                       | 3                | 1         | 545   | 519   |  104   |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    |                | 5x5            | 300                       | 5                | 1         | 876   | 870   |  189   |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    |                | 7x7            | 300                       | 7                | 1         | 1539  | 1506  |  300   |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    | 8 Pixel        | 3x3            | 150                       | 6                | 8         | 1002  | 1368  |  264   |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    |                | 5x5            | 150                       | 10               | 8         | 1576  | 3183  |  611   |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+--------+
+    |                | 7x7            | 150                       | 14               | 8         | 2414  | 5018  |  942   |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
 
 
 The following table summarizes the resource utilization of the kernel in different configurations, generated using the Vivado HLS™ 2019.1 tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K (3840x2160) image with UltraRAM enable.
 
 .. table:: Table 59. boxFilter Function Resource Utilization Summary with UltraRAM enabled
 
-+----------------+----------------+---------------------------+------------------+-----------+----------+-------+--------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                           |   
-+                +                +                           +------------------+-----------+----------+-------+--------+
-|                |                |                           | BRAM_18K         | URAM      | DSP_48Es | FF    |  LUT   |
-+================+================+===========================+==================+===========+==========+=======+========+
-| 1 Pixel        | 3x3            | 300                       | 0                | 1         | 1        | 821   |  521   |
-+                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
-|                | 5x5            | 300                       | 0                | 1         | 1        | 1204  |  855   |
-+                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
-|                | 7x7            | 300                       | 0                | 1         | 1        | 2083  |  1431  |
-+----------------+----------------+---------------------------+------------------+-----------+----------+-------+--------+
-| 8 Pixel        | 3x3            | 150                       | 0                | 3         | 8        | 1263  |  1480  |
-+                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
-|                | 5x5            | 150                       | 0                | 5         | 8        | 1771  |  3154  |
-+                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
-|                | 7x7            | 150                       | 0                | 7         | 8        | 2700  |  5411  |
-+----------------+----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    +----------------+----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                           |   
+    +                +                +                           +------------------+-----------+----------+-------+--------+
+    |                |                |                           | BRAM_18K         | URAM      | DSP_48Es | FF    |  LUT   |
+    +================+================+===========================+==================+===========+==========+=======+========+
+    | 1 Pixel        | 3x3            | 300                       | 0                | 1         | 1        | 821   |  521   |
+    +                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    |                | 5x5            | 300                       | 0                | 1         | 1        | 1204  |  855   |
+    +                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    |                | 7x7            | 300                       | 0                | 1         | 1        | 2083  |  1431  |
+    +----------------+----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    | 8 Pixel        | 3x3            | 150                       | 0                | 3         | 8        | 1263  |  1480  |
+    +                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    |                | 5x5            | 150                       | 0                | 5         | 8        | 1771  |  3154  |
+    +                +----------------+---------------------------+------------------+-----------+----------+-------+--------+
+    |                | 7x7            | 150                       | 0                | 7         | 8        | 2700  |  5411  |
+    +----------------+----------------+---------------------------+------------------+-----------+----------+-------+--------+
 
 
 .. rubric:: Performance Estimate
@@ -2623,23 +2626,23 @@ The following table summarizes the performance of the kernel in different config
 
 .. table:: Table 60. boxFilter Function Performance Estimate Summary
 
-+-------------------+---------------------+------------------+------------------+
-| Operating Mode    | Operating Frequency | Filter Size      | Latency Estimate |
-+                   |       (MHz)         +                  +------------------+
-|                   |                     |                  | Max Latency (ms) |
-+===================+=====================+==================+==================+
-| 1 pixel           |       300           | 3x3              | 7.2              |
-+                   +---------------------+------------------+------------------+
-|                   |       300           | 5x5              | 7.21             |
-+                   +---------------------+------------------+------------------+
-|                   |       300           | 7x7              | 7.22             |
-+-------------------+---------------------+------------------+------------------+
-| 8 pixel           |       150           | 3x3              | 1.7              |
-+                   +---------------------+------------------+------------------+
-|                   |       150           | 5x5              | 1.7              |
-+                   +---------------------+------------------+------------------+
-|                   |       150           | 7x7              | 1.7              |
-+-------------------+---------------------+------------------+------------------+
+    +-------------------+---------------------+------------------+------------------+
+    | Operating Mode    | Operating Frequency | Filter Size      | Latency Estimate |
+    +                   |       (MHz)         +                  +------------------+
+    |                   |                     |                  | Max Latency (ms) |
+    +===================+=====================+==================+==================+
+    | 1 pixel           |       300           | 3x3              | 7.2              |
+    +                   +---------------------+------------------+------------------+
+    |                   |       300           | 5x5              | 7.21             |
+    +                   +---------------------+------------------+------------------+
+    |                   |       300           | 7x7              | 7.22             |
+    +-------------------+---------------------+------------------+------------------+
+    | 8 pixel           |       150           | 3x3              | 1.7              |
+    +                   +---------------------+------------------+------------------+
+    |                   |       150           | 5x5              | 1.7              |
+    +                   +---------------------+------------------+------------------+
+    |                   |       150           | 7x7              | 1.7              |
+    +-------------------+---------------------+------------------+------------------+
 
 
 .. _boundingbox:
@@ -2717,13 +2720,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table 62. boundingbox Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 5                    | 4         |2521|1649 | 409 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 5                    | 4         |2521|1649 | 409 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -2737,13 +2740,13 @@ image for highlighting 3 different boundaries (480x640, 100x200,
 
 .. table:: Table 63. boundingbox Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 0.15             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 0.15             |
+    +-----------------------------+------------------+
 
 .. rubric:: Vitis Vision Reference
 
@@ -2854,6 +2857,9 @@ parameters:
    |                       | In XF_NPPC8, output pixels precision is      |
    |                       | XF_NPPC8.                                    |
    +-----------------------+----------------------------------------------+
+   | NPC1                  | The output NPC is 32.Packing 2bit, 32 pixels |
+   |                       | into 64 bit pointer                          |
+   +-----------------------+----------------------------------------------+
    | USE_URAM              | Enable to map some storage structures to     |
    |                       | URAM                                         |
    +-----------------------+----------------------------------------------+
@@ -2908,25 +2914,25 @@ grayscale HD (1080x1920) image for Filter size is 3.
 
 .. table:: Table 66. xf::cv::Canny and EdgeTracing Function Resource Utilization Summary
 
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| Name           |Resource Utilization                                                                                                         |
-+                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-|                | 1 pixel            | 1 pixel            | 8 pixel            | 8 pixel            | Edge Linking       | Edge Linking       |
-+                +--------------------+--------------------+--------------------+--------------------+                    +                    +
-|                | L1NORM,FS:3        | L2NORM,FS:3        | L1NORM,FS:3        | L2NORM,FS:3        |                    |                    |
-+                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-|                | 300 MHz            | 300 MHz            | 150 MHz            | 150 MHz            | 300 MHz            | 150 MHz            |
-+================+====================+====================+====================+====================+====================+====================+
-| BRAM_18K       | 22                 | 18                 | 36                 | 32                 | 84                 | 84                 |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| DSP48E         | 2                  | 4                  | 16                 | 32                 | 3                  | 3                  |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| FF             | 3027               | 3507               | 4899               | 6208               | 17600              | 14356              |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| LUT            | 2626               | 3170               | 6518               | 9560               | 15764              | 14274              |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| CLB            | 606                | 708                | 1264               | 1871               | 2955               | 3241               |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | Name           |Resource Utilization                                                                                                         |
+    +                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    |                | 1 pixel            | 1 pixel            | 8 pixel            | 8 pixel            | Edge Linking       | Edge Linking       |
+    +                +--------------------+--------------------+--------------------+--------------------+                    +                    +
+    |                | L1NORM,FS:3        | L2NORM,FS:3        | L1NORM,FS:3        | L2NORM,FS:3        |                    |                    |
+    +                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    |                | 300 MHz            | 300 MHz            | 150 MHz            | 150 MHz            | 300 MHz            | 150 MHz            |
+    +================+====================+====================+====================+====================+====================+====================+
+    | BRAM_18K       | 22                 | 18                 | 36                 | 32                 | 84                 | 84                 |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | DSP48E         | 2                  | 4                  | 16                 | 32                 | 3                  | 3                  |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | FF             | 3027               | 3507               | 4899               | 6208               | 17600              | 14356              |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | LUT            | 2626               | 3170               | 6518               | 9560               | 15764              | 14274              |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | CLB            | 606                | 708                | 1264               | 1871               | 2955               | 3241               |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
 
 
 
@@ -2938,25 +2944,25 @@ image for Filter size is 3.
 .. table:: Table 67. xf::cv::Canny and EdgeTracing Function Resource Utilization Summary with UltraRAM Enable
 
 
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| Name           |Resource Utilization                                                                                                         |
-+                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-|                | 1 pixel            | 1 pixel            | 8 pixel            | 8 pixel            | Edge Linking       | Edge Linking       |
-+                +--------------------+--------------------+--------------------+--------------------+                    +                    +
-|                | L1NORM,FS:3        | L2NORM,FS:3        | L1NORM,FS:3        | L2NORM,FS:3        |                    |                    |
-+                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-|                | 300 MHz            | 300 MHz            | 150 MHz            | 150 MHz            | 300 MHz            | 150 MHz            |
-+================+====================+====================+====================+====================+====================+====================+
-| BRAM_18K       | 10                 | 8                  | 3                  | 3                  | 4                  | 4                  |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| URAM           | 1                  | 1                  | 15                 | 13                 | 8                  | 8                  |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| DSP48E         | 2                  | 4                  | 16                 | 32                 | 8                  | 8                  |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| FF             | 3184               | 3749               | 5006               | 7174               | 5581               | 7054               |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
-| LUT            | 2511               | 2950               | 6695               | 9906               | 4092               | 6380               |
-+----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | Name           |Resource Utilization                                                                                                         |
+    +                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    |                | 1 pixel            | 1 pixel            | 8 pixel            | 8 pixel            | Edge Linking       | Edge Linking       |
+    +                +--------------------+--------------------+--------------------+--------------------+                    +                    +
+    |                | L1NORM,FS:3        | L2NORM,FS:3        | L1NORM,FS:3        | L2NORM,FS:3        |                    |                    |
+    +                +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    |                | 300 MHz            | 300 MHz            | 150 MHz            | 150 MHz            | 300 MHz            | 150 MHz            |
+    +================+====================+====================+====================+====================+====================+====================+
+    | BRAM_18K       | 10                 | 8                  | 3                  | 3                  | 4                  | 4                  |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | URAM           | 1                  | 1                  | 15                 | 13                 | 8                  | 8                  |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | DSP48E         | 2                  | 4                  | 16                 | 32                 | 8                  | 8                  |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | FF             | 3184               | 3749               | 5006               | 7174               | 5581               | 7054               |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+    | LUT            | 2511               | 2950               | 6695               | 9906               | 4092               | 6380               |
+    +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
 
 .. rubric:: Performance Estimate
 
@@ -2969,15 +2975,15 @@ module.
 
 .. table:: Table 68. xf::cv::Canny and EdgeTracing Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 10.8             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 8.5              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 10.8             |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 8.5              |
+    +-----------------------------+------------------+
 
 
 .. rubric:: Deviation from OpenCV
@@ -3054,13 +3060,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4 single-channel HD
 
 .. table:: Table 70. merge Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |494 | 386 | 85  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |494 | 386 | 85  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -3073,13 +3079,13 @@ images.
 
 .. table:: Table 71. merge Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.92             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.92             |
+    +-----------------------------+------------------+
 
 
 .. _channel-extract:
@@ -3178,13 +3184,13 @@ image.
 
 .. table:: Table 74. extractChannel Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |508 | 354 | 96  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |508 | 354 | 96  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -3195,13 +3201,13 @@ Xczu9eg-ffvb1156-1-i-es1, to process a 4 channel HD (1080x1920) image.
 
 .. table:: Table 75. extractChannel Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.92             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.92             |
+    +-----------------------------+------------------+
 
 .. _color-conversion:
 
@@ -3214,27 +3220,28 @@ represent the input formats and the columns represent the output
 formats. Supported conversions are discussed in the following sections.
 
 .. table:: Table 76. Supported Color Conversions
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| I/O Formats | RGBA                                  | NV12                                           | NV21                                           | IYUV                                  | UYVY                                        | YUYV                                        | YUV4                                  | RGB                                         | BGR                                         |
-+=============+=======================================+================================================+================================================+=======================================+=============================================+=============================================+=======================================+=============================================+=============================================+
-| RGBA        | N/A                                   | For details, see the RGBA to NV12              | For details, see the RGBA to NV21              | For details, see the RGBA/RGB to IYUV |                                             |                                             | For details, see the RGBA/RGB to YUV4 |                                             |                                             |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| NV12        | For details, see the NV12 to RGBA     | N/A                                            | For details, see the NV12 to NV21/NV21 to NV12 | For details, see the NV12 to IYUV     | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV12 to YUV4     | For details, see the NV12/NV21 to RGB/ BGR  | For details, see the NV12/NV21 to RGB/ BGR  |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| NV21        | For details, see the NV21 to RGBA     | For details, see the NV12 to NV21/NV21 to NV12 | N/A                                            | For details, see the NV21 to IYUV     | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV21 to YUV4     | For details, see the NV12/NV21 to RGB/ BGR  | For details, see the NV12/NV21 to RGB/ BGR  |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| IYUV        | For details, see the IYUV to RGBA/RGB | For details, see the IYUV to NV12              |                                                | N/A                                   |                                             |                                             | For details, see the IYUV to YUV4     | For details, see the IYUV to RGBA/RGB       |                                             |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| UYVY        | For details, see the UYVY to RGBA     | For details, see the UYVY to NV12              |                                                | For details, see the UYVY to IYUV     | N/A                                         |                                             |                                       |                                             |                                             |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| YUYV        | For details, see the YUYV to RGBA     | For details, see the YUYV to NV12              |                                                | For details, see the YUYV to IYUV     |                                             | N/A                                         |                                       |                                             |                                             |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| YUV4        |                                       |                                                |                                                |                                       |                                             |                                             | N/A                                   |                                             |                                             |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| RGB         |                                       | For details see the RGB/ BGR to NV12/NV21      | For details see theRGB/ BGR to NV12/NV21       | For details see the RGBA/RGB to IYUV  | For details see the RGB/BGR to UYVY/YUYV    | For details see the RGB/BGR to UYVY/YUYV    | For details see the RGBA/RGB to YUV4  |                                             | For details see the BGR to RGB / RGB to BGR |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
-| BGR         |                                       | For details see the RGB/ BGR to NV12/NV21      | For details see theRGB/ BGR to NV12/NV21       |                                       | For details see the RGB/BGR to UYVY/YUYV    | For details see the RGB/BGR to UYVY/YUYV    |                                       | For details see the BGR to RGB / RGB to BGR |                                             |
-+-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | I/O Formats | RGBA                                  | NV12                                           | NV21                                           | IYUV                                  | UYVY                                        | YUYV                                        | YUV4                                  | RGB                                         | BGR                                         |
+    +=============+=======================================+================================================+================================================+=======================================+=============================================+=============================================+=======================================+=============================================+=============================================+
+    | RGBA        | N/A                                   | For details, see the RGBA to NV12              | For details, see the RGBA to NV21              | For details, see the RGBA/RGB to IYUV |                                             |                                             | For details, see the RGBA/RGB to YUV4 |                                             |                                             |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | NV12        | For details, see the NV12 to RGBA     | N/A                                            | For details, see the NV12 to NV21/NV21 to NV12 | For details, see the NV12 to IYUV     | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV12 to YUV4     | For details, see the NV12/NV21 to RGB/ BGR  | For details, see the NV12/NV21 to RGB/ BGR  |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | NV21        | For details, see the NV21 to RGBA     | For details, see the NV12 to NV21/NV21 to NV12 | N/A                                            | For details, see the NV21 to IYUV     | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV12/NV21 to UYVY/YUYV | For details, see the NV21 to YUV4     | For details, see the NV12/NV21 to RGB/ BGR  | For details, see the NV12/NV21 to RGB/ BGR  |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | IYUV        | For details, see the IYUV to RGBA/RGB | For details, see the IYUV to NV12              |                                                | N/A                                   |                                             |                                             | For details, see the IYUV to YUV4     | For details, see the IYUV to RGBA/RGB       |                                             |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | UYVY        | For details, see the UYVY to RGBA     | For details, see the UYVY to NV12              |                                                | For details, see the UYVY to IYUV     | N/A                                         |                                             |                                       |                                             |                                             |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | YUYV        | For details, see the YUYV to RGBA     | For details, see the YUYV to NV12              |                                                | For details, see the YUYV to IYUV     |                                             | N/A                                         |                                       |                                             |                                             |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | YUV4        |                                       |                                                |                                                |                                       |                                             |                                             | N/A                                   |                                             |                                             |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | RGB         |                                       | For details see the RGB/ BGR to NV12/NV21      | For details see theRGB/ BGR to NV12/NV21       | For details see the RGBA/RGB to IYUV  | For details see the RGB/BGR to UYVY/YUYV    | For details see the RGB/BGR to UYVY/YUYV    | For details see the RGBA/RGB to YUV4  |                                             | For details see the BGR to RGB / RGB to BGR |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
+    | BGR         |                                       | For details see the RGB/ BGR to NV12/NV21      | For details see theRGB/ BGR to NV12/NV21       |                                       | For details see the RGB/BGR to UYVY/YUYV    | For details see the RGB/BGR to UYVY/YUYV    |                                       | For details see the BGR to RGB / RGB to BGR |                                             |
+    +-------------+---------------------------------------+------------------------------------------------+------------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+
 
 .. rubric:: Other conversions
 
@@ -3327,13 +3334,13 @@ image.
 
 .. table:: Table (rgba/rgb)2yuv4 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 9         |589 | 328 | 96  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 9         |589 | 328 | 96  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -3346,13 +3353,13 @@ version for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table (rgba/rgb)2yuv4 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 1.89             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 1.89             |
+    +-----------------------------+------------------+
 
 
 .. _rgba-iyuv:
@@ -3424,13 +3431,13 @@ image.
 
 .. table:: Table (rgba/rgb)2iyuv Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 9         |816 | 472 | 149 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 9         |816 | 472 | 149 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -3442,13 +3449,13 @@ image.
 
 .. table:: Table (rgba/rgb)2iyuv Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 1.8              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 1.8              |
+    +-----------------------------+------------------+
 
 .. _rgba-nv12:
 
@@ -3513,13 +3520,13 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table rgba2nv12 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 9         |802 | 452 | 128 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 9         |802 | 452 | 128 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -3530,13 +3537,13 @@ image.
 
 .. table:: Table rgba2nv12 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 1.8              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 1.8              |
+    +-----------------------------+------------------+
 
 .. _rgba-nv21:
 
@@ -3603,13 +3610,13 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table rgba2nv21 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 9         |802 | 453 | 131 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 9         |802 | 453 | 131 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -3622,13 +3629,13 @@ image.
 
 .. table:: Table rgba2nv21 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 1.89             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 1.89             |
+    +-----------------------------+------------------+
 
 .. _yuyv-rgba:
 
@@ -3687,13 +3694,13 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table yuyv2rgba Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 6         |765 | 705 | 165 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 6         |765 | 705 | 165 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -3706,13 +3713,13 @@ image.
 
 .. table:: Table yuyv2rgba Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _yuv-to-nv12:
@@ -3780,15 +3787,15 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table yuyv2nv12 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |831 | 491 | 149 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |1196| 632 | 161 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |831 | 491 | 149 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |1196| 632 | 161 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -3801,15 +3808,15 @@ image.
 
 .. table:: Table yuyv2nv12 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _yuyv-to-iyuv:
 
@@ -3878,15 +3885,15 @@ image.
 
 .. table:: Table yuyv2iyuv Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |835 | 497 | 149 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |1428| 735 | 210 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |835 | 497 | 149 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |1428| 735 | 210 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -3897,15 +3904,15 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table yuyv2iyuv Function Performance Estimate
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _uyvy-to-iyuv:
 
@@ -3968,15 +3975,16 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 Table uyvy2iyuv Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |835 | 494 | 139 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |1428| 740 | 209 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |835 | 494 | 139 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |1428| 740 | 209 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+
 .. rubric:: Performance Estimate
 
 
@@ -3987,15 +3995,15 @@ image.
 
 .. table:: Table uyvy2iyuv Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _uyvy-to-rgba:
 
@@ -4056,13 +4064,13 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table uyvy2rgba Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 6         |773 | 704 | 160 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 6         |773 | 704 | 160 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -4073,13 +4081,14 @@ the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920)
 image.
 
 .. table:: Table uyvy2rgba Function Performance Estimate Summary
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.8              |
-+-----------------------------+------------------+
+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.8              |
+    +-----------------------------+------------------+
 
 .. _uyvy-to-nv12:
 
@@ -4147,15 +4156,15 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table uyvy2nv12 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |831 | 488 | 131 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |1235| 677 | 168 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |831 | 488 | 131 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |1235| 677 | 168 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -4166,15 +4175,15 @@ image.
 
 .. table:: Table uyvy2nv12 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _iyuv-to-rgba:
@@ -4246,13 +4255,13 @@ image.
 
 .. table:: Table iyuv2(rgba/rgb) Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 2                    | 5         |1208| 728 | 196 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 2                    | 5         |1208| 728 | 196 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -4265,13 +4274,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table iyuv2(rgba/rgb) Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _iyuv-to-nv12:
 
@@ -4341,15 +4350,15 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image..
 
 .. table:: Table iyuv2nv12 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 12        |907 | 677 | 158 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 12        |1591| 1022| 235 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 12        |907 | 677 | 158 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 12        |1591| 1022| 235 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -4362,15 +4371,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table iyuv2nv12 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _iyuv-to-yuv4:
 
@@ -4441,15 +4450,15 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 .. table:: Table iyuv2yuv4 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |1398| 870 | 232 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |2134| 1214| 304 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |1398| 870 | 232 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |2134| 1214| 304 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -4462,15 +4471,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table iyuv2yuv4 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 13.8             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 3.4              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 13.8             |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 3.4              |
+    +-----------------------------+------------------+
 
 
 .. _nv12-to-iyuv:
@@ -4543,15 +4552,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table nv122iyuv Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |1344| 717 | 208 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 1         |1961| 1000| 263 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |1344| 717 | 208 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 1         |1961| 1000| 263 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -4563,15 +4572,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table nv122iyuv Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _nv12-to-rgba:
@@ -4640,13 +4649,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table nv122rgba Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 2                    | 5         |1191| 708 | 195 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 2                    | 5         |1191| 708 | 195 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -4658,13 +4667,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table nv122rgba Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _nv12-to-yuv4:
 
@@ -4736,15 +4745,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table nv122yuv4 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |1383| 832 | 230 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |1772| 1034| 259 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |1383| 832 | 230 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |1772| 1034| 259 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -4757,15 +4766,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table nv122yuv4 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 13.8             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 3.4              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 13.8             |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 3.4              |
+    +-----------------------------+------------------+
 
 .. _nv21-to-iyuv:
 
@@ -4837,15 +4846,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table nv212iyuv Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |1377| 730 | 219 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 1         |1975| 1012| 279 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |1377| 730 | 219 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 1         |1975| 1012| 279 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -4858,15 +4867,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table nv212iyuv Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _nv21-to-rgba:
@@ -4934,13 +4943,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table nv212rgba Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 2                    | 5         |1170| 673 | 183 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 2                    | 5         |1170| 673 | 183 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -4952,13 +4961,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table nv212rgba Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _nv21-to-yuv4:
@@ -5031,15 +5040,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table nv212yuv4 Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |1383| 817 | 233 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 8 Pixel        | 150                       | 0                    | 0         |1887| 1087| 287 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |1383| 817 | 233 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 8 Pixel        | 150                       | 0                    | 0         |1887| 1087| 287 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -5051,15 +5060,15 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table nv212yuv4 Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 13.8             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 3.5              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 13.8             |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 3.5              |
+    +-----------------------------+------------------+
 
 
 .. _rgb-to-gray:
@@ -5121,13 +5130,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table RGB2GRAY Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 3         |439 | 280 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 3         |439 | 280 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5139,13 +5148,14 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 (1080x1920) image.
 
 Table RGB2GRAY Function Performance Estimate Summary
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _bgr-to-gray:
 
@@ -5213,13 +5223,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table bgr2gray Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 3         |439 | 280 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 3         |439 | 280 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5232,13 +5242,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 Table bgr2gray Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _gray-to-rgb:
@@ -5303,13 +5313,13 @@ image.
 
 .. table:: Table gray2rgb Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |156 | 184 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |156 | 184 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5322,13 +5332,13 @@ image.
 
 .. table:: Table gray2rgb Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _gray-to-bgr:
 
@@ -5397,13 +5407,13 @@ image.
 
 .. table:: Table gray2bgr Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |156 | 184 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |156 | 184 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5415,13 +5425,13 @@ for the Xczu9eg-ffvb1156-1-i-es1, to process a HD (1080x1920) image.
 
 .. table:: Table gray2bgr Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _hls-to-rgb:
 
@@ -5486,13 +5496,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table HLS2RGB/BGR Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 3         |4366| 3096|
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 3         |4366| 3096|
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5505,13 +5515,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table HLS2RGB/BGR Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _rgb-to-xyz:
 
@@ -5574,13 +5584,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table RGB2XYZ Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |644 | 380 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |644 | 380 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -5592,13 +5602,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table RGB2XYZ Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _bgr-to-xyz:
@@ -5661,13 +5671,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table BGR2XYZ Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |644 | 380 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |644 | 380 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -5679,13 +5689,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table BGR2XYZ Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _rgb-to-ycrcb:
@@ -5756,13 +5766,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table RGB/BGR2YCrCb Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 5         |660 | 500 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 5         |660 | 500 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5775,13 +5785,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table RGB/BGR2YCrCb Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _rgb-to-hsv:
@@ -5849,13 +5859,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table RGB/BGR2HSV Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 6                    | 8         |1582| 1274|
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 6                    | 8         |1582| 1274|
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -5867,13 +5877,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table RGB/BGR2HSV Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _rgb-to-hls:
@@ -5937,13 +5947,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table RGB/BGR2HLS Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 3         |4366| 3096|
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 3         |4366| 3096|
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -5956,13 +5966,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table RGB/BGR2HLS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _ycrcb-to-rgb:
@@ -6033,13 +6043,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table YCrCb2RGB/BGR Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 4         |538 | 575 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 4         |538 | 575 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6052,13 +6062,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table YCrCb2RGB/BGR Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _hsv-to-rgb:
 
@@ -6126,13 +6136,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table HSV2RGB/BGR Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |1543| 1006|
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |1543| 1006|
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6145,13 +6155,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table HSV2RGB/BGR Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _nv21-to-rgb:
@@ -6239,13 +6249,13 @@ to ``RGB/ BGR`` function in Normal mode (1 pixel), as generated in the
 Vivado HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to
 process a HD (1080x1920) image.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 2                    | 5         |339 | 289 | 76  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 2                    | 5         |339 | 289 | 76  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6257,13 +6267,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _nv12-to-nv21-to-nv12:
@@ -6341,13 +6351,13 @@ NV122NV21/NV212NV12 function in Normal mode (1-Pixel), as generated in
 the Vivado HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA
 to process a HD (1080x1920) image.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |258 | 161 | 61  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |258 | 161 | 61  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6359,13 +6369,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _nv12-uyvy:
 
@@ -6456,13 +6466,13 @@ The following table summarizes the resource utilization of
 generated in the Vivado HLS 2019.1 tool for the Xilinx
 xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 1                    | 0         |337 | 201 | 64  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 1                    | 0         |337 | 201 | 64  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6474,13 +6484,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _uyvy-yuyv-to-rgb:
@@ -6565,13 +6575,13 @@ to ``RGB/BGR`` function in Normal mode(1-Pixel), as generated in the
 Vivado HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to
 process a HD (1080x1920) image.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 6         |444 | 486 | 109 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 6         |444 | 486 | 109 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -6582,13 +6592,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _uyvy-to-yuyv-to-uyvy:
 
@@ -6653,13 +6663,13 @@ The following table summarizes the resource utilization of ``UYVY`` to
 generated in the Vivado HLS 2019.1 tool for the Xilinx
 xczu9eg-ffvb1156-2-i-es2 FPGA.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 1         |368 | 176 | 109 |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 1         |368 | 176 | 109 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6671,13 +6681,14 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a grayscale HD
 (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _uyvy-yuyv-to-nv21:
@@ -6754,13 +6765,13 @@ to ``NV21`` function in Normal mode (1 pixel), as generated in the
 Vivado HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to
 process a HD (1080x1920) image.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |215 | 73  | 42  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |215 | 73  | 42  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6772,13 +6783,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _rgb-bgr-to-nv12-nv21:
@@ -6871,13 +6882,13 @@ to ``NV12/NV21`` function in Normal mode (1-Pixel), as generated in the
 Vivado HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to
 process a HD (1080x1920) image.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 9         |413 | 279 | 66  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 9         |413 | 279 | 66  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -6889,13 +6900,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _bgr-to-rgb-to-bgr:
@@ -6954,13 +6965,13 @@ The following table summarizes the resource utilization of RGB to BGR/
 BGR to RGB function in Normal mode (1-Pixel), as generated in the Vivado
 HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 0         |317 | 118 | 98  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 0         |317 | 118 | 98  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -6971,13 +6982,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _rgb-bgr-to-uyvy-yuyv:
 
@@ -7054,13 +7065,13 @@ The following table summarizes the resource utilization of ``RGB/BGR``
 to ``UYVY/YUYV`` function in normal mode(1-Pixel), as generated in the
 Vivado HLS 2019.1 tool for the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA.
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0                    | 9         |249 | 203 | 55  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0                    | 9         |249 | 203 | 55  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -7072,13 +7083,13 @@ Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA to process a HD (1080x1920) image.
 
 .. table:: Table Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _xyz-to-rgb-bgr:
 
@@ -7137,13 +7148,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD
 
 .. table:: Table XYZ2RGB/BGR Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +                           +----------------------+-----------+----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===========================+======================+===========+====+=====+
-| 1 Pixel        | 300                       | 0                    | 8         |639 | 401 |
-+----------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +                           +----------------------+-----------+----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===========================+======================+===========+====+=====+
+    | 1 Pixel        | 300                       | 0                    | 8         |639 | 401 |
+    +----------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -7156,13 +7167,13 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 
 .. table:: Table XYZ2RGB/BGR Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 
 .. _colorcorrectionmatrix:
@@ -7240,7 +7251,7 @@ The following table summarizes a performance estimate of the kernel in different
     +--------------------+-------------------------+---------------------------------------------+
     | 2 pixel            | 300                     | 3.6                                         |
     +--------------------+-------------------------+---------------------------------------------+
-	
+    
 
 .. _color-tresholding:
 
@@ -7265,33 +7276,33 @@ the source image with low and high threshold values, and returns either
 
 The table below describes the template and the function parameters.
 
-+--------------+-------------------------------------------------------+
-| Parameter    | Description                                           |
-+==============+=======================================================+
-| SRC_T        | Input pixel type. Only 8-bit, unsigned, 3 channel is  |
-|              | supported (XF_8UC3).                                  |
-+--------------+-------------------------------------------------------+
-| DST_T        | Output pixel type. Only 8-bit, unsigned, 1 channel is |
-|              | supported (XF_8UC1).                                  |
-+--------------+-------------------------------------------------------+
-| MAXCOLORS    | Maximum number of color values                        |
-+--------------+-------------------------------------------------------+
-| ROWS         | Maximum height of input and output image              |
-+--------------+-------------------------------------------------------+
-| COLS         | Maximum width of input and output image. Must be a    |
-|              | multiple of 8, for 8 pixel mode.                      |
-+--------------+-------------------------------------------------------+
-| NPC          | Number of pixels to be processed per cycle. Only      |
-|              | XF_NPPC1 supported.                                   |
-+--------------+-------------------------------------------------------+
-| \_src_mat    | Input image                                           |
-+--------------+-------------------------------------------------------+
-| \_dst_mat    | Thresholded image                                     |
-+--------------+-------------------------------------------------------+
-| low_thresh   | Lowest threshold values for the colors                |
-+--------------+-------------------------------------------------------+
-| high_thresh  | Highest threshold values for the colors               |
-+--------------+-------------------------------------------------------+
+    +--------------+-------------------------------------------------------+
+    | Parameter    | Description                                           |
+    +==============+=======================================================+
+    | SRC_T        | Input pixel type. Only 8-bit, unsigned, 3 channel is  |
+    |              | supported (XF_8UC3).                                  |
+    +--------------+-------------------------------------------------------+
+    | DST_T        | Output pixel type. Only 8-bit, unsigned, 1 channel is |
+    |              | supported (XF_8UC1).                                  |
+    +--------------+-------------------------------------------------------+
+    | MAXCOLORS    | Maximum number of color values                        |
+    +--------------+-------------------------------------------------------+
+    | ROWS         | Maximum height of input and output image              |
+    +--------------+-------------------------------------------------------+
+    | COLS         | Maximum width of input and output image. Must be a    |
+    |              | multiple of 8, for 8 pixel mode.                      |
+    +--------------+-------------------------------------------------------+
+    | NPC          | Number of pixels to be processed per cycle. Only      |
+    |              | XF_NPPC1 supported.                                   |
+    +--------------+-------------------------------------------------------+
+    | \_src_mat    | Input image                                           |
+    +--------------+-------------------------------------------------------+
+    | \_dst_mat    | Thresholded image                                     |
+    +--------------+-------------------------------------------------------+
+    | low_thresh   | Lowest threshold values for the colors                |
+    +--------------+-------------------------------------------------------+
+    | high_thresh  | Highest threshold values for the colors               |
+    +--------------+-------------------------------------------------------+
 
 .. _compare:
 
@@ -7368,23 +7379,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table Compare Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 87                          | 60                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 38                          | 84                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 16                          | 20                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 87                          | 60                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 38                          | 84                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 16                          | 20                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -7397,15 +7408,15 @@ image.
 
 .. table:: Table Compare Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _compares:
@@ -7487,23 +7498,23 @@ for the Xczu9eg-ffvb1156-1-i-es1 FPGA
 
 .. table:: Table CompareS Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 93                          | 93                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 39                          | 68                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 21                          | 28                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 93                          | 93                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 39                          | 68                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 21                          | 28                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -7516,15 +7527,15 @@ image.
 
 .. table:: Table CompareS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _convertscaleabs:
@@ -7593,23 +7604,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . convertScaleAbs Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 38                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 949                         | 1971                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 1052                        | 1522                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 218                         | 382                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 38                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 949                         | 1971                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 1052                        | 1522                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 218                         | 382                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 
@@ -7623,15 +7634,15 @@ image...
 
 .. table:: Table . convertScaleAbs Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 .. _crop:
@@ -7689,7 +7700,7 @@ The following table describes the template and the function parameters.
    +---------------+------------------------------------------------------+
    | \_dst_mat     | Output ROI image                                     |
    +---------------+------------------------------------------------------+
-   | roi           | ROI is a ``xf::cv::Rect`` object that consists of the    |
+   | roi           | ROI is a ``xf::cv::Rect`` object that consists of the|
    |               | top left corner of the rectangle along with the      |
    |               | height and width of the rectangle.                   |
    +---------------+------------------------------------------------------+
@@ -7705,21 +7716,21 @@ xczu9eg-ffvb1156-2-i-es2 FPGA.
 
 .. table:: Table Crop Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 6                           | 8                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 10                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 17482                       | 16995                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 16831                       | 15305                       |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 6                           | 8                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 10                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 17482                       | 16995                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 16831                       | 15305                       |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -7732,15 +7743,15 @@ image for 3 ROIs (480x640, 100x200, 300x300).
 
 .. table:: Table Crop Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 1.7              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 0.6              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 1.7              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 0.6              |
+    +-----------------------------+------------------+
 
 
 Multiple ROI Extraction
@@ -7758,6 +7769,132 @@ Multiple ROI Extraction Example
 .. code:: c
 
     {xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[0],roi[0]); xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[1],roi[1]); xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[2],roi[2]);}
+    
+
+.. _customcca:
+
+Custom CCA
+==========
+
+The ``custom CCA`` function takes a binary image as input which contains a 
+fruit on a conveyer belt (black background) and returns the total fruit pixels 
+minus defect, total defect pixels and defect image  which has the defects marked as 
+'255'. This function is a custom made solution for defect detection in fruit, which 
+ideally works with other pre-processing functions.
+
+The custom CCA algorthm works in two-passes. The first pass includes labelling the 
+background, foreground and defect in forward and reverse raster-scan. The second pass 
+to perform an '&' operation over the forward and reverse partial output data. 
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+    template <int HEIGHT, int WIDTH>
+    void ccaCustom(
+    uint8_t* in_ptr1, 
+    uint8_t* in_ptr2, 
+    uint8_t* tmp_out_ptr1, 
+    uint8_t* tmp_out_ptr2, 
+    uint8_t* out_ptr, 
+    int& obj_pix, 
+    int& def_pix, 
+    int height, 
+    int width)
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table accumulate Parameter Description
+
+   +-----------------+----------------------------------------------------+
+   | Parameter       | Description                                        |
+   +=================+====================================================+
+   | HEIGHT          | Maximum height of input and output image.          |
+   +-----------------+----------------------------------------------------+
+   | WIDTH           | Maximum width of input and output image.           |
+   +-----------------+----------------------------------------------------+
+   | in_ptr1         | Input 8-bit image pointer for forward pass, binary |
+   |                 | 8-bit image ('0' and '255')                        |
+   +-----------------+----------------------------------------------------+
+   | in_ptr1         | Input 8-bit image pointer for the parallel         |
+   |                 | computation of reverse pass, binary 8-bit image    |
+   |                 | ('0' and '255')                                    |
+   +-----------------+----------------------------------------------------+
+   | tmp_out_ptr1    | 8-bit pointer to store and read from the temporary |
+   |                 | buffer in DDR for the forward pass. This memory    |
+   |                 | must be allocated before the kernel call.          |
+   +-----------------+----------------------------------------------------+
+   | tmp_out_ptr2    | 8-bit pointer to store and read from the temporary |
+   |                 | buffer in DDR for the reverse pass. This memory    |
+   |                 | must be allocated before the kernel call.          |
+   +-----------------+----------------------------------------------------+
+   | out_ptr         | Output 8-bit image pointer for the which contains  |
+   |                 | the defects image. Defect pixels are marked as     |
+   |                 | '255'.                                             |
+   +-----------------+----------------------------------------------------+
+   | obj_pix         | output - no. of object/foreground pixels without   |
+   |                 | the count of defect pixels.                        |
+   +-----------------+----------------------------------------------------+
+   | def_pix         | output - no. of defect pixels in the               |
+   |                 | object/foreground.                                 |
+   +-----------------+----------------------------------------------------+
+   | height          | Height of the input image                          |
+   +-----------------+----------------------------------------------------+
+   | Width           | Width of the input image                           |
+   +-----------------+----------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization for custom CCA, generated using Vivado HLS 2021.1 tool for the xczu9eg-ffvb1156-1-i-es1, to process a FHD (1080x1920) image.
+
+.. table:: Table customCCA Function Resource Utilization Summary
+
+
+    +----------------+---------------------------+----------------------+-----------+-------+------+------+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                     |
+    +                +                           +----------------------+-----------+-------+------+------+
+    |                |                           | BRAM_18K             | DSP_48Es  |   FF  |  LUT | CLB  |
+    +================+===========================+======================+===========+=======+======+======+
+    | 1 Pixel        | 300                       | 10                   | 10        | 11166 | 7556 | 1757 |
+    +----------------+---------------------------+----------------------+-----------+-------+------+------+
+
+
+The following table summarizes the resource utilization for custom CCA, generated using Vivado HLS 2021.1 tool for the xczu9eg-ffvb1156-1-i-es1, to process a 4K image.
+
+.. table:: Table 16. customCCA Function Resource Utilization Summary
+
+
+    +----------------+---------------------------+----------------------+-----------+-------+------+------+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                     |
+    +                +                           +----------------------+-----------+-------+------+------+
+    |                |                           | BRAM_18K             | DSP_48Es  |   FF  |  LUT | CLB  |
+    +================+===========================+======================+===========+=======+======+======+
+    | 1 Pixel        | 300                       | 12                   | 10        | 11199 | 7804 | 1748 |
+    +----------------+---------------------------+----------------------+-----------+-------+------+------+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes the performance for custom CCA, as generated using Vivado HLS 2019.1 tool for the xczu9eg-ffvb1156-1-i-es1, to process a FHD (1080x1920) image.
+
+.. table:: Table 17. customCCA Function Performance Estimate Summary
+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 14               |
+    +-----------------------------+------------------+
 
 .. _custom-convolution:
 
@@ -7851,19 +7988,19 @@ image.
 
 .. table:: Table filter2D Function Resource Utilization Summary
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |
-+                +                +                           +------------------+-----------+-------+-------+----------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |    CLB   |
-+================+================+===========================+==================+===========+=======+=======+==========+
-| 1 Pixel        | 3x3            | 300                       | 3                | 9         | 1701  | 1161  |   269    |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 5x5            | 300                       | 5                | 25        | 3115  | 2144  |   524    |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
-| 8 Pixel        | 3x3            | 150                       | 6                | 72        | 2783  | 2768  |   638    |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 5x5            | 150                       | 10               | 216       | 3020  | 4443  |   1007   |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |
+    +                +                +                           +------------------+-----------+-------+-------+----------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |    CLB   |
+    +================+================+===========================+==================+===========+=======+=======+==========+
+    | 1 Pixel        | 3x3            | 300                       | 3                | 9         | 1701  | 1161  |   269    |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 5x5            | 300                       | 5                | 25        | 3115  | 2144  |   524    |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    | 8 Pixel        | 3x3            | 150                       | 6                | 72        | 2783  | 2768  |   638    |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 5x5            | 150                       | 10               | 216       | 3020  | 4443  |   1007   |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
 
 
 The following table summarizes the resource utilization of the kernel in
@@ -7872,15 +8009,15 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 Channel image.
 
 .. table:: Table filter2D Function Resource Utilization Summary
 
-+----------------+---------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Filter Size   | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +               +                           +----------------------+-----------+----+-----+
-|                |               |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===============+===========================+======================+===========+====+=====+
-| 1 Pixel        |  3x3          | 300                       | 18                   | 27        |886 | 801 |
-+----------------+---------------+---------------------------+----------------------+-----------+----+-----+
-| 8 Pixel        |  5x5          | 300                       | 30                   | 75        |1793|1445 |
-+----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Filter Size   | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +               +                           +----------------------+-----------+----+-----+
+    |                |               |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===============+===========================+======================+===========+====+=====+
+    | 1 Pixel        |  3x3          | 300                       | 18                   | 27        |886 | 801 |
+    +----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+    | 8 Pixel        |  5x5          | 300                       | 30                   | 75        |1793|1445 |
+    +----------------+---------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -7893,19 +8030,19 @@ image.
 
 .. table:: Table filter2D Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+------------------+
-| Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
-+                             +  Frequency       +                  +------------------+
-|                             |  (MHz)           |                  | Max (ms)         |
-+=============================+==================+==================+==================+
-| 1 pixel                     | 300              | 3x3              | 7                |
-+                             +------------------+------------------+------------------+
-|                             | 300              | 5x5              | 7.1              |
-+-----------------------------+------------------+------------------+------------------+
-| 8 pixel                     | 150              | 3x3              | 1.86             |
-+                             +------------------+------------------+------------------+
-|                             | 150              | 5x5              | 1.86             |
-+-----------------------------+------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+------------------+
+    | Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
+    +                             +  Frequency       +                  +------------------+
+    |                             |  (MHz)           |                  | Max (ms)         |
+    +=============================+==================+==================+==================+
+    | 1 pixel                     | 300              | 3x3              | 7                |
+    +                             +------------------+------------------+------------------+
+    |                             | 300              | 5x5              | 7.1              |
+    +-----------------------------+------------------+------------------+------------------+
+    | 8 pixel                     | 150              | 3x3              | 1.86             |
+    +                             +------------------+------------------+------------------+
+    |                             | 150              | 5x5              | 1.86             |
+    +-----------------------------+------------------+------------------+------------------+
 
 
 .. _delay:
@@ -7936,27 +8073,27 @@ number of clock cycles.
 
 The table below describes the template and the function parameters.
 
-+--------------+-------------------------------------------------------+
-| Parameter    | Description                                           |
-+==============+=======================================================+
-| SRC_T        | Input and output pixel type                           |
-+--------------+-------------------------------------------------------+
-| ROWS         | Maximum height of input and output image.             |
-+--------------+-------------------------------------------------------+
-| COLS         | Maximum width of input and output image (must be a    |
-|              | multiple of 8, for 8 pixel operation)                 |
-+--------------+-------------------------------------------------------+
-| NPC          | Number of pixels to be processed per cycle; possible  |
-|              | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8   |
-|              | pixel operations respectively.                        |
-+--------------+-------------------------------------------------------+
-| MAXDELAY     | Maximum delay that the function is to be instantiated |
-|              | for.                                                  |
-+--------------+-------------------------------------------------------+
-| \_src        | Input image                                           |
-+--------------+-------------------------------------------------------+
-| \_dst        | Output image                                          |
-+--------------+-------------------------------------------------------+
+    +--------------+-------------------------------------------------------+
+    | Parameter    | Description                                           |
+    +==============+=======================================================+
+    | SRC_T        | Input and output pixel type                           |
+    +--------------+-------------------------------------------------------+
+    | ROWS         | Maximum height of input and output image.             |
+    +--------------+-------------------------------------------------------+
+    | COLS         | Maximum width of input and output image (must be a    |
+    |              | multiple of 8, for 8 pixel operation)                 |
+    +--------------+-------------------------------------------------------+
+    | NPC          | Number of pixels to be processed per cycle; possible  |
+    |              | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8   |
+    |              | pixel operations respectively.                        |
+    +--------------+-------------------------------------------------------+
+    | MAXDELAY     | Maximum delay that the function is to be instantiated |
+    |              | for.                                                  |
+    +--------------+-------------------------------------------------------+
+    | \_src        | Input image                                           |
+    +--------------+-------------------------------------------------------+
+    | \_dst        | Output image                                          |
+    +--------------+-------------------------------------------------------+
 
 .. _demosaicing:
 
@@ -8035,17 +8172,17 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table Demosaicing Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-+                +                           +----------------------+-----------+----+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+======================+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 8                    | 0         |1906|1915 |412  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 2 Pixel        | 300                       | 8                    | 0         |2876|3209 |627  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
-| 4 Pixel        | 300                       | 8                    | 0         |2950|3222 |660  |
-+----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
+    +                +                           +----------------------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+======================+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 8                    | 0         |1906|1915 |412  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 2 Pixel        | 300                       | 8                    | 0         |2876|3209 |627  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+    | 4 Pixel        | 300                       | 8                    | 0         |2950|3222 |660  |
+    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 The following table shows the resource utilization of the Demosaicing
@@ -8054,13 +8191,13 @@ xczu7ev-ffvc1156-2-e FPGA.
 
 .. table:: Table 206. Demosaicing Function Resource Utilization Summary with UltraRAM Enabled
 
-+----------------+---------------------------+-----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                 |
-+                +                           +------------+----------+-----------+----+-----+-----+
-|                |                           | BRAM_18K   | URAM     | DSP_48Es  | FF | LUT | CLB |
-+================+===========================+============+==========+===========+====+=====+=====+
-| 1 Pixel        | 300                       | 0          |  1       | 0         |1366|1399 | 412 |
-+----------------+---------------------------+------------+----------+-----------+----+-----+-----+
+    +----------------+---------------------------+-----------------------+-----------+----+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                 |
+    +                +                           +------------+----------+-----------+----+-----+-----+
+    |                |                           | BRAM_18K   | URAM     | DSP_48Es  | FF | LUT | CLB |
+    +================+===========================+============+==========+===========+====+=====+=====+
+    | 1 Pixel        | 300                       | 0          |  1       | 0         |1366|1399 | 412 |
+    +----------------+---------------------------+------------+----------+-----------+----+-----+-----+
 
 
 
@@ -8073,19 +8210,19 @@ process a 4K (3840x2160) image.
 
 .. table:: Table Demosaicing Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 27.82            |
-+-----------------------------+------------------+
-| 2 pixel operation (300 MHz) | 13.9             |
-+-----------------------------+------------------+
-| 4 pixel operation           | 6.95             |
-+                             +                  +
-| (300 MHz, 8-bit image only) |                  |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 27.82            |
+    +-----------------------------+------------------+
+    | 2 pixel operation (300 MHz) | 13.9             |
+    +-----------------------------+------------------+
+    | 4 pixel operation           | 6.95             |
+    +                             +                  +
+    | (300 MHz, 8-bit image only) |                  |
+    +-----------------------------+------------------+
 
 .. _dilate:
 
@@ -8160,23 +8297,23 @@ for the Xczu9eg-ffvb1156-1-i-es1 FPGA for HD (1080X1920) image.
 
 .. table:: Table dilate Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 3                           | 6                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 411                         | 657                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 392                         | 1249                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 96                          | 255                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 3                           | 6                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 411                         | 657                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 392                         | 1249                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 96                          | 255                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -8188,23 +8325,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA for 4K 3channel image.
 
 .. table:: Table dilate Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization        |
-+                             +-----------------------------+
-|                             | 1 pixel per clock operation |  
-+                             +-----------------------------+
-|                             | 300 MHz                     |
-+=============================+=============================+
-| BRAM_18K                    | 18                          |
-+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           |
-+-----------------------------+-----------------------------+
-| FF                          | 983                         |
-+-----------------------------+-----------------------------+
-| LUT                         | 745                         |
-+-----------------------------+-----------------------------+
-| CLB                         | 186                         |
-+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization        |
+    +                             +-----------------------------+
+    |                             | 1 pixel per clock operation |  
+    +                             +-----------------------------+
+    |                             | 300 MHz                     |
+    +=============================+=============================+
+    | BRAM_18K                    | 18                          |
+    +-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           |
+    +-----------------------------+-----------------------------+
+    | FF                          | 983                         |
+    +-----------------------------+-----------------------------+
+    | LUT                         | 745                         |
+    +-----------------------------+-----------------------------+
+    | CLB                         | 186                         |
+    +-----------------------------+-----------------------------+
 
 
 The following table summarizes a performance estimate of the Dilation
@@ -8214,15 +8351,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table dilate Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+
-| Operating Mode              | Latency Estimate                    |
-+                             +------------------+------------------+
-|                             | Min Latency (ms) | Max Latency (ms) |
-+=============================+==================+==================+
-| 1 pixel operation (300 MHz) | 7.0              | 7.0              |
-+-----------------------------+------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.87             | 1.87             |
-+-----------------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+
+    | Operating Mode              | Latency Estimate                    |
+    +                             +------------------+------------------+
+    |                             | Min Latency (ms) | Max Latency (ms) |
+    +=============================+==================+==================+
+    | 1 pixel operation (300 MHz) | 7.0              | 7.0              |
+    +-----------------------------+------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.87             | 1.87             |
+    +-----------------------------+------------------+------------------+
 
 
 .. _distance-transform:
@@ -8347,27 +8484,27 @@ facilitates the duplication process of the FIFOs.
 
 The table below describes the template and the function parameters.
 
-+----------+-----------------------------------------------------------+
-| Paramete | Description                                               |
-| r        |                                                           |
-+==========+===========================================================+
-| SRC_T    | Input and output pixel type                               |
-+----------+-----------------------------------------------------------+
-| ROWS     | Maximum height of input and output image.                 |
-+----------+-----------------------------------------------------------+
-| COLS     | Maximum width of input and output image (must be a        |
-|          | multiple of 8, for 8-pixel operation)                     |
-+----------+-----------------------------------------------------------+
-| NPC      | Number of pixels to be processed per cycle. Possible      |
-|          | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8 pixel |
-|          | operations respectively.                                  |
-+----------+-----------------------------------------------------------+
-| \_src    | Input image                                               |
-+----------+-----------------------------------------------------------+
-| \_dst1   | Duplicate output for \_src                                |
-+----------+-----------------------------------------------------------+
-| \_dst2   | Duplicate output for \_src                                |
-+----------+-----------------------------------------------------------+
+    +----------+-----------------------------------------------------------+
+    | Paramete | Description                                               |
+    | r        |                                                           |
+    +==========+===========================================================+
+    | SRC_T    | Input and output pixel type                               |
+    +----------+-----------------------------------------------------------+
+    | ROWS     | Maximum height of input and output image.                 |
+    +----------+-----------------------------------------------------------+
+    | COLS     | Maximum width of input and output image (must be a        |
+    |          | multiple of 8, for 8-pixel operation)                     |
+    +----------+-----------------------------------------------------------+
+    | NPC      | Number of pixels to be processed per cycle. Possible      |
+    |          | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8 pixel |
+    |          | operations respectively.                                  |
+    +----------+-----------------------------------------------------------+
+    | \_src    | Input image                                               |
+    +----------+-----------------------------------------------------------+
+    | \_dst1   | Duplicate output for \_src                                |
+    +----------+-----------------------------------------------------------+
+    | \_dst2   | Duplicate output for \_src                                |
+    +----------+-----------------------------------------------------------+
 
 .. _erode:
 
@@ -8444,23 +8581,23 @@ FullHD image(1080x1920).
 
 .. table:: Table erode Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 3                           | 6                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 411                         | 657                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 392                         | 1249                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 96                          | 255                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 3                           | 6                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 411                         | 657                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 392                         | 1249                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 96                          | 255                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization of the Erosion
@@ -8470,23 +8607,23 @@ Vivado HLS 2019.1 version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA,for
 
 .. table:: Table erode Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization        |
-+                             +-----------------------------+
-|                             | 1 pixel per clock operation |  
-+                             +-----------------------------+
-|                             | 300 MHz                     |
-+=============================+=============================+
-| BRAM_18K                    | 18                          |
-+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           |
-+-----------------------------+-----------------------------+
-| FF                          | 983                         |
-+-----------------------------+-----------------------------+
-| LUT                         | 3745                        |
-+-----------------------------+-----------------------------+
-| CLB                         | 186                         |
-+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization        |
+    +                             +-----------------------------+
+    |                             | 1 pixel per clock operation |  
+    +                             +-----------------------------+
+    |                             | 300 MHz                     |
+    +=============================+=============================+
+    | BRAM_18K                    | 18                          |
+    +-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           |
+    +-----------------------------+-----------------------------+
+    | FF                          | 983                         |
+    +-----------------------------+-----------------------------+
+    | LUT                         | 3745                        |
+    +-----------------------------+-----------------------------+
+    | CLB                         | 186                         |
+    +-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -8498,15 +8635,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table erode Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+
-| Operating Mode              | Latency Estimate                    |
-+                             +------------------+------------------+
-|                             | Min Latency (ms) | Max Latency (ms) |
-+=============================+==================+==================+
-| 1 pixel operation (300 MHz) | 7.0              | 7.0              |
-+-----------------------------+------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.85             | 1.85             |
-+-----------------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+
+    | Operating Mode              | Latency Estimate                    |
+    +                             +------------------+------------------+
+    |                             | Min Latency (ms) | Max Latency (ms) |
+    +=============================+==================+==================+
+    | 1 pixel operation (300 MHz) | 7.0              | 7.0              |
+    +-----------------------------+------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.85             | 1.85             |
+    +-----------------------------+------------------+------------------+
 
 
 .. _fast-corner-detection:
@@ -8585,23 +8722,23 @@ image with NMS.
 
 .. table:: Table fast Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 10                          | 20                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 2695                        | 7310                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 3792                        | 20956                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 769                         | 3519                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 10                          | 20                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 2695                        | 7310                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 3792                        | 20956                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 769                         | 3519                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 
@@ -8615,15 +8752,15 @@ with non-maximum suppression (NMS).
 
 .. table:: Table fast Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+------------------+
-| Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
-+                             +  Frequency       +                  +------------------+
-|                             |  (MHz)           |                  | Max (ms)         |
-+=============================+==================+==================+==================+
-| 1 pixel                     | 300              | 3x3              | 7                |
-+-----------------------------+------------------+------------------+------------------+
-| 8 pixel                     | 150              | 3x3              | 1.86             |
-+-----------------------------+------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+------------------+
+    | Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
+    +                             +  Frequency       +                  +------------------+
+    |                             |  (MHz)           |                  | Max (ms)         |
+    +=============================+==================+==================+==================+
+    | 1 pixel                     | 300              | 3x3              | 7                |
+    +-----------------------------+------------------+------------------+------------------+
+    | 8 pixel                     | 150              | 3x3              | 1.86             |
+    +-----------------------------+------------------+------------------+------------------+
 
 
 .. _gaincontrol:
@@ -8639,30 +8776,37 @@ The gain control modules improve the overall brightness of the input image. In t
 
 .. code:: c
 
-   template< int BFORMAT,int SRC_T, int ROWS, int COLS, int NPC = 1>void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & dst)
-
+   template <int BFORMAT, int SRC_T, int ROWS, int COLS, int NPC = 1>
+            void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+                             unsigned short rgain,
+                             unsigned short bgain)
 
 The following table describes the template and the function parameters.
 
 .. table:: Table gaincontrol Parameter Description
 
-+-----------+--------------------------------------------------------------------+
-| Parameter | Description                                                        |
-+===========+====================================================================+
-| BFORMAT   | Input Bayer pattern.                                               |
-+-----------+--------------------------------------------------------------------+
-| SRC_T     | Input and Output Pixel Type.                                       |
-+-----------+--------------------------------------------------------------------+
-| ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
-+-----------+--------------------------------------------------------------------+
-| COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
-+-----------+--------------------------------------------------------------------+
-| NPC       | Number of Pixels to be processed per cycle.                        |
-+-----------+--------------------------------------------------------------------+
-| Src1      | Input Bayer image                                                  |
-+-----------+--------------------------------------------------------------------+
-| dst       | Output Bayer image                                                 |
-+-----------+--------------------------------------------------------------------+
+    +-----------+--------------------------------------------------------------------+
+    | Parameter | Description                                                        |
+    +===========+====================================================================+
+    | BFORMAT   | Input Bayer pattern.                                               |
+    +-----------+--------------------------------------------------------------------+
+    | SRC_T     | Input and Output Pixel Type.                                       |
+    +-----------+--------------------------------------------------------------------+
+    | ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
+    +-----------+--------------------------------------------------------------------+
+    | COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
+    +-----------+--------------------------------------------------------------------+
+    | NPC       | Number of Pixels to be processed per cycle.                        |
+    +-----------+--------------------------------------------------------------------+
+    | src       | Input Bayer image                                                  |
+    +-----------+--------------------------------------------------------------------+
+    | dst       | Output Bayer image                                                 |
+    +-----------+--------------------------------------------------------------------+
+    | rgain     | gain value for red channel in Q9.7 format                          |
+    +-----------+--------------------------------------------------------------------+
+    | bgain     | gain value for red channel in Q9.7 format                          |
+    +-----------+--------------------------------------------------------------------+
 
 
 .. rubric:: Resource Utilization
@@ -8672,45 +8816,239 @@ The following table summarizes the resource utilization of the kernel in differe
 
 .. table:: Table gaincontrol Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+-----+-----+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate |          |     |     |       |
-|                |                     |                      |          |     |     |       |
-|                | (MHz)               |                      |          |     |     |       |
-+                +                     +----------------------+----------+-----+-----+-------+
-|                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | SLICE |
-+================+=====================+======================+==========+=====+=====+=======+
-| 1 pixel        | 300                 | 0                    | 3        | 233 | 95  | 59    |
-+----------------+---------------------+----------------------+----------+-----+-----+-------+
-| 2 pixel        | 300                 | 0                    | 3        | 235 | 95  | 59    |
-+----------------+---------------------+----------------------+----------+-----+-----+-------+
+    +----------------+---------------------+----------------------+----------+-----+-----+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate |          |     |     |       |
+    |                |                     |                      |          |     |     |       |
+    |                | (MHz)               |                      |          |     |     |       |
+    +                +                     +----------------------+----------+-----+-----+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | SLICE |
+    +================+=====================+======================+==========+=====+=====+=======+
+    | 1 pixel        | 300                 | 0                    | 3        | 233 | 95  | 59    |
+    +----------------+---------------------+----------------------+----------+-----+-----+-------+
+    | 2 pixel        | 300                 | 0                    | 3        | 235 | 95  | 59    |
+    +----------------+---------------------+----------------------+----------+-----+-----+-------+
 
 .. rubric:: Performance Estimate
 
 
 The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1, to process a 4K image.
 
-+----------------+---------------------+------------------+
-| Operating Mode | Operating Frequency | Latency Estimate |
-|                |                     |                  |
-|                | (MHz)               |                  |
-+                +                     +------------------+
-|                |                     | Max (ms)         |
-+================+=====================+==================+
-| 1 pixel        | 300                 | 27.7             |
-+----------------+---------------------+------------------+
-| 2 pixel        | 300                 | 14.2             |
-+----------------+---------------------+------------------+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 27.7             |
+    +----------------+---------------------+------------------+
+    | 2 pixel        | 300                 | 14.2             |
+    +----------------+---------------------+------------------+
+
+.. _extractExposureFrames:
+
+Extract Exposure Frames 
+========================
+
+The extractExposureFrames module returns the Shortexposureframe and Longexposureframe from the input frame using the Digital overlap parameter.
+
+.. rubric:: API Syntax
 
 
+.. code:: c
 
+   template <int SRC_T, int N_ROWS, int MAX_ROWS, int MAX_COLS, int NPPC = XF_NPPC1, int USE_URAM = 0>
+            void extractExposureFrames(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS, NPPC>& _hdrSrc,
+                                       xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _lefSrc,
+                                       xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _sefSrc)
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table extractExposureFrames Parameter Description
+
+    +-----------+--------------------------------------------------------------------+
+    | Parameter | Description                                                        |
+    +===========+====================================================================+
+    | SRC_T     | Input and Output Pixel Type.                                       |
+    +-----------+--------------------------------------------------------------------+
+    | N_ROWS    | Number of Digital overlap rows between SEF and LEF                 |
+    +-----------+--------------------------------------------------------------------+
+    | MAX_ROWS  | Maximum height of input and output image (Must be multiple of NPC) |
+    +-----------+--------------------------------------------------------------------+
+    | MAX_COLS  | Maximum width of input and output image (Must be multiple of NPC)  |
+    +-----------+--------------------------------------------------------------------+
+    | NPPC      | Number of Pixels to be processed per cycle.                        |
+    +-----------+--------------------------------------------------------------------+
+    | USE_URAM  | enable to use URAM instead of BRAM in the design.                  |
+    +-----------+--------------------------------------------------------------------+
+    | _hdrSrc   | Input HDR image                                                    |
+    +-----------+--------------------------------------------------------------------+
+    | _lefSrc   | Long exposure frame                                                |
+    +-----------+--------------------------------------------------------------------+
+    | _sefSrc   | Short exposure frame                                               |
+    +-----------+--------------------------------------------------------------------+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of the kernel in different configurations, generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a HD image.
+
+.. table:: Table extractExposureFrames Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+----------+------+------+------+
+    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |      |      |
+    |                |                     |                      |          |      |      |      |
+    |                | (MHz)               |                      |          |      |      |      |
+    +                +                     +----------------------+----------+------+------+------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB  |
+    +================+=====================+======================+==========+======+======+======+
+    | 1 pixel        | 300                 | 8                    | 0        | 408  | 304  | 120  |
+    +----------------+---------------------+----------------------+----------+------+------+------+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a HD image.
+
+.. table:: Table extractExposureFrames Resource Utilization Summary
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 14               |
+    +----------------+---------------------+------------------+
+
+
+.. _flip:
+
+Flip
+====
+
+The Flip function converts input image into output image which is a horizontal flip or vertical flip or both of input image, 
+based on user input.
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+    template <int PTR_WIDTH, int TYPE, int ROWS, int COLS, int NPC>
+    void flip(ap_uint<PTR_WIDTH>* SrcPtr,
+              ap_uint<PTR_WIDTH>* DstPtr,
+              int Rows,
+              int Cols,
+              int Direction)
+
+The following table describes the template and the function parameters.
+
+.. table:: Table Flip Parameter Description
+
+    +-----------+--------------------------------------------------------------------+
+    | Parameter | Description                                                        |
+    +===========+====================================================================+
+    | PTR_WIDTH | Pixel Width of Input and Output Pointer                            |
+    +-----------+--------------------------------------------------------------------+
+    | TYPE      | Input and Output Pixel type                                        |
+    +-----------+--------------------------------------------------------------------+
+    | ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
+    +-----------+--------------------------------------------------------------------+
+    | COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
+    +-----------+--------------------------------------------------------------------+
+    | NPC       | Number of Pixels to be processed per cycle.                        |
+    +-----------+--------------------------------------------------------------------+
+    | SrcPtr    | Input Image pointer.                                               |
+    +-----------+--------------------------------------------------------------------+
+    | DstPtr    | Output Image pointer.                                              |
+    +-----------+--------------------------------------------------------------------+
+    | Rows      | Height of the image                                                |
+    +-----------+--------------------------------------------------------------------+
+    | Cols      | Width of the image                                                 |
+    +-----------+--------------------------------------------------------------------+
+    | Direction | Direction of flip, possible values are horizontal (0),             |
+    |           | vertical (1) and both (-1)                                         |
+    +-----------+--------------------------------------------------------------------+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.1 tool for the xczu7ev-ffvc1156-2-e, to process a grayscale 4k (2160x3840) image. 
+
+.. table:: Table flip Resource Utilization Summary
+
+    +----------------+----------------+---------------------+----------------------+----------+------+------+------+
+    | Operating Mode | Direction of   | Operating Frequency | Utilization Estimate |          |      |      |      |
+    |                | flip           |                     |                      |          |      |      |      |
+    |                |                | (MHz)               |                      |          |      |      |      |
+    +                +                +                     +----------------------+----------+------+------+------+
+    |                |                |                     | BRAM_18K             | DSP      | FF   | LUT  | URAM |
+    +================+================+=====================+======================+==========+======+======+======+
+    | 1 Pixel        | Horizontal     | 300                 | 12                   | 5        | 5888 | 7787 | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+------+------+
+    |                | Vertical       | 300                 | 12                   | 5        | 5888 | 7787 | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+------+------+
+    |                | Both           | 300                 | 12                   | 5        | 5888 | 7787 | 0    |
+    +----------------+----------------+---------------------+----------------------+----------+------+------+------+
+    | 4 Pixel        | Horizontal     | 300                 | 16                   | 5        | 7180 | 9794 | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+------+------+
+    |                | Vertical       | 300                 | 16                   | 5        | 7180 | 9794 | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+------+------+
+    |                | Both           | 300                 | 16                   | 5        | 7180 | 9794 | 0    |
+    +----------------+----------------+---------------------+----------------------+----------+------+------+------+
+
+The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.1 tool for the xczu7ev-ffvc1156-2-e, to process a 4k (2160x3840) 3 channel image.  
+
+.. table:: Table flip Resource Utilization Summary
+
+    +----------------+----------------+---------------------+----------------------+----------+------+-------+------+
+    | Operating Mode | Direction of   | Operating Frequency | Utilization Estimate |          |      |       |      |
+    |                | flip           |                     |                      |          |      |       |      |
+    |                |                | (MHz)               |                      |          |      |       |      |
+    +                +                +                     +----------------------+----------+------+-------+------+
+    |                |                |                     | BRAM_18K             | DSP      | FF   | LUT   | URAM |
+    +================+================+=====================+======================+==========+======+=======+======+
+    | 1 Pixel        | Horizontal     | 300                 | 32                   | 5        | 6355 | 9005  | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+-------+------+
+    |                | Vertical       | 300                 | 32                   | 5        | 6355 | 9005  | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+-------+------+
+    |                | Both           | 300                 | 32                   | 5        | 6355 | 9005  | 0    |
+    +----------------+----------------+---------------------+----------------------+----------+------+-------+------+
+    | 4 Pixel        | Horizontal     | 300                 | 56                   | 5        | 8798 | 15409 | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+-------+------+
+    |                | Vertical       | 300                 | 56                   | 5        | 8798 | 15409 | 0    |
+    +                +----------------+---------------------+----------------------+----------+------+-------+------+
+    |                | Both           | 300                 | 56                   | 5        | 8798 | 15409 | 0    |
+    +----------------+----------------+---------------------+----------------------+----------+------+-------+------+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.1 tool for the xczu7ev-ffvc1156-2-e, to process a 4k (2160x3840) 3 channel image.
+
+.. table:: Table flip Resource Utilization Summary
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 28.5             |
+    +----------------+---------------------+------------------+
+    | 4 pixel        | 300                 | 7.7              |
+    +----------------+---------------------+------------------+
 
 .. _gammacorrection:
 
+Gamma Correction
+=================
 
-Gammacorrection
-===============
-
-The gamma correction modules improves the overall brightness of image. The gamma loouptable is generated using the gamma value and with following equation.
+The gammacorrection modules improves the overall brightness of image. The gamma lookuptable is generated using the gamma value and with following equation.
 
 |image162|
 
@@ -8721,32 +9059,36 @@ The gamma correction modules improves the overall brightness of image. The gamma
 
 .. code:: c
 
-   template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,float gammaval)
+   template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
+   void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                        xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                        unsigned char lut_table[256 * 3])
 
 
 The following table describes the template and the function parameters.
 
 .. table:: Table gammacorrection Parameter Description
 
-+-----------+--------------------------------------------------------------------+
-| Parameter | Description                                                        |
-+===========+====================================================================+
-| SRC_T     | Input Pixel Type.                                                  |
-+-----------+--------------------------------------------------------------------+
-| DST_T     | Output Pixel Type.                                                 |
-+-----------+--------------------------------------------------------------------+
-| ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
-+-----------+--------------------------------------------------------------------+
-| COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
-+-----------+--------------------------------------------------------------------+
-| NPC       | Number of Pixels to be processed per cycle.                        |
-+-----------+--------------------------------------------------------------------+
-| src       | Input image                                                        |
-+-----------+--------------------------------------------------------------------+
-| dst       | Output image                                                       |
-+-----------+--------------------------------------------------------------------+
-| Gammaval  | Input gamma value for brightness increase.                         |
-+-----------+--------------------------------------------------------------------+
+    +-----------+--------------------------------------------------------------------+
+    | Parameter | Description                                                        |
+    +===========+====================================================================+
+    | SRC_T     | Input Pixel Type.                                                  |
+    +-----------+--------------------------------------------------------------------+
+    | DST_T     | Output Pixel Type.                                                 |
+    +-----------+--------------------------------------------------------------------+
+    | ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
+    +-----------+--------------------------------------------------------------------+
+    | COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
+    +-----------+--------------------------------------------------------------------+
+    | NPC       | Number of Pixels to be processed per cycle.                        |
+    +-----------+--------------------------------------------------------------------+
+    | src       | Input image                                                        |
+    +-----------+--------------------------------------------------------------------+
+    | dst       | Output image                                                       |
+    +-----------+--------------------------------------------------------------------+
+    | lut_table | Lookup table for gamma values.first 256 will be R,next 256 values  +
+    |           | are G gamma and last 256 values are B values                       |
+    +-----------+--------------------------------------------------------------------+
 
 .. rubric:: Resource Utilization
 
@@ -8755,17 +9097,15 @@ The following table summarizes the resource utilization of the kernel in differe
 
 .. table:: Table gammacorrection Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+------+------+------+
-| Operating Mode | Operating Frequency | Utilization Estimate |          |      |      |      |
-|                |                     |                      |          |      |      |      |
-|                | (MHz)               |                      |          |      |      |      |
-+                +                     +----------------------+----------+------+------+------+
-|                |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB  |
-+================+=====================+======================+==========+======+======+======+
-| 1 pixel        | 300                 | 13                   | 31       | 4261 | 3213 | 1295 |
-+----------------+---------------------+----------------------+----------+------+------+------+
-| 4 pixel        | 300                 | 22                   | 32       | 4297 | 3232 | 1261 |
-+----------------+---------------------+----------------------+----------+------+------+------+
+    +----------------+---------------------+----------------------+----------+------+------+------+
+    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |      |      |
+    |                |                     |                      |          |      |      |      |
+    |                | (MHz)               |                      |          |      |      |      |
+    +                +                     +----------------------+----------+------+------+------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB  |
+    +================+=====================+======================+==========+======+======+======+
+    | 1 pixel        | 300                 | 3                    | 0        | 177  | 360  | 120  |
+    +----------------+---------------------+----------------------+----------+------+------+------+
 
 .. rubric:: Performance Estimate
 
@@ -8774,17 +9114,121 @@ The following table summarizes a performance estimate of the kernel in different
 
 .. table:: Table gammacorrection Resource Utilization Summary
 
-+----------------+---------------------+------------------+
-| Operating Mode | Operating Frequency | Latency Estimate |
-|                |                     |                  |
-|                | (MHz)               |                  |
-+                +                     +------------------+
-|                |                     | Max (ms)         |
-+================+=====================+==================+
-| 1 pixel        | 300                 | 27.9             |
-+----------------+---------------------+------------------+
-| 4 pixel        | 300                 | 7                |
-+----------------+---------------------+------------------+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 27.9             |
+    +----------------+---------------------+------------------+
+    | 4 pixel        | 300                 | 7                |
+    +----------------+---------------------+------------------+
+
+
+.. _hdrmerge:
+
+HDR Merge
+==========
+
+HDR Merge module generates the High Dynamic Range (HDR) image from a set of different exposure frames. Usually, image sensors has limited dynamic range and it's difficult to get HDR image with single image capture. From the sensor, the frames are collected with different exposure times and will get different exposure frames. HDRMerge will generate the HDR frame with those exposure frames.
+The HDRMerge in RGB domain is complex and expensive interms of latency, because of camera response function. But,in Bayer domain the camera resonse function is linear.
+The radiance value which passes through the lens of the image sensor is converted into pixel intensity value. The camera response function relates the radiance value to pixel value.
+The CRF function in 
+
+        |HDRIMG1|
+        
+        here, |HDRIMG2|
+        
+The CRF function f(x) linearly express as
+
+        |HDRIMG3|    
+        
+To compute the weight in pixel value domain, 
+
+        |HDRIMG4|
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int NO_EXPS, int W_SIZE>
+    void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat2,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+                    short wr_hls[NO_EXPS * NPC * W_SIZE])
+
+The following table describes the template and the function parameters.
+
+.. table:: Table HDRmerge Parameter Description
+
+    +-----------+--------------------------------------------------------------------+
+    | Parameter | Description                                                        |
+    +===========+====================================================================+
+    | SRC_T     | Input Pixel Type.                                                  |
+    +-----------+--------------------------------------------------------------------+
+    | DST_T     | Output Pixel Type.                                                 |
+    +-----------+--------------------------------------------------------------------+
+    | ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
+    +-----------+--------------------------------------------------------------------+
+    | COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
+    +-----------+--------------------------------------------------------------------+
+    | NPC       | Number of Pixels to be processed per cycle.                        |
+    +-----------+--------------------------------------------------------------------+
+    | NO_EXPS   | Number exposure frames to be merged in the module                  |
+    +-----------+--------------------------------------------------------------------+
+    | W_SIZE    | W_SIZE is should be 2 power pixel width.                           |
+    +-----------+--------------------------------------------------------------------+
+    | _src_mat1 | Short exposure frame                                               |
+    +-----------+--------------------------------------------------------------------+
+    | _src_mat2 | Long exposure frame                                                |
+    +-----------+--------------------------------------------------------------------+
+    | _dst_mat  | Output HDR image                                                   |
+    +-----------+--------------------------------------------------------------------+
+    | wr_hls    | Lookup table for weight values.computing the weights LUT in host   |
+    |           | side and passing as input to the function.weight values are Q1.15  |
+    +-----------+--------------------------------------------------------------------+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.1 tool for the xczu9eg-ffvb1156-2-e, to process a bayer HD image. 
+
+.. table:: Table HDRMerge Resource Utilization Summary
+
+    +----------------+----------------+---------------------+----------------------+----------+------+------+------+
+    | Operating Mode | Pixel Type     | Operating Frequency | Utilization Estimate |          |      |      |      |
+    |                |                |                     |                      |          |      |      |      |
+    |                |                | (MHz)               |                      |          |      |      |      |
+    +                +                +                     +----------------------+----------+------+------+------+
+    |                |                |                     | BRAM_18K             | DSP      | FF   | LUT  | CLB  |
+    +================+================+=====================+======================+==========+======+======+======+
+    | 1 Pixel        | 8bit           | 300                 | 2                    | 8        |5824  |4886  |1079  |
+    +                +----------------+---------------------+----------------------+----------+------+------+------+
+    |                | 10bit          | 300                 | 2                    | 8        |5826  |4919  |1034  |
+    +----------------+----------------+---------------------+----------------------+----------+------+------+------+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes the latency numbers in different configurations, generated using Vitis HLS 2021.1 tool for the xczu9eg-ffvb1156-2-e, to process a HD image.
+
+.. table:: Table HDRMerge Latency Summary
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 7.3              |
+    +----------------+---------------------+------------------+
+    | 2 pixel        | 300                 | 3.7              |
+    +----------------+---------------------+------------------+
 
 
 .. _gaussian-filter:
@@ -8859,23 +9303,23 @@ grayscale HD (1080x1920) image.
 
 .. table:: Table . GaussianBlur Function Resource Utilization Summary
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |      
-+                +                +                           +------------------+-----------+-------+-------+----------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   | CLB      |
-+================+================+===========================+==================+===========+=======+=======+==========+
-| 1 Pixel        | 3x3            | 300                       | 3                | 17        | 3641  | 2791  | 610      |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 5x5            | 300                       | 5                | 27        | 4461  | 3544  | 764      |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 7x7            | 250                       | 7                | 35        | 4770  | 4201  | 894      |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
-| 8 Pixel        | 3x3            | 150                       | 6                | 52        | 3939  | 3784  | 814      |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 5x5            | 150                       | 10               | 111       | 5688  | 5639  | 1133     |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 7x7            | 150                       | 14               | 175       | 7594  | 7278  | 1518     |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |      
+    +                +                +                           +------------------+-----------+-------+-------+----------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   | CLB      |
+    +================+================+===========================+==================+===========+=======+=======+==========+
+    | 1 Pixel        | 3x3            | 300                       | 3                | 17        | 3641  | 2791  | 610      |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 5x5            | 300                       | 5                | 27        | 4461  | 3544  | 764      |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 7x7            | 250                       | 7                | 35        | 4770  | 4201  | 894      |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    | 8 Pixel        | 3x3            | 150                       | 6                | 52        | 3939  | 3784  | 814      |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 5x5            | 150                       | 10               | 111       | 5688  | 5639  | 1133     |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 7x7            | 150                       | 14               | 175       | 7594  | 7278  | 1518     |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
 
 
 The following table summarizes the resource utilization of the Gaussian
@@ -8885,17 +9329,17 @@ Channel image.
 
 .. table:: Table . GaussianBlur Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+-----------+-----------+-----+-----+
-| Operating Mode | Filter Size               | Operating Frequency  | Utilization Estimate              |
-+                +                           +                      +-----------+-----------+-----+-----+
-|                |                           | (MHz)                | BRAM_18K  | DSP_48Es  | LUT | CLB |
-+================+===========================+======================+===========+===========+=====+=====+
-| 1 Pixel        | 3x3                       | 300                  | 18        |33         | 4835| 3742|
-+                +---------------------------+----------------------+-----------+-----------+-----+-----+
-|                | 5x5                       | 300                  | 30        |51         | 5755| 3994|
-+                +---------------------------+----------------------+-----------+-----------+-----+-----+
-|                | 7x7                       | 300                  | 42        |135        | 8086| 5422|
-+----------------+---------------------------+----------------------+-----------+-----------+-----+-----+
+    +----------------+---------------------------+----------------------+-----------+-----------+-----+-----+
+    | Operating Mode | Filter Size               | Operating Frequency  | Utilization Estimate              |
+    +                +                           +                      +-----------+-----------+-----+-----+
+    |                |                           | (MHz)                | BRAM_18K  | DSP_48Es  | LUT | CLB |
+    +================+===========================+======================+===========+===========+=====+=====+
+    | 1 Pixel        | 3x3                       | 300                  | 18        |33         | 4835| 3742|
+    +                +---------------------------+----------------------+-----------+-----------+-----+-----+
+    |                | 5x5                       | 300                  | 30        |51         | 5755| 3994|
+    +                +---------------------------+----------------------+-----------+-----------+-----+-----+
+    |                | 7x7                       | 300                  | 42        |135        | 8086| 5422|
+    +----------------+---------------------------+----------------------+-----------+-----------+-----+-----+
 
 .. rubric:: Performance Estimate
 
@@ -8907,23 +9351,23 @@ tool for Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD
 
 .. table:: Table . GaussianBlur Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+
-| Operating Mode              | Filter Size      | Latency Estimate |
-+                             +                  +------------------+
-|                             |                  | Max Latency (ms) |
-+=============================+==================+==================+
-| 1 pixel operation (300 MHz) | 3x3              | 7.01             |
-+                             +------------------+------------------+
-|                             | 5x5              | 7.03             |
-+                             +------------------+------------------+
-|                             | 7x7              | 7.06             |
-+-----------------------------+------------------+------------------+
-| 8 pixel operation (150 MHz) | 3x3              | 1.6              |
-+                             +------------------+------------------+
-|                             | 5x5              | 1.7              |
-+                             +------------------+------------------+
-|                             | 7x7              | 1.74             |
-+-----------------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+
+    | Operating Mode              | Filter Size      | Latency Estimate |
+    +                             +                  +------------------+
+    |                             |                  | Max Latency (ms) |
+    +=============================+==================+==================+
+    | 1 pixel operation (300 MHz) | 3x3              | 7.01             |
+    +                             +------------------+------------------+
+    |                             | 5x5              | 7.03             |
+    +                             +------------------+------------------+
+    |                             | 7x7              | 7.06             |
+    +-----------------------------+------------------+------------------+
+    | 8 pixel operation (150 MHz) | 3x3              | 1.6              |
+    +                             +------------------+------------------+
+    |                             | 5x5              | 1.7              |
+    +                             +------------------+------------------+
+    |                             | 7x7              | 1.74             |
+    +-----------------------------+------------------+------------------+
 
 .. _gradient-magnitude:
 
@@ -8999,23 +9443,23 @@ image and for L2 normalization.
 
 .. table:: Table . magnitude Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 2                           | 16                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 707                         | 2002                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 774                         | 3666                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 172                         | 737                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 2                           | 16                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 707                         | 2002                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 774                         | 3666                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 172                         | 737                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -9027,15 +9471,15 @@ image and for L2 normalization.
 
 .. table:: Table . magnitude Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 7.2              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 7.2              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _gradient-phase:
 
@@ -9116,23 +9560,23 @@ image.
 
 .. table:: Table . phase Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 6                           | 24                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 6                           | 19                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 873                         | 2396                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 753                         | 3895                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 187                         | 832                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 6                           | 24                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 6                           | 19                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 873                         | 2396                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 753                         | 3895                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 187                         | 832                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 
@@ -9236,13 +9680,13 @@ which are within the radius.
 
 Radius = 1
 
-+----------------------+----------------------+----------------------+
-| x-1, y-1             | x-1, y               | x-1, y+1             |
-+----------------------+----------------------+----------------------+
-| x, y-1               | x, y                 | x, y+1               |
-+----------------------+----------------------+----------------------+
-| x+1, y-1             | x+1, y               | x+1, y+1             |
-+----------------------+----------------------+----------------------+
+    +----------------------+----------------------+----------------------+
+    | x-1, y-1             | x-1, y               | x-1, y+1             |
+    +----------------------+----------------------+----------------------+
+    | x, y-1               | x, y                 | x, y+1               |
+    +----------------------+----------------------+----------------------+
+    | x+1, y-1             | x+1, y               | x+1, y+1             |
+    +----------------------+----------------------+----------------------+
 
 Threshold:
 ----------
@@ -9295,7 +9739,7 @@ The following table describes the template and the function parameters.
    +--------------+-------------------------------------------------------+
    | threshold    | Threshold applied to the corner measure.              |
    +--------------+-------------------------------------------------------+
-   | k            | Harris detector parameter                             |
+   | k            | Harris detector parameter in Q16.16 format.           |
    +--------------+-------------------------------------------------------+
 
 
@@ -9312,405 +9756,405 @@ The following table summarizes the resource utilization for Sobel Filter
 
 .. table:: Table . Resource Utilization Summary - For Sobel Filter = 3, Box filter=3 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 33                          | 66                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 80                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 3254                        | 9330                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 3522                        | 13222                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 731                         | 2568                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 33                          | 66                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 80                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 3254                        | 9330                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 3522                        | 13222                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 731                         | 2568                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=5 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 3, Box filter=5 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 45                          | 90                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 80                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 5455                        | 12459                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 5695                        | 24594                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1132                        | 4498                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 45                          | 90                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 80                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 5455                        | 12459                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 5695                        | 24594                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1132                        | 4498                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=7 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 3, Box filter=7 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 57                          | 114                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 80                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 8783                        | 16593                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 9157                        | 39813                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1757                        | 6809                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 57                          | 114                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 80                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 8783                        | 16593                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 9157                        | 39813                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1757                        | 6809                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=3 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 5, Box filter=3 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 35                          | 70                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 80                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 4656                        | 11659                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 4681                        | 17394                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1005                        | 3277                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 35                          | 70                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 80                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 4656                        | 11659                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 4681                        | 17394                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1005                        | 3277                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=5 and NMS_RADIUS =1.
 
 .. table:: Table. Resource Utilization Summary - Sobel Filter = 5, Box filter=5 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 47                          | 94                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 80                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 6019                        | 14776                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 6337                        | 28795                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1353                        | 5102                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 47                          | 94                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 80                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 6019                        | 14776                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 6337                        | 28795                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1353                        | 5102                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=7 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 5, Box filter=7 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 59                          | 118                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 80                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 9388                        | 18913                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 9414                        | 43070                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1947                        | 7508                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 59                          | 118                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 10                          | 80                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 9388                        | 18913                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 9414                        | 43070                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1947                        | 7508                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=3 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 7, Box filter=3 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 37                          | 74                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 11                          | 88                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 6002                        | 13880                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 6337                        | 25573                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1327                        | 4868                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 37                          | 74                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 11                          | 88                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 6002                        | 13880                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 6337                        | 25573                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1327                        | 4868                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=5 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 7, Box filter=5 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 49                          | 98                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 11                          | 88                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 7410                        | 17049                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 8076                        | 36509                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 1627                        | 6518                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 49                          | 98                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 11                          | 88                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 7410                        | 17049                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 8076                        | 36509                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 1627                        | 6518                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=7 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 7, Box filter=7 and NMS_RADIUS =1
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 61                          | 74                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 11                          | 88                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 10714                       | 21137                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 11500                       | 51331                       |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 2261                        | 8863                        |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 61                          | 74                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 11                          | 88                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 10714                       | 21137                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 11500                       | 51331                       |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 2261                        | 8863                        |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=3 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 3, Box filter=3 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 41                   | 82      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 5519                 | 10714   |
-+----------+----------------------+---------+
-| LUT      | 5094                 | 16930   |
-+----------+----------------------+---------+
-| CLB      | 1076                 | 3127    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 41                   | 82      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 5519                 | 10714   |
+    +----------+----------------------+---------+
+    | LUT      | 5094                 | 16930   |
+    +----------+----------------------+---------+
+    | CLB      | 1076                 | 3127    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=5 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 53                   | 106     |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 6798                 | 13844   |
-+----------+----------------------+---------+
-| LUT      | 6866                 | 28286   |
-+----------+----------------------+---------+
-| CLB      | 1383                 | 4965    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 53                   | 106     |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 6798                 | 13844   |
+    +----------+----------------------+---------+
+    | LUT      | 6866                 | 28286   |
+    +----------+----------------------+---------+
+    | CLB      | 1383                 | 4965    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=7 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 3, Box filter=7 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 65                   | 130     |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 10137                | 17977   |
-+----------+----------------------+---------+
-| LUT      | 10366                | 43589   |
-+----------+----------------------+---------+
-| CLB      | 1940                 | 7440    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 65                   | 130     |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 10137                | 17977   |
+    +----------+----------------------+---------+
+    | LUT      | 10366                | 43589   |
+    +----------+----------------------+---------+
+    | CLB      | 1940                 | 7440    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=3 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 5, Box filter=3 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 43                   | 86      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 5957                 | 12930   |
-+----------+----------------------+---------+
-| LUT      | 5987                 | 21187   |
-+----------+----------------------+---------+
-| CLB      | 1244                 | 3922    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 43                   | 86      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 5957                 | 12930   |
+    +----------+----------------------+---------+
+    | LUT      | 5987                 | 21187   |
+    +----------+----------------------+---------+
+    | CLB      | 1244                 | 3922    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=5 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 5, Box filter=5 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 55                   | 110     |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 5442                 | 16053   |
-+----------+----------------------+---------+
-| LUT      | 6561                 | 32377   |
-+----------+----------------------+---------+
-| CLB      | 1374                 | 5871    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 55                   | 110     |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 5442                 | 16053   |
+    +----------+----------------------+---------+
+    | LUT      | 6561                 | 32377   |
+    +----------+----------------------+---------+
+    | CLB      | 1374                 | 5871    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=7 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 5, Box filter=7 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 67                   | 134     |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 10673                | 20190   |
-+----------+----------------------+---------+
-| LUT      | 10793                | 46785   |
-+----------+----------------------+---------+
-| CLB      | 2260                 | 8013    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 67                   | 134     |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 10673                | 20190   |
+    +----------+----------------------+---------+
+    | LUT      | 10793                | 46785   |
+    +----------+----------------------+---------+
+    | CLB      | 2260                 | 8013    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=3 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 7, Box filter=3 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 45                   | 90      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 7341                 | 15161   |
-+----------+----------------------+---------+
-| LUT      | 7631                 | 29185   |
-+----------+----------------------+---------+
-| CLB      | 1557                 | 5425    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 45                   | 90      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 7341                 | 15161   |
+    +----------+----------------------+---------+
+    | LUT      | 7631                 | 29185   |
+    +----------+----------------------+---------+
+    | CLB      | 1557                 | 5425    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=5 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 7, Box filter=5 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 57                   | 114     |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 8763                 | 18330   |
-+----------+----------------------+---------+
-| LUT      | 9368                 | 40116   |
-+----------+----------------------+---------+
-| CLB      | 1857                 | 7362    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 57                   | 114     |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 8763                 | 18330   |
+    +----------+----------------------+---------+
+    | LUT      | 9368                 | 40116   |
+    +----------+----------------------+---------+
+    | CLB      | 1857                 | 7362    |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=7 and NMS_RADIUS =2.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 7, Box filter=7 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 69                   | 138     |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 12078                | 22414   |
-+----------+----------------------+---------+
-| LUT      | 12831                | 54652   |
-+----------+----------------------+---------+
-| CLB      | 2499                 | 9628    |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 69                   | 138     |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 12078                | 22414   |
+    +----------+----------------------+---------+
+    | LUT      | 12831                | 54652   |
+    +----------+----------------------+---------+
+    | CLB      | 2499                 | 9628    |
+    +----------+----------------------+---------+
 
 .. rubric:: Resource Utilization with URAM enable
 
@@ -9721,397 +10165,397 @@ The following table summarizes the resource utilization for Sobel Filter = 3, Bo
 
 .. table:: Table . Resource Utilization Summary - For Sobel Filter = 3, Box filter=3 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 4                    | 21      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 5306                 | 11846   |
-+----------+----------------------+---------+
-| LUT      | 3696                 | 13846   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 4                    | 21      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 5306                 | 11846   |
+    +----------+----------------------+---------+
+    | LUT      | 3696                 | 13846   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=5 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 3, Box filter=5 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 30      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 7625                 | 13899   |
-+----------+----------------------+---------+
-| LUT      | 5596                 | 27136   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 30      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 7625                 | 13899   |
+    +----------+----------------------+---------+
+    | LUT      | 5596                 | 27136   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=7 and NMS_RADIUS =1.
 
 .. table:: Table . Resource Utilization Summary - Sobel Filter = 3, Box filter=7 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 42      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 12563                | 19919   |
-+----------+----------------------+---------+
-| LUT      | 8816                 | 39087   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 42      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 12563                | 19919   |
+    +----------+----------------------+---------+
+    | LUT      | 8816                 | 39087   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=3 and NMS_RADIUS =1.
 
 .. table:: Table 251. Resource Utilization Summary - Sobel Filter = 5, Box filter=3 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 4                    | 23      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 6689                 | 15022   |
-+----------+----------------------+---------+
-| LUT      | 4506                 | 18719   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 4                    | 23      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 6689                 | 15022   |
+    +----------+----------------------+---------+
+    | LUT      | 4506                 | 18719   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=5 and NMS_RADIUS =1.
 
 .. table:: Table 252. Resource Utilization Summary - Sobel Filter = 5, Box filter=5 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 32      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 9050                 | 17063   |
-+----------+----------------------+---------+
-| LUT      | 6405                 | 31992   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 32      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 9050                 | 17063   |
+    +----------+----------------------+---------+
+    | LUT      | 6405                 | 31992   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=7 and NMS_RADIUS =1.
 
 .. table:: Table 253. Resource Utilization Summary - Sobel Filter = 5, Box filter=7 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 44      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 13946                | 23116   |
-+----------+----------------------+---------+
-| LUT      | 9626                 | 44738   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 44      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 13946                | 23116   |
+    +----------+----------------------+---------+
+    | LUT      | 9626                 | 44738   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=3 and NMS_RADIUS =1.
 
 .. table:: Table 254. Resource Utilization Summary - Sobel Filter = 7, Box filter=3 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 4                    | 25      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 8338                 | 17378   |
-+----------+----------------------+---------+
-| LUT      | 6151                 | 24844   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 4                    | 25      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 8338                 | 17378   |
+    +----------+----------------------+---------+
+    | LUT      | 6151                 | 24844   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=5 and NMS_RADIUS =1.
 
 .. table:: Table 255. Resource Utilization Summary - Sobel Filter = 7, Box filter=5 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 34      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 10497                | 19457   |
-+----------+----------------------+---------+
-| LUT      | 7858                 | 39762   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 34      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 10497                | 19457   |
+    +----------+----------------------+---------+
+    | LUT      | 7858                 | 39762   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=7 and NMS_RADIUS =1.
 
 .. table:: Table 256. Resource Utilization Summary - Sobel Filter = 7, Box filter=7 and NMS_RADIUS =1
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 12                   | 12      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 46      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 15393                | 25450   |
-+----------+----------------------+---------+
-| LUT      | 11080                | 50662   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 12                   | 12      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 46      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 15393                | 25450   |
+    +----------+----------------------+---------+
+    | LUT      | 11080                | 50662   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=3 and NMS_RADIUS =2.
 
 .. table:: Table 257. Resource Utilization Summary - Sobel Filter = 3, Box filter=3 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 4                    | 21      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 6286                 | 13441   |
-+----------+----------------------+---------+
-| LUT      | 4704                 | 18072   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 4                    | 21      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 6286                 | 13441   |
+    +----------+----------------------+---------+
+    | LUT      | 4704                 | 18072   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=5 and NMS_RADIUS =2.
 
 .. table:: Table 258. Resource Utilization Summary
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 30      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 8626                 | 15498   |
-+----------+----------------------+---------+
-| LUT      | 6606                 | 31371   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 30      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 8626                 | 15498   |
+    +----------+----------------------+---------+
+    | LUT      | 6606                 | 31371   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=7 and NMS_RADIUS =2.
 
 .. table:: Table 259. Resource Utilization Summary - Sobel Filter = 3, Box filter=7 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 42      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 13543                | 21522   |
-+----------+----------------------+---------+
-| LUT      | 9853                 | 43301   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 42      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 13543                | 21522   |
+    +----------+----------------------+---------+
+    | LUT      | 9853                 | 43301   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=3 and NMS_RADIUS =2.
 
 .. table:: Table 260. Resource Utilization Summary - Sobel Filter = 5, Box filter=3 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 4                    | 23      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 7670                 | 16750   |
-+----------+----------------------+---------+
-| LUT      | 5513                 | 22854   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 4                    | 23      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 7670                 | 16750   |
+    +----------+----------------------+---------+
+    | LUT      | 5513                 | 22854   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=5 and NMS_RADIUS =2.
 
 .. table:: Table 261. Resource Utilization Summary - Sobel Filter = 5, Box filter=5 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 32      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 9712                 | 18793   |
-+----------+----------------------+---------+
-| LUT      | 7338                 | 36136   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 32      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 9712                 | 18793   |
+    +----------+----------------------+---------+
+    | LUT      | 7338                 | 36136   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 5, Box filter=7 and NMS_RADIUS =2.
 
 .. table:: Table 262. Resource Utilization Summary - Sobel Filter = 5, Box filter=7 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 44      |
-+----------+----------------------+---------+
-| DSP48E   | 10                   | 80      |
-+----------+----------------------+---------+
-| FF       | 14650                | 24846   |
-+----------+----------------------+---------+
-| LUT      | 10558                | 48866   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 44      |
+    +----------+----------------------+---------+
+    | DSP48E   | 10                   | 80      |
+    +----------+----------------------+---------+
+    | FF       | 14650                | 24846   |
+    +----------+----------------------+---------+
+    | LUT      | 10558                | 48866   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=3 and NMS_RADIUS =2.
 
 .. table:: Table 263. Resource Utilization Summary - Sobel Filter = 7, Box filter=3 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 4                    | 25      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 9562                 | 19101   |
-+----------+----------------------+---------+
-| LUT      | 7405                 | 29986   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 4                    | 25      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 9562                 | 19101   |
+    +----------+----------------------+---------+
+    | LUT      | 7405                 | 29986   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=5 and NMS_RADIUS =2.
 
 .. table:: Table 264. Resource Utilization Summary - Sobel Filter = 7, Box filter=5 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 34      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 11751                | 21180   |
-+----------+----------------------+---------+
-| LUT      | 9254                 | 44024   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 34      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 11751                | 21180   |
+    +----------+----------------------+---------+
+    | LUT      | 9254                 | 44024   |
+    +----------+----------------------+---------+
 
 The following table summarizes the resource utilization for Sobel Filter = 7, Box filter=7 and NMS_RADIUS =2.
 
 .. table:: Table 265. Resource Utilization Summary - Sobel Filter = 7, Box filter=7 and NMS_RADIUS =2
 
-+----------+----------------------+---------+
-| Name     | Resource Utilization           |
-+          +----------------------+---------+
-|          | 1 pixel              | 8 pixel |
-+----------+----------------------+---------+
-|          | 300 MHz              | 150 MHz |
-+==========+======================+=========+
-| BRAM_18K | 20                   | 20      |
-+----------+----------------------+---------+
-| URAM     | 7                    | 46      |
-+----------+----------------------+---------+
-| DSP48E   | 11                   | 88      |
-+----------+----------------------+---------+
-| FF       | 16723                | 27156   |
-+----------+----------------------+---------+
-| LUT      | 12474                | 54858   |
-+----------+----------------------+---------+
+    +----------+----------------------+---------+
+    | Name     | Resource Utilization           |
+    +          +----------------------+---------+
+    |          | 1 pixel              | 8 pixel |
+    +----------+----------------------+---------+
+    |          | 300 MHz              | 150 MHz |
+    +==========+======================+=========+
+    | BRAM_18K | 20                   | 20      |
+    +----------+----------------------+---------+
+    | URAM     | 7                    | 46      |
+    +----------+----------------------+---------+
+    | DSP48E   | 11                   | 88      |
+    +----------+----------------------+---------+
+    | FF       | 16723                | 27156   |
+    +----------+----------------------+---------+
+    | LUT      | 12474                | 54858   |
+    +----------+----------------------+---------+
 
 .. rubric:: Performance Estimate
 
@@ -10119,85 +10563,85 @@ The following table summarizes a performance estimate of the Harris corner detec
 
 .. table:: Table 266. cornerHarris Function Performance Estimate Summary
 
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| Operating Mode | Operating Frequency | Configuration                                 |Latency Estimate|
-|                |                     |                                               |                |
-|                | (MHz)               |                                               |                |
-+                +---------------------+---------------+------------------+------------+----------------+
-|                |                     | Sobel         | Box              | NMS Radius | Latency(In ms) |
-+================+=====================+===============+==================+============+================+
-| 1 pixel        | 300 MHz             | 3             | 3                | 1          | 7              |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 3             | 5                | 1          | 7.1            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 3             | 7                | 1          | 7.1            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 5             | 3                | 1          | 7.2            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 5             | 5                | 1          | 7.2            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 5             | 7                | 1          | 7.2            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 7             | 3                | 1          | 7.22           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 7             | 5                | 1          | 7.22           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 7             | 7                | 1          | 7.22           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 3             | 3                | 1          | 1.7            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 3             | 5                | 1          | 1.7            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 3             | 7                | 1          | 1.7            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 5             | 3                | 1          | 1.71           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 5             | 5                | 1          | 1.71           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 5             | 7                | 1          | 1.71           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 7             | 3                | 1          | 1.8            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 7             | 5                | 1          | 1.8            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 7             | 7                | 1          | 1.8            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 3             | 3                | 2          | 7.1            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 3             | 5                | 2          | 7.1            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 3             | 7                | 2          | 7.1            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 5             | 3                | 2          | 7.21           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 5             | 5                | 2          | 7.21           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 5             | 7                | 2          | 7.21           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 7             | 3                | 2          | 7.22           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 7             | 5                | 2          | 7.22           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 1 pixel        | 300 MHz             | 7             | 7                | 2          | 7.22           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 3             | 3                | 2          | 1.8            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 3             | 5                | 2          | 1.8            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 3             | 7                | 2          | 1.8            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 5             | 3                | 2          | 1.81           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 5             | 5                | 2          | 1.81           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 5             | 7                | 2          | 1.81           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 7             | 3                | 2          | 1.9            |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 7             | 5                | 2          | 1.91           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
-| 8 pixel        | 150 MHz             | 7             | 7                | 2          | 1.92           |
-+----------------+---------------------+---------------+------------------+------------+----------------+
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | Operating Mode | Operating Frequency | Configuration                                 |Latency Estimate|
+    |                |                     |                                               |                |
+    |                | (MHz)               |                                               |                |
+    +                +---------------------+---------------+------------------+------------+----------------+
+    |                |                     | Sobel         | Box              | NMS Radius | Latency(In ms) |
+    +================+=====================+===============+==================+============+================+
+    | 1 pixel        | 300 MHz             | 3             | 3                | 1          | 7              |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 3             | 5                | 1          | 7.1            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 3             | 7                | 1          | 7.1            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 5             | 3                | 1          | 7.2            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 5             | 5                | 1          | 7.2            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 5             | 7                | 1          | 7.2            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 7             | 3                | 1          | 7.22           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 7             | 5                | 1          | 7.22           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 7             | 7                | 1          | 7.22           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 3             | 3                | 1          | 1.7            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 3             | 5                | 1          | 1.7            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 3             | 7                | 1          | 1.7            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 5             | 3                | 1          | 1.71           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 5             | 5                | 1          | 1.71           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 5             | 7                | 1          | 1.71           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 7             | 3                | 1          | 1.8            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 7             | 5                | 1          | 1.8            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 7             | 7                | 1          | 1.8            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 3             | 3                | 2          | 7.1            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 3             | 5                | 2          | 7.1            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 3             | 7                | 2          | 7.1            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 5             | 3                | 2          | 7.21           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 5             | 5                | 2          | 7.21           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 5             | 7                | 2          | 7.21           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 7             | 3                | 2          | 7.22           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 7             | 5                | 2          | 7.22           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 1 pixel        | 300 MHz             | 7             | 7                | 2          | 7.22           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 3             | 3                | 2          | 1.8            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 3             | 5                | 2          | 1.8            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 3             | 7                | 2          | 1.8            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 5             | 3                | 2          | 1.81           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 5             | 5                | 2          | 1.81           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 5             | 7                | 2          | 1.81           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 7             | 3                | 2          | 1.9            |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 7             | 5                | 2          | 1.91           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
+    | 8 pixel        | 150 MHz             | 7             | 7                | 2          | 1.92           |
+    +----------------+---------------------+---------------+------------------+------------+----------------+
 
 .. rubric:: Deviation from OpenCV
 
@@ -10258,41 +10702,41 @@ for 8 pixel mode.
 
 .. table:: Table . calcHist Function Resource Utilization Summary
 
-+----------+----------------------------+------------------------------+
-| Name     | Resource Utilization                                      |
-+          +----------------------------+------------------------------+
-|          | Normal Operation (1 pixel) | Resource Optimized (8 pixel) |
-+==========+============================+==============================+
-| BRAM_18K | 2                          | 16                           |
-+----------+----------------------------+------------------------------+
-| DSP48E   | 0                          | 0                            |
-+----------+----------------------------+------------------------------+
-| FF       | 196                        | 274                          |
-+----------+----------------------------+------------------------------+
-| LUT      | 240                        | 912                          |
-+----------+----------------------------+------------------------------+
-| CLB      | 57                         | 231                          |
-+----------+----------------------------+------------------------------+
+    +----------+----------------------------+------------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +----------------------------+------------------------------+
+    |          | Normal Operation (1 pixel) | Resource Optimized (8 pixel) |
+    +==========+============================+==============================+
+    | BRAM_18K | 2                          | 16                           |
+    +----------+----------------------------+------------------------------+
+    | DSP48E   | 0                          | 0                            |
+    +----------+----------------------------+------------------------------+
+    | FF       | 196                        | 274                          |
+    +----------+----------------------------+------------------------------+
+    | LUT      | 240                        | 912                          |
+    +----------+----------------------------+------------------------------+
+    | CLB      | 57                         | 231                          |
+    +----------+----------------------------+------------------------------+
 
 The following table summarizes the resource utilization of the calcHist function for Normal Operation (1 pixel), generated using Vivado HLS 2019.1 version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz for 1 pixel case for 4K image 3 channel.
 
 .. table:: Table . calcHist Function Resource Utilization Summary
 
-+----------+----------------------------+
-| Name     | Resource Utilization       |
-+          +----------------------------+
-|          | Normal Operation (1 pixel) |
-+==========+============================+
-| BRAM_18K | 8                          |
-+----------+----------------------------+
-| DSP48E   | 0                          |
-+----------+----------------------------+
-| FF       | 381                        |
-+----------+----------------------------+
-| LUT      | 614                        |
-+----------+----------------------------+
-| CLB      | 134                        |
-+----------+----------------------------+
+    +----------+----------------------------+
+    | Name     | Resource Utilization       |
+    +          +----------------------------+
+    |          | Normal Operation (1 pixel) |
+    +==========+============================+
+    | BRAM_18K | 8                          |
+    +----------+----------------------------+
+    | DSP48E   | 0                          |
+    +----------+----------------------------+
+    | FF       | 381                        |
+    +----------+----------------------------+
+    | LUT      | 614                        |
+    +----------+----------------------------+
+    | CLB      | 134                        |
+    +----------+----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -10305,15 +10749,15 @@ pixel mode.
 
 .. table:: Table . calcHist Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _histogram-equalization:
 
@@ -10386,15 +10830,15 @@ pixel and 150 MHz for 8 pixel mode.
 
 .. table:: Table . equalizeHist Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
-+                +                           +----------------------+----------+------+------+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
-+================+===========================+======================+==========+======+======+=====+
-| 1 pixel        | 300                       | 4                    | 5        | 3492 | 1807 | 666 |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| 8 pixel        | 150                       | 25                   | 5        | 3526 | 2645 | 835 |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
+    +                +                           +----------------------+----------+------+------+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
+    +================+===========================+======================+==========+======+======+=====+
+    | 1 pixel        | 300                       | 4                    | 5        | 3492 | 1807 | 666 |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | 8 pixel        | 150                       | 25                   | 5        | 3526 | 2645 | 835 |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
 
 .. rubric:: Performance Estimate
 
@@ -10407,22 +10851,22 @@ Optimized (8 pixel) configurations, generated using Vivado HLS
 
 .. table:: Table . equalizeHist Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max (ms)         |
-+=============================+==================+
-| 1 pixel per clock operation | 13.8             |
-+-----------------------------+------------------+
-| 8 pixel per clock operation | 3.4              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max (ms)         |
+    +=============================+==================+
+    | 1 pixel per clock operation | 13.8             |
+    +-----------------------------+------------------+
+    | 8 pixel per clock operation | 3.4              |
+    +-----------------------------+------------------+
 
 .. _hog:
 
 HOG
 ===
 
-The histogram of oriented gradients (HOG) is a feature descriptor used
+The Histogram of Oriented Gradients (HOG) is a feature descriptor used
 in computer vision for the purpose of object detection. The feature
 descriptors produced from this approach is widely used in the pedestrian
 detection.
@@ -10512,9 +10956,9 @@ The following table describes the function parameters.
    +--------------+-------------------------------------------------------+
    | Parameters   | Description                                           |
    +==============+=======================================================+
-   | \_in_mat     | Input image, of xf::cv::Mat type                          |
+   | \_in_mat     | Input image, of xf::cv::Mat type                      |
    +--------------+-------------------------------------------------------+
-   | \_desc_mat   | Output descriptors, of xf::cv::Mat type                   |
+   | \_desc_mat   | Output descriptors, of xf::cv::Mat type               |
    +--------------+-------------------------------------------------------+
 
 Where,
@@ -10540,47 +10984,46 @@ process an image of 1920x1080 resolution.
 
 .. table:: Table . HOGDescriptor Function Resource Utilization Summary
 
-+----------+-----------------------------------------------+-------+-------+-------+
-| Resource | Utilization (at 300 MHz) of 1 pixel operation                         |
-+          +-----------------------------------------------+-------+-------+-------+
-|          | NRB                                                   | RB            |
-+          +-----------------------------------------------+-------+-------+-------+
-|          | Gray                                          | RGB   | Gray  | RGB   |
-+==========+===============================================+=======+=======+=======+
-| BRAM_18K | 43                                            | 49    | 171   | 177   |
-+----------+-----------------------------------------------+-------+-------+-------+
-| DSP48E   | 34                                            | 46    | 36    | 48    |
-+----------+-----------------------------------------------+-------+-------+-------+
-| FF       | 15365                                         | 15823 | 15205 | 15663 |
-+----------+-----------------------------------------------+-------+-------+-------+
-| LUT      | 12868                                         | 13267 | 13443 | 13848 |
-+----------+-----------------------------------------------+-------+-------+-------+
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | Resource | Utilization (at 300 MHz) of 1 pixel operation                         |
+    +          +-----------------------------------------------+-------+-------+-------+
+    |          | NRB                                                   | RB            |
+    +          +-----------------------------------------------+-------+-------+-------+
+    |          | Gray                                          | RGB   | Gray  | RGB   |
+    +==========+===============================================+=======+=======+=======+
+    | BRAM_18K | 43                                            | 49    | 171   | 177   |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | DSP48E   | 34                                            | 46    | 36    | 48    |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | FF       | 15365                                         | 15823 | 15205 | 15663 |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | LUT      | 12868                                         | 13267 | 13443 | 13848 |
+    +----------+-----------------------------------------------+-------+-------+-------+
 
 The following table shows the resource utilization of ``HOGDescriptor``
 function for normal operation (1 pixel) mode as generated in Vivado HLS 2019.1
 version tool for the part xczu7ev-ffvc1156-2-e at 300 MHz to process an
 image of 1920x1080 resolution with UltraRAM enabled.
 
-.. table:: Table . HOGDescriptor Function Resource Utilization Summary with
-UltraRAM enabled
+.. table:: Table . HOGDescriptor Function Resource Utilization Summary with UltraRAM enabled
 
-+----------+-----------------------------------------------+-------+-------+-------+
-| Resource | Utilization (at 300 MHz) of 1 pixel operation                         |
-+          +-----------------------------------------------+-------+-------+-------+
-|          | NRB                                                   | RB            |
-+          +-----------------------------------------------+-------+-------+-------+
-|          | Gray                                          | RGB   | Gray  | RGB   |
-+==========+===============================================+=======+=======+=======+
-| BRAM_18K | 10                                            | 12    | 18    | 20    |
-+----------+-----------------------------------------------+-------+-------+-------+
-| URAM     | 15                                            | 15    | 15    | 17    |
-+----------+-----------------------------------------------+-------+-------+-------+
-| DSP48E   | 34                                            | 46    | 36    | 48    |
-+----------+-----------------------------------------------+-------+-------+-------+
-| FF       | 17285                                         | 17917 | 18270 | 18871 |
-+----------+-----------------------------------------------+-------+-------+-------+
-| LUT      | 12409                                         | 12861 | 12793 | 13961 |
-+----------+-----------------------------------------------+-------+-------+-------+
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | Resource | Utilization (at 300 MHz) of 1 pixel operation                         |
+    +          +-----------------------------------------------+-------+-------+-------+
+    |          | NRB                                                   | RB            |
+    +          +-----------------------------------------------+-------+-------+-------+
+    |          | Gray                                          | RGB   | Gray  | RGB   |
+    +==========+===============================================+=======+=======+=======+
+    | BRAM_18K | 10                                            | 12    | 18    | 20    |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | URAM     | 15                                            | 15    | 15    | 17    |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | DSP48E   | 34                                            | 46    | 36    | 48    |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | FF       | 17285                                         | 17917 | 18270 | 18871 |
+    +----------+-----------------------------------------------+-------+-------+-------+
+    | LUT      | 12409                                         | 12861 | 12793 | 13961 |
+    +----------+-----------------------------------------------+-------+-------+-------+
 
 .. rubric:: Performance Estimate
 
@@ -10592,19 +11035,19 @@ of 1920x1080p resolution.
 
 .. table:: Table . HOGDescriptor Function Performance Estimate Summary
 
-+----------------+---------------------------+------------------+----------+
-| Operating Mode | Operating Frequency (MHz) | Latency Estimate            |
-+                +                           +------------------+----------+
-|                |                           | Min (ms)         | Max (ms) |
-+================+===========================+==================+==========+
-| NRB-Gray       | 300                       | 6.98             | 8.83     |
-+----------------+---------------------------+------------------+----------+
-| NRB-RGBA       | 300                       | 6.98             | 8.83     |
-+----------------+---------------------------+------------------+----------+
-| RB-Gray        | 300                       | 176.81           | 177      |
-+----------------+---------------------------+------------------+----------+
-| RB-RGBA        | 300                       | 176.81           | 177      |
-+----------------+---------------------------+------------------+----------+
+    +----------------+---------------------------+------------------+----------+
+    | Operating Mode | Operating Frequency (MHz) | Latency Estimate            |
+    +                +                           +------------------+----------+
+    |                |                           | Min (ms)         | Max (ms) |
+    +================+===========================+==================+==========+
+    | NRB-Gray       | 300                       | 6.98             | 8.83     |
+    +----------------+---------------------------+------------------+----------+
+    | NRB-RGBA       | 300                       | 6.98             | 8.83     |
+    +----------------+---------------------------+------------------+----------+
+    | RB-Gray        | 300                       | 176.81           | 177      |
+    +----------------+---------------------------+------------------+----------+
+    | RB-RGBA        | 300                       | 176.81           | 177      |
+    +----------------+---------------------------+------------------+----------+
 
 .. rubric:: Deviations from OpenCV
 
@@ -10771,19 +11214,19 @@ image for 512 lines.
 
 .. table:: Table . Houghlines Function Resource Utilization Summary
 
-+----------+----------------------+
-| Name     | Resource Utilization |
-+          +----------------------+
-|          | THETA=1, RHO=1       |
-+==========+======================+
-| BRAM_18K | 542                  |
-+----------+----------------------+
-| DSP48E   | 10                   |
-+----------+----------------------+
-| FF       | 60648                |
-+----------+----------------------+
-| LUT      | 56131                |
-+----------+----------------------+
+    +----------+----------------------+
+    | Name     | Resource Utilization |
+    +          +----------------------+
+    |          | THETA=1, RHO=1       |
+    +==========+======================+
+    | BRAM_18K | 542                  |
+    +----------+----------------------+
+    | DSP48E   | 10                   |
+    +----------+----------------------+
+    | FF       | 60648                |
+    +----------+----------------------+
+    | LUT      | 56131                |
+    +----------+----------------------+
 
 .. rubric:: Performance Estimate
 
@@ -10795,13 +11238,13 @@ Xczu9eg-ffvb1156-1-i-es1 to process a grayscale HD (1080x1920) image for
 
 .. table:: Table . Houghlines Function Performance Estimate Summary
 
-+----------------+---------------------------+------------------+
-| Operating Mode | Operating Frequency (MHz) | Latency Estimate |
-+                +                           +------------------+
-|                |                           | Max (ms)         |
-+================+===========================+==================+
-| THETA=1, RHO=1 | 300                       | 12.5             |
-+----------------+---------------------------+------------------+
+    +----------------+---------------------------+------------------+
+    | Operating Mode | Operating Frequency (MHz) | Latency Estimate |
+    +                +                           +------------------+
+    |                |                           | Max (ms)         |
+    +================+===========================+==================+
+    | THETA=1, RHO=1 | 300                       | 12.5             |
+    +----------------+---------------------------+------------------+
 
 
 
@@ -10816,21 +11259,21 @@ The input image are typically pre-processed before being fed for inference of di
 
 The preProcess function supports operating modes presented in the below table:
 
-+---------+--------------------------------------------------+--------------------------------------+
-| Op Code | Operation                                        | Description                          |
-+=========+==================================================+======================================+
-| 0       | |image165|                                       | Mean subtraction                     |
-+---------+--------------------------------------------------+--------------------------------------+
-| 1       | |image166|                                       | Scale and clip                       |
-+---------+--------------------------------------------------+--------------------------------------+
-| 2       | |image167|                                       | Clipping                             |
-+---------+--------------------------------------------------+--------------------------------------+
-| 3       | |image168|                                       | Scale and bias                       |
-+---------+--------------------------------------------------+--------------------------------------+
-| 4       | |image169|                                       | Scale and bias with mean subtraction |
-+---------+--------------------------------------------------+--------------------------------------+
-| 5       | |image170|                                       | Complete operation                   |
-+---------+--------------------------------------------------+--------------------------------------+
+    +---------+--------------------------------------------------+--------------------------------------+
+    | Op Code | Operation                                        | Description                          |
+    +=========+==================================================+======================================+
+    | 0       | |image165|                                       | Mean subtraction                     |
+    +---------+--------------------------------------------------+--------------------------------------+
+    | 1       | |image166|                                       | Scale and clip                       |
+    +---------+--------------------------------------------------+--------------------------------------+
+    | 2       | |image167|                                       | Clipping                             |
+    +---------+--------------------------------------------------+--------------------------------------+
+    | 3       | |image168|                                       | Scale and bias                       |
+    +---------+--------------------------------------------------+--------------------------------------+
+    | 4       | |image169|                                       | Scale and bias with mean subtraction |
+    +---------+--------------------------------------------------+--------------------------------------+
+    | 5       | |image170|                                       | Complete operation                   |
+    +---------+--------------------------------------------------+--------------------------------------+
 
 .. rubric:: API Syntax
 
@@ -10846,78 +11289,78 @@ The following table describes the template and the function parameters.
 
 .. table:: Table gammacorrection Parameter Description
 
-+--------------------+----------------------------------------------+
-| Parameter          | Description                                  |
-+====================+==============================================+
-| srcStrm            | Input image stream                           |
-+--------------------+----------------------------------------------+
-| out                | Output pointer                               |
-+--------------------+----------------------------------------------+
-| params             | Array containing α, β and γ values           |
-+--------------------+----------------------------------------------+
-| rows               | Input image height                           |
-+--------------------+----------------------------------------------+
-| cols               | Input image width                            |
-+--------------------+----------------------------------------------+
-| th1                | Upper threshold                              |
-+--------------------+----------------------------------------------+
-| th2                | Lower threshold                              |
-+--------------------+----------------------------------------------+
-| INPUT_PTR_WIDTH_T  | Width of input pointer                       |
-+--------------------+----------------------------------------------+
-| OUTPUT_PTR_WIDTH_T | Width of output pointer                      |
-+--------------------+----------------------------------------------+
-| T_CHANNELS_T       | Total Channels                               |
-+--------------------+----------------------------------------------+
-| CPW_T              | Channels Packed per DDR Word                 |
-+--------------------+----------------------------------------------+
-| ROWS_T             | Max Height of Image                          |
-+--------------------+----------------------------------------------+
-| COLS_T             | Max Width of Image                           |
-+--------------------+----------------------------------------------+
-| NPC_T              | Number of pixels processed per clock         |
-+--------------------+----------------------------------------------+
-| PACK_MODE_T        | data format (pixel packed or channel packed) |
-+--------------------+----------------------------------------------+
-| WX_T               | x bit width                                  |
-+--------------------+----------------------------------------------+
-| WA_T               | alpha bit width                              |
-+--------------------+----------------------------------------------+
-| WB_T               | beta bit width                               |
-+--------------------+----------------------------------------------+
-| WY_T               | Gamma bit width                              |
-+--------------------+----------------------------------------------+
-| WO_T               | Output bit width                             |
-+--------------------+----------------------------------------------+
-| FX_T               | Number of integer bits for x                 |
-+--------------------+----------------------------------------------+
-| FA_T               | Number of integer bits for alpha             |
-+--------------------+----------------------------------------------+
-| FB_T               | Number of integer bits for beta              |
-+--------------------+----------------------------------------------+
-| FY_T               | Number of integer bits for gamma             |
-+--------------------+----------------------------------------------+
-| FO_T               | Number of integer bits for output            |
-+--------------------+----------------------------------------------+
-| SIGNED_IN_T        | Signed input flag                            |
-+--------------------+----------------------------------------------+
-| OPMODE_T           | Operating mode                               |
-+--------------------+----------------------------------------------+
+    +--------------------+----------------------------------------------+
+    | Parameter          | Description                                  |
+    +====================+==============================================+
+    | srcStrm            | Input image stream                           |
+    +--------------------+----------------------------------------------+
+    | out                | Output pointer                               |
+    +--------------------+----------------------------------------------+
+    | params             | Array containing α, β and γ values           |
+    +--------------------+----------------------------------------------+
+    | rows               | Input image height                           |
+    +--------------------+----------------------------------------------+
+    | cols               | Input image width                            |
+    +--------------------+----------------------------------------------+
+    | th1                | Upper threshold                              |
+    +--------------------+----------------------------------------------+
+    | th2                | Lower threshold                              |
+    +--------------------+----------------------------------------------+
+    | INPUT_PTR_WIDTH_T  | Width of input pointer                       |
+    +--------------------+----------------------------------------------+
+    | OUTPUT_PTR_WIDTH_T | Width of output pointer                      |
+    +--------------------+----------------------------------------------+
+    | T_CHANNELS_T       | Total Channels                               |
+    +--------------------+----------------------------------------------+
+    | CPW_T              | Channels Packed per DDR Word                 |
+    +--------------------+----------------------------------------------+
+    | ROWS_T             | Max Height of Image                          |
+    +--------------------+----------------------------------------------+
+    | COLS_T             | Max Width of Image                           |
+    +--------------------+----------------------------------------------+
+    | NPC_T              | Number of pixels processed per clock         |
+    +--------------------+----------------------------------------------+
+    | PACK_MODE_T        | data format (pixel packed or channel packed) |
+    +--------------------+----------------------------------------------+
+    | WX_T               | x bit width                                  |
+    +--------------------+----------------------------------------------+
+    | WA_T               | alpha bit width                              |
+    +--------------------+----------------------------------------------+
+    | WB_T               | beta bit width                               |
+    +--------------------+----------------------------------------------+
+    | WY_T               | Gamma bit width                              |
+    +--------------------+----------------------------------------------+
+    | WO_T               | Output bit width                             |
+    +--------------------+----------------------------------------------+
+    | FX_T               | Number of integer bits for x                 |
+    +--------------------+----------------------------------------------+
+    | FA_T               | Number of integer bits for alpha             |
+    +--------------------+----------------------------------------------+
+    | FB_T               | Number of integer bits for beta              |
+    +--------------------+----------------------------------------------+
+    | FY_T               | Number of integer bits for gamma             |
+    +--------------------+----------------------------------------------+
+    | FO_T               | Number of integer bits for output            |
+    +--------------------+----------------------------------------------+
+    | SIGNED_IN_T        | Signed input flag                            |
+    +--------------------+----------------------------------------------+
+    | OPMODE_T           | Operating mode                               |
+    +--------------------+----------------------------------------------+
 
 .. rubric:: Resource Utilization
 
 
 The following table summarizes the resource utilization of preProcess for NPC_T =8, CPW_T=3 and OPMODE=0, for a maximum input image size of 1280x720 pixels. The results are after synthesis in Vitis 2019.2 for the Xilinx xcu200-fsgd2104-2-e FPGA at 300 MHz. Latency for this configuration is 0.7 ms.
 
-+----------------+---------------------+----------------------+----------+------+-------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate |          |      |       |       |
-|                |                     |                      |          |      |       |       |
-|                | (MHz)               |                      |          |      |       |       |
-+                +                     +----------------------+----------+------+-------+-------+
-|                |                     | BRAM_18K             | DSP_48Es | FF   | LUT   | SLICE |
-+================+=====================+======================+==========+======+=======+=======+
-| 8 pixel        | 300                 | 0                    | 2        | 7554 | 11127 | 2155  |
-+----------------+---------------------+----------------------+----------+------+-------+-------+
+    +----------------+---------------------+----------------------+----------+------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |       |       |
+    |                |                     |                      |          |      |       |       |
+    |                | (MHz)               |                      |          |      |       |       |
+    +                +                     +----------------------+----------+------+-------+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT   | SLICE |
+    +================+=====================+======================+==========+======+=======+=======+
+    | 8 pixel        | 300                 | 0                    | 2        | 7554 | 11127 | 2155  |
+    +----------------+---------------------+----------------------+----------+------+-------+-------+
 
 
 
@@ -10986,15 +11429,15 @@ for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
 
 .. table:: Table . pyrUp Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+------+------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                       |
-|                |                     |                                            |
-|                | (MHz)               |                                            |
-+                +                     +----------------------+------+------+-------+
-|                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+=====================+======================+======+======+=======+
-| 1 Pixel        | 300                 | 1124                 | 1199 | 0    | 10    |
-+----------------+---------------------+----------------------+------+------+-------+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 1124                 | 1199 | 0    | 10    |
+    +----------------+---------------------+----------------------+------+------+-------+
 
 
 The following table summarizes the resource utilization of pyrUp for 1
@@ -11004,15 +11447,15 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
 
 .. table:: Table . pyrUp Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+------+------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                       |
-|                |                     |                                            |
-|                | (MHz)               |                                            |
-+                +                     +----------------------+------+------+-------+
-|                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+=====================+======================+======+======+=======+
-| 1 Pixel        | 300                 | 2074                 | 2176 | 0    | 59    |
-+----------------+---------------------+----------------------+------+------+-------+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 2074                 | 2176 | 0    | 59    |
+    +----------------+---------------------+----------------------+------+------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -11023,15 +11466,15 @@ on Vivado HLS 2019.1 for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . pyrUp Function Performance Estimate Summary
 
-+----------------+---------------------+------------------+------------------+
-| Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
-|                |                     |                  |                  |
-|                | (MHz)               |                  |                  |
-+                +                     +                  +------------------+
-|                |                     |                  | Max (ms)         |
-+================+=====================+==================+==================+
-| 1 pixel        | 300                 | 1920x1080        | 27.82            |
-+----------------+---------------------+------------------+------------------+
+    +----------------+---------------------+------------------+------------------+
+    | Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
+    |                |                     |                  |                  |
+    |                | (MHz)               |                  |                  |
+    +                +                     +                  +------------------+
+    |                |                     |                  | Max (ms)         |
+    +================+=====================+==================+==================+
+    | 1 pixel        | 300                 | 1920x1080        | 27.82            |
+    +----------------+---------------------+------------------+------------------+
 
 .. _pyramid-down:
 
@@ -11096,15 +11539,15 @@ for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
 
 .. table:: Table . pyrDown Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+------+------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                       |
-|                |                     |                                            |
-|                | (MHz)               |                                            |
-+                +                     +----------------------+------+------+-------+
-|                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+=====================+======================+======+======+=======+
-| 1 Pixel        | 300                 | 1171                 | 1238 | 1    | 5     |
-+----------------+---------------------+----------------------+------+------+-------+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 1171                 | 1238 | 1    | 5     |
+    +----------------+---------------------+----------------------+------+------+-------+
 
 
 The following table summarizes the resource utilization of pyrDown for 1
@@ -11114,15 +11557,15 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
 
 .. table:: Table . pyrDown Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+------+------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                       |
-|                |                     |                                            |
-|                | (MHz)               |                                            |
-+                +                     +----------------------+------+------+-------+
-|                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+=====================+======================+======+======+=======+
-| 1 Pixel        | 300                 | 2158                 | 1983 | 2    | 30    |
-+----------------+---------------------+----------------------+------+------+-------+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 2158                 | 1983 | 2    | 30    |
+    +----------------+---------------------+----------------------+------+------+-------+
 
 The following table summarizes the resource utilization of pyrDown for 1
 pixel per cycle implementation, for a maximum input image size of
@@ -11131,15 +11574,15 @@ Xilinx xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM enabled.
 
 .. table:: Table . pyrDown Function Resource Utilization Summary with UltraRAM Enabled
 
-+----------------+---------------------+----------------------+------+------+-------+------+
-| Operating Mode | Operating Frequency | Utilization Estimate                              |
-|                |                     |                                                   |
-|                | (MHz)               |                                                   |
-+                +                     +----------------------+------+------+-------+------+
-|                |                     | LUTs                 | FFs  | DSPs | BRAMs | URAM |
-+================+=====================+======================+======+======+=======+======+
-| 1 Pixel        | 300                 | 1171                 | 1243 | 0    | 0     | 1    |
-+----------------+---------------------+----------------------+------+------+-------+------+
+    +----------------+---------------------+----------------------+------+------+-------+------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                              |
+    |                |                     |                                                   |
+    |                | (MHz)               |                                                   |
+    +                +                     +----------------------+------+------+-------+------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs | URAM |
+    +================+=====================+======================+======+======+=======+======+
+    | 1 Pixel        | 300                 | 1171                 | 1243 | 0    | 0     | 1    |
+    +----------------+---------------------+----------------------+------+------+-------+------+
 
 
 .. rubric:: Performance Estimate
@@ -11150,15 +11593,15 @@ in Vivado HLS 2019.1 for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . pyrDown Function Performance Estimate Summary
 
-+----------------+---------------------+------------------+------------------+
-| Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
-|                |                     |                  |                  |
-|                | (MHz)               |                  |                  |
-+                +                     +                  +------------------+
-|                |                     |                  | Max (ms)         |
-+================+=====================+==================+==================+
-| 1 pixel        | 300                 | 1920x1080        | 6.99             |
-+----------------+---------------------+------------------+------------------+
+    +----------------+---------------------+------------------+------------------+
+    | Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
+    |                |                     |                  |                  |
+    |                | (MHz)               |                  |                  |
+    +                +                     +                  +------------------+
+    |                |                     |                  | Max (ms)         |
+    +================+=====================+==================+==================+
+    | 1 pixel        | 300                 | 1920x1080        | 6.99             |
+    +----------------+---------------------+------------------+------------------+
 
 
 .. _InitUndistortRectifyMapInverse:
@@ -11192,8 +11635,7 @@ format.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . InitUndistortRectifyMapInverse Function Parameter
-Descriptions
+.. table:: Table . InitUndistortRectifyMapInverse Function Parameter Descriptions
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -11302,23 +11744,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA
 
 .. table:: Table . InRange Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+          +-----------------------------+-----------------------------+
-|          | 300 MHz                     | 150 MHz                     |
-+==========+=============================+=============================+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 86                          | 154                         |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 60                          | 148                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 15                          | 37                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +          +-----------------------------+-----------------------------+
+    |          | 300 MHz                     | 150 MHz                     |
+    +==========+=============================+=============================+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 86                          | 154                         |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 60                          | 148                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 15                          | 37                          |
+    +----------+-----------------------------+-----------------------------+
 
 
 
@@ -11333,15 +11775,15 @@ image.
 
 .. table:: Table . InRange Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _integral-image:
 
@@ -11403,23 +11845,23 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD
 
 .. table:: Table . integral Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization        |
-+                             +-----------------------------+
-|                             | 1 pixel per clock operation |  
-+                             +-----------------------------+
-|                             | 300 MHz                     |
-+=============================+=============================+
-| BRAM_18K                    | 4                           |
-+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           |
-+-----------------------------+-----------------------------+
-| FF                          | 613                         |
-+-----------------------------+-----------------------------+
-| LUT                         | 378                         |
-+-----------------------------+-----------------------------+
-| CLB                         | 102                         |
-+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization        |
+    +                             +-----------------------------+
+    |                             | 1 pixel per clock operation |  
+    +                             +-----------------------------+
+    |                             | 300 MHz                     |
+    +=============================+=============================+
+    | BRAM_18K                    | 4                           |
+    +-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           |
+    +-----------------------------+-----------------------------+
+    | FF                          | 613                         |
+    +-----------------------------+-----------------------------+
+    | LUT                         | 378                         |
+    +-----------------------------+-----------------------------+
+    | CLB                         | 102                         |
+    +-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -11431,13 +11873,13 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table . integral Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 7.2              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 7.2              |
+    +-----------------------------+------------------+
 
 .. _dense-pyramidal-lk-optical:
 
@@ -11510,8 +11952,7 @@ optical flow along with the scale is obtained.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . densePyrOpticalFlow Function Parameter
-Descriptions
+.. table:: Table . densePyrOpticalFlow Function Parameter Descriptions
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -11593,15 +12034,15 @@ optical flow computed for a window size of 11 over an image size of
 
 .. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+-------+------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                        |
-|                |                     |                                             |
-|                | (MHz)               |                                             |
-+                +                     +----------------------+-------+------+-------+
-|                |                     | LUTs                 | FFs   | DSPs | BRAMs |
-+================+=====================+======================+=======+======+=======+
-| 1 Pixel        | 300                 | 32231                | 16596 | 52   | 215   |
-+----------------+---------------------+----------------------+-------+------+-------+
+    +----------------+---------------------+----------------------+-------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                        |
+    |                |                     |                                             |
+    |                | (MHz)               |                                             |
+    +                +                     +----------------------+-------+------+-------+
+    |                |                     | LUTs                 | FFs   | DSPs | BRAMs |
+    +================+=====================+======================+=======+======+=======+
+    | 1 Pixel        | 300                 | 32231                | 16596 | 52   | 215   |
+    +----------------+---------------------+----------------------+-------+------+-------+
 
 .. rubric:: Resource Utilization with UltraRAM Enable
 
@@ -11614,15 +12055,15 @@ the Xilinx xczu7ev-ffvc1156-2 FPGA at 300 MHz with UltraRAM enabled.
 
 .. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+-------+------+-------+------+
-| Operating Mode | Operating Frequency | Utilization Estimate                               |
-|                |                     |                                                    |
-|                | (MHz)               |                                                    |
-+                +                     +----------------------+-------+------+-------+------+
-|                |                     | LUTs                 | FFs   | DSPs | BRAMs | URAM |
-+================+=====================+======================+=======+======+=======+======+
-| 1 Pixel        | 300                 | 31164                | 42320 | 81   | 34    | 23   |
-+----------------+---------------------+----------------------+-------+------+-------+------+
+    +----------------+---------------------+----------------------+-------+------+-------+------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                               |
+    |                |                     |                                                    |
+    |                | (MHz)               |                                                    |
+    +                +                     +----------------------+-------+------+-------+------+
+    |                |                     | LUTs                 | FFs   | DSPs | BRAMs | URAM |
+    +================+=====================+======================+=======+======+=======+======+
+    | 1 Pixel        | 300                 | 31164                | 42320 | 81   | 34    | 23   |
+    +----------------+---------------------+----------------------+-------+------+-------+------+
 
 
 .. rubric:: Performance Estimate
@@ -11635,19 +12076,19 @@ the zcu102 evaluation board.
 
 .. table:: Table . densePyrOpticalFlow Function Performance Estimate Summary
 
-+----------------+---------------------+------------+------------------+
-| Operating Mode | Operating Frequency | Image Size | Latency Estimate |
-|                |                     |            |                  |
-|                | (MHz)               |            |                  |
-+                +                     +            +------------------+
-|                |                     |            | Max (ms)         |
-+================+=====================+============+==================+
-| 1 pixel        | 300                 | 1920x1080  | 49.7             |
-+----------------+---------------------+------------+------------------+
-| 1 pixel        | 300                 | 1280x720   | 22.9             |
-+----------------+---------------------+------------+------------------+
-| 1 pixel        | 300                 | 1226x370   | 12.02            |
-+----------------+---------------------+------------+------------------+
+    +----------------+---------------------+------------+------------------+
+    | Operating Mode | Operating Frequency | Image Size | Latency Estimate |
+    |                |                     |            |                  |
+    |                | (MHz)               |            |                  |
+    +                +                     +            +------------------+
+    |                |                     |            | Max (ms)         |
+    +================+=====================+============+==================+
+    | 1 pixel        | 300                 | 1920x1080  | 49.7             |
+    +----------------+---------------------+------------+------------------+
+    | 1 pixel        | 300                 | 1280x720   | 22.9             |
+    +----------------+---------------------+------------+------------------+
+    | 1 pixel        | 300                 | 1226x370   | 12.02            |
+    +----------------+---------------------+------------+------------------+
 
 .. _dense-non-pyramidal-lk-optical:
 
@@ -11711,8 +12152,7 @@ equations and two unknowns:
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . DenseNonPyrLKOpticalFlow Function Parameter
-Descriptions
+.. table:: Table . DenseNonPyrLKOpticalFlow Function Paramete Descriptions
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -11757,17 +12197,17 @@ MHz.
 
 .. table:: Table . DenseNonPyrLKOpticalFlow Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+-------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                            |
-|                |                     |                                                 |
-|                | (MHz)               |                                                 |
-+                +                     +----------------------+----------+-------+-------+
-|                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
-+================+=====================+======================+==========+=======+=======+
-| 1 pixel        | 300                 | 178                  | 42       | 11984 | 7730  |
-+----------------+---------------------+----------------------+----------+-------+-------+
-| 2 pixel        | 300                 | 258                  | 82       | 22747 | 15126 |
-+----------------+---------------------+----------------------+----------+-------+-------+
+    +----------------+---------------------+----------------------+----------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                            |
+    |                |                     |                                                 |
+    |                | (MHz)               |                                                 |
+    +                +                     +----------------------+----------+-------+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
+    +================+=====================+======================+==========+=======+=======+
+    | 1 pixel        | 300                 | 178                  | 42       | 11984 | 7730  |
+    +----------------+---------------------+----------------------+----------+-------+-------+
+    | 2 pixel        | 300                 | 258                  | 82       | 22747 | 15126 |
+    +----------------+---------------------+----------------------+----------+-------+-------+
 
 The following table summarizes the resource utilization of
 DenseNonPyrLKOpticalFlow for a 4K image, as generated in the Vivado HLS version
@@ -11776,17 +12216,17 @@ enabled.
 
 .. table:: Table . DenseNonPyrLKOpticalFlow Function Resource Utilization Summary with UltraRAM Eanble
 
-+----------------+---------------------+----------------------+------+----------+-------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                                   |
-|                |                     |                                                        |
-|                | (MHz)               |                                                        |
-+                +                     +----------------------+------+----------+-------+-------+
-|                |                     | BRAM_18K             | URAM | DSP_48Es | FF    | LUTs  |
-+================+=====================+======================+======+==========+=======+=======+
-| 1 pixel        | 300                 | 0                    | 12   | 42       | 11803 | 7469  |
-+----------------+---------------------+----------------------+------+----------+-------+-------+
-| 2 pixel        | 300                 | 0                    | 23   | 80       | 22124 | 13800 |
-+----------------+---------------------+----------------------+------+----------+-------+-------+
+    +----------------+---------------------+----------------------+------+----------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                                   |
+    |                |                     |                                                        |
+    |                | (MHz)               |                                                        |
+    +                +                     +----------------------+------+----------+-------+-------+
+    |                |                     | BRAM_18K             | URAM | DSP_48Es | FF    | LUTs  |
+    +================+=====================+======================+======+==========+=======+=======+
+    | 1 pixel        | 300                 | 0                    | 12   | 42       | 11803 | 7469  |
+    +----------------+---------------------+----------------------+------+----------+-------+-------+
+    | 2 pixel        | 300                 | 0                    | 23   | 80       | 22124 | 13800 |
+    +----------------+---------------------+----------------------+------+----------+-------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -11798,17 +12238,17 @@ HLS 2019.1 version tool for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . DenseNonPyrLKOpticalFlow Function Performance Estimate Summary
 
-+----------------+---------------------+------------------+
-| Operating Mode | Operating Frequency | Latency Estimate |
-|                |                     |                  |
-|                | (MHz)               |                  |
-+                +                     +------------------+
-|                |                     | Max (ms)         |
-+================+=====================+==================+
-| 1 pixel        | 300                 | 28.01            |
-+----------------+---------------------+------------------+
-| 2 pixel        | 300                 | 14.01            |
-+----------------+---------------------+------------------+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 28.01            |
+    +----------------+---------------------+------------------+
+    | 2 pixel        | 300                 | 14.01            |
+    +----------------+---------------------+------------------+
 
 .. _kalman-filter:
 
@@ -11970,61 +12410,61 @@ P to address the numerical accuracy/stability problems.
 
 Table . Kalman Filter Parameter Description
 
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter                                                                                        | Used (?) or Unused (X)                                    | Description                                                                                                                                                              |
-+                                                                                                  +------------------------+-------------+--------------------+                                                                                                                                                                          +
-|                                                                                                  | Initialization         | Time Update | Measurement Update |                                                                                                                                                                          |
-+==================================================================================================+========================+=============+====================+==========================================================================================================================================================================+
-| N_STATE                                                                                          | ?                      | ?           | ?                  | Number of state variable; possible options are 1 to 128                                                                                                                  |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| M_MEAS                                                                                           | ?                      | ?           | ?                  | Number of measurement variable; possible options are 1 to 128; M_MEAS must be less than or equal to N_STATE. In case of Extended Kalman Filter(EKF), M_MEAS should be 1. |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| C_CTRL                                                                                           | ?                      | ?           | ?                  | Number of control variable; possible options are 0 to 128; C_CTRL must be less than or equal to N_STATE. In case of EKF, C_CTRL should be 1.                             |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| MTU                                                                                              | ?                      | ?           | ?                  | Number of multipliers used in time update; possible options are 1 to 128; MTU must be less than or equal to N_STATE                                                      |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| MMU                                                                                              | ?                      | ?           | ?                  | Number of multipliers used in Measurement update; possible options are 1 to 128; MMU must be less than or equal to N_STATE                                               |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| USE_URAM                                                                                         | ?                      | ?           | ?                  | URAM enable; possible options are 0 and 1                                                                                                                                |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| EKF_EN                                                                                           | ?                      | ?           | ?                  | Extended Kalman Filter Enable; possible options are 0 and 1                                                                                                              |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| TYPE                                                                                             | ?                      | ?           | ?                  | Type of input pixel. Currently, only XF_32FC1 is supported.                                                                                                              |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| NPC                                                                                              | ?                      | ?           | ?                  | Number of pixels to be processed per cycle; possible option is XF_NPPC1 (NOT relevant for this function)                                                                 |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| A_mat                                                                                            | ?                      | X           | X                  | Transition matrix A. In case of EKF, Jacobian Matrix F is mapped to A_mat.                                                                                               |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| B_mat                                                                                            | ?                      | X           | X                  | Control matrix B. In case of KF, B_mat argument is not required when C_CTRL=0. And in case of EKF, Dummy matrix with size (N_STATE x 1) is mapped to B_mat.              |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Uq_mat                                                                                           | ?                      | X           | X                  | U matrix for Process noise covariance matrix Q                                                                                                                           |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Dq_mat                                                                                           | ?                      | X           | X                  | D matrix for Process noise covariance matrix Q(only diagonal elements)                                                                                                   |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| H_mat                                                                                            | ?                      | X           | X                  | Measurement Matrix H. In case of EKF, Jacobian Matrix H is mapped to H_mat.                                                                                              |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| X0_mat                                                                                           | ?                      | X           | X                  | Initial state matrix. In case of EKF, state transition function f is mapped to X0_mat.                                                                                   |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| U0_mat                                                                                           | ?                      | X           | X                  | U matrix for initial error estimate covariance matrix P                                                                                                                  |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| D0_mat                                                                                           | ?                      | X           | X                  | D matrix for initial error estimate covariance matrix P(only diagonal elements)                                                                                          |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| R_mat                                                                                            | ?                      | X           | X                  | Measurement noise covariance matrix R(only diagonal elements). In case of EKF, input only one value of R since M_MEAS=1.                                                 |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| u_mat                                                                                            | X                      | ?           | X                  | Control input vector. In case of KF, u_mat argument is not required when C_CTRL=0. And in case of EKF, observation function h is mapped to u_mat.                        |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| y_mat                                                                                            | X                      | X           | ?                  | Measurement vector. In case of EKF, input only one measurement since M_MEAS=1.                                                                                           |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Xout_mat                                                                                         | X                      | ?           | ?                  | Output state matrix                                                                                                                                                      |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Uout_mat                                                                                         | X                      | ?           | ?                  | U matrix for output error estimate covariance matrix P                                                                                                                   |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Dout_mat                                                                                         | X                      | ?           | ?                  | D matrix for output error estimate covariance matrix P(only diagonal elements)                                                                                           |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| flag                                                                                             | ?                      | ?           | ?                  | Control flag register                                                                                                                                                    |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| All U, D counterparts of all initialized matrices (Q and P) are obtained using U-D factorization                                                                                                                                                                                                                                        |
-+--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Parameter                                                                                        | Used (?) or Unused (X)                                    | Description                                                                                                                                                              |
+    +                                                                                                  +------------------------+-------------+--------------------+                                                                                                                                                                          +
+    |                                                                                                  | Initialization         | Time Update | Measurement Update |                                                                                                                                                                          |
+    +==================================================================================================+========================+=============+====================+==========================================================================================================================================================================+
+    | N_STATE                                                                                          | ?                      | ?           | ?                  | Number of state variable; possible options are 1 to 128                                                                                                                  |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | M_MEAS                                                                                           | ?                      | ?           | ?                  | Number of measurement variable; possible options are 1 to 128; M_MEAS must be less than or equal to N_STATE. In case of Extended Kalman Filter(EKF), M_MEAS should be 1. |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | C_CTRL                                                                                           | ?                      | ?           | ?                  | Number of control variable; possible options are 0 to 128; C_CTRL must be less than or equal to N_STATE. In case of EKF, C_CTRL should be 1.                             |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | MTU                                                                                              | ?                      | ?           | ?                  | Number of multipliers used in time update; possible options are 1 to 128; MTU must be less than or equal to N_STATE                                                      |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | MMU                                                                                              | ?                      | ?           | ?                  | Number of multipliers used in Measurement update; possible options are 1 to 128; MMU must be less than or equal to N_STATE                                               |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | USE_URAM                                                                                         | ?                      | ?           | ?                  | URAM enable; possible options are 0 and 1                                                                                                                                |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | EKF_EN                                                                                           | ?                      | ?           | ?                  | Extended Kalman Filter Enable; possible options are 0 and 1                                                                                                              |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | TYPE                                                                                             | ?                      | ?           | ?                  | Type of input pixel. Currently, only XF_32FC1 is supported.                                                                                                              |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | NPC                                                                                              | ?                      | ?           | ?                  | Number of pixels to be processed per cycle; possible option is XF_NPPC1 (NOT relevant for this function)                                                                 |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | A_mat                                                                                            | ?                      | X           | X                  | Transition matrix A. In case of EKF, Jacobian Matrix F is mapped to A_mat.                                                                                               |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | B_mat                                                                                            | ?                      | X           | X                  | Control matrix B. In case of KF, B_mat argument is not required when C_CTRL=0. And in case of EKF, Dummy matrix with size (N_STATE x 1) is mapped to B_mat.              |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Uq_mat                                                                                           | ?                      | X           | X                  | U matrix for Process noise covariance matrix Q                                                                                                                           |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Dq_mat                                                                                           | ?                      | X           | X                  | D matrix for Process noise covariance matrix Q(only diagonal elements)                                                                                                   |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | H_mat                                                                                            | ?                      | X           | X                  | Measurement Matrix H. In case of EKF, Jacobian Matrix H is mapped to H_mat.                                                                                              |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | X0_mat                                                                                           | ?                      | X           | X                  | Initial state matrix. In case of EKF, state transition function f is mapped to X0_mat.                                                                                   |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | U0_mat                                                                                           | ?                      | X           | X                  | U matrix for initial error estimate covariance matrix P                                                                                                                  |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | D0_mat                                                                                           | ?                      | X           | X                  | D matrix for initial error estimate covariance matrix P(only diagonal elements)                                                                                          |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | R_mat                                                                                            | ?                      | X           | X                  | Measurement noise covariance matrix R(only diagonal elements). In case of EKF, input only one value of R since M_MEAS=1.                                                 |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | u_mat                                                                                            | X                      | ?           | X                  | Control input vector. In case of KF, u_mat argument is not required when C_CTRL=0. And in case of EKF, observation function h is mapped to u_mat.                        |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | y_mat                                                                                            | X                      | X           | ?                  | Measurement vector. In case of EKF, input only one measurement since M_MEAS=1.                                                                                           |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Xout_mat                                                                                         | X                      | ?           | ?                  | Output state matrix                                                                                                                                                      |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Uout_mat                                                                                         | X                      | ?           | ?                  | U matrix for output error estimate covariance matrix P                                                                                                                   |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Dout_mat                                                                                         | X                      | ?           | ?                  | D matrix for output error estimate covariance matrix P(only diagonal elements)                                                                                           |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | flag                                                                                             | ?                      | ?           | ?                  | Control flag register                                                                                                                                                    |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | All U, D counterparts of all initialized matrices (Q and P) are obtained using U-D factorization                                                                                                                                                                                                                                        |
+    +--------------------------------------------------------------------------------------------------+------------------------+-------------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. table:: Table . Control Flag Registers
 
@@ -12065,21 +12505,21 @@ Xczu9eg-ffvb1156-1 FPGA.
 
 .. table:: Table . Kalman Filter Function Resource Utilization Summary
 
-+----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
-| Name     | Resource Utilization                                                                                                                             |
-+          +-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
-|          | N_STATE=128; C_CTRL=128; M_MEAS=128; MTU=24; MMU=24 | N_STATE=64; C_CTRL=64; M_MEAS=12;MTU=16;MMU=16 | N_STATE=5; C_CTRL=1; M_MEAS=3;MTU=2;MMU=2 |
-+==========+=====================================================+================================================+===========================================+
-|          | 300 MHz                                             | 300 MHz                                        | 300 MHz                                   |
-+----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
-| BRAM_18K | 387                                                 | 142                                            | 24                                        |
-+----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
-| DSP48E   | 896                                                 | 548                                            | 87                                        |
-+----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
-| FF       | 208084                                              | 128262                                         | 34887                                     |
-+----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
-| LUT      | 113556                                              | 70942                                          | 18141                                     |
-+----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    +----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    | Name     | Resource Utilization                                                                                                                             |
+    +          +-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    |          | N_STATE=128; C_CTRL=128; M_MEAS=128; MTU=24; MMU=24 | N_STATE=64; C_CTRL=64; M_MEAS=12;MTU=16;MMU=16 | N_STATE=5; C_CTRL=1; M_MEAS=3;MTU=2;MMU=2 |
+    +==========+=====================================================+================================================+===========================================+
+    |          | 300 MHz                                             | 300 MHz                                        | 300 MHz                                   |
+    +----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    | BRAM_18K | 387                                                 | 142                                            | 24                                        |
+    +----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    | DSP48E   | 896                                                 | 548                                            | 87                                        |
+    +----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    | FF       | 208084                                              | 128262                                         | 34887                                     |
+    +----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
+    | LUT      | 113556                                              | 70942                                          | 18141                                     |
+    +----------+-----------------------------------------------------+------------------------------------------------+-------------------------------------------+
 
 
 The following table shows the resource utilization of the kernel for a
@@ -12115,17 +12555,17 @@ taking average latency of 100 iteration.
 
 .. table:: Table . Kalman Filter Function Performance Estimate Summary
 
-+-----------------------------------------------------+---------------------------+--------------+
-| Operating Mode                                      | Latency Estimate                         |
-+                                                     +---------------------------+--------------+
-|                                                     | Operating Frequency (MHz) | Latency (ms) |
-+=====================================================+===========================+==============+
-| N_STATE=128; C_CTRL=128; M_MEAS=128; MTU=24; MMU=24 | 300                       | 0.7          |
-+-----------------------------------------------------+---------------------------+--------------+
-| N_STATE=64; C_CTRL=64; M_MEAS=12; MTU=16; MMU=16    | 300                       | 0.12         |
-+-----------------------------------------------------+---------------------------+--------------+
-| N_STATE=5; C_CTRL=1; M_MEAS=3; MTU=2; MMU=2         | 300                       | 0.04         |
-+-----------------------------------------------------+---------------------------+--------------+
+    +-----------------------------------------------------+---------------------------+--------------+
+    | Operating Mode                                      | Latency Estimate                         |
+    +                                                     +---------------------------+--------------+
+    |                                                     | Operating Frequency (MHz) | Latency (ms) |
+    +=====================================================+===========================+==============+
+    | N_STATE=128; C_CTRL=128; M_MEAS=128; MTU=24; MMU=24 | 300                       | 0.7          |
+    +-----------------------------------------------------+---------------------------+--------------+
+    | N_STATE=64; C_CTRL=64; M_MEAS=12; MTU=16; MMU=16    | 300                       | 0.12         |
+    +-----------------------------------------------------+---------------------------+--------------+
+    | N_STATE=5; C_CTRL=1; M_MEAS=3; MTU=2; MMU=2         | 300                       | 0.04         |
+    +-----------------------------------------------------+---------------------------+--------------+
 
 The following table shows the performance of kernel for a configuration
 with UltraRAM enable, as generated using Vivado HLS 2019.1 tool for the Xilinx
@@ -12194,9 +12634,9 @@ R\ :sup:`p` and R\ :sup:`q` respectively, 1≤p, q≤n.
 | 
 
 .. note:: 
-#. |image127|, where |image128|, k is a time index and superscript is
-   row index and |image129|
-#. |image130| is a space of column vectors |image131|
+    #. |image127|, where |image128|, k is a time index and superscript is
+       row index and |image129|
+    #. |image130| is a space of column vectors |image131|
 
 
 | The equation for time update computations is as follows:
@@ -12347,19 +12787,19 @@ image.
 
 .. table:: Table filter2D Function Resource Utilization Summary
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |
-+                +                +                           +------------------+-----------+-------+-------+----------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |    CLB   |
-+================+================+===========================+==================+===========+=======+=======+==========+
-| 1 Pixel        | 3x3            | 300                       | 3                | 9         | 1701  | 1161  |   269    |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 5x5            | 300                       | 5                | 25        | 3115  | 2144  |   524    |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
-| 8 Pixel        | 3x3            | 150                       | 6                | 72        | 2783  | 2768  |   638    |
-+                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
-|                | 5x5            | 150                       | 10               | 216       | 3020  | 4443  |   1007   |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |
+    +                +                +                           +------------------+-----------+-------+-------+----------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |    CLB   |
+    +================+================+===========================+==================+===========+=======+=======+==========+
+    | 1 Pixel        | 3x3            | 300                       | 3                | 9         | 1701  | 1161  |   269    |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 5x5            | 300                       | 5                | 25        | 3115  | 2144  |   524    |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    | 8 Pixel        | 3x3            | 150                       | 6                | 72        | 2783  | 2768  |   638    |
+    +                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+    |                | 5x5            | 150                       | 10               | 216       | 3020  | 4443  |   1007   |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
 
 
 The following table summarizes the resource utilization of the kernel in
@@ -12368,15 +12808,15 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 Channel image.
 
 .. table:: Table filter2D Function Resource Utilization Summary
 
-+----------------+---------------+---------------------------+----------------------+-----------+----+-----+
-| Operating Mode | Filter Size   | Operating Frequency (MHz) |               Utilization Estimate          |
-+                +               +                           +----------------------+-----------+----+-----+
-|                |               |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
-+================+===============+===========================+======================+===========+====+=====+
-| 1 Pixel        |  3x3          | 300                       | 18                   | 27        |886 | 801 |
-+----------------+---------------+---------------------------+----------------------+-----------+----+-----+
-| 8 Pixel        |  5x5          | 300                       | 30                   | 75        |1793|1445 |
-+----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+    +----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+    | Operating Mode | Filter Size   | Operating Frequency (MHz) |               Utilization Estimate          |
+    +                +               +                           +----------------------+-----------+----+-----+
+    |                |               |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
+    +================+===============+===========================+======================+===========+====+=====+
+    | 1 Pixel        |  3x3          | 300                       | 18                   | 27        |886 | 801 |
+    +----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+    | 8 Pixel        |  5x5          | 300                       | 30                   | 75        |1793|1445 |
+    +----------------+---------------+---------------------------+----------------------+-----------+----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -12389,24 +12829,24 @@ image.
 
 .. table:: Table filter2D Function Performance Estimate Summary
 
-+-----------------------------+------------------+------------------+------------------+
-| Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
-+                             +  Frequency       +                  +------------------+
-|                             |  (MHz)           |                  | Max (ms)         |
-+=============================+==================+==================+==================+
-| 1 pixel                     | 300              | 3x3              | 7                |
-+                             +------------------+------------------+------------------+
-|                             | 300              | 5x5              | 7.1              |
-+-----------------------------+------------------+------------------+------------------+
-| 8 pixel                     | 150              | 3x3              | 1.86             |
-+                             +------------------+------------------+------------------+
-|                             | 150              | 5x5              | 1.86             |
-+-----------------------------+------------------+------------------+------------------+
+    +-----------------------------+------------------+------------------+------------------+
+    | Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
+    +                             +  Frequency       +                  +------------------+
+    |                             |  (MHz)           |                  | Max (ms)         |
+    +=============================+==================+==================+==================+
+    | 1 pixel                     | 300              | 3x3              | 7                |
+    +                             +------------------+------------------+------------------+
+    |                             | 300              | 5x5              | 7.1              |
+    +-----------------------------+------------------+------------------+------------------+
+    | 8 pixel                     | 150              | 3x3              | 1.86             |
+    +                             +------------------+------------------+------------------+
+    |                             | 150              | 5x5              | 1.86             |
+    +-----------------------------+------------------+------------------+------------------+
 
 
 .. _lensshadingcorrection:
 
-Lens shading correction
+Lens Shading Correction
 ========================
 
 Vignetting/Lensshading refers to the fall-off pixel intensity from the centre towards the edges of the image.
@@ -12515,7 +12955,7 @@ This implementaion is based on the algorithm proposed by J. Yang, A. Hore and O.
                         XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                         xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out)
-	
+    
    Overlaoded processing member function:
    
    xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, ROWS, COLS, NPC>::process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
@@ -12531,8 +12971,7 @@ This implementaion is based on the algorithm proposed by J. Yang, A. Hore and O.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . LocalToneMapping Function Parameter
-Descriptions
+.. table:: Table . LocalToneMapping Function Parameter Descriptions
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -12587,17 +13026,17 @@ LocalToneMapping for a 4K image, as generated in the Vitis HLS
 
 .. table:: Table . LocalToneMapping Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+-------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate                            |
-|                |                     |                                                 |
-|                | (MHz)               |                                                 |
-+                +                     +----------------------+----------+-------+-------+
-|                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
-+================+=====================+======================+==========+=======+=======+
-| 1 pixel        | 300                 |           0          |  123     | 35216 | 20246 |
-+----------------+---------------------+----------------------+----------+-------+-------+
-| 4 pixel        | 300                 |           0          |  330     | 67457 | 40391 |
-+----------------+---------------------+----------------------+----------+-------+-------+
+    +----------------+---------------------+----------------------+----------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                            |
+    |                |                     |                                                 |
+    |                | (MHz)               |                                                 |
+    +                +                     +----------------------+----------+-------+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
+    +================+=====================+======================+==========+=======+=======+
+    | 1 pixel        | 300                 |           0          |  123     | 35216 | 20246 |
+    +----------------+---------------------+----------------------+----------+-------+-------+
+    | 4 pixel        | 300                 |           0          |  330     | 67457 | 40391 |
+    +----------------+---------------------+----------------------+----------+-------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -12609,18 +13048,18 @@ HLS 2020.2 version tool for the Xilinx xcu200-fsgd2104-2-e FPGA.
 
 .. table:: Table . LocalToneMapping Function Performance Estimate Summary
 
-+----------------+---------------------+------------------+
-| Operating Mode | Operating Frequency | Latency Estimate |
-|                |                     |                  |
-|                | (MHz)               |                  |
-+                +                     +------------------+
-|                |                     | Max (ms)         |
-+================+=====================+==================+
-| 1 pixel        | 300                 |     7.2          |
-+----------------+---------------------+------------------+
-| 4 pixel        | 300                 |     1.9          |
-+----------------+---------------------+------------------+
-  
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 |     7.2          |
+    +----------------+---------------------+------------------+
+    | 4 pixel        | 300                 |     1.9          |
+    +----------------+---------------------+------------------+
+      
 
 .. _look-up-table:
 
@@ -12696,15 +13135,15 @@ image.
 
 .. table:: Table . LUT Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
-+                +                           +----------------------+----------+------+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
-+================+===========================+======================+==========+======+=====+=====+
-| 1 pixel        | 300                       | 1                    | 0        | 937  | 565 | 137 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| 8 pixel        | 150                       | 9                    | 0        | 1109 | 679 | 162 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
+    +                +                           +----------------------+----------+------+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
+    +================+===========================+======================+==========+======+=====+=====+
+    | 1 pixel        | 300                       | 1                    | 0        | 937  | 565 | 137 |
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
+    | 8 pixel        | 150                       | 9                    | 0        | 1109 | 679 | 162 |
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
 
 
 The following table summarizes the resource utilization of the LUT
@@ -12713,13 +13152,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4K 3Channel image.
 
 .. table:: Table . LUT Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
-+                +                           +----------------------+----------+------+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
-+================+===========================+======================+==========+======+=====+=====+
-| 1 pixel        | 300                       | 4                    | 0        | 1160 | 648 | 175 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
+    +                +                           +----------------------+----------+------+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
+    +================+===========================+======================+==========+======+=====+=====+
+    | 1 pixel        | 300                       | 4                    | 0        | 1160 | 648 | 175 |
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -12731,15 +13170,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . LUT Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.92             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.66             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.92             |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.66             |
+    +-----------------------------+------------------+
 
 
 .. _ariaid-title95:
@@ -12809,15 +13248,15 @@ image.
 
 .. table:: Table . meanStdDev Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
-+                +                           +----------------------+----------+------+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
-+================+===========================+======================+==========+======+=====+=====+
-| 1 pixel        | 300                       | 0                    | 6        | 896  | 461 | 121 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| 8 pixel        | 150                       | 0                    | 13       | 1180 | 985 | 208 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
+    +                +                           +----------------------+----------+------+-----+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
+    +================+===========================+======================+==========+======+=====+=====+
+    | 1 pixel        | 300                       | 0                    | 6        | 896  | 461 | 121 |
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
+    | 8 pixel        | 150                       | 0                    | 13       | 1180 | 985 | 208 |
+    +----------------+---------------------------+----------------------+----------+------+-----+-----+
 
 The following table summarizes the resource utilization of the
 meanStdDev function, generated using Vivado HLS 2019.1 tool for the
@@ -12825,13 +13264,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3Channel image.
 
 .. table:: Table . meanStdDev Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
-+                +                           +----------------------+----------+------+------+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
-+================+===========================+======================+==========+======+======+=====+
-| 1 pixel        | 300                       | 0                    | 7        | 5075 | 3324 | 725 |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
+    +                +                           +----------------------+----------+------+------+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
+    +================+===========================+======================+==========+======+======+=====+
+    | 1 pixel        | 300                       | 0                    | 7        | 5075 | 3324 | 725 |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
 
 
 
@@ -12844,15 +13283,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . meanStdDev Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency      |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9 ms           |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.69 ms          |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency      |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9 ms           |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.69 ms          |
+    +-----------------------------+------------------+
 
 .. _max:
 
@@ -12914,23 +13353,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Max Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+==========+=============================+=============================+
-|          | 300 MHz                     | 150 MHz                     |
-+----------+-----------------------------+-----------------------------+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 103                         | 153                         |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 44                          | 102                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 21                          | 38                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +==========+=============================+=============================+
+    |          | 300 MHz                     | 150 MHz                     |
+    +----------+-----------------------------+-----------------------------+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 103                         | 153                         |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 44                          | 102                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 21                          | 38                          |
+    +----------+-----------------------------+-----------------------------+
 
 
 
@@ -12944,15 +13383,15 @@ image.
 
 .. table:: Table . Max Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _maxs:
 
@@ -13015,23 +13454,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . MaxS Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+==========+=============================+=============================+
-|          | 300 MHz                     | 150 MHz                     |
-+----------+-----------------------------+-----------------------------+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 162                         | 43                          |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 103                         | 104                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 32                          | 20                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +==========+=============================+=============================+
+    |          | 300 MHz                     | 150 MHz                     |
+    +----------+-----------------------------+-----------------------------+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 162                         | 43                          |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 103                         | 104                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 32                          | 20                          |
+    +----------+-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -13043,15 +13482,15 @@ image.
 
 .. table:: Table . MaxS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _median-blur-filter:
 
@@ -13120,19 +13559,19 @@ FPGA.
 
 .. table:: Table . medianBlur Function Resource Utilization Summary
 
-+----------------+-------------+---------------------+----------------------+------+------+-------+
-| Operating Mode | FILTER_SIZE | Operating Frequency | Utilization Estimate                       |
-|                |             |                     |                                            |
-|                |             | (MHz)               |                                            |
-+                +             +                     +----------------------+------+------+-------+
-|                |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+=============+=====================+======================+======+======+=======+
-| 1 pixel        | 3           | 300                 | 1197                 | 771  | 0    | 3     |
-+----------------+-------------+---------------------+----------------------+------+------+-------+
-| 8 pixel        | 3           | 150                 | 6559                 | 1595 | 0    | 6     |
-+----------------+-------------+---------------------+----------------------+------+------+-------+
-| 1 pixel        | 5           | 300                 | 5860                 | 1886 | 0    | 5     |
-+----------------+-------------+---------------------+----------------------+------+------+-------+
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | FILTER_SIZE | Operating Frequency | Utilization Estimate                       |
+    |                |             |                     |                                            |
+    |                |             | (MHz)               |                                            |
+    +                +             +                     +----------------------+------+------+-------+
+    |                |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=============+=====================+======================+======+======+=======+
+    | 1 pixel        | 3           | 300                 | 1197                 | 771  | 0    | 3     |
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
+    | 8 pixel        | 3           | 150                 | 6559                 | 1595 | 0    | 6     |
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
+    | 1 pixel        | 5           | 300                 | 5860                 | 1886 | 0    | 5     |
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
 
 The following table summarizes the resource utilization of the
 medianBlur function for XF_NPPC1 with 3channel image as input, generated
@@ -13141,17 +13580,17 @@ FPGA.
 
 .. table:: Table . medianBlur Function Resource Utilization Summary
 
-+----------------+-------------+---------------------+----------------------+------+------+-------+
-| Operating Mode | FILTER_SIZE | Operating Frequency | Utilization Estimate                       |
-|                |             |                     |                                            |
-|                |             | (MHz)               |                                            |
-+                +             +                     +----------------------+------+------+-------+
-|                |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+=============+=====================+======================+======+======+=======+
-| 1 pixel        | 3           | 300                 | 2100                 | 1971 | 0    | 9     |
-+----------------+-------------+---------------------+----------------------+------+------+-------+
-| 1 pixel        | 5           | 300                 | 13541                | 9720 | 0    | 15    |
-+----------------+-------------+---------------------+----------------------+------+------+-------+
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | FILTER_SIZE | Operating Frequency | Utilization Estimate                       |
+    |                |             |                     |                                            |
+    |                |             | (MHz)               |                                            |
+    +                +             +                     +----------------------+------+------+-------+
+    |                |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=============+=====================+======================+======+======+=======+
+    | 1 pixel        | 3           | 300                 | 2100                 | 1971 | 0    | 9     |
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
+    | 1 pixel        | 5           | 300                 | 13541                | 9720 | 0    | 15    |
+    +----------------+-------------+---------------------+----------------------+------+------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -13163,19 +13602,19 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . medianBlur Function Performance Estimate Summary
 
-+----------------+-------------+---------------------+------------------+------------------+
-| Operating Mode | FILTER_SIZE | Operating Frequency | Input Image Size | Latency Estimate |
-|                |             |                     |                  |                  |
-|                |             | (MHz)               |                  |                  |
-+                +             +                     +                  +------------------+
-|                |             |                     |                  | Max (ms)         |
-+================+=============+=====================+==================+==================+
-| 1 pixel        | 3           | 300                 | 1920x1080        | 6.99             |
-+----------------+-------------+---------------------+------------------+------------------+
-| 8 pixel        | 3           | 150                 | 1920x1080        | 1.75             |
-+----------------+-------------+---------------------+------------------+------------------+
-| 1 pixel        | 5           | 300                 | 1920x1080        | 7.00             |
-+----------------+-------------+---------------------+------------------+------------------+
+    +----------------+-------------+---------------------+------------------+------------------+
+    | Operating Mode | FILTER_SIZE | Operating Frequency | Input Image Size | Latency Estimate |
+    |                |             |                     |                  |                  |
+    |                |             | (MHz)               |                  |                  |
+    +                +             +                     +                  +------------------+
+    |                |             |                     |                  | Max (ms)         |
+    +================+=============+=====================+==================+==================+
+    | 1 pixel        | 3           | 300                 | 1920x1080        | 6.99             |
+    +----------------+-------------+---------------------+------------------+------------------+
+    | 8 pixel        | 3           | 150                 | 1920x1080        | 1.75             |
+    +----------------+-------------+---------------------+------------------+------------------+
+    | 1 pixel        | 5           | 300                 | 1920x1080        | 7.00             |
+    +----------------+-------------+---------------------+------------------+------------------+
 
 .. _min:
 
@@ -13238,23 +13677,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Min Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+==========+=============================+=============================+
-|          | 300 MHz                     | 150 MHz                     |
-+----------+-----------------------------+-----------------------------+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 103                         | 153                         |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 44                          | 102                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 23                          | 34                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +==========+=============================+=============================+
+    |          | 300 MHz                     | 150 MHz                     |
+    +----------+-----------------------------+-----------------------------+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 103                         | 153                         |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 44                          | 102                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 23                          | 34                          |
+    +----------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -13267,15 +13706,15 @@ image.
 
 .. table:: Table . Min Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _mins:
 
@@ -13338,23 +13777,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA
 
 .. table:: Table . MinS Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+==========+=============================+=============================+
-|          | 300 MHz                     | 150 MHz                     |
-+----------+-----------------------------+-----------------------------+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 104                         | 159                         |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 43                          | 103                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 23                          | 36                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +==========+=============================+=============================+
+    |          | 300 MHz                     | 150 MHz                     |
+    +----------+-----------------------------+-----------------------------+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 104                         | 159                         |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 43                          | 103                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 23                          | 36                          |
+    +----------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -13367,15 +13806,15 @@ image.
 
 .. table:: Table . MinS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _minmax-location:
 
@@ -13446,17 +13885,17 @@ function, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
 image.
 
-.. tables:: Table . minMaxLoc Function Resource Utilization Summary
+.. table:: Table . minMaxLoc Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
-+                +                           +----------------------+----------+------+------+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
-+================+===========================+======================+==========+======+======+=====+
-| 1 pixel        | 300                       | 0                    | 3        | 451  | 398  | 86  |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| 8 pixel        | 150                       | 0                    | 3        | 1049 | 1025 | 220 |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
+    +                +                           +----------------------+----------+------+------+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
+    +================+===========================+======================+==========+======+======+=====+
+    | 1 pixel        | 300                       | 0                    | 3        | 451  | 398  | 86  |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | 8 pixel        | 150                       | 0                    | 3        | 1049 | 1025 | 220 |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
 
 
 .. rubric:: Performance Estimate
@@ -13468,15 +13907,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . minMaxLoc Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.69             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.69             |
+    +-----------------------------+------------------+
 
 .. _mean-shift-tracking:
 
@@ -13531,7 +13970,7 @@ The following table describes the template parameters.
    +--------------+-------------------------------------------------------+
    | OBJ_COLS     | Maximum width of the object to be tracked             |
    +--------------+-------------------------------------------------------+
-   | SRC_T        | Type of the input xf::cv::Mat, must be XF_8UC4, 8-bit     |
+   | SRC_T        | Type of the input xf::cv::Mat, must be XF_8UC4, 8-bit |
    |              | data with 4 channels                                  |
    +--------------+-------------------------------------------------------+
    | ROWS         | Maximum height of the image                           |
@@ -13590,8 +14029,7 @@ function for normal (1 pixel) configuration as generated in Vivado HLS
 process a RGB image of resolution,1920x1080, and for 10 objects of size
 of 250x250 and 4 iterations.
 
-.. table:: Table . MeanShift Function Resource Utilization and
-Performance Estimate Summary
+.. table:: Table . MeanShift Function Resource Utilization and Performance Estimate Summary
 
    +---------------+-------------------+-------+------+-------+-------+
    | Configuration | Max. Latency (ms) | BRAMs | DSPs | FFs   | LUTs  |
@@ -13617,8 +14055,8 @@ Mode filter is a non-linear digital filter which improves noise reduction. This 
 
 .. code:: c
 
-	template <int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
-	void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst)
+    template <int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
+    void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst)
 
 .. rubric:: Parameter Descriptions
 
@@ -13772,15 +14210,15 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD
 
 .. table:: Table . OtsuThreshold Function Resource Utilization Summary
 
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
-+                +                           +----------------------+----------+------+------+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
-+================+===========================+======================+==========+======+======+=====+
-| 1 pixel        | 300                       | 8                    | 49       | 2239 | 3353 | 653 |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
-| 8 pixel        | 150                       | 22                   | 49       | 1106 | 3615 | 704 |
-+----------------+---------------------------+----------------------+----------+------+------+-----+
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | Operating Mode | Operating Frequency (MHz) | Utilization Estimate                                |
+    +                +                           +----------------------+----------+------+------+-----+
+    |                |                           | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
+    +================+===========================+======================+==========+======+======+=====+
+    | 1 pixel        | 300                       | 8                    | 49       | 2239 | 3353 | 653 |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
+    | 8 pixel        | 150                       | 22                   | 49       | 1106 | 3615 | 704 |
+    +----------------+---------------------------+----------------------+----------+------+------+-----+
 
 .. rubric:: Performance Estimate
 
@@ -13791,20 +14229,20 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . OtsuThreshold Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.92             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.76             |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.92             |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.76             |
+    +-----------------------------+------------------+
 
 .. _paintmask:
 
-Paintmask
-=========
+Paint Mask
+===========
 
 The Paintmask function replace the pixel intensity value with given
 color value when mask is not zero or the corresponding pixel from the
@@ -13864,23 +14302,23 @@ Vivado HLS 2019.1 version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Paintmask Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+==========+=============================+=============================+
-|          | 300 MHz                     | 150 MHz                     |
-+----------+-----------------------------+-----------------------------+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 95                          | 163                         |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 57                          | 121                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 14                          | 33                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +==========+=============================+=============================+
+    |          | 300 MHz                     | 150 MHz                     |
+    +----------+-----------------------------+-----------------------------+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 95                          | 163                         |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 57                          | 121                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 14                          | 33                          |
+    +----------+-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -13892,15 +14330,15 @@ image.
 
 .. table:: Table . Painmask Function Performance Estimate Summary
 
-+----------------+---------------------------+--------------+
-| Operating Mode | Latency Estimate                         |
-+                +---------------------------+--------------+
-|                | Operating Frequency (MHz) | Latency (ms) |
-+================+===========================+==============+
-| 1 pixel        | 300                       | 6.9          |
-+----------------+---------------------------+--------------+
-| 8 pixel        | 150                       | 1.7          |
-+----------------+---------------------------+--------------+
+    +----------------+---------------------------+--------------+
+    | Operating Mode | Latency Estimate                         |
+    +                +---------------------------+--------------+
+    |                | Operating Frequency (MHz) | Latency (ms) |
+    +================+===========================+==============+
+    | 1 pixel        | 300                       | 6.9          |
+    +----------------+---------------------------+--------------+
+    | 8 pixel        | 150                       | 1.7          |
+    +----------------+---------------------------+--------------+
 
 .. _pixel-wise-addition:
 
@@ -13986,17 +14424,17 @@ image.
 
 .. table:: Table . add Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+----+-----+-----+
-| Operating Mode | Operating Frequency | Utilization Estimate                             |
-|                |                     |                                                  |
-|                | (MHz)               |                                                  |
-+                +                     +----------------------+----------+----+-----+-----+
-|                |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
-+================+=====================+======================+==========+====+=====+=====+
-| 1 pixel        | 300                 | 0                    | 0        | 62 | 55  | 11  |
-+----------------+---------------------+----------------------+----------+----+-----+-----+
-| 8 pixel        | 150                 | 0                    | 0        | 65 | 138 | 24  |
-+----------------+---------------------+----------------------+----------+----+-----+-----+
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                             |
+    |                |                     |                                                  |
+    |                | (MHz)               |                                                  |
+    +                +                     +----------------------+----------+----+-----+-----+
+    |                |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
+    +================+=====================+======================+==========+====+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 0        | 62 | 55  | 11  |
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
+    | 8 pixel        | 150                 | 0                    | 0        | 65 | 138 | 24  |
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
 
 The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the Xilinx
@@ -14004,15 +14442,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4K image with 3 channels.
 
 .. table:: Table . add Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
-| Operating Mode | Operating Frequency | Utilization Estimate                              |
-|                |                     |                                                   |
-|                | (MHz)               |                                                   |
-+                +                     +----------------------+----------+-----+-----+-----+
-|                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
-+================+=====================+======================+==========+=====+=====+=====+
-| 1 pixel        | 300                 | 0                    | 0        | 113 | 77  | 24  |
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                              |
+    |                |                     |                                                   |
+    |                | (MHz)               |                                                   |
+    +                +                     +----------------------+----------+-----+-----+-----+
+    |                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
+    +================+=====================+======================+==========+=====+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 0        | 113 | 77  | 24  |
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -14024,15 +14462,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . add Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _pixel-wise-multi:
 
@@ -14122,17 +14560,17 @@ image.
 
 .. table:: Table . multiply Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
-| Operating Mode | Operating Frequency | Utilization Estimate                              |
-|                |                     |                                                   |
-|                | (MHz)               |                                                   |
-+                +                     +----------------------+----------+-----+-----+-----+
-|                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
-+================+=====================+======================+==========+=====+=====+=====+
-| 1 pixel        | 300                 | 0                    | 2        | 124 | 59  | 18  |
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
-| 8 pixel        | 150                 | 0                    | 16       | 285 | 108 | 43  |
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                              |
+    |                |                     |                                                   |
+    |                | (MHz)               |                                                   |
+    +                +                     +----------------------+----------+-----+-----+-----+
+    |                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
+    +================+=====================+======================+==========+=====+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 2        | 124 | 59  | 18  |
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
+    | 8 pixel        | 150                 | 0                    | 16       | 285 | 108 | 43  |
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
 
 The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the Xilinx
@@ -14140,15 +14578,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K image with 3 channels.
 
 .. table:: Table 350. multiply Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
-| Operating Mode | Operating Frequency | Utilization Estimate                              |
-|                |                     |                                                   |
-|                | (MHz)               |                                                   |
-+                +                     +----------------------+----------+-----+-----+-----+
-|                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
-+================+=====================+======================+==========+=====+=====+=====+
-| 1 pixel        | 300                 | 0                    | 9        | 312 | 211 | 62  |
-+----------------+---------------------+----------------------+----------+-----+-----+-----+
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                              |
+    |                |                     |                                                   |
+    |                | (MHz)               |                                                   |
+    +                +                     +----------------------+----------+-----+-----+-----+
+    |                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
+    +================+=====================+======================+==========+=====+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 9        | 312 | 211 | 62  |
+    +----------------+---------------------+----------------------+----------+-----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -14160,15 +14598,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . multiply Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _pixel-wise-sub:
 
@@ -14253,17 +14691,17 @@ image.
 
 .. table:: Table . subtract Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+----+-----+-----+
-| Operating Mode | Operating Frequency | Utilization Estimate                             |
-|                |                     |                                                  |
-|                | (MHz)               |                                                  |
-+                +                     +----------------------+----------+----+-----+-----+
-|                |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
-+================+=====================+======================+==========+====+=====+=====+
-| 1 pixel        | 300                 | 0                    | 0        | 62 | 53  | 11  |
-+----------------+---------------------+----------------------+----------+----+-----+-----+
-| 8 pixel        | 150                 | 0                    | 0        | 59 | 13  | 21  |
-+----------------+---------------------+----------------------+----------+----+-----+-----+
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                             |
+    |                |                     |                                                  |
+    |                | (MHz)               |                                                  |
+    +                +                     +----------------------+----------+----+-----+-----+
+    |                |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
+    +================+=====================+======================+==========+====+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 0        | 62 | 53  | 11  |
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
+    | 8 pixel        | 150                 | 0                    | 0        | 59 | 13  | 21  |
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
 
 The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the Xilinx
@@ -14271,15 +14709,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K image with 3 channels.
 
 .. table:: Table . subtract Function Resource Utilization Summary
 
-+----------------+---------------------+----------------------+----------+----+-----+-----+
-| Operating Mode | Operating Frequency | Utilization Estimate                             |
-|                |                     |                                                  |
-|                | (MHz)               |                                                  |
-+                +                     +----------------------+----------+----+-----+-----+
-|                |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
-+================+=====================+======================+==========+====+=====+=====+
-| 1 pixel        | 300                 | 0                    | 0        | 110| 64  | 28  |
-+----------------+---------------------+----------------------+----------+----+-----+-----+
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                             |
+    |                |                     |                                                  |
+    |                | (MHz)               |                                                  |
+    +                +                     +----------------------+----------+----+-----+-----+
+    |                |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
+    +================+=====================+======================+==========+====+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 0        | 110| 64  | 28  |
+    +----------------+---------------------+----------------------+----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -14291,15 +14729,15 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
 .. table:: Table . subtract Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 
 
@@ -14469,23 +14907,23 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Reduce Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization        |
-+                             +-----------------------------+
-|                             | 1 pixel per clock operation |  
-+                             +-----------------------------+
-|                             | 300 MHz                     |
-+=============================+=============================+
-| BRAM_18K                    | 2                           |
-+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           |
-+-----------------------------+-----------------------------+
-| FF                          | 288                         |
-+-----------------------------+-----------------------------+
-| LUT                         | 172                         |
-+-----------------------------+-----------------------------+
-| CLB                         | 54                          |
-+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization        |
+    +                             +-----------------------------+
+    |                             | 1 pixel per clock operation |  
+    +                             +-----------------------------+
+    |                             | 300 MHz                     |
+    +=============================+=============================+
+    | BRAM_18K                    | 2                           |
+    +-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           |
+    +-----------------------------+-----------------------------+
+    | FF                          | 288                         |
+    +-----------------------------+-----------------------------+
+    | LUT                         | 172                         |
+    +-----------------------------+-----------------------------+
+    | CLB                         | 54                          |
+    +-----------------------------+-----------------------------+
 
 
 
@@ -14499,13 +14937,13 @@ image.
 
 .. table:: Table . Reduce Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
 
 .. _remap:
 
@@ -14617,8 +15055,7 @@ The following table summarizes the resource utilization of remap, for 4K
 Xilinx xczu7ev-ffvc1156 FPGA at 300 MHz, with WIN_ROWS as 100 for the
 XF_INTERPOLATION_BILINEAR mode using UltraRAM .
 
-.. table:: Table . remap Function Resource Utilization Summary with
-UltraRAM Enabled
+.. table:: Table . remap Function Resource Utilization Summary with UltraRAM Enabled
 
    +----------+----------------------+
    | Name     | Resource Utilization |
@@ -14744,25 +15181,25 @@ xczu9eg-ffvb1156-2-i-es2 FPGA.
 
 .. table:: Table . resize Function Resource Utilization Summary
 
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Operating Mode             | Utilization Estimate                                                                                                          |
-+                            +------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-|                            | 1 Pixel (at 300 MHz)                                               | 8 Pixel (at 150MHz)                                      |
-+                            +------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-|                            | IMAGESIZE              | LUTs                | FFs  | DSPs | BRAMs | IMAGESIZE                   | LUTs | FFs  | DSPs | BRAMs |
-+============================+========================+=====================+======+======+=======+=============================+======+======+======+=======+
-| Downscale Nearest Neighbor | 1920X1080 TO 960X1620  | 1089                | 1593 | 4    | 2     | 3840X2160 TO 1920X1080      | 2545 | 2250 | 4    | 12    |
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Downscale Bilinear         | 1920X1080 TO 960X1080  | 1340                | 1846 | 8    | 2     | 3840X2160 TO 1920X1080      | 5159 | 3092 | 36   | 12    |
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Downscale Area             | 3840X2160 TO 1920X1080 | 6146                | 8338 | 19   | 10    | 3840X2160 TO 1920X1080      |17892 | 19758| 162  |  16   |
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Upscale Nearest Neighbor   | 1920X1080 TO 3840X540  | 1089                | 1593 | 4    | 2     | 1920X1080 TO 3840X2160      | 1818 | 1686 | 4    | 6     |
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Upscale Bilinear           | 1920X1080 TO 3840X540  | 1340                | 1846 | 8    | 2     | 1920X1080 TO 3840X2160      | 3697 | 2739 | 36   | 6     |
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Upscale Area               | 1920X1080 TO 3840X2160 | 5811                | 8773 | 28   |  32   | 1920X1080 TO 3840X2160      |12214 |14003 |  98  | 24    |
-+----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    | Operating Mode             | Utilization Estimate                                                                                                          |
+    +                            +------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    |                            | 1 Pixel (at 300 MHz)                                               | 8 Pixel (at 150MHz)                                      |
+    +                            +------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    |                            | IMAGESIZE              | LUTs                | FFs  | DSPs | BRAMs | IMAGESIZE                   | LUTs | FFs  | DSPs | BRAMs |
+    +============================+========================+=====================+======+======+=======+=============================+======+======+======+=======+
+    | Downscale Nearest Neighbor | 1920X1080 TO 960X1620  | 1089                | 1593 | 4    | 2     | 3840X2160 TO 1920X1080      | 2545 | 2250 | 4    | 12    |
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    | Downscale Bilinear         | 1920X1080 TO 960X1080  | 1340                | 1846 | 8    | 2     | 3840X2160 TO 1920X1080      | 5159 | 3092 | 36   | 12    |
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    | Downscale Area             | 3840X2160 TO 1920X1080 | 6146                | 8338 | 19   | 10    | 3840X2160 TO 1920X1080      |17892 | 19758| 162  |  16   |
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    | Upscale Nearest Neighbor   | 1920X1080 TO 3840X540  | 1089                | 1593 | 4    | 2     | 1920X1080 TO 3840X2160      | 1818 | 1686 | 4    | 6     |
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    | Upscale Bilinear           | 1920X1080 TO 3840X540  | 1340                | 1846 | 8    | 2     | 1920X1080 TO 3840X2160      | 3697 | 2739 | 36   | 6     |
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
+    | Upscale Area               | 1920X1080 TO 3840X2160 | 5811                | 8773 | 28   |  32   | 1920X1080 TO 3840X2160      |12214 |14003 |  98  | 24    |
+    +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
 
 
 The following table summarizes the resource utilization of Resize
@@ -14771,25 +15208,25 @@ the Xilinx xczu9eg-ffvb1156-2-i-es2 FPGA for 3channel image as input.
 
 .. table:: Table . resize Function Resource Utilization Summary
 
-+----------------------------+------------------------+------+------+------+-------+
-| Operating Mode             | Utilization Estimate                                |
-+                            +------------------------+------+------+------+-------+
-|                            | 1 Pixel (at 300 MHz)                                |
-+                            +------------------------+------+------+------+-------+
-|                            | IMAGESIZE              | LUTs | FFs  | DSPs | BRAMs |
-+============================+========================+======+======+======+=======+
-| Downscale Nearest Neighbor | 3840X2160 TO 1920X108  | 1184 | 168  | 4    | 18    |
-+----------------------------+------------------------+------+------+------+-------+
-| Downscale Bilinear         | 3840X2160 TO 1920X1080 | 1592 | 2058 | 14   | 18    |
-+----------------------------+------------------------+------+------+------+-------+
-| Downscale Area             | 3840X2160 TO 1920X1080 | 3212 | 4777 | 104  | 72    |
-+----------------------------+------------------------+------+------+------+-------+
-| Upscale Nearest Neighbor   | 1920X1080 TO 3840X2160 | 1166 | 1697 | 4    | 9     |
-+----------------------------+------------------------+------+------+------+-------+
-| Upscale Bilinear           | 1920X1080 TO 3840X2160 | 1574 | 2053 | 14   | 9     |
-+----------------------------+------------------------+------+------+------+-------+
-| Upscale Area               | 1920X1080 TO 3840X2160 | 1731 | 2733 | 36   | 31    |
-+----------------------------+------------------------+------+------+------+-------+
+    +----------------------------+------------------------+------+------+------+-------+
+    | Operating Mode             | Utilization Estimate                                |
+    +                            +------------------------+------+------+------+-------+
+    |                            | 1 Pixel (at 300 MHz)                                |
+    +                            +------------------------+------+------+------+-------+
+    |                            | IMAGESIZE              | LUTs | FFs  | DSPs | BRAMs |
+    +============================+========================+======+======+======+=======+
+    | Downscale Nearest Neighbor | 3840X2160 TO 1920X108  | 1184 | 168  | 4    | 18    |
+    +----------------------------+------------------------+------+------+------+-------+
+    | Downscale Bilinear         | 3840X2160 TO 1920X1080 | 1592 | 2058 | 14   | 18    |
+    +----------------------------+------------------------+------+------+------+-------+
+    | Downscale Area             | 3840X2160 TO 1920X1080 | 3212 | 4777 | 104  | 72    |
+    +----------------------------+------------------------+------+------+------+-------+
+    | Upscale Nearest Neighbor   | 1920X1080 TO 3840X2160 | 1166 | 1697 | 4    | 9     |
+    +----------------------------+------------------------+------+------+------+-------+
+    | Upscale Bilinear           | 1920X1080 TO 3840X2160 | 1574 | 2053 | 14   | 9     |
+    +----------------------------+------------------------+------+------+------+-------+
+    | Upscale Area               | 1920X1080 TO 3840X2160 | 1731 | 2733 | 36   | 31    |
+    +----------------------------+------------------------+------+------+------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -14804,22 +15241,22 @@ latencies obtained for different interpolation types.
 
 .. table:: Table . resize Function Performance Estimate Summary
 
-+----------------+---------------------+-----------------------+-----------+-----------+---------+----------+---------+
-| Operating Mode | Operating Frequency | Latency Estimate (ms)                                                        |
-|                |                     |                                                                              |
-|                | (MHz)               |                                                                              |
-+                +                     +-----------------------+-----------+-----------+---------+----------+---------+
-|                |                     | Downscale             | Downscale | Downscale | Upscale | Upscale  | Upscale |
-|                |                     |                       |           |           |         |          |         |
-|                |                     | NN                    | Bilinear  | Area      | NN      | Bilinear | Area    |
-+================+=====================+=======================+===========+===========+=========+==========+=========+
-| 1 pixel        | 300                 | 6.94                  | 6.97      | 7.09      | 27.71   | 27.75    | 27.74   |
-+----------------+---------------------+-----------------------+-----------+-----------+---------+----------+---------+
+    +----------------+---------------------+-----------------------+-----------+-----------+---------+----------+---------+
+    | Operating Mode | Operating Frequency | Latency Estimate (ms)                                                        |
+    |                |                     |                                                                              |
+    |                | (MHz)               |                                                                              |
+    +                +                     +-----------------------+-----------+-----------+---------+----------+---------+
+    |                |                     | Downscale             | Downscale | Downscale | Upscale | Upscale  | Upscale |
+    |                |                     |                       |           |           |         |          |         |
+    |                |                     | NN                    | Bilinear  | Area      | NN      | Bilinear | Area    |
+    +================+=====================+=======================+===========+===========+=========+==========+=========+
+    | 1 pixel        | 300                 | 6.94                  | 6.97      | 7.09      | 27.71   | 27.75    | 27.74   |
+    +----------------+---------------------+-----------------------+-----------+-----------+---------+----------+---------+
 
 .. _bgr2hsv:
 
-BGR2HSV
-=======
+BGR to HSV Conversion
+======================
 
 The ``BGR2HSV`` function converts the input image color space to HSV
 color space and returns the HSV image as the output.
@@ -14839,25 +15276,25 @@ color space and returns the HSV image as the output.
 
 The table below describes the template and the function parameters.
 
-+--------------+-------------------------------------------------------+
-| Parameter    | Description                                           |
-+==============+=======================================================+
-| SRC_T        | Input pixel type should be XF_8UC3                    |
-+--------------+-------------------------------------------------------+
-| DST_T        | Output pixel type should be XF_8UC3                   |
-+--------------+-------------------------------------------------------+
-| ROWS         | Maximum height of input and output image              |
-+--------------+-------------------------------------------------------+
-| COLS         | Maximum width of input and output image. Must be      |
-|              | multiple of 8, for 8-pixel operation.                 |
-+--------------+-------------------------------------------------------+
-| NPC          | Number of pixels to be processed per cycle. Only      |
-|              | XF_NPPC1 is supported.                                |
-+--------------+-------------------------------------------------------+
-| \_src_mat    | Input image                                           |
-+--------------+-------------------------------------------------------+
-| \_dst_mat    | Output image                                          |
-+--------------+-------------------------------------------------------+
+    +--------------+-------------------------------------------------------+
+    | Parameter    | Description                                           |
+    +==============+=======================================================+
+    | SRC_T        | Input pixel type should be XF_8UC3                    |
+    +--------------+-------------------------------------------------------+
+    | DST_T        | Output pixel type should be XF_8UC3                   |
+    +--------------+-------------------------------------------------------+
+    | ROWS         | Maximum height of input and output image              |
+    +--------------+-------------------------------------------------------+
+    | COLS         | Maximum width of input and output image. Must be      |
+    |              | multiple of 8, for 8-pixel operation.                 |
+    +--------------+-------------------------------------------------------+
+    | NPC          | Number of pixels to be processed per cycle. Only      |
+    |              | XF_NPPC1 is supported.                                |
+    +--------------+-------------------------------------------------------+
+    | \_src_mat    | Input image                                           |
+    +--------------+-------------------------------------------------------+
+    | \_dst_mat    | Output image                                          |
+    +--------------+-------------------------------------------------------+
 
 
 .. _scharr-filter:
@@ -14932,23 +15369,23 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD
 
 .. table:: Table . Scharr Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 3                           | 6                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 728                         | 1434                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 812                         | 2481                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 171                         | 461                         |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 3                           | 6                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 728                         | 1434                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 812                         | 2481                        |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 171                         | 461                         |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 The following table summarizes the resource utilization of the kernel in
 different configurations, generated using Vivado HLS 2019.1 tool for the
@@ -14956,21 +15393,21 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 channel image.
 
 .. table:: Table . Scharr Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization        |
-+                             +-----------------------------+
-|                             | 1 pixel per clock operation |  
-+                             +-----------------------------+
-|                             | 300 MHz                     |
-+=============================+=============================+
-| BRAM_18K                    | 18                          |
-+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           |
-+-----------------------------+-----------------------------+
-| FF                          | 1911                        |
-+-----------------------------+-----------------------------+
-| LUT                         | 1392                        |
-+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization        |
+    +                             +-----------------------------+
+    |                             | 1 pixel per clock operation |  
+    +                             +-----------------------------+
+    |                             | 300 MHz                     |
+    +=============================+=============================+
+    | BRAM_18K                    | 18                          |
+    +-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           |
+    +-----------------------------+-----------------------------+
+    | FF                          | 1911                        |
+    +-----------------------------+-----------------------------+
+    | LUT                         | 1392                        |
+    +-----------------------------+-----------------------------+
 
 
 
@@ -15052,23 +15489,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Set Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 87                          | 87                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 43                          | 42                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 17                          | 18                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 87                          | 87                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 43                          | 42                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 17                          | 18                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -15081,15 +15518,15 @@ image.
 
 .. table:: Table . Set Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _sobel-filter:
 
@@ -15139,33 +15576,33 @@ The following table describes the template and the function parameters.
 
 .. table:: Table . Sobel Parameter Description
 
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter                              | Description                                                                                                                             |
-+========================================+=========================================================================================================================================+
-| FILTER_TYPE                            | Filter size. Filter size of 3 (XF_FILTER_3X3), 5 (XF_FILTER_5X5) and 7 (XF_FILTER_7X7) are supported.                                   |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| BORDER_TYPE                            | Border Type supported is XF_BORDER_CONSTANT                                                                                             |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SRC_T                                  | Input pixel type. Only 8-bit, unsigned, 1 and 3 channels are supported (XF_8UC1 and XF_8UC3)                                            |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| DST_T                                  | Output pixel type. Only 8-bit unsigned, 16-bit signed,1 and 3 channels are supported (XF_8UC1, XF_16SC1,XF_8UC3 and XF_16SC3)           |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| ROWS                                   | Maximum height of input and output image.                                                                                               |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| COLS                                   | Maximum width of input and output image. Must be multiple of 8, for 8-pixel operation.                                                  |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| NPC                                    | Number of pixels to be processed per cycle; possible options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8 pixel operations respectively. |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| USE_URAM                               | Enable to map storage structures to UltraRAM                                                                                            |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| \_src_mat                              | Input image                                                                                                                             |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| \_dst_matx                             | X gradient output image.                                                                                                                |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| \_dst_maty                             | Y gradient output image.                                                                                                                |
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| 1. Sobel 7x7 8-pixel is not supported.                                                                                                                                           | 
-+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | Parameter                              | Description                                                                                                                             |
+    +========================================+=========================================================================================================================================+
+    | FILTER_TYPE                            | Filter size. Filter size of 3 (XF_FILTER_3X3), 5 (XF_FILTER_5X5) and 7 (XF_FILTER_7X7) are supported.                                   |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | BORDER_TYPE                            | Border Type supported is XF_BORDER_CONSTANT                                                                                             |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | SRC_T                                  | Input pixel type. Only 8-bit, unsigned, 1 and 3 channels are supported (XF_8UC1 and XF_8UC3)                                            |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | DST_T                                  | Output pixel type. Only 8-bit unsigned, 16-bit signed,1 and 3 channels are supported (XF_8UC1, XF_16SC1,XF_8UC3 and XF_16SC3)           |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | ROWS                                   | Maximum height of input and output image.                                                                                               |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | COLS                                   | Maximum width of input and output image. Must be multiple of 8, for 8-pixel operation.                                                  |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | NPC                                    | Number of pixels to be processed per cycle; possible options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8 pixel operations respectively. |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | USE_URAM                               | Enable to map storage structures to UltraRAM                                                                                            |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | \_src_mat                              | Input image                                                                                                                             |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | \_dst_matx                             | X gradient output image.                                                                                                                |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | \_dst_maty                             | Y gradient output image.                                                                                                                |
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+    | 1. Sobel 7x7 8-pixel is not supported.                                                                                                                                           | 
+    +----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
 
 
@@ -15179,23 +15616,23 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD
 
 .. table:: Table . Sobel Function Resource Utilization Summary
 
-+----------------+-------------+---------------------+----------------------+----------+------+------+-----+
-| Operating Mode | Filter Size | Operating Frequency | Utilization Estimate                                |
-|                |             |                     |                                                     |
-|                |             | (MHz)               |                                                     |
-+                +             +                     +----------------------+----------+------+------+-----+
-|                |             |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
-+================+=============+=====================+======================+==========+======+======+=====+
-| 1 pixel        | 3x3         | 300                 | 3                    | 0        | 609  | 616  | 135 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+-----+
-|                | 5x5         | 300                 | 5                    | 0        | 1133 | 1499 | 308 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+-----+
-|                | 7x7         | 300                 | 7                    | 0        | 2658 | 3334 | 632 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+-----+
-| 8 pixel        | 3x3         | 150                 | 6                    | 0        | 1159 | 1892 | 341 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+-----+
-|                | 5x5         | 150                 | 10                   | 0        | 3024 | 5801 | 999 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+-----+
+    +----------------+-------------+---------------------+----------------------+----------+------+------+-----+
+    | Operating Mode | Filter Size | Operating Frequency | Utilization Estimate                                |
+    |                |             |                     |                                                     |
+    |                |             | (MHz)               |                                                     |
+    +                +             +                     +----------------------+----------+------+------+-----+
+    |                |             |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB |
+    +================+=============+=====================+======================+==========+======+======+=====+
+    | 1 pixel        | 3x3         | 300                 | 3                    | 0        | 609  | 616  | 135 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+-----+
+    |                | 5x5         | 300                 | 5                    | 0        | 1133 | 1499 | 308 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+-----+
+    |                | 7x7         | 300                 | 7                    | 0        | 2658 | 3334 | 632 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+-----+
+    | 8 pixel        | 3x3         | 150                 | 6                    | 0        | 1159 | 1892 | 341 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+-----+
+    |                | 5x5         | 150                 | 10                   | 0        | 3024 | 5801 | 999 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+-----+
 
 The following table summarizes the resource utilization of the kernel in
 different configurations, generated using Vivado HLS 2019.1 tool for the
@@ -15203,19 +15640,19 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 Channel image.
 
 .. table:: Table . Sobel Function Resource Utilization Summary
 
-+----------------+-------------+---------------------+----------------------+----------+------+------+
-| Operating Mode | Filter Size | Operating Frequency | Utilization Estimate                          |
-|                |             |                     |                                               |
-|                |             | (MHz)               |                                               |
-+                +             +                     +----------------------+----------+------+------+
-|                |             |                     | BRAM_18K             | DSP_48Es | FF   | LUT  |
-+================+=============+=====================+======================+==========+======+======+
-| 1 pixel        | 3x3         | 300                 | 18                   | 0        | 1047 | 1107 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+
-|                | 5x5         | 300                 | 30                   | 0        | 5370 | 3312 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+
-|                | 7x7         | 300                 | 42                   | 0        | 6100 | 5496 |
-+----------------+-------------+---------------------+----------------------+----------+------+------+
+    +----------------+-------------+---------------------+----------------------+----------+------+------+
+    | Operating Mode | Filter Size | Operating Frequency | Utilization Estimate                          |
+    |                |             |                     |                                               |
+    |                |             | (MHz)               |                                               |
+    +                +             +                     +----------------------+----------+------+------+
+    |                |             |                     | BRAM_18K             | DSP_48Es | FF   | LUT  |
+    +================+=============+=====================+======================+==========+======+======+
+    | 1 pixel        | 3x3         | 300                 | 18                   | 0        | 1047 | 1107 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+
+    |                | 5x5         | 300                 | 30                   | 0        | 5370 | 3312 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+
+    |                | 7x7         | 300                 | 42                   | 0        | 6100 | 5496 |
+    +----------------+-------------+---------------------+----------------------+----------+------+------+
 
 The following table summarizes the resource utilization of the kernel in
 different configurations, generated using Vivado HLS 2019.1 tool for the Xilinx
@@ -15224,23 +15661,23 @@ with UltraRAM enable.
 
 .. table:: Table . Sobel Function Resource Utilization Summary with UltraRAM enable
 
-+----------------+-------------+---------------------+----------------------+------+----------+------+------+
-| Operating Mode | Filter Size | Operating Frequency | Utilization Estimate                                 |
-|                |             |                     |                                                      |
-|                |             | (MHz)               |                                                      |
-+                +             +                     +----------------------+------+----------+------+------+
-|                |             |                     | BRAM_18K             | URAM | DSP_48Es | FF   | LUT  |
-+================+=============+=====================+======================+======+==========+======+======+
-| 1 pixel        | 3x3         | 300                 | 0                    | 1    | 0        | 919  | 707  |
-+----------------+-------------+---------------------+----------------------+------+----------+------+------+
-|                | 5x5         | 300                 | 0                    | 1    | 0        | 2440 | 1557 |
-+----------------+-------------+---------------------+----------------------+------+----------+------+------+
-|                | 7x7         | 300                 | 0                    | 1    | 0        | 4066 | 3495 |
-+----------------+-------------+---------------------+----------------------+------+----------+------+------+
-| 8 pixel        | 3x3         | 150                 | 0                    | 3    | 0        | 1803 | 2050 |
-+----------------+-------------+---------------------+----------------------+------+----------+------+------+
-|                | 5x5         | 150                 | 0                    | 5    | 0        | 4159 | 6817 |
-+----------------+-------------+---------------------+----------------------+------+----------+------+------+
+    +----------------+-------------+---------------------+----------------------+------+----------+------+------+
+    | Operating Mode | Filter Size | Operating Frequency | Utilization Estimate                                 |
+    |                |             |                     |                                                      |
+    |                |             | (MHz)               |                                                      |
+    +                +             +                     +----------------------+------+----------+------+------+
+    |                |             |                     | BRAM_18K             | URAM | DSP_48Es | FF   | LUT  |
+    +================+=============+=====================+======================+======+==========+======+======+
+    | 1 pixel        | 3x3         | 300                 | 0                    | 1    | 0        | 919  | 707  |
+    +----------------+-------------+---------------------+----------------------+------+----------+------+------+
+    |                | 5x5         | 300                 | 0                    | 1    | 0        | 2440 | 1557 |
+    +----------------+-------------+---------------------+----------------------+------+----------+------+------+
+    |                | 7x7         | 300                 | 0                    | 1    | 0        | 4066 | 3495 |
+    +----------------+-------------+---------------------+----------------------+------+----------+------+------+
+    | 8 pixel        | 3x3         | 150                 | 0                    | 3    | 0        | 1803 | 2050 |
+    +----------------+-------------+---------------------+----------------------+------+----------+------+------+
+    |                | 5x5         | 150                 | 0                    | 5    | 0        | 4159 | 6817 |
+    +----------------+-------------+---------------------+----------------------+------+----------+------+------+
 
 
 .. rubric:: Performance Estimate
@@ -15253,21 +15690,21 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. table:: Table . Sobel Function Performance Estimate Summary
 
-+----------------+---------------------+-------------+------------------+
-| Operating Mode | Operating Frequency | Filter Size | Latency Estimate |
-|                |                     |             |                  |
-|                | (MHz)               |             | (ms)             |
-+================+=====================+=============+==================+
-| 1 pixel        | 300                 | 3x3         | 7.5              |
-+                +---------------------+-------------+------------------+
-|                | 300                 | 5x5         | 7.5              |
-+                +---------------------+-------------+------------------+
-|                | 300                 | 7x7         | 7.5              |
-+----------------+---------------------+-------------+------------------+
-| 8 pixel        | 150                 | 3x3         | 1.7              |
-+                +---------------------+-------------+------------------+
-|                | 150                 | 5x5         | 1.71             |
-+----------------+---------------------+-------------+------------------+
+    +----------------+---------------------+-------------+------------------+
+    | Operating Mode | Operating Frequency | Filter Size | Latency Estimate |
+    |                |                     |             |                  |
+    |                | (MHz)               |             | (ms)             |
+    +================+=====================+=============+==================+
+    | 1 pixel        | 300                 | 3x3         | 7.5              |
+    +                +---------------------+-------------+------------------+
+    |                | 300                 | 5x5         | 7.5              |
+    +                +---------------------+-------------+------------------+
+    |                | 300                 | 7x7         | 7.5              |
+    +----------------+---------------------+-------------+------------------+
+    | 8 pixel        | 150                 | 3x3         | 1.7              |
+    +                +---------------------+-------------+------------------+
+    |                | 150                 | 5x5         | 1.71             |
+    +----------------+---------------------+-------------+------------------+
 
 .. _semi-global-method:
 
@@ -15361,13 +15798,13 @@ The following table summarizes the resource utilization for a 1920 x
 
 .. table:: Table . SemiGlobalBM Function Resource Utilization Summary
 
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+
-| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
-+                +                +                           +------------------+-----------+-------+-------+
-|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |
-+================+================+===========================+==================+===========+=======+=======+
-| 1 Pixel        | 5x5            | 200                       | 205              | 141       | 11856 | 19102 |
-+----------------+----------------+---------------------------+------------------+-----------+-------+-------+
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
+    | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
+    +                +                +                           +------------------+-----------+-------+-------+
+    |                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |
+    +================+================+===========================+==================+===========+=======+=======+
+    | 1 Pixel        | 5x5            | 200                       | 205              | 141       | 11856 | 19102 |
+    +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
 
 
 
@@ -15488,23 +15925,23 @@ The configurations are in the format: imageSize_WSIZE_NDisp_NDispUnits.
 
 .. table:: Table . StereoBM Function Resource Utilization Summary
 
-+----------------+-----------+----------------------+--------+-------+-------+
-| Configurations | Frequency | Resource Utilization                          |
-|                |           |                                               |
-|                | (MHz)     |                                               |
-+                +           +----------------------+--------+-------+-------+
-|                |           | BRAM_18k             | DSP48E | FF    | LUT   |
-+================+===========+======================+========+=======+=======+
-| HD_5_16_2      | 300       | 37                   | 20     | 6856  | 7181  |
-+----------------+-----------+----------------------+--------+-------+-------+
-| HD_9_32_4      | 300       | 45                   | 20     | 9700  | 10396 |
-+----------------+-----------+----------------------+--------+-------+-------+
-| HD_11_32_32    | 300       | 49                   | 20     | 34519 | 31978 |
-+----------------+-----------+----------------------+--------+-------+-------+
-| HD_15_128_32   | 300       | 57                   | 20     | 41017 | 35176 |
-+----------------+-----------+----------------------+--------+-------+-------+
-| HD_21_64_16    | 300       | 69                   | 20     | 29853 | 30706 |
-+----------------+-----------+----------------------+--------+-------+-------+
+    +----------------+-----------+----------------------+--------+-------+-------+
+    | Configurations | Frequency | Resource Utilization                          |
+    |                |           |                                               |
+    |                | (MHz)     |                                               |
+    +                +           +----------------------+--------+-------+-------+
+    |                |           | BRAM_18k             | DSP48E | FF    | LUT   |
+    +================+===========+======================+========+=======+=======+
+    | HD_5_16_2      | 300       | 37                   | 20     | 6856  | 7181  |
+    +----------------+-----------+----------------------+--------+-------+-------+
+    | HD_9_32_4      | 300       | 45                   | 20     | 9700  | 10396 |
+    +----------------+-----------+----------------------+--------+-------+-------+
+    | HD_11_32_32    | 300       | 49                   | 20     | 34519 | 31978 |
+    +----------------+-----------+----------------------+--------+-------+-------+
+    | HD_15_128_32   | 300       | 57                   | 20     | 41017 | 35176 |
+    +----------------+-----------+----------------------+--------+-------+-------+
+    | HD_21_64_16    | 300       | 69                   | 20     | 29853 | 30706 |
+    +----------------+-----------+----------------------+--------+-------+-------+
 
 The following table summarizes the resource utilization of the kernel in
 different configurations, generated using Vivado HLS 2019.1 version tool for
@@ -15515,23 +15952,23 @@ The configurations are in the format: imageSize_WSIZE_NDisp_NDispUnits.
 
 .. table:: Table . StereoBM Function Resource Utilization Summary with UltraRAM Enable
 
-+----------------+-----------+----------------------+------+--------+-------+-------+
-| Configurations | Frequency | Resource Utilization                                 |
-|                |           |                                                      |
-|                | (MHz)     |                                                      |
-+                +           +----------------------+------+--------+-------+-------+
-|                |           | BRAM_18k             | URAM | DSP48E | FF    | LUT   |
-+================+===========+======================+======+========+=======+=======+
-| HD_5_16_2      | 300       | 0                    | 12   | 20     | 7220  | 6529  |
-+----------------+-----------+----------------------+------+--------+-------+-------+
-| HD_9_32_4      | 300       | 0                    | 12   | 20     | 10186 | 9302  |
-+----------------+-----------+----------------------+------+--------+-------+-------+
-| HD_11_32_32    | 300       | 0                    | 14   | 20     | 44046 | 30966 |
-+----------------+-----------+----------------------+------+--------+-------+-------+
-| HD_15_128_32   | 300       | 0                    | 14   | 20     | 50556 | 38132 |
-+----------------+-----------+----------------------+------+--------+-------+-------+
-| HD_21_64_16    | 300       | 0                    | 16   | 20     | 35991 | 28464 |
-+----------------+-----------+----------------------+------+--------+-------+-------+
+    +----------------+-----------+----------------------+------+--------+-------+-------+
+    | Configurations | Frequency | Resource Utilization                                 |
+    |                |           |                                                      |
+    |                | (MHz)     |                                                      |
+    +                +           +----------------------+------+--------+-------+-------+
+    |                |           | BRAM_18k             | URAM | DSP48E | FF    | LUT   |
+    +================+===========+======================+======+========+=======+=======+
+    | HD_5_16_2      | 300       | 0                    | 12   | 20     | 7220  | 6529  |
+    +----------------+-----------+----------------------+------+--------+-------+-------+
+    | HD_9_32_4      | 300       | 0                    | 12   | 20     | 10186 | 9302  |
+    +----------------+-----------+----------------------+------+--------+-------+-------+
+    | HD_11_32_32    | 300       | 0                    | 14   | 20     | 44046 | 30966 |
+    +----------------+-----------+----------------------+------+--------+-------+-------+
+    | HD_15_128_32   | 300       | 0                    | 14   | 20     | 50556 | 38132 |
+    +----------------+-----------+----------------------+------+--------+-------+-------+
+    | HD_21_64_16    | 300       | 0                    | 16   | 20     | 35991 | 28464 |
+    +----------------+-----------+----------------------+------+--------+-------+-------+
 
 
 .. rubric:: Performance Estimate
@@ -15546,25 +15983,25 @@ The configurations are in the format: imageSize_WSIZE_NDisp_NDispUnits.
 
 .. table:: Table . StereoBM Function Performance Estimate Summary
 
-+----------------+-----------+--------------+--------+
-| Configurations | Frequency | Latency (ms)          |
-|                |           |                       |
-|                | (MHz)     |                       |
-+                +           +--------------+--------+
-|                |           | Min          | Max    |
-+================+===========+==============+========+
-| HD_5_16_2      | 300       | 55.296       | 55.296 |
-+----------------+-----------+--------------+--------+
-| HD_9_32_4      | 300       | 55.296       | 55.296 |
-+----------------+-----------+--------------+--------+
-| HD_11_32_32    | 300       | 6.912        | 6.912  |
-+----------------+-----------+--------------+--------+
-| HD_15_48_16    | 300       | 20.736       | 20.736 |
-+----------------+-----------+--------------+--------+
-| HD_15_128_32   | 300       | 27.648       | 27.648 |
-+----------------+-----------+--------------+--------+
-| HD_21_64_16    | 300       | 27.648       | 27.648 |
-+----------------+-----------+--------------+--------+
+    +----------------+-----------+--------------+--------+
+    | Configurations | Frequency | Latency (ms)          |
+    |                |           |                       |
+    |                | (MHz)     |                       |
+    +                +           +--------------+--------+
+    |                |           | Min          | Max    |
+    +================+===========+==============+========+
+    | HD_5_16_2      | 300       | 55.296       | 55.296 |
+    +----------------+-----------+--------------+--------+
+    | HD_9_32_4      | 300       | 55.296       | 55.296 |
+    +----------------+-----------+--------------+--------+
+    | HD_11_32_32    | 300       | 6.912        | 6.912  |
+    +----------------+-----------+--------------+--------+
+    | HD_15_48_16    | 300       | 20.736       | 20.736 |
+    +----------------+-----------+--------------+--------+
+    | HD_15_128_32   | 300       | 27.648       | 27.648 |
+    +----------------+-----------+--------------+--------+
+    | HD_21_64_16    | 300       | 27.648       | 27.648 |
+    +----------------+-----------+--------------+--------+
 
 .. _subrs:
 
@@ -15627,23 +16064,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . SubRS Function Resource Utilization Summary
 
-+----------+-----------------------------+-----------------------------+
-| Name     | Resource Utilization                                      |
-+          +-----------------------------+-----------------------------+
-|          | 1 pixel per clock operation | 8 pixel per clock operation |
-+          +-----------------------------+-----------------------------+
-|          | 300 MHz                     | 150 MHz                     |
-+==========+=============================+=============================+
-| BRAM_18K | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| DSP48E   | 0                           | 0                           |
-+----------+-----------------------------+-----------------------------+
-| FF       | 103                         | 104                         |
-+----------+-----------------------------+-----------------------------+
-| LUT      | 44                          | 133                         |
-+----------+-----------------------------+-----------------------------+
-| CLB      | 23                          | 43                          |
-+----------+-----------------------------+-----------------------------+
+    +----------+-----------------------------+-----------------------------+
+    | Name     | Resource Utilization                                      |
+    +          +-----------------------------+-----------------------------+
+    |          | 1 pixel per clock operation | 8 pixel per clock operation |
+    +          +-----------------------------+-----------------------------+
+    |          | 300 MHz                     | 150 MHz                     |
+    +==========+=============================+=============================+
+    | BRAM_18K | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | DSP48E   | 0                           | 0                           |
+    +----------+-----------------------------+-----------------------------+
+    | FF       | 103                         | 104                         |
+    +----------+-----------------------------+-----------------------------+
+    | LUT      | 44                          | 133                         |
+    +----------+-----------------------------+-----------------------------+
+    | CLB      | 23                          | 43                          |
+    +----------+-----------------------------+-----------------------------+
 
 .. rubric:: Performance Estimate
 
@@ -15655,15 +16092,15 @@ image.
 
 .. table:: Table . SubRS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _subs:
 
@@ -15726,23 +16163,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . SubS Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 103                         | 104                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 44                          | 133                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 23                          | 43                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 103                         | 104                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 44                          | 133                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 23                          | 43                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -15755,15 +16192,15 @@ image.
 
 .. table:: Table . SubS Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 .. _sum:
 
@@ -15818,23 +16255,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Sum Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 341                         | 408                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 304                         | 338                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 71                          | 87                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 341                         | 408                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 304                         | 338                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 71                          | 87                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -15847,17 +16284,17 @@ image.
 
 .. table:: Table . Sum Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) |                  |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) |                  |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) |                  |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) |                  |
+    +-----------------------------+------------------+
 
- 
+     
 
 .. _svm:
 
@@ -15941,13 +16378,13 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . SVM Function Resource Utilization Summary
 
-+---------------------------+---------------------------+----------+----+-----+-----+
-| Operating Frequency (MHz) | Utilization Estimate (ms)                             |
-+                           +---------------------------+----------+----+-----+-----+
-|                           | BRAM_18K                  | DSP_48Es | FF | LUT | CLB |
-+===========================+===========================+==========+====+=====+=====+
-| 300                       | 0                         | 1        | 27 | 34  | 12  |
-+---------------------------+---------------------------+----------+----+-----+-----+
+    +---------------------------+---------------------------+----------+----+-----+-----+
+    | Operating Frequency (MHz) | Utilization Estimate (ms)                             |
+    +                           +---------------------------+----------+----+-----+-----+
+    |                           | BRAM_18K                  | DSP_48Es | FF | LUT | CLB |
+    +===========================+===========================+==========+====+=====+=====+
+    | 300                       | 0                         | 1        | 27 | 34  | 12  |
+    +---------------------------+---------------------------+----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -15959,13 +16396,100 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . SVM Function Performance Estimate Summary
 
-+---------------------------+------------------+--------------+
-| Operating Frequency (MHz) | Latency Estimate                |
-+---------------------------+------------------+--------------+
-|                           | Min (cycles)     | Max (cycles) |
-+===========================+==================+==============+
-| 300                       | 204              | 204          |
-+---------------------------+------------------+--------------+
+    +---------------------------+------------------+--------------+
+    | Operating Frequency (MHz) | Latency Estimate                |
+    +---------------------------+------------------+--------------+
+    |                           | Min (cycles)     | Max (cycles) |
+    +===========================+==================+==============+
+    | 300                       | 204              | 204          |
+    +---------------------------+------------------+--------------+
+
+
+.. _threedlut:
+
+3D LUT
+===================
+
+3D Look Up Tables (LUTs) may look similar to 1D LUTs in their principle of using value as mapping indexes to get the new value, they differ in the sense that they operate on three independent parameters. This drastically increases the number of mapped indexes to value pairs. For example, a combination of 3 individual 1D LUTs can map 2^n * 3 values where n is the bitdepth, whereas a 3D LUT processing 3 channels will have 2^n * 2^n * 2^n possible values.
+
+Since all those huge number of values cannot be stored, only a subset of them are saved and the remaining values are computed through interpolation. The current implementation supports trilinear interpolation.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+    template <int LUTDIM, int SQLUTDIM, int INTYPE, int OUTTYPE, int ROWS, int COLS, int NPPC = 1, int URAM = 0>
+    void lut3d(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC>& in_img,
+               xf::cv::Mat<XF_32FC3, SQLUTDIM, LUTDIM, NPPC>& lut,
+               xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC>& out_img,
+               unsigned char lutdim)
+
+The following table describes the template and the function parameters.
+
+.. table:: Table 3D LUT Parameter Description
+
+    +-----------+---------------------------------------------------------------------+
+    | Parameter | Description                                                         |
+    +===========+=====================================================================+
+    | LUTDIM    | Maximum dimension of input LUT                                      |
+    +-----------+---------------------------------------------------------------------+
+    | SQLUTDIM  | Squared value of maximum dimension of input LUT                     |
+    +-----------+---------------------------------------------------------------------+
+    | INTYPE    | Input Pixel Type. XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3 supported   |
+    +-----------+---------------------------------------------------------------------+
+    | OUTTYPE   | Output Pixel Type. XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3 supported  |    
+    +-----------+---------------------------------------------------------------------+
+    | ROWS      | Maximum height of input and output image                            |
+    +-----------+---------------------------------------------------------------------+
+    | COLS      | Maximum width of input and output image                             |
+    +-----------+---------------------------------------------------------------------+
+    | NPPC      | Number of Pixels to be processed per cycle. Only XF_NPPC1 supported |
+    +-----------+---------------------------------------------------------------------+
+    | URAM      | Enable to map storage structures to UltraRAM.                       |
+    +-----------+---------------------------------------------------------------------+
+    | in_img    | Input image                                                         |
+    +-----------+---------------------------------------------------------------------+
+    | lut       | Input lut                                                           |
+    +-----------+---------------------------------------------------------------------+
+    | out_img   | Output image                                                        |
+    +-----------+---------------------------------------------------------------------+
+    | lutdim    | Dimension of input lut                                              |
+    +-----------+---------------------------------------------------------------------+
+    
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of the kernel in different configurations, generated using Vitis HLS 2020.2 tool for the Xilinx Alveo U200 FPGA, to process a 4K image.
+
+.. table:: Table 3D LUT Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+----------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |      |       |
+    |                |                     |                      |          |      |      |       |
+    |                | (MHz)               |                      |          |      |      |       |
+    +                +                     +----------------------+----------+------+------+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | SLICE |
+    +================+=====================+======================+==========+======+======+=======+
+    | 1 pixel        | 300                 | 30                   | 40        | 9182 | 12039| 847  |
+    +----------------+---------------------+----------------------+----------+------+------+-------+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool for the Xilinx Alveo U200 FPGA, to process 4K image.
+
+.. table:: Table 3D LUT Resource Utilization Summary
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+   
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 28.5             |
+    +----------------+---------------------+------------------+
+
 
 .. _thresholding:
 
@@ -16055,23 +16579,23 @@ process a grayscale HD (1080x1920) image.
 
 .. table:: Table . Threshold Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 110                         | 154                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 61                          | 139                         |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 16                          | 37                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 110                         | 154                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 61                          | 139                         |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 16                          | 37                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -16159,15 +16683,15 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Atan2LookupFP Function Resource Utilization Summary
 
-+---------------------+----------------------+----------+-----+-----+-----+
-| Operating Frequency | Utilization Estimate                              |
-|                     |                                                   |
-| (MHz)               |                                                   |
-+                     +----------------------+----------+-----+-----+-----+
-|                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
-+=====================+======================+==========+=====+=====+=====+
-| 300                 | 4                    | 2        | 275 | 75  | 139 |
-+---------------------+----------------------+----------+-----+-----+-----+
+    +---------------------+----------------------+----------+-----+-----+-----+
+    | Operating Frequency | Utilization Estimate                              |
+    |                     |                                                   |
+    | (MHz)               |                                                   |
+    +                     +----------------------+----------+-----+-----+-----+
+    |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
+    +=====================+======================+==========+=====+=====+=====+
+    | 300                 | 4                    | 2        | 275 | 75  | 139 |
+    +---------------------+----------------------+----------+-----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -16179,15 +16703,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Atan2LookupFP Function Performance Estimate Summary
 
-+---------------------+------------------+--------------+
-| Operating Frequency | Latency Estimate                |
-|                     |                                 |
-| (MHz)               |                                 |
-+                     +------------------+--------------+
-|                     | Min (cycles)     | Max (cycles) |
-+=====================+==================+==============+
-| 300                 | 1                | 15           |
-+---------------------+------------------+--------------+
+    +---------------------+------------------+--------------+
+    | Operating Frequency | Latency Estimate                |
+    |                     |                                 |
+    | (MHz)               |                                 |
+    +                     +------------------+--------------+
+    |                     | Min (cycles)     | Max (cycles) |
+    +=====================+==================+==============+
+    | 300                 | 1                | 15           |
+    +---------------------+------------------+--------------+
 
 .. _inverse:
 
@@ -16243,15 +16767,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Inverse Function Resource Utilization Summary
 
-+---------------------+----------------------+----------+-----+-----+-----+
-| Operating Frequency | Utilization Estimate                              |
-|                     |                                                   |
-| (MHz)               |                                                   |
-+                     +----------------------+----------+-----+-----+-----+
-|                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
-+=====================+======================+==========+=====+=====+=====+
-| 300                 | 4                    | 0        | 68  | 128 | 22  |
-+---------------------+----------------------+----------+-----+-----+-----+
+    +---------------------+----------------------+----------+-----+-----+-----+
+    | Operating Frequency | Utilization Estimate                              |
+    |                     |                                                   |
+    | (MHz)               |                                                   |
+    +                     +----------------------+----------+-----+-----+-----+
+    |                     | BRAM_18K             | DSP_48Es | FF  | LUT | CLB |
+    +=====================+======================+==========+=====+=====+=====+
+    | 300                 | 4                    | 0        | 68  | 128 | 22  |
+    +---------------------+----------------------+----------+-----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -16263,15 +16787,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Inverse Function Performance Estimate Summary
 
-+---------------------+------------------+--------------+
-| Operating Frequency | Latency Estimate                |
-|                     |                                 |
-| (MHz)               |                                 |
-+                     +------------------+--------------+
-|                     | Min (cycles)     | Max (cycles) |
-+=====================+==================+==============+
-| 300                 | 1                | 15           |
-+---------------------+------------------+--------------+
+    +---------------------+------------------+--------------+
+    | Operating Frequency | Latency Estimate                |
+    |                     |                                 |
+    | (MHz)               |                                 |
+    +                     +------------------+--------------+
+    |                     | Min (cycles)     | Max (cycles) |
+    +=====================+==================+==============+
+    | 300                 | 1                | 15           |
+    +---------------------+------------------+--------------+
 
 
 .. _square-root:
@@ -16334,15 +16858,15 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Sqrt Function Resource Utilization Summary
 
-+---------------------+----------------------+----------+----+-----+-----+
-| Operating Frequency | Utilization Estimate                             |
-|                     |                                                  |
-| (MHz)               |                                                  |
-+                     +----------------------+----------+----+-----+-----+
-|                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
-+=====================+======================+==========+====+=====+=====+
-| 300                 | 0                    | 0        | 8  | 6   | 1   |
-+---------------------+----------------------+----------+----+-----+-----+
+    +---------------------+----------------------+----------+----+-----+-----+
+    | Operating Frequency | Utilization Estimate                             |
+    |                     |                                                  |
+    | (MHz)               |                                                  |
+    +                     +----------------------+----------+----+-----+-----+
+    |                     | BRAM_18K             | DSP_48Es | FF | LUT | CLB |
+    +=====================+======================+==========+====+=====+=====+
+    | 300                 | 0                    | 0        | 8  | 6   | 1   |
+    +---------------------+----------------------+----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -16354,20 +16878,20 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Sqrt Function Performance Estimate Summary
 
-+---------------------+------------------+--------------+
-| Operating Frequency | Latency Estimate                |
-|                     |                                 |
-| (MHz)               |                                 |
-+                     +------------------+--------------+
-|                     | Min (cycles)     | Max (cycles) |
-+=====================+==================+==============+
-| 300                 | 18               | 18           |
-+---------------------+------------------+--------------+
+    +---------------------+------------------+--------------+
+    | Operating Frequency | Latency Estimate                |
+    |                     |                                 |
+    | (MHz)               |                                 |
+    +                     +------------------+--------------+
+    |                     | Min (cycles)     | Max (cycles) |
+    +=====================+==================+==============+
+    | 300                 | 18               | 18           |
+    +---------------------+------------------+--------------+
 
 .. _warptransform:
 
-WarpTransform
-=============
+Warp Transform
+===============
 
 The ``warpTransform`` function is designed to perform the perspective
 and affine geometric transformations on an image. The type of transform
@@ -16477,21 +17001,21 @@ image.
 
 .. table:: Table . warpTransform Function Resource Utilization Summary
 
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Transformation | INTERPOLATION \_TYPE | STORE \_LINES | START \_ROW | Operating Frequency | Utilization Estimate                       |
-|                |                      |               |             |                     |                                            |
-|                |                      |               |             | (MHz)               |                                            |
-+                +                      +               +             +                     +----------------------+------+------+-------+
-|                |                      |               |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+======================+===============+=============+=====================+======================+======+======+=======+
-| Perspective    | Bilinear             | 100           | 50          | 300                 | 7468                 | 9804 | 61   | 112   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 4514                 | 6761 | 35   | 104   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Affine         | Bilinear             | 100           | 50          | 300                 | 6139                 | 5606 | 40   | 124   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Affine         | Nearest Neighbor     | 100           | 50          | 300                 | 4611                 | 4589 | 18   | 112   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Transformation | INTERPOLATION \_TYPE | STORE \_LINES | START \_ROW | Operating Frequency | Utilization Estimate                       |
+    |                |                      |               |             |                     |                                            |
+    |                |                      |               |             | (MHz)               |                                            |
+    +                +                      +               +             +                     +----------------------+------+------+-------+
+    |                |                      |               |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+======================+===============+=============+=====================+======================+======+======+=======+
+    | Perspective    | Bilinear             | 100           | 50          | 300                 | 7468                 | 9804 | 61   | 112   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 4514                 | 6761 | 35   | 104   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Affine         | Bilinear             | 100           | 50          | 300                 | 6139                 | 5606 | 40   | 124   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Affine         | Nearest Neighbor     | 100           | 50          | 300                 | 4611                 | 4589 | 18   | 112   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
 
 
 The following table summarizes the resource utilization of the Warp
@@ -16500,19 +17024,19 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a BGR 4K image.
 
 .. table:: Table . warpTransform Function Resource Utilization Summary
 
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Transformation | INTERPOLATION \_TYPE | STORE \_LINES | START \_ROW | Operating Frequency | Utilization Estimate                       |
-|                |                      |               |             |                     |                                            |
-|                |                      |               |             | (MHz)               |                                            |
-+                +                      +               +             +                     +----------------------+------+------+-------+
-|                |                      |               |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
-+================+======================+===============+=============+=====================+======================+======+======+=======+
-| Perspective    | Bilinear             | 100           | 50          | 300                 | 9192                 | 7910 | 48   | 616   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 10533                | 12055| 69   | 604   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
-| Affine         | Bilinear             | 100           | 50          | 300                 | 6397                 | 8415 | 35   | 604   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Transformation | INTERPOLATION \_TYPE | STORE \_LINES | START \_ROW | Operating Frequency | Utilization Estimate                       |
+    |                |                      |               |             |                     |                                            |
+    |                |                      |               |             | (MHz)               |                                            |
+    +                +                      +               +             +                     +----------------------+------+------+-------+
+    |                |                      |               |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+======================+===============+=============+=====================+======================+======+======+=======+
+    | Perspective    | Bilinear             | 100           | 50          | 300                 | 9192                 | 7910 | 48   | 616   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 10533                | 12055| 69   | 604   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
+    | Affine         | Bilinear             | 100           | 50          | 300                 | 6397                 | 8415 | 35   | 604   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
 
 
 The following table summarizes the resource utilization of the Warp
@@ -16522,21 +17046,21 @@ UltraRAM enabled.
 
 .. table:: Table . warpTransform Function Resource Utilization Summary with UltraRAM Enable
 
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
-| Transformation | INTERPOLATION \_TYPE | STORE \_LINES | START \_ROW | Operating Frequency | Utilization Estimate                               |
-|                |                      |               |             |                     |                                                    |
-|                |                      |               |             | (MHz)               |                                                    |
-+                +                      +               +             +                     +----------------------+-------+------+-------+------+
-|                |                      |               |             |                     | LUTs                 | FFs   | DSPs | BRAMs | URAM |
-+================+======================+===============+=============+=====================+======================+=======+======+=======+======+
-| Perspective    | Bilinear             | 100           | 50          | 300                 | 7820                 | 12458 | 61   | 7     | 12   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
-| Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 4880                 | 8323  | 35   | 2     | 6    |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
-| Affine         | Bilinear             | 100           | 50          | 300                 | 6850                 | 9516  | 40   | 13    | 12   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
-| Affine         | Nearest Neighbor     | 100           | 50          | 300                 | 4651                 | 6548  | 18   | 6     | 6    |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
+    | Transformation | INTERPOLATION \_TYPE | STORE \_LINES | START \_ROW | Operating Frequency | Utilization Estimate                               |
+    |                |                      |               |             |                     |                                                    |
+    |                |                      |               |             | (MHz)               |                                                    |
+    +                +                      +               +             +                     +----------------------+-------+------+-------+------+
+    |                |                      |               |             |                     | LUTs                 | FFs   | DSPs | BRAMs | URAM |
+    +================+======================+===============+=============+=====================+======================+=======+======+=======+======+
+    | Perspective    | Bilinear             | 100           | 50          | 300                 | 7820                 | 12458 | 61   | 7     | 12   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
+    | Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 4880                 | 8323  | 35   | 2     | 6    |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
+    | Affine         | Bilinear             | 100           | 50          | 300                 | 6850                 | 9516  | 40   | 13    | 12   |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
+    | Affine         | Nearest Neighbor     | 100           | 50          | 300                 | 4651                 | 6548  | 18   | 6     | 6    |
+    +----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+------+
 
 
 
@@ -16548,8 +17072,7 @@ transform, as generated using Vivado HLS 2019.1 tool for Xilinx
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
 image.
 
-.. table:: Table . warpTransform Function Performance Estimate
-Summary
+.. table:: Table . warpTransform Function Performance Estimate Summary
 
    +------------+-------------+-------+-------+----------+-------------+
    | Transforma | INTERPOLATI | STORE | START | Operatin | Latency     |
@@ -16627,23 +17150,23 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 .. table:: Table . Zero Function Resource Utilization Summary
 
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 78                          | 78                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 42                          | 41                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 15                          | 14                          |
-+-----------------------------+-----------------------------+-----------------------------+
+    +-----------------------------+-----------------------------+-----------------------------+
+    | Name                        | Resource Utilization                                      |
+    +                             +-----------------------------+-----------------------------+
+    |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
+    +                             +-----------------------------+-----------------------------+
+    |                             | 300 MHz                     | 150 MHz                     |
+    +=============================+=============================+=============================+
+    | BRAM_18K                    | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | DSP48E                      | 0                           | 0                           |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | FF                          | 78                          | 78                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | LUT                         | 42                          | 41                          |
+    +-----------------------------+-----------------------------+-----------------------------+
+    | CLB                         | 15                          | 14                          |
+    +-----------------------------+-----------------------------+-----------------------------+
 
 
 .. rubric:: Performance Estimate
@@ -16656,15 +17179,15 @@ image.
 
 .. table:: Table . Zero Function Performance Estimate Summary
 
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
+    +-----------------------------+------------------+
+    | Operating Mode              | Latency Estimate |
+    +                             +------------------+
+    |                             | Max Latency (ms) |
+    +=============================+==================+
+    | 1 pixel operation (300 MHz) | 6.9              |
+    +-----------------------------+------------------+
+    | 8 pixel operation (150 MHz) | 1.7              |
+    +-----------------------------+------------------+
 
 :sup:`1` N. Dalal, B. Triggs: Histograms of oriented gradients for human
 detection, IEEE Computer Society Conference on Computer Vision and
@@ -17012,3 +17535,11 @@ Pattern Recognition, 2005.
    :class: image
 .. |image170| image:: ./images/eq6DNN.png
    :class: image   
+.. |HDRIMG1| image:: ./images/HDRIMG1.PNG
+   :class: image
+.. |HDRIMG2| image:: ./images/HDRIMG2.PNG
+   :class: image
+.. |HDRIMG3| image:: ./images/HDRIMG3.PNG
+   :class: image
+.. |HDRIMG4| image:: ./images/HDRIMG4.PNG
+   :class: image 

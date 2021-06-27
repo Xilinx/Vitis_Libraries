@@ -119,8 +119,24 @@ int main(int argc, char** argv) {
 
     std::cout << "INFO: Thresholds loaded." << std::endl;
 
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
     // Reference function:
     colordetect(in_img, ocv_ref, low_thresh.data(), high_thresh.data());
+
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
 
     // Write down reference and input image:
     cv::imwrite("outputref.png", ocv_ref);
@@ -231,6 +247,11 @@ int main(int argc, char** argv) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
 
     return 0;
 }

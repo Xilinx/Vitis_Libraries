@@ -28,6 +28,89 @@
 //#include <iostream>
 #include <string>
 
+static void getPseudoColorInt(pix_t pix, float fx, float fy, rgba_t& rgba) {
+    // normalization factor is key for good visualization. Make this auto-ranging
+    // or controllable from the host TODO
+    // const int normFac = 127/2;
+    const int normFac = 10;
+
+    int y = 127 + (int)(fy * normFac);
+    int x = 127 + (int)(fx * normFac);
+    if (y > 255) y = 255;
+    if (y < 0) y = 0;
+    if (x > 255) x = 255;
+    if (x < 0) x = 0;
+
+    rgb_t rgb;
+    if (x > 127) {
+        if (y < 128) {
+            // 1 quad
+            rgb.r = x - 127 + (127 - y) / 2;
+            rgb.g = (127 - y) / 2;
+            rgb.b = 0;
+        } else {
+            // 4 quad
+            rgb.r = x - 127;
+            rgb.g = 0;
+            rgb.b = y - 127;
+        }
+    } else {
+        if (y < 128) {
+            // 2 quad
+            rgb.r = (127 - y) / 2;
+            rgb.g = 127 - x + (127 - y) / 2;
+            rgb.b = 0;
+        } else {
+            // 3 quad
+            rgb.r = 0;
+            rgb.g = 128 - x;
+            rgb.b = y - 127;
+        }
+    }
+
+    rgba.r = pix / 4 + 3 * rgb.r / 4;
+    rgba.g = pix / 4 + 3 * rgb.g / 4;
+    rgba.b = pix / 4 + 3 * rgb.b / 4;
+    rgba.a = 255;
+    // rgba.r = rgb.r;
+    // rgba.g = rgb.g;
+    // rgba.b = rgb.b ;
+}
+
+static void getOutPix(float* fx, float* fy, pix_t* p, hls::stream<rgba_t>& out_pix, int rows, int cols, int size) {
+    for (int r = 0; r < rows; r++) {
+// clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+        // clang-format on
+        for (int c = 0; c < cols; c++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
+            #pragma HLS PIPELINE
+            // clang-format on
+            float fx_ = *(fx + r * cols + c);
+            float fy_ = *(fy + r * cols + c);
+
+            pix_t p_ = *(p + r * cols + c);
+            rgba_t out_pix_;
+            getPseudoColorInt(p_, fx_, fy_, out_pix_);
+
+            out_pix.write(out_pix_);
+        }
+    }
+}
+
+static void writeMatRowsRGBA(hls::stream<rgba_t>& pixStream, unsigned int* dst, int rows, int cols, int size) {
+    for (int i = 0; i < size; i++) {
+// clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPC
+        #pragma HLS PIPELINE
+        // clang-format on
+        rgba_t tmpData = pixStream.read();
+        *(dst + i) = (unsigned int)tmpData.a << 24 | (unsigned int)tmpData.b << 16 | (unsigned int)tmpData.g << 8 |
+                     (unsigned int)tmpData.r;
+    }
+}
+
 int main(int argc, char** argv) {
     cv::Mat frame0, frame1;
     cv::Mat flowx, flowy;
@@ -93,11 +176,9 @@ int main(int argc, char** argv) {
 
     hls::stream<rgba_t> out_pix("Color pixel");
 
-    xf::cv::getOutPix<MAX_HEIGHT, MAX_WIDTH, XF_NPPC1>(flowx_copy, flowy_copy, frame1.data, out_pix, frame0.rows,
-                                                       frame0.cols, frame0.cols * frame0.rows);
+    getOutPix(flowx_copy, flowy_copy, frame1.data, out_pix, frame0.rows, frame0.cols, frame0.cols * frame0.rows);
 
-    xf::cv::writeMatRowsRGBA<MAX_HEIGHT, MAX_WIDTH, XF_NPPC1, KMED>(out_pix, outputBuffer, frame0.rows, frame0.cols,
-                                                                    frame0.cols * frame0.rows);
+    writeMatRowsRGBA(out_pix, outputBuffer, frame0.rows, frame0.cols, frame0.cols * frame0.rows);
 
     rgba_t* outbuf_copy;
     for (int i = 0; i < frame0.rows; i++) {

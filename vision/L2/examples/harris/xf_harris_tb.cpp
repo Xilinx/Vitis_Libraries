@@ -19,6 +19,8 @@
 #include "xf_ocv_ref.hpp"
 
 #include "xcl2.hpp"
+
+#include <time.h>
 int main(int argc, char** argv) {
     cv::Mat in_img, img_gray;
     cv::Mat hls_out_img, ocv_out_img;
@@ -52,7 +54,6 @@ int main(int argc, char** argv) {
     hls_out_img.create(in_img.rows, in_img.cols, CV_8U); // create memory for hls output image
     ocv_out_img.create(in_img.rows, in_img.cols, CV_8U); // create memory for opencv output image
 
-    ocv_ref(in_img, ocv_out_img, Th);
     /**************		HLS Function	  *****************/
     float K = 0.04;
     uint16_t k = K * (1 << 16); // Convert to Q0.16 format
@@ -172,14 +173,44 @@ int main(int argc, char** argv) {
         }
     }
 
-    /*						End of marking HLS points on the image
+    /*						End of marking HLS points on the
+     * image
      */
-    /*						Write HLS and Opencv corners into a file
+    /*						Write HLS and Opencv corners into a
+     * file
      */
 
     ocvpnts = in_img.clone();
 
     int nhls = hls_points.size();
+
+#if __XF_BENCHMARK
+
+    int blocksize = 3;
+    int ksize = 3;
+
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
+    // Opencv implementation:
+    cv::cornerHarris(in_img, ocv_out_img, blocksize, ksize, (double)k);
+
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+
+#else
+
+    ocv_ref(in_img, ocv_out_img, Th);
 
     /// Drawing a circle around corners
     for (int j = 1; j < ocv_out_img.rows - 1; j++) {
@@ -196,7 +227,8 @@ int main(int argc, char** argv) {
 
     /*									End
      */
-    /*							Find common points in among opencv and
+    /*							Find common points in among opencv
+     * and
      * HLS
      */
     int ocv_x, ocv_y, hls_x, hls_y;
@@ -214,9 +246,10 @@ int main(int argc, char** argv) {
         }
     }
     /*							End */
-    imwrite("output_hls.png", out_img); // HLS Image
+    // HLS Image
     imwrite("output_ocv.png", ocvpnts); // Opencv Image
-    /*						Success, Loss and Gain Percentages
+    /*						Success, Loss and Gain
+     * Percentages
      */
     float persuccess, perloss, pergain;
 
@@ -234,5 +267,16 @@ int main(int argc, char** argv) {
         return -1;
     }
     std::cout << "Test Passed " << std::endl;
+
+#endif
+    imwrite("output_hls.png", out_img);
+
+#if __XF_BENCHMARK
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
+#endif
+
     return 0;
 }

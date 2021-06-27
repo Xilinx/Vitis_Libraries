@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <time.h>
 
 #include "./xf_kalmanfilter_config.h"
 #include "common/xf_headers.hpp"
@@ -254,6 +255,10 @@ int main(int argc, char* argv[]) {
     std::cout << "\tNumber of measurements: " << KF_M << std::endl;
     std::cout << "\tNumber of control input: " << KF_C << std::endl;
 
+    // Start time for latency calculation of CPU function
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
     // OpenCv Kalman Filter in Double Precision
     cv::KalmanFilter kf(KF_N, KF_M, KF_C, CV_64F);
     kf.statePost = X0;
@@ -283,6 +288,16 @@ int main(int argc, char* argv[]) {
 
     // OpenCv Kalman Filter in Double Precision - correct/update:
     kf.correct(zk);
+
+    // Ending time latency calculation of CPU function
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
 
     // xfOpenCV Kalman Filter in Single Precision - OpenCL section:
 
@@ -449,4 +464,7 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "ERROR: Test Fail.\n ");
         return -1;
     }
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
 }

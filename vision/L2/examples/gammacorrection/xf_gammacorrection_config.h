@@ -37,7 +37,7 @@
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
 
-void gammacorrection_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
-                           xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1>& imgOutput,
-                           float gammaval);
+#define INPUT_PTR_WIDTH 32
+#define OUTPUT_PTR_WIDTH 32
+
 #endif //_XF_GAMMA_CONFIG_H_

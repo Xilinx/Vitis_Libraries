@@ -17,7 +17,7 @@
 #include "xf_histogram_config.h"
 
 static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
-static constexpr int __XF_DEPTH__PTR = (256 * (XF_CHANNELS(TYPE, NPC1)));
+static constexpr int __XF_DEPTH_PTR = (256 * (XF_CHANNELS(TYPE, NPC1)));
 
 void histogram_accel(ap_uint<PTR_WIDTH>* img_in, unsigned int* histogram, int rows, int cols) {
 // clang-format off

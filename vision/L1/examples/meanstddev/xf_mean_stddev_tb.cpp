@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     }
 
 #if GRAY
-    cvtColor(in_img, in_img, CV_BGR2GRAY);
+    cvtColor(in_img, in_img, cv::COLOR_BGR2GRAY);
 #endif
 
     int channels = in_img.channels();

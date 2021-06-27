@@ -17,8 +17,11 @@
 #include "common/xf_headers.hpp"
 #include "xf_pyr_dense_optical_flow_config.h"
 
-#include "xcl2.hpp"
+#include "opencv2/video.hpp"
+#include "xf_lkdensepyrof_ref.hpp"
+#include <time.h>
 
+#include "xcl2.hpp"
 /* Color Coding */
 // kernel returns this type. Packed strcuts on axi ned to be powers-of-2.
 typedef struct __rgba {
@@ -34,14 +37,14 @@ const float powTwo15 = pow(2, 15);
 #define THRESHOLD 3.0
 #define THRESHOLD_R 3.0
 /* color coding */
-
+#define NORM_FAC 10
 // custom, hopefully, low cost colorizer.
 void getPseudoColorInt(IN_TYPE pix, float fx, float fy, rgba_t& rgba) {
     // TODO get the normFac from the host as cmdline arg
-    const int normFac = 10;
+    // const int normFac = 10;
 
-    int y = 127 + (int)(fy * normFac);
-    int x = 127 + (int)(fx * normFac);
+    int y = 127 + (int)(fy * NORM_FAC);
+    int x = 127 + (int)(fx * NORM_FAC);
     if (y > 255) y = 255;
     if (y < 0) y = 0;
     if (x > 255) x = 255;
@@ -329,6 +332,44 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    // OpenCV Implementation
+    cv::Mat glx_cv = cv::Mat::zeros(im0.size(), CV_32F);
+    cv::Mat gly_cv = cv::Mat::zeros(im0.size(), CV_32F);
+#if __XF_BENCHMARK
+    int rows = im0.rows, cols = im0.cols;
+
+    std::vector<cv::Point2f> pt0, pt1;
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++) pt0.push_back(cv::Point2f(j, i));
+    const cv::Size winSize(WINSIZE_OFLOW, WINSIZE_OFLOW);
+    std::vector<uchar> status;
+    std::vector<float> err;
+
+    // TIMER START CODE
+    struct timespec begin_hw, end_hw;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
+    cv::calcOpticalFlowPyrLK(im0, im1, pt0, pt1, status, err, winSize, NUM_LEVELS);
+
+    // TIMER END CODE
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+
+    for (int i = 0; i < pt0.size(); i++) {
+        if (status[i]) {
+            glx_cv.at<float>((int)pt0[i].y, (int)pt0[i].x) = pt1[i].x - pt0[i].x;
+            gly_cv.at<float>((int)pt0[i].y, (int)pt0[i].x) = pt1[i].y - pt0[i].y;
+        }
+    }
+#else
+    refOpticalFlow(im0, im1, glx_cv, gly_cv);
+#endif
+
     // Auviz Hardware implementation
     cv::Mat glx(im0.size(), CV_32F, cv::Scalar::all(0)); // flow at each level is updated in this variable
     cv::Mat gly(im0.size(), CV_32F, cv::Scalar::all(0));
@@ -354,11 +395,13 @@ int main(int argc, char** argv) {
 
     // output file names for the current case
     char colorout_filename[20] = "flow_image.png";
+    char colorout_filename_cv[20] = "flow_image_cv.png";
 
     // Color code the flow vectors on original image
+    Vec3ucpt color_px;
+
     cv::Mat color_code_img;
     color_code_img.create(im0.size(), CV_8UC3);
-    Vec3ucpt color_px;
     for (int rc = 0; rc < im0.rows; rc++) {
         for (int cc = 0; cc < im0.cols; cc++) {
             rgba_t colorcodedpx;
@@ -370,11 +413,64 @@ int main(int argc, char** argv) {
     }
     cv::imwrite(colorout_filename, color_code_img);
     color_code_img.release();
-    // end color coding
+
+    cv::Mat color_code_img_cv;
+    color_code_img_cv.create(im0.size(), CV_8UC3);
+    for (int rc = 0; rc < im0.rows; rc++) {
+        for (int cc = 0; cc < im0.cols; cc++) {
+            rgba_t colorcodedpx;
+            getPseudoColorInt(im0.at<unsigned char>(rc, cc), glx_cv.at<float>(rc, cc), gly_cv.at<float>(rc, cc),
+                              colorcodedpx);
+            color_px = Vec3ucpt(colorcodedpx.b, colorcodedpx.g, colorcodedpx.r);
+            color_code_img_cv.at<Vec3ucpt>(rc, cc) = color_px;
+        }
+    }
+    cv::imwrite(colorout_filename_cv, color_code_img_cv);
+    color_code_img_cv.release();
+// end color coding
+
+#if __XF_BENCHMARK == 0
+    const int ERROR_THRESH = 5;
+    cv::Mat glx_diff, gly_diff, glx_diff_thresh, gly_diff_thresh;
+    cv::absdiff(glx, glx_cv, glx_diff);
+    cv::absdiff(gly, gly_cv, gly_diff);
+
+    double u_min, u_max, v_min, v_max, min, max;
+    cv::minMaxLoc(glx_diff, &u_min, &u_max);
+    cv::minMaxLoc(gly_diff, &v_min, &v_max);
+    min = (u_min < v_min) ? u_min : v_min;
+    max = (u_max > v_max) ? u_max : v_max;
+
+    glx_diff = glx_diff * NORM_FAC;
+    gly_diff = gly_diff * NORM_FAC;
+    threshold(glx_diff, glx_diff_thresh, ERROR_THRESH, 1, cv::THRESH_BINARY_INV);
+    threshold(gly_diff, gly_diff_thresh, ERROR_THRESH, 1, cv::THRESH_BINARY_INV);
+    cv::Mat valid_out = glx_diff_thresh.mul(gly_diff_thresh);
+
+    int pixels_under_thresh = cv::countNonZero(valid_out);
+    int total_pixels = im0.rows * im0.cols;
+    int pixels_above_thresh = total_pixels - pixels_under_thresh;
+    float pixels_above_thresh_per = ((float)pixels_above_thresh) * 100.0 / total_pixels;
+
+    std::cout << "        Minimum error in intensity = " << min << std::endl;
+    std::cout << "        Maximum error in intensity = " << max << std::endl;
+    std::cout << "        Percentage of pixels above error threshold = " << pixels_above_thresh_per << std::endl;
+    if (pixels_above_thresh_per > 20) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
+#else
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is " << hw_time << "ms" << std::endl;
+#endif
 
     // releaseing mats and pointers created inside the main for loop
     glx.release();
     gly.release();
+    glx_cv.release();
+    gly_cv.release();
     im0.release();
     im1.release();
     return 0;

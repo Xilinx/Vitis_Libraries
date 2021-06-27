@@ -121,7 +121,7 @@ void IplImage2AXIvideoxf(IplImage* img, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_v
 
 template <int NPC, int W>
 void cvMat2AXIvideoxf(::cv::Mat& cv_mat, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
-    IplImage img = cv_mat;
+    IplImage img = cvIplImage(cv_mat);
     IplImage2AXIvideoxf<W, NPC>(&img, AXI_video_strm);
 }
 template <int NPC, int W>
@@ -218,7 +218,7 @@ void AXIvideo2IplImagexf(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, IplI
 
 template <int NPC, int W>
 void AXIvideo2cvMatxf(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, ::cv::Mat& cv_mat) {
-    IplImage img = cv_mat;
+    IplImage img = cvIplImage(cv_mat);
     AXIvideo2IplImagexf<W, NPC>(AXI_video_strm, &img);
 }
 } // namespace cv

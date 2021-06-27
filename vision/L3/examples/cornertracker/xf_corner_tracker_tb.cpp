@@ -17,6 +17,8 @@
 #include "common/xf_headers.hpp"
 #include "xf_corner_tracker_config.h"
 
+#include "xf_cornertracker_ref.hpp" // OpenCV Reference Code for Corner Tracker Function
+
 #define VIDEO_INPUT 0
 #define HLS 0
 
@@ -148,6 +150,30 @@ int main(int argc, char** argv) {
     }
     char img_name[1000], out_img_name[50], pyr_out_img_name[50], pyr_out_img_name2[50];
     char* path = argv[1];
+
+    std::vector<cv::Point2f> finalPointList, finalPointListCV;
+    // TIMER START CODE
+    // NOTE: This timer records the time taken to run the entire funciton including the creation of all required
+    // variables which increases the reported latency value
+    struct timespec begin_hw, end_hw;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
+    finalPointListCV = cornertracker_cv(
+        argv[1], atoi(argv[2]),
+        atoi(argv[4])); // OpenCV Reference Function, store the final output to compare it to the xf_opencv output
+
+    // TIMER END CODE
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is " << hw_time << "ms" << std::endl;
+
 #if VIDEO_INPUT
     cv::VideoCapture cap;
 
@@ -564,6 +590,7 @@ int main(int argc, char** argv) {
                 row_num = (point >> 16) & 0x0000FFFF; //.range(31,16);
                 col_num = point & 0x0000FFFF;         //.range(15,0);
                 cv::Point2f rmappoint((float)col_num, (float)row_num);
+                finalPointList.push_back(rmappoint);
                 cv::circle(outputimage, rmappoint, 2, cv::Scalar(0, 0, 255), -1, 8);
             }
         }
@@ -605,5 +632,39 @@ int main(int argc, char** argv) {
     im0.release();
     im1.release();
     MEMORYFREE(list);
+
+    // Error Calculation
+    std::vector<double> errVec;
+    double ERROR_THRESH = 3;
+    uint errCount = 0;
+    double errMin = 0, errMax = 0;
+    for (int i = 0; i < finalPointList.size(); i++) {
+        double minDist = 0;
+        for (int j = 0; j < finalPointListCV.size(); j++) {
+            double x = finalPointList[i].x - finalPointListCV[j].x;
+            double y = finalPointList[i].y - finalPointListCV[j].y;
+            double dist = (x * x) + (y * y);
+            if (dist < minDist || j == 0) minDist = dist;
+        }
+        errVec.push_back(minDist);
+        if (minDist > ERROR_THRESH) errCount++;
+        if (minDist < errMin || i == 0) errMin = minDist;
+        if (minDist > errMax || i == 0) errMax = minDist;
+    }
+
+    double pixels_above_thresh_per = ((float)errCount * 100.0 / finalPointList.size());
+    std::cout << "        Minimum error = " << errMin << std::endl;
+    std::cout << "        Maximum error = " << errMax << std::endl;
+    std::cout << "        Percentage of points above error threshold = " << pixels_above_thresh_per << std::endl;
+    if (pixels_above_thresh_per > 20) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is " << hw_time << "ms" << std::endl;
+
     return 0;
 }

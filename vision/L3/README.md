@@ -14,12 +14,12 @@ This directory contains whole applications formed by stitching a pipeline of Vit
 
     source < path-to-Vitis-installation-directory >/settings64.sh
 
-    source < part-to-XRT-installation-directory >/setup.sh
-
     export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 
+    source < part-to-XRT-installation-directory >/setup.sh
+	
 	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
 
 	export OPENCV_LIB=< path-to-opencv-lib-folder >

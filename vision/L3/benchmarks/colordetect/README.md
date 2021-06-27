@@ -23,23 +23,37 @@ hardware accelerated xf::cv::colordetect on FPGA  : 133 images(full-hd)/sec
 
     source < path-to-Vitis-installation-directory >/settings64.sh
 
-    source < path-to-XRT-installation-directory >/setup.sh
-
     export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 
-    make all TARGET=< sw_emu|hw_emu|hw >
+    source < path-to-XRT-installation-directory >/setup.sh
 
-    make run TARGET=< sw_emu|hw_emu|hw >
+	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+
+	export OPENCV_LIB=< path-to-opencv-lib-folder >
+	
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+	
+    make host xclbin TARGET=< sw_emu|hw_emu|hw >
+
 
 **For embedded devices:**
 
+	Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : "./sdk.sh -y -d ./ -p"
+	
+	Unzip the rootfs file : "gunzip ./rootfs.ext4.gz"
+
     export SYSROOT=< path-to-platform-sysroot >
+	
+	export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
 
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > BOARD=Zynq ARCH=< aarch32 | aarch64 >
+	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
 
-    make run TARGET=< sw_emu|hw_emu|hw >  BOARD=Zynq ARCH=< aarch32 | aarch64 > #This command will generate the sd_card folder
+    make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
+
+    make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build.
+
 
 **Note1**. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.
 

@@ -17,7 +17,13 @@
 #include "common/xf_headers.hpp"
 #include "xf_hog_descriptor_config.h"
 #include "ObjDet_reference.hpp"
+#include "opencv2/objdetect.hpp"
 #include "xcl2.hpp"
+
+#include <time.h>
+
+using namespace std;
+using namespace cv;
 
 // for masking the output value
 #define operatorAND 0x0000FFFF
@@ -41,9 +47,9 @@ int main(int argc, char** argv) {
 
 // Converting the image type based on the configuration
 #if GRAY_T
-    cvtColor(img_raw, img, CV_BGR2GRAY);
+    cvtColor(img_raw, img, cv::COLOR_BGR2GRAY);
 #elif RGB_T
-    cvtColor(img_raw, img, CV_BGR2RGB);
+    cvtColor(img_raw, img, cv::COLOR_BGR2RGB);
 #endif
 
     // Creating the input pointers
@@ -78,26 +84,11 @@ int main(int argc, char** argv) {
 #endif
     int dim = (total_no_of_windows * nodpw_tb);
 
-    // Reference HOG implementation:
-    AURHOGDescriptor d(cv::Size(XF_WIN_WIDTH, XF_WIN_HEIGHT), cv::Size(XF_BLOCK_WIDTH, XF_BLOCK_HEIGHT),
-                       cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), XF_NO_OF_BINS);
-
-    // Creating the input pointers
-    vector<float> descriptorsValues;
-    vector<cv::Point> locations;
-
-    d.AURcompute(img, descriptorsValues, cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(0, 0), locations);
-
 #if GRAY_T
     int _planes = 1;
 #elif RGB_T
     int _planes = 3;
 #endif
-
-    std::vector<float> ocv_out_fl(dim);
-
-    // Output of the OCV will be in column major form, for comparison reason we convert that into row major
-    cmToRmConv(descriptorsValues, ocv_out_fl.data(), total_no_of_windows);
 
     std::vector<uint32_t> outMat(1 * no_of_descs_hw);
 
@@ -144,12 +135,13 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
-                                            CL_TRUE,             // blocking call
-                                            0,                   // buffer offset in bytes
-                                            image_in_size_bytes, // Size in bytes
-                                            img.data,            // Pointer to the data to copy
-                                            nullptr, &event));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
+                                       CL_TRUE,             // blocking call
+                                       0,                   // buffer offset in bytes
+                                       image_in_size_bytes, // Size in bytes
+                                       img.data,            // Pointer to the data to copy
+                                       nullptr, &event));
 
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));
@@ -203,7 +195,8 @@ int main(int argc, char** argv) {
     for (int i = 0; i < dim; i++) {
         out_fl[i] = ((float)output1[i] / (float)65536.0);
     }
-#elif NON_REPETITIVE_BLOCKS // Reading in the NRB mode and arranging the data for comparison
+#elif NON_REPETITIVE_BLOCKS // Reading in the NRB mode and arranging the data
+    // for comparison
     std::vector<float> out_fl_tmp(dim_expand);
     int tmp_cnt = 0;
 
@@ -229,6 +222,57 @@ int main(int argc, char** argv) {
         }
     }
 #endif
+
+#if __XF_BENCHMARK
+
+    // Creating the input pointers
+    vector<float> descriptorsValues_cv;
+    vector<cv::Point> locations_cv;
+
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
+    // Opencv implementation:
+    cv::HOGDescriptor hog(cv::Size(XF_WIN_WIDTH, XF_WIN_HEIGHT), cv::Size(XF_BLOCK_WIDTH, XF_BLOCK_HEIGHT),
+                          cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT),
+                          XF_NO_OF_BINS);
+
+    hog.compute(img, descriptorsValues_cv, cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(0, 0), locations_cv);
+
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double cpu_time, hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
+
+#else
+
+    // Reference HOG implementation:
+    AURHOGDescriptor d(cv::Size(XF_WIN_WIDTH, XF_WIN_HEIGHT), cv::Size(XF_BLOCK_WIDTH, XF_BLOCK_HEIGHT),
+                       cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), XF_NO_OF_BINS);
+
+    // Creating the input pointers
+    vector<float> descriptorsValues;
+    vector<cv::Point> locations;
+
+    d.AURcompute(img, descriptorsValues, cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(0, 0), locations);
+
+    std::vector<float> ocv_out_fl(dim);
+
+    // Output of the OCV will be in column major form, for comparison reason we
+    // convert that into row major
+    cmToRmConv(descriptorsValues, ocv_out_fl.data(), total_no_of_windows);
 
     // Error analysis:
     float acc_diff = 0, max_diff = 0, max_pos = 0, counter_for_diff = 0;
@@ -272,6 +316,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     std::cout << "Test Passed " << std::endl;
+#endif
 
     return 0;
 }

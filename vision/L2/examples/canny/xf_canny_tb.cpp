@@ -18,6 +18,7 @@
 #include "xf_canny_config.h"
 
 #include "xcl2.hpp"
+#include <time.h>
 
 typedef unsigned char NMSTYPE;
 
@@ -172,14 +173,29 @@ int main(int argc, char** argv) {
 
     extractChannel(in_img, img_gray, 1); // Extract gray scale image
 
-    hls_img.create(img_gray.rows, img_gray.cols, img_gray.depth());      // HLS image creation
-    out_img.create(img_gray.rows, img_gray.cols / 4, img_gray.depth());  // HLS image creation
-    out_img_edge.create(img_gray.rows, img_gray.cols, img_gray.depth()); // HLS image creation
-
     int height, width;
     int low_threshold, high_threshold;
     height = img_gray.rows;
     width = img_gray.cols;
+
+    int npcCols = width;
+    int divNum = (int)(width / 32);
+    int npcColsNxt = (divNum + 1) * 32;
+    if (width % 32 != 0) {
+        npcCols = npcColsNxt;
+    }
+
+    int npcCols_8 = width;
+    int divNum_8 = (int)(width / 8);
+    int npcColsNxt_8 = (divNum_8 + 1) * 8;
+    if (width % 8 != 0) {
+        npcCols_8 = npcColsNxt_8;
+    }
+
+    hls_img.create(img_gray.rows, img_gray.cols, img_gray.depth());  // HLS image creation
+    out_img.create(img_gray.rows, npcCols / 4, img_gray.depth());    // HLS image creation
+    out_img_edge.create(img_gray.rows, npcCols_8, img_gray.depth()); // HLS image creation
+
     low_threshold = 30;
     high_threshold = 64;
 
@@ -200,7 +216,7 @@ int main(int argc, char** argv) {
 
     std::vector<cl::Memory> inBufVec, outBufVec;
     cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width));
-    cl::Buffer imageFromDevice(context, CL_MEM_READ_WRITE, (height * width / 4));
+    cl::Buffer imageFromDevice(context, CL_MEM_READ_WRITE, ((height * npcCols) / 4));
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
@@ -229,21 +245,14 @@ int main(int argc, char** argv) {
     diff_prof = end - start;
     std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
-    // Copying Device result data to Host memory
-    // q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height*width/4), out_img.data);
-    // q.finish();
-
     cl::Kernel krnl2(program, "edgetracing_accel");
-    // cl::Buffer imageToDeviceedge(context, CL_MEM_READ_WRITE,(height*width/4));
-    cl::Buffer imageFromDeviceedge(context, CL_MEM_WRITE_ONLY, (height * width));
+    cl::Buffer imageFromDeviceedge(context, CL_MEM_WRITE_ONLY, (height * npcCols_8));
 
     // Set the kernel arguments
     krnl2.setArg(0, imageFromDevice);
     krnl2.setArg(1, imageFromDeviceedge);
     krnl2.setArg(2, height);
     krnl2.setArg(3, width);
-
-    // q.enqueueWriteBuffer(imageToDeviceedge, CL_TRUE, 0, (height*(width/4)), out_img.data);
 
     // Profiling Objects
     cl_ulong startedge = 0;
@@ -264,16 +273,23 @@ int main(int argc, char** argv) {
     std::cout << (diff_prof_edge / 1000000) << "ms" << std::endl;
 
     // Copying Device result data to Host memory
-    q.enqueueReadBuffer(imageFromDeviceedge, CL_TRUE, 0, (height * width), out_img_edge.data);
+    q.enqueueReadBuffer(imageFromDeviceedge, CL_TRUE, 0, (height * npcCols_8), out_img_edge.data);
 
     q.finish();
 
-    /////////////////////////////////end of CL call//////////////////////////////////////////////////
+    /////////////////////////////////end of CL
+    /// call//////////////////////////////////////////////////
 
-    /*				Apply Gaussian mask and call opencv canny function				*/
+    /*				Apply Gaussian mask and call opencv canny function
+     */
     cv::Mat img_gray1;
     img_gray1.create(img_gray.rows, img_gray.cols, img_gray.depth());
     AverageGaussian(img_gray, img_gray1); // Gaussian filter
+
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
 
 #if L1NORM
     cv::Canny(img_gray1, ocv_img, 30.0, 64.0, FILTER_WIDTH, false); // Opencv canny function
@@ -282,34 +298,52 @@ int main(int argc, char** argv) {
     cv::Canny(img_gray1, ocv_img, 30.0, 64.0, FILTER_WIDTH, true); // Opencv canny function
 #endif
 
-    absdiff(ocv_img, out_img_edge, diff); // Absolute difference between opencv and hls result
-    imwrite("hls.png", out_img_edge);     // Save HLS result
-    imwrite("ocv.png", ocv_img);          // Save Opencv result
-    imwrite("diff.png", diff);
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
+
+    // absdiff(ocv_img, out_img_edge, diff); // Absolute difference between opencv
+    // and hls result
+    imwrite("hls.png", out_img_edge); // Save HLS result
+    imwrite("ocv.png", ocv_img);      // Save Opencv result
+    // imwrite("diff.png", diff);
     // Save difference image
     // Find minimum and maximum differences.
-    double minval = 256, maxval = 0;
+    /* double minval = 256, maxval = 0;
 
-    int cnt = 0;
-    for (int i = 0; i < diff.rows - 0; i++) {
-        for (int j = 0; j < diff.cols - 0; j++) {
-            uchar v = diff.at<uchar>(i, j);
+     int cnt = 0;
+     for (int i = 0; i < diff.rows - 0; i++) {
+         for (int j = 0; j < diff.cols - 0; j++) {
+             uchar v = diff.at<uchar>(i, j);
 
-            if (v > 0) cnt++;
-            if (minval > v) minval = v;
-            if (maxval < v) maxval = v;
-        }
-    }
+             if (v > 0) cnt++;
+             if (minval > v) minval = v;
+             if (maxval < v) maxval = v;
+         }
+     }
 
-    float err_per = 100.0 * (float)cnt / (diff.rows * diff.cols);
-    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
-    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
-    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
-    std::cout << "\tNo of Pixels with Error = " << cnt << std::endl;
+     float err_per = 100.0 * (float)cnt / (diff.rows * diff.cols);
+     std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+     std::cout << "\tPercentage of pixels above error threshold = " << err_per <<
+     std::endl;
+     std::cout << "\tNo of Pixels with Error = " << cnt << std::endl;
 
-    std::cout << "\tkernel done" << std::endl;
-    if (err_per > 2.5f) return 1;
-    /*			Destructors			*/
+     std::cout << "\tkernel done" << std::endl;
+     if (err_per > 2.5f) return 1;
+     /*			Destructors			*/
     in_img.~Mat();
     img_gray.~Mat();
     img_gray1.~Mat();

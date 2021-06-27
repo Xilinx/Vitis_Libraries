@@ -44,5 +44,10 @@
 #define OUT_TYPE XF_16UC1
 #endif
 
-void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols);
+void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                       int rows,
+                       int cols,
+                       unsigned short rgain,
+                       unsigned short bgain);
 #endif //_XF_GC_CONFIG_H_

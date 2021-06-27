@@ -32,4 +32,14 @@ Vitis vision library provides a software interface for computer vision functions
 
    api-reference
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Benchmark
 
+   Benchmark
+   
+.. toctree::
+   :maxdepth: 2
+   :caption: Release Notes
+
+   releasenotesxfopencv

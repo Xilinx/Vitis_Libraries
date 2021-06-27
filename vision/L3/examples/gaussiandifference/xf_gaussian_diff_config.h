@@ -17,13 +17,13 @@
 #ifndef _XF_GAUSSIAN_FILTER_CONFIG_H_
 #define _XF_GAUSSIAN_FILTER_CONFIG_H_
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
-#include "imgproc/xf_gaussian_filter.hpp"
-#include "imgproc/xf_duplicateimage.hpp"
-#include "imgproc/xf_delay.hpp"
 #include "core/xf_arithm.hpp"
+#include "hls_stream.h"
+#include "imgproc/xf_delay.hpp"
+#include "imgproc/xf_duplicateimage.hpp"
+#include "imgproc/xf_gaussian_filter.hpp"
 #include "xf_config_params.h"
 
 #define WIDTH 3840

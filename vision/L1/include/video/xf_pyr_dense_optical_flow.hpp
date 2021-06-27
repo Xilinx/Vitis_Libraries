@@ -333,19 +333,19 @@ void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPP
 // Ix, Iy, and It will be consumed at the same time and without any d
 // Giving them a 64 depth buffer just in case.
 // clang-format off
-    #pragma HLS STREAM variable=&strmIx            depth=64   dim=1
-    #pragma HLS STREAM variable=&strmIy            depth=64   dim=1
-    #pragma HLS STREAM variable=&strmIt_float      depth=64   dim=1
-    #pragma HLS STREAM variable=&flagU             depth=5000 dim=1
-    #pragma HLS STREAM variable=&flagV             depth=5000 dim=1
+    #pragma HLS STREAM variable=&strmIx            depth=64  
+    #pragma HLS STREAM variable=&strmIy            depth=64  
+    #pragma HLS STREAM variable=&strmIt_float      depth=64  
+    #pragma HLS STREAM variable=&flagU             depth=5000
+    #pragma HLS STREAM variable=&flagV             depth=5000
 // clang-format on
 
 // Flow U and V _in1 will be consumed at most 17*Width cycles after the _scaled.
 // 1920*17= 32640 (17 is arrived at by trial and experiment)
 // This ideally has to be taken care of by the data flow module.
 // clang-format off
-    #pragma HLS STREAM variable=&strmFlowU_in1     depth=32640 dim=1
-    #pragma HLS STREAM variable=&strmFlowV_in1     depth=32640 dim=1
+    #pragma HLS STREAM variable=&strmFlowU_in1     depth=32640 
+    #pragma HLS STREAM variable=&strmFlowV_in1     depth=32640
 // clang-format on
 #ifndef __SYNTHESIS__
     assert(rows <= MAXHEIGHT);

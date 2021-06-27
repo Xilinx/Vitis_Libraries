@@ -53,11 +53,16 @@ static void weightsghcalculation3x3(float sigma, unsigned char* weights) {
         sum += cf[i];
     }
 
+    float err = 0.0f;
     sum = 1. / sum;
     for (int i = 0; i < n; i++) {
         cf[i] = (float)(cf[i] * sum);
-        weights[i] = ((cf[i] * 256) + 0.5);
+        weights[i] = ((cf[i] * 256) + err + 0.5);
+
+        err = ((cf[i] * 256)) - weights[i];
     }
+
+    /// weights[1] = weights[1] + 1;
 }
 
 static void weightsghcalculation5x5(float sigma, unsigned char weights[5]) {
@@ -84,11 +89,13 @@ static void weightsghcalculation5x5(float sigma, unsigned char weights[5]) {
         cf[i] = (float)t;
         sum += cf[i];
     }
-
+    float err = 0.0f;
     sum = 1. / sum;
     for (int i = 0; i < n; i++) {
         cf[i] = (float)(cf[i] * sum);
-        weights[i] = ((float)(cf[i] * 256) + 0.5);
+        weights[i] = ((float)(cf[i] * 256) + err + 0.5);
+
+        err = ((cf[i] * 256)) - weights[i];
     }
 }
 

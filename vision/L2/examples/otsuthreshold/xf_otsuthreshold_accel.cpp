@@ -31,7 +31,6 @@ void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* Otsuval, int
 
 // clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
-    #pragma HLS STREAM variable=imgOutput.data depth=2
 
     #pragma HLS DATAFLOW
     // clang-format on

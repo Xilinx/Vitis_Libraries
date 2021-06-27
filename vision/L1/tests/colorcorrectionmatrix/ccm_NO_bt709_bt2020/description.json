@@ -3,7 +3,12 @@
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u200", "zcu102", "zcu104", "zc706"
+        "u200", 
+        "zcu102", 
+        "zcu104", 
+        "zc706", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 

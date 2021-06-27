@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
 
 // Converting the image type based on the configuration
 #if GRAY_T
-    cvtColor(img_raw, img, CV_BGR2GRAY);
+    cvtColor(img_raw, img, cv::COLOR_BGR2GRAY);
 #elif RGB_T
-    cvtColor(img_raw, img, CV_BGR2RGB);
+    cvtColor(img_raw, img, cv::COLOR_BGR2RGB);
 #endif
 
     // Creating the input pointers

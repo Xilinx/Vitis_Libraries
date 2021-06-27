@@ -135,13 +135,13 @@ int main(int argc, char** argv) {
 
 /*OpenCV resize function*/
 #if INTERPOLATION == 0
-    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_NN);
+    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, cv::INTER_NEAREST);
 #endif
 #if INTERPOLATION == 1
-    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_LINEAR);
+    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, cv::INTER_LINEAR);
 #endif
 #if INTERPOLATION == 2
-    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_AREA);
+    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, cv::INTER_AREA);
 #endif
 
     cv::absdiff(result_hls, result_ocv, error);

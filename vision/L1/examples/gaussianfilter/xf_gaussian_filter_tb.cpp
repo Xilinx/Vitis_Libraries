@@ -64,8 +64,7 @@ int main(int argc, char** argv) {
     int width = in_img.cols;
 
     // OpenCV Gaussian filter function
-    cv::GaussianBlur(in_img, ocv_ref, cvSize(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
-                     cv::BORDER_CONSTANT);
+    cv::GaussianBlur(in_img, ocv_ref, cv::Size(FILTER_WIDTH, FILTER_WIDTH), sigma, sigma, cv::BORDER_CONSTANT);
     imwrite("output_ocv.png", ocv_ref);
 
     // Call the top function
@@ -81,7 +80,7 @@ int main(int argc, char** argv) {
     imwrite("error.png", diff); // Save the difference image for debugging purpose
 
     float err_per;
-    xf::cv::analyzeDiff(diff, 0, err_per);
+    xf::cv::analyzeDiff(diff, 2, err_per);
 
     if (err_per > 0.0f) {
         return 1;

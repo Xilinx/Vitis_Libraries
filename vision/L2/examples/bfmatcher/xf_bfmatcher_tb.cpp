@@ -18,6 +18,8 @@
 #include "opencv2/features2d.hpp"
 #include "xf_bfmatcher_config.h"
 
+#include <time.h>
+
 #include "xcl2.hpp"
 #include "xf_opencl_wrap.hpp"
 
@@ -87,18 +89,31 @@ int main(int argc, char** argv) {
     // Opencv reference
     cv::Ptr<cv::DescriptorMatcher> matcher_cv;
     std::vector<std::vector<cv::DMatch> > knn_matches_cv;
+    std::vector<cv::DMatch> good_matches_cv;
+
+    // TIMER START CODE
+    struct timespec begin_hw, end_hw;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
 
     matcher_cv = cv::BFMatcher::create(cv::NORM_HAMMING, false);
     matcher_cv->knnMatch(descriptors1_cv, descriptors2_cv, knn_matches_cv, 2);
 
     // adding lowe's ratio test for comparison
-    std::vector<cv::DMatch> good_matches_cv;
     for (size_t i = 0; i < knn_matches_cv.size(); i++) {
         if (knn_matches_cv[i][0].distance < ratio_thresh * knn_matches_cv[i][1].distance) {
             good_matches_cv.push_back(knn_matches_cv[i][0]);
         }
     }
     //	End of OpenCV reference
+
+    // TIMER END CODE
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
 
     ///////////////////   HLS module  /////////////////
 
@@ -145,6 +160,10 @@ int main(int argc, char** argv) {
         }
     }
     std::cout << "Test passed successfully!" << std::endl;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is " << hw_time << "ms" << std::endl;
 
     return 0;
 }

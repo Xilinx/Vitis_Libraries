@@ -5,7 +5,9 @@
     ],
     "flow": "vitis",
     "platform_whitelist": [
-        "u200", "zcu102", "zcu104"
+        "u200",
+        "aws-vu9p-f1", 
+        "vck190", "zcu102", "zcu104"
     ], 
     "platform_blacklist": [
         "u280", "u250", "u50"
@@ -25,18 +27,50 @@
 		}
 	    }
         },
+        "aws-vu9p-f1": {
+            "host": {
+                "compiler": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
+                }
+            }
+        },
+        "vck190": {
+            "host": {
+                "compiler": {
+                    "includepaths": [
+			"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }, 
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/lib"
+                    ]
+                }
+            }
+        },
 	"zcu102": {
             "host": {
                 "compiler": {
 			"includepaths" : [
-				"$(SYSROOT)/usr/include"
+				"$(SYSROOT)/usr/include",
+				"$(SYSROOT)/usr/include/opencv4"
 			],
 			"options" : "--sysroot=$(SYSROOT)"
 		},
 		"linker" : {
 			"librarypaths" : [
 				"$(SYSROOT)/usr/lib",
-				"${SYSROOT}/opt/xilinx/xrt/lib"
+				"${SYSROOT}/lib"
 			]
 		}
 	    }
@@ -45,14 +79,15 @@
             "host": {
                 "compiler": {
 			"includepaths" : [
-				"$(SYSROOT)/usr/include"
+				"$(SYSROOT)/usr/include",
+				"$(SYSROOT)/usr/include/opencv4"
 			],
 			"options" : "--sysroot=$(SYSROOT)"					
 		},
 		"linker" : {
 			"librarypaths" : [
 				"$(SYSROOT)/usr/lib",
-				"${SYSROOT}/opt/xilinx/xrt/lib"
+				"${SYSROOT}/lib"
 			]
 		}
 	    }

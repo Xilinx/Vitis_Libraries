@@ -278,7 +278,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL ////////////////////////
 
-    cvtColor(outputimg0, outputimg1, CV_RGBA2BGR);
+    cvtColor(outputimg0, outputimg1, cv::COLOR_RGBA2BGR);
     cv::imwrite("out.png", outputimg0);
 
     refimage = cv::imread(argv[4], 1);
@@ -381,7 +381,7 @@ int main(int argc, char** argv) {
     q.finish();
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL ////////////////////////
-    cvtColor(outputimg0, outputimg0, CV_RGB2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGB2BGR);
     imwrite("out.png", outputimg0);
 
     refimage = cv::imread(argv[4], 1);
@@ -814,7 +814,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
 
-    cvtColor(outputimg0, outputimg0, CV_RGB2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGB2BGR);
     imwrite("out.png", outputimg0);
 
     refimage = cv::imread(argv[3], 1);
@@ -1955,7 +1955,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
 
-    cvtColor(outputimg0, outputimg0, CV_RGB2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGB2BGR);
     imwrite("out.png", outputimg0);
 
     refimage = cv::imread(argv[3], 1);
@@ -2105,7 +2105,7 @@ int main(int argc, char** argv) {
     error_img1.create(S1, CV_8UC1);
     error_img2.create(S1, CV_8UC1);
 
-    cvtColor(inputimg, inputimg, CV_BGR2RGBA);
+    cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGBA);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
@@ -2210,7 +2210,7 @@ int main(int argc, char** argv) {
     error_img1.create(S1, CV_8UC1);
     error_img2.create(S1, CV_8UC1);
 
-    cvtColor(inputimg, inputimg, CV_BGR2RGBA);
+    cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGBA);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
@@ -2321,7 +2321,7 @@ int main(int argc, char** argv) {
     outputimg1.create(S1, CV_16UC1);
     error_img1.create(S1, CV_16UC1);
 
-    cvtColor(inputimg0, inputimg0, CV_BGR2RGBA);
+    cvtColor(inputimg0, inputimg0, cv::COLOR_BGR2RGBA);
     img_height = inputimg0.rows;
     img_width = inputimg0.cols;
 
@@ -2420,7 +2420,7 @@ int main(int argc, char** argv) {
     outputimg1.create(S1, CV_16UC1);
     error_img1.create(S1, CV_16UC1);
 
-    cvtColor(inputimg0, inputimg0, CV_BGR2RGBA);
+    cvtColor(inputimg0, inputimg0, cv::COLOR_BGR2RGBA);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
@@ -2518,7 +2518,7 @@ int main(int argc, char** argv) {
     error_img1.create(S1, CV_8UC1);
     error_img2.create(S1, CV_8UC1);
 
-    cvtColor(inputimg, inputimg, CV_BGR2RGB);
+    cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGB);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
@@ -2626,7 +2626,7 @@ int main(int argc, char** argv) {
     outputimg1.create(S1, CV_16UC1);
     error_img1.create(S1, CV_16UC1);
 
-    cvtColor(inputimg0, inputimg0, CV_BGR2RGB);
+    cvtColor(inputimg0, inputimg0, cv::COLOR_BGR2RGB);
     img_height = inputimg0.rows;
     img_width = inputimg0.cols;
 
@@ -2824,7 +2824,7 @@ int main(int argc, char** argv) {
     outputimg1.create(S1, CV_16UC1);
     error_img1.create(S1, CV_16UC1);
 
-    cvtColor(inputimg0, inputimg0, CV_BGR2RGB);
+    cvtColor(inputimg0, inputimg0, cv::COLOR_BGR2RGB);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
@@ -3016,7 +3016,7 @@ int main(int argc, char** argv) {
     error_img1.create(S1, CV_8UC1);
     error_img2.create(S1, CV_8UC1);
 
-    cvtColor(inputimg, inputimg, CV_BGR2RGB);
+    cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGB);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
@@ -3118,7 +3118,7 @@ int main(int argc, char** argv) {
     outputimg0.create(S0, CV_16UC1);
     error_img0.create(S0, CV_16UC1);
 
-    cvtColor(inputimg, inputimg, CV_BGR2RGB);
+    cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGB);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
@@ -3267,7 +3267,7 @@ int main(int argc, char** argv) {
     outputimg0.create(S0, CV_16UC1);
     error_img0.create(S0, CV_16UC1);
 
-    cvtColor(inputimg, inputimg, CV_BGR2RGB);
+    cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGB);
 
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
@@ -3836,7 +3836,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
 
-    cvtColor(outputimg0, outputimg0, CV_RGBA2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGBA2BGR);
     refimage = cv::imread(argv[2], 1);
     if (!refimage.data) {
         fprintf(stderr, "Failed to open reference image\n ");
@@ -3906,7 +3906,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
 
-    cvtColor(outputimg0, outputimg0, CV_RGB2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGB2BGR);
 
     imwrite("out.png", outputimg0);
 
@@ -4292,7 +4292,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
 
-    cvtColor(outputimg0, outputimg0, CV_RGBA2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGBA2BGR);
     imwrite("out.png", outputimg0);
 
     refimage = cv::imread(argv[2], 1);
@@ -4432,7 +4432,7 @@ int main(int argc, char** argv) {
     q.finish();
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
-    cvtColor(outputimg0, outputimg0, CV_RGB2BGR);
+    cvtColor(outputimg0, outputimg0, cv::COLOR_RGB2BGR);
     imwrite("out.png", outputimg0);
 
     refimage = cv::imread(argv[2], 1);
@@ -4449,7 +4449,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC1);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC1);
     /////////////////////////////////////// CL ////////////////////////
@@ -4504,7 +4504,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_RGB2GRAY, 1);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_RGB2GRAY, 1);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -4571,7 +4571,7 @@ int main(int argc, char** argv) {
     ////////////////////////////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_BGR2GRAY, 1);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_BGR2GRAY, 1);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -4637,7 +4637,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_GRAY2RGB, 3);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_GRAY2RGB, 3);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     cv::absdiff(outputimg, ocv_outputimg, error_img0);
@@ -4700,7 +4700,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_GRAY2BGR, 3);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_GRAY2BGR, 3);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -4712,7 +4712,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -4832,7 +4832,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg, inputimg, cv::COLOR_BGR2RGB);
 
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
@@ -4845,7 +4845,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -4900,7 +4900,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_RGB2XYZ);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_RGB2XYZ);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -4967,7 +4967,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_BGR2XYZ);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_BGR2XYZ);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -4979,8 +4979,8 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
-    cv::cvtColor(inputimg, inputimg, CV_RGB2XYZ);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
+    cv::cvtColor(inputimg, inputimg, cv::COLOR_RGB2XYZ);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5035,13 +5035,13 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_RGB2XYZ);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_RGB2XYZ);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_XYZ2RGB);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_XYZ2RGB);
 
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
@@ -5054,7 +5054,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2XYZ);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2XYZ);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5106,7 +5106,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_XYZ2BGR);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_XYZ2BGR);
 
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
@@ -5119,7 +5119,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5174,7 +5174,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_RGB2YCrCb);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_RGB2YCrCb);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5239,7 +5239,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_BGR2YCrCb);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_BGR2YCrCb);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5251,7 +5251,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2YCrCb);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2YCrCb);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5302,7 +5302,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_YCrCb2RGB);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_YCrCb2RGB);
 
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
@@ -5315,7 +5315,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2YCrCb);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2YCrCb);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5370,7 +5370,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_YCrCb2BGR);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_YCrCb2BGR);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5382,7 +5382,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5437,7 +5437,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL ////////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_RGB2HLS);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_RGB2HLS);
 
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
@@ -5505,7 +5505,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL ////////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_BGR2HLS);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_BGR2HLS);
     // c_Ref((float*)inputimg.data,(float*)ocv_outputimg.data,3);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
@@ -5518,7 +5518,7 @@ int main(int argc, char** argv) {
     if (!inputimg.data) {
         return -1;
     }
-    cv::cvtColor(inputimg, inputimg, CV_BGR2HLS);
+    cv::cvtColor(inputimg, inputimg, cv::COLOR_BGR2HLS);
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
@@ -5572,7 +5572,7 @@ int main(int argc, char** argv) {
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL ////////////////////////
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_HLS2RGB);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_HLS2RGB);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5584,7 +5584,7 @@ int main(int argc, char** argv) {
     if (!inputimg.data) {
         return -1;
     }
-    cv::cvtColor(inputimg, inputimg, CV_BGR2HLS);
+    cv::cvtColor(inputimg, inputimg, cv::COLOR_BGR2HLS);
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     /////////////////////////////////////// CL ////////////////////////
@@ -5637,7 +5637,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL ////////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_HLS2BGR);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_HLS2BGR);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5649,7 +5649,7 @@ int main(int argc, char** argv) {
     if (!inputimg1.data) {
         return -1;
     }
-    cv::cvtColor(inputimg1, inputimg, CV_BGR2RGB);
+    cv::cvtColor(inputimg1, inputimg, cv::COLOR_BGR2RGB);
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
@@ -5707,7 +5707,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_RGB2HSV);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_RGB2HSV);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5774,7 +5774,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_BGR2HSV);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_BGR2HSV);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5786,7 +5786,7 @@ int main(int argc, char** argv) {
     if (!inputimg.data) {
         return -1;
     }
-    cv::cvtColor(inputimg, inputimg, CV_BGR2HSV);
+    cv::cvtColor(inputimg, inputimg, cv::COLOR_BGR2HSV);
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
@@ -5840,7 +5840,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_HSV2RGB);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_HSV2RGB);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);
@@ -5852,7 +5852,7 @@ int main(int argc, char** argv) {
     if (!inputimg.data) {
         return -1;
     }
-    cv::cvtColor(inputimg, inputimg, CV_BGR2HSV);
+    cv::cvtColor(inputimg, inputimg, cv::COLOR_BGR2HSV);
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
@@ -5906,7 +5906,7 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
 
     // OpenCV reference
-    cv::cvtColor(inputimg, ocv_outputimg, CV_HSV2BGR);
+    cv::cvtColor(inputimg, ocv_outputimg, cv::COLOR_HSV2BGR);
     cv::imwrite("ocv_out.jpg", ocv_outputimg);
     cv::imwrite("hls_out.jpg", outputimg);
     absdiff(outputimg, ocv_outputimg, error_img0);

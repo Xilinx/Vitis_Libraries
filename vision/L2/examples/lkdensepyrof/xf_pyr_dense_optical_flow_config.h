@@ -36,4 +36,6 @@
 #define TYPE XF_8UC1
 #define NPC_T XF_NPPC1
 
+#define __XF_BENCHMARK 0
+
 #endif

@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     }
 
 #if DIM
-    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM)) {
+    if ((REDUCTION_OP == cv::REDUCE_AVG) || (REDUCTION_OP == cv::REDUCE_SUM)) {
         dst_hls.create(in_img.rows, 1, CV_32SC1);
         ocv_ref.create(in_img.rows, 1, CV_32SC1);
     } else {
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     }
 
 #else
-    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM)) {
+    if ((REDUCTION_OP == cv::REDUCE_AVG) || (REDUCTION_OP == cv::REDUCE_SUM)) {
         dst_hls.create(1, in_img.cols, CV_32SC1);
         ocv_ref.create(1, in_img.cols, CV_32SC1);
     } else {
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
                  width);
 
     // Reference function
-    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM))
+    if ((REDUCTION_OP == cv::REDUCE_AVG) || (REDUCTION_OP == cv::REDUCE_SUM))
         cv::reduce(in_img, ocv_ref, DIM, REDUCTION_OP, CV_32SC1); // avg, sum
     else
         cv::reduce(in_img, ocv_ref, DIM, REDUCTION_OP, CV_8UC1);

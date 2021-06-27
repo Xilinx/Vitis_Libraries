@@ -18,6 +18,10 @@
 #include "xcl2.hpp"
 #include "xf_gaussian_diff_config.h"
 
+#include <time.h>
+
+using namespace cv;
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
@@ -47,6 +51,35 @@ int main(int argc, char** argv) {
 #if FILTER_WIDTH == 5
     float sigma = 0.8333f;
 #endif
+
+    cv::Mat dst(in_gray.size(), in_gray.type());
+    cv::Mat dst2(in_gray.size(), in_gray.type());
+    cv::Mat dst3(in_gray.size(), in_gray.type());
+    cv::Mat dst4(in_gray.size(), in_gray.type());
+    cv::Mat dst_fin(in_gray.size(), in_gray.type());
+
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
+    // OpenCV reference function
+    cv::GaussianBlur(in_gray, dst, cv::Size(FILTER_WIDTH, FILTER_WIDTH), sigma, sigma, BORDER_CONSTANT);
+    dst2 = dst.clone();
+    dst3 = dst.clone();
+    cv::GaussianBlur(dst2, dst4, cv::Size(FILTER_WIDTH, FILTER_WIDTH), sigma, sigma, BORDER_CONSTANT);
+    subtract(dst3, dst4, dst_fin);
+
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
 
     // OpenCL section:
     size_t image_in_size_bytes = in_gray.rows * in_gray.cols * sizeof(unsigned char);
@@ -117,6 +150,11 @@ int main(int argc, char** argv) {
     // Write the output of kernel:
     cv::imwrite("output_hls.png", out_img);
     std::cout << "Test Passed " << std::endl;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
 
     return 0;
 }

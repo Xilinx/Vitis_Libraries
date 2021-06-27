@@ -23,13 +23,13 @@ sys.path.insert(0, os.path.abspath('docs'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Vision Library'
-copyright = '2020, Xilinx'
+copyright = '2021, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2020.2'
+version = '2021.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2020.2'
+release = 'v2021.1'
 html_last_updated_fmt = '%B %d, %Y'
 
 # -- General configuration ---------------------------------------------------

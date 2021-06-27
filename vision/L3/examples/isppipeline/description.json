@@ -47,7 +47,8 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include"
+                        "$(SYSROOT)/usr/include",
+			"$(SYSROOT)/usr/include/opencv4"
                     ], 
                     "options": "--sysroot=$(SYSROOT)"
                 }, 
@@ -63,7 +64,8 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include"
+                        "$(SYSROOT)/usr/include",
+			"$(SYSROOT)/usr/include/opencv4"
                     ], 
                     "options": "--sysroot=$(SYSROOT)"
                 }, 

@@ -4,9 +4,11 @@
     "flow": "hls", 
     "platform_whitelist": [
         "u200", 
-        "u50",
-		"zcu102", 
-        "zcu104"
+        "u50", 
+        "zcu102", 
+        "zcu104", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 

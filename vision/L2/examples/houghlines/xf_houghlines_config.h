@@ -17,15 +17,18 @@
 #ifndef _XF_HOUGHLINES_CONFIG_H_
 #define _XF_HOUGHLINES_CONFIG_H_
 
-#include "hls_stream.h"
 #include "ap_int.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 #include "imgproc/xf_houghlines.hpp"
 //#include "xf_config_params.h"
 
 #define HEIGHT 1080
 #define WIDTH 1920
+
+// Set the function for reference
+#define __XF_BENCHMARK 1
 
 // Set the optimization type:
 #define NPC1 XF_NPPC1
@@ -34,7 +37,7 @@
 
 #define THETASTEP 2 // 6.1 format
 
-#define LINESMAX 512
+#define LINESMAX 100
 
 #define DIAGVAL 2203 // 275 //cvRound((sqrt(WIDTH*WIDTH + HEIGHT*HEIGHT)) / RHOSTEP);
 

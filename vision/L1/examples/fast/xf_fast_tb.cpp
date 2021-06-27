@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 
     uchar_t threshold = 20; // threshold
 
-    cvtColor(in_img, in_gray, CV_BGR2GRAY);
+    cvtColor(in_img, in_gray, cv::COLOR_BGR2GRAY);
 
     // OPenCV reference function
 

@@ -18,6 +18,8 @@
 #include "xcl2.hpp"
 #include "xf_fast_config.h"
 
+#include <time.h>
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
@@ -111,8 +113,22 @@ int main(int argc, char** argv) {
     // Write the kernel output:
     cv::imwrite("hls_out.jpg", out_hls);
 
+    // TIMER START CODE
+    struct timespec begin_hw, end_hw;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
     // OpenCV reference function
     cv::FAST(in_gray, keypoints, threshold, NMS);
+
+    // TIMER END CODE
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+
     std::vector<cv::Point> hls_points;
     std::vector<cv::Point> ocv_points;
     std::vector<cv::Point> common_points;
@@ -219,6 +235,10 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     std::cout << "Test Passed" << std::endl;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is " << hw_time << "ms" << std::endl;
 
     return 0;
 }

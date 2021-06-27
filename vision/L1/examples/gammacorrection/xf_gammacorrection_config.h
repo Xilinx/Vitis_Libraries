@@ -40,7 +40,10 @@
 #define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 32
 
-void gammacorrection_accel(
-    ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, float gammaval, int rows, int cols);
+void gammacorrection_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           unsigned char gamma_lut[256 * 3],
+                           int rows,
+                           int cols);
 
 #endif //_XF_GAMMA_CONFIG_H_

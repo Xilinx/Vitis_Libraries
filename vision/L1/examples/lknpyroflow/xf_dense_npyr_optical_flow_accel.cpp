@@ -16,9 +16,9 @@
 
 #include "xf_dense_npyr_optical_flow_config.h"
 
-static constexpr int __XF_DEPTH_IN =
+static constexpr int _XF_DEPTH_IN =
     (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPPC)) / 8) / (INPUT_PTR_WIDTH / 8);
-static constexpr int __XF_DEPTH_OUT =
+static constexpr int _XF_DEPTH_OUT =
     (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(XF_32FC1, NPPC)) / 32) / (OUTPUT_PTR_WIDTH / 32);
 
 void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,

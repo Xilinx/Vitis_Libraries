@@ -4,7 +4,9 @@
     "flow": "hls", 
     "platform_whitelist": [
         "u200", 
-        "u50"
+        "u50", 
+        "aws-vu9p-f1", 
+        "vck190"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
@@ -34,7 +36,7 @@
         "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
-        "disable": false, 
+        "disable": true, 
         "jobs": [
             {
                 "index": 0, 
@@ -53,7 +55,7 @@
                     "hls_csim": 60, 
                     "hls_cosim": 300, 
                     "hls_vivado_impl": 300, 
-                    "hls_csynth": 60
+                    "hls_csynth": 300
                 }
             }
         ], 

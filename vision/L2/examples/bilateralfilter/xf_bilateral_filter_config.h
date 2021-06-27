@@ -17,13 +17,13 @@
 #ifndef _XF_BILATERAL_FILTER_CONFIG_H_
 #define _XF_BILATERAL_FILTER_CONFIG_H_
 
-#include "hls_stream.h"
 #include "ap_int.h"
+#include "hls_stream.h"
 
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
-#include "xf_config_params.h"
 #include "imgproc/xf_bilateral_filter.hpp"
+#include "xf_config_params.h"
 
 typedef unsigned short int uint16_t;
 

@@ -18,6 +18,8 @@
 #include "xcl2.hpp"
 #include "xf_stereolbm_config.h"
 
+#include <time.h>
+
 using namespace std;
 
 #define _TEXTURE_THRESHOLD_ 20
@@ -70,7 +72,21 @@ int main(int argc, char** argv) {
     stereobm->setPreFilterCap(_PRE_FILTER_CAP_);
     stereobm->setUniquenessRatio(_UNIQUENESS_RATIO_);
     stereobm->setTextureThreshold(_TEXTURE_THRESHOLD_);
+
+    // TIMER START CODE
+    struct timespec begin_hw, end_hw;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
     stereobm->compute(left_img, right_img, disp);
+
+    // TIMER END CODE
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double hw_time;
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
 
     cv::Mat disp8, hls_disp8;
     disp.convertTo(disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
@@ -201,6 +217,15 @@ int main(int argc, char** argv) {
 
     float err_per;
     xf::cv::analyzeDiff(diff_c, 0, err_per);
+    if (err_per > 0.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return 1;
+    }
+    std::cout << "Test Passed" << std::endl;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is " << hw_time << "ms" << std::endl;
 
     return 0;
 }

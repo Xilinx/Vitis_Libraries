@@ -11,7 +11,7 @@ void AEC_ref(cv::Mat& _src, cv::Mat& _dst) {
 
     cv::Mat yuvimage, yuvimageop, finalop;
 
-    cv::cvtColor(_src, yuvimage, CV_BGR2HSV);
+    cv::cvtColor(_src, yuvimage, cv::COLOR_BGR2HSV);
 
     cv::Mat yuvchannels[3];
 
@@ -21,7 +21,7 @@ void AEC_ref(cv::Mat& _src, cv::Mat& _dst) {
 
     cv::merge(yuvchannels, 3, yuvimageop);
 
-    cv::cvtColor(yuvimageop, _dst, CV_HSV2BGR);
+    cv::cvtColor(yuvimageop, _dst, cv::COLOR_HSV2BGR);
 }
 
 int main(int argc, char** argv) {

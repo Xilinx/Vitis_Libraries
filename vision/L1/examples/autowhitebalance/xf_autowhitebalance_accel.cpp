@@ -49,7 +49,7 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 // clang-format on
 
 // clang-format off
-#pragma HLS stream variable=impop.data dim=1 depth=2
+#pragma HLS stream variable=impop.data depth=2
     // clang-format on
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);

@@ -12,12 +12,12 @@ Level 2 contains the host-callable kernels and engines for various Vitis Vision 
 
     source < path-to-Vitis-installation-directory >/settings64.sh
 
-    source < path-to-XRT-installation-directory >/setup.sh
-
     export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 
+    source < path-to-XRT-installation-directory >/setup.sh
+	
 	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
 
 	export OPENCV_LIB=< path-to-opencv-lib-folder >

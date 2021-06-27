@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <time.h>
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
@@ -125,7 +126,7 @@ void xiHoughLinesstandard(cv::Mat& img,
     if (mintheta > 0) min_theta = (CV_PI * mintheta) / 180;
 
     if (max_theta < min_theta) {
-        CV_Error(CV_StsBadArg, "max_theta must be greater than min_theta");
+        CV_Error(cv::Error::StsBadArg, "max_theta must be greater than min_theta");
     }
     int numangle = cvRound((max_theta - min_theta) / theta);
     int numrho = cvRound((sqrt(width * width + height * height)) / rho);
@@ -220,90 +221,6 @@ void xiHoughLinesstandard(cv::Mat& img,
     }
 }
 
-void HoughLinesstandardcref(cv::Mat& img,
-                            std::vector<cv::Vec2f>& lines,
-                            float rho,
-                            float theta,
-                            int threshold,
-                            int linesMax,
-                            int maxtheta,
-                            int mintheta) {
-    int i, j;
-    float irho = 1 / rho;
-
-    CV_Assert(img.type() == CV_8UC1);
-
-    const uchar* image = img.ptr();
-    int step = (int)img.step;
-    int width = img.cols;
-    int height = img.rows;
-
-    double max_theta;
-    double min_theta;
-
-    if (maxtheta > 0) max_theta = (CV_PI * maxtheta) / 180;
-    if (mintheta > 0) min_theta = (CV_PI * mintheta) / 180;
-
-    if (max_theta < min_theta) {
-        CV_Error(CV_StsBadArg, "max_theta must be greater than min_theta");
-    }
-    int numangle = cvRound((max_theta - min_theta) / theta);
-    // int numrho = cvRound((sqrt(width*width + height*height)*2 ) / rho);
-    int numrho = cvRound((sqrt(width * width + height * height) * 2) / rho);
-
-    cv::AutoBuffer<int> _accum((numangle + 2) * (numrho + 2));
-    std::vector<int> _sort_buf;
-    cv::AutoBuffer<float> _tabSin(numangle);
-    cv::AutoBuffer<float> _tabCos(numangle);
-    int* accum = _accum;
-    float *tabSin = _tabSin, *tabCos = _tabCos;
-
-    memset(accum, 0, sizeof(accum[0]) * (numangle + 2) * (numrho + 2));
-
-    float ang = static_cast<float>(min_theta);
-    for (int n = 0; n < numangle; ang += theta, n++) {
-        tabSin[n] = (float)(sin((double)ang) * irho);
-        tabCos[n] = (float)(cos((double)ang) * irho);
-    }
-
-    for (i = 0; i < height; i++) {
-        for (j = 0; j < width; j++) {
-            if (image[(i)*step + (j)] != 0)
-
-                for (int n = 0; n < numangle; n++) {
-                    int r = cvRound((j)*tabCos[n] + (i)*tabSin[n]);
-                    r += (numrho - 1) / 2;
-                    accum[(n + 1) * (numrho + 2) + r + 1]++;
-                }
-        }
-    }
-
-    // stage 2. find local maximums
-    for (int r = 0; r < numrho; r++)
-        for (int n = 0; n < numangle; n++) {
-            int base = (n + 1) * (numrho + 2) + r + 1;
-            if (accum[base] > threshold && accum[base] > accum[base - 1] && accum[base] >= accum[base + 1] &&
-                accum[base] > accum[base - numrho - 2] && accum[base] >= accum[base + numrho + 2])
-                _sort_buf.push_back(base);
-        }
-
-    // stage 3. sort the detected lines by accumulator value
-    std::sort(_sort_buf.begin(), _sort_buf.end(), hough_cmp_gt(accum));
-
-    // stage 4. store the first min(total,linesMax) lines to the output buffer
-    linesMax = std::min(linesMax, (int)_sort_buf.size());
-    double scale = 1. / (numrho + 2);
-    for (i = 0; i < linesMax; i++) {
-        LinePolar line;
-        int idx = _sort_buf[i];
-        int n = cvFloor(idx * scale) - 1;
-        int r = idx - (n + 1) * (numrho + 2) - 1;
-        line.rho = (r - (numrho - 1) * 0.5f) * rho;
-        line.angle = static_cast<float>(min_theta) + n * theta;
-        lines.push_back(cv::Vec2f(line.rho, line.angle));
-    }
-}
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
@@ -328,10 +245,10 @@ int main(int argc, char** argv) {
     cv::Mat dst, cdst, crefdst, crefxi, crefcv;
     cv::Canny(in_gray, dst, 50, 200, 3);
 
-    cvtColor(dst, cdst, CV_GRAY2BGR);
-    cvtColor(dst, crefdst, CV_GRAY2BGR);
-    cvtColor(dst, crefxi, CV_GRAY2BGR);
-    cvtColor(dst, crefcv, CV_GRAY2BGR);
+    cvtColor(dst, cdst, cv::COLOR_GRAY2BGR);
+    cvtColor(dst, crefdst, cv::COLOR_GRAY2BGR);
+    cvtColor(dst, crefxi, cv::COLOR_GRAY2BGR);
+    cvtColor(dst, crefcv, cv::COLOR_GRAY2BGR);
 
     std::vector<float> outputrho(LINESMAX);
     std::vector<float> outputtheta(LINESMAX);
@@ -422,19 +339,36 @@ int main(int argc, char** argv) {
     float thetaval = (THETASTEP / 2.0);
     float angleref = (CV_PI * thetaval) / 180;
 
+#if __XF_BENCHMARK
+
+    // Start time for latency calculation of CPU function
+
+    struct timespec begin_hw, end_hw, begin_cpu, end_cpu;
+    clock_gettime(CLOCK_REALTIME, &begin_hw);
+
+    // Opencv Function
+
+    cv::HoughLines(dst, linesxi, RHOSTEP, angleref, threshold, 0, 0, MINTHETA, MAXTHETA);
+
+    // End time for latency calculation of CPU function
+
+    clock_gettime(CLOCK_REALTIME, &end_hw);
+    long seconds, nanoseconds;
+    double cpu_time, hw_time;
+
+    seconds = end_hw.tv_sec - begin_hw.tv_sec;
+    nanoseconds = end_hw.tv_nsec - begin_hw.tv_nsec;
+    hw_time = seconds + nanoseconds * 1e-9;
+    hw_time = hw_time * 1e3;
+
+    std::cout.precision(3);
+    std::cout << std::fixed;
+    std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
+
+#else
+
     xiHoughLinesstandard(dst, linesxi, RHOSTEP, angleref, threshold, maxlines, MAXTHETA,
                          MINTHETA); // FLOATING POINT Reference code
-
-    FILE* fpre1 = fopen("HLSOUT.txt", "w");
-    FILE* fpre2 = fopen("FLOATREFOUT.txt", "w");
-
-    for (size_t i = 0; i < linesxi.size(); i++) {
-        fprintf(fpre1, "%f %f\n", outputrho[i], outputtheta[i]);
-        fprintf(fpre2, "%f %f\n", linesxi[i][0], linesxi[i][1]);
-    }
-
-    fclose(fpre1);
-    fclose(fpre2);
 
     // Results verification:
     int count = 0;
@@ -464,6 +398,8 @@ int main(int argc, char** argv) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
+
+#endif
 
 #if 0
 	int heiby2 = (height/2);

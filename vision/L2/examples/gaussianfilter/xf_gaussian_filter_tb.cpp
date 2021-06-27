@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 #endif
 
     // OpenCV Gaussian filter function
-    cv::GaussianBlur(in_img, ocv_ref, cvSize(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
+    cv::GaussianBlur(in_img, ocv_ref, cv::Size(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
                      cv::BORDER_CONSTANT);
 
     imwrite("output_ocv.png", ocv_ref);

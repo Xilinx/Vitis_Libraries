@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('docs'))
 # -- Project information -----------------------------------------------------
 
 project = 'xfOpenCV'
-copyright = '2019, Xilinx'
+copyright = '2021, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version

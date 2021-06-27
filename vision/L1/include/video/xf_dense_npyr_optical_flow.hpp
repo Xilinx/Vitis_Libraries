@@ -30,61 +30,6 @@ namespace cv {
 // enable to run c-sim
 //#define HLS_SIM
 
-// Custom low cost colorizer. Uses RGB to show 4 directions. For
-// simple demo purposes only. Real applications would take flow values and do
-// other useful analysis on them.
-static void getPseudoColorInt(pix_t pix, float fx, float fy, rgba_t& rgba) {
-    // normalization factor is key for good visualization. Make this auto-ranging
-    // or controllable from the host TODO
-    // const int normFac = 127/2;
-    const int normFac = 10;
-
-    int y = 127 + (int)(fy * normFac);
-    int x = 127 + (int)(fx * normFac);
-    if (y > 255) y = 255;
-    if (y < 0) y = 0;
-    if (x > 255) x = 255;
-    if (x < 0) x = 0;
-
-    rgb_t rgb;
-    if (x > 127) {
-        if (y < 128) {
-            // 1 quad
-            rgb.r = x - 127 + (127 - y) / 2;
-            rgb.g = (127 - y) / 2;
-            rgb.b = 0;
-        } else {
-            // 4 quad
-            rgb.r = x - 127;
-            rgb.g = 0;
-            rgb.b = y - 127;
-        }
-    } else {
-        if (y < 128) {
-            // 2 quad
-            rgb.r = (127 - y) / 2;
-            rgb.g = 127 - x + (127 - y) / 2;
-            rgb.b = 0;
-        } else {
-            // 3 quad
-            rgb.r = 0;
-            rgb.g = 128 - x;
-            rgb.b = y - 127;
-        }
-    }
-
-    rgba.r = pix / 4 + 3 * rgb.r / 4;
-    rgba.g = pix / 4 + 3 * rgb.g / 4;
-    rgba.b = pix / 4 + 3 * rgb.b / 4;
-    rgba.a = 255;
-    // rgba.r = rgb.r;
-    // rgba.g = rgb.g;
-    // rgba.b = rgb.b ;
-}
-// read external array matB and stream.
-// Can be simplified to a single loop with II=1 TODO
-// void readMatRows ( mywide_t< XF_NPIXPERCYCLE(NPC) >  *matB, hls::stream < mywide_t< XF_NPIXPERCYCLE(NPC) > >&
-// pixStream)
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void readMatRows16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& src,
                           hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& pixStream,
@@ -573,31 +518,6 @@ static void computeFlow16(hls::stream<int>& ixix,
     }
 }
 
-// convert flow values to visualizable pixel. For simple demo purposes only
-template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
-static void getOutPix16(
-    hls::stream<float>& fx, hls::stream<float>& fy, hls::stream<rgba_t>& out_pix, int rows, int cols, int size) {
-    for (int r = 0; r < rows; r++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int c = 0; c < cols / 2; c++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/2
-            #pragma HLS PIPELINE
-            // clang-format on
-            float fx_ = fx.read();
-            float fy_ = fy.read();
-
-            pix_t p_ = 0;
-            rgba_t out_pix_;
-            getPseudoColorInt(p_, fx_, fy_, out_pix_);
-
-            out_pix.write(out_pix_);
-        }
-    }
-}
-
 // line buffer for both input images. Can be split to a fn that models a single
 // linebuffer
 template <int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
@@ -826,7 +746,7 @@ static void readMatRows(
 
 // write rgba stream to external array dst. The "a" is just padding and is
 // unused
-template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
+/*template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void writeMatRowsRGBA(hls::stream<rgba_t>& pixStream, unsigned int* dst, int rows, int cols, int size) {
     for (int i = 0; i < size; i++) {
 // clang-format off
@@ -837,7 +757,7 @@ static void writeMatRowsRGBA(hls::stream<rgba_t>& pixStream, unsigned int* dst, 
         *(dst + i) = (unsigned int)tmpData.a << 24 | (unsigned int)tmpData.b << 16 | (unsigned int)tmpData.g << 8 |
                      (unsigned int)tmpData.r;
     }
-}
+}*/
 
 // Compute sums for bottom-right and top-right pixel and update the column sums.
 // Use column sums to update the integrals. Implements O(1) sliding window.
@@ -1147,30 +1067,6 @@ static void writeOutput8(hls::stream<float>& fx_in,
         flowy.write(r, *fy_out_int);
         // ap_uint<32> a32 = flowx.read(r);
         // ap_uint<32> b32 = flowy.read(r);
-    }
-}
-
-// convert flow values to visualizable pixel. For simple demo purposes only
-template <int ROWS, int COLS, int NPC>
-static void getOutPix(float* fx, float* fy, pix_t* p, hls::stream<rgba_t>& out_pix, int rows, int cols, int size) {
-    for (int r = 0; r < rows; r++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int c = 0; c < cols; c++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
-            #pragma HLS PIPELINE
-            // clang-format on
-            float fx_ = *(fx + r * cols + c);
-            float fy_ = *(fy + r * cols + c);
-
-            pix_t p_ = *(p + r * cols + c);
-            rgba_t out_pix_;
-            getPseudoColorInt(p_, fx_, fy_, out_pix_);
-
-            out_pix.write(out_pix_);
-        }
     }
 }
 

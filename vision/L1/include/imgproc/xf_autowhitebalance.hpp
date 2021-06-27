@@ -65,16 +65,15 @@ template <int SRC_T,
           int DEPTH_DST,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
-          int TC,
-          int S_DEPTH>
+          int TC>
 void AWBGainUpdateKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                         xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& dst,
+                         xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                          float thresh,
                          int i_gain[3]) {
     int width = src1.cols >> XF_BITSHIFT(NPC);
     int height = src1.rows;
 
-    // printf("%d %d %d\n",i_gain[0],i_gain[1],i_gain[2]);
+    printf("%d %d %d\n", i_gain[0], i_gain[1], i_gain[2]);
 
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
 
@@ -138,7 +137,7 @@ void AWBChannelGainKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 
     int maxval = (1 << (XF_DTPIXELDEPTH(SRC_T, NPC))) - 1; // 65535.0f;
 
-    ap_ufixed<32, 32> thresh255 = ap_ufixed<32, 32>(thresh * maxval + 16384);
+    ap_ufixed<32, 32> thresh255 = ap_ufixed<32, 32>(thresh * maxval);
 
     int minRGB, maxRGB;
 
@@ -217,8 +216,7 @@ Row_Loop:
 
     ap_ufixed<40, 40> max_sum_fixed = MAX(sum[0], MAX(sum[1], sum[2]));
 
-    // printf("%ld %ld %ld\n",(unsigned long)sum[0],(unsigned
-    // long)sum[1],(unsigned long)sum[2]);
+    printf("%ld %ld %ld\n", (unsigned long)sum[0], (unsigned long)sum[1], (unsigned long)sum[2]);
 
     ap_ufixed<40, 2> bval = (float)0.1;
     ap_ufixed<40, 40> zero = 0;
@@ -256,7 +254,7 @@ Row_Loop:
     float a2 = dinG1;
     float a3 = dinR1;
 
-    // printf("%f %f %f\n",a1,a2,a3);
+    printf("division values : %f %f %f\n", a1, a2, a3);
 
     // int i_gain[3] = {0, 0, 0};
     i_gain[0] = (dinB1 * (1 << STEP));
@@ -280,18 +278,20 @@ void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     short height = dst.rows;
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
 
-    int writenct = 0;
-    int depth = 3; // depth of histogram tree
+    ap_uint<STEP + 1> bins = HIST_SIZE; // number of bins at each histogram level
 
-    int bins = HIST_SIZE; // number of bins at each histogram level
-
-    int nElements = HIST_SIZE; // int(pow((float)bins, (float)depth));
+    ap_uint<STEP + 1> nElements = HIST_SIZE; // int(pow((float)bins, (float)depth));
 
     int total = dst.cols * dst.rows;
-    ap_fixed<24, 18> min_vals = inputMin - 0.5f;
-    ap_fixed<24, 18> max_vals = inputMax + 0.5f;
-    ap_fixed<24, 18> minValue[3] = {min_vals, min_vals, min_vals}; //{-0.5, -0.5, -0.5};
-    ap_fixed<24, 18> maxValue[3] = {max_vals, max_vals, max_vals}; //{12287.5, 16383.5, 12287.5};
+    ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> minValue[3] = {min_vals, min_vals, min_vals}; //{-0.5, -0.5, -0.5};
+    ap_fixed<STEP + 8, STEP + 2> maxValue[3] = {max_vals, max_vals, max_vals}; //{12287.5, 16383.5, 12287.5};
+    ap_fixed<STEP + 8, 4> s1 = p;
+    ap_fixed<STEP + 8, 4> s2 = p;
+
+    int rval = s1 * total / 100;
+    int rval1 = (100 - s2) * total / 100;
 
 //	fprintf(stderr,"after normalization step 1");
 
@@ -303,25 +303,18 @@ void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     for (int j = 0; j < 3; ++j)
     // searching for s1 and s2
     {
-        ap_uint<16> p1 = 0;
-        ap_uint<16> p2 = bins - 1;
+        ap_uint<STEP + 2> p1 = 0;
+        ap_uint<STEP + 2> p2 = bins - 1;
         ap_uint<32> n1 = 0;
         ap_uint<32> n2 = total;
 
-        ap_fixed<24, 18> s1 = p;
-        ap_fixed<24, 18> s2 = p;
-
-        ap_fixed<24, 18> interval = (max_vals - min_vals) / bins;
+        ap_fixed<STEP + 8, STEP + 2> interval = (max_vals - min_vals) / bins;
 
         for (int k = 0; k < 1; ++k)
         // searching for s1 and s2
         {
             int value = hist[j][p1];
             int value1 = hist[j][p2];
-
-            int rval = (s1 * total) / 100;
-
-            int rval1 = (100 - s2) * total / 100;
 
             while (n1 + hist[j][p1] < rval && p1 < HIST_SIZE) {
 #pragma HLS PIPELINE
@@ -331,7 +324,7 @@ void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 n1 += hist[j][p1++];
                 minValue[j] += interval;
             }
-            p1 *= bins;
+            // p1 *= bins;
 
             while (n2 - hist[j][p2] > rval1 && p2 != 0) {
 #pragma HLS PIPELINE
@@ -341,40 +334,38 @@ void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 n2 -= hist[j][p2--];
                 maxValue[j] -= interval;
             }
-            p2 = (p2 + 1) * bins - 1;
+            // p2 = (p2 + 1) * bins - 1;
 
-            interval /= bins;
+            // interval /= bins;
         }
     }
 
     //	fprintf(stderr,"after normalization step 2");
 
-    ap_fixed<32, 18> maxmin_diff[3];
+    ap_fixed<STEP + 8, STEP + 2> maxmin_diff[3];
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable = maxmin_diff complete dim = 0
     // clang-format on
 
-    ap_fixed<32, 18> newmax = inputMax;
-    ap_fixed<32, 18> newmin = 0.0f;
+    ap_fixed<STEP + 8, STEP + 2> newmax = inputMax;
+    ap_fixed<STEP + 8, STEP + 2> newmin = 0.0f;
     maxmin_diff[0] = maxValue[0] - minValue[0];
     maxmin_diff[1] = maxValue[1] - minValue[1];
     maxmin_diff[2] = maxValue[2] - minValue[2];
-    ap_fixed<32, 18> newdiff = newmax - newmin;
+    ap_fixed<STEP + 8, STEP + 2> newdiff = newmax - newmin;
 
     XF_TNAME(SRC_T, NPC) in_buf_n, in_buf_n1, out_buf_n;
-
-    ap_fixed<32, 18> inv_val[3];
-
-    if (maxmin_diff[0] != 0) inv_val[0] = ((ap_fixed<32, 18>)1 / maxmin_diff[0]);
-    if (maxmin_diff[1] != 0) inv_val[1] = ((ap_fixed<32, 18>)1 / maxmin_diff[1]);
-    if (maxmin_diff[2] != 0) inv_val[2] = ((ap_fixed<32, 18>)1 / maxmin_diff[2]);
-
-    //	printf("%f %f\n",(float)minValue[0],(float)maxValue[0]);
-    //	printf("%f %f\n",(float)minValue[1],(float)maxValue[1]);
-    //	printf("%f %f\n",(float)minValue[2],(float)maxValue[2]);
+    printf("valuesmin max :%f %f %f %f %f %f\n", (float)maxValue[0], (float)maxValue[1], (float)maxValue[2],
+           (float)minValue[0], (float)minValue[1], (float)minValue[2]);
 
     int pval = 0, read_index = 0, write_index = 0;
     ap_uint<13> row, col;
+
+    ap_fixed<STEP + 16, 2> inv_val[3];
+
+    if (maxmin_diff[0] != 0) inv_val[0] = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff[0]);
+    if (maxmin_diff[1] != 0) inv_val[1] = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff[1]);
+    if (maxmin_diff[2] != 0) inv_val[2] = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff[2]);
 
 Row_Loop1:
     for (row = 0; row < height; row++) {
@@ -391,10 +382,10 @@ Row_Loop1:
             // clang-format on
             in_buf_n = src.read(read_index++);
 
-            ap_fixed<40, 18> value = 0;
-            ap_fixed<40, 18> divval = 0;
-            ap_fixed<40, 18> finalmul = 0;
-            ap_int<40> dstval;
+            ap_fixed<STEP + 8, STEP + 2> value = 0;
+            ap_fixed<STEP + STEP + 16, STEP + 8> divval = 0;
+            ap_fixed<STEP + 16, STEP + 16> finalmul = 0;
+            ap_int<32> dstval;
 
             for (int p = 0, bit = 0; p < XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC); p++, bit = p % 3) {
 // clang-format off
@@ -403,7 +394,7 @@ Row_Loop1:
                 XF_CTUNAME(SRC_T, NPC)
                 val = in_buf_n.range(p * STEP + STEP - 1, p * STEP);
                 value = val - minValue[bit];
-                divval = value / maxmin_diff[p % 3];
+                divval = value * inv_val[p % 3];
                 finalmul = divval * newdiff;
                 dstval = (int)(finalmul + newmin);
                 if (dstval.range(31, 31) == 1) {
@@ -493,15 +484,27 @@ HIST_INITIALIZE_LOOP:
         }
     }
 
+    static uint32_t old[XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)] = {};
+    static uint32_t old1[XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)] = {};
+    static uint32_t acc[XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)] = {};
+    static uint32_t acc1[XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)] = {};
+#pragma HLS ARRAY_PARTITION variable = old complete
+#pragma HLS ARRAY_PARTITION variable = old1 complete
+#pragma HLS ARRAY_PARTITION variable = acc complete
+#pragma HLS ARRAY_PARTITION variable = acc1 complete
+
     int readcnt = 0;
-    ap_fixed<24, 18> min_vals = inputMin - 0.5f;
-    ap_fixed<24, 18> max_vals = inputMax + 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
 
-    ap_fixed<24, 18> minValue = min_vals, minValue1 = min_vals;
-    ap_fixed<24, 18> maxValue = max_vals, maxValue1 = max_vals;
+    ap_fixed<STEP + 8, STEP + 2> minValue = min_vals, minValue1 = min_vals;
+    ap_fixed<STEP + 8, STEP + 2> maxValue = max_vals, maxValue1 = max_vals;
 
-    ap_fixed<24, 18> interval = ap_fixed<24, 18>(maxValue - minValue) / bins;
+    ap_fixed<STEP + 8, STEP + 2> interval = ap_fixed<STEP + 8, STEP + 2>(maxValue - minValue) / bins;
 
+    ap_fixed<STEP + 8, 2> internal_inv = ((ap_fixed<STEP + 8, 2>)1 / interval);
+    int pos = 0, pos1 = 0;
+    int currentBin = 0, currentBin1 = 0;
 ROW_LOOP:
     for (int row = 0; row != (height); row++) // histogram filling
     {
@@ -535,16 +538,42 @@ ROW_LOOP:
                 val = in_pix.range(j * STEP + STEP - 1, j * STEP);
                 val1 = in_pix1.range(j * STEP + STEP - 1, j * STEP);
 
-                int pos = 0, pos1 = 0;
-                int currentBin = 0, currentBin1 = 0;
+                currentBin = int((val - minValue) * internal_inv);
+                currentBin1 = int((val1 - minValue1) * internal_inv);
 
-                currentBin = int((val - minValue + (ap_fixed<24, 18>)(1e-4f)) / interval);
-                currentBin1 = int((val1 - minValue1 + (ap_fixed<24, 18>)(1e-4f)) / interval);
-
-                ++tmp_hist[j][pos + currentBin];
-                ++tmp_hist1[j][pos1 + currentBin1];
+                uint32_t tmp = old[j];
+                uint32_t tmp1 = old1[j];
+                uint32_t tmp_acc = acc[j];
+                uint32_t tmp_acc1 = acc1[j];
+                if (tmp == currentBin) {
+                    tmp_acc = tmp_acc + 1;
+                } else {
+                    tmp_hist[j][tmp] = tmp_acc;
+                    tmp_acc = tmp_hist[j][currentBin] + 1;
+                }
+                if (tmp1 == currentBin1) {
+                    tmp_acc1 = tmp_acc1 + 1;
+                } else {
+                    tmp_hist1[j][tmp1] = tmp_acc1;
+                    tmp_acc1 = tmp_hist1[j][currentBin1] + 1;
+                }
+                old[j] = currentBin;
+                old1[j] = currentBin1;
+                acc[j] = tmp_acc;
+                acc1[j] = tmp_acc1;
             }
         }
+    }
+END_HIST_LOOP:
+    for (ap_uint<5> ch_ppc = 0; ch_ppc < (XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)); ch_ppc++) {
+// clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=6
+		#pragma HLS UNROLL
+        // clang-format on
+        uint32_t tmp = old[ch_ppc];
+        uint32_t tmp1 = old1[ch_ppc];
+        tmp_hist[ch_ppc][tmp] = acc[ch_ppc];
+        tmp_hist1[ch_ppc][tmp1] = acc1[ch_ppc];
     }
 
     //	Now merge computed partial histograms
@@ -594,9 +623,9 @@ void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
         src1, src2, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE, int S_DEPTH = 2>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
 void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& dst,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                       uint32_t histogram[3][HIST_SIZE],
                       float thresh,
                       float inputMin,
@@ -607,18 +636,18 @@ void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    AWBNormalizationkernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_DEPTH(SRC_T, NPC), 1, HIST_SIZE, S_DEPTH>(
+    AWBNormalizationkernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_DEPTH(SRC_T, NPC), 1, HIST_SIZE>(
         src, dst, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int S_DEPTH = 2>
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
 void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& src2,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& src2,
                    float thresh,
                    int i_gain[3]) {
     xf::cv::AWBGainUpdateKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
                                 XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                                (COLS >> XF_BITSHIFT(NPC)), S_DEPTH>(src1, src2, thresh, i_gain);
+                                (COLS >> XF_BITSHIFT(NPC))>(src1, src2, thresh, i_gain);
 }
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>

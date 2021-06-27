@@ -41,6 +41,6 @@
 #define XF_AXI_GBR 1
 
 #define INPUT_PTR_WIDTH 64
-#define OUTPUT_PTR_WIDTH 256
+#define OUTPUT_PTR_WIDTH 32
 
 #define XF_USE_URAM 0 // uram enable

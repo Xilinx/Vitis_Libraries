@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     }
 
     /*  convert to gray  */
-    cvtColor(in_img, in_gray, CV_BGR2GRAY);
+    cvtColor(in_img, in_gray, cv::COLOR_BGR2GRAY);
 
     /////////	OpenCV Phase computation API    ///////
     cv::Sobel(in_gray, c_grad_x1, CV_32FC1, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);

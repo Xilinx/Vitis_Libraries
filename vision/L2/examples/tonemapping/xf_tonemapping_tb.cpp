@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     }
 
     // Read input image
-    in_img = cv::imread(argv[1], CV_LOAD_IMAGE_UNCHANGED);
+    in_img = cv::imread(argv[1], cv::IMREAD_UNCHANGED);
     if (in_img.data == NULL) {
         fprintf(stderr, "Can't open image !!\n");
         return -1;

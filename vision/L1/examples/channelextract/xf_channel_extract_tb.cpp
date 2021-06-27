@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     }
 
     out_img.create(in_src.rows, in_src.cols, CV_8U);
-    cv::cvtColor(in_src, in_rgba, CV_BGR2RGBA);
+    cv::cvtColor(in_src, in_rgba, cv::COLOR_BGR2RGBA);
     uint16_t channel = XF_EXTRACT_CH_R;
 
     int height = in_rgba.rows;

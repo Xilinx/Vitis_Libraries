@@ -97,6 +97,10 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::extractChannel                    | imgproc/xf_channel_extract.hpp    |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::ccaCustom                         | imgproc/xf_cca_custom.hpp         |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::clahe                             | imgproc/xf_clahe.hpp              |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::convertTo                         | imgproc/xf_convert_bitdepth.hpp   |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::crop                              | imgproc/xf_crop.hpp               |
@@ -146,6 +150,8 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::filter2D                          | imgproc/xf_custom_convolution.hpp |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::flip                              | features/xf_flip.hpp              |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::GaussianBlur                      | imgproc/xf_gaussian_filter.hpp    |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::gaincontrol                       | imgproc/xf_gaincontrol.hpp        |
@@ -157,6 +163,10 @@ folder name, which contains the library function.
    | xf::cv::calcHist                          | imgproc/xf_histogram.hpp          |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::equalizeHist                      | imgproc/xf_hist_equalize.hpp      |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::extractExposureFrames             | imgproc/xf_extract_eframes.hpp    |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::HDRMerge_bayer                    | imgproc/xf_hdrmerge.hpp           |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::HOGDescriptor                     | imgproc/xf_hog_descriptor.hpp     |
    +-------------------------------------------+-----------------------------------+
@@ -223,6 +233,8 @@ folder name, which contains the library function.
    | xf::cv::StereoBM                          | imgproc/xf_stereoBM.hpp           |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::SVM                               | imgproc/xf_svm.hpp                |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::lut3d                             | imgproc/xf_3dlut.hpp              |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::Threshold                         | imgproc/xf_threshold.hpp          |
    +-------------------------------------------+-----------------------------------+
@@ -306,6 +318,9 @@ design is completely built and the board has booted up correctly.
    | Canny        | xf::cv::Canny             | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
+   | ccaCustom    | xf::cv::ccaCustom         | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
    | channelcombi | xf::cv::merge             | ./<executable name>.elf  |
    | ne           |                           | <path to input image 1>  |
    |              |                           | <path to input image 2>  |
@@ -314,6 +329,9 @@ design is completely built and the board has booted up correctly.
    +--------------+---------------------------+--------------------------+
    | Channelextra | xf::cv::extractChannel    | ./<executable name>.elf  |
    | ct           |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | CLAHE        | xf::cv::clahe             | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
    | Colordetect  | xf::cv::bgr2hsv,          | ./<executable name>.elf  |
    |              | xf::cv::colorthresholding,| <path to input image>    |
@@ -439,7 +457,10 @@ design is completely built and the board has booted up correctly.
    | Erosion      | xf::cv::erode             | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
-   | Fast         | xf::cv::fast              | ./<executable name>.elf  |
+   | FAST         | xf::cv::fast              | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Flip         | xf::cv::flip              | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
    | Gaussianfilt | xf::cv::GaussianBlur      | ./<executable name>.elf  |
@@ -593,6 +614,9 @@ design is completely built and the board has booted up correctly.
    | Svm          | xf::cv::SVM               | ./<executable name>.elf  |
    +--------------+---------------------------+--------------------------+
    | threshold    | xf::cv::Threshold         | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | 3dlut        | xf::cv::lut3d             | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
    | warptransfor | xf::cv::warpTransform     | ./<executable name>.elf  |

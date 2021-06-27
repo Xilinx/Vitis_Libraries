@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,28 +25,31 @@ DEBUG := no
 #'estimate' for estimate report generation
 #'system' for system report generation
 ifneq ($(REPORT), no)
-LDCLFLAGS += --report estimate
-LDCLFLAGS += --report system
+VPP_LDFLAGS += --report estimate
+VPP_LDFLAGS += --report system
 endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-LDCLFLAGS += --profile_kernel data:all:all:all
+VPP_LDFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
-LDCLFLAGS += --dk protocol:all:all:all
+VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
-#Check environment setup
+#Checks for XILINX_XRT
+ifeq ($(HOST_ARCH), x86)
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
+endif
+else
 ifndef XILINX_VITIS
   XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
 endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
 endif
 
 #Checks for Device Family
@@ -71,15 +74,27 @@ ifndef SYSROOT
 endif
 endif
 
+check_version:
+ifneq (, $(shell which git))
+ifneq (,$(wildcard $(XFLIB_DIR)/.git))
+	@cd $(XFLIB_DIR) && git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -n 1 && cd -
+endif
+endif
+
 #Checks for g++
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
 ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
 ifndef XILINX_VIVADO
-$(error [ERROR]: g++ version older. Please use 5.0 or above)
+$(error [ERROR]: g++ version too old. Please use 5.0 or above)
 else
 CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
-$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
+ifeq ($(LD_LIBRARY_PATH),)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64
+else
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64:$(LD_LIBRARY_PATH)
+endif
+$(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
 endif
 else ifeq ($(HOST_ARCH), aarch64)
@@ -107,18 +122,25 @@ endif
 
 .PHONY: check_xrt
 check_xrt:
+ifeq ($(HOST_ARCH), x86)
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
 endif
+endif
 
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
+ifeq ($(HOST_ARCH), x86)
 ifeq (,$(LD_LIBRARY_PATH))
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib
 else
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
+else # aarch64
+ifeq (,$(LD_LIBRARY_PATH))
+LD_LIBRARY_PATH := $(SYSROOT)/usr/lib 
+else
+LD_LIBRARY_PATH := $(SYSROOT)/usr/lib:$(LD_LIBRARY_PATH) 
+endif
 endif
 
 # check target

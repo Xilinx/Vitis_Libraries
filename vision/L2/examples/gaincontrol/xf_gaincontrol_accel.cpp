@@ -20,13 +20,20 @@ static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1
 
 extern "C" {
 
-void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols) {
+void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                       int rows,
+                       int cols,
+                       unsigned short rgain,
+                       unsigned short bgain) {
 // clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1 
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2 
     
     #pragma HLS INTERFACE s_axilite port=rows     
-    #pragma HLS INTERFACE s_axilite port=cols     
+    #pragma HLS INTERFACE s_axilite port=cols
+	#pragma HLS INTERFACE s_axilite port=rgain     
+    #pragma HLS INTERFACE s_axilite port=bgain	
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
@@ -39,7 +46,7 @@ void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WID
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
 
-    xf::cv::gaincontrol<BFORMAT, IN_TYPE, HEIGHT, WIDTH, NPC1>(in_mat, _dst);
+    xf::cv::gaincontrol<BFORMAT, IN_TYPE, HEIGHT, WIDTH, NPC1>(in_mat, _dst, rgain, bgain);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(_dst, img_out);
 }

@@ -32,8 +32,8 @@ typedef unsigned char uchar;
 
 #define IN_TYPE XF_16SC1
 #define INPUT_PTR_WIDTH 16
-#define OUT_TYPE XF_32SC1
-#define OUTPUT_PTR_WIDTH 32
+#define OUT_TYPE XF_64SC1
+#define OUTPUT_PTR_WIDTH 64
 
 // Set the optimization type:
 #define NPC1 XF_NPPC1
@@ -48,6 +48,6 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
                ap_uint<INPUT_PTR_WIDTH>* img_in2,
                unsigned short* params,
                unsigned char* fractional_out,
-               ap_int<32>* result_out);
+               ap_int<64>* result_out);
 
 #endif // end of _XF_SVM_CONFIG_H_
