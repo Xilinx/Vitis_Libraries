@@ -136,6 +136,20 @@ Methods
 
 .. FunctionSection
 
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1decimate__hb_1_1fir__decimate__hb__graph_1a0ad5f7ae670c3b7e2a1dc62840065b6d:
+.. _cid-xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1decimate__hb_1_1fir__decimate__hb__graph_1af66b5d1850eb6a614c8922d75d718abc:
 .. _cid-xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph::fir_decimate_hb_graph:
 

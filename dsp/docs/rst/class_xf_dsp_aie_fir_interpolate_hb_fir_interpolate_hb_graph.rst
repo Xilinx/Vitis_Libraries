@@ -137,6 +137,20 @@ Methods
 
 .. FunctionSection
 
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a5fd8b7b442d95e3aa53a87804bce5f8b:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a322623376990401b7391a43fdb7485bb:
 .. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::fir_interpolate_hb_graph:
 

@@ -85,6 +85,20 @@ Methods
 
 .. FunctionSection
 
+.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1real2complex_1_1widget__real2complex__graph_1a80216f5c453cc2d3cd4e921098c796da:
+.. _cid-xf::dsp::aie::widget::real2complex::widget_real2complex_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
 .. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1real2complex_1_1widget__real2complex__graph_1ae696c0352b415fcc14f6accd01bf1116:
 .. _cid-xf::dsp::aie::widget::real2complex::widget_real2complex_graph::widget_real2complex_graph:
 

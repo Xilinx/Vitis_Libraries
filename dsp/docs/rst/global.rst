@@ -10,10 +10,6 @@ Global Namespace
 
 	namespace_adf.rst
 	namespace_xf.rst
-	class_create_casc_kernel.rst
-	class_create_casc_kernel-2.rst
-	class_create_casc_kernel_recur.rst
-	class_create_casc_kernel_recur-2.rst
 
 
 
@@ -50,55 +46,6 @@ Global Namespace
 	            namespace :ref:`xf::dsp::aie::widget<doxid-namespacexf_1_1dsp_1_1aie_1_1widget>`
 	                namespace :ref:`xf::dsp::aie::widget::api_cast<doxid-namespacexf_1_1dsp_1_1aie_1_1widget_1_1api__cast>`
 	                namespace :ref:`xf::dsp::aie::widget::real2complex<doxid-namespacexf_1_1dsp_1_1aie_1_1widget_1_1real2complex>`
-
-	// classes
-
-	template <
-	    int dim,
-	    typename TT_DATA,
-	    typename TT_TWIDDLE,
-	    unsigned int TP_POINT_SIZE,
-	    unsigned int TP_FFT_NIFFT,
-	    unsigned int TP_SHIFT,
-	    unsigned int TP_CASC_LEN
-	    >
-	class :ref:`create_casc_kernel<doxid-classcreate__casc__kernel>` 
-
-	template <
-	    int dim,
-	    unsigned int TP_POINT_SIZE,
-	    unsigned int TP_FFT_NIFFT,
-	    unsigned int TP_SHIFT,
-	    unsigned int TP_CASC_LEN
-	    >
-	class :ref:`create_casc_kernel <dim, cfloat, cfloat, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN><doxid-classcreate__casc__kernel_3_01dim_00_01cfloat_00_01cfloat_00_01_t_p___p_o_i_n_t___s_i_z_e_00_01_5e33aad387a48d90f9881bde9de1be36>` 
-
-	template <
-	    int dim,
-	    typename TT_DATA,
-	    typename TT_INT_DATA,
-	    typename TT_TWIDDLE,
-	    unsigned int TP_POINT_SIZE,
-	    unsigned int TP_FFT_NIFFT,
-	    unsigned int TP_SHIFT,
-	    unsigned int TP_CASC_LEN,
-	    unsigned int TP_END_RANK,
-	    unsigned int TP_RANKS_PER_KERNEL
-	    >
-	class :ref:`create_casc_kernel_recur<doxid-classcreate__casc__kernel__recur>` 
-
-	template <
-	    typename TT_DATA,
-	    typename TT_INT_DATA,
-	    typename TT_TWIDDLE,
-	    unsigned int TP_POINT_SIZE,
-	    unsigned int TP_FFT_NIFFT,
-	    unsigned int TP_SHIFT,
-	    unsigned int TP_CASC_LEN,
-	    unsigned int TP_END_RANK,
-	    unsigned int TP_RANKS_PER_KERNEL
-	    >
-	class :ref:`create_casc_kernel_recur <1, TT_DATA, TT_INT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_END_RANK, TP_RANKS_PER_KERNEL><doxid-classcreate__casc__kernel__recur_3_011_00_01_t_t___d_a_t_a_00_01_t_t___i_n_t___d_a_t_a_00_01_t_t03876e192f4c23116830e13c34e8e459>` 
 
 	// macros
 

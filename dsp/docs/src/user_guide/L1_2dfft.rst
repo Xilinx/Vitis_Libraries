@@ -1,3 +1,17 @@
+..
+   Copyright 2021 Xilinx, Inc.
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
 .. _L1_2DFFT_LABEL:
 
 .. toctree::
@@ -13,19 +27,19 @@
 Overview
 ========
 
-Vitis DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive. 
-This L1 primitive is designed to be easily transformed into an L2 Vitis kernel by adding memory adapters. 
-The L1 primitive is designed to have an array of stream interface, as wide as device DDR memory  
-widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the FFT input 
-side which has AXI interface for connection with DDR memory on one side and other sides need to have 
-memory wide streaming interface to connect with the 2-D FFT L1 primitive. A second memory plugin is required 
-at the output side of the FFT, which reads in an array of stream data and connects it to the output AXI interface 
+Vitis DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive.
+This L1 primitive is designed to be easily transformed into an L2 Vitis kernel by adding memory adapters.
+The L1 primitive is designed to have an array of stream interface, as wide as device DDR memory
+widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the FFT input
+side which has AXI interface for connection with DDR memory on one side and other sides need to have
+memory wide streaming interface to connect with the 2-D FFT L1 primitive. A second memory plugin is required
+at the output side of the FFT, which reads in an array of stream data and connects it to the output AXI interface
 for DDR memory connection.
 
 Block Level Interface
 =====================
 
-The figure below shows the block level interface for 2-D FFT. Essentially it is an array of 
+The figure below shows the block level interface for 2-D FFT. Essentially it is an array of
 stream interface at the input and the output.
 
 .. image:: /images/2-2d_fft_if.jpg
@@ -40,9 +54,9 @@ stream interface at the input and the output.
 2-Dimensional FFT is built on top of 1-D FFT. It deploys multiple 1-D FFT processors in parallel to
 accelerate calculations. Potentially 2-D FFT can be accelerated by deploying multiple processors in
 parallel, to process multiple lines(rows/columns) of input data whose 1-D FFT calculation is independent of each other (Data parallelism).
-Essentially decreasing the latency and also increasing the throughput. But 2-D FFT throughput can 
-also be increased by using a task level pipeline where one set of 1-D FFT processors also called line 
-processors work row wise on 2-D input data and another set of line processors work column wise in a task level 
+Essentially decreasing the latency and also increasing the throughput. But 2-D FFT throughput can
+also be increased by using a task level pipeline where one set of 1-D FFT processors also called line
+processors work row wise on 2-D input data and another set of line processors work column wise in a task level
 pipeline on data produced by row processors as shown in the figure below. The row processors perform 1-D FFT row by row and column processors
 perform transforms on columns. Row processors connect to column processors through a matrix transposer.
 The following figure shows a simplified block diagram which gives the 2-D FFT architecture used by the Vitis FFT
@@ -55,13 +69,13 @@ is specified as described in :ref:`Configuration Parameter Structure for Floatin
     :alt: doc tool flow
     :width: 30%
     :align: center
-    
-    
+
+
 Supported Data Types
 ====================
 
 2-D FFT currently supports **complex<float>** and **complex<ap_fixed<>>** type for simulation and synthesis.
-Also currently Vitis FFT library doesn't support standard std::complex<float> instead a complex_wrapper class 
+Also currently Vitis FFT library doesn't support standard std::complex<float> instead a complex_wrapper class
 in shipped with the Vitis FFT library that can be used for simulation and synthesis.
 
 +-----------------------------+-------------------------+--------------------------+
@@ -86,19 +100,19 @@ L1 API for 2-D FFT
            unsigned int t_numRows,
            unsigned int t_numCols,
            unsigned int t_numKernels,
-           typename t_ssrFFTParamsRowProc, 
-           typename t_ssrFFTParamsColProc, 
+           typename t_ssrFFTParamsRowProc,
+           typename t_ssrFFTParamsColProc,
            unsigned int t_rowInstanceIDOffset,
            unsigned int t_colInstanceIDOffset,
            typename T_elemType // complex element type
            >
    void fft2d(hls::stream<WideInputType> , hls::stream<WideOutputType>);
-   
+
 Template Parameters
 -------------------
-  
-Function: fft2d is the top level L1 API provided which takes a number of template parameters and in/out streams. These template 
-functions describe the architecture and the data-path of 1-D FFT processors deployed as line processors. The  
+
+Function: fft2d is the top level L1 API provided which takes a number of template parameters and in/out streams. These template
+functions describe the architecture and the data-path of 1-D FFT processors deployed as line processors. The
 description of these parameters is as follows:
 
 +-----------------------+-------------------------------------------------------------------+
@@ -135,9 +149,9 @@ description of these parameters is as follows:
 
 * t_ssrFFTParamsRowProc: It is a structure of parameters that describes tranform direction, data-path etc for row processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
-* t_ssrFFTParamsColProc: It is a structure of parameters that describes tranform direction, data-path etc for column processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>` 
+* t_ssrFFTParamsColProc: It is a structure of parameters that describes tranform direction, data-path etc for column processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
-* t_rowInstanceIDOffset: 2-D FFT deploys multiple 1D FFT processors and it is required that every 1D FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**  
+* t_rowInstanceIDOffset: 2-D FFT deploys multiple 1D FFT processors and it is required that every 1D FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**
 
 * t_colInstanceIDOffset: 2-D FFT deploys multiple 1D FFT processors and it is required that every 1D FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**
 
@@ -156,9 +170,9 @@ Currently the template paramters for 2-D FFT should follow the constraints liste
 4- t_rowInstanceIDOffset and t_colInstanceIDOffset should be different and ``abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > t_numKernels``
 
 5- The selection of radix ``R`` , ``t_numKernels`` and ``t_memWidth`` should satisfy : ``R*t_numKernels==t_memWidth``. This constraint essentially highlights the fact that number of kernels used should be enough not more nor less to exhaust input bandwidth.
-6- ``t_memWidth`` should be multiple of sizeof(complex<float>)  
+6- ``t_memWidth`` should be multiple of sizeof(complex<float>)
 
-  
+
 Library Usage
 =============
 This section will provide information about how to use 2-D FFT in your project.
@@ -207,11 +221,11 @@ To use the 2-D FFT L1 library:
 		static const scaling_mode_enum scaling_mode = SSR_FFT_NO_SCALING;
 		static const fft_output_order_enum output_data_order = SSR_FFT_NATURAL;
 		static const int twiddle_table_word_length = 18;
-		static const int twiddle_table_integer_part_length = 1; 
+		static const int twiddle_table_integer_part_length = 1;
 		static const transform_direction_enum transform_direction = FORWARD_TRANSFORM;
 		static const butterfly_rnd_mode_enum butterfly_rnd_mode = TRN;
    };
-   
+
    struct params_column:ssr_fft_default_params
    {
 		static const int N = 16;
@@ -219,7 +233,7 @@ To use the 2-D FFT L1 library:
 		static const scaling_mode_enum scaling_mode = SSR_FFT_NO_SCALING;
 		static const fft_output_order_enum output_data_order = SSR_FFT_NATURAL;
 		static const int twiddle_table_word_length = 18;
-		static const int twiddle_table_integer_part_length = 2; 
+		static const int twiddle_table_integer_part_length = 2;
 		static const transform_direction_enum transform_direction = FORWARD_TRANSFORM;
 		static const butterfly_rnd_mode_enum butterfly_rnd_mode = TRN;
    };
@@ -230,12 +244,12 @@ To use the 2-D FFT L1 library:
 
 
       fft2d<
-            8, 
+            8,
             16,
             16,
             2,
-            params_row, 
-            params_col, 
+            params_row,
+            params_col,
             0,
             3,
             std::complex<ap_fixed<...>>
@@ -285,7 +299,7 @@ To use the 2-D FFT L1 library:
       static const fft_output_order_enum output_data_order = SSR_FFT_NATURAL;
       static const transform_direction_enum transform_direction = FORWARD_TRANSFORM;
    };
-   
+
    struct params_column:ssr_fft_default_params
    {
       static const int N = 16;
@@ -300,18 +314,18 @@ To use the 2-D FFT L1 library:
 
 
       fft2d<
-            8, 
+            8,
             16,
             16,
             2,
-            params_row, 
-            params_col, 
+            params_row,
+            params_col,
             0,
             3,
             complex_wrapper<float>
            >(p_inStream, p_outStream);
-           
-           
+
+
 2-D FFT Examples
 ========================
 The following section gives examples for 2-d floating and fixed point FFT.
@@ -381,7 +395,7 @@ the declaration of top level function ``top_fft2d`` that will be synthesized.
 
 	void top_fft2d(MemWideIFStreamTypeIn& p_inStream, MemWideIFStreamTypeOut& p_outStream);
 	#endif
- 
+
 Following ``.cpp`` file named ``top_2d_fft_test.cpp`` defines top level function which essentially calls ``fft2d`` from Vitis FFT library.
 
 .. code-block:: cpp
@@ -427,8 +441,8 @@ Following ``.cpp`` file named ``top_2d_fft_test.cpp`` defines top level function
 	#endif
 	    fft2d<k_memWidth, k_fftKernelSize, k_fftKernelSize, k_numOfKernels, FFTParams, FFTParams2, k_rowInstanceIDOffset,
 		  k_colInstanceIDOffset, T_elemType>(p_inStream, p_outStream);
-	}	
-   
+	}
+
 The ``main`` function is defined as follows which runs an impulse test:
 
 .. code-block:: cpp
@@ -494,12 +508,12 @@ The ``main`` function is defined as follows which runs an impulse test:
 Compiling and Building Example HLS Project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Before compiling and running the example it is required to setup the path to HLS compiler which can be done as follows:
-change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2019.2, and run following command to set up the environment.
+change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2021.1, and run following command to set up the environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2019.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfix_impluse`` it can be simulated, synthesized or co-simulated as follows:
@@ -571,7 +585,7 @@ the declaration of top level function ``top_fft2d`` that will be synthesized.
 
 	void top_fft2d(MemWideIFStreamTypeIn& p_inStream, MemWideIFStreamTypeOut& p_outStream);
 	#endif
- 
+
 Following ``.cpp`` file named ``top_2d_fft_test.cpp`` defines top level function which essentially calls ``fft2d`` from Vitis FFT library.
 
 .. code-block:: cpp
@@ -618,7 +632,7 @@ Following ``.cpp`` file named ``top_2d_fft_test.cpp`` defines top level function
 	    fft2d<k_memWidth, k_fftKernelSize, k_fftKernelSize, k_numOfKernels, FFTParams, FFTParams2, k_rowInstanceIDOffset,
 		  k_colInstanceIDOffset, T_elemType>(p_inStream, p_outStream);
 	}
-   
+
 The ``main`` function is defined as follows which runs an impulse test:
 
 .. code-block:: cpp
@@ -684,70 +698,32 @@ The ``main`` function is defined as follows which runs an impulse test:
 Compiling and Building Example HLS Project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Before compiling and running the example it is required to setup the path to HLS compiler which can be done as follows:
-change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2019.2, and run following command to set up the environment.
+change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2021.1, and run following command to set up the environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2019.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
 Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat, build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target.
 
-2-D FFT Tests 
+2-D FFT Tests
 ----------------------------------------------------------
 Different tests are provided for fixed point and floating point 2-D FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 2-D FFT tests are in folder ``REPO_PATH/dsp/L1/tests/hw/2dfft``
 
 Launching an Individual Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To launch an individual test first it is required to setup environment for lanching Vitis HLS Compiler which can be done as follows:
- setup of environment variable **TA_PATH** to point to the installation path of your Vitis 2019.2, and run following commands to set up the environment.
+ setup of environment variable **TA_PATH** to point to the installation path of your Vitis 2021.1, and run following commands to set up the environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2019.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the environment settings are done an idividual test can be launched by going to test folder ( any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/`` that has Makefile is a test) and running the make command :
 ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``  you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
-
-Launching all the Tests Collectivey
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the tests inside the repo. These scripts will try to find all the tests within this ``test``  folder and launch them one by one, printing the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that sets up Vitis HLS compiler paths and should look something like this:
-
-.. code-block:: bash
-
-   export TA_PATH="LOCAL VITIS INSTALL PATH"	
-   export XILINX_VITIS=${TA_PATH}/Vitis/2019.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
-   source ${XILINX_VIVADO}/settings64.sh
-
-Once the install paths are setup, launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
-
-
-L1 Performance Benchmarks and QoR
-===========================================
-This section gives L1 performance benchmarks and QoR for 2-dimensional FFT for fixed point and floating point implementation for different sizes of inputs. The results are reported for post place and route implementation using standard automated flow. No manual routing and placement is done.
-
-2-D Fixed Point FFT
-----------------------
-Following table gives results for fixed point complex data type with sizes ranging from 32x32 to 256x256. The results show that 2-D FFT fixed point FFT with different sizes can easily run at more than 350MHz clock speed. 
-
-.. csv-table:: 2-D Fixed Point FFT Performance and QoR Results
-   :file: ../csv_data_files/fft2d_l1_fixed_point_bench.csv
-   :align: center
-   :header: "Size","SSR","No. of 1D-Processors","fmax (MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) x1000","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","URAMs',"CP(ns)","II (Cycles)","Latency (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
-
-
-2-D Floating Point(fp32) FFT
------------------------------------------
-Following table gives results for floating point complex data type with sizes ranging from 32x32 to 256x256. The results show that 2-D FFT floating point FFT with different sizes can easily run at more than 300MHz clock speed. 
-
-.. csv-table:: 2-D Floating Point(fp32) FFT Performance and QoR Results
-   :file: ../csv_data_files/fft2d_l1_fp32_bench.csv
-   :align: center
-   :header: "Size","SSR","No. of 1D-Processors","fmax (MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) x1000","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","URAMs',"CP(ns)","II (Cycles)","Latency (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
-
 

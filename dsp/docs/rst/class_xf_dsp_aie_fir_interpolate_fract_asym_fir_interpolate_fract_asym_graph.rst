@@ -17,9 +17,9 @@ template class xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_
 Overview
 ~~~~~~~~
 
-fir_interpolate_asym is an Asymmetric Interpolation FIR filter
+fir_interpolate_fract_asym is an Asymmetric Fractional Interpolation FIR filter
 
-These are the templates to configure the Asymmetric Interpolation FIR class.
+These are the templates to configure the Asymmetric Fractional Interpolation FIR class.
 
 
 
@@ -136,6 +136,20 @@ Methods
 ~~~~~~~
 
 .. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__fract__asym_1_1fir__interpolate__fract__asym__graph_1a7f00f8fd33540e89961f966680ae006a:
+.. _cid-xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_asym_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
 
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__fract__asym_1_1fir__interpolate__fract__asym__graph_1a2f89d23e24df85a46acb09f6bf985c7c:
 .. _cid-xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_asym_graph::fir_interpolate_fract_asym_graph:

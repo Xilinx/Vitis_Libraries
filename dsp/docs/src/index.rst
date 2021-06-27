@@ -17,26 +17,29 @@
 Vitis DSP Library
 ========================
 
-Vitis DSP library provides implementation of different L1/L2/L3 primitives for digital signal processing.
-Current version only provides implementation of Discrete Fourier Transform using Fast
-Fourier Transform algorithm for acceleration on Xilinx FPGAs. The Library is planned
-to provide three types of implementations namely L1 primitives, L2 kernels and L3 software APIs. Those
-implementations are organized in their corresponding directories L1, L2 and L3.
+The Vitis |trade| digital signal processing library (DSPLib) provides an implementation of different L1/L2/L3 primitives for digital signal processing.
+
+The DSPLib contains PL and AI Engine solutions. For documentation on AI Engine solutions, see :ref:`1_INTRODUCTION`.
+
+The current PL library consists of an implementation of a Discrete Fourier Transform using a Fast
+Fourier Transform algorithm for acceleration on Xilinx |reg| FPGAs. The library is planned
+to provide three types of implementations namely L1 primitives, L2 kernels, and L3 software APIs. Those
+implementations are organized in their corresponding directories L1, L2, and L3.
+
 The L1 primitives can be leveraged by developers working on harware design
-implementation or designing hardware kernels for acceleration. L1 primitives are partitcularly
-suitable for hardware savy designers. The L2 kernels are HLS-based predesigned kernels
+implementation or designing hardware kernels for acceleration. They are particularly
+suitable for hardware designers. The L2 kernels are HLS-based predesigned kernels
 that can be directly used for FPGA acceleration of different applications on integration with
-Xilinx Runtime (XRT). The L3 provides software APIs in C, C++ and Python which
-allows software developers to offload FFT calculation to FPGAs for acceleration. Before
-an FGPA can perform the FFT computation. The FPGA needs to be configured with a particular image
-called an Overlay.
+the Xilinx Runtime (XRT). The L3 provides software APIs in C, C++, and Python which
+allow software developers to offload FFT calculation to FPGAs for acceleration. Before
+an FPGA can perform the FFT computation, the FPGA needs to be configured with a particular image
+called an overlay.
 
 Since all the kernel code is developed with the permissive Apache 2.0 license,
-advanced users can easily tailor, optimize or combine them for their own needs.
+advanced users can easily tailor, optimize, or combine them for their own needs.
 Demos and usage examples of different level implementations are also provided
 for reference.
 
-**Note**: Current release of the Vitis FFT only provides L1 primitives.
 
 .. toctree::
    :caption: Library Overview
@@ -46,19 +49,20 @@ for reference.
    release.rst
 
 .. toctree::
-   :caption: L1 PL User Guide  (L1 HLS DSP Library User Guide)
+   :caption: L1 PL DSP Library User Guide
    :maxdepth: 4
 
    user_guide/L1.rst
    user_guide/L1_2dfft.rst
 
 .. toctree::
-   :caption: L2 AIE DSP Library User Guide  (L2 AIE DSP Library User Guide)
+   :caption: L2 DSP Library User Guide
    :maxdepth: 4
 
    user_guide/L2/1-introduction.rst
    user_guide/L2/2-dsp-lib-func.rst
    user_guide/L2/3-using-examples.rst
+   user_guide/L2/5-benchmark.rst
 
 
 .. toctree::
@@ -66,6 +70,7 @@ for reference.
    :caption: API Reference
    :hidden:
 
+   API Reference Overview <user_guide/L2/4-api-reference>
    fir_sr_asym_graph <rst/class_xf_dsp_aie_fir_sr_asym_fir_sr_asym_graph>
    fir_sr_sym_graph <rst/class_xf_dsp_aie_fir_sr_sym_fir_sr_sym_graph>
    fir_interpolate_asym_graph <rst/class_xf_dsp_aie_fir_interpolate_asym_fir_interpolate_asym_graph>
@@ -78,3 +83,11 @@ for reference.
    fft_ifft_dit_1ch_graph <rst/class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_base_graph>
    widget_api_cast_graph <rst/class_xf_dsp_aie_widget_api_cast_widget_api_cast_graph>
    widget_real2complex_graph <rst/class_xf_dsp_aie_widget_real2complex_widget_real2complex_graph>
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
+
+
+

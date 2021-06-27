@@ -1,3 +1,17 @@
+.. 
+   Copyright 2021 Xilinx, Inc.
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
 .. _L1_FFT_LABEL:
 
 .. toctree::
@@ -775,45 +789,4 @@ To launch an individual test first it is required to setup environment for lanch
 Once the environment settings are done an individual test can be launched by going to test folder (any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/1dfft`` that has a Makefile is a test) and running the make command :
 
 ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``  you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
-
-Launching all the Tests Collectivey
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the tests inside the repo. These scripts will try to find all the tests within this ``test`` folder and launch them one by one, printing the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that sets up Vitis HLS compiler paths and should look something like this:
-
-.. code-block:: bash
-
-   export TA_PATH="LOCAL VITIS INSTALL PATH"	
-   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
-   source ${XILINX_VIVADO}/settings64.sh
-
-Once the install paths are setup, launch the bash script named ``run_all_cosim_tests.sh`` to run all the tests.
-
-
-L1 Performance Benchmarks and QoR
-============================================
-The FFT throughput (initiation interval) can be calculated as L/R where R is the SSR value and L
-is the number of samples to be transformed. The possible values for R (SSR values) are: 2,4,8,16.
-These values allow for a Fmax range of **300-550 MHz** when targeting the slowest of UltraScale+
-speed-grade devices. 
-
-1-D Fixed Point FFT
-----------------------
-Following table gives the performance of 1-dimensional FFT for 27 bit fixed point complex input. Different SSR factors and FFT sizes are reported for comparison in terms of performance and resource utilization. The synthesis is performed for Alveo U250 FPGA part. From the table it is clear that SSR FFT when synthezied with size upto 4K can run with fmax ranging from 500 to 300 MHz. The results are reported for post place and route. The routing and placement is done using standard Vivado place and route flow no manual floorplanning or routing is done at all.
-
-
-.. csv-table:: 1-D Fixed Point FFT Performance and QoR Results
-   :file: ../csv_data_files/fft_l1_fixed_point_bench.csv
-   :align: center
-   :header: "Size","SSR","fmax(MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) xMillion","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","CP(ns)","II (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
-
-1-D Floating Point (fp32) FFT
-----------------------------------------
-
-Following table gives the performance of 1-dimensional FFT floating point (fp32) complex input under similar setting as used for fixed point 1-D FFT. For floating point types generally the resource usages is larger than fixed point because of larger data-path and need for more complicated compute units for doing operations such as addition, multiplication, comparison etc. The results are reported for post place and route. The routing and placement is done using standard Vivado place and route flow no manual floorplanning or routing is done at all.
-
-.. csv-table:: 1-D Floating Point (FP32) FFT Performance and QoR Results
-   :file: ../csv_data_files/fft_l1_fp32_bench.csv
-   :align: center
-   :header: "Size","SSR","fmax(MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) xMillion","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","CP(ns)","II (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
 

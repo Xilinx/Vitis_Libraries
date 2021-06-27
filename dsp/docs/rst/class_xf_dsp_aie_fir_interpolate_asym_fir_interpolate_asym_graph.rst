@@ -136,6 +136,20 @@ Methods
 
 .. FunctionSection
 
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__asym_1_1fir__interpolate__asym__graph_1ae16ca566636eb46c872c5b6b554f1cee:
+.. _cid-xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__asym_1_1fir__interpolate__asym__graph_1ae4c57192763cb63d9a62eac519684a61:
 .. _cid-xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph::fir_interpolate_asym_graph:
 

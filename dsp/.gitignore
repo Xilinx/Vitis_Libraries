@@ -7,3 +7,7 @@
 *~
 dummy_*
 settings.tcl
+docs/_build
+docs/html
+docs/xml
+docs/.stamp

@@ -1,3 +1,20 @@
+..
+   Copyright 2021 Xilinx, Inc.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+.. _3_USING_EXAMPLES:
+
 *******************
 Using the Examples
 *******************
@@ -6,51 +23,53 @@ Using the Examples
 Compiling and Simulating Using the Example Design
 =================================================
 
-TODO: Add examples to xf_dsp repository
-
 A Makefile is included with the example design. It is located inside the `L2/examples/fir_129t_sym/` directory. Use the following steps to compile, simulate and verify the example design using the Makefile.
 
-1. Compile the example design.
+#. Clean Work directory and all output files
 
    .. code-block::
 
-        >> make compile
+         make clean
 
-2. Simulate the example design.
+#. Compile the example design.
 
    .. code-block::
 
-        >> make sim
+         make compile
+
+#. Simulate the example design.
+
+   .. code-block::
+
+         make sim
 
    This generates the file `output.txt` in the `aiesimulator_output/data` directory.
 
-3. To compare the output results with the golden reference, extract samples from output.txt, then perform a diff with respect to the reference using the following command.
+#. To compare the output results with the golden reference, extract samples from output.txt, then perform a diff with respect to the reference using the following command.
 
    .. code-block::
 
-        >> make check_op
+         make check_op
 
-4. Display the status summary with.
+#. Display the status summary with.
 
    .. code-block::
 
-        >> make get_status
+         make get_status
 
    This populates the status.txt file. Review this file to get the status.
 
-   .. note::
-
-        All of the preceding steps are performed in sequence using the following command:
+   .. note:: All of the preceding steps are performed in sequence using the following command:
 
         .. code-block::
 
-            >> make all
+             make all
 
 ==================================================================
 Using the Vitis Unified Software Platform to Run an Example Design
 ==================================================================
 
-This section briefly describes how to create, build, and simulate a library element example using the Xilinx Vitis™ integrated design environment (IDE).
+This section briefly describes how to create, build, and simulate a library element example using the Vitis |trade| integrated design environment (IDE).
 
 Steps for Creating the Example Project in the Vitis IDE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +82,7 @@ DSPLib examples can contain a pre-packaged Vitis project (in compressed format) 
 
         setenv DSPLIB_ROOT <your-install-directory/dsplib>
 
-2. Type vitis to launch the Vitis IDE, and create a new workspace.
+2. Type `vitis` to launch the Vitis IDE, and create a new workspace.
 
 3. Select **File → Import → Vitis project** exported zip file.
 
@@ -77,7 +96,7 @@ DSPLib examples can contain a pre-packaged Vitis project (in compressed format) 
 
       |image7|
 
-   c. Navigate to the installed xck190 platform file (.xpfm).
+   c. Navigate to the installed vck190 platform file (.xpfm).
 
       .. note:: The VCK190 base platform must be downloaded from the Xilinx lounge.
 
@@ -127,31 +146,36 @@ test.h
         using namespace adf ;
         namespace testcase {
             class test_kernel: public graph {
-                private:
-                // FIR coefficients
-                std::vector<int16> m_taps = std::vector<int16>{-1, -3, 3, -1, -3, 6, -1, -7, 9, -1, -12, 14, 1, -20, 19, 5, -31, 26, 12, -45, 32, 23, -63, 37, 40, -86, 40, 64, -113, 39, 96, -145, 33, 139, -180, 17, 195, -218, -9, 266, -258, -53, 357, -299, -118, 472, -339, -215, 620, -376, -360, 822,
-                -409, -585, 1118, -437, -973, 1625, -458, -1801, 2810, -470, -5012, 10783,
-                25067};
-                //FIR Graph class
-                xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph<cint16, int16,
-                FIR129_LENGTH, FIR129_SHIFT, FIR129_ROUND_MODE, FIR129_INPUT_SAMPLES>
-                firGraph;
-                public:
-                port<input> in;
-                port<output> out;
-                // Constructor - with FIR graph class initialization
-                test_kernel():firGraph(m_taps) {
-                    // Make connections
-                    // Size of window in Bytes.
-                    // Margin gets automatically added within the FIR graph class.
-                    // Margin equals to FIR length rounded up to nearest multiple of 32
-                    Bytes.
-                    connect<>(in, firGraph.in);
-                    connect<>(firGraph.out, out);
-                };
+               private:
+               // FIR coefficients
+               std::vector<int16> m_taps   = std::vector<int16>{
+                        -1, -3, 3, -1, -3, 6, -1, -7, 9, -1, -12, 14, 1, -20, 19, 5,
+                        -31, 26, 12, -45, 32, 23, -63, 37, 40, -86, 40, 64, -113, 39, 96, -145,
+                        33, 139, -180, 17, 195, -218, -9, 266, -258, -53, 357, -299, -118, 472, -339, -215,
+                        620, -376, -360, 822, -409, -585, 1118, -437, -973, 1625, -458, -1801, 2810, -470, -5012, 10783,
+                        25067};
+               //FIR Graph class
+               xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph<cint16, int16,
+               FIR129_LENGTH, FIR129_SHIFT, FIR129_ROUND_MODE, FIR129_INPUT_SAMPLES>
+               firGraph;
+               public:
+               port<input> in;
+               port<output> out;
+               // Constructor - with FIR graph class initialization
+               test_kernel():firGraph(m_taps) {
+                  // Make connections
+                  // Size of window in Bytes.
+                  // Margin gets automatically added within the FIR graph class.
+                  // Margin equals to FIR length rounded up to nearest multiple of 32
+                  Bytes.
+                  connect<>(in, firGraph.in);
+                  connect<>(firGraph.out, out);
+               };
             };
         };
 
+test.cpp
+~~~~~~~~
 .. code-block::
 
         #include "test.h"
@@ -176,10 +200,16 @@ test.h
 .. |image4| image:: ./media/image2.png
 .. |image5| image:: ./media/image2.png
 .. |image6| image:: ./media/image2.png
-.. |image7| image:: ./media/image5.jpeg
-.. |image8| image:: ./media/image6.jpeg
-.. |image9| image:: ./media/image7.jpeg
+.. |image7| image:: ./media/image5.png
+.. |image8| image:: ./media/image6.png
+.. |image9| image:: ./media/image7.png
 .. |image10| image:: ./media/image2.png
 .. |image11| image:: ./media/image2.png
 .. |image12| image:: ./media/image2.png
 .. |image13| image:: ./media/image2.png
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
+

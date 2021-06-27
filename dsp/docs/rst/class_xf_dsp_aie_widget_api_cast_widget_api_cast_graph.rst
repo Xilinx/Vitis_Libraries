@@ -17,9 +17,9 @@ template class xf::dsp::aie::widget::api_cast::widget_api_cast_graph
 Overview
 ~~~~~~~~
 
-widget_api_cast is a Asymmetric Single Rate FIR filter
+widget_api_cast is a design to change the interface between connected components. This component is able to change the stream interface to window interface and vice-versa. In addition, multiple input stream ports may be defined, as well as multiple copies of the window output.
 
-These are the templates to configure the Asymmetric Single Rate FIR class.
+These are the templates to configure the Widget API Cast class.
 
 
 
@@ -32,6 +32,21 @@ These are the templates to configure the Asymmetric Single Rate FIR class.
         - TT_DATA
 
         - describes the type of individual data samples input to and output from the function. This is a typename and must be one of the following: int16, cint16, int32, cint32, float, cfloat.
+
+    *
+        - TP_IN_API
+
+        - defines the input interface type. 0 = Window, 1 = Stream
+
+    *
+        - TP_OUT_API
+
+        - defines the output interface type. 0 = Window, 1 = Stream
+
+    *
+        - TP_NUM_INPUTS
+
+        - describes the number of input stream interfaces to be processed. When 2 inputs are configured, whe data will be read sequentially from each.
 
     *
         - TP_WINDOW_VSIZE
@@ -87,6 +102,20 @@ Methods
 ~~~~~~~
 
 .. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1ac9c791f1e1e95ff60b41ae97c98fe94e:
+.. _cid-xf::dsp::aie::widget::api_cast::widget_api_cast_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
 
 .. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a7c9b45a6e3a1bd33bfa7ae2bc57e0107:
 .. _cid-xf::dsp::aie::widget::api_cast::widget_api_cast_graph::widget_api_cast_graph:
