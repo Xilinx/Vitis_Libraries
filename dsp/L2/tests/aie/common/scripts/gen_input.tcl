@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+#
 set usage "
 For generating random stimulus for data files.
 tclsh gen_input.tcl <filename> <numSamples> <iterations> \[<seed>\] \[<stim_type>\]

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Compare files containing numbers, line by line, value by value.
 
 
 # Get args
@@ -175,5 +176,6 @@ if {!$fexist1} {
     close $outFile
     puts "INFO: Compared files match."
 }
+
 
 

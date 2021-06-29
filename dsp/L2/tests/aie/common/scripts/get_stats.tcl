@@ -55,16 +55,6 @@ set strLvl2  "        <function_name>$filterFunctionName"
 set strLvl2main  "        <function_name>main"
 set strLvl3  "        <function_and_descendants_time>"
 
-set list initiationInterval
-set list cycleCountTotal
-set list cycleCountMin
-set list cycleCountMax
-set list cycleCountAvg
-set list cycleCountTheoryMin
-set list throughputTheoryMax
-set list throughputAvg
-set list throughputIIAvg
-
 
 set x 0
 set lineNo 0

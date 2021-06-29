@@ -21,7 +21,7 @@ xf::dsp::aie::testcase::test_graph matMult;
 
 #ifdef USING_UUT
 #ifdef USING_PL_MOVER
-//need explicit port name, so we can connect in hw.
+// need explicit port name, so we can connect in hw.
 PLIO* in1 = new PLIO("DataIn1", adf::plio_32_bits, QUOTE(INPUT_FILE_A));
 PLIO* in2 = new PLIO("DataIn2", adf::plio_32_bits, QUOTE(INPUT_FILE_B));
 PLIO* out1 = new PLIO("DataOut1", adf::plio_32_bits, QUOTE(OUTPUT_FILE));
@@ -83,6 +83,7 @@ std::array<connect<>*, numInputs> net = [] {
 
 #else
 simulation::platform<2, 1> platform(QUOTE(INPUT_FILE_A), QUOTE(INPUT_FILE_B), QUOTE(OUTPUT_FILE));
+
 connect<> net0A(platform.src[0], matMult.inA);
 connect<> net0B(platform.src[1], matMult.inB);
 #endif
@@ -119,5 +120,3 @@ int main(void) {
     return 0;
 }
 #endif
-
-

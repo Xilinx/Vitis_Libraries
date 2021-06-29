@@ -78,7 +78,6 @@ class test_graph : public graph {
         printf(QUOTE(T_DATA_A) QUOTE(T_DATA_B));
         printf("\n");
         printf("\n");
-
         namespace dsplib = xf::dsp::aie;
 
         dsplib::blas::matrix_mult::UUT_GRAPH<T_DATA_A, T_DATA_B, P_DIM_A, P_DIM_AB, P_DIM_B, P_SHIFT, P_ROUND_MODE,
@@ -104,6 +103,7 @@ class test_graph : public graph {
         connect<>(inA, mmultGraph.inA);
         connect<>(inB, mmultGraph.inB);
 #endif
+
         connect<>(mmultGraph.out, out);
 
         printf("========================\n");

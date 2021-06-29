@@ -304,8 +304,8 @@ class matrix_mult_graph : public graph {
     }
 };
 /**
- * @cond NOCOMMENTS
- */
+  * @cond NOCOMMENTS
+  */
 
 // Specialized template for Cascade length of 1
 template <typename TT_DATA_A,

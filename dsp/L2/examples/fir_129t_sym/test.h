@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <cardano.h>
+#include <adf.h>
 
 #include "fir_sr_sym_graph.hpp"
 
@@ -22,7 +22,7 @@
 #define FIR129_ROUND_MODE 0
 #define FIR129_INPUT_SAMPLES 256
 
-using namespace cardano;
+using namespace adf;
 
 namespace testcase {
 
