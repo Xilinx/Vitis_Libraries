@@ -1,5 +1,4 @@
 # Benchmark of MCEuropeanEngine
-*************************************************
 
 
 Overview
@@ -14,7 +13,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
+For getting the design,
 
     cd L2/benchmarks/MCEuropeanEngine
 

@@ -521,6 +521,6 @@ User applications can subsequently be built against this library as in the examp
    :caption: Benchmark 
    :maxdepth: 2
    
-   benchmark/benchmark.rst
+   benchmark.rst
 
 

@@ -29,11 +29,7 @@ Benchmark
 Application Scenario
 ---------------------
 
-The application scenarios are provided for each case. User could find as bellow.
-
-    :ref:`MCEuropeanEngine <MCEE_Profiling>`  
-    :ref:`MCAmericanEngine <MCAE_Profiling>`  
-    :ref:`TreeEngine <TreeEngine_Profiling>`  
+The application scenarios are provided for each case. User could find details in Profiling section under each case's benchmark description page.
 
 Performance
 -----------
