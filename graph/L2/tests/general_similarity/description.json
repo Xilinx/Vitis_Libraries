@@ -25,7 +25,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/generalSimilarityKernel.xclbin -offset LIB_DIR/L2/tests/general_similarity/data/cosine_sparse_offset.csr -indiceWeight LIB_DIR/L2/tests/general_similarity/data/cosine_sparse_indice_weight.csr -golden LIB_DIR/L2/tests/general_similarity/data/cosine_sparse.mtx -similarityType 1 -graphType 0 -dataType 0 -sourceID 3 -sortNUM 32", 
+            "cmd_args": " -xclbin BUILD/generalSimilarityKernel.xclbin -offset PROJECT/data/cosine_sparse_offset.csr -indiceWeight PROJECT/data/cosine_sparse_indice_weight.csr -golden PROJECT/data/cosine_sparse.mtx -similarityType 1 -graphType 0 -dataType 0 -sourceID 3 -sortNUM 32", 
             "name": "generic launch for all flows"
         }
     ], 

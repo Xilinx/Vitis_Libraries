@@ -25,7 +25,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/denseSimilarityKernel.xclbin -weight LIB_DIR/L2/tests/dense_similarity_multi_kernel/data/cosine_dense_weight.csr -golden LIB_DIR/L2/tests/dense_similarity_multi_kernel/data/cosine_dense.mtx -similarityType 1 -dataType 0 -graphType 1 -sourceID 3 -topK 32 -v 120 -e 208", 
+            "cmd_args": " -xclbin BUILD/denseSimilarityKernel.xclbin -weight PROJECT/data/cosine_dense_weight.csr -golden PROJECT/data/cosine_dense.mtx -similarityType 1 -dataType 0 -graphType 1 -sourceID 3 -topK 32 -v 120 -e 208", 
             "name": "generic launch for all flows"
         }
     ], 

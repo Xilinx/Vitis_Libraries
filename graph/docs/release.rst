@@ -22,12 +22,26 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2), the asynchronous software level (L3) and TigerGraph integration (plugin) APIs.
+
+2.0
+----
+The algorithms implemented by Vitis Graph Library include:
+ - Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor.
+ - Centrality analysis: PageRank.
+ - Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).
+ - Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
+ - Community Detection: Louvain Modularity( New for 2021.1 ), Label Propagation and Triangle Count.
+ - Search: Breadth First Search, 2-Hop Search( New for 2021.1 ) 
+ - Graph Format: Calculate Degree and Format Convert between CSR and CSC.
+
+
 1.0
 ----
 
 The 1.0 release provides a range of algorithm, includes:
 
-- Centrality analysis: Page Rank.
+- Centrality analysis: PageRank.
 - Pathfinding:  Single Source Shortest Path.
 - Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
 - Community Detection:  Label Propagation and Triangle Count.
