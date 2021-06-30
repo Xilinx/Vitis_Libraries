@@ -260,7 +260,15 @@ V_LOOP:
 
                 for (int j = 0; j < 8; j++) {
 #pragma HLS UNROLL
-                    strm_out[j].write(tmp[j] + 128); //+128
+                    idct_out_t cut = 0;
+                    if ((tmp[j] + 128) > 255) {
+                        cut = 255;
+                    } else if ((tmp[j] + 128) < 0) {
+                        cut = 0;
+                    } else {
+                        cut = (tmp[j] + 128);
+                    }
+                    strm_out[j].write(cut); //+128
                 }
             }
         }
@@ -702,7 +710,6 @@ void decoder_jpg_full_top(ap_uint<_WAxi>* ptr,
 
 } // namespace details
 
-
 // ------------------------------------------------------------
 /**
  * @brief Level 2 : kernel implement for jfif parser + huffman decoder + iQ_iDCT
@@ -726,9 +733,9 @@ void decoder_jpg_full_top(ap_uint<_WAxi>* ptr,
 // frequency 250MHz for kernel, for only huffman core 286MHz by vivado 2018.3
 
 inline void kernelJpegDecoderTop(ap_uint<AXI_WIDTH>* jpeg_pointer,
-                                  const int size,
-                                  ap_uint<64>* yuv_mcu_pointer,
-                                  ap_uint<32>* infos) {
+                                 const int size,
+                                 ap_uint<64>* yuv_mcu_pointer,
+                                 ap_uint<32>* infos) {
     // clang-format off
 
 	//for jfif parser
