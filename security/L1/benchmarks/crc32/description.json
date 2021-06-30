@@ -5,7 +5,7 @@
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 
-        "aws-vu9p-f1", 
+        "aws-vu9p-f1",
         "vck190"
     ], 
     "platform_blacklist": [
@@ -40,9 +40,12 @@
     }, 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/CRC32Kernel.xclbin -data PROJECT/data/test.dat -num 16", 
+            "cmd_args": " -xclbin BUILD/CRC32Kernel.xclbin -data PROJECT/test.dat -num 16", 
             "name": "generic launch for all flows"
         }
+    ],
+    "data": [
+        "LIB_DIR/L1/benchmarks/crc32/test.dat"
     ], 
     "host": {
         "host_exe": "host.exe", 
@@ -128,6 +131,7 @@
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
+            "vitis_hw_build", 
             "vitis_hw_run"
         ], 
         "category": "canary"

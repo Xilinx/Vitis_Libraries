@@ -29,14 +29,31 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-1.0
-----
+2021.1
+------
 
-The 1.0 release provides a range of HLS primitives for:
+The 2021.1 release provide support for:
+* RIPEMD160
+* Initial support for BLS (not complete)
 
- * Symmetric Block Cipher
- * Symmetric Stream Cipher
- * Cipher Operation Mode
- * Message Authentication code(MAC)
- * Hash Function
- * Asymmetric Cryptography
+2020.2
+------
+
+The 2020.2 release provide support for signatures algorithms and VDF funtions.
+* DSA
+* ECC
+* ECDSA
+* EDDSA
+* VDF
+
+2019.2
+------
+
+The 2019.2 release provides a range of HLS primitives for:
+
+* Symmetric Block Cipher
+* Symmetric Stream Cipher
+* Cipher Operation Mode
+* Message Authentication code(MAC)
+* Hash Function
+* Asymmetric Cryptography

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.3
+# makefile-generator v1.0.4
 #
 
 # ####################################### Help Section #####################################
@@ -20,7 +20,7 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
 	$(ECHO) "  make clean "
@@ -29,24 +29,14 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64>"
-	$(ECHO) "      Command to prepare sd_card files."
-	$(ECHO) "      This target is only used in embedded device."
-	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to run application in emulation or on board."
 	$(ECHO) ""
-	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make host HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for embedded devices"
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
-	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
-	$(ECHO) "       export PERL=<path-to-perl-installation-location >"
 	$(ECHO) ""
 
 # ##################### Setting up default value of TARGET ##########################
@@ -65,11 +55,7 @@ endif
 
 # #################### Checking if DEVICE in whitelist ############################
 ifneq ($(findstring xilinx_u250_xdma_201830_2, $(DEVICE)), xilinx_u250_xdma_201830_2)
-ifneq ($(findstring aws-vu9p-f1, $(DEVICE)), aws-vu9p-f1)
-ifneq ($(findstring vck190, $(DEVICE)), vck190)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
-endif
-endif
 endif
 
 # ######################## Setting up Project Variables #################################
@@ -88,14 +74,6 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
-
-# ####################### Setting environment variables for embedded #####################
-ifneq ($(HOST_ARCH), x86)
-SYSROOT := $(SYSROOT)
-PERL ?= perl
-SDCARD := sd_card
-EMU_DIR := $(SDCARD)/data/emulation
-endif
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
@@ -120,18 +98,13 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-ifneq ($(HOST_ARCH), x86)
-CXXFLAGS += --sysroot=$(SYSROOT)
-CXXFLAGS += -I$(SYSROOT)/usr/include/xrt -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-else
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-endif
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 -lssl -lcrypto
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 CXXFLAGS += -D USE_DDR
@@ -143,18 +116,10 @@ LDFLAGS += -L${SYSROOT}/opt/xilinx/xrt/lib
 endif
 
 # ################### Setting package and image directory #######################
-EMBEDDED_PACKAGE_OUT = package_$(TARGET)
-ifneq (,$(findstring zc706, $(XDEVICE)))
-K_IMAGE := $(EDGE_COMMON_SW)/uImage
-else
-K_IMAGE := $(EDGE_COMMON_SW)/Image
-endif
 
 EXE_NAME := aes256CbcEncryptBenchmark.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/aes256CbcEncryptKernel.xclbin
-
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/aes256CbcEncryptKernel.xclbin -len 1024 -num 16
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -169,72 +134,62 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(CUR_DIR)/kernel
 
-aes256CbcEncryptKernel_1_VPP_FLAGS += --hls.clock 300000000:aes256CbcEncryptKernel_1
-aes256CbcEncryptKernel_2_VPP_FLAGS += --hls.clock 300000000:aes256CbcEncryptKernel_2
-aes256CbcEncryptKernel_3_VPP_FLAGS += --hls.clock 300000000:aes256CbcEncryptKernel_3
-aes256CbcEncryptKernel_4_VPP_FLAGS += --hls.clock 300000000:aes256CbcEncryptKernel_4
-ifneq ($(HOST_ARCH), x86)
-VPP_LDFLAGS_aes256CbcEncryptKernel += --clock.defaultFreqHz 300000000
-else
+aes256CbcEncryptKernel_VPP_FLAGS += --hls.clock 300000000:aes256CbcEncryptKernel
 VPP_LDFLAGS_aes256CbcEncryptKernel += --kernel_frequency 300
-endif
 
+
+# Kernel args
 
 # ############################ Declaring Binary Containers ##########################
 
-ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/aes256CbcEncryptKernel.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/aes256CbcEncryptKernel.xclbin
-else
-BINARY_CONTAINERS += $(BUILD_DIR)/aes256CbcEncryptKernel_xo.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/aes256CbcEncryptKernel.xclbin
-endif
-BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS += $(TEMP_DIR)/aes256CbcEncryptKernel_1.xo
-BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS += $(TEMP_DIR)/aes256CbcEncryptKernel_2.xo
-BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS += $(TEMP_DIR)/aes256CbcEncryptKernel_3.xo
-BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS += $(TEMP_DIR)/aes256CbcEncryptKernel_4.xo
+BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS += $(TEMP_DIR)/aes256CbcEncryptKernel.xo
 
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-
+ifeq ($(HOST_ARCH), x86)
+all:  check_version check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all:  check_version check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host:   check_xrt $(EXE_FILE)
+else
+host:   check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp  check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp  check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: xclbin
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/aes256CbcEncryptKernel_1.xo: $(CUR_DIR)/kernel/aes256CbcEncryptKernel1.cpp
-	$(ECHO) "Compiling Kernel: aes256CbcEncryptKernel_1"
+$(TEMP_DIR)/aes256CbcEncryptKernel.xo: $(CUR_DIR)/kernel/aes256CbcEncryptKernel.cpp
+	$(ECHO) "Compiling Kernel: aes256CbcEncryptKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(aes256CbcEncryptKernel_1_VPP_FLAGS) $(VPP_FLAGS) -k aes256CbcEncryptKernel_1 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
-$(TEMP_DIR)/aes256CbcEncryptKernel_2.xo: $(CUR_DIR)/kernel/aes256CbcEncryptKernel2.cpp
-	$(ECHO) "Compiling Kernel: aes256CbcEncryptKernel_2"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(aes256CbcEncryptKernel_2_VPP_FLAGS) $(VPP_FLAGS) -k aes256CbcEncryptKernel_2 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
-$(TEMP_DIR)/aes256CbcEncryptKernel_3.xo: $(CUR_DIR)/kernel/aes256CbcEncryptKernel3.cpp
-	$(ECHO) "Compiling Kernel: aes256CbcEncryptKernel_3"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(aes256CbcEncryptKernel_3_VPP_FLAGS) $(VPP_FLAGS) -k aes256CbcEncryptKernel_3 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
-$(TEMP_DIR)/aes256CbcEncryptKernel_4.xo: $(CUR_DIR)/kernel/aes256CbcEncryptKernel4.cpp
-	$(ECHO) "Compiling Kernel: aes256CbcEncryptKernel_4"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(aes256CbcEncryptKernel_4_VPP_FLAGS) $(VPP_FLAGS) -k aes256CbcEncryptKernel_4 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(aes256CbcEncryptKernel_VPP_FLAGS) $(VPP_FLAGS) -k aes256CbcEncryptKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 
 
-$(BINARY_CONTAINERS): $(BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS)
+$(BUILD_DIR)/aes256CbcEncryptKernel.xclbin: $(BINARY_CONTAINER_aes256CbcEncryptKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/aes256CbcEncryptKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_aes256CbcEncryptKernel) -o '$@' $(+)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -244,59 +199,12 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 
 # ###############Setting Essential Checks And Running Rules For Vitis Flow #############
-# Setting default value for vitis flow
-RESULT_VAL ?= 
-RUN_LEVEL ?= 7
 run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-ifeq ($(HOST_ARCH), x86)
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
-ifeq ($(findstring vck190, $(DEVICE)), vck190)
-	export XCL_EMULATION_MODE=$(TARGET)
-	$(PERL) $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(EMBEDDED_PACKAGE_OUT)/launch_$(TARGET).sh -noc-memory-config qemu-memory-_ddr@0x00000000 -no-reboot" "./run_script.sh" "$(RESULT_STRING)" "$(RUN_LEVEL)" | tee embedded_run.log
-endif
-endif
-else
-ifeq ($(HOST_ARCH), x86)
 	$(EXE_FILE) $(HOST_ARGS)
-else
-	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
-endif
-endif
-
-# ######################### Preparing sdcard folder ##############################
-EMBEDDED_EXEC_SCRIPT = run_script.sh
-PACKAGE_FILES += $(EMBEDDED_EXEC_SCRIPT)
-PACKAGE_FILES += $(EXE_FILE)
-PACKAGE_FILES += emconfig.json
-PACKAGE_FILES += $(DATA_FILE)
-SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
-SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-ifneq ($(HOST_ARCH), x86)
-	@echo "Generating sd_card folder...."
-	mkdir -p $(EMBEDDED_PACKAGE_OUT)
-	rm -rf run_script.sh
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_script.sh
-ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_script.sh
-endif
-	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
-	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
-	emconfigutil --platform $(DEVICE) --nd 1;
-	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
-	@echo 'return_code=$$?' >> run_script.sh
-	@echo 'if [ $$return_code -ne 0 ]; then' >> run_script.sh
-	@echo '         echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_script.sh
-	@echo 'fi' >> run_script.sh
-	@echo 'echo "INFO: Embedded host run completed."' >> run_script.sh
-	@echo 'exit $$return_code' >> run_script.sh
-	chmod a+rx run_script.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(BINARY_CONTAINERS) --package.out_dir $(EMBEDDED_PACKAGE_OUT) --package.rootfs $(EDGE_COMMON_SW)/rootfs.ext4 --package.sd_file $(K_IMAGE) $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
-	@echo "### ***** sd_card generation done! ***** ###"
 endif
 
 # ################################# Cleaning Rules ##################################
@@ -305,13 +213,13 @@ cleanh:
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ start_simulation.sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
+	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS

@@ -41,7 +41,7 @@ void cbcWrapper(hls::stream<ap_uint<128> >& plaintext,
                 hls::stream<bool>& endRes,
                 ap_uint<64> msgNum) {
     for (ap_uint<64> i = 0; i < msgNum; i++) {
-        xf::security::aes256CbcDecrypt(plaintext, plaintext_e, key, iv, res, endRes);
+        xf::security::aes256CbcEncrypt(plaintext, plaintext_e, key, iv, res, endRes);
     }
 }
 
@@ -84,7 +84,7 @@ void wrapper(ap_uint<128>* input, ap_uint<128>* output, ap_uint<64> msg_num, ap_
 }
 
 // @brief top of kernel
-extern "C" void aes256CbcDecryptKernel(ap_uint<128>* inputData, ap_uint<128>* outputData) {
+extern "C" void aes256CbcEncryptKernel(ap_uint<128>* inputData, ap_uint<128>* outputData) {
 // clang-format off
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	num_write_outstanding = 16 num_read_outstanding = 16 \

@@ -7,8 +7,7 @@
     "platform_whitelist": [
         "u250", 
         "u50", 
-        "aws-vu9p-f1", 
-        "vck190"
+        "aws-vu9p-f1"
     ], 
     "platform_blacklist": [
         "zc"
@@ -65,7 +64,7 @@
     }, 
     "launch": [
         {
-            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcDecryptKernel.xclbin", 
+            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcDecryptKernel.xclbin -len 1024 -num 16", 
             "name": "generic launch for all flows"
         }
     ], 

@@ -5,8 +5,7 @@
     "flow": "vitis", 
     "platform_type": "", 
     "platform_whitelist": [
-        "xilinx_u250_xdma_201830_2", 
-        "vck190"
+        "xilinx_u250_xdma_201830_2"
     ], 
     "platform_blacklist": [
         "zc"
@@ -47,7 +46,7 @@
     }, 
     "launch": [
         {
-            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcEncryptKernel.xclbin", 
+            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcEncryptKernel.xclbin -len 1024 -num 16", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -80,13 +79,13 @@
         {
             "accelerators": [
                 {
-                    "location": "kernel/aes256CbcEncryptKernel1.cpp", 
+                    "location": "kernel/aes256CbcEncryptKernel.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_1", 
+                    "name": "aes256CbcEncryptKernel", 
                     "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "aes256CbcEncryptKernel_1", 
+                            "name": "aes256CbcEncryptKernel", 
                             "slr": "SLR0", 
                             "arguments": [
                                 {
@@ -96,72 +95,6 @@
                                 {
                                     "name": "outputData", 
                                     "memory": "DDR[0]"
-                                }
-                            ]
-                        }
-                    ]
-                }, 
-                {
-                    "location": "kernel/aes256CbcEncryptKernel2.cpp", 
-                    "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_2", 
-                    "num_compute_units": 1, 
-                    "compute_units": [
-                        {
-                            "name": "aes256CbcEncryptKernel_2", 
-                            "slr": "SLR1", 
-                            "arguments": [
-                                {
-                                    "name": "inputData", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "outputData", 
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        }
-                    ]
-                }, 
-                {
-                    "location": "kernel/aes256CbcEncryptKernel3.cpp", 
-                    "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_3", 
-                    "num_compute_units": 1, 
-                    "compute_units": [
-                        {
-                            "name": "aes256CbcEncryptKernel_3", 
-                            "slr": "SLR2", 
-                            "arguments": [
-                                {
-                                    "name": "inputData", 
-                                    "memory": "DDR[2]"
-                                }, 
-                                {
-                                    "name": "outputData", 
-                                    "memory": "DDR[2]"
-                                }
-                            ]
-                        }
-                    ]
-                }, 
-                {
-                    "location": "kernel/aes256CbcEncryptKernel4.cpp", 
-                    "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_4", 
-                    "num_compute_units": 1, 
-                    "compute_units": [
-                        {
-                            "name": "aes256CbcEncryptKernel_4", 
-                            "slr": "SLR3", 
-                            "arguments": [
-                                {
-                                    "name": "inputData", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "outputData", 
-                                    "memory": "DDR[3]"
                                 }
                             ]
                         }

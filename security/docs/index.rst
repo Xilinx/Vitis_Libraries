@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2019-2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -246,11 +246,11 @@ Library Contents
 Shell Environment
 =================
 
-Setup the build environment using the Vitis and XRT scripts, and set the PLATFORM_REPO_PATHS to installation folder of platform files.
+Setup the build environment using the Vitis and XRT scripts, and set the ``PLATFORM_REPO_PATHS`` to installation folder of platform files.
 
 .. code-block:: bash
 
-    source <install path>/Vitis/2019.2/settings64.sh
+    source <Vitis 2021.1 install path>/settings64.sh
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
@@ -315,10 +315,10 @@ To run the Vitis projects for benchmark evaluation and test, you may need the ex
    guide_L1/hw_guide.rst
 
 .. toctree::
-   :caption: Benchmark Result
+   :caption: Benchmark
    :maxdepth: 1
 
-   benchmark/result.rst
+   benchmark.rst
 
 Index
 -----

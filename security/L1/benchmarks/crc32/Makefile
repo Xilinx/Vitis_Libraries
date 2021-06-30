@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.3
+# makefile-generator v1.0.4
 #
 
 # ####################################### Help Section #####################################
@@ -122,16 +122,16 @@ endif
 # ######################### Host compiler global settings ############################
 ifneq ($(HOST_ARCH), x86)
 CXXFLAGS += --sysroot=$(SYSROOT)
-CXXFLAGS += -I$(SYSROOT)/usr/include/xrt -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 else
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 endif
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 CXXFLAGS += -I$(SYSROOT)/usr/include
@@ -150,7 +150,7 @@ endif
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/CRC32Kernel.xclbin -data $(CUR_DIR)/data/test.dat -num 16
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/CRC32Kernel.xclbin -data $(CUR_DIR)/test.dat -num 16
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -175,6 +175,8 @@ VPP_LDFLAGS_CRC32Kernel += --kernel_frequency 300
 endif
 
 
+# Kernel args
+
 # ############################ Declaring Binary Containers ##########################
 
 ifeq ($(HOST_ARCH), x86)
@@ -187,16 +189,28 @@ endif
 BINARY_CONTAINER_CRC32Kernel_OBJS += $(TEMP_DIR)/CRC32Kernel.xo
 
 # ######################### Setting Targets of Makefile ################################
+DATA_FILE += $(XFLIB_DIR)/L1/benchmarks/crc32/test.dat
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-
+ifeq ($(HOST_ARCH), x86)
+all:  check_version check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+else
+all:  check_version check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig  sd_card
+endif
 
 .PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
+ifeq ($(HOST_ARCH), x86)
+host:   check_xrt $(EXE_FILE)
+else
+host:   check_sysroot $(EXE_FILE)
+endif
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp  check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp  check_sysroot  $(BINARY_CONTAINERS)
+endif
 
 .PHONY: build
 build: xclbin
@@ -205,7 +219,7 @@ build: xclbin
 $(TEMP_DIR)/CRC32Kernel.xo: $(XFLIB_DIR)/L1/benchmarks/crc32/kernel/crc32_kernel.cpp
 	$(ECHO) "Compiling Kernel: CRC32Kernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(CRC32Kernel_VPP_FLAGS) $(VPP_FLAGS) -k CRC32Kernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(CRC32Kernel_VPP_FLAGS) $(VPP_FLAGS) -k CRC32Kernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 
 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINER_CRC32Kernel_OBJS)
@@ -214,7 +228,12 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINER_CRC32Kernel_OBJS)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE):  $(HOST_SRCS) | check_xrt 
+else
+$(EXE_FILE):  $(HOST_SRCS) | check_sysroot 
+endif
+
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -254,7 +273,7 @@ PACKAGE_FILES += emconfig.json
 PACKAGE_FILES += $(DATA_FILE)
 SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
 SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+sd_card: host xclbin emconfig
 ifneq ($(HOST_ARCH), x86)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(EMBEDDED_PACKAGE_OUT)
@@ -265,7 +284,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
@@ -275,7 +296,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> run_script.sh
 	@echo 'exit $$return_code' >> run_script.sh
 	chmod a+rx run_script.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(BINARY_CONTAINERS) --package.out_dir $(EMBEDDED_PACKAGE_OUT) --package.rootfs $(EDGE_COMMON_SW)/rootfs.ext4 --package.sd_file $(K_IMAGE) $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(BINARY_CONTAINERS) --package.out_dir $(EMBEDDED_PACKAGE_OUT) --package.rootfs $(EDGE_COMMON_SW)/rootfs.ext4 --package.sd_file $(K_IMAGE) $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 
@@ -285,7 +306,7 @@ cleanh:
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ start_simulation.sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
