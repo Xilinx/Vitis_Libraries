@@ -74,7 +74,7 @@ This section briefly describes how to create, build, and simulate a library elem
 Steps for Creating the Example Project in the Vitis IDE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-DSPLib examples can contain a pre-packaged Vitis project (in compressed format) in the `L2/examples/<example_name>/vitis` folder. These can be imported into the Vitis IDE in a few steps. The following example shows how to import the `Fir129Example_system` project.
+Fir129Example_system is a pre-packaged Vitis project (in compressed format) that can be downloaded here: `Fir129Example_system <https://www.xilinx.com/bin/public/openDownload?filename=examples.vitis-2021.1.Fir129Example_system_2021_06_24.ide.zip>`_. This can be imported into the Vitis IDE in a few steps, as described below.
 
 1. Set the environment variable DSPLIB_ROOT. This must be set to the path to your directory where DSPLib is installed.
 
@@ -86,7 +86,7 @@ DSPLib examples can contain a pre-packaged Vitis project (in compressed format) 
 
 3. Select **File → Import → Vitis project** exported zip file.
 
-4. Click **Next** and browse to `L2/examples/fir_129t_sym/vitis` and select the ZIP file.
+4. Click **Next** and browse to your download directory and select the downloaded ZIP file.
 
 5. Set the correct path to the VCK190 platform file directory.
 
@@ -118,11 +118,6 @@ DSPLib examples can contain a pre-packaged Vitis project (in compressed format) 
 
 9. After simulation is complete, navigate to **Fir129Example [ aiengine] → Emulation-AIE → aiesimulator_output → data** and compare output.txt with the fir_out_ref.txt file in the data folder.
 
-==============
-Other Examples
-==============
-
-There are a collection of other examples available in the `L2/examples` directory. Each has a readme file, explaining what it is and details the step-by-step instructions.
 
 ====================
 Example Graph Coding
