@@ -20,9 +20,9 @@ compress/decompress kernels (excluding data movers). It achieves Fmax of 300MHz
 ========== ===== ====== ==== ===== ===== 
 Flow       LUT   LUTMem REG  BRAM  URAM 
 ========== ===== ====== ==== ===== ===== 
-Compress   2.9K  112    3.2K 4     6     
+Compress   3K    137    3.5K  4     6     
 ---------- ----- ------ ---- ----- ----- 
-DeCompress 878   31     983  16    0     
+DeCompress 6.4K  316    5.7K  0     4     
 ========== ===== ====== ==== ===== ===== 
 
 Performance Data
@@ -35,7 +35,7 @@ unit (Single Engine).
 Topic                         Results
 ============================= =========================
 Compression Throughput        260 MB/s
-Decompression Throughput      290 MB/s
+Decompression Throughput      1.97 GB/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================
 

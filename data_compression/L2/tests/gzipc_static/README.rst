@@ -36,12 +36,12 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx GZip static streaming compression kernels. 
-The final Fmax achieved is 285MHz 
+The final Fmax achieved is 300MHz 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   34.6K  2K    35.6K  48    64    
+Compress   33.2K  2.3K  36.8K  45    64    
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

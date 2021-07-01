@@ -42,7 +42,7 @@ on-boarding.
    :caption: Library Overview
    
    source/overview.rst
-   source/release.rst
+   release.rst
 
 .. toctree::
 	:maxdepth: 2

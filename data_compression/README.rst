@@ -87,19 +87,15 @@ Tables below showcases throughput details of compression for various Alveo accel
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | Architecture                                                           |  Compression Ratio   |     Throughput    |  FMax    |  LUT    |  BRAM |  URAM |
 +========================================================================+======================+===================+==========+=========+=======+=======+
-| `LZ4 Streaming <L2/tests/lz4_compress_streaming>`_                     |        2.13          |      290 MB/s     |  300MHz  |  3.2K   |  5    |  6    |
+| `LZ4 Streaming <L2/tests/lz4_compress_streaming>`_                     |        2.13          |      290 MB/s     |  300MHz  |  3K     |  5    |  6    |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Snappy Streaming <L2/demos/snappy_streaming>`_                        |        2.13          |      290 MB/s     |  300MHz  |  3.1K   |  4    |  6    |
+| `Snappy Streaming <L2/demos/snappy_streaming>`_                        |        2.13          |      290 MB/s     |  300MHz  |  3K     |  4    |  6    |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `LZ4 Memory Mapped <L2/tests/lz4_compress>`_                           |        2.13          |      2.2 GB/s     |  295MHz  |  47K    |  56   |  48   |
+| `GZip/Zlib Memory Mapped <L2/tests/gzipc_block_mm>`_                   |        2.67          |      2 GB/s       |  285MHz  |  52K    |  67   |  72   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Snappy Memory Mapped <L2/tests/snappy_compress>`_                     |        2.13          |      2.2 GB/s     |  300MHz  |  47K    |  48   |  48   |
+| `GZip/Zlib Compress Stream <L2/tests/gzipc>`_                          |        2.67          |      2 GB/s       |  290MHz  |  48.5K  |  61   |  72   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Memory Mapped <L2/tests/gzipc_block_mm>`_                   |        2.67          |      2 GB/s       |  285MHz  |  53.8K  |  75   |  72   |
-+------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Compress Stream <L2/tests/gzipc>`_                          |        2.67          |      2 GB/s       |  285MHz  |  49.7K  |  67   |  72   |
-+------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Fixed Compress Stream <L2/tests/gzipc_static>`_             |        2.25          |      2 GB/s       |  285MHz  |  34.6K  |  48   |  64   |
+| `GZip/Zlib Fixed Compress Stream <L2/tests/gzipc_static>`_             |        2.25          |      2 GB/s       |  300MHz  |  33.2K  |  45   |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 
 .. [*] LZ4 Streaming and Snappy Streaming: Uses Single Engine and Datawidth 8-bit
@@ -115,15 +111,15 @@ Tables below showcases throughput details of decompression for various Alveo acc
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Architecture                                                         |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |           
 +======================================================================+===================+==========+=========+=======+======+
-| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  300MHz  |  7.2K   |  0    |  4   |
+| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  284MHz  |  5.5K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  300MHz  |  8.8K   |  0    |  4   |
+| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  290MHz  |  6.4K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `GZip/Zlib Streaming <L2/tests/gzip_decompress>`_                    |     450  MB/s     |  252MHz  |  11.3K  |  6    |  3   |
+| `GZip/Zlib Streaming <L2/demos/gzip>`_                               |     518  MB/s     |  273MHz  |  6.9K   |  0    |  2   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Streaming <L2/demos/zstd_decompress>`_                         |     463  MB/s     |  232MHz  |  18K    |  52   |  4   |
+| `ZStd Streaming <L2/demos/zstd_decompress>`_                         |     463  MB/s     |  252MHz  |  21K    |  33   |  6   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Full File Streaming <L2/demos/zstd_decompress>`_               |     463  MB/s     |  232MHz  |  22K    |  52   |  4   |
+| `ZStd Full File Streaming <L2/demos/zstd_decompress>`_               |     463  MB/s     |  252MHz  |  21K    |  33   |  6   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
 .. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.

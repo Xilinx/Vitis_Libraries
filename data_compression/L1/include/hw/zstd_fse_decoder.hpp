@@ -791,6 +791,114 @@ hflkpt_codegen_outer:
     }
 }
 
+template <int MAX_CODELEN>
+void code_generator(uint8_t* weights,
+                    ap_uint<MAX_CODELEN + 1>* codeOffsets,
+                    ap_uint<8>* bl1Codes,
+                    ap_uint<8>* bl2Codes,
+                    ap_uint<8>* bl3Codes,
+                    ap_uint<8>* bl4Codes,
+                    ap_uint<8>* bl5Codes,
+                    ap_uint<8>* bl6Codes,
+                    ap_uint<8>* bl7Codes,
+                    ap_uint<8>* bl8Codes,
+                    ap_uint<8>* bl9Codes,
+                    ap_uint<8>* bl10Codes,
+                    ap_uint<8>* bl11Codes,
+                    uint8_t accuracyLog,
+                    uint16_t weightCnt) {
+    // regenerate huffman tree using literal bit-lengths
+    typedef ap_uint<MAX_CODELEN + 1> LCL_Code_t;
+    LCL_Code_t first_codeword[MAX_CODELEN + 1];
+    ap_uint<32> bitlen_histogram[MAX_CODELEN + 1];
+    ap_uint<4> bitlens[256];
+#pragma HLS ARRAY_PARTITION variable = first_codeword complete
+#pragma HLS ARRAY_PARTITION variable = bitlen_histogram complete
+
+    uint16_t codes[256];
+// initialize first_codeword and bitlength histogram
+hflkpt_init_blen_hist:
+    for (uint8_t i = 0; i < MAX_CODELEN + 1; ++i) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS LOOP_TRIPCOUNT min = MAX_CODELEN max = MAX_CODELEN
+        bitlen_histogram[i] = 0;
+    }
+// read bit-lengths
+hflkpt_fill_blen_hist:
+    for (uint16_t i = 0; i < weightCnt; ++i) {
+#pragma HLS PIPELINE II = 1
+        // convert weight to bitlen
+        uint8_t cblen = weights[i];
+        if (cblen > 0) cblen = (accuracyLog + 1 - cblen);
+        bitlens[i] = cblen;
+        bitlen_histogram[cblen]++;
+    }
+
+    // generate first codes
+    first_codeword[0] = 0;
+    codeOffsets[0] = 0;
+
+    uint16_t nextCode = 0;
+hflkpt_initial_codegen:
+    for (int8_t i = accuracyLog - 1; i >= 0; --i) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS LOOP_TRIPCOUNT min = 0 max = 11
+        uint16_t cur = nextCode;
+        nextCode += (bitlen_histogram[i + 1]);
+        nextCode >>= 1;
+        first_codeword[i] = cur;
+        codeOffsets[i] = cur;
+    }
+
+    uint16_t blen = 0;
+CodeGen:
+    for (uint16_t i = 0; i < weightCnt; i++) {
+#pragma HLS PIPELINE II = 1
+        blen = bitlens[i];
+        if (blen != 0) {
+            switch (blen) {
+                case 1:
+                    bl1Codes[first_codeword[0]] = i;
+                    break;
+                case 2:
+                    bl2Codes[first_codeword[1]] = i;
+                    break;
+                case 3:
+                    bl3Codes[first_codeword[2]] = i;
+                    break;
+                case 4:
+                    bl4Codes[first_codeword[3]] = i;
+                    break;
+                case 5:
+                    bl5Codes[first_codeword[4]] = i;
+                    break;
+                case 6:
+                    bl6Codes[first_codeword[5]] = i;
+                    break;
+                case 7:
+                    bl7Codes[first_codeword[6]] = i;
+                    break;
+                case 8:
+                    bl8Codes[first_codeword[7]] = i;
+                    break;
+                case 9:
+                    bl9Codes[ap_uint<8>(first_codeword[8])] = i;
+                    break;
+                case 10:
+                    bl10Codes[ap_uint<8>(first_codeword[9])] = i;
+                    break;
+                case 11:
+                    bl11Codes[ap_uint<8>(first_codeword[10])] = i;
+                    break;
+                default:
+                    assert(0);
+                    break;
+            }
+            first_codeword[blen - 1]++;
+        }
+    }
+}
+
 template <uint8_t PARALLEL_BYTE>
 void huffDecodeLiteralsSeq(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                            bool quadStream,
@@ -1073,22 +1181,48 @@ void hfdGetCodesStreamLiterals(uint16_t* cmpSize,
                                uint8_t* weights,
                                hls::stream<ap_uint<BS_WIDTH> >& huffBitStream,
                                hls::stream<ap_uint<8> >& validBitCntStream,
-                               hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream) {
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+                               hls::stream<ap_uint<9> >& literalStream) {
     const uint16_t c_HBFSize = 32;
     const uint16_t c_BSWidth = BS_WIDTH;
     const int c_bsPB = c_BSWidth / 8;
-    // huffman lookup tables
-    HuffmanTable huffTable[2048];
-#pragma HLS BIND_STORAGE variable = huffTable type = ram_t2p impl = bram
 
-    ap_uint<c_streamWidth> bsacc[MAX_CODELEN + 1];
-#pragma HLS ARRAY_PARTITION variable = bsacc complete
+    ap_uint<11> validCodeOffset;
+    ap_uint<4> bitLen;
+    ap_uint<8> symbol[MAX_CODELEN + 1];
+#pragma HLS ARRAY_PARTITION variable = symbol complete dim = 0
 
-    // generate huffman lookup table
-    huffGenLookupTable<MAX_CODELEN>(weights, huffTable, accuracyLog, weightCnt);
+    // New huffman code
+    ap_uint<MAX_CODELEN + 1> codeOffsets[MAX_CODELEN + 1];
+#pragma HLS ARRAY_PARTITION variable = codeOffsets dim = 1 complete
 
-    ap_uint<c_streamWidth> outBuffer;
+    ap_uint<8> bl1Code[2];
+    ap_uint<8> bl2Code[4];
+    ap_uint<8> bl3Code[8];
+    ap_uint<8> bl4Code[16];
+    ap_uint<8> bl5Code[32];
+    ap_uint<8> bl6Code[64];
+    ap_uint<8> bl7Code[128];
+    ap_uint<8> bl8Code[256];
+    ap_uint<8> bl9Code[256];
+    ap_uint<8> bl10Code[256];
+    ap_uint<8> bl11Code[256];
+#pragma HLS BIND_STORAGE variable = bl1Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl2Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl3Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl4Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl5Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl6Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl7Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl8Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl9Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl10Code type = ram_1p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl11Code type = ram_1p impl = lutram
+
+    // generate codes
+    code_generator<MAX_CODELEN>(weights, codeOffsets, bl1Code, bl2Code, bl3Code, bl4Code, bl5Code, bl6Code, bl7Code,
+                                bl8Code, bl9Code, bl10Code, bl11Code, accuracyLog, weightCnt);
+
+    ap_uint<9> outBuffer;
     uint8_t obbytes = 0;
 decode_huff_bitstream_outer:
     for (uint8_t si = 0; si < streamCnt; ++si) {
@@ -1115,11 +1249,6 @@ decode_huff_bitstream_outer:
         acchbs <<= (c_HBFSize - bitcnt);
         uint16_t byteIndx = c_bsPB; // just to verify with the compressed size
         const int msbBitCnt = c_HBFSize - c_BSWidth;
-        const uint8_t shiftCnt = c_HBFSize - accuracyLog;
-        uint8_t shiftCnt_mn = 16 - accuracyLog;
-        uint8_t sym, blen = 0;
-        uint16_t cflag = false;
-        uint16_t code;
 
         if (bitcnt < 16 && byteIndx < cmpSize[si]) {
             uint32_t tmp = huffBitStream.read();
@@ -1127,31 +1256,39 @@ decode_huff_bitstream_outer:
             bitcnt += c_BSWidth;
             byteIndx += c_bsPB;
         }
-        code = acchbs >> shiftCnt;
 
     // decode huffman bitstreams
     huf_dec_bitstream:
         while (true) {
 #pragma HLS PIPELINE II = 1
-            auto lkVal = huffTable[code];
 
-        hfdbs_shift_acc:
-            for (int s = 0; s < MAX_CODELEN + 1; ++s) {
+            for (uint8_t i = 0; i < MAX_CODELEN; ++i) {
 #pragma HLS UNROLL
-#pragma HLS LOOP_TRIPCOUNT min = MAX_CODELEN + 1 max = MAX_CODELEN + 1
-                bsacc[s] = acchbs << s;
+                validCodeOffset.range(i, i) = (acchbs.range(31, 31 - i) >= codeOffsets[i]) ? 1 : 0;
             }
-            bitcnt -= lkVal.bitlen;
-            acchbs = bsacc[lkVal.bitlen];
+
+            bitLen = 1 + ap_uint<6>(__builtin_ctz((unsigned int)(validCodeOffset)));
+
+            symbol[1] = bl1Code[acchbs.range(31, 31)];
+            symbol[2] = bl2Code[acchbs.range(31, 30)];
+            symbol[3] = bl3Code[acchbs.range(31, 29)];
+            symbol[4] = bl4Code[acchbs.range(31, 28)];
+            symbol[5] = bl5Code[acchbs.range(31, 27)];
+            symbol[6] = bl6Code[acchbs.range(31, 26)];
+            symbol[7] = bl7Code[acchbs.range(31, 25)];
+            symbol[8] = bl8Code[acchbs.range(31, 24)];
+            symbol[9] = bl9Code[ap_uint<8>(acchbs.range(31, 23))];
+            symbol[10] = bl10Code[ap_uint<8>(acchbs.range(31, 22))];
+            symbol[11] = bl11Code[ap_uint<8>(acchbs.range(31, 21))];
+
+            bitcnt -= bitLen;
+            acchbs <<= bitLen;
 
             // write the literal to output stream
-            outBuffer.range(((obbytes + 1) * 8) - 1, obbytes * 8) = lkVal.symbol;
-            ++obbytes;
-            if (obbytes == PARALLEL_BYTE) {
-                literalStream << outBuffer;
-                obbytes = 0;
-                outBuffer = 0;
-            }
+            outBuffer.range(7, 0) = symbol[bitLen];
+            outBuffer.range(8, 8) = true;
+            literalStream << outBuffer;
+
             ++outBytes;
             if (outBytes == decSize[si]) break;
 
@@ -1161,10 +1298,29 @@ decode_huff_bitstream_outer:
                 bitcnt += c_BSWidth;
                 byteIndx += c_bsPB;
             }
-            code = acchbs >> shiftCnt;
         }
     }
-    if (obbytes > 0) {
+
+    outBuffer = 0;
+    literalStream << outBuffer;
+}
+
+template <uint8_t PARALLEL_BYTE>
+void writeAccLiteralData(hls::stream<ap_uint<9> >& byteStream,
+                         hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream) {
+    ap_uint<8 * PARALLEL_BYTE> outBuffer;
+    ap_uint<4> writeIdx = 0;
+
+    for (ap_uint<9> inData = byteStream.read(); inData.range(8, 8) == 1; inData = byteStream.read()) {
+        outBuffer.range((writeIdx + 1) * 8 - 1, writeIdx * 8) = inData.range(7, 0);
+        writeIdx++;
+        if (writeIdx == PARALLEL_BYTE) {
+            literalStream << outBuffer;
+            writeIdx = 0;
+        }
+    }
+
+    if (writeIdx) {
         literalStream << outBuffer;
     }
 }
@@ -1186,16 +1342,20 @@ void huffDecodeLitInternal(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
     // internal streams
     hls::stream<ap_uint<c_BSWidth> > huffBitStream("huffBitStream");
     hls::stream<ap_uint<8> > validBitCntStream("validBitCntStream");
+    hls::stream<ap_uint<9> > byteLiteralStream("byteLiteralStream");
 #pragma HLS STREAM variable = huffBitStream depth = c_huffBSStreamDepth
 #pragma HLS STREAM variable = validBitCntStream depth = c_vbitCntStreamDepth
+#pragma HLS STREAM variable = byteLiteralStream depth = 4
 
 #pragma HLS DATAFLOW
 
     hfdDataFeader<PARALLEL_BYTE, c_BSWidth>(inStream, streamCnt, cmpSize, accHuff, bytesInAcc, huffBitStream,
                                             validBitCntStream);
 
-    hfdGetCodesStreamLiterals<PARALLEL_BYTE, MAX_CODELEN, c_BSWidth>(
-        cmpSize, decSize, accuracyLog, streamCnt, weightCnt, weights, huffBitStream, validBitCntStream, literalStream);
+    hfdGetCodesStreamLiterals<PARALLEL_BYTE, MAX_CODELEN, c_BSWidth>(cmpSize, decSize, accuracyLog, streamCnt,
+                                                                     weightCnt, weights, huffBitStream,
+                                                                     validBitCntStream, byteLiteralStream);
+    writeAccLiteralData<PARALLEL_BYTE>(byteLiteralStream, literalStream);
 }
 
 template <uint8_t PARALLEL_BYTE>

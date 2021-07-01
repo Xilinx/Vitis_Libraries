@@ -11,7 +11,7 @@ The binary host file generated is named as "**xil_gzip**" and it is present in `
 Executable Usage
 ----------------
 
-1. To execute single file for compression 	          : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <file_name>``
+1. To execute single file for compression 	    : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <file_name>``
 2. To execute multiple files for compression    : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -cfl <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
@@ -36,13 +36,13 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx GZip Compress/Decompress
-kernels. The final Fmax achieved is 285MHz 
+kernels. The final Fmax achieved is 290MHz 
 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   49.7K 3K     51.7K  67    72    
+Compress   48.5K 3.8K   50.5K  61    72    
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

@@ -38,7 +38,7 @@ The final Fmax achieved is 300MHz
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   47K   10K    50K   48    48
+Compress   52K    10.8K  57K   48    48
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

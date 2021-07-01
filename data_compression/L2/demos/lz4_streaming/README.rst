@@ -35,7 +35,7 @@ unit (Single Engine).
 Topic                         Results
 ============================= =========================
 Compression Throughput        287 MB/s
-Decompression Throughput      368 MB/s
+Decompression Throughput      1.8 GB/s
 Average Compression Ratio     2.23x (Silesia Benchmark)
 ============================= =========================
 
