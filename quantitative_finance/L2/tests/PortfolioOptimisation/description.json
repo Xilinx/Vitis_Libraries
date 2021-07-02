@@ -1,4 +1,5 @@
 {
+    "gui": false, 
     "name": "Xilinx Portfolio Optimisation Engine", 
     "description": [
         "L2 Portfolio Optimisation Engine"

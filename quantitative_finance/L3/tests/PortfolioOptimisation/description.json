@@ -1,4 +1,5 @@
 {
+    "gui": false, 
     "name": "Xilinx Portfolio Optimisation Model", 
     "description": [
         "Portfolio Optimisation using the L3 framework"
