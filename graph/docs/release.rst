@@ -24,7 +24,7 @@ Release Note
 
 Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2), the asynchronous software level (L3) and TigerGraph integration (plugin) APIs.
 
-2.0
+2021.1
 ----
 The algorithms implemented by Vitis Graph Library include:
  - Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor.
@@ -36,7 +36,7 @@ The algorithms implemented by Vitis Graph Library include:
  - Graph Format: Calculate Degree and Format Convert between CSR and CSC.
 
 
-1.0
+2020.2
 ----
 
 The 1.0 release provides a range of algorithm, includes:
