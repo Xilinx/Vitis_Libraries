@@ -177,5 +177,5 @@
         ],
         "category": "canary"
     },
-    "gui": true
+    "gui": false
 }
