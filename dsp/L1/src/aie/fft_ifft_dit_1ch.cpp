@@ -108,12 +108,14 @@ INLINE_DECL void stockhamStages<TT_DATA,
             //  ::aie::vector<TT_DATA,32/sizeof(TT_DATA)> headerRawVal;
             T_buff_256b<TT_OUT_DATA> blankOp;
             using in256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
-            using out256VectorType = ::aie::vector<TT_OUT_DATA, 256 / 8 / sizeof(TT_OUT_DATA)>;
+            using outVectorType =
+                ::aie::vector<TT_OUT_DATA, 256 / 8 / sizeof(TT_DATA)>; // has to be same number of elements as input.
             in256VectorType* inPtr;
-            out256VectorType* outPtr;
+            outVectorType* outPtr;
             in256VectorType in256;
-            out256VectorType out256;
+            outVectorType outVector;
             int ptSizePwr;
+            ::aie::accum<cacc48, 256 / 8 / sizeof(TT_DATA)> cacc384;
 
             blankOp.val = ::aie::zeros<TT_OUT_DATA, 32 / sizeof(TT_OUT_DATA)>();
             headerOp.val = ::aie::zeros<TT_OUT_DATA, 32 / sizeof(TT_OUT_DATA)>();
@@ -141,12 +143,22 @@ INLINE_DECL void stockhamStages<TT_DATA,
                     ptSizePwr) { // i.e. kernels earlier in the chain have already performed the FFT for this size
                     // copy input window to output window in 256bit chunks
                     inPtr = (in256VectorType*)inputx->ptr;
-                    outPtr = (out256VectorType*)outputy->ptr;
-                    for (int i = 0; i < TP_WINDOW_VSIZE / (32 / sizeof(TT_DATA)); i++) {
-                        in256 = *inPtr++;
-                        out256 = ::aie::vector_cast<TT_OUT_DATA, out256VectorType>(in256);
-                        *outPtr++ = out256;
+                    outPtr = (outVectorType*)outputy->ptr;
+                    if
+                        constexpr(std::is_same<TT_DATA, cfloat>::value) {
+                            for (int i = 0; i < TP_WINDOW_VSIZE / (32 / sizeof(TT_DATA)); i++) {
+                                *outPtr++ = *inPtr++;
+                            }
+                        }
+                    else {
+                        for (int i = 0; i < TP_WINDOW_VSIZE / (32 / sizeof(TT_DATA)); i++) {
+                            in256 = *inPtr++;
+                            cacc384.from_vector(in256, 0);
+                            outVector = cacc384.template to_vector<TT_OUT_DATA>(0);
+                            *outPtr++ = outVector;
+                        }
                     }
+
                 } else {
                     for (int iter = 0; iter < kOpsInWindow; iter++) {
                         if

@@ -41,6 +41,9 @@ compilation.
 #include <vector>
 
 //#define _DSPLIB_WIDGET_REAL2COMPLEX_HPP_DEBUG_
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
 
 namespace xf {
 namespace dsp {
@@ -58,7 +61,7 @@ class kernelClass {
     // Constructor
     kernelClass() {}
 
-    void kernelClassMain(const TT_DATA* inBuff, TT_OUT_DATA* outBuff);
+    void kernelClassMain(const TT_DATA* __restrict inBuff, TT_OUT_DATA* __restrict outBuff);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -70,7 +73,7 @@ class kernelClass<cint16, int16, TP_WINDOW_VSIZE> {
     // Constructor
     kernelClass() {}
 
-    void kernelClassMain(const cint16* inBuff, int16* outBuff);
+    void kernelClassMain(const cint16* __restrict inBuff, int16* __restrict outBuff);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -82,7 +85,7 @@ class kernelClass<cint32, int32, TP_WINDOW_VSIZE> {
     // Constructor
     kernelClass() {}
 
-    void kernelClassMain(const cint32* inBuff, int32* outBuff);
+    void kernelClassMain(const cint32* __restrict inBuff, int32* __restrict outBuff);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -94,7 +97,7 @@ class kernelClass<cfloat, float, TP_WINDOW_VSIZE> {
     // Constructor
     kernelClass() {}
 
-    void kernelClassMain(const cfloat* inBuff, float* outBuff);
+    void kernelClassMain(const cfloat* __restrict inBuff, float* __restrict outBuff);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -109,7 +112,7 @@ class widget_real2complex : public kernelClass<TT_DATA, TT_OUT_DATA, TP_WINDOW_V
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex::convertData); }
 
     // Main function
-    void convertData(input_window<TT_DATA>* inWindow, output_window<TT_OUT_DATA>* outWindow0);
+    void convertData(input_window<TT_DATA>* __restrict inWindow, output_window<TT_OUT_DATA>* __restrict outWindow0);
 };
 }
 }

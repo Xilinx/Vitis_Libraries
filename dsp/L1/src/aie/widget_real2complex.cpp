@@ -44,8 +44,8 @@ namespace real2complex {
 // Base specialization, used for
 // real to complex (all 3 variants)
 template <typename TT_DATA, typename TT_OUT_DATA, unsigned int TP_WINDOW_VSIZE>
-inline void kernelClass<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::kernelClassMain(const TT_DATA* inBuff,
-                                                                                TT_OUT_DATA* outBuff) {
+INLINE_DECL void kernelClass<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::kernelClassMain(const TT_DATA* __restrict inBuff,
+                                                                                     TT_OUT_DATA* __restrict outBuff) {
     using inReal128VectorType = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
     using inReal256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
     using outCplx256VectorType = ::aie::vector<TT_OUT_DATA, 256 / 8 / sizeof(TT_OUT_DATA)>;
@@ -74,7 +74,8 @@ inline void kernelClass<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::kernelClassMain(
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
-inline void kernelClass<cint16, int16, TP_WINDOW_VSIZE>::kernelClassMain(const cint16* inBuff, int16* outBuff) {
+INLINE_DECL void kernelClass<cint16, int16, TP_WINDOW_VSIZE>::kernelClassMain(const cint16* __restrict inBuff,
+                                                                              int16* __restrict outBuff) {
     typedef cint16 TT_DATA;
     typedef int16 TT_OUT_DATA;
     using inCplx256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
@@ -99,7 +100,8 @@ inline void kernelClass<cint16, int16, TP_WINDOW_VSIZE>::kernelClassMain(const c
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
-inline void kernelClass<cint32, int32, TP_WINDOW_VSIZE>::kernelClassMain(const cint32* inBuff, int32* outBuff) {
+INLINE_DECL void kernelClass<cint32, int32, TP_WINDOW_VSIZE>::kernelClassMain(const cint32* __restrict inBuff,
+                                                                              int32* __restrict outBuff) {
     typedef cint32 TT_DATA;
     typedef int32 TT_OUT_DATA;
     using inCplx256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
@@ -119,12 +121,14 @@ inline void kernelClass<cint32, int32, TP_WINDOW_VSIZE>::kernelClassMain(const c
             inCplx = *inPtr++;                                                        // load
             realLarge = ::aie::vector_cast<TT_OUT_DATA, inCplx256VectorType>(inCplx); // convert to real
             outReal = ::aie::filter_even<outReal256VectorType>(realLarge);            // cast
+            // outReal = realLarge.template extract<outStep>(0); //dummy code for sake of CRVO
             *outPtr++ = outReal;
         }
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
-inline void kernelClass<cfloat, float, TP_WINDOW_VSIZE>::kernelClassMain(const cfloat* inBuff, float* outBuff) {
+INLINE_DECL void kernelClass<cfloat, float, TP_WINDOW_VSIZE>::kernelClassMain(const cfloat* __restrict inBuff,
+                                                                              float* __restrict outBuff) {
     typedef cfloat TT_DATA;
     typedef float TT_OUT_DATA;
     using inCplx256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
@@ -144,6 +148,7 @@ inline void kernelClass<cfloat, float, TP_WINDOW_VSIZE>::kernelClassMain(const c
             inCplx = *inPtr++;                                                        // load
             realLarge = ::aie::vector_cast<TT_OUT_DATA, inCplx256VectorType>(inCplx); // convert to real
             outReal = ::aie::filter_even<outReal256VectorType>(realLarge);            // cast
+            //    outReal = realLarge.template extract<outStep>(0); //dummy code for sake of CRVO
             *outPtr++ = outReal;
         }
 };
@@ -155,8 +160,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE>
 __attribute__((noinline))   //This function is the hook for QoR profiling, so must be identifiable after compilation.
 void widget_real2complex<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::convertData
-                (input_window<TT_DATA>* inWindow0,
-                 output_window<TT_OUT_DATA>* outWindow0
+                (input_window<TT_DATA>* __restrict inWindow0,
+                 output_window<TT_OUT_DATA>* __restrict outWindow0
                 )
     {
     TT_DATA* inPtr = (TT_DATA*)inWindow0->ptr;

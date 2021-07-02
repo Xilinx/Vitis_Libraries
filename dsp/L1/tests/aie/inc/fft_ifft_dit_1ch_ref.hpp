@@ -29,6 +29,8 @@ namespace aie {
 namespace fft {
 namespace dit_1ch {
 
+constexpr int kFftDynHeadBytes = 32;
+
 //---------------------------------
 // Templatized types
 template <typename T_D>

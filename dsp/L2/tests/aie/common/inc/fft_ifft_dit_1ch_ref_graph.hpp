@@ -57,8 +57,9 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,
         // but keeps 256 bit alignment
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * 32> >(in, m_fftKernel.in[0]);
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * 32> >(m_fftKernel.out[0], out);
+        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * kFftDynHeadBytes> >(in, m_fftKernel.in[0]);
+        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * kFftDynHeadBytes> >(m_fftKernel.out[0],
+                                                                                                out);
 
         // Specify mapping constraints
         runtime<ratio>(m_fftKernel) = 0.4;
