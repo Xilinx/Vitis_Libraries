@@ -131,10 +131,10 @@ int main(int argc, char* argv[]) {
                             0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f};
 
     // generate msg and corresponding its encrypted txt
-    unsigned char* msg = (unsigned char*)malloc(msg_len);
+    unsigned char* msg = (unsigned char*)malloc(msg_len + 16);
     genMsg(msg, msg_len);
 
-    unsigned char* gld = (unsigned char*)malloc(msg_len);
+    unsigned char* gld = (unsigned char*)malloc(msg_len + 16);
     {
         int outlen1 = 0;
         int outlen2 = 0;
@@ -284,10 +284,10 @@ int main(int argc, char* argv[]) {
     }
 
     // release resource
-    // free(msg);
-    // free(gld);
-    // free(inputData);
-    // free(outputData);
+    free(msg);
+    free(gld);
+    free(inputData);
+    free(outputData);
 
     // if passed
     if (checked) {
