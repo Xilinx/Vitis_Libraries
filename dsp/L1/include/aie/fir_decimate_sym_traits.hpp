@@ -50,7 +50,6 @@ inline constexpr unsigned int fnFirDecSymmertySupported() {
     return SUPPORTED;
 };
 
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 // Unsupported types trigger static_assert. Only affected when AIE API in use
 // template<>inline constexpr unsigned int fnFirDecSymMultiColumn<cint16,  int16>() {return NOT_SUPPORTED;}; //
 // template<>inline constexpr unsigned int fnFirDecSymMultiColumn<cint16, cint16>() {return NOT_SUPPORTED;}; //
@@ -83,8 +82,6 @@ template <>
 inline constexpr unsigned int fnFirDecSymmertySupported<cfloat, cfloat>() {
     return NOT_SUPPORTED;
 }; // unsupported. No sym intrinsic.
-
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 
 // Forward and reverse data can fit into one 1024b register
 // 2 registers required for forward and reverse data respectively
@@ -125,14 +122,6 @@ template <typename TT_DATA, typename TT_COEFF>
 inline constexpr unsigned int fnNumColumnsDecSym() {
     return fnNumCols384<TT_DATA, TT_COEFF>();
 };
-
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
-
-// Once CRVO-3442 is fixed, revisit the code, to switch Cint32 Int32 type combo to the alternative intrinsic (2x2).
-// template <> inline constexpr unsigned int fnNumLanesDecSym<  cint32,  int32>() {return 2;};
-// template <> inline constexpr unsigned int fnNumColumnsDecSym<  cint32,  int32>() {return 2;};
-
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 
 // Function to determine how many bits to load each time data is fetched from the input window.
 template <typename TT_DATA, typename TT_COEFF, unsigned int T_ARCH>

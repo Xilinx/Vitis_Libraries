@@ -25,13 +25,11 @@ Coding conventions
 #include <adf.h>
 
 #define __NEW_WINDOW_H__ 1
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 // #define __AIEARCH__ 1
 // #define __AIENGINE__ 1
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
 #include "kernel_api_utils.hpp"
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 #include "fir_decimate_asym.hpp"
 #include "fir_decimate_asym_utils.hpp"
 
@@ -228,21 +226,21 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_DECIMATE_FACTOR,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filter1BuffBasic(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                                T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+void kernelFilterClass<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       TP_CASC_IN,
+                       TP_CASC_OUT,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       TP_USE_COEFF_RELOAD,
+                       TP_NUM_OUTPUTS>::filter1BuffBasic(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     // The plus one in this calculation converts index to width
     static constexpr unsigned int m_kInitialLoads1Buff =
         CEIL(m_kDataBuffXOffset + (TP_DECIMATE_FACTOR * (m_kLanes - 1)) + (m_kColumns - 1) + 1, m_kInitLoadVsize) /
@@ -351,21 +349,21 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_DECIMATE_FACTOR,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filter1BuffIncrStrobe(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                                     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+void kernelFilterClass<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       TP_CASC_IN,
+                       TP_CASC_OUT,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       TP_USE_COEFF_RELOAD,
+                       TP_NUM_OUTPUTS>::filter1BuffIncrStrobe(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     static constexpr unsigned int m_kRepeatFactor =
         TP_DECIMATE_FACTOR % 2 == 0 ? m_kInitLoadsInReg
                                     : m_kSamplesInDataBuff / m_kVOutSize; // only FACTORS of 2 or 3 supported

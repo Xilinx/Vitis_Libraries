@@ -93,7 +93,7 @@ inline constexpr unsigned int fnNumLanesIntFract<cint32, int32>() {
 };
 template <>
 inline constexpr unsigned int fnNumLanesIntFract<cint32, cint32>() {
-    return 4;
+    return 2;
 };
 template <>
 inline constexpr unsigned int fnNumLanesIntFract<float, float>() {

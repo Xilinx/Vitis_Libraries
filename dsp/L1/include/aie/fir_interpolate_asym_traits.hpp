@@ -127,7 +127,7 @@ inline constexpr unsigned int fnNumLanesIntAsym<cint32, int32>() {
 };
 template <>
 inline constexpr unsigned int fnNumLanesIntAsym<cint32, cint32>() {
-    return 4;
+    return 2;
 };
 template <>
 inline constexpr unsigned int fnNumLanesIntAsym<float, float>() {

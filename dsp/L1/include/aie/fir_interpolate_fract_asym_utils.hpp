@@ -24,8 +24,7 @@ because they are purely for kernel use, not graph level compilation.
 
 #include <stdio.h>
 #include <adf.h>
-// T_acc in here.
-#include "kernel_utils.hpp"
+
 namespace xf {
 namespace dsp {
 namespace aie {

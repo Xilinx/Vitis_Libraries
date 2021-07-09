@@ -43,15 +43,11 @@ static constexpr unsigned int kUpdWSize = 32;         // Upd_w size in Bytes (25
 static constexpr unsigned int kBuffSize128Byte = 128; // 1024-bit buffer size in Bytes
 static constexpr unsigned int kBuffSize64Byte = 64;   // 512-bit buffer size in Bytes
 
-// Defensive checks
-
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 // FIR element support type combination with AIE API
 template <typename TT_DATA, typename TT_COEFF>
 inline constexpr unsigned int fnFirDecAsymTypeSupport() {
     return fnUnsupportedTypeCombo<TT_DATA, TT_COEFF>();
-};     // all combinations supported, apart from int16 data & int16 coeffs - due to HW restriction (xsquare)
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
+}; // all combinations supported, apart from int16 data & int16 coeffs - due to HW restriction (xsquare)
 
 // function to return the number of lanes for a type combo
 template <typename TT_DATA, typename TT_COEFF>

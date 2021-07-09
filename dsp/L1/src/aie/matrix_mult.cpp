@@ -37,10 +37,8 @@ Coding conventions
 
 #include "matrix_mult.hpp" //hence including matrix_mult_traits.hpp too
 
-#include "kernel_utils.hpp" // for common types like T_buff_256b
 //#define _DSPLIB_MATRIX_MULT_HPP_DEBUG_
 
-//#include "debug_utils.h"
 namespace xf {
 namespace dsp {
 namespace aie {

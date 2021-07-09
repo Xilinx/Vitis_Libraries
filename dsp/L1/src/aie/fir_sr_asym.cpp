@@ -25,17 +25,12 @@ Coding conventions
 #include <adf.h>
 
 #define __NEW_WINDOW_H__ 1
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 #define __AIEARCH__ 1
 #define __AIENGINE__ 1
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
-#include "fir_sr_asym_traits.hpp"
 #include "fir_sr_asym.hpp"
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 #include "kernel_api_utils.hpp"
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 #include "fir_sr_asym_utils.hpp"
 
 namespace xf {
@@ -231,7 +226,8 @@ inline void kernelFilterClass<TT_DATA,
                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
-    T_buff_256b<TT_COEFF>* restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
+    T_buff_256b<TT_COEFF>* restrict coeff;
+    coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0;  // register for coeff values.
     T_buff_1024b<TT_DATA> sbuff; // input data value cache.
     T_acc<TT_DATA, TT_COEFF> acc;
@@ -325,7 +321,8 @@ void kernelFilterClass<TT_DATA,
                                                        T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
-    T_buff_256b<TT_COEFF>* restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
+    T_buff_256b<TT_COEFF>* restrict coeff;
+    coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0, coe1, coe2; // register for coeff values.
     T_buff_1024b<TT_DATA> sbuff;            // input data value cache.
     T_acc<TT_DATA, TT_COEFF> acc;
@@ -422,7 +419,8 @@ inline void kernelFilterClass<TT_DATA,
     set_rnd(TP_RND);
     set_sat();
 
-    T_buff_256b<TT_COEFF>* restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
+    T_buff_256b<TT_COEFF>* restrict coeff;
+    coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0;  // register for coeff values.
     T_buff_1024b<TT_DATA> sbuff; // input data value cache.
     T_acc<TT_DATA, TT_COEFF> acc;

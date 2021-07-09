@@ -46,8 +46,6 @@ Coding conventions
 #define Z_BUFFER wc0
 #endif
 
-// #define _DSPLIB_FIR_AIE_LLI_API_DEBUG_
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 #define __NEW_WINDOW_H__ 1
 // #define __AIEARCH__ 1
 // #define __AIENGINE__ 1
@@ -55,7 +53,6 @@ Coding conventions
 #include "aie_api/aie_adf.hpp"
 #include "aie_api/utils.hpp"
 #include "kernel_api_utils.hpp"
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 #include "fir_decimate_sym.hpp"
 #include "fir_decimate_sym_utils.hpp"
 

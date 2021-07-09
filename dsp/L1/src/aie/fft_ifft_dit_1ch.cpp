@@ -26,14 +26,12 @@ Coding conventions
 
 using namespace std;
 
-//#ifdef _DSPLIB_FFT_IFFT_DIT_1CH_HPP_AIE_API_
 #define __NEW_WINDOW_H__ 1
 #define __AIEARCH__ 1
 #define __AIENGINE__ 1
 // if we use 1kb registers -> aie api uses 2x512b registers for 1024b so we need this for QoR
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
-//#endif // _DSPLIB_FFT_IFFT_DIT_1CH_HPP_AIE_API_
 
 #include "fft_com_inc.h"
 #include "fft_ifft_dit_1ch.hpp"

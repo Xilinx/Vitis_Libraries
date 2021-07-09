@@ -22,6 +22,7 @@ Widget API Cast reference model
 #include <adf.h>
 #include <limits>
 #include "fir_ref_utils.hpp"
+#include "widget_api_cast_traits.hpp"
 
 #define _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
 
@@ -31,8 +32,8 @@ namespace aie {
 namespace widget {
 namespace api_cast {
 
-static constexpr unsigned int kWindowAPI = 0;
-static constexpr unsigned int kStreamAPI = 1;
+// static constexpr unsigned int kWindowAPI = 0;
+// static constexpr unsigned int kStreamAPI = 1;
 
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA, // type of data input and output

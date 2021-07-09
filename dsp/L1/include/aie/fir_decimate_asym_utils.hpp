@@ -175,8 +175,6 @@ inline void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int splice
     }
 };
 
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
-
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA>
 inline T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
@@ -350,8 +348,6 @@ inline T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym1Buff(T_accDecAsym<TT_DATA, TT_
             return retVal;
         }
 }
-
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DFX, unsigned int TP_DECIMATE_FACTOR>

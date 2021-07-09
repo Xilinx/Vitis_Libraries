@@ -95,6 +95,16 @@ kernelClass<TT_DATA, kStreamAPI, kWindowAPI, TP_NUM_INPUTS, TP_WINDOW_VSIZE, TP_
                 if
                     constexpr(TP_NUM_OUTPUT_CLONES >= 4) window_writeincr(outInterface.outWindow3, writeVal.val);
             }
+        if (TP_WINDOW_VSIZE * sizeof(TT_DATA) / 16 % 2 == 1) { // odd number of 128b chunks
+            readVal1 = stream_readincr_128b(inInterface.inStream0);
+            window_writeincr(outInterface.outWindow0, readVal1.val);
+            if
+                constexpr(TP_NUM_OUTPUT_CLONES >= 2) window_writeincr(outInterface.outWindow1, readVal1.val);
+            if
+                constexpr(TP_NUM_OUTPUT_CLONES >= 3) window_writeincr(outInterface.outWindow2, readVal1.val);
+            if
+                constexpr(TP_NUM_OUTPUT_CLONES >= 4) window_writeincr(outInterface.outWindow3, readVal1.val);
+        }
     }
 };
 
@@ -124,6 +134,11 @@ kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_C
                 writeVal.val = readVal.val.template extract<kSamplesIn128b>(1);
                 writeincr(outInterface.outStream1, writeVal.val);
             }
+        if (TP_WINDOW_VSIZE / kSamplesIn128b % 2 == 1) { // odd number of 128b chunks
+            readVal = window_readincr_256b(inInterface.inWindow0);
+            writeVal.val = readVal.val.template extract<kSamplesIn128b>(0);
+            writeincr(outInterface.outStream0, writeVal.val);
+        }
     }
 };
 

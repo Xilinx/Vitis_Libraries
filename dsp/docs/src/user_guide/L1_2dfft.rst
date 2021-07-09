@@ -20,9 +20,9 @@
 
    L1_2dfft.rst
 
-========================================
-2-Dimensional(Matrix) FFT L1 FPGA Module
-========================================
+============================================
+2-Dimensional(Matrix) SSR FFT L1 FPGA Module
+============================================
 
 Overview
 ========
@@ -30,16 +30,16 @@ Overview
 Vitis DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive.
 This L1 primitive is designed to be easily transformed into an L2 Vitis kernel by adding memory adapters.
 The L1 primitive is designed to have an array of stream interface, as wide as device DDR memory
-widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the FFT input
+widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the SSR FFT input
 side which has AXI interface for connection with DDR memory on one side and other sides need to have
-memory wide streaming interface to connect with the 2-D FFT L1 primitive. A second memory plugin is required
-at the output side of the FFT, which reads in an array of stream data and connects it to the output AXI interface
+memory wide streaming interface to connect with the 2-D SSR FFT L1 primitive. A second memory plugin is required
+at the output side of the SSR FFT, which reads in an array of stream data and connects it to the output AXI interface
 for DDR memory connection.
 
 Block Level Interface
 =====================
 
-The figure below shows the block level interface for 2-D FFT. Essentially it is an array of
+The figure below shows the block level interface for 2-D SSR FFT. Essentially it is an array of
 stream interface at the input and the output.
 
 .. image:: /images/2-2d_fft_if.jpg
@@ -48,22 +48,22 @@ stream interface at the input and the output.
     :align: center
 
 
-2-D FFT Architecture
-====================
+2-D SSR FFT Architecture
+========================
 
-2-Dimensional FFT is built on top of 1-D FFT. It deploys multiple 1-D FFT processors in parallel to
-accelerate calculations. Potentially 2-D FFT can be accelerated by deploying multiple processors in
-parallel, to process multiple lines(rows/columns) of input data whose 1-D FFT calculation is independent of each other (Data parallelism).
-Essentially decreasing the latency and also increasing the throughput. But 2-D FFT throughput can
-also be increased by using a task level pipeline where one set of 1-D FFT processors also called line
+2-Dimensional SSR FFT is built on top of 1-D SSR FFT. It deploys multiple 1-D SSR FFT processors in parallel to
+accelerate calculations. Potentially 2-D SSR FFT can be accelerated by deploying multiple processors in
+parallel, to process multiple lines(rows/columns) of input data whose 1-D SSR FFT calculation is independent of each other (Data parallelism).
+Essentially decreasing the latency and also increasing the throughput. But 2-D SSR FFT throughput can
+also be increased by using a task level pipeline where one set of 1-D SSR FFT processors also called line
 processors work row wise on 2-D input data and another set of line processors work column wise in a task level
-pipeline on data produced by row processors as shown in the figure below. The row processors perform 1-D FFT row by row and column processors
+pipeline on data produced by row processors as shown in the figure below. The row processors perform 1-D SSR FFT row by row and column processors
 perform transforms on columns. Row processors connect to column processors through a matrix transposer.
-The following figure shows a simplified block diagram which gives the 2-D FFT architecture used by the Vitis FFT
+The following figure shows a simplified block diagram which gives the 2-D SSR FFT architecture used by the Vitis SSR FFT
 Library. Essentially it is a big dataflow pipeline of blocks which perform data permutations and 1-D FFT transforms
-working either row wise or column wise. Each of the 1-D FFT processor ( :ref:`1-D Vitis FFT <L1_FFT_LABEL>` ) is a Super
-Sample Rate streaming processor. The 1-D FFT processors used along the rows and columns are supposed to have same configuration which
-is specified as described in :ref:`Configuration Parameter Structure for Floating Point FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>`
+working either row wise or column wise. Each of the 1-D SSR FFT processor ( :ref:`1-D Vitis SSR FFT <L1_FFT_LABEL>` ) is a Super
+Sample Rate streaming processor. The 1-D SSR FFT processors used along the rows and columns are supposed to have same configuration which
+is specified as described in :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>`
 
 .. image:: /images/3-2d_fft_blk_dia.jpg
     :alt: doc tool flow
@@ -74,9 +74,9 @@ is specified as described in :ref:`Configuration Parameter Structure for Floatin
 Supported Data Types
 ====================
 
-2-D FFT currently supports **complex<float>** and **complex<ap_fixed<>>** type for simulation and synthesis.
-Also currently Vitis FFT library doesn't support standard std::complex<float> instead a complex_wrapper class
-in shipped with the Vitis FFT library that can be used for simulation and synthesis.
+2-D SSR FFT currently supports **complex<float>** and **complex<ap_fixed<>>** type for simulation and synthesis.
+Also currently Vitis SSR FFT library doesn't support standard std::complex<float> instead a complex_wrapper class
+in shipped with the Vitis SSR FFT library that can be used for simulation and synthesis.
 
 +-----------------------------+-------------------------+--------------------------+
 |                             |                         |                          |
@@ -90,9 +90,9 @@ in shipped with the Vitis FFT library that can be used for simulation and synthe
 
 .. _2D_FFT_TEMPLATE_PARAMS_LABEL:
 
-L1 API for 2-D FFT
-==================
-2-D FFT is provided as a template function given below:
+L1 API for 2-D SSR FFT
+======================
+2-D SSR FFT is provided as a template function given below:
 
 .. code-block:: cpp
 
@@ -112,7 +112,7 @@ Template Parameters
 -------------------
 
 Function: fft2d is the top level L1 API provided which takes a number of template parameters and in/out streams. These template
-functions describe the architecture and the data-path of 1-D FFT processors deployed as line processors. The
+functions describe the architecture and the data-path of 1-D SSR FFT processors deployed as line processors. The
 description of these parameters is as follows:
 
 +-----------------------+-------------------------------------------------------------------+
@@ -141,25 +141,25 @@ description of these parameters is as follows:
 
 * t_memWidth:   Gives the width of wide stream in complex<inner_type> words can be calculated as: t_memWidth=(wide stream size in bits)/(sizeof(complex<T_elemType>)*8))
 
-* t_numRows:    2-D FFT processes a matrix the number of rows in input matrix are given by t_numRows
+* t_numRows:    2-D SSR FFT processes a matrix the number of rows in input matrix are given by t_numRows
 
-* t_numCols:    2-D FFT processes a matrix the number of columns in input matrix are given by t_numCols
+* t_numCols:    2-D SSR FFT processes a matrix the number of columns in input matrix are given by t_numCols
 
-* t_numKernels: 2dftt can deploy multiple 1-D FFT processors along rows and columns to processes numerous row/columns in parallel this paramter gives number of processors to be used along rows/columns. Number of columns used along rows and columns are same and equal t_numKernels
+* t_numKernels: 2-D SSR FFT can deploy multiple 1-D SSR FFT processors along rows and columns to processes numerous row/columns in parallel this paramter gives number of processors to be used along rows/columns. Number of columns used along rows and columns are same and equal t_numKernels
 
-* t_ssrFFTParamsRowProc: It is a structure of parameters that describes tranform direction, data-path etc for row processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`
+* t_ssrFFTParamsRowProc: It is a structure of parameters that describes tranform direction, data-path etc for row processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point SSR FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
-* t_ssrFFTParamsColProc: It is a structure of parameters that describes tranform direction, data-path etc for column processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`
+* t_ssrFFTParamsColProc: It is a structure of parameters that describes tranform direction, data-path etc for column processors. The details of configuration parameter structures can be found here :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>` for fixed point case (currently not supported) it is :ref:`Configuration Parameter Structure for Fixed Point SSR FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
-* t_rowInstanceIDOffset: 2-D FFT deploys multiple 1D FFT processors and it is required that every 1D FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**
+* t_rowInstanceIDOffset: 2-D SSR FFT deploys multiple 1D SSR FFT processors and it is required that every 1D SSR FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**
 
-* t_colInstanceIDOffset: 2-D FFT deploys multiple 1D FFT processors and it is required that every 1D FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**
+* t_colInstanceIDOffset: 2-D SSR FFT deploys multiple 1D SSR FFT processors and it is required that every 1D SSR FFT proessor has a unique ID. If 'M' processors are used along rows then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M) the selection of offset for rows and columns should be made such that these ranges are unique without any overlap. Essentially it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**
 
-* T_elemType: 2-D FFT processes complex samples and T_elemType gives the inner type used to store real and imaginary parts. Currently it supports only float as inner type for simulation and synthesis.
+* T_elemType: 2-D SSR FFT processes complex samples and T_elemType gives the inner type used to store real and imaginary parts. Currently it supports only float as inner type for simulation and synthesis.
 
 Constraints on the Choice of Template Parameters
 ------------------------------------------------
-Currently the template paramters for 2-D FFT should follow the constraints liste below :
+Currently the template paramters for 2-D SSR FFT should follow the constraints liste below :
 
 1- The radix ``R`` specified for both the row and column processors in ``t_ssrFFTParamsRowProc`` and ``t_ssrFFTParamsColProc`` should be same
 
@@ -175,11 +175,11 @@ Currently the template paramters for 2-D FFT should follow the constraints liste
 
 Library Usage
 =============
-This section will provide information about how to use 2-D FFT in your project.
+This section will provide information about how to use 2-D SSR FFT in your project.
 
-Fixed Point 2-D FFT L1 Module Usage
------------------------------------
-To use the fixed point Vitis 2-D FFT L1 module in a C++ HLS design:
+Fixed Point 2-D SSR FFT L1 Module Usage
+---------------------------------------
+To use the fixed point Vitis 2-D SSR FFT L1 module in a C++ HLS design:
 
 1- Clone the Vitis DSP Library git repository and add the following path to compiler include path:
 
@@ -189,13 +189,13 @@ To use the fixed point Vitis 2-D FFT L1 module in a C++ HLS design:
 
 3- Use namespace ``xf::dsp::fft``
 
-4- Define parameter structures for 1-D FFT processors used along rows and columns lets say call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D FFT Parameter Structure <FIXED_FFT_PARAMS_STRUCT_LABEL>`
+4- Define parameter structures for 1-D SSR FFT processors used along rows and columns lets say call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D SSR FFT Parameter Structure <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
-5- call ``fft2d<8, 16, 16, 2, params_row, params_column, 0,3, std::complex<ap_fixed<...>> >(p_inStream, p_outStream);`` description for template parameters can be found in :ref:`2-D FFT Template Parameters<2D_FFT_TEMPLATE_PARAMS_LABEL>`
+5- call ``fft2d<8, 16, 16, 2, params_row, params_column, 0,3, std::complex<ap_fixed<...>> >(p_inStream, p_outStream);`` description for template parameters can be found in :ref:`2-D SSR FFT Template Parameters<2D_FFT_TEMPLATE_PARAMS_LABEL>`
 
 Following section gives usage examples and explains some other interface level details for use in C++ based
 HLS design.
-To use the 2-D FFT L1 library:
+To use the 2-D SSR FFT L1 library:
 
 1. Include the ``vt_fft.hpp`` header:
 
@@ -255,9 +255,9 @@ To use the 2-D FFT L1 library:
             std::complex<ap_fixed<...>>
            >(p_inStream, p_outStream);
 
-Floating Point 2-D FFT L1 Module Usage
---------------------------------------
-To use the Vitis 2-D FFT L1 module in a C++ HLS design:
+Floating Point 2-D SSR FFT L1 Module Usage
+------------------------------------------
+To use the Vitis 2-D SSR FFT L1 module in a C++ HLS design:
 
 1- Clone the Vitis DSP Library git repository and add the following path to compiler include path:
 
@@ -267,13 +267,13 @@ To use the Vitis 2-D FFT L1 module in a C++ HLS design:
 
 3- Use namespace ``xf::dsp::fft``
 
-4- Define parameter structures for 1-D FFT processors used along rows and columns lets say call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D FFT Parameter Structure <FLOAT_FFT_PARAMS_STRUCT_LABEL>`
+4- Define parameter structures for 1-D SSR FFT processors used along rows and columns lets say call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D SSR FFT Parameter Structure <FLOAT_FFT_PARAMS_STRUCT_LABEL>`
 
-5- call ``fft2d<8, 16, 16, 2, params_row, params_column, 0,3, complex_wrapper<float> >(p_inStream, p_outStream);`` description for template parameters can be found in :ref:`2-D FFT Template Parameters<2D_FFT_TEMPLATE_PARAMS_LABEL>`
+5- call ``fft2d<8, 16, 16, 2, params_row, params_column, 0,3, complex_wrapper<float> >(p_inStream, p_outStream);`` description for template parameters can be found in :ref:`2-D SSR FFT Template Parameters<2D_FFT_TEMPLATE_PARAMS_LABEL>`
 
 Following section gives usage examples and explains some other interface level details for use in C++ based
 HLS design.
-To use the 2-D FFT L1 library:
+To use the 2-D SSR FFT L1 library:
 
 1. Include the ``vt_fft.hpp`` header:
 
@@ -308,7 +308,7 @@ To use the 2-D FFT L1 library:
       static const transform_direction_enum transform_direction = FORWARD_TRANSFORM;
    };
 
-4. Call 2-D FFT L1 module as follows:
+4. Call 2-D SSR FFT L1 module as follows:
 
 .. code-block:: cpp
 
@@ -326,20 +326,20 @@ To use the 2-D FFT L1 library:
            >(p_inStream, p_outStream);
 
 
-2-D FFT Examples
+2-D SSR FFT Examples
 ========================
-The following section gives examples for 2-d floating and fixed point FFT.
+The following section gives examples for 2-D floating and fixed point SSR FFT.
 
 2-D Fixed Point Example
 -----------------------------------
-Following section briefly describes how an example project using Vitis FFT library can be build that uses 2d- fixed point FFT.
+Following section briefly describes how an example project using Vitis SSR FFT can be build that uses 2-D fixed point SSR FFT.
 The source code files are listed which can be used to build HLS project by adding include path that points to
 local copy of Vitis FFT library.
 
 Top Level Definition and main Function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Following section lists a complete example test that uses 2-D fixed FFT L1 module. The header file named ``top_2d_fft_test.hpp`` listed
+Following section lists a complete example test that uses 2-D fixed point SSR FFT L1 module. The header file named ``top_2d_fft_test.hpp`` listed
 below provides definition of most of the template parameters and data types used in test and also
 the declaration of top level function ``top_fft2d`` that will be synthesized.
 
@@ -416,7 +416,7 @@ Following ``.cpp`` file named ``top_2d_fft_test.cpp`` defines top level function
 
 	#ifndef __SYNTHESIS__
 	    std::cout << "================================================================================" << std::endl;
-	    std::cout << "---------------------Calling 2D FFT Kernel with Parameters----------------------" << std::endl;
+	    std::cout << "-------------------Calling 2D SSR FFT Kernel with Parameters--------------------" << std::endl;
 	    std::cout << "================================================================================" << std::endl;
 	    std::cout << "    The Main Memory Width (no. complex<ap_fixed>)   : " << k_memWidth << std::endl;
 	    std::cout << "    The Size of 1D Row Kernel                    : " << FFTParams::N << std::endl;
@@ -486,7 +486,7 @@ The ``main`` function is defined as follows which runs an impulse test:
 		top_fft2d(l_matToStream, fftOutputStream);
 
 		printMatStream<k_fftKernelSize, k_fftKernelSize, k_memWidth, MemWideIFTypeOut>(
-		    fftOutputStream, "2D FFT Output Natural Order...");
+		    fftOutputStream, "2D SSR FFT Output Natural Order...");
 		streamToMatrix<k_fftKernelSize, k_fftKernelSize, k_memWidth, T_outType>(fftOutputStream, l_outMat);
 	    } // runs loop
 
@@ -523,14 +523,14 @@ Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfix_impluse`` and simul
 
 2-D Floating Point Example
 -----------------------------------
-Following section briefly describes how an example project using Vitis FFT library can be build that uses 2d-FFT.
+Following section briefly describes how an example project using Vitis SSR FFT can be build that uses 2-D SSR FFT.
 The source code files are listed which can be used to build HLS project by adding include path that points to
 local copy of Vitis FFT library.
 
 Top Level Definition and main Function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Following section lists a complete example test that uses 2-D FFT L1 module. The header file named ``top_2d_fft_test.hpp`` listed
+Following section lists a complete example test that uses 2-D SSR FFT L1 module. The header file named ``top_2d_fft_test.hpp`` listed
 below provides definition of most of the template parameters and data types used in test and also
 the declaration of top level function ``top_fft2d`` that will be synthesized.
 
@@ -606,7 +606,7 @@ Following ``.cpp`` file named ``top_2d_fft_test.cpp`` defines top level function
 
 	#ifndef __SYNTHESIS__
 	    std::cout << "================================================================================" << std::endl;
-	    std::cout << "---------------------Calling 2D FFT Kernel with Parameters----------------------" << std::endl;
+	    std::cout << "-------------------Calling 2D SSR FFT Kernel with Parameters--------------------" << std::endl;
 	    std::cout << "================================================================================" << std::endl;
 	    std::cout << "    The Main Memory Width (no. complex<float>)   : " << k_memWidth << std::endl;
 	    std::cout << "    The Size of 1D Row Kernel                    : " << FFTParams::N << std::endl;
@@ -676,7 +676,7 @@ The ``main`` function is defined as follows which runs an impulse test:
 		top_fft2d(l_matToStream, fftOutputStream);
 
 		printMatStream<k_fftKernelSize, k_fftKernelSize, k_memWidth, MemWideIFTypeOut>(
-		    fftOutputStream, "2D FFT Output Natural Order...");
+		    fftOutputStream, "2D SSR FFT Output Natural Order...");
 		streamToMatrix<k_fftKernelSize, k_fftKernelSize, k_memWidth, T_outType>(fftOutputStream, l_outMat);
 	    } // runs loop
 
@@ -709,9 +709,9 @@ change the setting of environment variable **TA_PATH** to point to the installat
 The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
 Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat, build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target.
 
-2-D FFT Tests
+2-D SSR FFT Tests
 ----------------------------------------------------------
-Different tests are provided for fixed point and floating point 2-D FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 2-D FFT tests are in folder ``REPO_PATH/dsp/L1/tests/hw/2dfft``
+Different tests are provided for fixed point and floating point 2-D SSR FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 2-D SSR FFT tests are in folder ``REPO_PATH/dsp/L1/tests/hw/2dfft``
 
 Launching an Individual Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

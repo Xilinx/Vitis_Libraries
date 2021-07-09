@@ -23,9 +23,18 @@ Coding conventions
 
 #pragma once
 #include <adf.h>
+
+#define __NEW_WINDOW_H__ 1
+
+#define __AIEARCH__ 1
+#define __AIENGINE__ 1
+#define __AIE_API_USE_NATIVE_1024B_VECTOR__
+#include "aie_api/aie_adf.hpp"
+
+#include "kernel_api_utils.hpp"
+
 #include "fir_interpolate_fract_asym.hpp"
 #include "fir_interpolate_fract_asym_utils.hpp"
-#include "kernel_utils.hpp" //readCascade is not specific to this FIR variant
 
 #include <cmath> // For power function
 

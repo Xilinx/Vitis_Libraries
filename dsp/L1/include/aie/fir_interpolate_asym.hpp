@@ -148,8 +148,9 @@ class kernelFilterClass {
          (m_kLanes - 1)) /
         m_kLanes; // effectively ceil[(kVOutsize+m_kColumns-1)/kLanes]
     static constexpr unsigned int m_kInitialLoadsIncr =
-        CEIL(m_kDataBuffXOffset + TP_FIR_RANGE_LEN, m_kDataLoadVsize) / m_kDataLoadVsize;
-    static constexpr unsigned int m_kRepeatFactor = m_kDataLoadsInReg;
+        CEIL(m_kDataBuffXOffset + TP_FIR_RANGE_LEN + m_kLanes * m_kDataLoadVsize / m_kVOutSize - 1, m_kDataLoadVsize) /
+        m_kDataLoadVsize;
+    static constexpr unsigned int m_kRepeatFactor = m_kDataLoadsInReg * m_kDataLoadVsize / m_kVOutSize;
 
     // Additional defensive checks
     static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0,

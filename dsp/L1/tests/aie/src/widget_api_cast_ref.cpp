@@ -210,6 +210,12 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1>
             window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
         }
     }
+    if (TP_WINDOW_VSIZE * kSampleSize / (kWriteSize / 2) % 2 == 1) { // odd number of chunks
+        for (int k = 0; k < kStreamReadSize / sizeof(TT_DATA); k++) {
+            d_in = readincr(inStream0); // read input data
+            window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+        }
+    }
 };
 
 // Widget API Cast - 2 stream input 2 window output
@@ -241,6 +247,13 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2>
         }
         for (int k = 0; k < 128 / 8 / sizeof(TT_DATA); k++) {
             d_in = readincr(inStream1); // read input data
+            window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+            window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
+        }
+    }
+    if (TP_WINDOW_VSIZE * kSampleSize / (kWriteSize / 2) % 2 == 1) { // odd number of chunks
+        for (int k = 0; k < kStreamReadSize / sizeof(TT_DATA); k++) {
+            d_in = readincr(inStream0); // read input data
             window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
             window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
         }
@@ -283,6 +296,14 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3>
             window_writeincr((output_window<TT_DATA>*)outWindow2, d_in);
         }
     }
+    if (TP_WINDOW_VSIZE * kSampleSize / (kWriteSize / 2) % 2 == 1) { // odd number of chunks
+        for (int k = 0; k < kStreamReadSize / sizeof(TT_DATA); k++) {
+            d_in = readincr(inStream0); // read input data
+            window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+            window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
+            window_writeincr((output_window<TT_DATA>*)outWindow2, d_in);
+        }
+    }
 };
 
 // Widget API Cast - 2 stream input 4 window output
@@ -318,6 +339,15 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4>
         }
         for (int k = 0; k < 128 / 8 / sizeof(TT_DATA); k++) {
             d_in = readincr(inStream1); // read input data
+            window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+            window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
+            window_writeincr((output_window<TT_DATA>*)outWindow2, d_in);
+            window_writeincr((output_window<TT_DATA>*)outWindow3, d_in);
+        }
+    }
+    if (TP_WINDOW_VSIZE * kSampleSize / (kWriteSize / 2) % 2 == 1) { // odd number of chunks
+        for (int k = 0; k < kStreamReadSize / sizeof(TT_DATA); k++) {
+            d_in = readincr(inStream0); // read input data
             window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
             window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
             window_writeincr((output_window<TT_DATA>*)outWindow2, d_in);
@@ -368,6 +398,10 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2>
             d_in = window_readincr(inWindow0); // read input data
             writeincr(outStream1, d_in);
         }
+    }
+    if (TP_WINDOW_VSIZE / kSamplesIn128b % 2 == 1) {
+        d_in = window_readincr(inWindow0); // read input data samplewise
+        writeincr(outStream0, d_in);
     }
 };
 }

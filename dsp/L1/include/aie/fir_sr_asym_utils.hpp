@@ -32,8 +32,6 @@ namespace aie {
 namespace fir {
 namespace sr_asym {
 
-#ifndef _DSPLIB_FIR_AIE_LLI_API_DEBUG_
-
 template <typename TT_DATA, typename TT_COEFF>
 inline constexpr unsigned int fnAccSizeSrAsym() {
     return fnAccSize<TT_DATA, TT_COEFF>();
@@ -84,8 +82,6 @@ inline T_acc<TT_DATA, TT_COEFF> initMacSrAsym(T_inputIF<CASC_IN_TRUE, TT_DATA> i
                                               unsigned int zstart) {
     return macSrAsym<TT_DATA, TT_COEFF>(acc, xbuff, xstart, zbuff, zstart);
 };
-
-#endif // _DSPLIB_FIR_AIE_LLI_API_DEBUG_
 }
 }
 }
