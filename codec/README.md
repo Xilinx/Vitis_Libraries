@@ -16,7 +16,7 @@ In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a
 
 ## Documentations
 
-For more details of the Codec library, please refer to [xf_codec Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/index.html).
+For more details of the Codec library, please refer to [xf_codec Library Documentation](https://xilinx.github.io/Vitis_Libraries/codec/2021.1/index.html).
 
 ## License
 
