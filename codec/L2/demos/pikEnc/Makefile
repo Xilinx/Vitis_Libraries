@@ -355,10 +355,8 @@ run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	XCL_EMULATION_MODE=$(TARGET) ./check.sh
 else
 	$(EXE_FILE) $(HOST_ARGS)
-	./check.sh
 endif
 
 # ################################# Cleaning Rules ##################################

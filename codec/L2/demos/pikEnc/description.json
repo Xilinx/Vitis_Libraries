@@ -32,7 +32,6 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./check.sh"
             ]
         }
     ], 
