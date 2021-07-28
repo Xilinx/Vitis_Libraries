@@ -1,7 +1,21 @@
 # Vitis Accelerated Libraries
 [Vitis&trade; Unified Software Platform](https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html) includes an extensive set of open-source, performance-optimized libraries that offer out-of-the-box acceleration with minimal to zero-code changes to your existing applications.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/)
+# Introducing AI Engine Enabled Libraries!
+
+With the 2021.1 release, Xilinx is adding AI Engine&trade; enabled functions to the Vitis Accelerated Libraries.
+
+AI Engines, found in the Versal AI Core devices, provide up to five times higher compute density for vector-based algorithms. Adaptable Engines provide flexible custom compute and data movement. Scalar Engines provide complex software support.
+
+The following libraries have AI Engine additions in 2021.1:
+* Vitis DSP Library
+* Vitis Vision Library (Mid-July 2021)
+
+AI Engine code for can be found under the "AIE" directories under the L1 for AIE only functions, and under L2 for functions that are comprised of both AIE and PL code.
+
+![AI Engine](https://xilinx.github.io/Vitis_Libraries/_images/aie_dir.png)
+
+# [Comprehensive Documentation](https://xilinx.github.io/Vitis_Libraries/)
 
 * Common Vitis accelerated-libraries for Math, Statistics, Linear Algebra, and DSP offer a set of core functionality for a wide range of diverse applications.
 * Domain-specific Vitis accelerated libraries offer out-of-the-box acceleration for workloads like Vision and Image Processing, Quantitative Finance, Database, and Data Analytics, Data Compression and more.
