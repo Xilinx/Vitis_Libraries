@@ -20,26 +20,26 @@
 #include "xf_datamover/write_result.hpp"
 #include "xf_datamover/types.hpp"
 
-template <{% for m in k["map"] %} class T{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %}>
+template <{% for m in k["map"] %}class T{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %}>
 void {{ k["name"] }}_preload({% for m in k["map"] %}
     // {{ loop.index0 }}
     xf::datamover::ConstData::type* {{ m["in_ref"]["name"] }},
     T{{ loop.index0 }}& ram{{ loop.index0 }},
     uint64_t sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
 {% endfor %}
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
 {% for m in k["map"] %}
     hls::stream<ConstData::type, 8> is{{ loop.index0 }};{% endfor %}
 
-    readConst({% for m in k["map"] %} {{ m["in_ref"]["name"] }}, is{{ loop.index0 }}, sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
+    readConst({% for m in k["map"] %}{{ m["in_ref"]["name"] }}, is{{ loop.index0 }}, sz{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
 {% for m in k["map"] %}
     ram{{ loop.index0 }}.preload(is{{ loop.index0 }}, sz{{ loop.index0 }});{% endfor %}
 }
 
-template <{% for m in k["map"] %} class T{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %}>
+template <{% for m in k["map"] %}class T{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %}>
 void {{ k["name"] }}_run({% for m in k["map"] %}
     // {{ loop.index0 }}
     T{{ loop.index0 }}& ram{{ loop.index0 }},
@@ -47,7 +47,7 @@ void {{ k["name"] }}_run({% for m in k["map"] %}
     xf::datamover::CheckResult::type* ret{{ loop.index0 }},
     uint64_t sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
 {% endfor %}
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
@@ -55,7 +55,7 @@ void {{ k["name"] }}_run({% for m in k["map"] %}
     hls::stream<CheckResult::type, 2> rs{{ loop.index0 }};{% endfor %}
 {% for m in k["map"] %}
     ram{{ loop.index0 }}.checkStream(s{{ loop.index0 }}, rs{{ loop.index0 }}, sz{{ loop.index0 }});{% endfor %}
-    writeResult({% for m in k["map"] %} rs{{ loop.index0 }}, ret{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
+    writeResult({% for m in k["map"] %}rs{{ loop.index0 }}, ret{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
 }
 
 extern "C" void {{ k["name"] }}(
@@ -68,10 +68,10 @@ extern "C" void {{ k["name"] }}(
     xf::datamover::CheckResult::type* {{ m["out"]["name"] }},
     uint64_t sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
 {% endfor %}
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface s_axilite bundle=control port=mode
 {% for m in k["map"] %}
 #pragma HLS interface m_axi offset=slave bundle=gmem{{ loop.index0 }} port={{ m["in_ref"]["name"] }} \
@@ -84,15 +84,14 @@ extern "C" void {{ k["name"] }}(
 #pragma HLS interface s_axilite bundle=control port=sz{{ loop.index0 }}
 {% endfor %}
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 {% for m in k["map"] %}
     Preloadable{{ m["ram"]["type"] }}<{{ m["in_port"]["width"] }}, {{ m["ram"]["depth"] }}> ram{{ loop.index0 }};{% endfor %}
 
     if (mode == MODE_PRELOAD) {
-        {{ k["name"] }}_preload({% for m in k["map"] %} {{ m["in_ref"]["name"] }}, ram{{ loop.index0 }}, sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
+        {{ k["name"] }}_preload({% for m in k["map"] %}{{ m["in_ref"]["name"] }}, ram{{ loop.index0 }}, sz{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
     } else if (mode == MODE_RUN) {
-        {{ k["name"] }}_run({% for m in k["map"] %} ram{{ loop.index0 }}, {{ m["in_port"]["name"] }}, {{ m["out"]["name"] }}, sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
+        {{ k["name"] }}_run({% for m in k["map"] %}ram{{ loop.index0 }}, {{ m["in_port"]["name"] }}, {{ m["out"]["name"] }}, sz{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
     }
 }
-
 {# vim: set filetype=cpp : #}

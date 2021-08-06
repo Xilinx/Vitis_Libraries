@@ -28,28 +28,27 @@ extern "C" void s2m_x2(
     ap_uint<32>* p1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface axis port=s0
 #pragma HLS interface m_axi offset=slave bundle=gmem0 port=p0 \
-    max_read_burst_length=32 num_read_outstanding=4 latency=128
+    max_write_burst_length=32 num_write_outstanding=4 latency=128
 #pragma HLS interface s_axilite bundle=control port=p0
 #pragma HLS interface s_axilite bundle=control port=sz0
 
 #pragma HLS interface axis port=s1
 #pragma HLS interface m_axi offset=slave bundle=gmem1 port=p1 \
-    max_read_burst_length=32 num_read_outstanding=4 latency=128
+    max_write_burst_length=32 num_write_outstanding=4 latency=128
 #pragma HLS interface s_axilite bundle=control port=p1
 #pragma HLS interface s_axilite bundle=control port=sz1
 
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
 #pragma HLS dataflow
 
     storeStreamToMaster(s0, p0, sz0);
     storeStreamToMaster(s1, p1, sz1);
 }
-

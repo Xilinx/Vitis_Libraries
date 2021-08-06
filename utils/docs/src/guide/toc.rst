@@ -16,7 +16,7 @@
 .. _module_guide:
 
 ======================
-L1 Module User Guide
+Utility API User Guide
 ======================
 
 .. toctree::

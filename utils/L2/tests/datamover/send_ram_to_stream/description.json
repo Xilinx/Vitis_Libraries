@@ -1,4 +1,5 @@
 {
+    "gui": false,
     "name": "Xilinx Send RAM to Stream Kernel Test", 
     "description": "", 
     "flow": "vitis", 

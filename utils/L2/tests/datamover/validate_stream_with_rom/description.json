@@ -1,4 +1,5 @@
 {
+    "gui": false,
     "name": "Xilinx Validate Stream with ROM Kernel Test", 
     "description": "", 
     "flow": "vitis", 

@@ -28,9 +28,14 @@ The kernel generator consists of the following parts:
 - Data converter: For transforming the user provided texture ROM content into usable initialization file
 - Python script: For automating the kernel generation from JSON to HLS C++ OpenCL kernel
 
+.. ATTENTION::
+    Generated kernels are not self-contained source code, they would reference low-level block implementation headers in ``L1/include`` folder.
+    Ensure that folder is passed to Vitis compiler as header search path when compiling project using generated PL kernels.
+
 **Usage**
 
-.. code-blcok:: bash
+.. code-block:: bash
+
     L2/scripts/generate_kernels MY_KERNELS.json
 
 Kernel Templates
@@ -154,7 +159,8 @@ Please be noticed that there are several limitations for this data converter, so
 Full Example Projects
 ---------------------
 
-.. code-blcok:: bash
+.. code-block:: bash
+
     cd L2/tests/datamover/load_master_to_stream
     # Only HW_EMU and HW run available
     make run TARGET=hw_emu

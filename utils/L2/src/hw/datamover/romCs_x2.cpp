@@ -19,7 +19,7 @@
 #include "xf_datamover/write_result.hpp"
 #include "xf_datamover/types.hpp"
 
-template < class T0, class T1>
+template <class T0, class T1>
 void romCs_x2_run(
     // 0
     T0& rom0,
@@ -33,7 +33,7 @@ void romCs_x2_run(
     xf::datamover::CheckResult::type* ret1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
@@ -43,7 +43,7 @@ void romCs_x2_run(
 
     rom0.checkStream(s0, rs0, sz0);
     rom1.checkStream(s1, rs1, sz1);
-    writeResult( rs0, ret0, rs1, ret1);
+    writeResult(rs0, ret0, rs1, ret1);
 }
 
 extern "C" void romCs_x2(
@@ -58,10 +58,10 @@ extern "C" void romCs_x2(
     xf::datamover::CheckResult::type* ret1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface axis port=s0
 #pragma HLS interface m_axi offset=slave bundle=gmemr port=ret0 \
     max_write_burst_length=32 num_write_outstanding=4 latency=128
@@ -73,7 +73,7 @@ extern "C" void romCs_x2(
 #pragma HLS interface s_axilite bundle=control port=ret1
 #pragma HLS interface s_axilite bundle=control port=sz1
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
     StaticRom<64, 512> rom0;
     const ap_uint<64> in0[] = {
@@ -87,6 +87,5 @@ extern "C" void romCs_x2(
     };
     rom1.data = in1;
 
-    romCs_x2_run( rom0, s0, ret0, sz0, rom1, s1, ret1, sz1);
+    romCs_x2_run(rom0, s0, ret0, sz0, rom1, s1, ret1, sz1);
 }
-

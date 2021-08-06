@@ -89,7 +89,7 @@ as possible to output.
 Generic Type
 ~~~~~~~~~~~~
 
-.. image:: /images/stream_one_to_n_load_balance_type.png
+.. image:: /images/stream_n_to_one_load_balance_type.png
    :alt: structure of load-balance collection
    :width: 80%
    :align: center

@@ -31,10 +31,10 @@ extern "C" void sCm_x2(
     xf::datamover::CheckResult::type* ret1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface axis port=s0
 #pragma HLS interface m_axi offset=slave bundle=gmem0 port=g0 \
     max_read_burst_length=32 num_read_outstanding=4 latency=128
@@ -52,7 +52,7 @@ extern "C" void sCm_x2(
 #pragma HLS interface s_axilite bundle=control port=ret1
 #pragma HLS interface s_axilite bundle=control port=sz1
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
 #pragma HLS dataflow
 
@@ -62,6 +62,5 @@ extern "C" void sCm_x2(
     checkStreamWithMaster(s0, g0, rs0, sz0);
     checkStreamWithMaster(s1, g1, rs1, sz1);
 
-    writeResult( rs0, ret0, rs1, ret1);
+    writeResult(rs0, ret0, rs1, ret1);
 }
-

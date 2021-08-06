@@ -23,10 +23,10 @@ extern "C" void {{ k["name"] }}({% for m in k["map"] %}
     ap_uint<{{ m["in_port"]["width"] }}>* {{ m["out"]["name"] }},
     uint64_t sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
 {% endfor %}
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off{% for m in k["map"] %}
+    ; // clang-format off{% for m in k["map"] %}
 #pragma HLS interface axis port={{ m["in_port"]["name"] }}
 #pragma HLS interface m_axi offset=slave bundle=gmem{{ loop.index0 }} port={{ m["out"]["name"] }} \
     max_write_burst_length=32 num_write_outstanding=4 latency=128
@@ -34,11 +34,10 @@ extern "C" void {{ k["name"] }}({% for m in k["map"] %}
 #pragma HLS interface s_axilite bundle=control port=sz{{ loop.index0 }}
 {% endfor %}
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
 #pragma HLS dataflow
 {% for m in k["map"] %}
     storeStreamToMaster({{ m["in_port"]["name"] }}, {{ m["out"]["name"] }}, sz{{ loop.index0 }});{% endfor %}
 }
-
 {# vim: set filetype=cpp : #}

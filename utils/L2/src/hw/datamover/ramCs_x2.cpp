@@ -20,7 +20,7 @@
 #include "xf_datamover/write_result.hpp"
 #include "xf_datamover/types.hpp"
 
-template < class T0, class T1>
+template <class T0, class T1>
 void ramCs_x2_preload(
     // 0
     xf::datamover::ConstData::type* din0,
@@ -32,7 +32,7 @@ void ramCs_x2_preload(
     T1& ram1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
@@ -40,13 +40,13 @@ void ramCs_x2_preload(
     hls::stream<ConstData::type, 8> is0;
     hls::stream<ConstData::type, 8> is1;
 
-    readConst( din0, is0, sz0, din1, is1, sz1);
+    readConst(din0, is0, sz0, din1, is1, sz1);
 
     ram0.preload(is0, sz0);
     ram1.preload(is1, sz1);
 }
 
-template < class T0, class T1>
+template <class T0, class T1>
 void ramCs_x2_run(
     // 0
     T0& ram0,
@@ -60,7 +60,7 @@ void ramCs_x2_run(
     xf::datamover::CheckResult::type* ret1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
@@ -70,7 +70,7 @@ void ramCs_x2_run(
 
     ram0.checkStream(s0, rs0, sz0);
     ram1.checkStream(s1, rs1, sz1);
-    writeResult( rs0, ret0, rs1, ret1);
+    writeResult(rs0, ret0, rs1, ret1);
 }
 
 extern "C" void ramCs_x2(
@@ -89,10 +89,10 @@ extern "C" void ramCs_x2(
     xf::datamover::CheckResult::type* ret1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface s_axilite bundle=control port=mode
 
 #pragma HLS interface m_axi offset=slave bundle=gmem0 port=din0 \
@@ -114,15 +114,14 @@ extern "C" void ramCs_x2(
 #pragma HLS interface s_axilite bundle=control port=sz1
 
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
     PreloadableUram<64, 512> ram0;
     PreloadableBram<32, 1024> ram1;
 
     if (mode == MODE_PRELOAD) {
-        ramCs_x2_preload( din0, ram0, sz0, din1, ram1, sz1);
+        ramCs_x2_preload(din0, ram0, sz0, din1, ram1, sz1);
     } else if (mode == MODE_RUN) {
-        ramCs_x2_run( ram0, s0, ret0, sz0, ram1, s1, ret1, sz1);
+        ramCs_x2_run(ram0, s0, ret0, sz0, ram1, s1, ret1, sz1);
     }
 }
-

@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019-2020 Xilinx, Inc.
+   Copyright 2019-2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ Setup the build environment using the Vitis and XRT scripts.
 
 .. code-block:: shell
 
-    source /opt/xilinx/Vitis/2020.2/settings64.sh
+    source /opt/xilinx/Vitis/2021.1/settings64.sh
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 

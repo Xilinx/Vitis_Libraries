@@ -28,10 +28,10 @@ extern "C" void m2s_x2(
     hls::stream<ap_axiu<32, 0, 0, 0> >& sout2b,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface m_axi offset=slave bundle=gmem0 port=din2a \
     max_read_burst_length=32 num_read_outstanding=4 latency=128
 #pragma HLS interface s_axilite bundle=control port=din2a
@@ -45,11 +45,10 @@ extern "C" void m2s_x2(
 #pragma HLS interface s_axilite bundle=control port=sz1
 
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
 #pragma HLS dataflow
 
     loadMasterToStream(din2a, sout2a, sz0);
     loadMasterToStream(din2b, sout2b, sz1);
 }
-

@@ -19,7 +19,7 @@
 #include "xf_datamover/write_result.hpp"
 #include "xf_datamover/types.hpp"
 
-template <{% for m in k["map"] %} class T{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %}>
+template <{% for m in k["map"] %}class T{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %}>
 void {{ k["name"] }}_run({% for m in k["map"] %}
     // {{ loop.index0 }}
     T{{ loop.index0 }}& rom{{ loop.index0 }},
@@ -27,7 +27,7 @@ void {{ k["name"] }}_run({% for m in k["map"] %}
     xf::datamover::CheckResult::type* ret{{ loop.index0 }},
     uint64_t sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
 {% endfor %}
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
@@ -35,7 +35,7 @@ void {{ k["name"] }}_run({% for m in k["map"] %}
     hls::stream<CheckResult::type, 2> rs{{ loop.index0 }};{% endfor %}
 {% for m in k["map"] %}
     rom{{ loop.index0 }}.checkStream(s{{ loop.index0 }}, rs{{ loop.index0 }}, sz{{ loop.index0 }});{% endfor %}
-    writeResult({% for m in k["map"] %} rs{{ loop.index0 }}, ret{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
+    writeResult({% for m in k["map"] %}rs{{ loop.index0 }}, ret{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
 }
 
 extern "C" void {{ k["name"] }}(
@@ -45,17 +45,17 @@ extern "C" void {{ k["name"] }}(
     xf::datamover::CheckResult::type* {{ m["out"]["name"] }},
     uint64_t sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
 {% endfor %}
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off{% for m in k["map"] %}
+    ; // clang-format off{% for m in k["map"] %}
 #pragma HLS interface axis port={{ m["in_port"]["name"] }}
 #pragma HLS interface m_axi offset=slave bundle=gmemr port={{ m["out"]["name"] }} \
     max_write_burst_length=32 num_write_outstanding=4 latency=128
 #pragma HLS interface s_axilite bundle=control port={{ m["out"]["name"] }}
 #pragma HLS interface s_axilite bundle=control port=sz{{ loop.index0 }}{% endfor %}
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 {% for m in k["map"] %}
     StaticRom<{{ m["in_port"]["width"] }}, {{ m["in_file"]["depth"] }}> rom{{ loop.index0 }};
     const ap_uint<{{ m["in_port"]["width"] }}> in{{ loop.index0 }}[] = {
@@ -63,7 +63,6 @@ extern "C" void {{ k["name"] }}(
     };
     rom{{ loop.index0 }}.data = in{{ loop.index0 }};
 {% endfor %}
-    {{ k["name"] }}_run({% for m in k["map"] %} rom{{ loop.index0 }}, {{ m["in_port"]["name"] }}, {{ m["out"]["name"] }}, sz{{ loop.index0 }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
+    {{ k["name"] }}_run({% for m in k["map"] %}rom{{ loop.index0 }}, {{ m["in_port"]["name"] }}, {{ m["out"]["name"] }}, sz{{ loop.index0 }}{{ ', ' if loop.index0 != (k["map"] | length) - 1 else '' }}{% endfor %});
 }
-
 {# vim: set filetype=cpp : #}

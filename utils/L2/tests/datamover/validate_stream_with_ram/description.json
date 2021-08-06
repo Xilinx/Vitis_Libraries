@@ -1,4 +1,5 @@
 {
+    "gui": false,
     "name": "Xilinx Validate Stream with RAM Kernel Test", 
     "description": "", 
     "flow": "vitis", 

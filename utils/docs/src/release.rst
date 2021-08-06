@@ -22,6 +22,14 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2021.1
+------
+
+In the 2021.1 release, Data-Mover is added into this library. Unlike other C++ based APIs, this addition
+is targeting people less experienced in HLS based kernel design and just wants to test their stream-based designs.
+The Data-Mover is actually a kernel source code generator, creating a list of common helper kernels to drive
+or valdiate designs, like those on AIE devices.
+
 2020.2
 ------
 

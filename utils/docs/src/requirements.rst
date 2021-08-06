@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019-2020 Xilinx, Inc.
+   Copyright 2019-2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,6 +37,6 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 Development Tools
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis 2020.2,
+This library is designed to work with Vitis 2021.1,
 and a matching version of XRT should be installed.
 

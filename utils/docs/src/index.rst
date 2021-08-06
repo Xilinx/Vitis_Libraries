@@ -25,8 +25,13 @@
    design_flows.rst
 
 .. toctree::
-   :caption: User Guide
+   :caption: Utility User Guide
    :maxdepth: 3
 
    guide/toc.rst
+
+.. toctree::
+   :caption: Data-Mover User Guide
+
+   datamover/kernel_gen_guide.rst
 

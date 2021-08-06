@@ -18,7 +18,7 @@
 #include "xf_datamover/static_rom.hpp"
 #include "xf_datamover/types.hpp"
 
-template < class T0, class T1>
+template <class T0, class T1>
 void rom2s_x2_run(
     // 0
     T0& rom0,
@@ -30,7 +30,7 @@ void rom2s_x2_run(
     hls::stream<ap_axiu<32, 0, 0, 0> >& s1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
 #pragma HLS dataflow
@@ -49,10 +49,10 @@ extern "C" void rom2s_x2(
     hls::stream<ap_axiu<32, 0, 0, 0> >& s1,
     uint64_t sz1
 
-) {
+    ) {
     using namespace xf::datamover;
 
-// clang-format off
+    ; // clang-format off
 #pragma HLS interface axis port=s0
 #pragma HLS interface s_axilite bundle=control port=sz0
 
@@ -60,7 +60,7 @@ extern "C" void rom2s_x2(
 #pragma HLS interface s_axilite bundle=control port=sz1
 
 #pragma HLS interface s_axilite bundle=control port=return
-// clang-format on
+    ; // clang-format on
 
     StaticRom<64, 512> rom0;
     const ap_uint<64> in0[] = {
@@ -74,6 +74,5 @@ extern "C" void rom2s_x2(
     };
     rom1.data = in1;
 
-    rom2s_x2_run( rom0, s0, sz0, rom1, s1, sz1);
+    rom2s_x2_run(rom0, s0, sz0, rom1, s1, sz1);
 }
-
