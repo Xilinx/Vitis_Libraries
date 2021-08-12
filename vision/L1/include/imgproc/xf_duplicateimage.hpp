@@ -37,6 +37,7 @@ void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 
     ap_uint<13> row, col;
     int readindex = 0, writeindex1 = 0, writeindex2 = 0;
+    const int TRIP_COLS = COLS / NPC;
 Row_Loop:
     for (row = 0; row < img_height; row++) {
 // clang-format off
@@ -46,7 +47,7 @@ Row_Loop:
     Col_Loop:
         for (col = 0; col < img_width; col++) {
 // clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = 240 max = 240
+#pragma HLS LOOP_TRIPCOUNT min = TRIP_COLS max = TRIP_COLS
 #pragma HLS pipeline
             // clang-format on
             XF_TNAME(SRC_T, NPC) tmp_src;
@@ -79,6 +80,7 @@ void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 
     ap_uint<13> row, col;
     int readindex = 0, writeindex1 = 0, writeindex2 = 0;
+    const int TRIP_COLS = COLS / NPC;
 Row_Loop:
     for (row = 0; row < img_height; row++) {
 // clang-format off
@@ -88,7 +90,7 @@ Row_Loop:
     Col_Loop:
         for (col = 0; col < img_width; col++) {
 // clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = 240 max = 240
+#pragma HLS LOOP_TRIPCOUNT min = TRIP_COLS max = TRIP_COLS
 #pragma HLS pipeline
             // clang-format on
             XF_TNAME(SRC_T, NPC) tmp_src;
@@ -110,6 +112,7 @@ void xFDuplicates(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 
     ap_uint<13> row, col;
     int readindex = 0, writeindex1 = 0, writeindex2 = 0, writeindex3 = 0;
+    const int TRIP_COLS = COLS / NPC;
 Row_Loop:
     for (row = 0; row < img_height; row++) {
 // clang-format off
@@ -119,7 +122,7 @@ Row_Loop:
     Col_Loop:
         for (col = 0; col < img_width; col++) {
 // clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = 240 max = 240
+#pragma HLS LOOP_TRIPCOUNT min = TRIP_COLS max = TRIP_COLS
 #pragma HLS pipeline
             // clang-format on
             XF_TNAME(SRC_T, NPC) tmp_src;

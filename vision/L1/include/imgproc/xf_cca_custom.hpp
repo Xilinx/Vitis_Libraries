@@ -88,7 +88,6 @@ void fw_cca(uint8_t* in_ptr, uint8_t* tmp_out_ptr, int& obj_pix, int height, int
     for (int i = 0; i < height; i++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=1 max=HEIGHT
-#pragma HLS PIPELINE II=1
         // clang-format on
         process_row<WIDTH>(in_ptr + offset, tmp_out_ptr + offset, lab_arr, obj_pix, width);
         offset += width;

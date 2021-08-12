@@ -25,12 +25,24 @@ Vitis vision library provides a software interface for computer vision functions
    
    overview
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Vitis Vision AIE Library User Guide
    
+   overview-aie
+
 .. toctree::
    :maxdepth: 2
    :caption: Vitis Vision Library API Reference
 
    api-reference
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Vitis Vision AIE Library API Reference
+
+   api-reference-aie
+
 
 .. toctree::
    :maxdepth: 2

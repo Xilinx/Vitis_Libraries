@@ -14,7 +14,7 @@ platforms in Vitis. The subsequent section also explains the
 methodology to verify the kernel in various emulation modes and on the
 hardware.
 
-.. _prerequisites:
+.. _prerequisites_hls:
 
 Prerequisites
 =============
@@ -281,7 +281,7 @@ Kernel-to-Kernel streaming
 
 There are two utility functions available in Vitis Vision, axiStrm2xfMat and xfMat2axiStrm to support streaming 
 of data between two kernels. For more details on kernel-to-kernel streaming, refer to the "Streaming Data Transfers Between the
-Kernels" section of UG1277 document.
+Kernels" section of [UG1393](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2021_1/ug1393-vitis-application-acceleration.pdf) document.
 
 axiStrm2xfMat
 ~~~~~~~~~~~~~

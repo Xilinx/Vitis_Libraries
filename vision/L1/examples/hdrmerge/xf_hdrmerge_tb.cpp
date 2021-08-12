@@ -1,4 +1,18 @@
-
+/*
+ * Copyright 2021 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "common/xf_headers.hpp"
 #include <math.h>
 #include "xf_hdrmerge_config.h"
@@ -243,15 +257,18 @@ void HDR_merge(cv::Mat& _src1,
             float rv = (float)(j / t[i]);
             wr[i][j] = compute_datareliabilityweight(c_inters, mu_h[i], mu_l[i], rv);
             wr_ocv[i][j] = wr[i][j] * 16384;
-            fprintf(fp, "%lf,", wr[i][j]);
+            fprintf(fp, "%d,", wr_ocv[i][j]);
         }
         fprintf(fp, "\n");
     }
     fclose(fp);
 
     cv::Mat final_w1, final_w2;
-
+#if T_8U
+    final_img.create(_src1.rows, _src1.cols, CV_8UC1);
+#else
     final_img.create(_src1.rows, _src1.cols, CV_16UC1);
+#endif
     final_w1.create(_src1.rows, _src1.cols, CV_32FC1);
     final_w2.create(_src1.rows, _src1.cols, CV_32FC1);
 
@@ -259,9 +276,13 @@ void HDR_merge(cv::Mat& _src1,
 
     for (int i = 0; i < _src1.rows; i++) {
         for (int j = 0; j < _src1.cols; j++) {
+#if T_8U
+            int val1 = _src1.at<unsigned char>(i, j);
+            int val2 = _src2.at<unsigned char>(i, j);
+#else
             int val1 = _src1.at<unsigned short>(i, j);
             int val2 = _src2.at<unsigned short>(i, j);
-
+#endif
             final_w1.at<float>(i, j) = (float)(wr[0][val1]);
             final_w2.at<float>(i, j) = (float)(wr[1][val2]);
 
@@ -278,8 +299,11 @@ void HDR_merge(cv::Mat& _src1,
                 final_val = (W_B_SIZE - 1);
             }
             fprintf(fp1, "%d,", final_val);
-
+#if T_8U
+            final_img.at<unsigned char>(i, j) = (unsigned char)final_val;
+#else
             final_img.at<unsigned short>(i, j) = (unsigned short)final_val;
+#endif
         }
         fprintf(fp1, "\n");
     }
@@ -289,7 +313,7 @@ void HDR_merge(cv::Mat& _src1,
 static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_strm, unsigned char InColorFormat) {
     int i, j, k, l;
 
-#if T_8U || T_10U || T_12U
+#if T_8U
     unsigned char cv_pix;
 #else
     unsigned short cv_pix;
@@ -317,10 +341,10 @@ static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_st
                     cv_pix = img.at<unsigned char>(i, j + l);
                 switch (depth) {
                     case 10:
-                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned char)cv_pix);
+                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned short)cv_pix);
                         break;
                     case 12:
-                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned char)cv_pix);
+                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned short)cv_pix);
                         break;
                     case 16:
                         xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned short)cv_pix);
@@ -349,7 +373,7 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
     int i, j, k, l;
     ap_axiu<AXI_WIDTH_OUT, 1, 1, 1> axi;
 
-#if T_8U || T_10U || T_12U
+#if T_8U
     unsigned char cv_pix;
 #else
     unsigned short cv_pix;
@@ -371,7 +395,7 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
                 for (l = 0; l < NPIX; l++) {
                     cv_pix = axi.data(l * depth + depth - 1, l * depth);
 
-#if T_8U || T_10U || T_12U
+#if T_8U
                     img.at<unsigned char>(i, (NPIX * j + l)) = cv_pix;
 #else
                     img.at<unsigned short>(i, (NPIX * j + l)) = cv_pix;
@@ -401,27 +425,34 @@ int main(int argc, char** argv) {
     hls_out.create(hdr_img_1.rows, hdr_img_1.cols, CV_8UC1);
     final_ocv.create(hdr_img_1.rows, hdr_img_1.cols, CV_8UC1);
 #endif
-#if T_16U
+#if T_16U || T_10U || T_12U
     hls_out.create(hdr_img_1.rows, hdr_img_1.cols, CV_16UC1);
     final_ocv.create(hdr_img_1.rows, hdr_img_1.cols, CV_16UC1);
 #endif
 
     short wr_ocv[NO_EXPS][W_B_SIZE];
 
-    HDR_merge(hdr_img_1, hdr_img_2, alpha, optical_black_value, intersec, rho, imax, t, final_ocv, wr_ocv);
+    // HDR_merge(hdr_img_1, hdr_img_2, alpha, optical_black_value, intersec, rho, imax, t, final_ocv, wr_ocv);
 
     int rows = hdr_img_1.rows;
     int cols = hdr_img_1.cols;
 
     short wr_hls[NO_EXPS * NPIX * W_B_SIZE];
 
+    // FILE *fp = fopen("exposuredata.txt","w");
     for (int k = 0; k < NPIX; k++) {
         for (int i = 0; i < NO_EXPS; i++) {
             for (int j = 0; j < (W_B_SIZE); j++) {
-                wr_hls[(i + k * NPIX) * W_B_SIZE + j] = wr_ocv[i][j];
+                int index1 = (i + k * NO_EXPS) * W_B_SIZE;
+                int index = index1 + j;
+                wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[i][j];
+                // fprintf(fp,"%d,",wr_ocv[i][j]);
             }
+            // fprintf(fp,"\n");
         }
+        // fprintf(fp,"\n");
     }
+    // fclose(fp);
 
     InVideoStrm_t_e_s src_axi1;
     InVideoStrm_t_e_s src_axi2;

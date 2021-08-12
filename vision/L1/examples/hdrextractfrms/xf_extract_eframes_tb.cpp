@@ -1,39 +1,25 @@
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef __XF_EXTRACT_EFRAMES_TB_CPP__
 #define __XF_EXTRACT_EFRAMES_TB_CPP__
 
 #include <iostream>
 #include <string>
 #include <map>
-/***************************************************************************
- Copyright (c) 2020, Xilinx, Inc.
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without modification,
- are permitted provided that the following conditions are met:
-
- 1. Redistributions of source code must retain the above copyright notice,
- this list of conditions and the following disclaimer.
-
- 2. Redistributions in binary form must reproduce the above copyright notice,
- this list of conditions and the following disclaimer in the documentation
- and/or other materials provided with the distribution.
-
- 3. Neither the name of the copyright holder nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ***************************************************************************/
-
 #include "common/xf_headers.hpp"
 #include "xf_extract_eframes_config.h"
 using namespace std;
@@ -41,7 +27,7 @@ using namespace std;
 static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_strm, unsigned char InColorFormat) {
     int i, j, k, l;
 
-#if T_8U || T_10U || T_12U
+#if T_8U
     unsigned char cv_pix;
 #else
     unsigned short cv_pix;
@@ -69,10 +55,10 @@ static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_st
                     cv_pix = img.at<unsigned char>(i, j + l);
                 switch (depth) {
                     case 10:
-                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned char)cv_pix);
+                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned short)cv_pix);
                         break;
                     case 12:
-                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned char)cv_pix);
+                        xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned short)cv_pix);
                         break;
                     case 16:
                         xf::cv::AXISetBitFields(axi, (l)*depth, depth, (unsigned short)cv_pix);
@@ -101,7 +87,7 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
     int i, j, k, l;
     ap_axiu<AXI_WIDTH_OUT, 1, 1, 1> axi;
 
-#if T_8U || T_10U || T_12U
+#if T_8U
     unsigned char cv_pix;
 #else
     unsigned short cv_pix;
@@ -123,7 +109,7 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
                 for (l = 0; l < XF_NPPC; l++) {
                     cv_pix = axi.data(l * depth + depth - 1, l * depth);
 
-#if T_8U || T_10U || T_12U
+#if T_8U
                     img.at<unsigned char>(i, (XF_NPPC * j + l)) = cv_pix;
 #else
                     img.at<unsigned short>(i, (XF_NPPC * j + l)) = cv_pix;
@@ -144,55 +130,108 @@ int main(int argc, char** argv) {
 
     height = img1.rows;
     width = img1.cols;
-
-    interleaved_img.create(cv::Size(img1.cols, img1.rows * 2), img1.type());
+#if T_8U
+    interleaved_img.create(cv::Size(img1.cols + NUM_H_BLANK, img1.rows * 2), img1.type());
     lef_img.create(img1.rows, img1.cols, CV_8U);
     sef_img.create(img1.rows, img1.cols, CV_8U);
+#else
+    interleaved_img.create(cv::Size(img1.cols + NUM_H_BLANK, img1.rows * 2), img1.type());
+    lef_img.create(img1.rows, img1.cols, CV_16U);
+    sef_img.create(img1.rows, img1.cols, CV_16U);
 
-    FILE* fp1 = fopen("img1.txt", "w");
-    FILE* fp2 = fopen("img2.txt", "w");
+#endif
+
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
             img1.at<unsigned char>(r, c) = 0;
             img2.at<unsigned char>(r, c) = 255;
-            fprintf(fp1, "%d ", img1.at<unsigned char>(r, c));
-            fprintf(fp2, "%d ", img2.at<unsigned char>(r, c));
         }
-        fprintf(fp1, "\n");
-        fprintf(fp2, "\n");
     }
-    fclose(fp1);
-    fclose(fp2);
 
     cv::imwrite("img1.png", img1);
     cv::imwrite("img2.png", img2);
 
+#if T_8U
     int sc = 1;
     int cnt = 0, cnt1 = 0;
     for (int r = 0; r < height * 2; r++) {
-        for (int c = 0; c < width; c++) {
-            if (r < 8) {
-                interleaved_img.at<unsigned char>(r, c) = img1.at<unsigned char>(r, c);
+        for (int c = 0; c < width + NUM_H_BLANK; c++) {
+            if (r < NUM_V_BLANK_LINES) {
+                if (c >= NUM_H_BLANK)
+                    interleaved_img.at<unsigned char>(r, c) = img1.at<unsigned char>(r, c);
+                else
+                    interleaved_img.at<unsigned char>(r, c) = 0;
             }
 
-            if (r >= 8 && r <= ((2 * height) - 8)) {
+            if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (r % 2 == 0) {
-                    interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c);
+                    if (c >= NUM_H_BLANK)
+                        interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c);
+                    else
+                        interleaved_img.at<unsigned char>(r, c) = 0;
                 } else {
-                    interleaved_img.at<unsigned char>(r, c) = img1.at<unsigned char>(cnt1 + 7, c);
+                    if (c >= NUM_H_BLANK)
+                        interleaved_img.at<unsigned char>(r, c) =
+                            img1.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c);
+                    else
+                        interleaved_img.at<unsigned char>(r, c) = 0;
                 }
             }
-            if (r >= ((2 * height) - 8)) {
-                interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c);
+            if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (c >= NUM_H_BLANK)
+                    interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c);
+                else
+                    interleaved_img.at<unsigned char>(r, c) = 0;
             }
         }
-        if (r % 2 == 0 && r >= 8) {
+        if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
             cnt++;
         }
-        if (r % 2 != 0 && r >= 8) {
+        if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
             cnt1++;
         }
     }
+#else
+    int sc = 1;
+    int cnt = 0, cnt1 = 0;
+    for (int r = 0; r < height * 2; r++) {
+        for (int c = 0; c < width + NUM_H_BLANK; c++) {
+            if (r < NUM_V_BLANK_LINES) {
+                if (c >= NUM_H_BLANK)
+                    interleaved_img.at<unsigned short>(r, c) = img1.at<unsigned short>(r, c);
+                else
+                    interleaved_img.at<unsigned short>(r, c) = 0;
+            }
+
+            if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (r % 2 == 0) {
+                    if (c >= NUM_H_BLANK)
+                        interleaved_img.at<unsigned short>(r, c) = img2.at<unsigned short>(cnt, c);
+                    else
+                        interleaved_img.at<unsigned short>(r, c) = 0;
+                } else {
+                    if (c >= NUM_H_BLANK)
+                        interleaved_img.at<unsigned short>(r, c) =
+                            img1.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c);
+                    else
+                        interleaved_img.at<unsigned short>(r, c) = 0;
+                }
+            }
+            if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (c >= NUM_H_BLANK)
+                    interleaved_img.at<unsigned short>(r, c) = img2.at<unsigned short>(cnt, c);
+                else
+                    interleaved_img.at<unsigned short>(r, c) = 0;
+            }
+        }
+        if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
+            cnt++;
+        }
+        if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
+            cnt1++;
+        }
+    }
+#endif
 
     unsigned char InColorFormat = 0;
     unsigned char OutColorFormat = 0;

@@ -15,7 +15,8 @@ Vitis vision library functions are mostly similar in functionality to their
 OpenCV equivalent. Any deviations, if present, are documented.
 
 
-.. seealso:: For more information on the Vitis vision library prerequisites, see Prerequisites_. 
+.. seealso:: For more information on the Vitis vision library please refer :ref:`Prerequisites <prerequisites_hls>` section
+
 To familiarize yourself with the steps required to use the Vitis vision library
 functions, see the `Using the Vitis vision
 Library <using-the-vitis-vision-library.html>`__.

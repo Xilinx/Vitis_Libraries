@@ -1191,7 +1191,7 @@ The following example demonstrates the ISP pipeline with HDR.
 				}
 				
 				
-.. |pp_image1| image:: ./images/letterbox.png
+.. |pp_image1| image:: ./images/letterbox.PNG
    :class: image 
    :width: 1000
    

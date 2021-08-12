@@ -33,6 +33,20 @@ For questions and to get help on this project or your own projects, visit the [X
 ## LICENSE AND CONTRIBUTING TO THE REPOSITORY
 The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
 
+    Copyright 2021 Xilinx, Inc.
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+        http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
 To contribute to this project, follow the guidelines in the [Repository Contribution README][] (link yet to be updated)
 
 ## ACKNOWLEDGEMENTS
@@ -41,7 +55,47 @@ This library is written by developers at
 
 ## Changelog:
 
-**New features and functions**
+**First release of selected vision functions for Versal AI Engines** 
+
+**Functions available:** 
+
+    •Filter2D
+
+    •absdiff
+
+    •accumulate
+
+    •accumulate_weighted
+
+    •addweighted
+
+    •blobFromImage
+
+    •colorconversion
+
+    •convertscaleabs
+
+    •erode
+
+    •gaincontrol
+
+    •gaussian
+
+    •laplacian
+
+    •pixelwise_mul
+
+    •threshold
+
+    •zero
+
+**xfcvDataMovers** : Utility datamovers to facilitate easy tiling of high resolution images and transfer to local memory of AI Engines cores. Two flavors
+
+    • Using PL kernel : higher throughput at the expense of additional PL resources. 
+    • Using GMIO : lower throughput than PL kernel version but uses Versal NOC (Network on chip) and no PL resources. 
+ 
+
+**New Programmable Logic (PL) functions and features**
 
 The below functions and pipelines are newly added into the library.
 

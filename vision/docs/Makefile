@@ -48,10 +48,10 @@ install: .stamp/sphinx
 .ONESHELL:
 .stamp/doxygen:
 	rm -rf doxygen/L1/xml doxygen/L2/xml doxygen/L3/xml
+	mkdir -p .stamp
 	cd doxygen/L1
 	doxygen ./Doxyfile
 	cd ../../
-	mkdir -p .stamp
 	touch .stamp/doxygen
 
 .ONESHELL:

@@ -55,7 +55,7 @@ void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
                     short wr_hls[NO_EXPS * NPC * W_SIZE]) {
 // clang-format off
-	#pragma HLS ARRAY_PARTITION variable=wr_hls dim=1 cyclic factor=NO_EXPS*NPC
+	#pragma HLS ARRAY_PARTITION variable=wr_hls dim=1 block factor=NO_EXPS*NPC
 // clang-format on	
 	unsigned short width = _src_mat1.cols >> XF_BITSHIFT(NPC);
 	unsigned short height = _src_mat1.rows;
@@ -94,10 +94,10 @@ void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
 			short final_w1 =  (short)(wr_hls[index1]);
 			short final_w2 =  (short)(wr_hls[index2]);
 		
-			ap_fixed<STEP+16,STEP> val_1 = (ap_fixed<STEP+16,STEP>)((float)(final_w1 * val1)/16384);
-			ap_fixed<STEP+16,STEP> val_2 = (ap_fixed<STEP+16,STEP>)((float)(final_w2 * val2)/16384);
+			ap_fixed<STEP+STEP*2,STEP+STEP> val_1 = (ap_fixed<STEP+STEP*2,STEP+STEP>)((float)(final_w1 * val1)/16384);
+			ap_fixed<STEP+STEP*2,STEP+STEP> val_2 = (ap_fixed<STEP+STEP*2,STEP+STEP>)((float)(final_w2 * val2)/16384);
 			
-			ap_fixed<STEP+16,STEP> sum_wei = (ap_fixed<STEP+16,STEP>)((float)(final_w1+final_w2)/16384);
+			ap_fixed<STEP+STEP*2,STEP+STEP> sum_wei = (ap_fixed<STEP+STEP*2,STEP+STEP>)((float)(final_w1+final_w2)/16384);
 
 			int final_val = (int)((val_1+val_2) / sum_wei);
 			
