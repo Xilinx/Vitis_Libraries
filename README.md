@@ -9,7 +9,7 @@ AI Engines, found in the Versal AI Core devices, provide up to five times higher
 
 The following libraries have AI Engine additions in 2021.1:
 * Vitis DSP Library
-* Vitis Vision Library (Mid-July 2021)
+* Vitis Vision Library
 
 AI Engine code for can be found under the "AIE" directories under the L1 for AIE only functions, and under L2 for functions that are comprised of both AIE and PL code.
 
