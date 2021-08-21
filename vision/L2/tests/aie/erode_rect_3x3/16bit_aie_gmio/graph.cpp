@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// 67d7842dbbe25473c3c32b93c0da8047785f30d78e8a024de1b57352245f9689
-
 #include "graph.h"
 
 GMIO gmioIn[1] = {GMIO("gmioIn1", 256, 1000)};
