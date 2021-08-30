@@ -59,16 +59,16 @@ int main(int argc, char** argv) {
     out_width = NEWWIDTH;
 
 /*OpenCV resize function*/
-
 #if INTERPOLATION == 0
-    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_NN);
+    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, cv::INTER_LINEAR);
 #endif
 #if INTERPOLATION == 1
-    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_LINEAR);
+    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, cv::INTER_LINEAR);
 #endif
 #if INTERPOLATION == 2
-    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_AREA);
+    cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, cv::INTER_LINEAR);
 #endif
+
 
     /* Call the top function */
     resize_accel((ap_uint<INPUT_PTR_WIDTH>*)img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, in_height, in_width,
