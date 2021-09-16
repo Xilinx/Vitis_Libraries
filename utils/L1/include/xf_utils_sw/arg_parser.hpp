@@ -225,6 +225,34 @@ class ArgParser {
         }
         return t;
     }
+    // uint32_t opt
+    int getAs(const std::string name, type<uint32_t>) const {
+        int t = 0;
+        std::string s = findOpt(name);
+        try {
+            // t = std::stoi(s);
+            t = std::stol(s);
+        } catch (std::exception const& e) {
+            _log << "ERROR: parsing option \"" << name << "\"'s value '" << s << "' as int: " << e.what() << "."
+                 << std::endl;
+            exit(1);
+        }
+        return t;
+    }
+    // uint64_t opt
+    int getAs(const std::string name, type<uint64_t>) const {
+        int t = 0;
+        std::string s = findOpt(name);
+        try {
+            // t = std::stoi(s);
+            t = std::stol(s);
+        } catch (std::exception const& e) {
+            _log << "ERROR: parsing option \"" << name << "\"'s value '" << s << "' as int: " << e.what() << "."
+                 << std::endl;
+            exit(1);
+        }
+        return t;
+    }
     // string opt
     std::string getAs(const std::string name, type<std::string>) const { return findOpt(name); }
 

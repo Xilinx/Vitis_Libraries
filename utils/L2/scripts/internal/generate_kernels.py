@@ -13,9 +13,11 @@ from argparse import ArgumentParser
 
 impl2file = {
     'LoadDdrToStream': 'load_master_to_stream.cpp.j2',
+    'LoadDdrToStreamWithCounter': 'load_master_to_stream_with_counter.cpp.j2',
 	'SendRamToStream': 'send_ram_to_stream.cpp.j2',
 	'SendRomToStream': 'send_rom_to_stream.cpp.j2',
 	'StoreStreamToMaster': 'store_stream_to_master.cpp.j2',
+	'StoreStreamToMasterWithCounter': 'store_stream_to_master_with_counter.cpp.j2',
 	'ValidateStreamWithMaster': 'validate_stream_with_master.cpp.j2',
 	'ValidateStreamWithRam': 'validate_stream_with_ram.cpp.j2',
 	'ValidateStreamWithRom': 'validate_stream_with_rom.cpp.j2'

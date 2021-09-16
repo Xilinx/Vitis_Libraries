@@ -72,6 +72,63 @@ void loadMasterToStream(ap_uint<WM>* mm, hls::stream<ap_axiu<WS, 0, 0, 0> >& s, 
     }
 }
 
+/**
+ * Load from AXI master, and send data to stream.
+ *
+ * It is expected that the size is aligned with (WM/8) and (WS/8),
+ * otherwise out-of-boundary data would be read/written.
+ *
+ * @tparam WM width of AXI master.
+ * @tparam WS width of AXI stream.
+ * @tparam BLEN burst length when reading from AXI master.
+ *
+ * @param mm master port.
+ * @param s stream port.
+ * @param size size of data to be loaded, in byte.
+ * @param vld_str stream port, to record the start and end position of loading data from AXI master to stream.
+ * @param cntData count data number that have been loaded from AXI master, in byte.
+ */
+template <int WM, int WS, int BLEN = 32>
+void loadMasterToStream(ap_uint<WM>* mm,
+                        hls::stream<ap_axiu<WS, 0, 0, 0> >& s,
+                        uint64_t size,
+                        hls::stream<ap_uint<1> >& vld_str,
+                        uint64_t* cntData) {
+#ifndef __SYNTHESIS__
+    static_assert(WM == WS, "WM should be equal to WS in the current implementation");
+#endif
+    const int bytePerData = WM / 8;
+    const int nBlks = size / bytePerData + ((size % bytePerData) > 0);
+    const int nBurst = nBlks / BLEN;
+    int cnt = 0;
+    vld_str.write_nb(1);
+    for (int i = 0; i < nBurst; i++) {
+        for (int j = 0; j < BLEN; j++) {
+#pragma HLS pipeline II = 1
+            ap_axiu<WS, 0, 0, 0> tmp;
+            tmp.data = mm[cnt];
+            tmp.keep = -1;
+            tmp.last = 0;
+            s.write(tmp);
+            cnt++;
+        }
+        *cntData = cnt * bytePerData;
+    }
+    int leftBlks = nBlks % BLEN;
+    if (leftBlks > 0) {
+        for (int i = 0; i < leftBlks; i++) {
+#pragma HLS pipeline II = 1
+            ap_axiu<WS, 0, 0, 0> tmp;
+            tmp.data = mm[cnt];
+            tmp.keep = -1;
+            tmp.last = 0;
+            s.write(tmp);
+            cnt++;
+        }
+    }
+    *cntData = cnt * bytePerData;
+    vld_str.write_nb(1);
+}
 } /* datamover */
 } /* xf */
 #endif

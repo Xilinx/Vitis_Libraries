@@ -50,7 +50,6 @@ help::
 	$(ECHO) ""
 
 # ##################### Setting up default value of TARGET ##########################
-#
 TARGET ?= hw_emu
 TARGET ?= sw_emu
 
@@ -93,6 +92,8 @@ PERL ?= perl
 SDCARD := sd_card
 EMU_DIR := $(SDCARD)/data/emulation
 endif
+# Setting customized_params in host
+SIZE ?= 1024
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
@@ -135,7 +136,7 @@ endif
 
 EXE_NAME := test_mover.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := --xclbin $(BUILD_DIR)/datamover.xclbin
+HOST_ARGS := --xclbin $(BUILD_DIR)/datamover.xclbin --size $(SIZE)
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -268,7 +269,9 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh
+	@echo '         cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'fi'  >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
