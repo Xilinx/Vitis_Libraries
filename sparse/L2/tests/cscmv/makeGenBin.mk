@@ -96,7 +96,7 @@ BOOST_LIB = $(XILINX_VIVADO)/lib/lnx64.o
 
 GEN_BIN_EXE_NAME = gen_bin.exe
 #
-GEN_BIN_CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/fp32 -I$(XFLIB_DIR)/L1/include/sw -I$(BOOST_INCLUDE) -I$(XILINX_VIVADO)/include
+GEN_BIN_CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw/fp32 -I$(XFLIB_DIR)/L1/include/sw -I$(BOOST_INCLUDE) -I$(XILINX_HLS)/include
 
 ifeq (no,$(DEBUG))
 	GEN_BIN_CXXFLAGS += -O3
