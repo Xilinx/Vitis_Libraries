@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/tests/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # MK_INC_BEGIN hls_common.mk
 
@@ -65,9 +65,6 @@ DEVICE ?= u200
 
 # MK_INC_BEGIN vitis_set_part.mk
 
-.PHONY: check_part
-
-ifeq (,$(XPART))
 # MK_INC_BEGIN vitis.mk
 
 .PHONY: check_vpp
@@ -94,6 +91,10 @@ export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITI
 endif
 
 # MK_INC_END vitis.mk
+
+.PHONY: check_part
+
+ifeq (,$(XPART))
 # MK_INC_BEGIN vitis_set_platform.mk
 
 ifneq (,$(wildcard $(DEVICE)))

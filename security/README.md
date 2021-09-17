@@ -121,6 +121,9 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 | shake128 | SHAKE-128 algorithm implementation | L1 |
 | shake256 | SHAKE-256 algorithm implementation | L1 |
 | blake2b | BLAKE2B algorithm implementation | L1 |
+| vdf_evaluate | Evaluate VDF implementation | L1 |
+| verifyWesolowski | Verify VDF Wesolowski implementation | L1 |
+| verifyPietrzak | Verify VDF Pietrzak implementation | L1 |
 
 ## Requirements
 

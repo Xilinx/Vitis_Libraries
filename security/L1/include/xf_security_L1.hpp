@@ -41,6 +41,7 @@
 #include "xf_security/gcm.hpp"
 #include "xf_security/gmac.hpp"
 #include "xf_security/hmac.hpp"
+#include "xf_security/keccak256.hpp"
 #include "xf_security/md4.hpp"
 #include "xf_security/md5.hpp"
 #include "xf_security/modular.hpp"

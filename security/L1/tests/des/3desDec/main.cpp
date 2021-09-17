@@ -17,10 +17,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <openssl/des.h>
-#include <openssl/rand.h>
 #include "test.hpp"
 #include "xf_security/des.hpp"
+
+typedef unsigned char DES_cblock[8];
 
 void cBlock2AP(DES_cblock block, ap_uint<64>& ap) {
     // unsigned char arr[8] = block;

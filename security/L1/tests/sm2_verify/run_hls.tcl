@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ create_clock -period $CLKP
 set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
-  csim_design -ldflags "-lcrypto -lssl"
+  csim_design
 }
 
 if {$CSYNTH == 1} {
@@ -47,7 +47,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-lcrypto -lssl"
+  cosim_design
 }
 
 if {$VIVADO_SYN == 1} {

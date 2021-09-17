@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,14 +39,17 @@ ifeq ($(DEBUG), yes)
 VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
-#Check environment setup
+#Checks for XILINX_XRT
+ifeq ($(HOST_ARCH), x86)
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
+endif
+else
 ifndef XILINX_VITIS
   XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
 endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
 endif
 
 #Checks for Device Family
@@ -68,6 +71,13 @@ check_sysroot:
 ifneq ($(HOST_ARCH), x86)
 ifndef SYSROOT
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+
+check_version:
+ifneq (, $(shell which git))
+ifneq (,$(wildcard $(XFLIB_DIR)/.git))
+	@cd $(XFLIB_DIR) && git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -n 1 && cd -
 endif
 endif
 
@@ -93,6 +103,16 @@ else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
 
+#Check OS and setting env
+OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
+OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
+
+ifeq ($(OSDIST), centos)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+endif
+endif
+
 #Setting VPP
 VPP := v++
 
@@ -112,8 +132,10 @@ endif
 
 .PHONY: check_xrt
 check_xrt:
+ifeq ($(HOST_ARCH), x86)
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
+endif
 endif
 
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)

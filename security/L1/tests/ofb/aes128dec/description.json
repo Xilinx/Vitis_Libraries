@@ -22,10 +22,10 @@
     }, 
     "testbench": {
         "source": [
-            "main.cpp"
+            "main.cpp",
+            "gld.dat"
         ], 
         "cflags": "", 
-        "ldflags": "-lcrypto -lssl", 
         "argv": {}, 
         "stdmath": false
     }, 

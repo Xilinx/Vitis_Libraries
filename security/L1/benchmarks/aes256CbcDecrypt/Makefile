@@ -90,8 +90,6 @@ CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
-LDFLAGS += -lssl -lcrypto
-
 
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
@@ -104,7 +102,7 @@ endif
 # ######################### Host compiler global settings ############################
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
-CXXFLAGS += -fmessage-length=0 -O3 -lssl -lcrypto
+CXXFLAGS += -fmessage-length=0 -O3
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
@@ -125,7 +123,7 @@ endif
 
 EXE_NAME := aes256CbcDecryptBenchmark.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin -len 1024 -num 16
+HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin -len 1024 -num 16 -gld $(CUR_DIR)/data/gld.dat
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -156,6 +154,7 @@ BINARY_CONTAINERS += $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin
 BINARY_CONTAINER_aes256CbcDecryptKernel_OBJS += $(TEMP_DIR)/aes256CbcDecryptKernel.xo
 
 # ######################### Setting Targets of Makefile ################################
+DATA_FILE += $(CUR_DIR)//data/gld.dat
 
 .PHONY: all clean cleanall docs emconfig
 ifeq ($(HOST_ARCH), x86)

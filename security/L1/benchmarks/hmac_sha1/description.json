@@ -46,10 +46,13 @@
     }, 
     "launch": [
         {
-            "cmd_args": " -mode fpga -xclbin BUILD/hmacSha1Kernel.xclbin", 
+            "cmd_args": " -mode fpga -xclbin BUILD/hmacSha1Kernel.xclbin -gld PROJECT/data/gld.dat", 
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
+    "data": [
+        "PROJECT/data/gld.dat"
+    ],
     "host": {
         "host_exe": "hmacSha1Benchmark.exe", 
         "compiler": {
@@ -63,8 +66,7 @@
                 "kernel", 
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/../utils/L1/include"
-            ], 
-            "options": "-O3 -lssl -lcrypto"
+            ]
         }
     }, 
     "v++": {

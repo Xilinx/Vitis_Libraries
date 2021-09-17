@@ -27,8 +27,7 @@ using namespace std;
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <openssl/md5.h>
+#include <fstream>
 
 // number of times to perform the test in different message and length
 #define NUM_TESTS 130
@@ -74,6 +73,8 @@ int main() {
         "abcdefghijklmnopqrstuvwxyz"
         "abcdefghijklmnopqrstuvwxyz";
     vector<Test> tests;
+    std::ifstream ifile;
+    ifile.open("gld.dat");
 
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
@@ -85,9 +86,11 @@ int main() {
         m[len] = 0;
         unsigned char h[DIG_SIZE];
         // call OpenSSL API to get the MD5 hash value of each message
-        MD5((const unsigned char*)message, len, (unsigned char*)h);
+        // MD5((const unsigned char*)message, len, (unsigned char*)h);
+        ifile.read((char*)h, DIG_SIZE);
         tests.push_back(Test(m, h));
     }
+    ifile.close();
 
     unsigned int nerror = 0;
     unsigned int ncorrect = 0;

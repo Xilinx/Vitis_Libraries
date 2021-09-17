@@ -64,10 +64,13 @@
     }, 
     "launch": [
         {
-            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcDecryptKernel.xclbin -len 1024 -num 16", 
+            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcDecryptKernel.xclbin -len 1024 -num 16 -gld PROJECT/data/gld.dat", 
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
+    "data": [
+        "PROJECT/data/gld.dat"
+    ],
     "host": {
         "host_exe": "aes256CbcDecryptBenchmark.exe", 
         "compiler": {
@@ -82,7 +85,7 @@
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/../utils/L1/include"
             ], 
-            "options": "-O3 -lssl -lcrypto"
+            "options": "-O3"
         }
     }, 
     "v++": {

@@ -29,8 +29,6 @@ using namespace std;
 #include <string>
 #include <vector>
 
-#include <openssl/sha.h>
-
 // number of times to perform the test in different message and length
 #define NUM_TESTS 300
 // the size of each message word in byte
@@ -61,22 +59,6 @@ std::string hash2str(unsigned char* h, int len) {
 }
 
 // initialize hash values for SHA-512/224
-int sha512_224_init(SHA512_CTX* c) {
-    c->h[0] = U64(0x8c3d37c819544da2);
-    c->h[1] = U64(0x73e1996689dcd4d6);
-    c->h[2] = U64(0x1dfab7ae32ff9c82);
-    c->h[3] = U64(0x679dd514582f9fcf);
-    c->h[4] = U64(0x0f6d2b697bd44da8);
-    c->h[5] = U64(0x77e36f7304c48942);
-    c->h[6] = U64(0x3f9d85a86a1d36c8);
-    c->h[7] = U64(0x1112e6ad91d692a1);
-
-    c->Nl = 0;
-    c->Nh = 0;
-    c->num = 0;
-    c->md_len = SHA224_DIGEST_LENGTH;
-    return 1;
-}
 
 int main() {
     std::cout << "****************************************" << std::endl;

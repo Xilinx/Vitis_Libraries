@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,17 +26,20 @@ if {![info exists CLKP]} {
 open_project -reset $PROJ
 
 add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "test.cpp gld.dat" -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top test_hmac_md4
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP
 set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
-  csim_design -ldflags "-lcrypto -lssl"
+  csim_design
 }
 
 if {$CSYNTH == 1} {
@@ -44,7 +47,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-lcrypto -lssl"
+  cosim_design
 }
 
 if {$VIVADO_SYN == 1} {
@@ -53,10 +56,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

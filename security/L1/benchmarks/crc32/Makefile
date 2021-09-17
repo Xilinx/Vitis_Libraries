@@ -108,7 +108,6 @@ CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
-LDFLAGS += -lssl -lcrypto
 
 
 ifeq ($(TARGET),sw_emu)

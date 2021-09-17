@@ -15,9 +15,7 @@
  */
 #include <ap_int.h>
 #include <iostream>
-
-#include <openssl/aes.h>
-#include <openssl/evp.h>
+#include <fstream>
 
 #include <sys/time.h>
 #include <new>
@@ -121,6 +119,12 @@ int main(int argc, char* argv[]) {
         msg_num = std::stoi(msg_num_str);
         std::cout << "Message num is " << msg_num << std::endl;
     }
+
+    std::string gld_path;
+    if (!parser.getCmdOption("-gld", gld_path)) {
+        std::cout << "ERROR:golden path is not set!\n";
+        return 1;
+    }
     // cipher key for test, other keys are fine.
     unsigned char key[] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a,
                            0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25,
@@ -134,15 +138,21 @@ int main(int argc, char* argv[]) {
     unsigned char* msg = (unsigned char*)malloc(msg_len + 16);
     genMsg(msg, msg_len);
 
+    std::ifstream ifile;
+    ifile.open(gld_path);
     unsigned char* gld = (unsigned char*)malloc(msg_len + 16);
     {
+        /*
         int outlen1 = 0;
         int outlen2 = 0;
         EVP_CIPHER_CTX ctx;
         EVP_EncryptInit(&ctx, EVP_aes_256_cbc(), key, ivec);
         EVP_EncryptUpdate(&ctx, gld, &outlen1, msg, msg_len);
         EVP_EncryptFinal(&ctx, gld + outlen1, &outlen2);
+        */
     }
+    ifile.read((char*)gld, msg_len + 16);
+    ifile.close();
 
     // Use packer to prepare msg package.
     //

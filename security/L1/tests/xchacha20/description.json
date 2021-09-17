@@ -13,7 +13,7 @@
     "project": "chacha20_test", 
     "solution": "solution1", 
     "clock": "3.33", 
-    "topfunction": "chacha20Core", 
+    "topfunction": "xchacha20Core", 
     "top": {
         "source": [
             "test.cpp"
@@ -25,7 +25,6 @@
             "test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
-        "ldflags": "-lcrypto -lssl", 
         "argv": {}, 
         "stdmath": false
     }, 

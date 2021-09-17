@@ -27,9 +27,7 @@ using namespace std;
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <openssl/aes.h>
-#include <openssl/evp.h>
+#include <fstream>
 
 // number of times to perform the test in different text and length
 // XXX notice that the datain char array should be long enough
@@ -104,6 +102,8 @@ int main() {
     const unsigned char ivec[] = "abcdefghijklmnopqrstuvwxyz";
 
     vector<Test> tests;
+    std::ifstream ifile;
+    ifile.open("gld.dat");
 
     // generate golden
     for (unsigned int i = 1; i < NUM_TESTS + 1; i++) {
@@ -122,10 +122,12 @@ int main() {
         din[inlen] = 0;
         cout << "inlen = " << dec << inlen << endl;
         // call OpenSSL API to get the golden
+        /*
         EVP_CIPHER_CTX ctx;
         EVP_DecryptInit(&ctx, EVP_aes_128_cfb128(), key, ivec);
         EVP_DecryptUpdate(&ctx, dout, &outlen1, (const unsigned char*)din, inlen);
         EVP_DecryptFinal(&ctx, dout + outlen1, &outlen2);
+        */
         cout << "outlen1 = " << dec << outlen1 << endl;
         cout << "outlen2 = " << dec << outlen2 << endl;
         /*
@@ -134,8 +136,10 @@ int main() {
         endl;
         }
         */
+        ifile.read((char*)dout, inlen);
         tests.push_back(Test(datain + i, (const char*)dout, inlen));
     }
+    ifile.close();
 
     unsigned int nerror = 0;
     unsigned int ncorrect = 0;

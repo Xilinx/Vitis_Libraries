@@ -27,9 +27,7 @@ using namespace std;
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <openssl/aes.h>
-#include <openssl/evp.h>
+#include <fstream>
 
 // number of times to perform the test in different text and length
 // XXX notice that the datain char array should be long enough
@@ -148,6 +146,8 @@ int main() {
         "abcdefghijklmnopqrstuvwxyz";
 
     vector<Test> tests;
+    std::ifstream ifile;
+    ifile.open("gld.dat");
 
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
@@ -168,6 +168,7 @@ int main() {
             memcpy(din, plaintext + i, plaintext_len);
         }
         // call OpenSSL API to get the golden
+        /*
         EVP_CIPHER_CTX* ctx;
         ctx = EVP_CIPHER_CTX_new();
         EVP_EncryptInit_ex(ctx, EVP_aes_192_gcm(), NULL, NULL, NULL);
@@ -180,6 +181,7 @@ int main() {
         ciphertext_len += len;
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, BLK_SIZE, tag);
         EVP_CIPHER_CTX_free(ctx);
+        */
         /*
 unsigned int index = 0;
 for (unsigned int j = 0; j < plaintext_len / BLK_SIZE; j++) {
@@ -194,9 +196,12 @@ if ((plaintext_len % BLK_SIZE) > 0) {
 }
 cout << "tag_golden : " << printr((unsigned char*)tag, BLK_SIZE) << endl;
         */
+        ifile.read((char*)ciphertext, plaintext_len);
+        ifile.read((char*)tag, BLK_SIZE);
         tests.push_back(Test((const char*)plaintext + i, (const char*)ciphertext, plaintext_len, (const char*)aad,
                              aad_len, (const char*)tag));
     }
+    ifile.close();
 
     unsigned int nerror = 0;
     unsigned int ncorrect = 0;

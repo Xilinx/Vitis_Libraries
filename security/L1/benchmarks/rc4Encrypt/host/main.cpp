@@ -15,9 +15,8 @@
  */
 #include <ap_int.h>
 #include <iostream>
-
-#include <openssl/rc4.h>
-#include <openssl/evp.h>
+#include <fstream>
+#include <algorithm>
 
 #include <sys/time.h>
 #include <new>
@@ -76,6 +75,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::string gld_path;
+    if (!parser.getCmdOption("-gld", gld_path)) {
+        std::cout << "ERROR: golden path is not set!\n";
+        return 1;
+    }
+
     // set repeat time
     int num_rep = 2;
     std::string num_str;
@@ -116,6 +121,7 @@ int main(int argc, char* argv[]) {
     unsigned char golden[4][N_ROW];
 
     // call OpenSSL API to get the golden
+    /*
     EVP_CIPHER_CTX* ctx;
     ctx = EVP_CIPHER_CTX_new();
     EVP_CipherInit_ex(ctx, EVP_rc4(), NULL, NULL, NULL, 1);
@@ -163,6 +169,14 @@ int main(int argc, char* argv[]) {
         EVP_CipherUpdate(ctx, golden[3] + i, &outlen, (const unsigned char*)datain2, 1);
     }
     EVP_CIPHER_CTX_free(ctx);
+    */
+
+    std::ifstream ifile;
+    ifile.open(gld_path);
+    for (int i = 0; i < 4; i++) {
+        ifile.read((char*)golden[i], N_ROW);
+    }
+    ifile.close();
 
     ap_uint<512> keyBlock[4];
     for (unsigned int i = 0; i < KEY_SIZE; i++) {

@@ -17,10 +17,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <openssl/des.h>
-#include <openssl/rand.h>
+#include <fstream>
 #include "test.hpp"
 #include "xf_security/des.hpp"
+
+typedef unsigned char DES_cblock[8];
 
 void cBlock2AP(DES_cblock block, ap_uint<64>& ap) {
     for (int i = 0; i < 8; ++i) {
@@ -70,22 +71,29 @@ int main() {
     xf::security::internal::print<64>(*keyAP);
 
     DES_cblock key;
-    DES_key_schedule keysched;
-
     // DES_random_key(&key);
     ap2CBlock(*keyAP, key);
     ap_uint<64> keyCp;
     cBlock2AP(key, keyCp);
+    /*
+    DES_key_schedule keysched;
     DES_set_key((C_Block*)key, &keysched);
 
     DES_ecb_encrypt((C_Block*)data, (C_Block*)out, &keysched, DES_ENCRYPT);
+
+    DES_ecb_encrypt((C_Block*)out, (C_Block*)back, &keysched, DES_DECRYPT);
+    */
+
+    std::ifstream ifile;
+    ifile.open("gld.dat");
+    ifile.read((char*)out, W);
+    ifile.read((char*)back, W);
+    ifile.close();
 
     ap_uint<64> cipherAP;
     cBlock2AP(out, cipherAP);
     std::cout << "Ciphertext\n";
     xf::security::internal::print<64>(cipherAP);
-
-    DES_ecb_encrypt((C_Block*)out, (C_Block*)back, &keysched, DES_DECRYPT);
 
     ap_uint<64> cipher;
     testEnc(*a, *keyAP, cipher);

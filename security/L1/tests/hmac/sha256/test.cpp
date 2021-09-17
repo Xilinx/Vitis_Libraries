@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #define XF_SECURITY_DECRYPT_DEBUG 1
-#include <openssl/sha.h>
+#include <fstream>
 
 // number of times to perform the test in different message and length
 #define NUM_TESTS 2 // 200
@@ -124,6 +124,7 @@ unsigned int string2Strm(std::string data, std::string title, hls::stream<ap_uin
     return cnt;
 }
 // compute golden hmac
+/*
 void hmacSHA256(const unsigned char* key,
                 unsigned int keyLen,
                 const unsigned char* message,
@@ -170,6 +171,7 @@ void hmacSHA256(const unsigned char* key,
     memcpy(khsh + BLOCK_SIZE, h2, HASH_SIZE);
     SHA256((const unsigned char*)khsh, BLOCK_SIZE + HASH_SIZE, (unsigned char*)h);
 }
+*/
 
 int main() {
     std::cout << "********************************" << std::endl;
@@ -182,6 +184,8 @@ int main() {
     // 80070713463e7749b90c2dc24911e275"; 	const char message[] = "ABCDEFGH";
     const char key[] = "key0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     std::vector<Test> tests;
+    std::ifstream ifile;
+    ifile.open("gld.dat");
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
         unsigned int len = i % 128 + 80;
@@ -196,10 +200,13 @@ int main() {
         m[len] = 0;
         unsigned char h[HASH_SIZE] = "";
         Test t(k, m, h);
-        hmacSHA256((const unsigned char*)k, t.key.length(), (const unsigned char*)m, t.msg.length(), (unsigned char*)h);
+        // hmacSHA256((const unsigned char*)k, t.key.length(), (const unsigned char*)m, t.msg.length(), (unsigned
+        // char*)h);
 
+        ifile.read((char*)h, HASH_SIZE);
         tests.push_back(Test(k, m, h));
     }
+    ifile.close();
     unsigned int nerror = 0;
     unsigned int ncorrect = 0;
 

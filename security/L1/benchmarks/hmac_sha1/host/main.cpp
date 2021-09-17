@@ -16,8 +16,8 @@
 
 #include <ap_int.h>
 #include <iostream>
-
-#include <openssl/sha.h>
+#include <fstream>
+#include <algorithm>
 
 #include <sys/time.h>
 #include <new>
@@ -54,6 +54,7 @@ ap_uint<GRP_WIDTH> char2ap_uint(unsigned char* data, int ptr) {
     return tmp;
 }
 
+/*
 void hmacSHA1(const unsigned char* key,
               unsigned int keyLen,
               const unsigned char* message,
@@ -91,6 +92,7 @@ void hmacSHA1(const unsigned char* key,
     memcpy(khsh + BLOCK_SIZE, h2, HASH_SIZE);
     SHA1((const unsigned char*)khsh, BLOCK_SIZE + HASH_SIZE, (unsigned char*)h);
 }
+*/
 
 class ArgParser {
    public:
@@ -132,6 +134,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 #endif
+
+    std::string gld_path;
+    if (!parser.getCmdOption("-gld", gld_path)) {
+        std::cout << "ERROR:golden path is not set!\n";
+    }
+
     // set repeat time
     int num_rep = 2;
     std::string num_str;
@@ -190,7 +198,11 @@ int main(int argc, char* argv[]) {
 
     // generate golden
     unsigned char hmacResult[20];
-    hmacSHA1(key, 32, messagein, n_msg, hmacResult);
+    // hmacSHA1(key, 32, messagein, n_msg, hmacResult);
+    std::ifstream ifile;
+    ifile.open(gld_path);
+    ifile.read((char*)hmacResult, 20);
+    ifile.close();
 
     // ouput length of the result
 

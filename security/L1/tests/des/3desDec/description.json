@@ -25,7 +25,6 @@
             "main.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
-        "ldflags": "-lcrypto -lssl", 
         "argv": {}, 
         "stdmath": false
     }, 

@@ -44,6 +44,7 @@ Design Internals
    internals/gmac.rst
    internals/hmac.rst
    internals/iaes.rst
+   internals/keccak256.rst
    internals/md4_5.rst
    internals/ofb.rst
    internals/poly1305.rst

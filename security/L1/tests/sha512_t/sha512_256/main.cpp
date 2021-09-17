@@ -29,8 +29,6 @@ using namespace std;
 #include <string>
 #include <vector>
 
-#include <openssl/evp.h>
-
 // number of times to perform the test in different message and length
 #define NUM_TESTS 300
 // the size of each message word in byte

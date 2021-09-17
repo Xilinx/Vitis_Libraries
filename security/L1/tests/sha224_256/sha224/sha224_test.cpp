@@ -28,7 +28,7 @@
 #include "xf_security/sha224_256.hpp"
 
 // For verification
-#include <openssl/sha.h>
+#include <fstream>
 
 #define NUM_TESTS 1000
 
@@ -73,6 +73,8 @@ int main(int argc, const char* argv[]) {
         "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopqabcdabc";
 
     std::vector<Test> tests;
+    std::ifstream ifile;
+    ifile.open("gld.dat");
     /* these values can be generated with
      *   echo -n "abc" | sha256sum,
      * where -n prevents echo to add \n after abc.
@@ -84,9 +86,11 @@ int main(int argc, const char* argv[]) {
         if (len != 0) memcpy(m, message, len);
         m[len] = 0;
         unsigned char h[28];
-        SHA224((const unsigned char*)message, len, (unsigned char*)h);
+        // SHA224((const unsigned char*)message, len, (unsigned char*)h);
+        ifile.read((char*)h, 28);
         tests.push_back(Test(m, h));
     }
+    ifile.close();
 
     int nerror = 0;
     int ncorrect = 0;

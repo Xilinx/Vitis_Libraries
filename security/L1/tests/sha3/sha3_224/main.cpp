@@ -30,7 +30,6 @@ using namespace std;
 #include <vector>
 
 // for using evp structure and SHA-3 API family
-// #include "openssl/evp.h"
 
 // number of times to perform the test in different message and length
 #define NUM_TESTS 400
