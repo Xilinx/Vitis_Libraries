@@ -134,6 +134,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/../solver/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/HeathJarrowMorton/src/kernel
+LDCLFLAGS_hjm_kernel += --kernel_frequency 200
 
 
 ############################## Declaring Binary Containers ##############################

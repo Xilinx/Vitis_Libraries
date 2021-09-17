@@ -247,7 +247,7 @@ class TreeInstrument<DT, 0, LEN2> { // swaption
                   DT probs[2][3],
                   xf_2D_array<DT, 4, LEN2>& values1,
                   xf_2D_array<DT, 4, LEN2>& values2) {
-        //#pragma HLS inline
+#pragma HLS inline
         DT tmp[L] = {0.0};
         for (int k1 = 0; k1 < L; k1++) {
             for (int branch2 = 0; branch2 < 3; branch2++) {

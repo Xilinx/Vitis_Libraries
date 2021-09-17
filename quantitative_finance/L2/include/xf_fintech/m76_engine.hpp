@@ -29,6 +29,7 @@ namespace internal {
 /// @param[out] out         The sum
 template <typename DT>
 void sum(DT* out, DT* in) {
+#pragma HLS inline
     DT tmp = 0;
 sum_loop:
     for (int i = 0; i < MAX_N; i++) {

@@ -154,6 +154,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/GarmanKohlhagenEngine/src/kernel
+LDCLFLAGS_gk_kernel += --kernel_frequency 200
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/gk_kernel.xclbin

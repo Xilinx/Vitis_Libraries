@@ -131,7 +131,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/../solver/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/HeathJarrowMorton/kernel
 hjm_kernel_VPP_FLAGS += --hls.clock 300000000:hjm_kernel
-VPP_LDFLAGS_hjm_kernel += --kernel_frequency 300
+VPP_LDFLAGS_hjm_kernel += --kernel_frequency 200
 
 
 # Kernel args

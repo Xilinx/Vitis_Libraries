@@ -122,6 +122,7 @@ VPP_FLAGS += --hls.jobs 8
 VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+VPP_LDFLAGS_gk_kernel += --kernel_frequency 200
 
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))

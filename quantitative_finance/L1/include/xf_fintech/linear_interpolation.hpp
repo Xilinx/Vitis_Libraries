@@ -70,6 +70,7 @@ DT multOperation(DT a, DT b) {
  */
 template <typename DT>
 inline DT linearInterpolation(DT x, int len, DT* arrX, DT* arrY) {
+#pragma HLS inline
     int cnt = 0;
 loop_linear1D:
     for (int i = 0; i < len; i++) {
