@@ -1,0 +1,196 @@
+.. index:: pair: namespace; hpc
+.. _doxid-namespacexf_1_1hpc:
+.. _cid-xf::hpc:
+
+namespace hpc
+=============
+
+.. toctree::
+	:hidden:
+
+	namespace_xf_hpc_cg.rst
+	namespace_xf_hpc_mlp.rst
+	namespace_xf_hpc_rtm.rst
+	enum_xf_hpc_Signal_t.rst
+	class_xf_hpc_StreamInstr.rst
+
+
+
+.. _doxid-namespacexf_1_1hpc_1a90c091ed7e93cae2f9b2b583537406c5:
+.. _cid-xf::hpc::clock_t:
+.. _doxid-namespacexf_1_1hpc_1a5757743ed30002255572d81ffa5a1b96:
+.. _cid-xf::hpc::wide2stream:
+.. _doxid-namespacexf_1_1hpc_1a29569cf6691d47e08370bd8f989ac474:
+.. _cid-xf::hpc::stream2wide:
+.. _doxid-namespacexf_1_1hpc_1a3e5224a451d14596259776d4aa050bf3:
+.. _cid-xf::hpc::streamconversion:
+.. _doxid-namespacexf_1_1hpc_1ad20fe7a03c22698bfa9105b2a57bf07d:
+.. _cid-xf::hpc::conv2stream:
+.. _doxid-namespacexf_1_1hpc_1a059bd3f187bcb6eb62d76b4966667560:
+.. _cid-xf::hpc::conv2wide:
+.. _doxid-namespacexf_1_1hpc_1a22c8fe8efad61db059bd7cf99f81614e:
+.. _cid-xf::hpc::duplicate:
+.. _doxid-namespacexf_1_1hpc_1a0dfe151f0c79f85a495fddd3fb5be068:
+.. _cid-xf::hpc::dataconsumer:
+.. _doxid-namespacexf_1_1hpc_1a689866ea19360c863ee0385e569e31f1:
+.. _cid-xf::hpc::collectstream:
+.. _doxid-namespacexf_1_1hpc_1a71529aad5b4ac9bfab8b326055e1af1c:
+.. _cid-xf::hpc::copy:
+.. _doxid-namespacexf_1_1hpc_1a354291a653a3ba56c004b2f9970f232e:
+.. _cid-xf::hpc::streamfwd:
+.. _doxid-namespacexf_1_1hpc_1a81b4242b45f1a4f916218fe19dce8c0a:
+.. _cid-xf::hpc::splitstream:
+.. _doxid-namespacexf_1_1hpc_1aefccde21b6c2029c5476fe53a5711904:
+.. _cid-xf::hpc::mergestream:
+.. _doxid-namespacexf_1_1hpc_1ad172368268ab7293d76b99ecfab3617e:
+.. _cid-xf::hpc::timer:
+.. _doxid-namespacexf_1_1hpc_1a4b37646f5912001f2ae499b88eca6890:
+.. _cid-xf::hpc::timer-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`xf::hpc::cg<doxid-namespacexf_1_1hpc_1_1cg>`
+	namespace :ref:`xf::hpc::mlp<doxid-namespacexf_1_1hpc_1_1mlp>`
+	namespace :ref:`xf::hpc::rtm<doxid-namespacexf_1_1hpc_1_1rtm>`
+
+	// typedefs
+
+	typedef uint64_t Clock_t
+
+	// enums
+
+	enum :ref:`Signal_t<doxid-namespacexf_1_1hpc_1a02512380b0a9d836fc9cab4f11dce35c>`
+
+	// classes
+
+	template <unsigned int t_InstrBytes>
+	class :ref:`StreamInstr<doxid-classxf_1_1hpc_1_1_stream_instr>` 
+
+
+
+
+
+.. FunctionSection
+
+.. _doxid-namespacexf_1_1hpc_1a8be74dfbb76eb31ddb3aa4d43298562a:
+.. _cid-xf::hpc::wide2stream-2:
+
+wide2stream
+-----------
+
+
+.. code-block:: cpp
+	
+	#include "streamOps.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    unsigned int t_DataWidth,
+	    unsigned int t_Multi
+	    >
+	void wide2stream (
+	    unsigned int p_n,
+	    hls::stream <ap_uint <t_DataWidth*t_Multi>>& p_wide,
+	    hls::stream <ap_uint <t_DataWidth>>& p_str
+	    )
+
+wide2stream converts an integer of wide datawidth to an integer of base datawidth
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataWidth
+
+        - is the base datawidth
+
+    *
+        - t_Multi
+
+        - is the factor between two datawidth
+
+    *
+        - p_n
+
+        - is the number of data to be read
+
+    *
+        - p_wide
+
+        - is the input stream of wide datawidth
+
+    *
+        - p_str
+
+        - is the output stream of base datawidth
+
+.. _doxid-namespacexf_1_1hpc_1a7a9d0a6c2c7e45eefcf4f9f2e20b9314:
+.. _cid-xf::hpc::stream2wide-2:
+
+stream2wide
+-----------
+
+
+.. code-block:: cpp
+	
+	#include "streamOps.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    unsigned int t_DataWidth,
+	    unsigned int t_Multi
+	    >
+	void stream2wide (
+	    unsigned int p_n,
+	    hls::stream <ap_uint <t_DataWidth>>& p_str,
+	    hls::stream <ap_uint <t_DataWidth*t_Multi>>& p_wide
+	    )
+
+stream2wide converts an integer of base datawidth to an integer of wide datawidth
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataWidth
+
+        - is the base datawidth
+
+    *
+        - t_Multi
+
+        - is the factor between two datawidth
+
+    *
+        - p_n
+
+        - is the number of data to be write
+
+    *
+        - p_str
+
+        - is the input stream of base datawidth
+
+    *
+        - p_wide
+
+        - is the output stream of wide datawidth
+

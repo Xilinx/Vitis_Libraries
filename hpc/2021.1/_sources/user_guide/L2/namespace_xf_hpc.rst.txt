@@ -1,0 +1,25 @@
+.. index:: pair: namespace; hpc
+.. _doxid-namespacexf_1_1hpc:
+.. _cid-xf::hpc:
+
+namespace hpc
+=============
+
+.. toctree::
+	:hidden:
+
+	namespace_xf_hpc_cg.rst
+	namespace_xf_hpc_rtm.rst
+
+
+
+
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`xf::hpc::cg<doxid-namespacexf_1_1hpc_1_1cg>`
+	namespace :ref:`xf::hpc::rtm<doxid-namespacexf_1_1hpc_1_1rtm>`
+

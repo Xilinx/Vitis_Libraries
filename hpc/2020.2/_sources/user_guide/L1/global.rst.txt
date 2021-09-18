@@ -1,0 +1,50 @@
+.. _global-namespace:
+
+Global Namespace
+================
+
+.. index:: pair: namespace; global
+
+.. toctree::
+	:hidden:
+
+	namespace_blas.rst
+	namespace_xf.rst
+
+
+
+
+
+.. _doxid-stencil3d_8hpp_1a977369729d1e675805d027e974f5687a:
+.. _cid-val:
+.. _doxid-domain3d_8hpp_1ac39d9cef6a5e030ba8d9e11121054268:
+.. _cid-max:
+.. _doxid-domain3d_8hpp_1abb702d8b501669a23aa0ab3b281b9384:
+.. _cid-min:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`blas<doxid-namespacexf_1_1blas>`
+	namespace :ref:`xf<doxid-namespacexf>`
+	    namespace :ref:`xf::hpc<doxid-namespacexf_1_1hpc>`
+	        namespace :ref:`xf::hpc::mlp<doxid-namespacexf_1_1hpc_1_1mlp>`
+	        namespace :ref:`xf::hpc::rtm<doxid-namespacexf_1_1hpc_1_1rtm>`
+
+	// global variables
+
+	static const unsigned int VAL
+
+	// macros
+
+	#define max( \
+	    x, \
+	    y \
+	    )
+
+	#define min( \
+	    x, \
+	    y \
+	    )
+

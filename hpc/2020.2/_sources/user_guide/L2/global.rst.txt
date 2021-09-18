@@ -1,0 +1,720 @@
+.. _global-namespace:
+
+Global Namespace
+================
+
+.. index:: pair: namespace; global
+
+.. toctree::
+	:hidden:
+
+	namespace_xf.rst
+
+
+
+Overview
+~~~~~~~~
+
+
+
+.. _doxid-rtmbackward_8hpp_1a8db702c5f18e2fb5782fd8dc1257c1ee:
+.. _cid-rtm_type:
+.. _doxid-rtmbackward_8hpp_1a3beeb465a3d01a861e773d1c4e9f7c65:
+.. _cid-rtm_pairtype:
+.. _doxid-rtmbackward_8hpp_1a603906c796b6ffa4b20f5fadb9e8563e:
+.. _cid-rtm_vttype:
+.. _doxid-rtmbackward_8hpp_1a5c88b114fe39642c160ee005fe6b1817:
+.. _cid-rtm_upbtype:
+.. _doxid-rtmbackward_8hpp_1af383be2d9d2b556515588e05b89b382b:
+.. _cid-rtm_widetype:
+.. _doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138:
+.. _cid-rtm_interface:
+.. _doxid-rtm2d_2rtmforward_8hpp_1a8db702c5f18e2fb5782fd8dc1257c1ee:
+.. _cid-rtm_type-2:
+.. _doxid-rtm2d_2rtmforward_8hpp_1a3beeb465a3d01a861e773d1c4e9f7c65:
+.. _cid-rtm_pairtype-2:
+.. _doxid-rtm2d_2rtmforward_8hpp_1a603906c796b6ffa4b20f5fadb9e8563e:
+.. _cid-rtm_vttype-2:
+.. _doxid-rtm2d_2rtmforward_8hpp_1a5c88b114fe39642c160ee005fe6b1817:
+.. _cid-rtm_upbtype-2:
+.. _doxid-rtm2d_2rtmforward_8hpp_1af383be2d9d2b556515588e05b89b382b:
+.. _cid-rtm_widetype-2:
+.. _doxid-rtm2d_2rtmforward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138:
+.. _cid-rtm_interface-2:
+.. _doxid-rtmforward__hbc_8hpp_1a67a429e8a3076066ae96a40de959880d:
+.. _cid-domain_type:
+.. _doxid-rtmforward__hbc_8hpp_1a6b50f1a01aab413d55750a97156f96c0:
+.. _cid-rtm_type-3:
+.. _doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272:
+.. _cid-rtm_type-4:
+.. _doxid-rtmforward__hbc_8hpp_1a5c88b114fe39642c160ee005fe6b1817:
+.. _cid-rtm_upbtype-3:
+.. _doxid-rtmforward__rbc_8hpp_1a67a429e8a3076066ae96a40de959880d:
+.. _cid-domain_type-2:
+.. _doxid-rtmforward__rbc_8hpp_1a6b50f1a01aab413d55750a97156f96c0:
+.. _cid-rtm_type-5:
+.. _doxid-rtmforward__rbc_8hpp_1a075936ac2eedc424835287dd7158e272:
+.. _cid-rtm_type-6:
+.. _doxid-rtmbackward_8hpp_1a7e92d8df621dd96343b3f871a19e1d15:
+.. _cid-backward:
+.. _doxid-rtm2d_2rtmforward_8hpp_1a61f5f2b6597d69d784fb98a4b3238d50:
+.. _cid-forward:
+.. _doxid-interface_8hpp_1afeb356a46fe2f30f72c24660a171c0ac:
+.. _cid-pointer:
+.. _doxid-interface_8hpp_1adc74e13db3ba0b9d96ed0833e2aa77fc:
+.. _cid-pragma_hls:
+.. _doxid-interface_8hpp_1afc8e1291dc69e71df7760323c5569b5c:
+.. _cid-scalar:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`xf<doxid-namespacexf>`
+	    namespace :ref:`xf::hpc<doxid-namespacexf_1_1hpc>`
+	        namespace :ref:`xf::hpc::rtm<doxid-namespacexf_1_1hpc_1_1rtm>`
+
+	// typedefs
+
+	typedef RTM2D <RTM_dataType, RTM_order, RTM_maxDim, RTM_MaxB, RTM_nPE> RTM_TYPE
+	typedef RTM_TYPE::t_PairInType RTM_pairType
+	typedef RTM_TYPE::t_InType RTM_vtType
+	typedef RTM_TYPE::t_UpbInType RTM_upbType
+	typedef xf::blas::WideType <RTM_dataType, RTM_parEntries> RTM_wideType
+	typedef RTM_wideType::t_TypeInt RTM_interface
+	typedef RTM2D <RTM_dataType, RTM_order, RTM_maxDim, RTM_MaxB, RTM_nPE> RTM_TYPE
+	typedef RTM_TYPE::t_PairInType RTM_pairType
+	typedef RTM_TYPE::t_InType RTM_vtType
+	typedef RTM_TYPE::t_UpbInType RTM_upbType
+	typedef xf::blas::WideType <RTM_dataType, RTM_parEntries> RTM_wideType
+	typedef RTM_wideType::t_TypeInt RTM_interface
+	typedef Domain3D <RTM_maxZ, RTM_maxY, RTM_order/2, RTM_nPEZ, RTM_nPEX, RTM_numFSMs> DOMAIN_TYPE
+	typedef RTM3D <:ref:`DOMAIN_TYPE<doxid-rtmforward__hbc_8hpp_1a67a429e8a3076066ae96a40de959880d>`, RTM_dataType, RTM_order, RTM_maxZ, RTM_maxY, RTM_MaxB, RTM_nPEZ, RTM_nPEX> RTM_TYPE
+	typedef RTM_TYPE::t_InType RTM_type
+	typedef RTM_TYPE::t_UpbInType RTM_upbType
+	typedef Domain3D <RTM_maxZ, RTM_maxY, RTM_order/2, RTM_nPEZ, RTM_nPEX, RTM_numFSMs> DOMAIN_TYPE
+	typedef RTM3D <:ref:`DOMAIN_TYPE<doxid-rtmforward__hbc_8hpp_1a67a429e8a3076066ae96a40de959880d>`, RTM_dataType, RTM_order, RTM_maxZ, RTM_maxY, RTM_MaxB, RTM_nPEZ, RTM_nPEX> RTM_TYPE
+	typedef RTM_TYPE::t_InType RTM_type
+
+	// macros
+
+	#define POINTER( \
+	    NAME, \
+	    BUNDLE \
+	    )
+
+	#define PRAGMA_HLS(x)
+	#define SCALAR(NAME)
+
+
+Global Functions
+~~~~~~~~~~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-fcn_kernel_8hpp_1aecbd0716f20f4ec1e5cf11df40c971aa:
+.. _cid-fcnkernel:
+
+fcnKernel
+---------
+
+
+.. code-block:: cpp
+	
+	#include "mlp/fcnKernel.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void fcnKernel (
+	    DdrIntType* p_DdrRd,
+	    DdrIntType* p_DdrWr
+	    )
+
+fcnKernel defines the kernel top function, with DDR/HBM as an interface
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_DdrRd
+
+        - is DDR/HBM memory address used for read
+
+    *
+        - p_DdrWr
+
+        - is DDR/HBM memory address used for write
+
+.. _doxid-rtmbackward_8hpp_1a0ca1906d3db1f95b273337e273d5dd19:
+.. _cid-rtmbackward:
+
+rtmbackward
+-----------
+
+
+.. code-block:: cpp
+	
+	#include "rtm2d/rtmbackward.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void rtmbackward (
+	    const unsigned int p_z,
+	    const unsigned int p_x,
+	    const unsigned int p_t,
+	    const unsigned int p_recz,
+	    const RTM_dataType* p_rec,
+	    const RTM_dataType* p_coefz,
+	    const RTM_dataType* p_coefx,
+	    const RTM_dataType* p_taperz,
+	    const RTM_dataType* p_taperx,
+	    const :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_v2dt2,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_p0,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_p1,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_r0,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_r1,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_i0,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_i1,
+	    :ref:`RTM_upbType<doxid-rtmbackward_8hpp_1a5c88b114fe39642c160ee005fe6b1817>`* p_upb
+	    )
+
+rfmbackward kernel function
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_z
+
+        - is the number of grids along detecting depth
+
+    *
+        - p_x
+
+        - is the number of grids along detecting width
+
+    *
+        - p_t
+
+        - is the number of detecting time parititons
+
+    *
+        - p_recz
+
+        - is the z coordinates of all receivers
+
+    *
+        - p_rec
+
+        - is the receiver data wavefileds
+
+    *
+        - p_coefz
+
+        - is the laplacian z-direction coefficients
+
+    *
+        - p_coefx
+
+        - is the laplacian x-direction coefficients
+
+    *
+        - p_taperz
+
+        - is the absorbing factor along z
+
+    *
+        - p_taperx
+
+        - is the absorbing factor along x
+
+    *
+        - p_v2dt2
+
+        - is the velocity model v^2 * dt^2
+
+    *
+        - p_upb
+
+        - is the uppper bounday wavefiled
+
+    *
+        - p_p0
+
+        - is the first input memory of source wavefield
+
+    *
+        - p_p1
+
+        - is the second input memory of source wavefield
+
+    *
+        - p_r0
+
+        - is the first input memory of receiver wavefield
+
+    *
+        - p_r1
+
+        - is the second input memory of receiver wavefield
+
+    *
+        - p_i0
+
+        - is the first input memory of cross-correlation images
+
+    *
+        - p_i1
+
+        - is the second input memory of cross-correlation images
+
+.. _doxid-rtm2d_2rtmforward_8hpp_1aadf2c81b880a72d4c9c80d64a27a28e3:
+.. _cid-rtmforward:
+
+rtmforward
+----------
+
+
+rtmforward overload (1)
++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "rtm2d/rtmforward.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void rtmforward (
+	    const unsigned int p_z,
+	    const unsigned int p_x,
+	    const unsigned int p_t,
+	    const unsigned int p_srcz,
+	    const unsigned int p_srcx,
+	    const RTM_dataType* p_src,
+	    const RTM_dataType* p_coefz,
+	    const RTM_dataType* p_coefx,
+	    const RTM_dataType* p_taperz,
+	    const RTM_dataType* p_taperx,
+	    const :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_v2dt2,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_p0,
+	    :ref:`RTM_interface<doxid-rtmbackward_8hpp_1adf51c5c8c983fbe42fa7d2d6ff958138>`* p_p1,
+	    :ref:`RTM_upbType<doxid-rtmbackward_8hpp_1a5c88b114fe39642c160ee005fe6b1817>`* p_upb
+	    )
+
+rfmforward kernel function
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_z
+
+        - is the number of grids along detecting depth
+
+    *
+        - p_x
+
+        - is the number of grids along detecting width
+
+    *
+        - p_t
+
+        - is the number of detecting time parititons
+
+    *
+        - p_srcz
+
+        - is the source z coordinate
+
+    *
+        - p_srcx
+
+        - is the source x coordinate
+
+    *
+        - p_src
+
+        - is the source wavefiled
+
+    *
+        - p_coefz
+
+        - is the laplacian z-direction coefficients
+
+    *
+        - p_coefx
+
+        - is the laplacian x-direction coefficients
+
+    *
+        - p_taperz
+
+        - is the absorbing factor along z
+
+    *
+        - p_taperx
+
+        - is the absorbing factor along x
+
+    *
+        - p_v2dt2
+
+        - is the velocity model v^2 * dt^2
+
+    *
+        - p_p0
+
+        - is the first input memory of source wavefield
+
+    *
+        - p_p1
+
+        - is the second input memory of source wavefield
+
+    *
+        - p_upb
+
+        - is the uppper bounday wavefiled
+
+.. _doxid-rtmforward__hbc_8hpp_1ad695609bb3fbbc6ed72c3fdb512df58b:
+.. _cid-rtmforward-2:
+
+rtmforward overload (2)
++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "rtm3d/rtmforward_hbc.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void rtmforward (
+	    const unsigned int p_z,
+	    const unsigned int p_y,
+	    const unsigned int p_x,
+	    const unsigned int p_t,
+	    const unsigned int p_srcz,
+	    const unsigned int p_srcy,
+	    const unsigned int p_srcx,
+	    const RTM_dataType* p_src,
+	    const RTM_dataType* p_coefz,
+	    const RTM_dataType* p_coefy,
+	    const RTM_dataType* p_coefx,
+	    const RTM_dataType* p_taperz,
+	    const RTM_dataType* p_tapery,
+	    const RTM_dataType* p_taperx,
+	    const :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_v2dt2,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_pi0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_pi1,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_po0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_po1,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppi0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppi1,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppo0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppo1,
+	    :ref:`RTM_upbType<doxid-rtmbackward_8hpp_1a5c88b114fe39642c160ee005fe6b1817>`* p_upb
+	    )
+
+rfmforward kernel function
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_z
+
+        - is the number of grids along z
+
+    *
+        - p_y
+
+        - is the number of grids along y
+
+    *
+        - p_x
+
+        - is the number of grids along x
+
+    *
+        - p_t
+
+        - is the number of detecting time parititons
+
+    *
+        - p_srcz
+
+        - is the source z coordinate
+
+    *
+        - p_srcy
+
+        - is the source y coordinate
+
+    *
+        - p_srcx
+
+        - is the source x coordinate
+
+    *
+        - p_src
+
+        - is the source wavefiled
+
+    *
+        - p_coefz
+
+        - is the laplacian z-direction coefficients
+
+    *
+        - p_coefy
+
+        - is the laplacian y-direction coefficients
+
+    *
+        - p_coefx
+
+        - is the laplacian x-direction coefficients
+
+    *
+        - p_taperz
+
+        - is the absorbing factor along z
+
+    *
+        - p_tapery
+
+        - is the absorbing factor along y
+
+    *
+        - p_taperx
+
+        - is the absorbing factor along x
+
+    *
+        - p_v2dt2
+
+        - is the velocity model v^2 * dt^2
+
+    *
+        - p_pi0
+
+        - the first input memory of pressure wavefield at t-1
+
+    *
+        - p_pi1
+
+        - the second input memory of pressure wavefield at t-1
+
+    *
+        - p_po0
+
+        - the first output memory of pressure wavefield at t-1
+
+    *
+        - p_po1
+
+        - the second output memory of pressure wavefield at t-1
+
+    *
+        - p_ppi0
+
+        - the first input memory of pressure wavefield at t-2
+
+    *
+        - p_ppi1
+
+        - the second input memory of pressure wavefield at t-2
+
+    *
+        - p_ppo0
+
+        - the first output memory of pressure wavefield at t-2
+
+    *
+        - p_ppo1
+
+        - the second output memory of pressure wavefield at t-2
+
+    *
+        - p_upb
+
+        - is the uppper bounday wavefiled
+
+.. _doxid-rtmforward__rbc_8hpp_1a8672f7937842f84fb5c5f7ca232c65f2:
+.. _cid-rtmforward-3:
+
+rtmforward overload (3)
++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "rtm3d/rtmforward_rbc.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void rtmforward (
+	    const unsigned int p_z,
+	    const unsigned int p_y,
+	    const unsigned int p_x,
+	    const unsigned int p_t,
+	    const unsigned int p_srcz,
+	    const unsigned int p_srcy,
+	    const unsigned int p_srcx,
+	    const RTM_dataType* p_src,
+	    const RTM_dataType* p_coefz,
+	    const RTM_dataType* p_coefy,
+	    const RTM_dataType* p_coefx,
+	    const :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_v2dt2,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_pi0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_pi1,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_po0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_po1,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppi0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppi1,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppo0,
+	    :ref:`RTM_type<doxid-rtmforward__hbc_8hpp_1a075936ac2eedc424835287dd7158e272>`* p_ppo1
+	    )
+
+rfmforward kernel function
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_z
+
+        - is the number of grids along z
+
+    *
+        - p_y
+
+        - is the number of grids along y
+
+    *
+        - p_x
+
+        - is the number of grids along x
+
+    *
+        - p_t
+
+        - is the number of detecting time parititons
+
+    *
+        - p_srcz
+
+        - is the source z coordinate
+
+    *
+        - p_srcy
+
+        - is the source y coordinate
+
+    *
+        - p_srcx
+
+        - is the source x coordinate
+
+    *
+        - p_src
+
+        - is the source wavefiled
+
+    *
+        - p_coefz
+
+        - is the laplacian z-direction coefficients
+
+    *
+        - p_coefy
+
+        - is the laplacian y-direction coefficients
+
+    *
+        - p_coefx
+
+        - is the laplacian x-direction coefficients
+
+    *
+        - p_v2dt2
+
+        - is the velocity model v^2 * dt^2
+
+    *
+        - p_pi0
+
+        - is the first input memory of pressure wavefield at t-1
+
+    *
+        - p_pi1
+
+        - is the second input memory of pressure wavefield at t-1
+
+    *
+        - p_po0
+
+        - is the first output memory of pressure wavefield at t-1
+
+    *
+        - p_po1
+
+        - is the second output memory of pressure wavefield at t-1
+
+    *
+        - p_ppi0
+
+        - is the first input memory of pressure wavefield at t-2
+
+    *
+        - p_ppi1
+
+        - is the second input memory of pressure wavefield at t-2
+
+    *
+        - p_ppo0
+
+        - is the first output memory of pressure wavefield at t-2
+
+    *
+        - p_ppo1
+
+        - is the second output memory of pressure wavefield at t-2
+

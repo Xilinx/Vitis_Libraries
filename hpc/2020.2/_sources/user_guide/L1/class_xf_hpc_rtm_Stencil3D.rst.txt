@@ -1,0 +1,394 @@
+.. index:: pair: class; xf::hpc::rtm::Stencil3D
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d:
+.. _cid-xf::hpc::rtm::stencil3d:
+
+template class xf::hpc::rtm::Stencil3D
+======================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "stencil3d.hpp"
+
+
+Overview
+~~~~~~~~
+
+:ref:`Stencil3D <doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d>` class defines isotrophic laplacian operation and time iterations function.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the basic wavefield datatype
+
+    *
+        - t_Order
+
+        - is the spatial discretization order
+
+    *
+        - t_MaxDimZ
+
+        - is the maximum dim along z-axis this kernel can process
+
+    *
+        - t_MaxDimY
+
+        - is the maximum dim along y-axis this kernel can process
+
+    *
+        - t_PEZ
+
+        - is the number of processing elements along z-axis
+
+    *
+        - t_PEX
+
+        - is the number of processing elements along x-axis
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1aecec47a27c6a6ec87df68a87df09ccee:
+.. _cid-xf::hpc::rtm::stencil3d::t_datatypez:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a7e456f93838b443548989843e54abff3:
+.. _cid-xf::hpc::rtm::stencil3d::t_intypez:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a89595cd36143aa7bd320e9d48d089df0:
+.. _cid-xf::hpc::rtm::stencil3d::t_datatypex:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a75168f3a428743bd6d1e0d1f6d5bf205:
+.. _cid-xf::hpc::rtm::stencil3d::t_intypex:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1afdeb4eb139ddc62eea7e9cf4f3a7aa84:
+.. _cid-xf::hpc::rtm::stencil3d::t_widetype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9:
+.. _cid-xf::hpc::rtm::stencil3d::t_intype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1aa9f9d734134ada29faa414e4d3d026e0:
+.. _cid-xf::hpc::rtm::stencil3d::t_pairtype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1acba83c60cdf7b764c90a38f91cff87bc:
+.. _cid-xf::hpc::rtm::stencil3d::t_pairintype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1ae1c61b852f4ed410ea9656bc382e70c5:
+.. _cid-xf::hpc::rtm::stencil3d::t_halforder:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a2bb6764fdd3028905c2fd7daec76469f:
+.. _cid-xf::hpc::rtm::stencil3d::t_numdata:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1acd0fa71f51035536b9ccd5ae82581085:
+.. _cid-xf::hpc::rtm::stencil3d::t_fifodepth:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a8b7b589da353e37da3c70a58aa588e40:
+.. _cid-xf::hpc::rtm::stencil3d::stencil3d:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1abae07c5f5be6de776efae0733a7ef5e9:
+.. _cid-xf::hpc::rtm::stencil3d::laplacian:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a95be44a5b7b010d16f9b7cdc088c865a:
+.. _cid-xf::hpc::rtm::stencil3d::merge:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a50f79b1d460fcb859373dafb0c1465e2:
+.. _cid-xf::hpc::rtm::stencil3d::split:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1abe0df2407dcb6ca6cbbd24ba190e36e4:
+.. _cid-xf::hpc::rtm::stencil3d::calculate:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a037614e8449d440d489791a68f87990d:
+.. _cid-xf::hpc::rtm::stencil3d::copy:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1ab2e2257babcce4da7910b9242d588c0f:
+.. _cid-xf::hpc::rtm::stencil3d::getx:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a57e22de3307c626a7ef64209cbdb854b:
+.. _cid-xf::hpc::rtm::stencil3d::gety:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1ada409e62f62893b7dce16ad96de2cc09:
+.. _cid-xf::hpc::rtm::stencil3d::getz:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a7b08e9896ed7c29175a607555c4fce1f:
+.. _cid-xf::hpc::rtm::stencil3d::getcube:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    int t_Order,
+	    int t_MaxDimZ = 128,
+	    int t_MaxDimY = 128,
+	    int t_PEZ = 1,
+	    int t_PEX = 1
+	    >
+	class Stencil3D
+
+	    // direct descendants
+
+	    template <
+	        typename t_Domain,
+	        typename t_DataType,
+	        int t_Order,
+	        int t_MaxDimZ = 128,
+	        int t_MaxDimY = 128,
+	        int t_MaxB = 40,
+	        int t_PEZ = 1,
+	        int t_PEX = 1
+	        >
+	    class :ref:`xf::hpc::rtm::RTM3D<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m3_d>` 
+
+	// typedefs
+
+	typedef blas::WideType <t_DataType, t_PEZ> t_DataTypeZ
+	typedef t_DataTypeZ::t_TypeInt t_InTypeZ
+	typedef blas::WideType <t_DataType, t_PEX> t_DataTypeX
+	typedef t_DataTypeX::t_TypeInt t_InTypeX
+	typedef blas::WideType <:ref:`t_InTypeX<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a75168f3a428743bd6d1e0d1f6d5bf205>`, t_PEZ, t_DataTypeX::t_TypeWidth> t_WideType
+	typedef t_WideType::t_TypeInt t_InType
+	typedef blas::WideType <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`, :ref:`t_NumData<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a2bb6764fdd3028905c2fd7daec76469f>`, t_WideType::t_TypeWidth> t_PairType
+	typedef t_PairType::t_TypeInt t_PairInType
+
+	// fields
+
+	static const unsigned int t_HalfOrder
+	static const unsigned int t_NumData
+	static const unsigned int t_FifoDepth
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a6f818885725fe0245685128ed63553b7:
+.. _cid-xf::hpc::rtm::stencil3d::setcoef:
+
+setCoef
+-------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void setCoef (
+	    const t_DataType* p_coefz,
+	    const t_DataType* p_coefy,
+	    const t_DataType* p_coefx
+	    )
+
+setCoef set the coefficients for stencil kernel
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_coefz
+
+        - is the coefficents along z-direction
+
+    *
+        - p_coefy
+
+        - is the coefficents along y-direction
+
+    *
+        - p_coefx
+
+        - is the coefficents along x-direction
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1aa145e4266d513e06c75189df73fff65a:
+.. _cid-xf::hpc::rtm::stencil3d::setdim:
+
+setDim
+------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void setDim (
+	    const unsigned int p_z,
+	    const unsigned int p_y,
+	    const unsigned int p_x
+	    )
+
+setDim set the dimension of the wavefields
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_z
+
+        - is the dimension of z-direction
+
+    *
+        - p_y
+
+        - is the dimension of y-direction
+
+    *
+        - p_x
+
+        - is the dimension of x-direction
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1ae8024c34974d43c3c080dfa2d7ba9726:
+.. _cid-xf::hpc::rtm::stencil3d::laplacian-2:
+
+laplacian
+---------
+
+
+laplacian overload (1)
+++++++++++++++++++++++
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void laplacian (
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_in,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_pin,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_out
+	    )
+
+laplacian computes the laplacian of an given wavefield
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_in
+
+        - is the input wavefield stream
+
+    *
+        - p_pin
+
+        - is a copy of p_in
+
+    *
+        - p_out
+
+        - is a stream of laplacian results
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a873955d9c09062b6532caabfe0042bd1:
+.. _cid-xf::hpc::rtm::stencil3d::propagate:
+
+propagate
+---------
+
+
+propagate overload (1)
+++++++++++++++++++++++
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void propagate (
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_v2dt2,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_cpvt,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_i0,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_i1,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_o0,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_o1,
+	    bool p_sw = false
+	    )
+
+propagate computes the time iteration for FDTD
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_v2dt2
+
+        - is the pow(v * dt, 2)
+
+    *
+        - p_cpvt
+
+        - is a copy of p_v2dt2
+
+    *
+        - p_i0
+
+        - is a stream of input wavefield
+
+    *
+        - p_i1
+
+        - is a stream of input wavefield
+
+    *
+        - p_o0
+
+        - is a stream of output wavefield
+
+    *
+        - p_o1
+
+        - is a stream of output wavefield
+
+    *
+        - p_sw
+
+        - a switch to swap outptu streams
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a5a2f5ed7ecabe281aa43318349e1eb13:
+.. _cid-xf::hpc::rtm::stencil3d::propagate-2:
+
+propagate overload (2)
+++++++++++++++++++++++
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void propagate (
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_v2dt2,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1a03001aee9822638d3ac8eb463b471de9>`>& p_cpvt,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1acba83c60cdf7b764c90a38f91cff87bc>`>& p_in,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil3_d_1acba83c60cdf7b764c90a38f91cff87bc>`>& p_out,
+	    bool p_sw = false
+	    )
+
+propagate computes the time iteration for FDTD
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_v2dt2
+
+        - is the pow(v * dt, 2)
+
+    *
+        - p_cpvt
+
+        - is a copy of p_v2dt2
+
+    *
+        - p_in
+
+        - is a stream of input wavefield
+
+    *
+        - p_out
+
+        - is a stream of output wavefield
+
+    *
+        - p_sw
+
+        - a switch to swap outptu streams
+

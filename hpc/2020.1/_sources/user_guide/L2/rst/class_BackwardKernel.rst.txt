@@ -1,0 +1,51 @@
+.. index:: pair: class; BackwardKernel
+.. _doxid-class_backward_kernel:
+.. _cid-backwardkernel:
+
+template class BackwardKernel
+=============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fpga.hpp"
+
+
+class :ref:`BackwardKernel <doxid-class_backward_kernel>` is used to manage and run backward kernel on :ref:`FPGA <doxid-class_f_p_g_a>`
+
+.. _doxid-class_backward_kernel_1a95e45a3aabb4640b4c995a38d20aef9c:
+.. _cid-backwardkernel::t_widetype:
+.. _doxid-class_backward_kernel_1a93ea7f8f48da6ab5d0055fb28415f645:
+.. _cid-backwardkernel::t_pairtype:
+.. _doxid-class_backward_kernel_1ae96508dd1db472fbb1e74e7257a3fd40:
+.. _cid-backwardkernel::_4k:
+.. _doxid-class_backward_kernel_1a9ea1867becaa8183d27e475393f8d6e1:
+.. _cid-backwardkernel::backwardkernel:
+.. _doxid-class_backward_kernel_1a21f97a3c72409c1e65dfa329c2fa82b2:
+.. _cid-backwardkernel::~backwardkernel:
+.. _doxid-class_backward_kernel_1aa019ae5381ab73d9206ef261e3a757b4:
+.. _cid-backwardkernel::loaddata:
+.. _doxid-class_backward_kernel_1abd8bc5c152d26985e54ef7126b458bd0:
+.. _cid-backwardkernel::run:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_Order,
+	    unsigned int t_PE
+	    >
+	class BackwardKernel
+
+	// typedefs
+
+	typedef :ref:`WideData<doxid-class_wide_data>` <t_DataType, t_PE> t_WideType
+	typedef :ref:`WideData<doxid-class_wide_data>` <:ref:`t_WideType<doxid-class_backward_kernel_1a95e45a3aabb4640b4c995a38d20aef9c>`, 2> t_PairType
+
+	// fields
+
+	static const unsigned int _4k
+

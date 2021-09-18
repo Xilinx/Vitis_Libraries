@@ -1,0 +1,350 @@
+.. index:: pair: class; xf::hpc::rtm::RTM2D
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d:
+.. _cid-xf::hpc::rtm::rtm2d:
+
+template class xf::hpc::rtm::RTM2D
+==================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "rtm2d.hpp"
+
+
+Overview
+~~~~~~~~
+
+:ref:`RTM2D <doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d>` class defines the basic operations for 2D :ref:`RTM2D <doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d>` .
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the basic wavefield datatype
+
+    *
+        - t_Order
+
+        - the spatial discretization order
+
+    *
+        - t_MaxDim
+
+        - the maximum height this kernel can process
+
+    *
+        - t_PE
+
+        - the number of processing elements
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1af7f90011d9e5177651153c9840e1b70d:
+.. _cid-xf::hpc::rtm::rtm2d::t_pairtype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1ae90b6f8628d28136325942a5537d1b3d:
+.. _cid-xf::hpc::rtm::rtm2d::t_widetype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68:
+.. _cid-xf::hpc::rtm::rtm2d::t_intype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45:
+.. _cid-xf::hpc::rtm::rtm2d::t_pairintype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1ae2f5afd178f4911d2f3f613a43d2a107:
+.. _cid-xf::hpc::rtm::rtm2d::t_upbtype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1aa1839fa1cb56b38697a50d0002c87982:
+.. _cid-xf::hpc::rtm::rtm2d::t_upbintype:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1ad162798e3f78d8a7ae1021b6a5dc3d2d:
+.. _cid-xf::hpc::rtm::rtm2d::rtm2d:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1aee52b39afbf45edb849816c9aaca0c9d:
+.. _cid-xf::hpc::rtm::rtm2d::setboundarydim:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a2e8eede024a1c5d2290e2ea527e0cddb:
+.. _cid-xf::hpc::rtm::rtm2d::getzb:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1aca032ec2b5b6153e684c9f201bb5a2aa:
+.. _cid-xf::hpc::rtm::rtm2d::getxb:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a87fcb471b86fe833cb16716a25b3d0d6:
+.. _cid-xf::hpc::rtm::rtm2d::settaper:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1ad3aad6c7f7464673e6c1a46bd1d8a2fa:
+.. _cid-xf::hpc::rtm::rtm2d::setsrc:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1ab096ecff4d9ad0f933889fbbf8c0060d:
+.. _cid-xf::hpc::rtm::rtm2d::setreceiver:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a62ccca834ce2f15a75b1c792588a3e40:
+.. _cid-xf::hpc::rtm::rtm2d::loadupb:
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a290e1615518c9457939bca1c89901c0f:
+.. _cid-xf::hpc::rtm::rtm2d::saveupb:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    int t_Order,
+	    int t_MaxDim = 1024,
+	    int t_MaxB = 40,
+	    int t_PE = t_Order / 2
+	    >
+	class RTM2D: public :ref:`xf::hpc::rtm::Stencil2D<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d>`
+
+	// typedefs
+
+	typedef :ref:`Stencil2D<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d>` <t_DataType, t_Order, t_MaxDim, t_PE>:::ref:`t_PairType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1af7f90011d9e5177651153c9840e1b70d>` t_PairType
+	typedef :ref:`Stencil2D<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d>` <t_DataType, t_Order, t_MaxDim, t_PE>:::ref:`t_WideType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1ae90b6f8628d28136325942a5537d1b3d>` t_WideType
+	typedef t_WideType::t_TypeInt t_InType
+	typedef t_PairType::t_TypeInt t_PairInType
+	typedef blas::WideType <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`, :ref:`t_HalfOrder<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1ade59769fffec6b35b90d80c82fc56a20>`/t_PE> t_UpbType
+	typedef t_UpbType::t_TypeInt t_UpbInType
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
+
+	// typedefs
+
+	typedef blas::WideType <t_DataType, t_PE> :ref:`t_WideType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1aafe7d51e78fcaf16b736eacf4f6b8003>`
+	typedef t_WideType::t_TypeInt :ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1ad61918bb5b177b3fb09d0f9606080944>`
+	typedef blas::WideType <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1ad61918bb5b177b3fb09d0f9606080944>`, :ref:`t_NumData<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1a378633323e4cc5761dab7fef794e744e>`, t_WideType::t_TypeWidth> :ref:`t_PairType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1a76507e7d99dcba0d582f682a5a037a0d>`
+	typedef t_PairType::t_TypeInt :ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1a7a9fbf8917229d25624b7d1431f71165>`
+
+	// fields
+
+	static const unsigned int :ref:`t_NumData<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1a378633323e4cc5761dab7fef794e744e>`
+	static const unsigned int :ref:`t_HalfOrder<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1ade59769fffec6b35b90d80c82fc56a20>`
+	static const unsigned int :ref:`t_FifoDepth<doxid-classxf_1_1hpc_1_1rtm_1_1_stencil2_d_1aaf58b72dd333682e79ded18f1e497185>`
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a3d475b95ca7dc3f324b3a319e22df08f:
+.. _cid-xf::hpc::rtm::rtm2d::forward:
+
+forward
+-------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void forward (
+	    const t_DataType p_src,
+	    hls::stream <:ref:`t_UpbInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1aa1839fa1cb56b38697a50d0002c87982>`>& p_upb,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_v2dt2,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_vt,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45>`>& p_p0,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45>`>& p_p1
+	    )
+
+forward defines the forward streaming module
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_src
+
+        - is the source wavefield at given time stamp
+
+    *
+        - p_upb
+
+        - is the upper boundary to be saved
+
+    *
+        - p_v2dt2
+
+        - is the pow(v * dt, 2)
+
+    *
+        - p_vt
+
+        - is a copy of p_v2dt2
+
+    *
+        - p_p0
+
+        - is the stream of input wavefield p(t-1) and p(t)
+
+    *
+        - p_p1
+
+        - is the stream of output wavefield p(t) and p(t+1)
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a7652fadda71b5b02ae377445bf5cbd99:
+.. _cid-xf::hpc::rtm::rtm2d::backwardf:
+
+backwardF
+---------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void backwardF (
+	    hls::stream <:ref:`t_UpbInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1aa1839fa1cb56b38697a50d0002c87982>`>& p_upb,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_v2dt2,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_vt,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45>`>& p_p0,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45>`>& p_p1,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_p,
+	    bool p_t = false
+	    )
+
+backwardF defines the backward streaming module for source wavefield
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_upb
+
+        - the stream of upper boundary to be restored
+
+    *
+        - p_v2dt2
+
+        - the pow(v * dt, 2)
+
+    *
+        - p_vt
+
+        - a copy of p_v2dt2
+
+    *
+        - p_p0
+
+        - the stream of input wavefield p(t+1) and p(t)
+
+    *
+        - p_p1
+
+        - the stream of output wavefield p(t) and p(t-1)
+
+    *
+        - p_p
+
+        - the stream of wavefield p(t-1) for cross-correlation
+
+    *
+        - p_t
+
+        - switch to swap p(t) and p(t-1) memory
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a6a5835caee49bd965b08c93b590a520e:
+.. _cid-xf::hpc::rtm::rtm2d::backwardr:
+
+backwardR
+---------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void backwardR (
+	    hls::stream <t_DataType>& p_rec,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_v2dt2,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_vt,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45>`>& p_r0,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a80dd88c7afdb0222afed59b01811ce45>`>& p_r1,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_r
+	    )
+
+backwardR defines the backward streaming module for receiver wavefield
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_rec
+
+        - the stream of the data from receivers
+
+    *
+        - p_v2dt2
+
+        - the pow(v * dt, 2)
+
+    *
+        - p_vt
+
+        - a copy of p_v2dt2
+
+    *
+        - p_r0
+
+        - the stream of input wavefield r(t+1) and r(t)
+
+    *
+        - p_r1
+
+        - the stream of output wavefield r(t) and r(t-1)
+
+    *
+        - p_r
+
+        - the stream of wavefield r(t-1) for cross-correlation
+
+.. _doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a8ac3b55c70218e362540b0fcdd0f9ee1:
+.. _cid-xf::hpc::rtm::rtm2d::crosscorrelation:
+
+crossCorrelation
+----------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void crossCorrelation (
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_p,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_r,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_imgIn,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1hpc_1_1rtm_1_1_r_t_m2_d_1a19b62fcebbe48948478dc7e6761c6c68>`>& p_imgOut
+	    )
+
+crossCorrelation constructs the detecting area images
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_p
+
+        - the stream of wavefield p(t) for cross-correlation
+
+    *
+        - p_r
+
+        - the stream of wavefield r(t) for cross-correlation
+
+    *
+        - p_imgIn
+
+        - the stream of input image
+
+    *
+        - p_imgOut
+
+        - the stream of output image
+

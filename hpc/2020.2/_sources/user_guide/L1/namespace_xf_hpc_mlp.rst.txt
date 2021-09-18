@@ -1,0 +1,145 @@
+.. index:: pair: namespace; mlp
+.. _doxid-namespacexf_1_1hpc_1_1mlp:
+.. _cid-xf::hpc::mlp:
+
+namespace mlp
+=============
+
+.. toctree::
+	:hidden:
+
+	class_xf_hpc_mlp_Fcn.rst
+
+
+
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1a3c8e540a82de766ac16cd7ceacddba31:
+.. _cid-xf::hpc::mlp::fcnscaleprelu:
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1a251eeb26806e3d4cfc1b2bdc4efefde7:
+.. _cid-xf::hpc::mlp::relu:
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1ad5598c5051402340fdadf454a97a892a:
+.. _cid-xf::hpc::mlp::sigmoid:
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1af988b4df2859bc24c15271556af8f138:
+.. _cid-xf::hpc::mlp::tansig:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// classes
+
+	template <
+	    typename t_FloatType,
+	    typename t_XDataType,
+	    unsigned int t_DdrWidth,
+	    unsigned int t_XDdrWidth,
+	    unsigned int t_aColMemWords = 1,
+	    unsigned int t_aRowMemWords = 1,
+	    unsigned int t_bColMemWords = 1,
+	    unsigned int t_maxWSize = 0,
+	    unsigned int t_maxBSize = 0
+	    >
+	class :ref:`Fcn<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn>` 
+
+
+
+
+
+.. FunctionSection
+
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1ab088e3a245b99e42418b3b7596862766:
+.. _cid-xf::hpc::mlp::relu-2:
+
+relu
+----
+
+
+.. code-block:: cpp
+	
+	#include "mlp/activations.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <typename t_DataType>
+	t_DataType relu (t_DataType x)
+
+relu (rectified linear unit) is a very common activation function in deep neural network
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+
+        - is the input value
+
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1a8576b01ce3e4f4d52fe749babd49a2e6:
+.. _cid-xf::hpc::mlp::sigmoid-2:
+
+sigmoid
+-------
+
+
+.. code-block:: cpp
+	
+	#include "mlp/activations.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <typename t_DataType>
+	t_DataType sigmoid (t_DataType x)
+
+sigmoid function is a very common activation function in MLP
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+
+        - is the input value
+
+.. _doxid-namespacexf_1_1hpc_1_1mlp_1ad767b7a344f71a1366b3e0383cee7534:
+.. _cid-xf::hpc::mlp::tansig-2:
+
+tansig
+------
+
+
+.. code-block:: cpp
+	
+	#include "mlp/activations.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <typename t_DataType>
+	t_DataType tansig (t_DataType x)
+
+tansig function is used as an activation function in some MLPs
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+
+        - is the input value
+

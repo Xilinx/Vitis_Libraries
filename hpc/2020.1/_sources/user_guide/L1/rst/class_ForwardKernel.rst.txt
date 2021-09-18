@@ -1,0 +1,51 @@
+.. index:: pair: class; ForwardKernel
+.. _doxid-class_forward_kernel:
+.. _cid-forwardkernel:
+
+template class ForwardKernel
+============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fpga.hpp"
+
+
+class :ref:`ForwardKernel <doxid-class_forward_kernel>` is used to manage and run forward kernel on :ref:`FPGA <doxid-class_f_p_g_a>`
+
+.. _doxid-class_forward_kernel_1aac4c98dac703cfbc51e3d6801c0139a4:
+.. _cid-forwardkernel::t_widetype:
+.. _doxid-class_forward_kernel_1acba777e1ed6080be2bbffa62c7f191fd:
+.. _cid-forwardkernel::t_pairtype:
+.. _doxid-class_forward_kernel_1a948c5aad00801150fe3530a7cac46209:
+.. _cid-forwardkernel::_4k:
+.. _doxid-class_forward_kernel_1a7fb5257294608646f3b5ea1dc0262854:
+.. _cid-forwardkernel::forwardkernel:
+.. _doxid-class_forward_kernel_1a8a679178e73d7b2dfd81bd603b66728e:
+.. _cid-forwardkernel::~forwardkernel:
+.. _doxid-class_forward_kernel_1afc1068f50888c480eea03db85ebcdf6a:
+.. _cid-forwardkernel::loaddata:
+.. _doxid-class_forward_kernel_1ab0ef39ca1e131deff4d0af7ef6a1c37a:
+.. _cid-forwardkernel::run:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_Order,
+	    unsigned int t_PE
+	    >
+	class ForwardKernel
+
+	// typedefs
+
+	typedef :ref:`WideData<doxid-class_wide_data>` <t_DataType, t_PE> t_WideType
+	typedef :ref:`WideData<doxid-class_wide_data>` <:ref:`t_WideType<doxid-class_forward_kernel_1aac4c98dac703cfbc51e3d6801c0139a4>`, 2> t_PairType
+
+	// fields
+
+	static const unsigned int _4k
+

@@ -1,0 +1,310 @@
+.. index:: pair: class; xf::hpc::mlp::Fcn
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn:
+.. _cid-xf::hpc::mlp::fcn:
+
+template class xf::hpc::mlp::Fcn
+================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fcn.hpp"
+
+
+Overview
+~~~~~~~~
+
+:ref:`Fcn <doxid-classxf_1_1hpc_1_1mlp_1_1_fcn>` class, implement C = f(A*B+X)
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_FloatType
+
+        - matrix A B entry data type
+
+    *
+        - t_XDataType
+
+        - matrix X entry data type
+
+    *
+        - t_DdrWidth
+
+        - number of matrix elements in one memory word
+
+    *
+        - t_XDdrWidth
+
+        - number of matrix elements in one memory word
+
+    *
+        - t_aColMemWords
+
+        - the number of memory words in one row of the matrix A buffer
+
+    *
+        - t_aRowMemWords
+
+        - the number of memory words in one column of the matrix A buffer
+
+    *
+        - t_bColMemWords
+
+        - the number of memory words in one row of the matrix B buffer
+
+    *
+        - t_maxWSize
+
+        - the maximun Weight matrix size 0 for unlimited size
+
+    *
+        - t_maxBSize
+
+        - the maximun Bias vector size 0 for unlimited size
+
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1aebfa65a48c0c1a11527a118e01a52e18:
+.. _cid-xf::hpc::mlp::fcn::ddrwidetype:
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a5f1eeaecbbb817b17a8fb3b06cbe3b38:
+.. _cid-xf::hpc::mlp::fcn::ddrstream:
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a9e1e5264f294535e75670591247fd747:
+.. _cid-xf::hpc::mlp::fcn::fcnargstype:
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21:
+.. _cid-xf::hpc::mlp::fcn::ddrinttype:
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1aaa60a6585ed827ec7f0f7e21ccb690b4:
+.. _cid-xf::hpc::mlp::fcn::fcn:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_FloatType,
+	    typename t_XDataType,
+	    unsigned int t_DdrWidth,
+	    unsigned int t_XDdrWidth,
+	    unsigned int t_aColMemWords = 1,
+	    unsigned int t_aRowMemWords = 1,
+	    unsigned int t_bColMemWords = 1,
+	    unsigned int t_maxWSize = 0,
+	    unsigned int t_maxBSize = 0
+	    >
+	class Fcn
+
+	// typedefs
+
+	typedef GemmKernel <t_FloatType, t_XDataType, t_DdrWidth, t_XDdrWidth, t_aColMemWords, t_aRowMemWords, t_bColMemWords>:::ref:`DdrWideType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1aebfa65a48c0c1a11527a118e01a52e18>` DdrWideType
+	typedef GemmKernel <t_FloatType, t_XDataType, t_DdrWidth, t_XDdrWidth, t_aColMemWords, t_aRowMemWords, t_bColMemWords>:::ref:`DdrStream<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a5f1eeaecbbb817b17a8fb3b06cbe3b38>` DdrStream
+	typedef FcnArgs FcnArgsType
+	typedef DdrWideType::t_TypeInt DdrIntType
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1adea2e977931f09c10fbcac33e7de88cf:
+.. _cid-xf::hpc::mlp::fcn::fcnactivation:
+
+FcnActivation
+-------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void FcnActivation (
+	    :ref:`DdrStream<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a5f1eeaecbbb817b17a8fb3b06cbe3b38>`& p_inS,
+	    :ref:`DdrStream<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a5f1eeaecbbb817b17a8fb3b06cbe3b38>`& p_outS,
+	    unsigned int p_blocks,
+	    t_FloatType (*) (t_FloatType) f_act,
+	    int16_t p_args
+	    )
+
+FcnActivation applies activation function to the FCN output.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_inS
+
+        - is the input stream from FCN
+
+    *
+        - p_outS
+
+        - is the output stream after applying activation
+
+    *
+        - p_blocks
+
+        - is the number of blocks to be processed
+
+    *
+        - f_act
+
+        - is the activation function
+
+    *
+        - p_args
+
+        - is the arguments passed to the activation function
+
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1ab6bf9e46a197d11b13f8ad1733634c8c:
+.. _cid-xf::hpc::mlp::fcn::fcnblocks:
+
+FcnBlocks
+---------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void FcnBlocks (
+	    :ref:`DdrIntType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21>`* p_aAddr,
+	    :ref:`DdrIntType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21>`* p_bAddr,
+	    :ref:`DdrIntType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21>`* p_cAddr,
+	    :ref:`DdrIntType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21>`* p_xAddr,
+	    unsigned int p_aColBlocks,
+	    unsigned int p_aRowBlocks,
+	    unsigned int p_bColBlocks,
+	    unsigned int p_aLd,
+	    unsigned int p_bLd,
+	    unsigned int p_cLd,
+	    unsigned int p_xLd,
+	    unsigned int p_transpBlocks,
+	    t_FloatType (*) (t_FloatType) f_act,
+	    :ref:`FcnArgsType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a9e1e5264f294535e75670591247fd747>`& p_Args
+	    )
+
+FcnBlocks runs the FCN for input matrices.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_aAddr
+
+        - the base address of matrix A in external memory
+
+    *
+        - p_bAddr
+
+        - the base address of matrix B in external memory
+
+    *
+        - p_cAddr
+
+        - the base address of matrix C in external memory
+
+    *
+        - p_xAddr
+
+        - the base address of matrix X in external memory
+
+    *
+        - p_aColBlocks
+
+        - the No. blocks along matrix X cols
+
+    *
+        - p_aRowBlocks
+
+        - the No. blocks along matrix X rows
+
+    *
+        - p_bColBlocks
+
+        - the No. blocks along matrix X cols
+
+    *
+        - p_aLd
+
+        - the matrix A word leading dimention
+
+    *
+        - p_bLd
+
+        - the matrix B word leading dimention
+
+    *
+        - p_cLd
+
+        - the matrix C word leading dimention
+
+    *
+        - p_xLd
+
+        - the matrix X word leading dimention
+
+    *
+        - f_act
+
+        - the activation function
+
+    *
+        - p_Args
+
+        - the arguments for fcn operation
+
+    *
+        - p_transpBlocks
+
+        - the number of blocks for compute
+
+.. _doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1ab16341847220afbbf4c339e6c834817f:
+.. _cid-xf::hpc::mlp::fcn::runfcn:
+
+runFcn
+------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void runFcn (
+	    :ref:`DdrIntType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21>`* p_DdrRd,
+	    :ref:`DdrIntType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a2a76f804dddef66efb5867a02de2dc21>`* p_DdrWr,
+	    :ref:`FcnArgsType<doxid-classxf_1_1hpc_1_1mlp_1_1_fcn_1a9e1e5264f294535e75670591247fd747>`& p_Args
+	    )
+
+runFcn launch fcn operation with given arguments
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_DdrRd
+
+        - the DDR/HBM address for input data
+
+    *
+        - p_DdrWr
+
+        - the DDR/HBM address for output data
+
+    *
+        - p_Args
+
+        - the arguments for fcn
+

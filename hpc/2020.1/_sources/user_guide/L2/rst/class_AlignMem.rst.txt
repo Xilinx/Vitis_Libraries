@@ -1,0 +1,66 @@
+.. index:: pair: class; AlignMem
+.. _doxid-class_align_mem:
+.. _cid-alignmem:
+
+template class AlignMem
+=======================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "alignMem.hpp"
+
+
+
+
+.. _doxid-class_align_mem_1a90e91d7929c0b192b5b99f7a497047e1:
+.. _cid-alignmem::m_ptr:
+.. _doxid-class_align_mem_1a59371d0b42e49b871046fcd7ed234981:
+.. _cid-alignmem::m_size:
+.. _doxid-class_align_mem_1a6fc26972a96241712149ec1b353582b0:
+.. _cid-alignmem::alignmem:
+.. _doxid-class_align_mem_1a2f7a0c558371b4b547a4de11c70cc4dd:
+.. _cid-alignmem::alignmem-2:
+.. _doxid-class_align_mem_1adb9d30c5c9ee24a56c2489986c5a1457:
+.. _cid-alignmem::alignmem-3:
+.. _doxid-class_align_mem_1a452d6aa0edd1bbc344027c56013672cc:
+.. _cid-alignmem::alignmem-4:
+.. _doxid-class_align_mem_1a58fb62ee13e5dfcf7d454d4e5f9dd615:
+.. _cid-alignmem::alignmem-5:
+.. _doxid-class_align_mem_1a6d4f0f6201b3bf31d30769d9a09c55f9:
+.. _cid-alignmem::operator:
+.. _doxid-class_align_mem_1ae9fbf7b193664485209e27b91652a3c4:
+.. _cid-alignmem::alloc:
+.. _doxid-class_align_mem_1a880d22b433f83d66210bff0ee269a8b6:
+.. _cid-alignmem::size:
+.. _doxid-class_align_mem_1aeec3a66aedda0a0c5b0f4a740668a5f4:
+.. _cid-alignmem::release:
+.. _doxid-class_align_mem_1acdf457ace2f376a9b53a8d14fdc9ed91:
+.. _cid-alignmem::ptr:
+.. _doxid-class_align_mem_1ae99d6e912cbeed0e1565a33920bfd1d3:
+.. _cid-alignmem::operator t_datatype *:
+.. _doxid-class_align_mem_1a953b52aadf5b0f8736fe6688ac8db853:
+.. _cid-alignmem::operator void *:
+.. _doxid-class_align_mem_1a0dff6490466ca222d82757a3fbf46dfb:
+.. _cid-alignmem::operator-2:
+.. _doxid-class_align_mem_1ac257a1ad7ba101fa973c3796f288d19b:
+.. _cid-alignmem::operator-3:
+.. _doxid-class_align_mem_1afd8e7372586546df60a48c1388f6b7d4:
+.. _cid-alignmem::~alignmem:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_Page = 4096
+	    >
+	class AlignMem
+
+	// fields
+
+	t_DataType* m_ptr
+	int m_size
+
