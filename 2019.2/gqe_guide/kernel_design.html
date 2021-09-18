@@ -1,0 +1,1134 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vitis Database Library, GQE, join kernel, aggregate kernel, partition kernel" name="keywords" />
+<meta content="GQE kernel design." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>	
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>		
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>	
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>	
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>	
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>		
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GQE Kernel APIs" href="kernel_api.html" />
+    <link rel="prev" title="GQE Overview" href="gqe_overview.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search" 
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a> 
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search" 
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Database Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#design-flows">Design Flows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usecase.html">Typical Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="L2.html">L2 GQE Kernel User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gqe_overview.html">GQE Overview</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GQE Kernel Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#join-kernel">Join Kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aggregate-kernel">Aggregate Kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#partition-kernel">Partition Kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_api.html">GQE Kernel APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_demo.html">GQE Kernel Acceleration Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L3.html">L3 GQE Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/tpc_h.html">TPC-H Queries with GQE</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Database Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="L2.html">L2 GQE Kernel User Guide</a> &raquo;</li>
+        
+      <li>GQE Kernel Design</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gqe-kernel-design">
+<span id="id1"></span><h1>GQE Kernel Design<a class="headerlink" href="#gqe-kernel-design" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="join-kernel">
+<span id="gqe-join-kernel-design"></span><h2>Join Kernel<a class="headerlink" href="#join-kernel" title="Permalink to this headline">¶</a></h2>
+<p>The GQE join kernel is a compound of multiple post-bitstream programmable primitives,
+and can execute not only hash-join but also a number of primitives often found as
+prologue or epilogue of join operations. With its bypass design in data path,
+it can even perform execution without a join.</p>
+<a class="reference internal image-reference" href="../_images/gqe_join_kernel.png"><img alt="GQE Join Kernel" class="align-center" src="../_images/gqe_join_kernel.png" style="width: 829.1999999999999px; height: 292.2px;" /></a>
+<p>The internal of this kernel is illustrated in the figure above. Internal multi-join supports
+three reconfigurable modes, namely inner join, anti-join and semi-join.
+This kernel works with three input buffers, two for data and one for configuration,
+and it emits result to one output buffer, with same data structure as its data input buffers.</p>
+<p>The uniformed buffer content structure design allows this kernel to be seamlessly scheduled,
+using one’s output as successor’s input. Basically, a buffer contains an input table
+or an intermediate result table, and each table has a list of data columns,
+placed one after another and aligned to 512b boundaries.</p>
+<p>Each column’s data structure is essentially a 512-bit header, followed by raw data.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In the current release, all columns are expected to have the same number of elements of same type,
+so only the first columns header is used by kernel. This will likely change in future release.</p>
+</div>
+<p>The buffer and column’s data structure is shown in the figure below.</p>
+<a class="reference internal image-reference" href="../_images/gqe_2.0_data.png"><img alt="GQE 2.0 Data Buffer Content" class="align-center" src="../_images/gqe_2.0_data.png" style="width: 339.0px; height: 431.4px;" /></a>
+<p>The configuration buffer basically programs the kernel at runtime. It toggles execution step
+primitives on or off, and defines the filter and/or evaluation expressions.
+The details are documented in the following table:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="15%" />
+<col width="14%" />
+<col width="14%" />
+<col width="8%" />
+<col width="10%" />
+<col width="10%" />
+<col width="9%" />
+<col width="9%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">192-511</th>
+<th class="head">191-184</th>
+<th class="head">120-183</th>
+<th class="head">56-119</th>
+<th class="head">6</th>
+<th class="head">3-5</th>
+<th class="head">2</th>
+<th class="head">1</th>
+<th class="head">0</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Shuffle</td>
+<td>Tab C col sel</td>
+<td>Tab B col-id</td>
+<td>Tab A col-id</td>
+<td>append</td>
+<td>join sel</td>
+<td>dual key</td>
+<td>aggr on</td>
+<td>join on</td>
+</tr>
+<tr class="row-odd"><td colspan="9">(padding at MSB) eval-0 config</td>
+</tr>
+<tr class="row-even"><td colspan="9">(padding at MSB) eval-1 config</td>
+</tr>
+<tr class="row-odd"><td colspan="9">filter Tab A config</td>
+</tr>
+<tr class="row-even"><td colspan="9">filter Tab A config (cont’)</td>
+</tr>
+<tr class="row-odd"><td colspan="9">(padding at MSB) filter Tab A config (cont’)</td>
+</tr>
+<tr class="row-even"><td colspan="9">filter Tab B config</td>
+</tr>
+<tr class="row-odd"><td colspan="9">filter Tab B config (cont’)</td>
+</tr>
+<tr class="row-even"><td colspan="9">(padding at MSB) filter Tab B config (cont’)</td>
+</tr>
+</tbody>
+</table>
+<p>Both input table A and B can support up to 8 columns.
+The selection and order of columns in pipeline is appointed via the column index.
+Within each buffer, the columns are indexed starting from 0.
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> is used as a special value to instruct the table scanner to feed zero for that column.</p>
+<p>For example, suppose Table A’s column indices are <code class="docutils literal notranslate"><span class="pre">[3,2,1,-1,-1]</span></code>.
+Then Column 3 will be the first in data path, and Column 2 the second and Column 1 the third.
+Column 0 and other columns if exists are ignored.
+The last two slots in data path will be filled with zeros.</p>
+<p>The filter config is aligned to lower bits, and each filter’s config fully covers the first two
+512-bit slots, and partially use the third one.</p>
+<p>Here the <code class="docutils literal notranslate"><span class="pre">join_on</span></code> option toggles whether hash-join is enabled or by-passed in the pipeline.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">dual_key</span></code> option instructs the kernel to use
+both first and second column as join key in hash-join, and when it is asserted, the third column
+becomes the first part of the payload input.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">join</span> <span class="pre">sel</span></code> option indicates the work mode of multi-join, 0 for normal hash join, 1 for semi-join and
+2 for anti-join.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">append</span></code> option toggles whether the append mode is enabled during writing out consecutive joined table.
+This option would be usually used when it joins two sub-tables after hash partition.</p>
+<p>The eval config is for the <a class="reference internal" href="../guide/hw_api.html#cid-xf-database-dynamiceval"><span class="std std-ref">dynamicEval</span></a> primitive,
+and aligns to the lower bits of the 512-bit allocated for it.</p>
+<p>The aggregation always performs the calculation of min, max, sum and count for each of its input column.
+When <code class="docutils literal notranslate"><span class="pre">aggr_on</span></code> is set, aggregation values will write instead of the original rows.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">To support large sum and count, the output data width of these two fields are doubled.
+So that the aggregation value for each column is <code class="docutils literal notranslate"><span class="pre">min,</span> <span class="pre">max,</span> <span class="pre">sum</span> <span class="pre">LSB,</span> <span class="pre">sum</span> <span class="pre">MSB,</span> <span class="pre">count</span> <span class="pre">LSB,</span> <span class="pre">count</span> <span class="pre">MSB</span></code>.</p>
+</div>
+<p>The write option is basically a bit mask for 8 slots in data path.
+Only when the corresponding one-hot bit is asserted, the column is written to the output buffer.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">Due to limitation in current <code class="docutils literal notranslate"><span class="pre">write_out</span></code>, the output buffer must always
+provide 8 column slots, even not all used.</p>
+</div>
+<p>The hardware resource utilization of join kernel is shown in the table below (work as 182MHz).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="11%" />
+<col width="8%" />
+<col width="16%" />
+<col width="15%" />
+<col width="11%" />
+<col width="9%" />
+<col width="7%" />
+<col width="5%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Primitive</td>
+<td>Quantity</td>
+<td>LUT</td>
+<td>LUT as memory</td>
+<td>LUT as logic</td>
+<td>Register</td>
+<td>BRAM36</td>
+<td>URAM</td>
+<td>DSP</td>
+</tr>
+<tr class="row-even"><td>Scan</td>
+<td>1</td>
+<td>12814</td>
+<td>4758</td>
+<td>8056</td>
+<td>18968</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td>Filter</td>
+<td>4</td>
+<td>2155</td>
+<td>13</td>
+<td>2142</td>
+<td>1776</td>
+<td>0.5</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>Hash join</td>
+<td>1</td>
+<td>118625</td>
+<td>30396</td>
+<td>88229</td>
+<td>171852</td>
+<td>254.5</td>
+<td>192</td>
+<td>80</td>
+</tr>
+<tr class="row-odd"><td>Eval</td>
+<td>2</td>
+<td>2362</td>
+<td>315</td>
+<td>2047</td>
+<td>2325</td>
+<td>0</td>
+<td>0</td>
+<td>21</td>
+</tr>
+<tr class="row-even"><td>Direct aggr</td>
+<td>1</td>
+<td>1958</td>
+<td>0</td>
+<td>1958</td>
+<td>3307</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>Write</td>
+<td>1</td>
+<td>20604</td>
+<td>5693</td>
+<td>14911</td>
+<td>30275</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>AXI DDR</td>
+<td>1</td>
+<td>6803</td>
+<td>1370</td>
+<td>5433</td>
+<td>15045</td>
+<td>60</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>AXI HBM</td>
+<td>1</td>
+<td>25734</td>
+<td>3321</td>
+<td>22413</td>
+<td>31290</td>
+<td>32</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>Total</td>
+<td>&#160;</td>
+<td>236692</td>
+<td>63384</td>
+<td>173608</td>
+<td>330108</td>
+<td>348.5</td>
+<td>192</td>
+<td>124</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aggregate-kernel">
+<h2>Aggregate Kernel<a class="headerlink" href="#aggregate-kernel" title="Permalink to this headline">¶</a></h2>
+<p>The GQE Aggregate kernel is another key kernel of General Query Engine (GQE),
+and supports both grouping and non-grouping aggregate operations.</p>
+<a class="reference internal image-reference" href="../_images/gqe_aggr_kernel.png"><img alt="GQE Aggregate Kernel" class="align-center" src="../_images/gqe_aggr_kernel.png" style="width: 801.6px; height: 348.0px;" /></a>
+<p>The internal structure of this kernel is shown in the figure above. It consists of one scan and write,
+two evaluations, one filter, hash group aggregate as well as one aggregate primitive. Raw input table is
+scanned in or write out by column. Before entering into hash group aggregate module, each element in each
+row will be evaluated and filtered. Thus, some new elements can be generated and some rows will be
+discarded behind. Moreover, two cascaded evaluation modules are added to support more complex expression.</p>
+<p>Hash group aggregate is the key module in this kernel, which is a multi-PU implementation and given
+in the following diagram. Each PU requires 2 HBM banks and some URAM memory blocks to buffer distinct
+keys as well as payloads after aggregate operations. And one internal loop is implemented to consume
+all input rows with each iteration. Furthermore, all PUs are working in parallel to achieve higher
+performance.</p>
+<a class="reference internal image-reference" href="../_images/gqe_aggr_detail.png"><img alt="Detais Diagram of Hash Group Aggregate" class="align-center" src="../_images/gqe_aggr_detail.png" style="width: 665.4px; height: 421.8px;" /></a>
+<p>Also, the data structure of input and output tables is same as join kernel. The whole configuration is
+composed of 128 32-bit slot. And the details of configuration buffers are listed in the table:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="37%" />
+<col width="41%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Module</td>
+<td>Module Config Width</td>
+<td>Position</td>
+</tr>
+<tr class="row-even"><td>Scan</td>
+<td>64 bit</td>
+<td>config[0]~config[1]</td>
+</tr>
+<tr class="row-odd"><td>Eval0</td>
+<td>289 bit</td>
+<td>config[2]~config[11]</td>
+</tr>
+<tr class="row-even"><td>Eval1</td>
+<td>289 bit</td>
+<td>config[12]~config[21]</td>
+</tr>
+<tr class="row-odd"><td>Filter</td>
+<td>45*32 bit</td>
+<td>config[22]~config[66]</td>
+</tr>
+<tr class="row-even"><td>Shuffle0</td>
+<td>64 bit</td>
+<td>config[67]~config[68]</td>
+</tr>
+<tr class="row-odd"><td>Shuffle1</td>
+<td>64 bit</td>
+<td>config[69]~config[70]</td>
+</tr>
+<tr class="row-even"><td>Shuffle2</td>
+<td>64 bit</td>
+<td>config[71]~config[72]</td>
+</tr>
+<tr class="row-odd"><td>Shuffle3</td>
+<td>64 bit</td>
+<td>config[73]~config[74]</td>
+</tr>
+<tr class="row-even"><td>Group Aggr</td>
+<td>4*32 bit</td>
+<td>config[75]~config[78]</td>
+</tr>
+<tr class="row-odd"><td>Column Merge</td>
+<td>64 bit</td>
+<td>config[79]~config[80]</td>
+</tr>
+<tr class="row-even"><td>Aggregate</td>
+<td>1 bit</td>
+<td>config[81]</td>
+</tr>
+<tr class="row-odd"><td>Write</td>
+<td>16 bit</td>
+<td>config[82]</td>
+</tr>
+<tr class="row-even"><td>Reserved</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>config[83]~config[127]</td>
+</tr>
+</tbody>
+</table>
+<p>The hardware resource utilization of hash group aggregate is shown in the table below (work as 193MHz).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="11%" />
+<col width="8%" />
+<col width="16%" />
+<col width="15%" />
+<col width="11%" />
+<col width="9%" />
+<col width="7%" />
+<col width="5%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Primitive</td>
+<td>Quantity</td>
+<td>LUT</td>
+<td>LUT as memory</td>
+<td>LUT as logic</td>
+<td>Register</td>
+<td>BRAM36</td>
+<td>URAM</td>
+<td>DSP</td>
+</tr>
+<tr class="row-even"><td>Scan</td>
+<td>1</td>
+<td>12209</td>
+<td>4758</td>
+<td>7451</td>
+<td>18974</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td>Eval</td>
+<td>8</td>
+<td>2153</td>
+<td>426</td>
+<td>1727</td>
+<td>2042</td>
+<td>4</td>
+<td>0</td>
+<td>21</td>
+</tr>
+<tr class="row-even"><td>Filter</td>
+<td>4</td>
+<td>2168</td>
+<td>13</td>
+<td>2155</td>
+<td>1764</td>
+<td>0.5</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>Group Aggr</td>
+<td>1</td>
+<td>162202</td>
+<td>27819</td>
+<td>134383</td>
+<td>210926</td>
+<td>62</td>
+<td>256</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>Direct Aggr</td>
+<td>1</td>
+<td>4349</td>
+<td>0</td>
+<td>4349</td>
+<td>6611</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>Write</td>
+<td>1</td>
+<td>30938</td>
+<td>9490</td>
+<td>21448</td>
+<td>43579</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>AXI DDR</td>
+<td>1</td>
+<td>4586</td>
+<td>1313</td>
+<td>3273</td>
+<td>78855</td>
+<td>18</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>AXI HBM</td>
+<td>1</td>
+<td>20528</td>
+<td>4456</td>
+<td>16072</td>
+<td>45416</td>
+<td>124</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>Total</td>
+<td>&#160;</td>
+<td>298470</td>
+<td>60402</td>
+<td>238068</td>
+<td>399737</td>
+<td>255</td>
+<td>256</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="partition-kernel">
+<h2>Partition Kernel<a class="headerlink" href="#partition-kernel" title="Permalink to this headline">¶</a></h2>
+<p>The GQE partition kernel can partition one table’s rows into corresponding clusters according to hash of selected
+key columns. This kernel is designed to scale the problem size that can be handled by the GQE Join or Aggregate kernel.
+To reduce the size of intermediate data, it is equipped with dynamic filter like other kernels.</p>
+<a class="reference internal image-reference" href="../_images/gqe_part_kernel.png"><img alt="GQE Part Kernel" class="align-center" src="../_images/gqe_part_kernel.png" style="width: 656.5999999999999px; height: 275.09999999999997px;" /></a>
+<p>The internal of this kernel is illustrated in the figure above. It consists of two input buffers and one output buffer.
+Firstly, the kernel scans the input tables into multiple columns and then it filters them (if the related condition is
+given in configuration buffer). After that, each row will be dispatched into various buckets based on the hash value of
+primary key. Finally, every full hash bucket will trigger on one burst write into output buffer.</p>
+<p>The details for hash partition is shown in the following figure. One URAM array is used to buffer one burst length rows
+for each hash part. And the following module behind build PU will spilt each row into multiple columns for compatible
+output format with other kernels.</p>
+<a class="reference internal image-reference" href="../_images/gqe_part_detail.png"><img alt="Detais Diagram of Hash Partition" class="align-center" src="../_images/gqe_part_detail.png" style="width: 799.4px; height: 354.9px;" /></a>
+<p>To simplify the design, GQE partition kernel can reuse the scan and filter configuration with GQE join kernel. Also,
+as mentioned above, the data structure of input and output tables is the same as join kernel.</p>
+<p>The hardware resource utilization of single hash partition is shown in the table below (work as 200MHz).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="11%" />
+<col width="8%" />
+<col width="16%" />
+<col width="15%" />
+<col width="11%" />
+<col width="9%" />
+<col width="7%" />
+<col width="5%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Primitive</td>
+<td>Quantity</td>
+<td>LUT</td>
+<td>LUT as memory</td>
+<td>LUT as logic</td>
+<td>Register</td>
+<td>BRAM36</td>
+<td>URAM</td>
+<td>DSP</td>
+</tr>
+<tr class="row-even"><td>Scan</td>
+<td>1</td>
+<td>12032</td>
+<td>4752</td>
+<td>7280</td>
+<td>19383</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td>Filter</td>
+<td>4</td>
+<td>3551</td>
+<td>809</td>
+<td>2742</td>
+<td>3809</td>
+<td>0.5</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-even"><td>Hash partition</td>
+<td>1</td>
+<td>26363</td>
+<td>1521</td>
+<td>27496</td>
+<td>45762</td>
+<td>20</td>
+<td>256</td>
+<td>5</td>
+</tr>
+<tr class="row-odd"><td>Write</td>
+<td>1</td>
+<td>26083</td>
+<td>5082</td>
+<td>21286</td>
+<td>33202</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr class="row-even"><td>AXI DDR</td>
+<td>1</td>
+<td>5046</td>
+<td>1010</td>
+<td>4036</td>
+<td>11303</td>
+<td>59.5</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>Total</td>
+<td>&#160;</td>
+<td>76091</td>
+<td>14102</td>
+<td>61989</td>
+<td>116884</td>
+<td>81</td>
+<td>256</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition attention">
+<p class="first admonition-title">Attention</p>
+<p class="last">To use the GQE Partition kernel, host must pass the number of partitions through a kernel argument,
+create corresponding number of sub-buffers on Partition kernel’s output,
+and invoke GQE Join or Aggregate kernel multiple times accordingly.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+	  
+	  
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kernel_api.html" class="btn btn-neutral float-right" title="GQE Kernel APIs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gqe_overview.html" class="btn btn-neutral float-left" title="GQE Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+  </div>	  
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+  
+  
+
+  
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2019, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+			
+			underscoreSetup();
+		</script>
+	</body>
+</html>
