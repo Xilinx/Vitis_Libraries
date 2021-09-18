@@ -1,0 +1,1496 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vision, Library, Vitis Vision Library, cv" name="keywords" />
+<meta content="Using the Vitis vision library." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="_static/js/jquery.min.js"></script>	
+	  <script type="text/javascript" src="_static/js/gtm.js"></script>
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="_static/js/common-ui-all.min.js"></script>		
+    <script type="text/javascript" src="_static/js/header-footer.min.js"></script>	
+    <script type="text/javascript" src="_static/js/jquery-ui.min.js"></script>	
+    <script type="text/javascript" src="_static/js/CoveoJsSearch.Lazy.min.js"></script>	
+    <script type="text/javascript" src="_static/js/linkid.js"></script>		
+    <script type="text/javascript" src="_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search" 
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a> 
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search" 
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Vitis Vision Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2020.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Vitis Vision Library User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#getting-started-with-vitis-vision">Getting Started with Vitis Vision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#getting-started-with-hls">Getting Started with HLS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#design-examples-using-vitis-vision-library">Design Examples Using Vitis Vision Library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Vitis Vision Library API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#xf-cv-mat-image-container-class">xf::cv::Mat Image Container Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#vitis-vision-library-functions">Vitis Vision Library Functions</a></li>
+</ul>
+
+            
+			<p class="caption"><span class="caption-text">This Page</span></p>
+				<ul class="current">
+				  <li class="toctree-l1"><a href="_sources/using-the-vitis-vision-library.rst.txt"
+						rel="nofollow">Show Source</a></li>						
+				</ul>
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Vitis Vision Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Using the Vitis vision Library</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/using-the-vitis-vision-library.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-the-vitis-vision-library">
+<h1>Using the Vitis vision Library<a class="headerlink" href="#using-the-vitis-vision-library" title="Permalink to this headline">¶</a></h1>
+<p>This section describes using the Vitis vision library in the Vitis development
+environment.</p>
+<p>Note: The instructions in this section assume that you have downloaded
+and installed all the required packages.</p>
+<p><em>include</em> folder constitutes all the necessary components to build a
+Computer Vision or Image Processing pipeline using the library. The
+folders <em>common</em> and <em>core</em> contain the infrastructure that the library
+functions need for basic functions, Mat class, and macros. The library
+functions are categorized into 4 folders, <em>features</em>, <em>video</em>, <em>dnn</em>, and
+<em>imgproc</em> based on the operation they perform. The names of the folders
+are self-explanatory.</p>
+<p>To work with the library functions, you need to include the path to the
+the <em>include</em> folder in the Vitis project. You can include relevant header files
+for the library functions you will be working with after you source the
+<em>include</em> folder’s path to the compiler. For example, if you would like to
+work with Harris Corner Detector and Bilateral Filter, you must use the
+following lines in the host code:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">“features/xf_harris.hpp” //for Harris Corner Detector</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">“imgproc/xf_bilateral_filter.hpp” //for Bilateral Filter</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">“video/xf_kalmanfilter.hpp”</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>After the headers are included, you can work with the library functions
+as described in the <a class="reference external" href="api-reference.html#ycb1504034263746">Vitis vision Library API
+Reference</a> using the examples
+in the examples folder as reference.</p>
+<p>The following table gives the name of the header file, including the
+folder name, which contains the library function.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Table : Vitis Vision Library</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Function Name</p></th>
+<th class="head"><p>File Path in the include folder</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>xf::cv::accumulate</p></td>
+<td><p>imgproc/xf_accumulate_image.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::accumulateSquare</p></td>
+<td><p>imgproc/xf_accumulate_squared.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::accumulateWeighted</p></td>
+<td><p>imgproc/xf_accumulate_weighted.hp
+p</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::absdiff, xf::cv::add,
+xf::cv::subtract, xf::cv::bitwise_and,
+xf::cv::bitwise_or, xf::cv::bitwise_not,
+xf::cv::bitwise_xor,xf::cv::multiply
+,xf::cv::Max, xf::cv::Min,xf::cv::compare,
+xf::cv::zero, xf::cv::addS, xf::cv::SubS,
+xf::cv::SubRS ,xf::cv::compareS,
+xf::cv::MaxS, xf::cv::MinS, xf::cv::set</p></td>
+<td><p>core/xf_arithm.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::addWeighted</p></td>
+<td><p>imgproc/xf_add_weighted.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::autowhitebalance</p></td>
+<td><p>imgproc/xf_autowhitebalance.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::autoexposurecorrection</p></td>
+<td><p>imgproc/xf_aec.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::bilateralFilter</p></td>
+<td><p>imgproc/xf_bilaterealfilter.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::blackLevelCorrection</p></td>
+<td><p>imgproc/xf_black_level.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::bfmatcher</p></td>
+<td><p>imgproc/xf_bfmatcher.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::boxFilter</p></td>
+<td><p>imgproc/xf_box_filter.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::boundingbox</p></td>
+<td><p>imgproc/xf_boundingbox.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::badpixelcorrection</p></td>
+<td><p>imgproc/xf_bpc.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::Canny</p></td>
+<td><p>imgproc/xf_canny.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::colorcorrectionmatrix</p></td>
+<td><p>imgproc/xf_colorcorrectionmatrix.
+hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::Colordetect</p></td>
+<td><p>imgproc/xf_colorthresholding.hpp,
+imgproc/xf_bgr2hsv.hpp,
+imgproc/xf_erosion.hpp,
+imgproc/xf_dilation.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::merge</p></td>
+<td><p>imgproc/xf_channel_combine.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::extractChannel</p></td>
+<td><p>imgproc/xf_channel_extract.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::convertTo</p></td>
+<td><p>imgproc/xf_convert_bitdepth.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::crop</p></td>
+<td><p>imgproc/xf_crop.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::distanceTransform</p></td>
+<td><p>imgproc/xf_distancetransform.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::nv122iyuv, xf::cv::nv122rgba,
+xf::cv::nv122yuv4, xf::cv::nv212iyuv,
+xf::cv::nv212rgba, xf::cv::nv212yuv4,
+xf::cv::rgba2yuv4, xf::cv::rgba2iyuv,
+xf::cv::rgba2nv12, xf::cv::rgba2nv21,
+xf::cv::uyvy2iyuv, xf::cv::uyvy2nv12,
+xf::cv::uyvy2rgba, xf::cv::yuyv2iyuv,
+xf::cv::yuyv2nv12, xf::cv::yuyv2rgba,
+xf::cv::rgb2iyuv,xf::cv::rgb2nv12,
+xf::cv::rgb2nv21, xf::cv::rgb2yuv4,
+xf::cv::rgb2uyvy, xf::cv::rgb2yuyv,
+xf::cv::rgb2bgr, xf::cv::bgr2uyvy,
+xf::cv::bgr2yuyv, xf::cv::bgr2rgb,
+xf::cv::bgr2nv12, xf::cv::bgr2nv21,
+xf::cv::iyuv2nv12, xf::cv::iyuv2rgba,
+xf::cv::iyuv2rgb, xf::cv::iyuv2yuv4,
+xf::cv::nv122uyvy, xf::cv::nv122yuyv,
+xf::cv::nv122nv21, xf::cv::nv212rgb,
+xf::cv::nv212bgr, xf::cv::nv212uyvy,
+xf::cv::nv212yuyv, xf::cv::nv212nv12,
+xf::cv::uyvy2rgb, xf::cv::uyvy2bgr,
+xf::cv::uyvy2yuyv, xf::cv::yuyv2rgb,
+xf::cv::yuyv2bgr, xf::cv::yuyv2uyvy,
+xf::cv::rgb2gray, xf::cv::bgr2gray,
+xf::cv::gray2rgb, xf::cv::gray2bgr,
+xf::cv::rgb2xyz, xf::cv::bgr2xyz…</p></td>
+<td><p>imgproc/xf_cvt_color.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::densePyrOpticalFlow</p></td>
+<td><p>video/xf_pyr_dense_optical_flow.h
+pp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::DenseNonPyrLKOpticalFlow</p></td>
+<td><p>video/xf_dense_npyr_optical_flow.
+hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::dilate</p></td>
+<td><p>imgproc/xf_dilation.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::demosaicing</p></td>
+<td><p>imgproc/xf_demosaicing.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::erode</p></td>
+<td><p>imgproc/xf_erosion.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::fast</p></td>
+<td><p>features/xf_fast.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::filter2D</p></td>
+<td><p>imgproc/xf_custom_convolution.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::GaussianBlur</p></td>
+<td><p>imgproc/xf_gaussian_filter.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::gaincontrol</p></td>
+<td><p>imgproc/xf_gaincontrol.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::gammacorrection</p></td>
+<td><p>imgproc/xf_gammacorrection</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::cornerHarris</p></td>
+<td><p>features/xf_harris.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::calcHist</p></td>
+<td><p>imgproc/xf_histogram.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::equalizeHist</p></td>
+<td><p>imgproc/xf_hist_equalize.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::HOGDescriptor</p></td>
+<td><p>imgproc/xf_hog_descriptor.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::Houghlines</p></td>
+<td><p>imgproc/xf_houghlines.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::inRange</p></td>
+<td><p>imgproc/xf_inrange.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::integralImage</p></td>
+<td><p>imgproc/xf_integral_image.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::KalmanFilter</p></td>
+<td><p>video/xf_kalmanfilter.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::Lscdistancebased</p></td>
+<td><p>imgproc/xf_lensshadingcorrection
+.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::LTM::process</p></td>
+<td><p>imgproc/xf_ltm.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::LUT</p></td>
+<td><p>imgproc/xf_lut.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::magnitude</p></td>
+<td><p>core/xf_magnitude.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::MeanShift</p></td>
+<td><p>imgproc/xf_mean_shift.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::meanStdDev</p></td>
+<td><p>core/xf_mean_stddev.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::medianBlur</p></td>
+<td><p>imgproc/xf_median_blur.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::minMaxLoc</p></td>
+<td><p>core/xf_min_max_loc.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::modefilter</p></td>
+<td><p>imgproc/xf_modefilter.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::OtsuThreshold</p></td>
+<td><p>imgproc/xf_otsuthreshold.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::phase</p></td>
+<td><p>core/xf_phase.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::preProcess</p></td>
+<td><p>dnn/xf_pre_process.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::paintmask</p></td>
+<td><p>imgproc/xf_paintmask.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::pyrDown</p></td>
+<td><p>imgproc/xf_pyr_down.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::pyrUp</p></td>
+<td><p>imgproc/xf_pyr_up.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::xf_QuatizationDithering</p></td>
+<td><p>imgproc/xf_quantizationdithering
+.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::reduce</p></td>
+<td><p>imgrpoc/xf_reduce.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::remap</p></td>
+<td><p>imgproc/xf_remap.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::resize</p></td>
+<td><p>imgproc/xf_resize.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::convertScaleAbs</p></td>
+<td><p>imgproc/xf_convertscaleabs.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::Scharr</p></td>
+<td><p>imgproc/xf_scharr.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::SemiGlobalBM</p></td>
+<td><p>imgproc/xf_sgbm.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::Sobel</p></td>
+<td><p>imgproc/xf_sobel.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::StereoPipeline</p></td>
+<td><p>imgproc/xf_stereo_pipeline.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::sum</p></td>
+<td><p>imgproc/xf_sum.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::StereoBM</p></td>
+<td><p>imgproc/xf_stereoBM.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::SVM</p></td>
+<td><p>imgproc/xf_svm.hpp</p></td>
+</tr>
+<tr class="row-odd"><td><p>xf::cv::Threshold</p></td>
+<td><p>imgproc/xf_threshold.hpp</p></td>
+</tr>
+<tr class="row-even"><td><p>xf::cv::warpTransform</p></td>
+<td><p>imgproc/xf_warp_transform.hpp</p></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="changing-the-hardware-kernel-configuration">
+<h2>Changing the Hardware Kernel Configuration<a class="headerlink" href="#changing-the-hardware-kernel-configuration" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>To modify the configuration of any function, update the following file:</p>
+<p>&lt;path to vitis vision git folder&gt;/vision/L1/examples/&lt;function&gt;/build/xf_config_params.h .</p>
+</div></blockquote>
+</div>
+<div class="section" id="using-the-vitis-vision-library-functions-on-hardware">
+<h2>Using the Vitis vision Library Functions on Hardware<a class="headerlink" href="#using-the-vitis-vision-library-functions-on-hardware" title="Permalink to this headline">¶</a></h2>
+<p>The following table lists the Vitis vision library functions and the command
+to run the respective examples on hardware. It is assumed that your
+design is completely built and the board has booted up correctly.</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Table : Using the Vitis vision Library Function on Hardware</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 40%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Example</p></th>
+<th class="head"><p>Function Name</p></th>
+<th class="head"><p>Usage on Hardware</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>accumulate</p></td>
+<td><p>xf::cv::accumulate</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>accumulatesq
+uared</p></td>
+<td><p>xf::cv::accumulateSquare</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>accumulatewe
+ighted</p></td>
+<td><p>xf::cv::accumulateWeighted</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>addS</p></td>
+<td><p>xf::cv::addS</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>arithm</p></td>
+<td><p>xf::cv::absdiff,
+xf::cv::subtract,
+xf::cv::bitwise_and,
+xf::cv::bitwise_or,
+xf::cv::bitwise_not,
+xf::cv::bitwise_xor</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>addweighted</p></td>
+<td><p>xf::cv::addWeighted</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Autoexposure
+correction</p></td>
+<td><p>xf::cv::autoexposurecorr
+ection</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Autowhite
+balance</p></td>
+<td><p>xf::cv::autowhitebalance</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Bilateralfil
+ter</p></td>
+<td><p>xf::cv::bilateralFilter</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>BlackLevel
+Correction</p></td>
+<td><p>xf::cv::blackLevel
+Correction</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>BruteForce</p></td>
+<td><p>xf::cv::bfmatcher</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Boxfilter</p></td>
+<td><p>xf::cv::boxFilter</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Badpixelcorr
+ection</p></td>
+<td><p>xf::cv::badpixelcorrection</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Boundingbox</p></td>
+<td><p>xf::cv::boundingbox</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;
+&lt;No of ROI’s&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Canny</p></td>
+<td><p>xf::cv::Canny</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>channelcombi
+ne</p></td>
+<td><p>xf::cv::merge</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;
+&lt;path to input image 3&gt;
+&lt;path to input image 4&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Channelextra
+ct</p></td>
+<td><p>xf::cv::extractChannel</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Colordetect</p></td>
+<td><p>xf::cv::bgr2hsv,
+xf::cv::colorthresholding,
+xf::cv:: erode, xf::cv::
+dilate</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>color
+correction
+matrix</p></td>
+<td><p>xf::cv::colorcorrection
+matrix</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>compare</p></td>
+<td><p>xf::cv::compare</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>compareS</p></td>
+<td><p>xf::cv::compareS</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Convertbitde
+pth</p></td>
+<td><p>xf::cv::convertTo</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>convertScale
+Abs</p></td>
+<td><p>xf::cv::convertScaleAbs</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cornertracke
+r</p></td>
+<td><p>xf::cv::cornerTracker</p></td>
+<td><p>./exe &lt;input video&gt; &lt;no.
+of frames&gt; &lt;Harris
+Threshold&gt; &lt;No. of
+frames after which
+Harris Corners are
+Reset&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>crop</p></td>
+<td><p>xf::cv::crop</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Customconv</p></td>
+<td><p>xf::cv::filter2D</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+IYUV2NV12</p></td>
+<td><p>xf::cv::iyuv2nv12</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;
+&lt;path to input image 3&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+IYUV2RGBA</p></td>
+<td><p>xf::cv::iyuv2rgba</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;
+&lt;path to input image 3&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+IYUV2YUV4</p></td>
+<td><p>xf::cv::iyuv2yuv4</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;
+&lt;path to input image 3&gt;
+&lt;path to input image 4&gt;
+&lt;path to input image 5&gt;
+&lt;path to input image 6&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+NV122IYUV</p></td>
+<td><p>xf::cv::nv122iyuv</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+NV122RGBA</p></td>
+<td><p>xf::cv::nv122rgba</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+NV122YUV4</p></td>
+<td><p>xf::cv::nv122yuv4</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+NV212IYUV</p></td>
+<td><p>xf::cv::nv212iyuv</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+NV212RGBA</p></td>
+<td><p>xf::cv::nv212rgba</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+NV212YUV4</p></td>
+<td><p>xf::cv::nv212yuv4</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+RGBA2YUV4</p></td>
+<td><p>xf::cv::rgba2yuv4</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+RGBA2IYUV</p></td>
+<td><p>xf::cv::rgba2iyuv</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+RGBA2NV12</p></td>
+<td><p>xf::cv::rgba2nv12</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+RGBA2NV21</p></td>
+<td><p>xf::cv::rgba2nv21</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+UYVY2IYUV</p></td>
+<td><p>xf::cv::uyvy2iyuv</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+UYVY2NV12</p></td>
+<td><p>xf::cv::uyvy2nv12</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+UYVY2RGBA</p></td>
+<td><p>xf::cv::uyvy2rgba</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+YUYV2IYUV</p></td>
+<td><p>xf::cv::yuyv2iyuv</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>cvtcolor
+YUYV2NV12</p></td>
+<td><p>xf::cv::yuyv2nv12</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>cvtcolor
+YUYV2RGBA</p></td>
+<td><p>xf::cv::yuyv2rgba</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Demosaicing</p></td>
+<td><p>xf::cv::demosaicing</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Difference
+of Gaussian</p></td>
+<td><p>xf::cv::GaussianBlur,
+xf::cv::duplicateMat,
+and
+xf::cv::subtract</p></td>
+<td><p>./&lt;exe-name&gt;.elf &lt;path
+to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Dilation</p></td>
+<td><p>xf::cv::dilate</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Distance
+Transform</p></td>
+<td><p>xf::cv::distanceTransform</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Erosion</p></td>
+<td><p>xf::cv::erode</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Fast</p></td>
+<td><p>xf::cv::fast</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gaussianfilt
+er</p></td>
+<td><p>xf::cv::GaussianBlur</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Gaincontrol</p></td>
+<td><p>xf::cv::gaincontrol</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gammacorrec
+tion</p></td>
+<td><p>xf::cv::gammacorrection</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Harris</p></td>
+<td><p>xf::cv::cornerHarris</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Histogram</p></td>
+<td><p>xf::cv::calcHist</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Histequializ
+e</p></td>
+<td><p>xf::cv::equalizeHist</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hog</p></td>
+<td><p>xf::cv::HOGDescriptor</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Houghlines</p></td>
+<td><p>xf::cv::HoughLines</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>inRange</p></td>
+<td><p>xf::cv::inRange</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Integralimg</p></td>
+<td><p>xf::cv::integralImage</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Laplacian
+Filter</p></td>
+<td><p>xf::cv::filter2d</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Lkdensepyrof</p></td>
+<td><p>xf::cv::densePyrOpticalFlo
+w</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Lknpyroflow</p></td>
+<td><p>xf::cv::DenseNonPyr
+LKOpticalFlow</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>lensshading
+correction</p></td>
+<td><p>xf::cv::Lscdistancebased</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Lut</p></td>
+<td><p>xf::cv::LUT</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Local tone
+mapping</p></td>
+<td><p>xf::cv::LTM::process</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kalman
+Filter</p></td>
+<td><p>xf::cv::KalmanFilter</p></td>
+<td><p>./&lt;executable name&gt;.elf</p></td>
+</tr>
+<tr class="row-even"><td><p>Magnitude</p></td>
+<td><p>xf::cv::magnitude</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Max</p></td>
+<td><p>xf::cv::Max</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>MaxS</p></td>
+<td><p>xf::cv::MaxS</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>meanshifttra
+cking</p></td>
+<td><p>xf::cv::MeanShift</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input
+video/input image files&gt;
+&lt;Number of objects to
+track&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>meanstddev</p></td>
+<td><p>xf::cv::meanStdDev</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>medianblur</p></td>
+<td><p>xf::cv::medianBlur</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Min</p></td>
+<td><p>xf::cv::Min</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>MinS</p></td>
+<td><p>xf::cv::MinS</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Minmaxloc</p></td>
+<td><p>xf::cv::minMaxLoc</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mode filter</p></td>
+<td><p>xf::cv::modefilter</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>otsuthreshol
+d</p></td>
+<td><p>xf::cv::OtsuThreshold</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>paintmask</p></td>
+<td><p>xf::cv::paintmask</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Phase</p></td>
+<td><p>xf::cv::phase</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pyrdown</p></td>
+<td><p>xf::cv::pyrDown</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Pyrup</p></td>
+<td><p>xf::cv::pyrUp</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quantization
+Dithering</p></td>
+<td><p>xf::cv::xf_Quatization
+Dithering</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>reduce</p></td>
+<td><p>xf::cv::reduce</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>remap</p></td>
+<td><p>xf::cv::remap</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;
+&lt;path to mapx data&gt;
+&lt;path to mapy data&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Resize</p></td>
+<td><p>xf::cv::resize</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>scharrfilter</p></td>
+<td><p>xf::cv::Scharr</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>set</p></td>
+<td><p>xf::cv::set</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>SemiGlobalBM</p></td>
+<td><p>xf::cv::SemiGlobalBM</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to left image&gt;
+&lt;path to right image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>sobelfilter</p></td>
+<td><p>xf::cv::Sobel</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>stereopipeli
+ne</p></td>
+<td><p>xf::cv::StereoPipeline</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to left image&gt;
+&lt;path to right image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>stereolbm</p></td>
+<td><p>xf::cv::StereoBM</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to left image&gt;
+&lt;path to right image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>subRS</p></td>
+<td><p>xf::cv::SubRS</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>subS</p></td>
+<td><p>xf::cv::SubS</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>sum</p></td>
+<td><p>xf::cv::sum</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image 1&gt;
+&lt;path to input image 2&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>Svm</p></td>
+<td><p>xf::cv::SVM</p></td>
+<td><p>./&lt;executable name&gt;.elf</p></td>
+</tr>
+<tr class="row-odd"><td><p>threshold</p></td>
+<td><p>xf::cv::Threshold</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-even"><td><p>warptransfor
+m</p></td>
+<td><p>xf::cv::warpTransform</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p>zero</p></td>
+<td><p>xf::cv::zero</p></td>
+<td><p>./&lt;executable name&gt;.elf
+&lt;path to input image&gt;</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+
+</footer>
+
+        </div>
+      </div>
+	  
+	  
+	  <!-- Sphinx Page Footer block -->
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+      <span class="lastupdated">
+        Last updated on February 03, 2021.
+      </span>
+
+    </p>
+  </div>	  
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+  
+  
+
+  
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2020, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+			
+			underscoreSetup();
+		</script>
+	</body>
+</html>

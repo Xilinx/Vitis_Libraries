@@ -1,0 +1,75 @@
+.. _colorcorrectionmatrix:
+
+Color correction matrix
+========================
+
+Color correction matrix algorithm converts the input image color format to output image color format using the colorcorrection matrix provided by the user (CCM_TYPE).
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+    template <int CCM_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
+    void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+                               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat)
+
+.. rubric:: Parameter Descriptions
+
+The following table describes template parameters and arguments of the function.
+
+.. table:: Table colorcorrectionmatrix correction Parameter Description
+
+   +-----------------+-----------------------------------------------------------+
+   | Parameter       | Description                                               |
+   +=================+===========================================================+
+   | CCM_TYPE        | colorcorrection matrix.                                   |
+   +-----------------+-----------------------------------------------------------+
+   | SRC_T           | Input pixel type. 8/10/12/16-bit unsigned, 3 channel are  |
+   |                 | supported (XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3).        |
+   +-----------------+-----------------------------------------------------------+
+   | DST_T           | Output pixel type. 8/10/12/16-bit unsigned, 3 channel are |
+   |                 | supported (XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3).        |
+   +-----------------+-----------------------------------------------------------+
+   | ROWS            | Maximum height of input and output image                  |
+   +-----------------+-----------------------------------------------------------+
+   | COLS            | Maximum width of input and output image. In case of       |
+   |                 | N-pixel parallelism, width should be multiple of N.       |
+   +-----------------+-----------------------------------------------------------+
+   | NPC             | Number of pixels to be processed per cycle; possible      |
+   |                 | options is XF_NPPC1, XF_NPPC2 AND so on                   |
+   +-----------------+-----------------------------------------------------------+
+   | _src_mat        | Input image                                               |
+   +-----------------+-----------------------------------------------------------+
+   | _dst_mat        | Output image                                              |
+   +-----------------+-----------------------------------------------------------+
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table colorcorrectionmatrix correction Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    |                    |   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel-8U         | 300                     | 0                        | 9            | 283    | 254     | 73      |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    | 1 pixel-16U        | 300                     | 0                        | 9            | 353    | 239     | 75      |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table colorcorrectionmatrix correction Function Performance Estimate Summary
+
+    +--------------------+-------------------------+---------------------------------------------+
+    |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+    |                    |   (MHz)                 | **Max (ms)**                                |
+    +====================+=========================+=============================================+
+    | 1 pixel            | 300                     | 7                                           |
+    +--------------------+-------------------------+---------------------------------------------+
+    | 2 pixel            | 300                     | 3.6                                         |
+    +--------------------+-------------------------+---------------------------------------------+

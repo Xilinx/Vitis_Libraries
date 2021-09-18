@@ -1,0 +1,139 @@
+
+.. _autowhitebalance:
+Autowhitebalance
+=================
+**Grayworld whitebalancing algorithm:**
+
+This algorithm scales the values of pixels based on a gray-world assumption which states that the average of all channels should result in a gray image.
+It adds a modification which thresholds pixels based on their saturation value and only uses pixels below the provided threshold in finding average pixel values.
+Saturation is calculated using the following for a 3-channel RGB image per pixel I and is in the range [0, 1]:
+
+|image161|
+
+A threshold of 1 means that all pixels are used to white-balance, while a threshold of 0 means no pixels are used. Lower thresholds are useful in white-balancing saturated images.
+
+**Simple whitebalancing algorithm:**
+
+A simple white balance algorithm that works by independently stretching each of the input image channels to the specified range(maximum and minimum). Computes channel wise intensity histogram and ignores p% maximum and minimum values and finally normalize each channel with min and max. For increased robustness it ignores the top and bottom :math:`p\%\ \ (4\%\ is\ fixed)` \ of pixel values.
+
+.. rubric:: API Syntax for Simple white balance
+
+
+.. code:: c
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
+	void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
+                  uint32_t histogram[3][HIST_SIZE],
+                  float thresh,
+                  float inputMin,
+                  float inputMax,
+                  float outputMin,
+                  float outputMax)
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE, int S_DEPTH = 2>
+	void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& dst,
+                      uint32_t histogram[3][HIST_SIZE],
+                      float thresh,
+                      float inputMin,
+                      float inputMax,
+                      float outputMin,
+                      float outputMax) 	
+
+.. rubric:: API Syntax for Grayworld white balance	
+
+.. code:: c	
+
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
+	void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                    float thresh,
+                    int i_gain[3])
+					
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int S_DEPTH = 2>
+	void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& src2,
+                   float thresh,
+                   int i_gain[3])
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table Autowhitebalance Parameter Description
+
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   Parameter   |   Description                                                                                                                |
+    +===============+==============================================================================================================================+
+    |   SRC_T       | Input Pixel Type.                                                                                                            |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   DST_T       | Output Pixel Type.                                                                                                           |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   ROWS        | Maximum height of input and output image (Must be multiple of NPC)                                                           |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   COLS        | Maximum width of input and output image (Must be multiple of NPC)                                                            |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   NPC         | Number of Pixels to be processed per cycle.                                                                                  |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   WB_TYPE     | White balance type. Supported types are Gray world and simple.                                                               |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+	|   HIST_SIZE   | Histogram size.                                                                                                              |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   Src1        | Input image.                                                                                                                 |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   Src2        | Input image.                                                                                                                 |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+	|   histogram   | Histogram array for the Simple AWB.                                                                                          |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   i_gain      | Gain values for gray-world AWB.                                                                                              |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   dst         | Output image.                                                                                                                |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   thresh      | Threshold value, which is used in gray world white balance method to compute average pixel values below the threshold value. |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   inputMin    | Input image range minimum value.                                                                                             |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   inputMax    | Input image range maximum value.                                                                                             |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   outputMin   | Output image range minimum value.                                                                                            |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   outputMax   | Output image range maximum value.                                                                                            |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.1 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
+
+.. table:: Table Autowhitebalance Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    |                    |                         |                                                                      |
+    |                    |   (MHz)                 |                                                                      |
+    +                    +                         +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel            | 300                     | 14                       | 10           | 4798   | 4953    | 1757    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    | 2 pixel            | 300                     | 14                       | 10           | 8335   | 8535    | 2901    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in
+different configurations, as generated using Vitis HLS 2020.1 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
+
+.. table:: Table Autowhitebalance Function Performance Estimate Summary
+
++--------------------+-------------------------+---------------------------------------------+
+|   Operating Mode   |   Operating Frequency   |   Latency Estimate                          |
+|                    |                         |                                             |
+|                    |   (MHz)                 |                                             |
++                    +                         +---------------------------------------------+
+|                    |                         | **Max (ms)**                                |
++====================+=========================+=============================================+
+| 1 pixel            | 300                     | 55.2 for still image(27.9 for video stream) |
++--------------------+-------------------------+---------------------------------------------+
+| 2 pixel            | 300                     | 28 for still image(14.2 for video stream)   |
++--------------------+-------------------------+---------------------------------------------+
+

@@ -1,0 +1,91 @@
+
+.. _blacklevelcorrection:
+
+Blacklevelcorrection
+====================
+
+Black level leads to the whitening of image in dark region and perceived loss of overall
+contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+     template <int SRC_T,int MAX_ROWS,int MAX_COLS,int NPPC = XF_NPPC1,int MUL_VALUE_WIDTH = 16,int FL_POS = 15,int USE_DSP = 1>
+     void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _Src,
+                               xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _Dst,
+                               XF_CTUNAME(SRC_T, NPPC) black_level,
+                               float mul_value)
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table blacklevelcorrection correction Parameter Description
+
+   +-----------------+-----------------------------------------------------------+
+   | Parameter       | Description                                               |
+   +=================+===========================================================+
+   | MUL_VALUE_WIDTH | Width of multiplication factor.                           |
+   +-----------------+-----------------------------------------------------------+
+   | FL_POS          | Number of fractional bits in multiplication factor.       |
+   +-----------------+-----------------------------------------------------------+
+   | USE_DSP         | Enables usage of DSP for multiplication.                  |
+   +-----------------+-----------------------------------------------------------+
+   | SRC_T           | Input pixel type. 8/10/12/16-bit unsigned 1 channel       |
+   |                 | are supported (XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1).    |
+   +-----------------+-----------------------------------------------------------+
+   | DST_T           | Output pixel type. 8/10/12/16-bit unsigned 1 channel are  |
+   |                 | supported (XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1).        |
+   +-----------------+-----------------------------------------------------------+
+   | MAX_ROWS        | Maximum height of input and output image.                 |
+   +-----------------+-----------------------------------------------------------+
+   | MAX_COLS        | Maximum width of input and output image. In case of       |
+   |                 | N-pixel parallelism, width should be multiple of N.       |
+   +-----------------+-----------------------------------------------------------+
+   | NPC             | Number of pixels to be processed per cycle; possible      |
+   |                 | options are XF_NPPC1, XF_NPPC2 AND so on                  |
+   +-----------------+-----------------------------------------------------------+
+   | \_Src           | Input image                                               |
+   +-----------------+-----------------------------------------------------------+
+   | \_Dst           | Output image                                              |
+   +-----------------+-----------------------------------------------------------+
+   | \black_level    | Black level value                                         |
+   +-----------------+-----------------------------------------------------------+
+   | \mul_value      | Multiplication factor for blacklevel correction;          |      
+   |                 | which is computed as maxlevel/(maxlevel-blacklevel)       |
+   +-----------------+-----------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, 
+generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table blacklevelcorrection Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel-8U         | 300                     | 0                        | 0            | 279    | 271     | 70      |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+
+.. table:: Table blacklevelcorrection Function Performance Estimate Summary
+
+    +--------------------+-------------------------+---------------------------------------------+
+    |   Operating Mode   |   Operating Frequency   |  Latency Estimate                           |
+    +                    +                         +                                             +
+    |                    |   (MHz)                 |  **Max (ms)**                               |
+    +====================+=========================+=============================================+
+    | 1 pixel            | 300                     | 7                                           |
+    +--------------------+-------------------------+---------------------------------------------+
+    | 2 pixel            | 300                     | 3.6                                         |
+    +--------------------+-------------------------+---------------------------------------------+

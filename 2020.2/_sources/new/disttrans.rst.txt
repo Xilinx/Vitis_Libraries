@@ -1,0 +1,92 @@
+.. _distance-transform:
+
+Distance transform Feature Matcher
+==================================
+The distance transform is an operator normally only applied to binary 
+images, where in this case the image must be coded as zero and non-zero 
+pixels as a grayscale image. The result of the transform is a graylevel 
+image that looks similar to the input image, except that the graylevel 
+intensities of points inside foreground regions are changed to show the 
+distance to the closest boundary from each point.
+This Xilinx implementation applies 3x3 mask, of distance type DIST_L2 
+(Euclidean distance), with horizontal/vertical shift cost, a = 0.955, and 
+diagonal shift cost b = 1.3693.
+Computing the distance takes two passes, forward and backward. During the 
+forward pass, forward mask is applied, and while the backward pass the 
+backward mask is applied over the forward pass data.
+In this implementation, it is required to pass a cache memory for the 
+kernel to interact (write while forward pass, read while backward pass).
+The cache memory must be of image dimensions and of type ap_uint<32>.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+   template <int IN_PTR, int FW_PTR, int ROWS, int COLS, int USE_URAM>
+   void distanceTransform(ap_uint<IN_PTR>* _src,
+                          float* _dst, ap_uint<FW_PTR>* _fw_pass, 
+                          int rows, int cols)
+ 
+.. rubric:: Parameter Descriptions
+
+The following table describes template paramters and arguments of the function.
+
+.. table:: Table distance-transform Parameter Description
+
+   +-----------------+------------------------------------------------------+
+   | Parameter       | Description                                          |
+   +=================+======================================================+
+   | IN_PTR          | Input ptr width must be '8'.                         |
+   +-----------------+------------------------------------------------------+
+   | FW_PTR          | Forward pass data pointer width must be '32'.        |
+   +-----------------+------------------------------------------------------+
+   | ROWS            | Maximum number of rows of the input image that the   |
+   |                 | hardware kernel must be built for.                   |
+   +-----------------+------------------------------------------------------+
+   | COLS            | Maximum number of columns of the input image that    |
+   |                 | the hardware kernel must be built for.               |
+   +-----------------+------------------------------------------------------+
+   | USE_URAM        | Default is '0'. Can be set to '1', if the device has |
+   |                 | URAM support.                                        |
+   +-----------------+------------------------------------------------------+
+   | _src            | Grayscale input image ptr, of ap_uint<8>* type.      |
+   +-----------------+------------------------------------------------------+
+   | _dst            | The distance image ptr,of type float*.               |
+   +-----------------+------------------------------------------------------+
+   | _fw_pass        | Forward pass ptr, of type ap_uint<32>. This is used  |
+   |                 | as an intermediary cache, between forward and        |
+   |                 | backward passes.                                     |
+   +-----------------+------------------------------------------------------+
+   | rows            | Number of rows in the input image, must be less than |
+   |                 | ROWS.                                                |
+   +-----------------+------------------------------------------------------+   
+   | cols            | Number of cols in the input image, must be less than |
+   |                 | COLS.                                                |
+   +-----------------+------------------------------------------------------+
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization of the kernel in different configurations, generated using Vitis 2020.2 tool, to process a 4K image.
+
+.. table:: Table distance-transform Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | default            | 300                     | 22                       | 0            | 5129   | 7444    | 1757    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis 2020.2 tool, to process a 4K image.
+
+.. table:: Table distance-transform Function Performance Estimate Summary
+
+   +--------------------+-------------------------+---------------------------------------------+
+   |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+   |                    |   (MHz)                 | **Max (ms)**                                |
+   +====================+=========================+=============================================+
+   | default            | 200                     |  86.249                                     |
+   +--------------------+-------------------------+---------------------------------------------+

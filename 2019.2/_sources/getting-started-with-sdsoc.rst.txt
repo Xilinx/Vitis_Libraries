@@ -1,0 +1,1857 @@
+.. _ariaid-title1:
+
+Getting Started with SDSoC
+==============================
+
+This chapter provides the information you need to bring up your design
+using the xfOpenCV library functions.
+
+.. _ariaid-title2:
+
+Prerequisites
+-------------
+
+This section lists the prerequisites for using the xfOpenCV library
+functions on ZCU104 based platforms. The methodology holds true for
+ZC702 and ZC706 reVISION platforms as well.
+
+-  Download and install the SDx development environment according to the
+   directions provided in SDSoC Environments Release Notes,
+   Installation, and Licensing Guide
+   (`UG1294 <https://www.xilinx.com/cgi-bin/docs/rdoc?v=2019.1;d=ug1294-sdsoc-rnil.pdf>`__).
+   Before launching the SDx development environment on Linux, set the
+   ``$SYSROOT`` environment variable to point to the Linux root file
+   system if using terminal to build project, delivered with the
+   reVISION platform. For example:
+
+   .. code:: pre
+
+      export SYSROOT = <local folder>/zcu104_rv_ss/sw/a53_linux/a53_linux/sysroot/aarch64-xilinx-xilinx
+
+-  Download the Zynq® UltraScale+™ MPSoC Embedded Vision Platform zip
+   file and extract its contents. Create the SDx development environment
+   workspace in the zcu104_rv_ss folder of the extracted design file
+   hierarchy. For more details, see the `reVISION Getting Started
+   Guide <http://www.wiki.xilinx.com/reVISION+Getting+Started+Guide>`__.
+-  Set up the ZCU104 evaluation board. For more details, see the
+   `reVISION Getting Started
+   Guide <http://www.wiki.xilinx.com/reVISION+Getting+Started+Guide>`__.
+-  Download the xfOpenCV library. This library is made available through
+   github. Run the following ``git             clone`` command to clone
+   the xfOpenCV repository to your local disk:
+
+   .. code:: pre
+
+      git clone https://github.com/Xilinx/xfopencv.git
+
+.. _ariaid-title3:
+
+Migrating HLS Video Library to xfOpenCV
+---------------------------------------
+
+The HLS video library will soon be deprecated. All the functions and
+most of the infrastructure available in HLS video library are now
+available in xfOpenCV with their names changed and some modifications.
+These HLS video library functions ported to xfOpenCV support SDSoc build
+flow also.
+
+This section provides the details on using the C++ video processing
+functions and the infrastructure present in HLS video library.
+
+Infrastructure Functions and Classes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All the functions imported from HLS video library now take xf::Mat (in
+sync with xfOpenCV library) to represent image data instead of hls::Mat.
+The main difference between these two is that the hls::Mat uses
+hls::stream to store the data whereas xf::Mat uses a pointer. Therefore,
+hls:: Mat cannot be exactly replaced with xf::Mat for migrating.
+
+Below table summarizes the differences between member functions of
+hls::Mat to xf::Mat.
+
+.. table:: Table 1. Infrastructure Functions and Classes
+
+   +----------------------+----------------------+----------------------+
+   | Member Function      | hls::Mat (HLS Video  | Xf::Mat (xfOpenCV    |
+   |                      | lib)                 | lib)                 |
+   +======================+======================+======================+
+   | channels()           | Returns the number   | Returns the number   |
+   |                      | of channels          | of channels          |
+   +----------------------+----------------------+----------------------+
+   | type()               | Returns the enum     | Returns the enum     |
+   |                      | value of pixel type  | value of pixel type  |
+   +----------------------+----------------------+----------------------+
+   | depth()              | Returns the enum     | Returns the depth of |
+   |                      | value of pixel type  | pixel including      |
+   |                      |                      | channels             |
+   +----------------------+----------------------+----------------------+
+   | read()               | Readout a value and  | Readout a value from |
+   |                      | return it as a       | a given location and |
+   |                      | scalar from stream   | return it as a       |
+   |                      |                      | packed (for          |
+   |                      |                      | multi-pixel/clock)   |
+   |                      |                      | value.               |
+   +----------------------+----------------------+----------------------+
+   | operator >>          | Similar to read()    | Not available in     |
+   |                      |                      | xfOpenCV             |
+   +----------------------+----------------------+----------------------+
+   | operator <<          | Similar to write()   | Not available in     |
+   |                      |                      | xfOpenCV             |
+   +----------------------+----------------------+----------------------+
+   | Write()              | Write a scalar value | Writes a packed (for |
+   |                      | into the stream      | multi-pixel/clock)   |
+   |                      |                      | value into the given |
+   |                      |                      | location.            |
+   +----------------------+----------------------+----------------------+
+
+Infrastructure files available in HLS Video Library hls_video_core.h,
+hls_video_mem.h, hls_video_types.h are moved to xf_video_core.h,
+xf_video_mem.h, xf_video_types.h in xfOpenCV Library and
+hls_video_imgbase.h is deprecated. Code inside these files unchanged
+except that these are now under xf::namespace.
+
+Classes
+~~~~~~~
+
+Memory Window Buffer
+   hls::window is now xf::window. No change in the implementation,
+   except the namespace change. This is located in “xf_video_mem.h”
+   file.
+Memory Line Buffer
+   hls::LineBuffer is now xf::LineBuffer. No difference between the two,
+   except xf::LineBuffer has extra template arguments for inferring
+   different types of RAM structures, for the storage structure used.
+   Default storage type is “RAM_S2P_BRAM” with RESHAPE_FACTOR=1.
+   Complete description can be found here
+   `xf::LineBuffer <getting-started-with-sdsoc.html#ndi1542884914646>`__. This is
+   located in xf_video_mem.h file.
+
+Funtions
+~~~~~~~~
+
+OpenCV interface functions
+   These functions covert image data of OpenCV Mat format to/from HLS
+   AXI types. HLS Video Library had 14 interface functions, out of
+   which, two functions are available in xfOpenCV Library:
+   cvMat2AXIvideo and AXIvideo2cvMat located in “xf_axi.h” file. The
+   rest are all deprecated.
+
+AXI4-Stream I/O Functions
+   The I/O functions which convert hls::Mat to/from AXI4-Stream
+   compatible data type (hls::stream) are hls::AXIvideo2Mat,
+   hls::Mat2AXIvideo. These functions are now deprecated and added 2 new
+   functions xf::AXIvideo2xfMat and xf:: xfMat2AXIvideo to facilitate
+   the xf::Mat to/from conversion. To use these functions, the header
+   file "xf_infra.h" must be included.
+
+.. _ariaid-title4:
+
+xf::window
+~~~~~~~~~~
+
+A template class to represent the 2D window buffer. It has three
+parameters to specify the number of rows, columns in window buffer and
+the pixel data type.
+
+Class definition
+^^^^^^^^^^^^^^^^
+
+.. code:: pre
+
+   template<int ROWS, int COLS, typename T>
+   class Window {
+   public:
+       Window() 
+      /* Window main APIs */
+       void shift_pixels_left();
+       void shift_pixels_right();
+       void shift_pixels_up();
+       void shift_pixels_down();
+       void insert_pixel(T value, int row, int col);
+       void insert_row(T value[COLS], int row);
+       void insert_top_row(T value[COLS]);
+       void insert_bottom_row(T value[COLS]);
+       void insert_col(T value[ROWS], int col);
+       void insert_left_col(T value[ROWS]);
+       void insert_right_col(T value[ROWS]);
+       T& getval(int row, int col);
+       T& operator ()(int row, int col);
+       T val[ROWS][COLS];
+   #ifdef __DEBUG__
+       void restore_val();
+       void window_print();
+       T val_t[ROWS][COLS];
+   #endif
+   };
+
+Parameter Descriptions
+^^^^^^^^^^^^^^^^^^^^^^
+
+The following table lists the xf::Window class members and their
+descriptions.
+
+.. table:: Table 2. Window Function Parameter Descriptions
+
+   +-----------------+----------------------------------------------------+
+   | Parameter       | Description                                        |
+   +=================+====================================================+
+   | Val             | 2-D array to hold the contents of buffer.          |
+   +-----------------+----------------------------------------------------+
+
+Member Function Description
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. table:: Table 3. Member Function Description
+
+   +-----------------------------------+-----------------------------------+
+   | Function                          | Description                       |
+   +===================================+===================================+
+   | shift_pixels_left()               | Shift the window left, that moves |
+   |                                   | all stored data within the window |
+   |                                   | right, leave the leftmost column  |
+   |                                   | (col = COLS-1) for inserting new  |
+   |                                   | data.                             |
+   +-----------------------------------+-----------------------------------+
+   | shift_pixels_right()              | Shift the window right, that      |
+   |                                   | moves all stored data within the  |
+   |                                   | window left, leave the rightmost  |
+   |                                   | column (col = 0) for inserting    |
+   |                                   | new data.                         |
+   +-----------------------------------+-----------------------------------+
+   | shift_pixels_up()                 | Shift the window up, that moves   |
+   |                                   | all stored data within the window |
+   |                                   | down, leave the top row (row =    |
+   |                                   | ROWS-1) for inserting new data.   |
+   +-----------------------------------+-----------------------------------+
+   | shift_pixels_down()               | Shift the window down, that moves |
+   |                                   | all stored data within the window |
+   |                                   | up, leave the bottom row (row =   |
+   |                                   | 0) for inserting new data.        |
+   +-----------------------------------+-----------------------------------+
+   | insert_pixel(T value, int row,    | Insert a new element value at     |
+   | int col)                          | location (row, column) of the     |
+   |                                   | window.                           |
+   +-----------------------------------+-----------------------------------+
+   | insert_row(T value[COLS], int     | Inserts a set of values in any    |
+   | row)                              | row of the window.                |
+   +-----------------------------------+-----------------------------------+
+   | insert_top_row(T value[COLS])     | Inserts a set of values in the    |
+   |                                   | top row = 0 of the window.        |
+   +-----------------------------------+-----------------------------------+
+   | insert_bottom_row(T value[COLS])  | Inserts a set of values in the    |
+   |                                   | bottom row = ROWS-1 of the        |
+   |                                   | window.                           |
+   +-----------------------------------+-----------------------------------+
+   | insert_col(T value[ROWS], int     | Inserts a set of values in any    |
+   | col)                              | column of the window.             |
+   +-----------------------------------+-----------------------------------+
+   | insert_left_col(T value[ROWS])    | Inserts a set of values in left   |
+   |                                   | column = 0 of the window.         |
+   +-----------------------------------+-----------------------------------+
+   | insert_right_col(T value[ROWS])   | Inserts a set of values in right  |
+   |                                   | column = COLS-1 of the window.    |
+   +-----------------------------------+-----------------------------------+
+   | T& getval(int row, int col)       | Returns the data value in the     |
+   |                                   | window at position (row,column).  |
+   +-----------------------------------+-----------------------------------+
+   | T& operator ()(int row, int col)  | Returns the data value in the     |
+   |                                   | window at position (row,column).  |
+   +-----------------------------------+-----------------------------------+
+   | restore_val()                     | Restore the contents of window    |
+   |                                   | buffer to another array.          |
+   +-----------------------------------+-----------------------------------+
+   | window_print()                    | Print all the data present in     |
+   |                                   | window buffer onto console.       |
+   +-----------------------------------+-----------------------------------+
+
+Template Parameter Description
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. table:: Table 4. Template Parameter Description
+
+   +-----------+------------------------------------------+
+   | Parameter | Description                              |
+   +===========+==========================================+
+   | ROWS      | Number of rows in the window buffer.     |
+   +-----------+------------------------------------------+
+   | COLS      | Number of columns in the window buffer.  |
+   +-----------+------------------------------------------+
+   | T         | Data type of pixel in the window buffer. |
+   +-----------+------------------------------------------+
+
+Sample code for window buffer declaration
+
+.. code:: pre
+
+   Window<K_ROWS, K_COLS, unsigned char> kernel;
+
+.. _ariaid-title5:
+
+xf::LineBuffer
+~~~~~~~~~~~~~~
+
+A template class to represent 2D line buffer. It has three parameters to
+specify the number of rows, columns in window buffer and the pixel data
+type.
+
+.. _class-definition-1:
+
+Class definition
+^^^^^^^^^^^^^^^^
+
+.. code:: pre
+
+   template<int ROWS, int COLS, typename T, XF_ramtype_e MEM_TYPE=RAM_S2P_BRAM, int RESHAPE_FACTOR=1>
+    class LineBuffer {
+   public:
+       LineBuffer()
+          /* LineBuffer main APIs */
+       /* LineBuffer main APIs */
+       void shift_pixels_up(int col);
+       void shift_pixels_down(int col);
+       void insert_bottom_row(T value, int col);
+       void insert_top_row(T value, int col);
+       void get_col(T value[ROWS], int col);
+       T& getval(int row, int col);
+       T& operator ()(int row, int col);
+
+       /* Back compatible APIs */
+       void shift_up(int col);
+       void shift_down(int col);
+       void insert_bottom(T value, int col);
+       void insert_top(T value, int col);
+       T val[ROWS][COLS];
+   #ifdef __DEBUG__
+       void restore_val();
+       void linebuffer_print(int col);
+       T val_t[ROWS][COLS];
+   #endif
+   };   
+
+.. _parameter-descriptions-1:
+
+Parameter Descriptions
+^^^^^^^^^^^^^^^^^^^^^^
+
+The following table lists the xf::LineBuffer class members and their
+descriptions.
+
+.. table:: Table 5. Line Buffer Function Parameter Descriptions
+
+   +-----------------+----------------------------------------------------+
+   | Parameter       | Description                                        |
+   +=================+====================================================+
+   | Val             | 2-D array to hold the contents of line buffer.     |
+   +-----------------+----------------------------------------------------+
+
+Member Functions Description
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. table:: Table 6. Member Functions Description
+
+   +-----------------------------------+-----------------------------------+
+   | Function                          | Description                       |
+   +===================================+===================================+
+   | shift_pixels_up(int col)          | Line buffer contents Shift up,    |
+   |                                   | new values will be placed in the  |
+   |                                   | bottom row=ROWS-1.                |
+   +-----------------------------------+-----------------------------------+
+   | shift_pixels_down(int col)        | Line buffer contents Shift down,  |
+   |                                   | new values will be placed in the  |
+   |                                   | top row=0.                        |
+   +-----------------------------------+-----------------------------------+
+   | insert_bottom_row(T value, int    | Inserts a new value in bottom     |
+   | col)                              | row= ROWS-1 of the line buffer.   |
+   +-----------------------------------+-----------------------------------+
+   | insert_top_row(T value, int col)  | Inserts a new value in top row=0  |
+   |                                   | of the line buffer.               |
+   +-----------------------------------+-----------------------------------+
+   | get_col(T value[ROWS], int col)   | Get a column value of the line    |
+   |                                   | buffer.                           |
+   +-----------------------------------+-----------------------------------+
+   | T& getval(int row, int col)       | Returns the data value in the     |
+   |                                   | line buffer at position (row,     |
+   |                                   | column).                          |
+   +-----------------------------------+-----------------------------------+
+   | T& operator ()(int row, int col); | Returns the data value in the     |
+   |                                   | line buffer at position (row,     |
+   |                                   | column).                          |
+   +-----------------------------------+-----------------------------------+
+
+.. _template-parameter-description-1:
+
+Template Parameter Description
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. table:: Table 7. Template Parameter Description
+
+   +-----------------------------------+-----------------------------------+
+   | Parameter                         | Description                       |
+   +===================================+===================================+
+   | ROWS                              | Number of rows in line buffer.    |
+   +-----------------------------------+-----------------------------------+
+   | COLS                              | Number of columns in line buffer. |
+   +-----------------------------------+-----------------------------------+
+   | T                                 | Data type of pixel in line        |
+   |                                   | buffer.                           |
+   +-----------------------------------+-----------------------------------+
+   | MEM_TYPE                          | Type of storage element. It takes |
+   |                                   | one of the following enumerated   |
+   |                                   | values: RAM_1P_BRAM, RAM_1P_URAM, |
+   |                                   | RAM_2P_BRAM, RAM_2P_URAM,         |
+   |                                   | RAM_S2P_BRAM, RAM_S2P_URAM,       |
+   |                                   | RAM_T2P_BRAM, RAM_T2P_URAM.       |
+   +-----------------------------------+-----------------------------------+
+   | RESHAPE_FACTOR                    | Specifies the amount to divide an |
+   |                                   | array.                            |
+   +-----------------------------------+-----------------------------------+
+
+Sample code for line buffer declaration:
+
+.. code:: pre
+
+   LineBuffer<3, 1920, XF_8UC3, RAM_S2P_URAM,1>     buff; 
+
+.. _ariaid-title6:
+
+Video Processing Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following table summarizes the video processing functions ported
+from HLS Video Library into xfOpenCV Library along with the API
+modifications.
+
+.. table:: Table 8. Video Processing Functions
+
+   +--------+------------------------------+------------------------------+
+   | Functi | HLS Video Library -API       | xfOpenCV Library-API         |
+   | ons    |                              |                              |
+   +========+==============================+==============================+
+   | addS   | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int POLICY_TYPE, |
+   |        | LS, int SRC_T, typename _T,  |  int SRC_T, int ROWS, int CO |
+   |        | int DST_T>                   | LS, int NPC =1>              |
+   |        |    void AddS(Mat<ROWS, COLS, |    void addS(xf::Mat<SRC_T,  |
+   |        |  SRC_T>&src,Scalar<HLS_MAT_C | ROWS, COLS, NPC> & _src1, un |
+   |        | N(SRC_T), _T> scl, Mat<ROWS, | signed char _scl[XF_CHANNELS |
+   |        |  COLS, DST_T>& dst)          | (SRC_T,NPC)],xf::Mat<SRC_T,  |
+   |        |                              | ROWS, COLS, NPC> & _dst)     |
+   +--------+------------------------------+------------------------------+
+   | AddWei | .. code:: pre                | .. code:: pre                |
+   | ghted  |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T,int D |
+   |        | LS, int SRC1_T, int SRC2_T,  | ST_T, int ROWS, int COLS, in |
+   |        | int DST_T, typename P_T>     | t NPC = 1>                   |
+   |        |    void AddWeighted(Mat<ROWS |    void addWeighted(xf::Mat< |
+   |        | , COLS, SRC1_T>& src1,P_T al | SRC_T, ROWS, COLS, NPC> & sr |
+   |        | pha,Mat<ROWS, COLS, SRC2_T>& | c1,float alpha, xf::Mat<SRC_ |
+   |        |  src2,P_T beta, P_T gamma,Ma | T, ROWS, COLS, NPC> & src2,f |
+   |        | t<ROWS, COLS, DST_T>& dst)   | loat beta, float gama, xf::M |
+   |        |                              | at<DST_T, ROWS, COLS, NPC> & |
+   |        |                              |  dst)                        |
+   +--------+------------------------------+------------------------------+
+   | Cmp    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int CMP_OP, int  |
+   |        | LS, int SRC1_T, int SRC2_T,  | SRC_T, int ROWS, int COLS, i |
+   |        | int DST_T>                   | nt NPC =1>                   |
+   |        |    void Cmp(Mat<ROWS, COLS,  |    void compare(xf::Mat<SRC_ |
+   |        | SRC1_T>& src1,Mat<ROWS, COLS | T, ROWS, COLS, NPC> & _src1, |
+   |        | , SRC2_T>& src2,             |  xf::Mat<SRC_T, ROWS, COLS,  |
+   |        |    Mat<ROWS, COLS, DST_T>& d | NPC> & _src2,xf::Mat<SRC_T,  |
+   |        | st,int cmp_op)               | ROWS, COLS, NPC> & _dst)     |
+   +--------+------------------------------+------------------------------+
+   | CmpS   | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int CMP_OP, int  |
+   |        | LS, int SRC_T, typename P_T, | SRC_T, int ROWS, int COLS, i |
+   |        |  int DST_T>                  | nt NPC =1>                   |
+   |        |    void CmpS(Mat<ROWS, COLS, |    void compare(xf::Mat<SRC_ |
+   |        |  SRC_T>& src,  P_T value, Ma | T, ROWS, COLS, NPC> & _src1, |
+   |        | t<ROWS, COLS, DST_T>& dst, i |  unsigned char _scl[XF_CHANN |
+   |        | nt cmp_op)                   | ELS(SRC_T,NPC)],xf::Mat<SRC_ |
+   |        |                              | T, ROWS, COLS, NPC> & _dst)  |
+   +--------+------------------------------+------------------------------+
+   | Max    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int R |
+   |        | LS, int SRC1_T, int SRC2_T,  | OWS, int COLS, int NPC =1>   |
+   |        | int DST_T>                   |    void Max(xf::Mat<SRC_T, R |
+   |        |    void Max(Mat<ROWS, COLS,  | OWS, COLS, NPC> & _src1, xf: |
+   |        | SRC1_T>& src1,               | :Mat<SRC_T, ROWS, COLS, NPC> |
+   |        |            Mat<ROWS, COLS, S |  & _src2,xf::Mat<SRC_T, ROWS |
+   |        | RC2_T>& src2,                | , COLS, NPC> & _dst)         |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | MaxS   | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T, int  |
+   |        | LS, int SRC_T, typename _T,  | ROWS, int COLS, int NPC =1>  |
+   |        | int DST_T>                   |    void max(xf::Mat<SRC_T, R |
+   |        |    void MaxS(Mat<ROWS, COLS, | OWS, COLS, NPC> & _src1,  un |
+   |        |  SRC_T>& src,                | signed char _scl[XF_CHANNELS |
+   |        |    _T value, Mat<ROWS, COLS, | (SRC_T,NPC)],xf::Mat<SRC_T,  |
+   |        |  DST_T>& dst)                | ROWS, COLS, NPC> & _dst)     |
+   +--------+------------------------------+------------------------------+
+   | Min    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T, int  |
+   |        | LS, int SRC1_T, int SRC2_T,  | ROWS, int COLS, int NPC =1>  |
+   |        | int DST_T>                   |    void Min(xf::Mat<SRC_T, R |
+   |        |    void Min(Mat<ROWS, COLS,  | OWS, COLS, NPC> & _src1, xf: |
+   |        | SRC1_T>& src1,               | :Mat<SRC_T, ROWS, COLS, NPC> |
+   |        |            Mat<ROWS, COLS, S |  & _src2,xf::Mat<SRC_T, ROWS |
+   |        | RC2_T>& src2,                | , COLS, NPC> & _dst)         |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | MinS   | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T, int  |
+   |        | LS, int SRC_T, typename _T,  | ROWS, int COLS, int NPC =1>  |
+   |        | int DST_T>                   |    void min(xf::Mat<SRC_T, R |
+   |        |    void MinS(Mat<ROWS, COLS, | OWS, COLS, NPC> & _src1,  un |
+   |        |  SRC_T>& src,                | signed char _scl[XF_CHANNELS |
+   |        |            _T value,Mat<ROWS | (SRC_T,NPC)],xf::Mat<SRC_T,  |
+   |        | , COLS, DST_T>& dst)         | ROWS, COLS, NPC> & _dst)     |
+   +--------+------------------------------+------------------------------+
+   | PaintM | .. code:: pre                | .. code:: pre                |
+   | ask    |                              |                              |
+   |        |    template<int SRC_T,int MA |    template< int SRC_T,int M |
+   |        | SK_T,int ROWS,int COLS>      | ASK_T, int ROWS, int COLS,in |
+   |        |    void PaintMask(           | t NPC=1>                     |
+   |        |    Mat<ROWS,COLS,SRC_T>   &_ |    void paintmask(xf::Mat<SR |
+   |        | src,                         | C_T, ROWS, COLS, NPC> & _src |
+   |        |    Mat<ROWS,COLS,MASK_T>&_ma | _mat, xf::Mat<MASK_T, ROWS,  |
+   |        | sk,                          | COLS, NPC> & in_mask, xf::Ma |
+   |        |    Mat<ROWS,COLS,SRC_T>&_dst | t<SRC_T, ROWS, COLS, NPC> &  |
+   |        | ,Scalar<HLS_MAT_CN(SRC_T),HL | _dst_mat, unsigned char _col |
+   |        | S_TNAME(SRC_T)> _color)      | or[XF_CHANNELS(SRC_T,NPC)])  |
+   +--------+------------------------------+------------------------------+
+   | Reduce | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<typename INTER_S |    template< int REDUCE_OP,  |
+   |        | UM_T, int ROWS, int COLS, in | int SRC_T,int DST_T, int ROW |
+   |        | t SRC_T, int DST_ROWS, int D | S, int COLS,int ONE_D_HEIGHT |
+   |        | ST_COLS, int DST_T>          | , int ONE_D_WIDTH, int NPC=1 |
+   |        |    void Reduce(              | >                            |
+   |        |             Mat<ROWS, COLS,  |    void reduce(xf::Mat<SRC_T |
+   |        | SRC_T> &src,                 | , ROWS, COLS, NPC> & _src_ma |
+   |        |             Mat<DST_ROWS, DS | t,  xf::Mat<DST_T, ONE_D_HEI |
+   |        | T_COLS, DST_T> &dst,         | GHT, ONE_D_WIDTH, 1> & _dst_ |
+   |        |             int dim,         | mat, unsigned char dim)      |
+   |        |             int op=HLS_REDUC |                              |
+   |        | E_SUM)                       |                              |
+   +--------+------------------------------+------------------------------+
+   | Zero   | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T, int  |
+   |        | LS, int SRC_T, int DST_T>    | ROWS, int COLS, int NPC =1>  |
+   |        |    void Zero(Mat<ROWS, COLS, |    void zero(xf::Mat<SRC_T,  |
+   |        |  SRC_T>& src,                | ROWS, COLS, NPC> & _src1,xf: |
+   |        |              Mat<ROWS, COLS, | :Mat<SRC_T, ROWS, COLS, NPC> |
+   |        |  DST_T>& dst)                |  & _dst)                     |
+   +--------+------------------------------+------------------------------+
+   | Sum    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<typename DST_T,  |    template< int SRC_T, int  |
+   |        | int ROWS, int COLS, int SRC_ | ROWS, int COLS, int NPC = 1> |
+   |        | T>                           |    void sum(xf::Mat<SRC_T, R |
+   |        |    Scalar<HLS_MAT_CN(SRC_T), | OWS, COLS, NPC> & src1, doub |
+   |        |  DST_T> Sum(                 | le sum[XF_CHANNELS(SRC_T,NPC |
+   |        |            Mat<ROWS, COLS, S | )] )                         |
+   |        | RC_T>& src)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | SubS   | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int POLICY_TYPE, |
+   |        | LS, int SRC_T, typename _T,  |  int SRC_T, int ROWS, int CO |
+   |        | int DST_T>                   | LS, int NPC =1>              |
+   |        |    void SubS(Mat<ROWS, COLS, |    void SubS(xf::Mat<SRC_T,  |
+   |        |  SRC_T>& src,                | ROWS, COLS, NPC> & _src1,  u |
+   |        |            Scalar<HLS_MAT_CN | nsigned char _scl[XF_CHANNEL |
+   |        | (SRC_T), _T> scl,            | S(SRC_T,NPC)],xf::Mat<SRC_T, |
+   |        |            Mat<ROWS, COLS, D |  ROWS, COLS, NPC> & _dst)    |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | SubRS  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int POLICY_TYPE, |
+   |        | LS, int SRC_T, typename _T,  |  int SRC_T, int ROWS, int CO |
+   |        | int DST_T>                   | LS, int NPC =1>              |
+   |        |    void SubRS(Mat<ROWS, COLS |    void SubRS(xf::Mat<SRC_T, |
+   |        | , SRC_T>& src,               |  ROWS, COLS, NPC> & _src1, u |
+   |        |            Scalar<HLS_MAT_CN | nsigned char _scl[XF_CHANNEL |
+   |        | (SRC_T), _T> scl,            | S(SRC_T,NPC)],xf::Mat<SRC_T, |
+   |        |            Mat<ROWS, COLS, D |  ROWS, COLS, NPC> & _dst)    |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | Set    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T, int  |
+   |        | LS, int SRC_T, typename _T,  | ROWS, int COLS, int NPC =1>  |
+   |        | int DST_T>                   |    void set(xf::Mat<SRC_T, R |
+   |        |    void Set(Mat<ROWS, COLS,  | OWS, COLS, NPC> & _src1,  un |
+   |        | SRC_T>& src,                 | signed char _scl[XF_CHANNELS |
+   |        |            Scalar<HLS_MAT_CN | (SRC_T,NPC)],xf::Mat<SRC_T,  |
+   |        | (SRC_T), _T> scl,            | ROWS, COLS, NPC> & _dst)     |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | Absdif | .. code:: pre                | .. code:: pre                |
+   | f      |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int R |
+   |        | LS, int SRC1_T, int SRC2_T,  | OWS, int COLS, int NPC =1>   |
+   |        | int DST_T>                   |    void absdiff(xf::Mat<SRC_ |
+   |        |    void AbsDiff(             | T, ROWS, COLS, NPC> & _src1, |
+   |        |            Mat<ROWS, COLS, S | xf::Mat<SRC_T, ROWS, COLS, N |
+   |        | RC1_T>& src1,                | PC> & _src2,xf::Mat<SRC_T, R |
+   |        |            Mat<ROWS, COLS, S | OWS, COLS, NPC> & _dst)      |
+   |        | RC2_T>& src2,                |                              |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | And    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int R |
+   |        | LS, int SRC1_T, int SRC2_T,  | OWS, int COLS, int NPC = 1>  |
+   |        | int DST_T>                   |    void bitwise_and(xf::Mat< |
+   |        |    void And(                 | SRC_T, ROWS, COLS, NPC> & _s |
+   |        |            Mat<ROWS, COLS, S | rc1, xf::Mat<SRC_T, ROWS, CO |
+   |        | RC1_T>& src1,                | LS, NPC> & _src2, xf::Mat<SR |
+   |        |            Mat<ROWS, COLS, S | C_T, ROWS, COLS, NPC> &_dst) |
+   |        | RC2_T>& src2,                |                              |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>&  dst)                 |                              |
+   +--------+------------------------------+------------------------------+
+   | Dilate | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int Shape_type,i |    template<int BORDER_TYPE, |
+   |        | nt ITERATIONS,int SRC_T, int |  int TYPE, int ROWS, int COL |
+   |        |  DST_T, typename KN_T,int IM | S,int K_SHAPE,int K_ROWS,int |
+   |        | G_HEIGHT,int IMG_WIDTH,int K |  K_COLS, int ITERATIONS, int |
+   |        | _HEIGHT,int K_WIDTH>         |  NPC=1>                      |
+   |        |    void Dilate(Mat<IMG_HEIGH |    void dilate (xf::Mat<TYPE |
+   |        | T, IMG_WIDTH, SRC_T>&_src,Ma | , ROWS, COLS, NPC> & _src, x |
+   |        | t<IMG_HEIGHT, IMG_WIDTH, DST | f::Mat<TYPE, ROWS, COLS, NPC |
+   |        | _T&_dst,Window<K_HEIGHT,K_WI | > & _dst,unsigned char _kern |
+   |        | DTH,KN_T>&_kernel)           | el[K_ROWS*K_COLS])           |
+   +--------+------------------------------+------------------------------+
+   | Duplic | .. code:: pre                | .. code:: pre                |
+   | ate    |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int R |
+   |        | LS, int SRC_T, int DST_T>    | OWS, int COLS,int NPC>       |
+   |        |    void Duplicate(Mat<ROWS,  |    void duplicateMat(xf::Mat |
+   |        | COLS, SRC_T>& src,Mat<ROWS,  | <SRC_T, ROWS, COLS, NPC> & _ |
+   |        | COLS, DST_T>& dst1,Mat<ROWS, | src, xf::Mat<SRC_T, ROWS, CO |
+   |        |  COLS, DST_T>& dst2)         | LS, NPC> & _dst1,xf::Mat<SRC |
+   |        |                              | _T, ROWS, COLS, NPC> & _dst2 |
+   |        |                              | )                            |
+   +--------+------------------------------+------------------------------+
+   | Equali | .. code:: pre                | .. code:: pre                |
+   | zeHist |                              |                              |
+   |        |    template<int SRC_T, int D |    template<int SRC_T, int R |
+   |        | ST_T,int ROW, int COL>       | OWS, int COLS, int NPC = 1>  |
+   |        |    void EqualizeHist(Mat<ROW |    void equalizeHist(xf::Mat |
+   |        | , COL, SRC_T>&_src,Mat<ROW,  | <SRC_T, ROWS, COLS, NPC> & _ |
+   |        | COL, DST_T>&_dst)            | src,xf::Mat<SRC_T, ROWS, COL |
+   |        |                              | S, NPC> & _src1,xf::Mat<SRC_ |
+   |        |                              | T, ROWS, COLS, NPC> & _dst)  |
+   +--------+------------------------------+------------------------------+
+   | erode  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int Shape_type,i |    template<int BORDER_TYPE, |
+   |        | nt ITERATIONS,int SRC_T, int |  int TYPE, int ROWS, int COL |
+   |        |  DST_T, typename KN_T,int IM | S,int K_SHAPE,int K_ROWS,int |
+   |        | G_HEIGHT,int IMG_WIDTH,int K |  K_COLS, int ITERATIONS, int |
+   |        | _HEIGHT,int K_WIDTH>         |  NPC=1>                      |
+   |        |    void Erode(Mat<IMG_HEIGHT |    void erode (xf::Mat<TYPE, |
+   |        | , IMG_WIDTH, SRC_T>&_src,Mat |  ROWS, COLS, NPC> & _src, xf |
+   |        | <IMG_HEIGHT,IMG_WIDTH,DST_T> | ::Mat<TYPE, ROWS, COLS, NPC> |
+   |        | &_dst,Window<K_HEIGHT,K_WIDT |  & _dst,unsigned char _kerne |
+   |        | H,KN_T>&_kernel)             | l[K_ROWS*K_COLS])            |
+   +--------+------------------------------+------------------------------+
+   | FASTX  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int SRC_T,int RO |    template<int NMS,int SRC_ |
+   |        | WS,int COLS>                 | T,int ROWS, int COLS,int NPC |
+   |        |    void FASTX(Mat<ROWS,COLS, | =1>                          |
+   |        | SRC_T> &_src,                |    void fast(xf::Mat<SRC_T,  |
+   |        |    Mat<ROWS,COLS,HLS_8UC1>&_ | ROWS, COLS, NPC> & _src_mat, |
+   |        | mask,HLS_TNAME(SRC_T)_thresh | xf::Mat<SRC_T, ROWS, COLS, N |
+   |        | old,bool _nomax_supression)  | PC> & _dst_mat,unsigned char |
+   |        |                              |  _threshold)                 |
+   +--------+------------------------------+------------------------------+
+   | Filter | .. code:: pre                | .. code:: pre                |
+   | 2D     |                              |                              |
+   |        |    template<int SRC_T, int D |    template<int BORDER_TYPE, |
+   |        | ST_T, typename KN_T, typenam | int FILTER_WIDTH,int FILTER_ |
+   |        | e POINT_T,                   | HEIGHT, int SRC_T,int DST_T, |
+   |        |    int IMG_HEIGHT,int IMG_WI |  int ROWS, int COLS,int NPC> |
+   |        | DTH,int K_HEIGHT,int K_WIDTH |    void filter2D(xf::Mat<SRC |
+   |        | >                            | _T, ROWS, COLS, NPC> & _src_ |
+   |        |    void Filter2D(Mat<IMG_HEI | mat,xf::Mat<DST_T, ROWS, COL |
+   |        | GHT, IMG_WIDTH, SRC_T> &_src | S, NPC> & _dst_mat,short int |
+   |        | ,Mat<IMG_HEIGHT, IMG_WIDTH,  |  filter[FILTER_HEIGHT*FILTER |
+   |        | DST_T>  &_dst,Window<K_HEIGH | _WIDTH],unsigned char _shift |
+   |        | T,K_WIDTH,KN_T>&_kernel,Poin | )                            |
+   |        | t_<POINT_T>anchor)           |                              |
+   +--------+------------------------------+------------------------------+
+   | Gaussi | .. code:: pre                | .. code:: pre                |
+   | anBlur |                              |                              |
+   |        |    template<int KH,int KW,ty |    template<int FILTER_SIZE, |
+   |        | pename BORDERMODE,int SRC_T, |  int BORDER_TYPE, int SRC_T, |
+   |        | int DST_T,int ROWS,int COLS> |  int ROWS, int COLS,int NPC  |
+   |        |    void GaussianBlur(Mat<ROW | = 1>                         |
+   |        | S, COLS, SRC_T>              |    void GaussianBlur(xf::Mat |
+   |        |    &_src, Mat<ROWS, COLS, DS | <SRC_T, ROWS, COLS, NPC> & _ |
+   |        | T_T>                         | src, xf::Mat<SRC_T, ROWS, CO |
+   |        |    &_dst,double sigmaX=0,dou | LS, NPC> & _dst, float sigma |
+   |        | ble sigmaY=0)                | )                            |
+   +--------+------------------------------+------------------------------+
+   | Harris | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int blockSize,in |    template<int FILTERSIZE,i |
+   |        | t Ksize,typename KT,int SRC_ | nt BLOCKWIDTH, int NMSRADIUS |
+   |        | T,int DST_T,int ROWS,int COL | ,int SRC_T,int ROWS, int COL |
+   |        | S>                           | S,int NPC=1,bool USE_URAM=fa |
+   |        |    void Harris(Mat<ROWS, COL | lse>                         |
+   |        | S, SRC_T>                    |    void cornerHarris(xf::Mat |
+   |        |    &_src,Mat<ROWS, COLS, DST | <SRC_T, ROWS, COLS, NPC> & s |
+   |        | _T>&_dst,KT k,int threshold  | rc,xf::Mat<SRC_T, ROWS, COLS |
+   |        |                              | , NPC> & dst,uint16_t thresh |
+   |        |                              | old, uint16_t k)             |
+   +--------+------------------------------+------------------------------+
+   | Corner | .. code:: pre                | .. code:: pre                |
+   | Harris |                              |                              |
+   |        |    template<int blockSize,in |    template<int FILTERSIZE,i |
+   |        | t Ksize,typename KT,int SRC_ | nt BLOCKWIDTH, int NMSRADIUS |
+   |        | T,int DST_T,int ROWS,int COL | ,int SRC_T,int ROWS, int COL |
+   |        | S>                           | S,int NPC=1,bool USE_URAM=fa |
+   |        |    void CornerHarris(        | lse>                         |
+   |        |    Mat<ROWS, COLS, SRC_T>&_s |    void cornerHarris(xf::Mat |
+   |        | rc,Mat<ROWS, COLS, DST_T>&_d | <SRC_T, ROWS, COLS, NPC> & s |
+   |        | st,KT k)                     | rc,xf::Mat<SRC_T, ROWS, COLS |
+   |        |                              | , NPC> & dst,uint16_t thresh |
+   |        |                              | old, uint16_t k              |
+   +--------+------------------------------+------------------------------+
+   | HoughL | .. code:: pre                | .. code:: pre                |
+   | ines2  |                              |                              |
+   |        |    template<unsigned int the |    template<unsigned int RHO |
+   |        | ta,unsigned int rho,typename | ,unsigned int THETA,int MAXL |
+   |        |  AT,typename RT,int SRC_T,in | INES,int DIAG,int MINTHETA,i |
+   |        | t ROW,int COL,unsigned int l | nt MAXTHETA,int SRC_T, int R |
+   |        | inesMax>                     | OWS, int COLS,int NPC>       |
+   |        |    void HoughLines2(Mat<ROW, |    void HoughLines(xf::Mat<S |
+   |        | COL,SRC_T> &_src,            | RC_T, ROWS, COLS, NPC> & _sr |
+   |        |    Polar_<AT,RT> (&_lines)[l | c_mat,float outputrho[MAXLIN |
+   |        | inesMax],unsigned int thresh | ES],float outputtheta[MAXLIN |
+   |        | old)                         | ES],short threshold,short li |
+   |        |                              | nesmax)                      |
+   +--------+------------------------------+------------------------------+
+   | Integr | .. code:: pre                | .. code:: pre                |
+   | al     |                              |                              |
+   |        |    template<int SRC_T, int D |    template<int SRC_TYPE,int |
+   |        | ST_T,                        |  DST_TYPE, int ROWS, int COL |
+   |        |    int ROWS,int COLS>        | S, int NPC>                  |
+   |        |    void Integral(Mat<ROWS, C |    void integral(xf::Mat<SRC |
+   |        | OLS, SRC_T>&_src,            | _TYPE, ROWS, COLS, NPC> & _s |
+   |        |            Mat<ROWS+1, COLS+ | rc_mat, xf::Mat<DST_TYPE, RO |
+   |        | 1, DST_T>&_sum )             | WS, COLS, NPC> & _dst_mat)   |
+   +--------+------------------------------+------------------------------+
+   | Merge  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int D |
+   |        | LS, int SRC_T, int DST_T>    | ST_T, int ROWS, int COLS, in |
+   |        |    void Merge(               | t NPC=1>                     |
+   |        |            Mat<ROWS, COLS, S |    void merge(xf::Mat<SRC_T, |
+   |        | RC_T>& src0,                 |  ROWS, COLS, NPC> &_src1, xf |
+   |        |            Mat<ROWS, COLS, S | ::Mat<SRC_T, ROWS, COLS, NPC |
+   |        | RC_T>& src1,                 | > &_src2, xf::Mat<SRC_T, ROW |
+   |        |            Mat<ROWS, COLS, S | S, COLS, NPC> &_src3, xf::Ma |
+   |        | RC_T>& src2,                 | t<SRC_T, ROWS, COLS, NPC> &_ |
+   |        |            Mat<ROWS, COLS, S | src4, xf::Mat<DST_T, ROWS, C |
+   |        | RC_T>& src3,                 | OLS, NPC> &_dst)             |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst)                  |                              |
+   +--------+------------------------------+------------------------------+
+   | MinMax | .. code:: pre                | .. code:: pre                |
+   | Loc    |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T,int RO |
+   |        | LS, int SRC_T, typename P_T> | WS,int COLS,int NPC=0>       |
+   |        |    void MinMaxLoc(Mat<ROWS,  |    void minMaxLoc(xf::Mat<SR |
+   |        | COLS, SRC_T>& src,           | C_T, ROWS, COLS, NPC> & _src |
+   |        |    P_T* min_val,P_T* max_val | ,int32_t *min_value, int32_t |
+   |        | ,Point& min_loc,             |  *max_value,uint16_t *_minlo |
+   |        |    Point& max_loc)           | cx, uint16_t *_minlocy, uint |
+   |        |                              | 16_t *_maxlocx, uint16_t *_m |
+   |        |                              | axlocy )                     |
+   +--------+------------------------------+------------------------------+
+   | Mul    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |     template<int POLICY_TYPE |
+   |        | LS, int SRC1_T, int SRC2_T,  | , int SRC_T, int ROWS, int C |
+   |        | int DST_T>                   | OLS, int NPC = 1>            |
+   |        |    void Mul(Mat<ROWS, COLS,  |    void multiply(xf::Mat<SRC |
+   |        | SRC1_T>& src1,               | _T, ROWS, COLS, NPC> & src1, |
+   |        |            Mat<ROWS, COLS, S |  xf::Mat<SRC_T, ROWS, COLS,  |
+   |        | RC2_T>& src2,                | NPC> & src2, xf::Mat<SRC_T,  |
+   |        |            Mat<ROWS, COLS, D | ROWS, COLS, NPC> & dst,float |
+   |        | ST_T>& dst)                  |  scale)                      |
+   +--------+------------------------------+------------------------------+
+   | Not    | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int R |
+   |        | LS, int SRC_T, int DST_T>    | OWS, int COLS, int NPC = 1>  |
+   |        |    void Not(Mat<ROWS, COLS,  |    void bitwise_not(xf::Mat< |
+   |        | SRC_T>& src,                 | SRC_T, ROWS, COLS, NPC> & sr |
+   |        |            Mat<ROWS, COLS, D | c, xf::Mat<SRC_T, ROWS, COLS |
+   |        | ST_T>& dst)                  | , NPC> & dst)                |
+   +--------+------------------------------+------------------------------+
+   | Range  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int R |
+   |        | LS, int SRC_T, int DST_T, ty | OWS, int COLS,int NPC=1>     |
+   |        | pename P_T>                  |    void inRange(xf::Mat<SRC_ |
+   |        |    void Range(Mat<ROWS, COLS | T, ROWS, COLS, NPC> & src,un |
+   |        | , SRC_T>& src,               | signed char lower_thresh,uns |
+   |        |            Mat<ROWS, COLS, D | igned char upper_thresh,xf:: |
+   |        | ST_T>& dst,                  | Mat<SRC_T, ROWS, COLS, NPC>  |
+   |        |            P_T start,P_T end | & dst)                       |
+   |        | )                            |                              |
+   +--------+------------------------------+------------------------------+
+   | Resize | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int SRC_T, int R |    template<int INTERPOLATIO |
+   |        | OWS,int COLS,int DROWS,int D | N_TYPE, int TYPE, int SRC_RO |
+   |        | COLS>                        | WS, int SRC_COLS, int DST_RO |
+   |        |    void Resize (             | WS, int DST_COLS, int NPC, i |
+   |        |            Mat<ROWS, COLS, S | nt MAX_DOWN_SCALE>           |
+   |        | RC_T> &_src,                 |    void resize (xf::Mat<TYPE |
+   |        |            Mat<DROWS, DCOLS, | , SRC_ROWS, SRC_COLS, NPC> & |
+   |        |  SRC_T> &_dst,               |  _src, xf::Mat<TYPE, DST_ROW |
+   |        |            int interpolation | S, DST_COLS, NPC> & _dst)    |
+   |        | =HLS_INTER_LINEAR )          |                              |
+   +--------+------------------------------+------------------------------+
+   | sobel  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int XORDER, int  |    template<int BORDER_TYPE, |
+   |        | YORDER, int SIZE, int SRC_T, | int FILTER_TYPE, int SRC_T,i |
+   |        |  int DST_T, int ROWS,int COL | nt DST_T, int ROWS, int COLS |
+   |        | S,int DROWS,int DCOLS>       | ,int NPC=1,bool USE_URAM = f |
+   |        |    void Sobel (Mat<ROWS, COL | alse>                        |
+   |        | S, SRC_T>                    |    void Sobel(xf::Mat<SRC_T, |
+   |        |    &_src,Mat<DROWS, DCOLS, D |  ROWS, COLS, NPC> & _src_mat |
+   |        | ST_T> &_dst)                 | ,xf::Mat<DST_T, ROWS, COLS,  |
+   |        |                              | NPC> & _dst_matx,xf::Mat<DST |
+   |        |                              | _T, ROWS, COLS, NPC> & _dst_ |
+   |        |                              | maty)                        |
+   +--------+------------------------------+------------------------------+
+   | split  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int SRC_T, int D |
+   |        | LS, int SRC_T, int DST_T>    | ST_T, int ROWS, int COLS, in |
+   |        |    void Split(               | t NPC=1>                     |
+   |        |            Mat<ROWS, COLS, S |    void extractChannel(xf::M |
+   |        | RC_T>& src,                  | at<SRC_T, ROWS, COLS, NPC> & |
+   |        |            Mat<ROWS, COLS, D |  _src_mat, xf::Mat<DST_T, RO |
+   |        | ST_T>& dst0,                 | WS, COLS, NPC> & _dst_mat, u |
+   |        |            Mat<ROWS, COLS, D | int16_t _channel)            |
+   |        | ST_T>& dst1,                 |                              |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst2,                 |                              |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>& dst3)                 |                              |
+   +--------+------------------------------+------------------------------+
+   | Thresh | .. code:: pre                | .. code:: pre                |
+   | old    |                              |                              |
+   |        |    template<int ROWS, int CO |    template<int THRESHOLD_TY |
+   |        | LS, int SRC_T, int DST_T>    | PE, int SRC_T, int ROWS, int |
+   |        |    void Threshold(           |  COLS,int NPC=1>             |
+   |        |            Mat<ROWS, COLS, S |    void Threshold(xf::Mat<SR |
+   |        | RC_T>& src,                  | C_T, ROWS, COLS, NPC> & _src |
+   |        |            Mat<ROWS, COLS, D | _mat,xf::Mat<SRC_T, ROWS, CO |
+   |        | ST_T>& dst,                  | LS, NPC> & _dst_mat,short in |
+   |        |            HLS_TNAME(SRC_T)  | t thresh,short int maxval )  |
+   |        | thresh,                      |                              |
+   |        |            HLS_TNAME(DST_T)  |                              |
+   |        | maxval,                      |                              |
+   |        |            int thresh_type)  |                              |
+   +--------+------------------------------+------------------------------+
+   | Scale  | .. code:: pre                | .. code:: pre                |
+   |        |                              |                              |
+   |        |    template<int ROWS, int CO |    template< int SRC_T,int D |
+   |        | LS, int SRC_T, int DST_T, ty | ST_T, int ROWS, int COLS, in |
+   |        | pename P_T>                  | t NPC = 1>                   |
+   |        |    void Scale(Mat<ROWS, COLS |    void scale(xf::Mat<SRC_T, |
+   |        | , SRC_T>& src,Mat<ROWS, COLS |  ROWS, COLS, NPC> & src1, xf |
+   |        | , DST_T>& dst, P_T scale=1.0 | ::Mat<DST_T, ROWS, COLS, NPC |
+   |        | ,P_T shift=0.0)              | > & dst,float scale, float s |
+   |        |                              | hift)                        |
+   +--------+------------------------------+------------------------------+
+   | InitUn | .. code:: pre                | .. code:: pre                |
+   | distor |                              |                              |
+   | tRecti |    template<typename CMT, ty |    template< int CM_SIZE, in |
+   | fyMapI | pename DT, typename ICMT, in | t DC_SIZE, int MAP_T, int RO |
+   | nverse | t ROWS, int COLS, int MAP1_T | WS, int COLS, int NPC >      |
+   |        | , int MAP2_T, int N>         |    void InitUndistortRectify |
+   |        |    void InitUndistortRectify | MapInverse (                 |
+   |        | MapInverse (                 |            ap_fixed<32,12> * |
+   |        |     Window<3,3, CMT> cameraM | cameraMatrix,                |
+   |        | atrix,DT(&distCoeffs)[N],Win |            ap_fixed<32,12> * |
+   |        | dow<3,3, ICMT> ir, Mat<ROWS, | distCoeffs,                  |
+   |        |  COLS, MAP1_T>  &map1,Mat<RO |            ap_fixed<32,12> * |
+   |        | WS, COLS, MAP2_T>  &map2,int | ir,                          |
+   |        |  noRotation=false)           |            xf::Mat<MAP_T, RO |
+   |        |                              | WS, COLS, NPC> &_mapx_mat,xf |
+   |        |                              | ::Mat<MAP_T, ROWS, COLS, NPC |
+   |        |                              | > &_mapy_mat,int _cm_size, i |
+   |        |                              | nt _dc_size)                 |
+   +--------+------------------------------+------------------------------+
+   | Avg,   | .. code:: pre                | .. code:: pre                |
+   | mean,  |                              |                              |
+   | AvgStd |    template<typename DST_T,  |    template<int SRC_T,int RO |
+   | dev    | int ROWS, int COLS, int SRC_ | WS, int COLS,int NPC=1>void  |
+   |        | T>                           | meanStdDev(xf::Mat<SRC_T, RO |
+   |        |    DST_T Mean(Mat<ROWS, COLS | WS, COLS, NPC> & _src,unsign |
+   |        | , SRC_T>& src)               | ed short* _mean,unsigned sho |
+   |        |                              | rt* _stddev)                 |
+   +--------+------------------------------+------------------------------+
+   | CvtCol | .. code:: pre                | `Color                       |
+   | or     |                              | Conversion <api-reference |
+   |        |    template<typename CONVERS | .html#toi1504034269249>`__   |
+   |        | ION,int SRC_T, int DST_T,int |                              |
+   |        |  ROWS,int COLS>              |                              |
+   |        |    void CvtColor(Mat<ROWS, C |                              |
+   |        | OLS, SRC_T>  &_src,          |                              |
+   |        |            Mat<ROWS, COLS, D |                              |
+   |        | ST_T>    &_dst)              |                              |
+   +--------+------------------------------+------------------------------+
+
+Note: All the functions except Reduce can process N-pixels per clock
+where N is power of 2.
+
+.. _ariaid-title7:
+
+Using the xfOpenCV Library
+--------------------------
+
+This section describes using the xfOpenCV library in the SDx development
+environment.
+
+Note: The instructions in this section assume that you have downloaded
+and installed all the required packages. For more information, see the
+`Prerequisites <getting-started-with-sdsoc.html#gyt1504034261161>`__.
+
+include folder constitutes all the necessary components to build a
+Computer Vision or Image Processing pipeline using the library. The
+folders common and core contain the infrastructure that the library
+functions need for basic functions, Mat class, and macros. The library
+functions are categorized into three folders, features, video and
+imgproc based on the operation they perform. The names of the folders
+are self-explanatory.
+
+To work with the library functions, you need to include the path to the
+The xfOpenCV library is structured as shown in the following table. The
+include folder in the SDx project. You can include relevant header files
+for the library functions you will be working with after you source the
+include folder’s path to the compiler. For example, if you would like to
+work with Harris Corner Detector and Bilateral Filter, you must use the
+following lines in the host code:
+
+.. code:: pre
+
+   #include “features/xf_harris.hpp” //for Harris Corner Detector
+   #include “imgproc/xf_bilateral_filter.hpp” //for Bilateral Filter
+   #include “video/xf_kalmanfilter.hpp”
+
+After the headers are included, you can work with the library functions
+as described in the `xfOpenCV Library API
+Reference <api-reference.html#ycb1504034263746>`__ using the examples
+in the examples folder as reference.
+
+The following table gives the name of the header file, including the
+folder name, which contains the library function.
+
+.. table:: Table 9. xfOpenCV Library Contents
+
+   +-----------------------------------+-----------------------------------+
+   | Function Name                     | File Path in the include folder   |
+   +===================================+===================================+
+   | xf::accumulate                    | imgproc/xf_accumulate_image.hpp   |
+   +-----------------------------------+-----------------------------------+
+   | xf::accumulateSquare              | imgproc/xf_accumulate_squared.hpp |
+   +-----------------------------------+-----------------------------------+
+   | xf::accumulateWeighted            | imgproc/xf_accumulate_weighted.hp |
+   |                                   | p                                 |
+   +-----------------------------------+-----------------------------------+
+   | xf::absdiff, xf::add,             | core/xf_arithm.hpp                |
+   | xf::subtract, xf::bitwise_and,    |                                   |
+   | xf::bitwise_or, xf::bitwise_not,  |                                   |
+   | xf::bitwise_xor,xf::multiply      |                                   |
+   | ,xf::Max, xf::Min, xf::compare,   |                                   |
+   | xf::zero, xf::addS, xf::SubS,     |                                   |
+   | xf::SubRS ,xf::compareS,          |                                   |
+   | xf::MaxS, xf::MinS, xf::set       |                                   |
+   +-----------------------------------+-----------------------------------+
+   | xf::addWeighted                   | imgproc/xf_add_weighted.hpp       |
+   +-----------------------------------+-----------------------------------+
+   | xf::bilateralFilter               | imgproc/xf_histogram.hpp          |
+   +-----------------------------------+-----------------------------------+
+   | xf::boxFilter                     | imgproc/xf_box_filter.hpp         |
+   +-----------------------------------+-----------------------------------+
+   | xf::boundingbox                   | imgproc/xf_boundingbox.hpp        |
+   +-----------------------------------+-----------------------------------+
+   | xf::Canny                         | imgproc/xf_canny.hpp              |
+   +-----------------------------------+-----------------------------------+
+   | xf::Colordetect                   | imgproc/xf_colorthresholding.hpp, |
+   |                                   | imgproc/xf_bgr2hsv.hpp,           |
+   |                                   | imgproc/xf_erosion.hpp,           |
+   |                                   | imgproc/xf_dilation.hpp           |
+   +-----------------------------------+-----------------------------------+
+   | xf::merge                         | imgproc/xf_channel_combine.hpp    |
+   +-----------------------------------+-----------------------------------+
+   | xf::extractChannel                | imgproc/xf_channel_extract.hpp    |
+   +-----------------------------------+-----------------------------------+
+   | xf::convertTo                     | imgproc/xf_convert_bitdepth.hpp   |
+   +-----------------------------------+-----------------------------------+
+   | xf::crop                          | imgproc/xf_crop.hpp               |
+   +-----------------------------------+-----------------------------------+
+   | xf::filter2D                      | imgproc/xf_custom_convolution.hpp |
+   +-----------------------------------+-----------------------------------+
+   | xf::nv122iyuv, xf::nv122rgba,     | imgproc/xf_cvt_color.hpp          |
+   | xf::nv122yuv4, xf::nv212iyuv,     |                                   |
+   | xf::nv212rgba, xf::nv212yuv4,     |                                   |
+   | xf::rgba2yuv4, xf::rgba2iyuv,     |                                   |
+   | xf::rgba2nv12, xf::rgba2nv21,     |                                   |
+   | xf::uyvy2iyuv, xf::uyvy2nv12,     |                                   |
+   | xf::uyvy2rgba, xf::yuyv2iyuv,     |                                   |
+   | xf::yuyv2nv12, xf::yuyv2rgba,     |                                   |
+   | xf::rgb2iyuv,xf::rgb2nv12,        |                                   |
+   | xf::rgb2nv21, xf::rgb2yuv4,       |                                   |
+   | xf::rgb2uyvy, xf::rgb2yuyv,       |                                   |
+   | xf::rgb2bgr, xf::bgr2uyvy,        |                                   |
+   | xf::bgr2yuyv, xf::bgr2rgb,        |                                   |
+   | xf::bgr2nv12, xf::bgr2nv21,       |                                   |
+   | xf::iyuv2nv12, xf::iyuv2rgba,     |                                   |
+   | xf::iyuv2rgb, xf::iyuv2yuv4,      |                                   |
+   | xf::nv122uyvy, xf::nv122yuyv,     |                                   |
+   | xf::nv122nv21, xf::nv212rgb,      |                                   |
+   | xf::nv212bgr, xf::nv212uyvy,      |                                   |
+   | xf::nv212yuyv, xf::nv212nv12,     |                                   |
+   | xf::uyvy2rgb, xf::uyvy2bgr,       |                                   |
+   | xf::uyvy2yuyv, xf::yuyv2rgb,      |                                   |
+   | xf::yuyv2bgr, xf::yuyv2uyvy,      |                                   |
+   | xf::rgb2gray, xf::bgr2gray,       |                                   |
+   | xf::gray2rgb, xf::gray2bgr,       |                                   |
+   | xf::rgb2xyz, xf::bgr2xyz...       |                                   |
+   +-----------------------------------+-----------------------------------+
+   | xf::dilate                        | imgproc/xf_dilation.hpp           |
+   +-----------------------------------+-----------------------------------+
+   | xf::demosaicing                   | imgproc/xf_demosaicing.hpp        |
+   +-----------------------------------+-----------------------------------+
+   | xf::erode                         | imgproc/xf_erosion.hpp            |
+   +-----------------------------------+-----------------------------------+
+   | xf::fast                          | features/xf_fast.hpp              |
+   +-----------------------------------+-----------------------------------+
+   | xf::GaussianBlur                  | imgproc/xf_gaussian_filter.hpp    |
+   +-----------------------------------+-----------------------------------+
+   | xf::cornerHarris                  | features/xf_harris.hpp            |
+   +-----------------------------------+-----------------------------------+
+   | xf::calcHist                      | imgproc/xf_histogram.hpp          |
+   +-----------------------------------+-----------------------------------+
+   | xf::equalizeHist                  | imgproc/xf_hist_equalize.hpp      |
+   +-----------------------------------+-----------------------------------+
+   | xf::HOGDescriptor                 | imgproc/xf_hog_descriptor.hpp     |
+   +-----------------------------------+-----------------------------------+
+   | xf::Houghlines                    | imgproc/xf_houghlines.hpp         |
+   +-----------------------------------+-----------------------------------+
+   | xf::inRange                       | imgproc/xf_inrange.hpp            |
+   +-----------------------------------+-----------------------------------+
+   | xf::integralImage                 | imgproc/xf_integral_image.hpp     |
+   +-----------------------------------+-----------------------------------+
+   | xf::densePyrOpticalFlow           | video/xf_pyr_dense_optical_flow.h |
+   |                                   | pp                                |
+   +-----------------------------------+-----------------------------------+
+   | xf::DenseNonPyrLKOpticalFlow      | video/xf_dense_npyr_optical_flow. |
+   |                                   | hpp                               |
+   +-----------------------------------+-----------------------------------+
+   | xf::LUT                           | imgproc/xf_lut.hpp                |
+   +-----------------------------------+-----------------------------------+
+   | xf::KalmanFilter                  | video/xf_kalmanfilter.hpp         |
+   +-----------------------------------+-----------------------------------+
+   | xf::magnitude                     | core/xf_magnitude.hpp             |
+   +-----------------------------------+-----------------------------------+
+   | xf::MeanShift                     | imgproc/xf_mean_shift.hpp         |
+   +-----------------------------------+-----------------------------------+
+   | xf::meanStdDev                    | core/xf_mean_stddev.hpp           |
+   +-----------------------------------+-----------------------------------+
+   | xf::medianBlur                    | imgproc/xf_median_blur.hpp        |
+   +-----------------------------------+-----------------------------------+
+   | xf::minMaxLoc                     | core/xf_min_max_loc.hpp           |
+   +-----------------------------------+-----------------------------------+
+   | xf::OtsuThreshold                 | imgproc/xf_otsuthreshold.hpp      |
+   +-----------------------------------+-----------------------------------+
+   | xf::phase                         | core/xf_phase.hpp                 |
+   +-----------------------------------+-----------------------------------+
+   | xf::paintmask                     | imgproc/xf_paintmask.hpp          |
+   +-----------------------------------+-----------------------------------+
+   | xf::pyrDown                       | imgproc/xf_pyr_down.hpp           |
+   +-----------------------------------+-----------------------------------+
+   | xf::pyrUp                         | imgproc/xf_pyr_up.hpp             |
+   +-----------------------------------+-----------------------------------+
+   | xf::reduce                        | imgrpoc/xf_reduce.hpp             |
+   +-----------------------------------+-----------------------------------+
+   | xf::remap                         | imgproc/xf_remap.hpp              |
+   +-----------------------------------+-----------------------------------+
+   | xf::resize                        | imgproc/xf_resize.hpp             |
+   +-----------------------------------+-----------------------------------+
+   | xf::scale                         | imgproc/xf_scale.hpp              |
+   +-----------------------------------+-----------------------------------+
+   | xf::Scharr                        | imgproc/xf_scharr.hpp             |
+   +-----------------------------------+-----------------------------------+
+   | xf::SemiGlobalBM                  | imgproc/xf_sgbm.hpp               |
+   +-----------------------------------+-----------------------------------+
+   | xf::Sobel                         | imgproc/xf_sobel.hpp              |
+   +-----------------------------------+-----------------------------------+
+   | xf::StereoPipeline                | imgproc/xf_stereo_pipeline.hpp    |
+   +-----------------------------------+-----------------------------------+
+   | xf::sum                           | imgproc/xf_sum.hpp                |
+   +-----------------------------------+-----------------------------------+
+   | xf::StereoBM                      | imgproc/xf_stereoBM.hpp           |
+   +-----------------------------------+-----------------------------------+
+   | xf::SVM                           | imgproc/xf_svm.hpp                |
+   +-----------------------------------+-----------------------------------+
+   | xf::Threshold                     | imgproc/xf_threshold.hpp          |
+   +-----------------------------------+-----------------------------------+
+   | xf::warpTransform                 | imgproc/xf_warp_transform.hpp     |
+   +-----------------------------------+-----------------------------------+
+
+The different ways to use the xfOpenCV library examples are listed
+below:
+
+-  `Downloading and Using xfOpenCV Libraries from SDx
+   GUI <getting-started-with-sdsoc.html#oar1512131703913>`__
+-  `Building a Project Using the Example Makefiles on
+   Linux <getting-started-with-sdsoc.html#jqu1504034263390>`__
+-  `Using reVISION Samples on the reVISION
+   Platform <getting-started-with-sdsoc.html#dlc1513202722577>`__
+-  `Using the xfOpenCV Library on a non-reVISION
+   Platform <getting-started-with-sdsoc.html#ejq1506318012907>`__
+
+.. _ariaid-title8:
+
+Downloading and Using xfOpenCV Libraries from SDx GUI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can download xfOpenCV directly from SDx GUI. To build a project
+using the example makefiles on the Linux platform:
+
+#. From SDx IDE, click Xilinx and select SDx Libraries.
+#. Click Download next to the Xilinx xfOpenCV Library.
+
+   .. figure:: ./images/xqb1554997288515.png
+      :alt: 
+      :figclass: image
+      :name: oar1512131703913__image_icz_jrq_vcb
+      :width: 520px
+      :height: 260px
+
+   The library is downloaded into <home
+   directory>/Xilinx/SDx/2019.1/xfopencv. After the library is
+   downloaded, the entire set of examples in the library are available
+   in the list of templates while creating a new project.
+
+   Note: The library can be added to any project from the IDE menu
+   options.
+
+#. To add a library to a project, from SDx IDE, click Xilinx and select
+   SDx Libraries.
+#. Select Xilinx xfOpenCV Library and click Add to project. The dropdown
+   menu consists of options of which project the libraries need to be
+   included to.
+
+All the headers as part of the include/ folder in xfOpenCV library would
+be copied into the local project directory as
+<project_dir>/libs/xfopencv/include. All the settings required for the
+libraries to be run are also set when this action is completed.
+
+.. _ariaid-title9:
+
+Building a Project Using the Example Makefiles on Linux
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use the following steps to build a project using the example makefiles
+on the Linux platform:
+
+#. Open a terminal.
+#. When building for reVISION platform, set the environment variable
+   SYSROOT to <*the path to platform
+   folder*>\ */sw/a53_linux/a53_linux/sysroot/aarch64-xilinx-linux.*
+#. Change the platform variable to point to the downloaded platform
+   folder in makefile. Ensure that the folder name of the downloaded
+   platform is unchanged.
+#. When building for revision platform , change IDIRS and LDIRS
+   variables in the Makefile as follows:
+
+   .. code:: pre
+
+      IDIRS = -I. -I${SYSROOT}/usr/include -I ../../include
+      LDIRS = --sysroot=${SYSROOT} -L=/lib -L=/usr/lib -Wl,-rpath-link=${SYSROOT}/lib,-rpath-link=${SYSROOT}/usr/lib 
+
+#. Change the directory to the location where you want to build the
+   example.
+
+   .. code:: pre
+
+      cd <path to example>
+
+#. When building for revision platform, add
+   ``#include"opencv2/imgcodecs/imgcodecs.hpp"`` in xf_headers.h file,
+   both in if and else part.
+#. Set the environment variables to run SDx development environment.
+
+   -  For c shell:
+
+      .. code:: pre
+
+         source <SDx tools install path>/settings.csh
+
+   -  For bash shell:
+
+      .. code:: pre
+
+         source <SDx tools install path>/settings.sh
+
+#. Type the ``make`` command in the terminal. The sd_card folder is
+   created and can be found in the <path to example> folder.
+
+Note: Ignore 2, 4 and 6 steps when building for Non revision platforms.
+
+.. _ariaid-title10:
+
+Using reVISION Samples on the reVISION Platform
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use the following steps to run a unit test for bilateral filter on
+zcu104_rv_ss:
+
+#. Launch the SDx development environment using the desktop icon or the
+   Start menu.
+
+   The Workspace Launcher dialog appears.
+
+#. Click Browse to enter a workspace folder used to store your projects
+   (you can use workspace folders to organize your work), then click OK
+   to dismiss the Workspace Launcher dialog.
+
+   Note: Before launching the SDx IDE on Linux, ensure that you use the
+   same shell that you have used to set the ``$SYSROOT`` environment
+   variable. This is usually the file path to the Linux root file
+   system.
+
+   The SDx development environment window opens with the Welcome tab
+   visible when you create a new workspace. The Welcome tab can be
+   closed by clicking the X icon or minimized if you do not wish to use
+   it.
+
+#. Select File > New > Xilinx SDx Project from the SDx development
+   environment menu bar.
+
+   The New Project dialog box opens.
+
+#. Specify the name of the project. For example Bilateral.
+#. Click Next.
+
+   The the Choose Hardware Platform page appears.
+
+#. From the Choose Hardware Platform page, click the Add Custom Platform
+   button.
+#. Browse to the directory where you extracted the reVISION platform
+   files. Ensure that you select the zcu104_rv_ss folder.
+#. From the Choose Hardware Platform page, select zcu104_rv_ss (custom).
+#. Click Next.
+
+   The Templates page appears, containing source code examples for the
+   selected platform.
+
+#. From the list of application templates, select bilateral - File I/O
+   and click Finish.
+#. add ``#include"opencv2/imgcodecs/imgcodecs.hpp"`` in xf_headers.h
+   file present under project/src/examples/bilateral/,both in if and
+   else part.
+#. Click the Active build configurations drop-down from the SDx Project
+   Settings window, to select the active configuration or create a build
+   configuration.
+
+   The standard build configurations are Debug and Release. To get the
+   best runtime performance, switch to use the Release build
+   configuration as it uses a higher compiler optimization setting than
+   the Debug build configuration.
+
+   .. figure:: ./images/bxr1554996988685.png
+      :alt: 
+      :figclass: image
+      :name: dlc1513202722577__image_k33_cdz_vcb
+
+#. Set the Data motion network clock frequency (MHz) to the required
+   frequency, on the SDx Project Settings page.
+#. Right-click the project and select Build Project or press Ctrl+B keys
+   to build the project, in the Project Explorer view.
+#. Copy the contents of the newly created sd_card folder to the SD card.
+   The sd_card folder contains all the files required to run designs on
+   the ``ZCU104`` board.
+#. Insert the SD card in the ``ZCU104`` board card slot and switch it
+   ON.
+   Note: A serial port emulator (Teraterm/ minicom) is required to
+   interface the user commands to the board.
+#. Upon successful boot, run the following command in the Teraterm
+   terminal (serial port emulator.)
+
+   .. code:: pre
+
+      #cd /media/card
+      #remount
+
+#. Run the .elf file for the respective functions.
+
+   For more information, see the `Using the xfOpenCV Library Functions
+   on Hardware <getting-started-with-sdsoc.html#vao1504034261806>`__.
+
+.. _ariaid-title11:
+
+Using the xfOpenCV Library on a non-reVISION Platform
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section describes using the xfOpenCV library on a non-reVISION
+platform, in the SDx™ development environment. The examples in xfOpenCV
+require OpenCV libraries for successful compilation. As non-reVISION
+platform may or may not contain opencv libs, as a perquisites it is
+required to install/compile opencv libraries(with compatible
+libjpeg.so).
+
+Note: The instructions in this section assume that you have downloaded
+and installed all the required packages. For more information, see the
+`Prerequisites <getting-started-with-sdsoc.html#gyt1504034261161>`__.
+
+Use the following steps to import the xfOpenCV library into a SDx
+project and execute it on a custom platform:
+
+#. Launch the SDx development environment using the desktop icon or the
+   Start menu.
+
+   The Workspace Launcher dialog appears.
+
+#. Click Browse to enter a workspace folder used to store your projects
+   (you can use workspace folders to organize your work), then click OK
+   to dismiss the Workspace Launcher dialog.
+
+   The SDx development environment window opens with the Welcome tab
+   visible when you create a new workspace. The Welcome tab can be
+   closed by clicking the X icon or minimized if you do not wish to use
+   it.
+
+#. Select File > New > Xilinx SDx Project from the SDx development
+   environment menu bar.
+
+   The New Project dialog box opens.
+
+#. Specify the name of the project. For example Test.
+#. Click Next.
+
+   The the Choose Hardware Platform page appears.
+
+#. From the Choose Hardware Platform page, select a suitable platform.
+   For example, zcu102.
+#. Click Next.
+
+   The Choose Software Platform and Target CPU page appears.
+
+#. From the Choose Software Platform and Target CPU page, select an
+   appropriate software platform and the target CPU. For example, select
+   A9 from the CPU dropdown list for ZC702 and ZC706 reVISION platforms.
+#. Click Next. The Templates page appears, containing source code
+   examples for the selected platform.
+#. From the list of application templates, select Empty Application and
+   click Finish.
+
+   The New Project dialog box closes. A new project with the specified
+   configuration is created. The SDx Project Settings view appears.
+   Notice the progress bar in the lower right border of the view, Wait
+   for a few moments for the C/C++ Indexer to finish.
+
+#. The standard build configurations are Debug and Release. To get the
+   best run-time performance, switch to use the Release build
+   configuration as it uses a higher compiler optimization setting than
+   the Debug build configuration.
+
+   .. figure:: ./images/bxr1554996988685.png
+      :alt: 
+      :figclass: image
+      :name: ejq1506318012907__image_ifx_ryl_2bb
+
+#. Set the Data motion network clock frequency (MHz) to the required
+   frequency, on the SDx Project Settings page.
+#. Select the Generate bitstream and Generate SD card image check boxes.
+#. Right-click on the newly created project in the Project Explorer
+   view.
+#. From the context menu that appears, select C/C++ Build Settings.
+
+   The Properties for <project> dialog box appears.
+
+#. Click the Tool Settings tab.
+#. Expand the SDS++ Compiler > Directories tree.
+#. Click the |image0| icon to add the "<xfopencv_location>\include" and
+   "<OpenCV_location>\include" folder locations to the Include Paths
+   list.
+
+   Note: The OpenCV library is not provided by Xilinx for custom
+   platforms. You are required to provide the library. Use the reVISION
+   platform in order to use the OpenCV library provided by Xilinx.
+
+   .. figure:: ./images/okw1554997115827.png
+      :alt: 
+      :figclass: image
+      :name: ejq1506318012907__image_gk2_dgn_2bb
+
+#. In the same page, under SDS++ Compiler > Inferred Options > Software
+   Platform, specify "-hls-target 1" in the Software Platform Inferred
+   Flags.
+#. Click Apply.
+#. Expand the SDS++ Linker > Libraries tree.
+#. Click the |image1| icon and add the following libraries to the
+   Libraries(-l) list. These libraries are required by OpenCV.
+
+   -  opencv_core
+   -  opencv_imgproc
+   -  opencv_imgcodecs
+   -  opencv_features2d
+   -  opencv_calib3d
+   -  opencv_flann
+   -  opencv_video
+   -  opencv_videoio
+
+#. Click the |image2| icon and add <opencv_Location>/lib folder location
+   to the Libraries search path (-L) list.
+
+   Note: The OpenCV library is not provided by Xilinx for custom
+   platforms. You are required to provide the library. Use the reVISION
+   platform in order to use the OpenCV library provided by Xilinx.
+
+   .. figure:: ./images/elq1554997015517.png
+      :alt: 
+      :figclass: image
+      :name: ejq1506318012907__image_zyl_pgn_2bb
+
+#. Click Apply to save the configuration.
+#. Click OK to close the Properties for <project> dialog box.
+#. Expand the newly created project tree in the Project Explorer view.
+#. Right-click the src folder and select Import. The Import dialog box
+   appears.
+#. Select File System and click Next.
+#. Click Browse to navigate to the <xfopencv_Location>/examples folder
+   location.
+#. Select the folder that corresponds to the library that you desire to
+   import. For example, accumulate.
+
+   .. figure:: ./images/vfi1554997040834.png
+      :alt: 
+      :figclass: image
+      :name: ejq1506318012907__image_wxp_j3n_2bb
+
+#. Right-click the library function in the Project Explorer view and
+   select Toggle HW/SW to move the function to the hardware.
+
+   .. figure:: ./images/uzw1554997347249.png
+      :alt: 
+      :figclass: image
+      :name: ejq1506318012907__image_xnw_ckn_2bb
+      :width: 436px
+      :height: 317px
+
+#. Right-click the project and select Build Project or press Ctrl+B keys
+   to build the project, in the Project Explorer view.
+
+   The build process may take anytime between few minutes to several
+   hours, depending on the power of the host machine and the complexity
+   of the design. By far, the most time is spent processing the routines
+   that have been tagged for realization in hardware.
+
+#. Copy the contents of the newly created
+   .\<workspace>\<function>\Release\sd_card folder to the SD card. The
+   sd_card folder contains all the files required to run designs on a
+   board.
+#. Insert the SD card in the board card slot and switch it ON.
+
+   Note: A serial port emulator (Teraterm/ minicom) is required to
+   interface the user commands to the board.
+
+#. Upon successful boot, navigate to the ./mnt folder and run the
+   following command at the prompt:
+
+   .. code:: pre
+
+      #cd /mnt
+
+   Note: It is assumed that the OpenCV libraries are a port of the root
+   filesystem. If not, add the location of OpenCV libraries to
+   ``LD_LIBRARY_PATH`` using the
+   ``$ export                             LD_LIBRARY_PATH=<location of OpenCV libraries>/lib``
+   command.
+
+#. Run the .elf executable file. For more information, see the `Using
+   the xfOpenCV Library Functions on
+   Hardware <getting-started-with-sdsoc.html#vao1504034261806>`__.
+
+.. _ariaid-title12:
+
+Changing the Hardware Kernel Configuration
+------------------------------------------
+
+Use the following steps to change the hardware kernel configuration:
+
+#. Update the <path to xfOpenCV git
+   folder>/xfOpenCV/examples/<function>/xf_config_params.h file.
+#. Update the makefile along with the xf_config_params.h file:
+
+   a. Find the line with the function name in the makefile. For
+      bilateral filter, the line in the makefile will be
+      ``xf::BilateralFilter<3,1,0,1080,1920,1>``.
+   b. Update the template parameters in the makefile to reflect changes
+      made in the xf_config_params.h file. For more details, see the
+      `xfOpenCV Library API
+      Reference <api-reference.html#ycb1504034263746>`__.
+
+.. _ariaid-title13:
+
+Using the xfOpenCV Library Functions on Hardware
+------------------------------------------------
+
+The following table lists the xfOpenCV library functions and the command
+to run the respective examples on hardware. It is assumed that your
+design is completely built and the board has booted up correctly.
+
+.. table:: Table 10. Using the xfOpenCV Library Function on Hardware
+
+   +--------------+---------------------------+--------------------------+
+   | Example      | Function Name             | Usage on Hardware        |
+   +==============+===========================+==========================+
+   | accumulate   | xf::accumulate            | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | accumulatesq | xf::accumulateSquare      | ./<executable name>.elf  |
+   | uared        |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | accumulatewe | xf::accumulateWeighted    | ./<executable name>.elf  |
+   | ighted       |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | addS         | xf::addS                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | arithm       | xf::absdiff, xf::add,     | ./<executable name>.elf  |
+   |              | xf::subtract,             | <path to input image 1>  |
+   |              | xf::bitwise_and,          | <path to input image 2>  |
+   |              | xf::bitwise_or,           |                          |
+   |              | xf::bitwise_not,          |                          |
+   |              | xf::bitwise_xor           |                          |
+   +--------------+---------------------------+--------------------------+
+   | addweighted  | xf::addWeighted           | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | Bilateralfil | xf::bilateralFilter       | ./<executable name>.elf  |
+   | ter          |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Boxfilter    | xf::boxFilter             | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Boundingbox  | xf::boundingbox           | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   |              |                           | <No of ROI's>            |
+   +--------------+---------------------------+--------------------------+
+   | Canny        | xf::Canny                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | channelcombi | xf::merge                 | ./<executable name>.elf  |
+   | ne           |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   |              |                           | <path to input image 3>  |
+   |              |                           | <path to input image 4>  |
+   +--------------+---------------------------+--------------------------+
+   | Channelextra | xf::extractChannel        | ./<executable name>.elf  |
+   | ct           |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Colordetect  | xf::bgr2hsv,              | ./<executable name>.elf  |
+   |              | xf::colorthresholding,    | <path to input image>    |
+   |              | xf:: erode, and xf::      |                          |
+   |              | dilate                    |                          |
+   +--------------+---------------------------+--------------------------+
+   | compare      | xf::compare               | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | compareS     | xf::compareS              | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Convertbitde | xf::convertTo             | ./<executable name>.elf  |
+   | pth          |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Cornertracke | xf::cornerTracker         | ./exe <input video> <no. |
+   | r            |                           | of frames> <Harris       |
+   |              |                           | Threshold> <No. of       |
+   |              |                           | frames after which       |
+   |              |                           | Harris Corners are       |
+   |              |                           | Reset>                   |
+   +--------------+---------------------------+--------------------------+
+   | crop         | xf::crop                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Customconv   | xf::filter2D              | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::iyuv2nv12             | ./<executable name>.elf  |
+   | IYUV2NV12    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   |              |                           | <path to input image 3>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::iyuv2rgba             | ./<executable name>.elf  |
+   | IYUV2RGBA    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   |              |                           | <path to input image 3>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::iyuv2yuv4             | ./<executable name>.elf  |
+   | IYUV2YUV4    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   |              |                           | <path to input image 3>  |
+   |              |                           | <path to input image 4>  |
+   |              |                           | <path to input image 5>  |
+   |              |                           | <path to input image 6>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::nv122iyuv             | ./<executable name>.elf  |
+   | NV122IYUV    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::nv122rgba             | ./<executable name>.elf  |
+   | NV122RGBA    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::nv122yuv4             | ./<executable name>.elf  |
+   | NV122YUV4    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::nv212iyuv             | ./<executable name>.elf  |
+   | NV212IYUV    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::nv212rgba             | ./<executable name>.elf  |
+   | NV212RGBA    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::nv212yuv4             | ./<executable name>.elf  |
+   | NV212YUV4    |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::rgba2yuv4             | ./<executable name>.elf  |
+   | RGBA2YUV4    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::rgba2iyuv             | ./<executable name>.elf  |
+   | RGBA2IYUV    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::rgba2nv12             | ./<executable name>.elf  |
+   | RGBA2NV12    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::rgba2nv21             | ./<executable name>.elf  |
+   | RGBA2NV21    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::uyvy2iyuv             | ./<executable name>.elf  |
+   | UYVY2IYUV    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::uyvy2nv12             | ./<executable name>.elf  |
+   | UYVY2NV12    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::uyvy2rgba             | ./<executable name>.elf  |
+   | UYVY2RGBA    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::yuyv2iyuv             | ./<executable name>.elf  |
+   | YUYV2IYUV    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::yuyv2nv12             | ./<executable name>.elf  |
+   | YUYV2NV12    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | cvtcolor     | xf::yuyv2rgba             | ./<executable name>.elf  |
+   | YUYV2RGBA    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Demosaicing  | xf::demosaicing           | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Difference   | xf:: GaussianBlur, xf::   | ./<exe-name>.elf <path   |
+   | of Gaussian  | duplicateMat, xf::        | to input image>          |
+   |              | delayMat, and             |                          |
+   |              | xf::subtract              |                          |
+   +--------------+---------------------------+--------------------------+
+   | Dilation     | xf::dilate                | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Erosion      | xf::erode                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Fast         | xf::fast                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Gaussianfilt | xf::GaussianBlur          | ./<executable name>.elf  |
+   | er           |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Harris       | xf::cornerHarris          | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Histogram    | xf::calcHist              | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Histequializ | xf::equalizeHist          | ./<executable name>.elf  |
+   | e            |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Hog          | xf::HOGDescriptor         | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Houghlines   | xf::HoughLines            | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | inRange      | xf::inRange               | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Integralimg  | xf::integralImage         | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Lkdensepyrof | xf::densePyrOpticalFlow   | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | Lknpyroflow  | xf::DenseNonPyrLKOpticalF | ./<executable name>.elf  |
+   |              | low                       | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | Lut          | xf::LUT                   | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Kalman       | xf::KalmanFilter          | ./<executable name>.elf  |
+   | Filter       |                           |                          |
+   +--------------+---------------------------+--------------------------+
+   | Magnitude    | xf::magnitude             | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Max          | xf::Max                   | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | MaxS         | xf::MaxS                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | meanshifttra | xf::MeanShift             | ./<executable name>.elf  |
+   | cking        |                           | <path to input           |
+   |              |                           | video/input image files> |
+   |              |                           | <Number of objects to    |
+   |              |                           | track>                   |
+   +--------------+---------------------------+--------------------------+
+   | meanstddev   | xf::meanStdDev            | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | medianblur   | xf::medianBlur            | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Min          | xf::Min                   | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | MinS         | xf::MinS                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Minmaxloc    | xf::minMaxLoc             | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | otsuthreshol | xf::OtsuThreshold         | ./<executable name>.elf  |
+   | d            |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | paintmask    | xf::paintmask             | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Phase        | xf::phase                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Pyrdown      | xf::pyrDown               | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Pyrup        | xf::pyrUp                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | reduce       | xf::reduce                | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | remap        | xf::remap                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   |              |                           | <path to mapx data>      |
+   |              |                           | <path to mapy data>      |
+   +--------------+---------------------------+--------------------------+
+   | Resize       | xf::resize                | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | scale        | xf::scale                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | scharrfilter | xf::Scharr                | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | set          | xf::set                   | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | SemiGlobalBM | xf::SemiGlobalBM          | ./<executable name>.elf  |
+   |              |                           | <path to left image>     |
+   |              |                           | <path to right image>    |
+   +--------------+---------------------------+--------------------------+
+   | sobelfilter  | xf::Sobel                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | stereopipeli | xf::StereoPipeline        | ./<executable name>.elf  |
+   | ne           |                           | <path to left image>     |
+   |              |                           | <path to right image>    |
+   +--------------+---------------------------+--------------------------+
+   | stereolbm    | xf::StereoBM              | ./<executable name>.elf  |
+   |              |                           | <path to left image>     |
+   |              |                           | <path to right image>    |
+   +--------------+---------------------------+--------------------------+
+   | subRS        | xf::SubRS                 | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | subS         | xf::SubS                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | sum          | xf::sum                   | ./<executable name>.elf  |
+   |              |                           | <path to input image 1>  |
+   |              |                           | <path to input image 2>  |
+   +--------------+---------------------------+--------------------------+
+   | Svm          | xf::SVM                   | ./<executable name>.elf  |
+   +--------------+---------------------------+--------------------------+
+   | threshold    | xf::Threshold             | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | warptransfor | xf::warpTransform         | ./<executable name>.elf  |
+   | m            |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | zero         | xf::zero                  | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+
+.. |image0| image:: ./images/wuz1554997295362.png
+   :class: image
+   :name: ejq1506318012907__image_i5p_thm_2bb
+.. |image1| image:: ./images/wuz1554997295362.png
+   :class: image
+   :name: ejq1506318012907__image_k5t_w3m_2bb
+.. |image2| image:: ./images/wuz1554997295362.png
+   :class: image
+   :name: ejq1506318012907__image_tlx_kjm_2bb

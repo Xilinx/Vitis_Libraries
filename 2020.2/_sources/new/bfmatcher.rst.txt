@@ -1,0 +1,91 @@
+.. _bruteforce-feature-matcher:
+
+Brute-force (Bf) Feature Matcher
+================================
+
+Bf matcher takes the descriptor of one feature in first set and is matched 
+with all other features in second set and the closest one is returned.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+   template <int PU = 1, int MAX_KEYPOINTS = 10000>
+   void bfMatcher(ap_uint<256> desc_list_q[MAX_KEYPOINTS],
+                  ap_uint<256> desc_list_t[MAX_KEYPOINTS],
+                  ap_int<16> match_list[MAX_KEYPOINTS],
+                  ap_uint<32> num_keypoints_q,
+                  ap_uint<32> num_keypoints_t,
+                  float ratio_thresh)
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes template paramters and arguments of the function.
+
+.. table:: Table brute-force matcher Parameter Description
+
+   +-----------------+------------------------------------------------------+
+   | Parameter       | Description                                          |
+   +=================+======================================================+
+   | PU              | Parallel units / compute units. Number of parallel   |
+   |                 | matches computed. Default is '1'. Increasing this    |
+   |                 | parameter results in lesser compute time, but also   |
+   |                 | consumes more hardware resources.                    |
+   +-----------------+------------------------------------------------------+
+   | MAX_KEYPOINTS   | Maximum keypoints in the query and training feature  |
+   |                 | sets.                                                |
+   +-----------------+------------------------------------------------------+
+   | desc_list_q     | Feature descriptor query list of 256-bit type.       |
+   +-----------------+------------------------------------------------------+
+   | desc_list_t     | Feature descriptor training list of 256-bit type.    |
+   +-----------------+------------------------------------------------------+
+   | match_list      | Index of corresponding matches for query list in     |
+   |                 | training set.                                        |
+   +-----------------+------------------------------------------------------+
+   | num_keypoints_q | Total number keypoints in the query set. This must   |
+   |                 | not exceed MAX_KEYPOINTS.                            |
+   +-----------------+------------------------------------------------------+
+   | num_keypoints_t | Total number keypoints in the training set. This     |
+   |                 | must not exceed MAX_KEYPOINTS.                       |
+   +-----------------+------------------------------------------------------+
+   | ratio_thresh    | Ratio threshold for lowe's test, for strong matches. |
+   +-----------------+------------------------------------------------------+
+   
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis 2020.2 tool, for MAX_KEYPOINTS of 10000.
+
+.. table:: Table brute-force matcher Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                     |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |
+    +====================+=========================+==========================+==============+========+=========+
+    | PU = 1             | 300                     | 162                      | 0            | 5152   | 8453    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+    | PU = 2             | 300                     | 176                      | 0            | 9471   | 16320   |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+    | PU = 10            | 300                     | 176                      | 0            | 17708  | 48839   |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in
+different configurations, as generated using Vitis 2020.2 tool, for MAX_KEYPOINTS of 10000.
+
+.. table:: Table brute-force matcher Function Performance Estimate Summary
+
+   +--------------------+-------------------------+---------------------------------------------+
+   |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+   |                    |   (MHz)                 | **Max (ms)**                                |
+   +====================+=========================+=============================================+
+   | PU = 1             | 300                     |  333.4                                      |
+   +--------------------+-------------------------+---------------------------------------------+
+   | PU = 2             | 300                     |  168.6                                      |
+   +--------------------+-------------------------+---------------------------------------------+
+   | PU = 10            | 300                     |  34.285                                     |
+   +--------------------+-------------------------+---------------------------------------------+

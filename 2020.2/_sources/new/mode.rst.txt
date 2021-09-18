@@ -1,0 +1,86 @@
+.. _mode-filter:
+
+Mode filter 
+===========
+
+Mode filter is a non-linear digital filter which improves noise reduction. This implementes filter operation with given size of N by computing **mode** for all the pixels in NxN window.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+	template <int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
+	void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst) {
+
+.. rubric:: Parameter Descriptions
+
+The following table describes the template and the function parameters.
+
+.. table:: Table Mode filter Parameter Description
+
+   +--------------+-------------------------------------------------------+
+   | Parameter    | Description                                           |
+   +==============+=======================================================+
+   | FILTER_SIZE  | Window size of the hardware filter for which the      |
+   |              | hardware kernel will be built. This can be any odd    |
+   |              | positive integer greater than 1.                      |
+   +--------------+-------------------------------------------------------+
+   | BORDER_TYPE  | The way in which borders will be processed in the     |
+   |              | hardware kernel. Currently, only XF_BORDER_REPLICATE  |
+   |              | is supported.                                         |
+   +--------------+-------------------------------------------------------+
+   | TYPE         | Input and Output pixel type. Only 8-bit, unsigned, 1  |
+   |              | or 3 channels are supported (XF_8UC1 and XF_8UC3)     |
+   +--------------+-------------------------------------------------------+
+   | ROWS         | Number of rows in the image being processed.          |
+   +--------------+-------------------------------------------------------+
+   | COLS         | Number of columns in the image being processed. Must  |
+   |              | be a multiple of 8, for 8-pixel operation.            |
+   +--------------+-------------------------------------------------------+
+   | NPC          | Number of pixels to be processed in parallel. Options |
+   |              | are XF_NPPC1 (for 1 pixel processing per clock),      |
+   |              | XF_NPPC8 (for 8 pixel processing per clock            |
+   +--------------+-------------------------------------------------------+
+   | _src         | Input image.                                          |
+   +--------------+-------------------------------------------------------+
+   | _dst         | Output image.                                         |
+   +--------------+-------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization of the
+Mode filter function for XF_NPPC1 configurations, generated
+using Vitis HLS 2020.2 version tool.
+
+.. table:: Table Mode filter Function Resource Utilization Summary
+
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+   | Operating Mode | FILTER_SIZE | Operating Frequency | Utilization Estimate                        |
+   +                +             + (MHz)               +----------------------+-------+------+-------+
+   |                |             |                     | LUTs                 | FFs   | DSPs | BRAMs |
+   +================+=============+=====================+======================+=======+======+=======+
+   | 1 pixel        | 3           | 300                 | 628                  | 900   | 0    | 3     |
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+   | 1 pixel        | 5           | 300                 | 2579                 | 4070  | 0    | 5     |
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+   | 1 pixel        | 7           | 300                 | 7852                 | 14065 | 0    | 7     |
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes performance estimates of Mode filter
+function on Vitis HLS 2020.2 version tool.
+
+.. table:: Table Mode filter Function Performance Estimate Summary
+
+   +----------------+-------------+---------------------+------------------+------------------+
+   | Operating Mode | FILTER_SIZE | Operating Frequency | Input Image Size | Latency Estimate |
+   |                |             | (MHz)               |                  | Max (ms)         |
+   +================+=============+=====================+==================+==================+
+   | 1 pixel        | 3           | 300                 | 1920x1080        | 6.99             |
+   +----------------+-------------+---------------------+------------------+------------------+
+   | 1 pixel        | 5           | 300                 | 1920x1080        | 7.00             |
+   +----------------+-------------+---------------------+------------------+------------------+
+   | 1 pixel        | 7           | 300                 | 1920x1080        | 7.15             |
+   +----------------+-------------+---------------------+------------------+------------------+
