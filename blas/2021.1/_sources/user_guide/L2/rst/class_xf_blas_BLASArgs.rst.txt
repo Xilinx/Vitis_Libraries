@@ -1,0 +1,34 @@
+.. index:: pair: class; xf::blas::BLASArgs
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_args:
+.. _cid-xf::blas::blasargs:
+
+class xf::blas::BLASArgs
+========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "helper.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_args_1af056c6b37f7acdeecd332139bced207d:
+.. _cid-xf::blas::blasargs::~blasargs:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_args_1a4ce97161d9ad6b26c9d7b71242f2f400:
+.. _cid-xf::blas::blasargs::sizeinbytes:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_args_1afaeeb1db1c6687b55641dc15cbcbf800:
+.. _cid-xf::blas::blasargs::asbytearray:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	class BLASArgs
+
+	    // direct descendants
+
+	    class :ref:`xf::blas::GemmArgs<doxid-classxf_1_1blas_1_1_gemm_args>` 
+	    class :ref:`xf::blas::GemvArgs<doxid-classxf_1_1blas_1_1_gemv_args>` 
+

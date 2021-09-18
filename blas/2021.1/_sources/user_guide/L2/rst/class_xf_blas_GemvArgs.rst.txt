@@ -1,0 +1,35 @@
+.. index:: pair: class; xf::blas::GemvArgs
+.. _doxid-classxf_1_1blas_1_1_gemv_args:
+.. _cid-xf::blas::gemvargs:
+
+class xf::blas::GemvArgs
+========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "gemv_host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_gemv_args_1afe31885398d3fda845bc00753f0361ec:
+.. _cid-xf::blas::gemvargs::~gemvargs:
+.. _doxid-classxf_1_1blas_1_1_gemv_args_1a02fe1b1373e7fbb26ee41a319ffa1a3e:
+.. _cid-xf::blas::gemvargs::gemvargs:
+.. _doxid-classxf_1_1blas_1_1_gemv_args_1a2ad417814e7c6aa16ab80668fd5cf176:
+.. _cid-xf::blas::gemvargs::gemvargs-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	class GemvArgs: public :ref:`xf::blas::BLASArgs<doxid-classxf_1_1blas_1_1_b_l_a_s_args>`
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
+

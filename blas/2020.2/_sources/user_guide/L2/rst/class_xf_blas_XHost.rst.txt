@@ -1,0 +1,61 @@
+.. index:: pair: class; xf::blas::XHost
+.. _doxid-classxf_1_1blas_1_1_x_host:
+.. _cid-xf::blas::xhost:
+
+class xf::blas::XHost
+=====================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_x_host_1ad0482aba2612d44b300b1eedf3d34940:
+.. _cid-xf::blas::xhost::xhost:
+.. _doxid-classxf_1_1blas_1_1_x_host_1af3b2b7d5da8fd7ae61f1d38b5cb98383:
+.. _cid-xf::blas::xhost::xhost-2:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a455cd544a4e863ba5e5ef9c1712df23f:
+.. _cid-xf::blas::xhost::addmatrestricted:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a804452593deb12795ee5a97c2a7f08e1:
+.. _cid-xf::blas::xhost::allocmatrestricted:
+.. _doxid-classxf_1_1blas_1_1_x_host_1af1e768a44b2b90d433ccb11d2fa99d39:
+.. _cid-xf::blas::xhost::allocmat:
+.. _doxid-classxf_1_1blas_1_1_x_host_1ada17eee22ed521af37c8a3056b9091ba:
+.. _cid-xf::blas::xhost::setmattofpga:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a65a788cba977dd26f4a04d2821fd36a5:
+.. _cid-xf::blas::xhost::setmattofpgarestricted:
+.. _doxid-classxf_1_1blas_1_1_x_host_1aa3ffebe5275db075a47a5b64785a17e4:
+.. _cid-xf::blas::xhost::addinstr:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a1275be491c985634e5dfe065f1f78440:
+.. _cid-xf::blas::xhost::getmat:
+.. _doxid-classxf_1_1blas_1_1_x_host_1afc9ac25f7fdef8f5a5222d561e101fbd:
+.. _cid-xf::blas::xhost::devicesync:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a9c87d0991c6ac493afa547d2f9617245:
+.. _cid-xf::blas::xhost::getmatmanaged:
+.. _doxid-classxf_1_1blas_1_1_x_host_1aace0b8340c7a0a913b935d137736e034:
+.. _cid-xf::blas::xhost::getmatrestricted:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a796ca715968817b3dbfeeec0c4a0fcc7:
+.. _cid-xf::blas::xhost::getmatbyaddress:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a5a3faab80dcf75e069c3fe960aefe8e2:
+.. _cid-xf::blas::xhost::clearinstrbuf:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a6b6fedbefa819413e286dedd6ea627b1:
+.. _cid-xf::blas::xhost::getaddress:
+.. _doxid-classxf_1_1blas_1_1_x_host_1af073f792b0484a94d2ec618c3e9601a3:
+.. _cid-xf::blas::xhost::freemat:
+.. _doxid-classxf_1_1blas_1_1_x_host_1a9ea0c48d872769e682660c7654386f91:
+.. _cid-xf::blas::xhost::closecontext:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	class XHost
+
+	    // direct descendants
+
+	    class :ref:`xf::blas::BLASHost<doxid-classxf_1_1blas_1_1_b_l_a_s_host>` 
+

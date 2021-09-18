@@ -1,0 +1,84 @@
+.. index:: pair: class; xf::blas::Transp
+.. _doxid-classxf_1_1blas_1_1_transp:
+.. _cid-xf::blas::transp:
+
+template class xf::blas::Transp
+===============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "transp.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_transp_1ae07bc3c50e1c9f7d3098241decec3103:
+.. _cid-xf::blas::transp::ddrwidetype:
+.. _doxid-classxf_1_1blas_1_1_transp_1a58ff866e251bd65c5060e11fcd8b03d4:
+.. _cid-xf::blas::transp::ddrinttype:
+.. _doxid-classxf_1_1blas_1_1_transp_1a8c0483a3c3a1d9a9accab757583129f0:
+.. _cid-xf::blas::transp::ddrstream:
+.. _doxid-classxf_1_1blas_1_1_transp_1add04a4ecd6851effe6dd5041f8b1a410:
+.. _cid-xf::blas::transp::transpargstype:
+.. _doxid-classxf_1_1blas_1_1_transp_1a3a362c758f584b72f94698209c1d778b:
+.. _cid-xf::blas::transp::matformattype:
+.. _doxid-classxf_1_1blas_1_1_transp_1a945d467d5873e51db8baed5c0291614f:
+.. _cid-xf::blas::transp::t_colblocklength:
+.. _doxid-classxf_1_1blas_1_1_transp_1a2423dbd8719d2e62063bb796b77d4e92:
+.. _cid-xf::blas::transp::t_rowblocklength:
+.. _doxid-classxf_1_1blas_1_1_transp_1a52f9dd7a43f3b73418708f8c57690f29:
+.. _cid-xf::blas::transp::processwithreuse:
+.. _doxid-classxf_1_1blas_1_1_transp_1aa481d3abeccfa85acfe5a2356e039b71:
+.. _cid-xf::blas::transp::shuffle_input:
+.. _doxid-classxf_1_1blas_1_1_transp_1ad0d556a455030eec5b92e7217086595e:
+.. _cid-xf::blas::transp::wr_buffer:
+.. _doxid-classxf_1_1blas_1_1_transp_1aa7b224f3e16c3a33029746aeb7dcae8b:
+.. _cid-xf::blas::transp::split:
+.. _doxid-classxf_1_1blas_1_1_transp_1a354b6584b8eb408ac45657a829a60711:
+.. _cid-xf::blas::transp::wr_bufferwithreuse:
+.. _doxid-classxf_1_1blas_1_1_transp_1ac5561895506a791e6ae5856f02ba04b4:
+.. _cid-xf::blas::transp::merge:
+.. _doxid-classxf_1_1blas_1_1_transp_1a15680b993071f4e8aff439207766341f:
+.. _cid-xf::blas::transp::mergewithreuse:
+.. _doxid-classxf_1_1blas_1_1_transp_1a207f0611cbc71f228f4fec51699bace1:
+.. _cid-xf::blas::transp::shuffle_output:
+.. _doxid-classxf_1_1blas_1_1_transp_1ac6d6d590e39be99bce753f137b88ccf8:
+.. _cid-xf::blas::transp::load_matrix:
+.. _doxid-classxf_1_1blas_1_1_transp_1a0ec120e062069a83b4c093c39d91d9d1:
+.. _cid-xf::blas::transp::store_matrix:
+.. _doxid-classxf_1_1blas_1_1_transp_1a86d553d5b39252d40cb562a013ca00e2:
+.. _cid-xf::blas::transp::store_matrixgva:
+.. _doxid-classxf_1_1blas_1_1_transp_1a1a90b88a80db2b9d95c38deaf54fa9d6:
+.. _cid-xf::blas::transp::transp_matrix_blocks:
+.. _doxid-classxf_1_1blas_1_1_transp_1a6af40d0c2db89ddcd0b4427f146dff32:
+.. _cid-xf::blas::transp::transp_gemva_blocks:
+.. _doxid-classxf_1_1blas_1_1_transp_1a4cd1dc15940c91e508d51e6c36f8cec8:
+.. _cid-xf::blas::transp::runtransp:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_FloatType,
+	    unsigned int t_DdrWidth,
+	    unsigned int t_colMemWords,
+	    unsigned int t_rowMemWords
+	    >
+	class Transp
+
+	// typedefs
+
+	typedef WideType <t_FloatType, t_DdrWidth> DdrWideType
+	typedef DdrWideType::t_TypeInt DdrIntType
+	typedef hls::stream <typename WideType <t_FloatType, t_DdrWidth>::t_TypeInt> DdrStream
+	typedef TranspArgs TranspArgsType
+	typedef DdrMatrixShape::FormatType MatFormatType
+
+	// fields
+
+	static const unsigned short t_colBlockLength
+	static const unsigned short t_rowBlockLength
+

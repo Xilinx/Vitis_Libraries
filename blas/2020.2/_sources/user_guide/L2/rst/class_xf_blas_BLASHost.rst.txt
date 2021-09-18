@@ -1,0 +1,46 @@
+.. index:: pair: class; xf::blas::BLASHost
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host:
+.. _cid-xf::blas::blashost:
+
+class xf::blas::BLASHost
+========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_1ad6ca472cb6b45e8abedc86b48e3dc089:
+.. _cid-xf::blas::blashost::blashost:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_1a78661702b4f6792c7df678ece5760971:
+.. _cid-xf::blas::blashost::~blashost:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_1a9c54613cb1fc330706c35cdff4bc9ecd:
+.. _cid-xf::blas::blashost::blashost-2:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_1a32f9ac059db2dc6edffa6d3504ba14e0:
+.. _cid-xf::blas::blashost::blashost-3:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_1a2011d9dd8f40cd46ba5d7d4caef2b751:
+.. _cid-xf::blas::blashost::execute:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_1acffd85459afbe457bce475878bbfa12d:
+.. _cid-xf::blas::blashost::enablerun:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	class BLASHost: public :ref:`xf::blas::XHost<doxid-classxf_1_1blas_1_1_x_host>`
+
+	    // direct descendants
+
+	    class :ref:`xf::blas::GEMMHost<doxid-classxf_1_1blas_1_1_g_e_m_m_host>` 
+	    class :ref:`xf::blas::GEMVHost<doxid-classxf_1_1blas_1_1_g_e_m_v_host>` 
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
+

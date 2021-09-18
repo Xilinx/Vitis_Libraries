@@ -1,0 +1,87 @@
+.. index:: pair: class; xf::blas::GemmArgs
+.. _doxid-classxf_1_1blas_1_1_gemm_args:
+.. _cid-xf::blas::gemmargs:
+
+class xf::blas::GemmArgs
+========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "gemm_host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a73226674fb4b0df9432baa57f955b351:
+.. _cid-xf::blas::gemmargs::m_postscaleval:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a92b39e662aa916bfd4500de82ecd253f:
+.. _cid-xf::blas::gemmargs::m_optype:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a531f3f7242468fc776fd376f484e425d:
+.. _cid-xf::blas::gemmargs::m_aoffset:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a105d54202722bf51c12288cca6660fd3:
+.. _cid-xf::blas::gemmargs::m_boffset:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a2cea8bb7546c80c3421a26c928439b46:
+.. _cid-xf::blas::gemmargs::m_coffset:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a5ae8cf14f35a630361038fc55e390492:
+.. _cid-xf::blas::gemmargs::m_xoffset:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a9db57868aa9243c8da96e1104e2253f3:
+.. _cid-xf::blas::gemmargs::m_m:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a4a878c50717009cca19dcf5b45b36247:
+.. _cid-xf::blas::gemmargs::m_k:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a2145471692374ce33bc58324f993dfa6:
+.. _cid-xf::blas::gemmargs::m_n:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a9d869c291238fbfcfe1568d8a4707bf5:
+.. _cid-xf::blas::gemmargs::m_lda:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a5eaf10cbff7bfd3e5c10711488a38124:
+.. _cid-xf::blas::gemmargs::m_ldb:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a0765fba11be0f26df000863e6964bde0:
+.. _cid-xf::blas::gemmargs::m_ldc:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1aedf74bc46bbb866e39dd5ff169bd2043:
+.. _cid-xf::blas::gemmargs::m_ldx:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1ab372004d2119ea21d6b358ebb31d0d0a:
+.. _cid-xf::blas::gemmargs::m_postscaleval-2:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a2fd8b73e67219b522bdde42b8e6147af:
+.. _cid-xf::blas::gemmargs::m_empty:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1acc0eee5796c22081c2415e96bf39c582:
+.. _cid-xf::blas::gemmargs::~gemmargs:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a6e453cc87208f7eb16b1fb22e23e153f:
+.. _cid-xf::blas::gemmargs::gemmargs:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1ab215a0290c16d4db6f0afe49398015e7:
+.. _cid-xf::blas::gemmargs::gemmargs-2:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1ab4d6a4c3b1acffa12790bad77da145eb:
+.. _cid-xf::blas::gemmargs::sizeinbytes:
+.. _doxid-classxf_1_1blas_1_1_gemm_args_1a5664a995a239009ee6246ed1bb468192:
+.. _cid-xf::blas::gemmargs::asbytearray:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	class GemmArgs: public :ref:`xf::blas::BLASArgs<doxid-classxf_1_1blas_1_1_b_l_a_s_args>`
+
+	// fields
+
+	:ref:`m_GemmArgs<doxid-classxf_1_1blas_1_1_gemm_args_1a9d7e9ef1e796ad2d71268dc6230d2aa6>` m_postScaleVal
+	int m_optype
+	unsigned int m_aOffset
+	unsigned int m_bOffset
+	unsigned int m_cOffset
+	unsigned int m_xOffset
+	unsigned int m_m
+	unsigned int m_k
+	unsigned int m_n
+	unsigned int m_lda
+	unsigned int m_ldb
+	unsigned int m_ldc
+	unsigned int m_ldx
+	int m_postScaleVal
+	int m_empty[3]
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
+
