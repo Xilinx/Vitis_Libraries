@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta content="GESVDJ, Alveo, Lapack, Jacobi, matrix" name="keywords" />
+<meta content="The hardware resources and performance for double and float datatype for symmetric matrix (GESVDJ)." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Header information provided by Emily-->
+    <meta name="Language" content="en">
+    <meta name="Location" content="us">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+  
+  <title>Singular Value Decomposition for symmetric matrix (GESVDJ) &mdash; Vitis Solver Library 2019.2 release documentation</title>
+  
+<!-- Header information provided by Emily-->
+    <meta name="apple-itunes-app" content="app-id=1063287962">
+    <meta name="google-play-app" content="app-id=com.marketing.xilinxgo">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://kit.fontawesome.com/d3dd8c60ed.js"></script>
+    
+   
+    <link rel="stylesheet" href="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.css" type="text/css" />
+    
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css">
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Singular Value Decomposition for general matrix (GESVJ)" href="gesvj.html" />
+    <link rel="prev" title="Tridiagonal Linear Solver (GTSV)" href="gtsv.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="xilinx-bs3">
+    <noindex>
+        <header data-component="header">
+            <nav class="navbar navbar-default">
+                <div class="container main-nav">
+                    <div class="row">
+                        <div class="col-xs-5 col-sm-2 logo-column">
+                            <div class="logo">
+                                <a href="https://www.xilinx.com/">
+                                    <img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc" />
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-8 navbar-column">
+                            <div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+                                <ul class="nav navbar-nav nav-justified">
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://developer.xilinx.com/">
+                                            Developers
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://www.xilinx.com/support.html">
+                                            Support
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://forums.xilinx.com/">
+                                            Forums
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mini-nav col-sm-2">
+                            <button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </noindex>
+</div>
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Solver Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Library Overview</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../L2.html">L2 Module User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../benchmark/benchmark.html">Quality and Performance</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gtsv.html">Tridiagonal Linear Solver (GTSV)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Singular Value Decomposition for symmetric matrix (GESVDJ)</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gesvj.html">Singular Value Decomposition for general matrix (GESVJ)</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vitis Solver Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../benchmark/benchmark.html">Quality and Performance</a> &raquo;</li>
+        
+      <li>Singular Value Decomposition for symmetric matrix (GESVDJ)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="singular-value-decomposition-for-symmetric-matrix-gesvdj">
+<h1>Singular Value Decomposition for symmetric matrix (GESVDJ)<a class="headerlink" href="#singular-value-decomposition-for-symmetric-matrix-gesvdj" title="Permalink to this headline">¶</a></h1>
+<p>The hardware resources and performance for double and float datatype gesvdj are listed in <a class="reference internal" href="#tabsvddouble"><span class="std std-numref">Table 2</span></a> and <a class="reference internal" href="#tabsvdfloat"><span class="std std-numref">Table 3</span></a>.</p>
+<span id="tabsvddouble"></span><table border="1" class="docutils align-center" id="id1">
+<caption><span class="caption-number">Table 2 </span><span class="caption-text">double Type GESVDJ performance table</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="14%" />
+<col width="9%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="11%" />
+<col width="9%" />
+<col width="20%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Matrix Size</td>
+<td>Unroll</td>
+<td>URAM</td>
+<td>BRAM</td>
+<td>DSP</td>
+<td>Register</td>
+<td>LUT</td>
+<td>Kernel time (ms)</td>
+<td>Frequency(MHz)</td>
+</tr>
+<tr class="row-even"><td>8x8</td>
+<td>4</td>
+<td>20</td>
+<td>6</td>
+<td>216</td>
+<td>46245</td>
+<td>39365</td>
+<td>0.0711</td>
+<td>250</td>
+</tr>
+<tr class="row-odd"><td>512x512</td>
+<td>8</td>
+<td>128</td>
+<td>333</td>
+<td>408</td>
+<td>120837</td>
+<td>115121</td>
+<td>2100.833</td>
+<td>208.3</td>
+</tr>
+</tbody>
+</table>
+<span id="tabsvdfloat"></span><table border="1" class="docutils align-center" id="id2">
+<caption><span class="caption-number">Table 3 </span><span class="caption-text">float Type GESVDJ performance table</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="14%" />
+<col width="9%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="11%" />
+<col width="9%" />
+<col width="20%" />
+<col width="18%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Matrix Size</td>
+<td>Unroll</td>
+<td>URAM</td>
+<td>BRAM</td>
+<td>DSP</td>
+<td>Register</td>
+<td>LUT</td>
+<td>Kernel time (ms)</td>
+<td>Frequency(MHz)</td>
+</tr>
+<tr class="row-even"><td>8x8</td>
+<td>4</td>
+<td>20</td>
+<td>4</td>
+<td>114</td>
+<td>23647</td>
+<td>18529</td>
+<td>0.0533</td>
+<td>250</td>
+</tr>
+<tr class="row-odd"><td>512x512</td>
+<td>8</td>
+<td>128</td>
+<td>307</td>
+<td>210</td>
+<td>65569</td>
+<td>65003</td>
+<td>1687.274</td>
+<td>208.3</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Board: <cite>Xilinx Alveo U250 Data Center Accelerator Card</cite></p>
+</div>
+<p>The accuracy of GESVDJ implementation has been verified with Lapack dgesvd (QR based SVD) and dgesvj (Jacobi SVD) functions.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">The unroll factor is limited by 2 factors, the matrix size and URAM port. The maximum unroll factor should be less than half of matrix size, and <span class="math notranslate nohighlight">\(2 \times {Unroll}^{2}\)</span> should also be less than available URAM on board. Besides, unroll factor can only be the factorization of 2</p>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="gesvj.html" class="btn btn-neutral float-right" title="Singular Value Decomposition for general matrix (GESVJ)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gtsv.html" class="btn btn-neutral float-left" title="Tridiagonal Linear Solver (GTSV)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p>
+        
+        &copy; Copyright 2019, Xilinx
+
+    </p>
+  </div>
+<!--
+    
+    
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+-->
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

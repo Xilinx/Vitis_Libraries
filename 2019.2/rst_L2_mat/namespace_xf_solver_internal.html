@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Header information provided by Emily-->
+    <meta name="Language" content="en">
+    <meta name="Location" content="us">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+  
+  <title>namespace internal &mdash; Vitis Solver Library 2019.2 release documentation</title>
+  
+<!-- Header information provided by Emily-->
+    <meta name="apple-itunes-app" content="app-id=1063287962">
+    <meta name="google-play-app" content="app-id=com.marketing.xilinxgo">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://kit.fontawesome.com/d3dd8c60ed.js"></script>
+    
+   
+    <link rel="stylesheet" href="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.css" type="text/css" />
+    
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css">
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="xilinx-bs3">
+    <noindex>
+        <header data-component="header">
+            <nav class="navbar navbar-default">
+                <div class="container main-nav">
+                    <div class="row">
+                        <div class="col-xs-5 col-sm-2 logo-column">
+                            <div class="logo">
+                                <a href="https://www.xilinx.com/">
+                                    <img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc" />
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-8 navbar-column">
+                            <div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+                                <ul class="nav navbar-nav nav-justified">
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://developer.xilinx.com/">
+                                            Developers
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://www.xilinx.com/support.html">
+                                            Support
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://forums.xilinx.com/">
+                                            Forums
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mini-nav col-sm-2">
+                            <button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </noindex>
+</div>
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Solver Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Library Overview</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/L2.html">L2 Module User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark.html">Quality and Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Solver Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>namespace internal</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="namespace-internal">
+<span id="cid-xf-solver-internal"></span><span id="doxid-namespacexf-1-1solver-1-1internal"></span><span id="index-0"></span><h1>namespace internal<a class="headerlink" href="#namespace-internal" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-solver-internal-cholesky-core">
+<span id="doxid-namespacexf-1-1solver-1-1internal-1a75ba2bf52fd98c6cdbc0c27ae1a14877"></span><span id="cid-xf-solver-internal-chol-col-wrapper"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1afa65ea570adec57819b45d90c2b064bd"></span><span id="cid-xf-solver-internal-chol-jj"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1ac6e51b75c4355f8a90e0974a982779a3"></span><span id="cid-xf-solver-internal-chol-col"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1ab4887555d40c2e2b1c78e73976ea9c32"></span><span id="cid-xf-solver-internal-getrf-nopivot-core"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a893b086163868745116c1a13c8a4c5ca"></span><span id="cid-xf-solver-internal-rowupdate"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1aa7fa46af494d5848625778515f85d8f6"></span><span id="cid-xf-solver-internal-update-av"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a9b9f081f0cef1df085a670b7b0e43808"></span><span id="cid-xf-solver-internal-update-v"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a8d5fdee99a09aedcab394b72ed5fb519"></span><span id="cid-xf-solver-internal-update-a"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1aec7b9038db40f6d1759691e26304f41a"></span><span id="cid-xf-solver-internal-svd-and-conv"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a32c48bb9af32b234a539bd4137134b78"></span><span id="cid-xf-solver-internal-jacobi-rotation-2x2-2"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a53605494a76bd3399866aab6f8b94c23"></span><span id="cid-xf-solver-internal-jacobi-svd"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a7d478128921a3dedff0cf7a9f533dc32"></span><span id="cid-xf-solver-internal-funcdataflow"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a334605a19e2b0c7469eaa9c11ec54788"></span><span id="cid-xf-solver-internal-unrollrow"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a3d88159b55830f71101cab45eccac82a"></span><span id="cid-xf-solver-internal-unrollcol"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a6d652326ee528ec7c65cc90dad2ce2e1"></span><span id="cid-xf-solver-internal-genblockmat"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1ab59a13abf1abdb093f910a7e398e37c3"></span><span id="cid-xf-solver-internal-swaptwo"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a1ca13651365e8bea947adbe881fa58ee"></span><span id="cid-xf-solver-internal-jacobi-rotation-2x2"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a8f2c74edab5dcce8c56064e2f7667d55"></span><span id="cid-xf-solver-internal-qrf"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1ad59a4e8fb17a54a2a8398c523565da29"></span><span id="cid-xf-solver-internal-update"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1ad8102ac3d3d3c563e75fefd413817680"></span><span id="cid-xf-solver-internal-updatecolumns"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1af55a4c2fbe3ff53869bc9ccb05b50c02"></span><span></span><span class="c1">// unions</span>
+
+<span class="k">union</span> <a class="reference internal" href="union_xf_solver_internal_double_cast_new.html#doxid-unionxf-1-1solver-1-1internal-1-1double-cast-new"><span class="std std-ref">double_cast_new</span></a><span></span>
+<span class="k">union</span> <a class="reference internal" href="union_xf_solver_internal_double_casting.html#doxid-unionxf-1-1solver-1-1internal-1-1double-casting"><span class="std std-ref">double_casting</span></a><span></span>
+
+<span class="c1">// classes</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <a class="reference internal" href="class_xf_solver_internal_Trait.html#doxid-classxf-1-1solver-1-1internal-1-1-trait"><span class="std std-ref">Trait</span></a><span></span>
+
+<span class="k">template</span> <span class="o">&lt;&gt;</span>
+<span class="k">class</span> <a class="reference internal" href="class_xf_solver_internal_Trait-2.html#doxid-classxf-1-1solver-1-1internal-1-1-trait-3-01double-01-4"><span class="std std-ref">Trait &lt;double&gt;</span></a><span></span>
+
+<span class="k">template</span> <span class="o">&lt;&gt;</span>
+<span class="k">class</span> <a class="reference internal" href="class_xf_solver_internal_Trait-3.html#doxid-classxf-1-1solver-1-1internal-1-1-trait-3-01float-01-4"><span class="std std-ref">Trait &lt;float&gt;</span></a>
+</pre>
+<div class="section" id="calc-converge">
+<span id="cid-xf-solver-internal-calc-converge"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1aaad1b1f9b454fea8f64a604d56ebd667"></span><h2>calc_converge<a class="headerlink" href="#calc-converge" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;MatrixDecomposition/gesvj.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">calc_converge</span> <span class="p">(</span>
+    <span class="n">T</span> <span class="n">alpha</span><span class="p">,</span>
+    <span class="n">T</span> <span class="n">beta</span><span class="p">,</span>
+    <span class="n">T</span> <span class="n">gamma</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">conv_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>calc the converge of next sweep</p>
+</div>
+<div class="section" id="read-and-gen-2x2">
+<span id="cid-xf-solver-internal-read-and-gen-2x2"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a447445e5604edde6b38182fe3f892e81"></span><h2>read_and_gen_2x2<a class="headerlink" href="#read-and-gen-2x2" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;MatrixDecomposition/gesvj.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NRMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">MCU</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ACUM</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">read_and_gen_2x2</span> <span class="p">(</span>
+    <span class="n">T</span> <span class="n">matA</span> <span class="p">[</span><span class="n">MCU</span><span class="p">][</span><span class="n">ACUM</span><span class="p">][</span><span class="n">NCMAX</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">A_i</span> <span class="p">[</span><span class="n">MCU</span><span class="p">][</span><span class="n">ACUM</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">A_j</span> <span class="p">[</span><span class="n">MCU</span><span class="p">][</span><span class="n">ACUM</span><span class="p">],</span>
+    <span class="kt">int</span> <span class="n">m</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">col_i</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">col_j</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">alpha_strm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">beta_strm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">gamma_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>Read two columns of A into two seperate Bram.</p>
+</div>
+<div class="section" id="read-v-2cols">
+<span id="cid-xf-solver-internal-read-v-2cols"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1a6216ac2686f5051779baadef57f76341"></span><h2>read_V_2cols<a class="headerlink" href="#read-v-2cols" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;MatrixDecomposition/gesvj.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ACUN</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">read_V_2cols</span> <span class="p">(</span>
+    <span class="n">T</span> <span class="n">matV</span> <span class="p">[</span><span class="n">NCU</span><span class="p">][</span><span class="n">ACUN</span><span class="p">][</span><span class="n">NCMAX</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">V_i</span> <span class="p">[</span><span class="n">NCU</span><span class="p">][</span><span class="n">ACUN</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">V_j</span> <span class="p">[</span><span class="n">NCU</span><span class="p">][</span><span class="n">ACUN</span><span class="p">],</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">col_i</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">col_j</span>
+    <span class="p">)</span>
+</pre>
+<p>Read two columns (i and j) of V into two seperate Bram V_i[N] and V_j[N].</p>
+</div>
+<div class="section" id="read-to-2cols">
+<span id="cid-xf-solver-internal-read-to-2cols"></span><span id="doxid-namespacexf-1-1solver-1-1internal-1aa4917299c2fd454532267908e8f76944"></span><h2>read_to_2cols<a class="headerlink" href="#read-to-2cols" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;MatrixDecomposition/gesvj.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NRMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">MCU</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ACUM</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ACUN</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">read_to_2cols</span> <span class="p">(</span>
+    <span class="n">T</span> <span class="n">matA</span> <span class="p">[</span><span class="n">MCU</span><span class="p">][</span><span class="n">ACUM</span><span class="p">][</span><span class="n">NCMAX</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">matV</span> <span class="p">[</span><span class="n">NCU</span><span class="p">][</span><span class="n">ACUN</span><span class="p">][</span><span class="n">NCMAX</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">A_i</span> <span class="p">[</span><span class="n">MCU</span><span class="p">][</span><span class="n">ACUM</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">A_j</span> <span class="p">[</span><span class="n">MCU</span><span class="p">][</span><span class="n">ACUM</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">V_i</span> <span class="p">[</span><span class="n">NCU</span><span class="p">][</span><span class="n">ACUN</span><span class="p">],</span>
+    <span class="n">T</span> <span class="n">V_j</span> <span class="p">[</span><span class="n">NCU</span><span class="p">][</span><span class="n">ACUN</span><span class="p">],</span>
+    <span class="kt">int</span> <span class="n">m</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">col_i</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">col_j</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">alpha_strm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">beta_strm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">gamma_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>read 2 columns(i and j) of data from A matrix and V matrix</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p>
+        
+        &copy; Copyright 2019, Xilinx
+
+    </p>
+  </div>
+<!--
+    
+    
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+-->
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

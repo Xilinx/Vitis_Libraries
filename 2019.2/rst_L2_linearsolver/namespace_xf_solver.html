@@ -1,0 +1,644 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Header information provided by Emily-->
+    <meta name="Language" content="en">
+    <meta name="Location" content="us">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+  
+  <title>namespace solver &mdash; Vitis Solver Library 2019.2 release documentation</title>
+  
+<!-- Header information provided by Emily-->
+    <meta name="apple-itunes-app" content="app-id=1063287962">
+    <meta name="google-play-app" content="app-id=com.marketing.xilinxgo">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://kit.fontawesome.com/d3dd8c60ed.js"></script>
+    
+   
+    <link rel="stylesheet" href="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.css" type="text/css" />
+    
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css">
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="xilinx-bs3">
+    <noindex>
+        <header data-component="header">
+            <nav class="navbar navbar-default">
+                <div class="container main-nav">
+                    <div class="row">
+                        <div class="col-xs-5 col-sm-2 logo-column">
+                            <div class="logo">
+                                <a href="https://www.xilinx.com/">
+                                    <img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc" />
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-8 navbar-column">
+                            <div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+                                <ul class="nav navbar-nav nav-justified">
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://developer.xilinx.com/">
+                                            Developers
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://www.xilinx.com/support.html">
+                                            Support
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://forums.xilinx.com/">
+                                            Forums
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mini-nav col-sm-2">
+                            <button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </noindex>
+</div>
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Solver Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Library Overview</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/L2.html">L2 Module User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark.html">Quality and Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Solver Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>namespace solver</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="namespace-solver">
+<span id="cid-xf-solver"></span><span id="doxid-namespacexf-1-1solver"></span><span id="index-0"></span><h1>namespace solver<a class="headerlink" href="#namespace-solver" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="c1">// namespaces</span>
+
+<span class="k">namespace</span> <a class="reference internal" href="../rst_L2_mat/namespace_xf_solver_internal.html#doxid-namespacexf-1-1solver-1-1internal"><span class="std std-ref">xf::solver::internal</span></a><span></span>
+<span class="k">namespace</span> <a class="reference internal" href="namespace_xf_solver_internal_gelinear.html#doxid-namespacexf-1-1solver-1-1internal-gelinear"><span class="std std-ref">xf::solver::internal_gelinear</span></a><span></span>
+<span class="k">namespace</span> <a class="reference internal" href="namespace_xf_solver_internal_gemi.html#doxid-namespacexf-1-1solver-1-1internal-gemi"><span class="std std-ref">xf::solver::internal_gemi</span></a><span></span>
+<span class="k">namespace</span> <a class="reference internal" href="namespace_xf_solver_internal_polinear.html#doxid-namespacexf-1-1solver-1-1internal-polinear"><span class="std std-ref">xf::solver::internal_polinear</span></a><span></span>
+<span class="k">namespace</span> <a class="reference internal" href="namespace_xf_solver_internal_pomi.html#doxid-namespacexf-1-1solver-1-1internal-pomi"><span class="std std-ref">xf::solver::internal_pomi</span></a><span></span>
+<span class="k">namespace</span> <a class="reference internal" href="namespace_xf_solver_internal_trtrs.html#doxid-namespacexf-1-1solver-1-1internal-trtrs"><span class="std std-ref">xf::solver::internal_trtrs</span></a>
+</pre>
+<div class="section" id="gelinearsolver">
+<span id="cid-xf-solver-gelinearsolver"></span><span id="doxid-namespacexf-1-1solver-1a4380dbd7992efd603fe32bf2a3415df9"></span><h2>gelinearsolver<a class="headerlink" href="#gelinearsolver" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;LinearSolver/gelinearsolver.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">gelinearsolver</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">A</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">b</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">B</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">lda</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ldb</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">info</span>
+    <span class="p">)</span>
+</pre>
+<p>This function solves a system of linear equation with general matrix along with multiple right-hand side vector</p>
+<div class="math notranslate nohighlight">
+\[\begin{equation*} {Ax=B}\end{equation*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is a dense general matrix of size <span class="math notranslate nohighlight">\(n \times n\)</span> , <span class="math notranslate nohighlight">\(x\)</span> is a vector need to be computed, and <span class="math notranslate nohighlight">\(B\)</span> is input vector.</p>
+<p>The maximum matrix size supported in FPGA is templated by NMAX.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>T</td>
+<td>data type (support float and double)</td>
+</tr>
+<tr class="row-even"><td>NMAX</td>
+<td>maximum number of rows/columns of input matrix</td>
+</tr>
+<tr class="row-odd"><td>NCU</td>
+<td>number of computation unit</td>
+</tr>
+<tr class="row-even"><td>n</td>
+<td>number of rows/cols of matrix A</td>
+</tr>
+<tr class="row-odd"><td>A</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(n \times n\)</span></td>
+</tr>
+<tr class="row-even"><td>b</td>
+<td>number of columns of matrix B</td>
+</tr>
+<tr class="row-odd"><td>B</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(b \times n\)</span> , and overwritten by the output matrix x</td>
+</tr>
+<tr class="row-even"><td>lda</td>
+<td>leading dimention of input matrix A</td>
+</tr>
+<tr class="row-odd"><td>ldb</td>
+<td>leading dimention of input matrix B</td>
+</tr>
+<tr class="row-even"><td>info</td>
+<td>output info (unused)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gematrixinverse">
+<span id="cid-xf-solver-gematrixinverse"></span><span id="doxid-namespacexf-1-1solver-1a330738ad0c91400601fc9029bbe18d70"></span><h2>gematrixinverse<a class="headerlink" href="#gematrixinverse" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;LinearSolver/gematrixinverse.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">gematrixinverse</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">m</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">A</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">lda</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">info</span>
+    <span class="p">)</span>
+</pre>
+<p>This function computes the inverse matrix of <span class="math notranslate nohighlight">\(A\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{equation*} {A}^{-1}\end{equation*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is a dense general matrix of size <span class="math notranslate nohighlight">\(m \times m\)</span> . The maximum matrix size supported in FPGA is templated by NMAX.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>T</td>
+<td>data type (support float and double)</td>
+</tr>
+<tr class="row-even"><td>NMAX</td>
+<td>maximum number of rows/columns of input matrix</td>
+</tr>
+<tr class="row-odd"><td>NCU</td>
+<td>number of computation unit</td>
+</tr>
+<tr class="row-even"><td>m</td>
+<td>number of rows/cols of matrix A</td>
+</tr>
+<tr class="row-odd"><td>A</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(n \times n\)</span></td>
+</tr>
+<tr class="row-even"><td>lda</td>
+<td>leading dimention of input matrix A</td>
+</tr>
+<tr class="row-odd"><td>info</td>
+<td>output info (unused)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gtsv">
+<span id="cid-xf-solver-gtsv"></span><span id="doxid-namespacexf-1-1solver-1ab2a500c3d35adb231e4fbdfe7b17932a"></span><h2>gtsv<a class="headerlink" href="#gtsv" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;LinearSolver/gtsv_pcr.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">NMAX</span><span class="p">,</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">NCU</span>
+    <span class="o">&gt;</span>
+<span class="kt">int</span> <span class="n">gtsv</span> <span class="p">(</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">matDiagLow</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">matDiag</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">matDiagUp</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">rhs</span>
+    <span class="p">)</span>
+</pre>
+<p>Tri-diagonal linear solver. Compute solution to linear system with a tridiagonal matrix. Parallel Cyclic Reduction method.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>T</td>
+<td>data type (support float and double)</td>
+</tr>
+<tr class="row-even"><td>NMAX</td>
+<td>matrix size</td>
+</tr>
+<tr class="row-odd"><td>NCU</td>
+<td>number of compute units</td>
+</tr>
+<tr class="row-even"><td>matDiagLow</td>
+<td>lower diagonal of matrix</td>
+</tr>
+<tr class="row-odd"><td>matDiag</td>
+<td>diagonal of matrix</td>
+</tr>
+<tr class="row-even"><td>matDiagUp</td>
+<td>upper diagonal of matrix</td>
+</tr>
+<tr class="row-odd"><td>rhs</td>
+<td>right-hand side</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="polinearsolver">
+<span id="cid-xf-solver-polinearsolver"></span><span id="doxid-namespacexf-1-1solver-1ada1d0e10d79095ed587f0714b7d3b1d1"></span><h2>polinearsolver<a class="headerlink" href="#polinearsolver" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;LinearSolver/polinearsolver.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">polinearsolver</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">A</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">b</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">B</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">lda</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ldb</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">info</span>
+    <span class="p">)</span>
+</pre>
+<p>This function solves a system of linear equation with symmetric positive definite (SPD) matrix along with multiple right-hand side vector</p>
+<div class="math notranslate nohighlight">
+\[\begin{equation*} {Ax=B}\end{equation*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is a dense SPD triangular matrix of size <span class="math notranslate nohighlight">\(m \times m\)</span> , <span class="math notranslate nohighlight">\(x\)</span> is a vector need to be computed, and <span class="math notranslate nohighlight">\(B\)</span> is input vector.</p>
+<p>The maximum matrix size supported in FPGA is templated by NMAX.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>T</td>
+<td>data type (support float and double)</td>
+</tr>
+<tr class="row-even"><td>NMAX</td>
+<td>maximum number of rows/columns of input matrix</td>
+</tr>
+<tr class="row-odd"><td>NCU</td>
+<td>number of computation unit</td>
+</tr>
+<tr class="row-even"><td>n</td>
+<td>number of rows/cols of matrix A</td>
+</tr>
+<tr class="row-odd"><td>A</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(n \times n\)</span></td>
+</tr>
+<tr class="row-even"><td>b</td>
+<td>number of columns of matrix B</td>
+</tr>
+<tr class="row-odd"><td>B</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(b \times n\)</span> , and overwritten by the output matrix x</td>
+</tr>
+<tr class="row-even"><td>lda</td>
+<td>leading dimention of input matrix A</td>
+</tr>
+<tr class="row-odd"><td>ldb</td>
+<td>leading dimention of input matrix B</td>
+</tr>
+<tr class="row-even"><td>info</td>
+<td>output info (unused)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pomatrixinverse">
+<span id="cid-xf-solver-pomatrixinverse"></span><span id="doxid-namespacexf-1-1solver-1a3b929dda3eb23cf26506eae627591870"></span><h2>pomatrixinverse<a class="headerlink" href="#pomatrixinverse" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;LinearSolver/pomatrixinverse.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">pomatrixinverse</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">m</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">A</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">lda</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">info</span>
+    <span class="p">)</span>
+</pre>
+<p>This function computes the inverse matrix of <span class="math notranslate nohighlight">\(A\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{equation*} {A}^{-1}\end{equation*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is a dense symmetric positive-definite matrix of size <span class="math notranslate nohighlight">\(m \times m\)</span> . The maximum matrix size supported in FPGA is templated by NMAX.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>T</td>
+<td>data type (support float and double)</td>
+</tr>
+<tr class="row-even"><td>NMAX</td>
+<td>maximum number of rows/columns of input matrix</td>
+</tr>
+<tr class="row-odd"><td>NCU</td>
+<td>number of computation unit</td>
+</tr>
+<tr class="row-even"><td>m</td>
+<td>number of rows/cols of matrix A</td>
+</tr>
+<tr class="row-odd"><td>A</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(n \times n\)</span></td>
+</tr>
+<tr class="row-even"><td>lda</td>
+<td>leading dimention of input matrix A</td>
+</tr>
+<tr class="row-odd"><td>info</td>
+<td>output info (unused)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="trtrs">
+<span id="cid-xf-solver-trtrs"></span><span id="doxid-namespacexf-1-1solver-1a807c039392d453610093336dbb4b0b19"></span><h2>trtrs<a class="headerlink" href="#trtrs" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;LinearSolver/trtrs.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">T</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NMAX</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">NCU</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">trtrs</span> <span class="p">(</span>
+    <span class="kt">char</span> <span class="n">uplo</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">m</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">A</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">b</span><span class="p">,</span>
+    <span class="n">T</span><span class="o">*</span> <span class="n">B</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">lda</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ldb</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">info</span>
+    <span class="p">)</span>
+</pre>
+<p>This function solves a system of linear equation with triangular coefficient matrix along with multiple right-hand side vector</p>
+<div class="math notranslate nohighlight">
+\[\begin{equation*} {Ax=B}\end{equation*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is a dense lower or upper triangular matrix of size <span class="math notranslate nohighlight">\(m \times m\)</span> , <span class="math notranslate nohighlight">\(x\)</span> is a vector need to be computed, and <span class="math notranslate nohighlight">\(B\)</span> is input vector.</p>
+<p>The maximum matrix size supported in FPGA is templated by NMAX.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>T</td>
+<td>data type (support float and double)</td>
+</tr>
+<tr class="row-even"><td>NMAX</td>
+<td>maximum number of rows/columns of input matrix</td>
+</tr>
+<tr class="row-odd"><td>NCU</td>
+<td>number of computation unit</td>
+</tr>
+<tr class="row-even"><td>m</td>
+<td>number of rows/cols of matrix A</td>
+</tr>
+<tr class="row-odd"><td>A</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(n \times n\)</span></td>
+</tr>
+<tr class="row-even"><td>b</td>
+<td>number of columns of matrix B</td>
+</tr>
+<tr class="row-odd"><td>B</td>
+<td>input matrix of size <span class="math notranslate nohighlight">\(b \times n\)</span> , and overwritten by the output matrix x</td>
+</tr>
+<tr class="row-even"><td>lda</td>
+<td>leading dimention of input matrix A</td>
+</tr>
+<tr class="row-odd"><td>ldb</td>
+<td>leading dimention of input matrix B</td>
+</tr>
+<tr class="row-even"><td>info</td>
+<td>output info (unused)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p>
+        
+        &copy; Copyright 2019, Xilinx
+
+    </p>
+  </div>
+<!--
+    
+    
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+-->
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
