@@ -1,0 +1,1268 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/header-footer.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="WriteToDataFrame" href="writeToDataFrame.html" />
+    <link rel="prev" title="Internals of svm_predict" href="svm_predict.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search"
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search"
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Data Analytics Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2020.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Vitis Data Analytics Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design_flows.html">Design Flows</a></li>
+</ul>
+<p class="caption"><span class="caption-text">L1 User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../hw_guide.html">L1 Module User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../l1_class.html">Hardware Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l1_func.html">Hardware Functions in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::classification</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l1_func.html#hardware-functions-in-xf-data-analytics-clustering">Hardware Functions in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::clustering</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l1_func.html#hardware-functions-in-xf-data-analytics-regression">Hardware Functions in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::regression</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l1_func.html#hardware-functions-in-xf-data-analytics-text">Hardware Functions in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::text</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l1_func.html#hardware-functions-in-xf-data-analytics-dataframe">Hardware Functions in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::dataframe</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l1_func.html#software-c-functions">Software C Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../internals.html">Design Internals</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dt.html">Decision Tree (Predict)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kMeansPredict.html">K-Means (Predict)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linearRegression.html">Linear Regression (Predict)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="logisticRegression.html">Logistic Regression (Predict)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="naive_bayes.html">Multinomial Naive Bayes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svm_predict.html">Internals of svm_predict</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Regular Expression Virtual Machine (regex-VM)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#user-guide">User Guide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implemention">Implemention</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#profiling">Profiling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="writeToDataFrame.html">WriteToDataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="readFromDataFrame.html">ReadFromDataframe</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">L2 User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L2/l2_guide.html">L2 Kernel User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">L3 User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L3/L3.html">L3 Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmark/result.html">Benchmark Result</a></li>
+</ul>
+
+            
+			
+				<h3>Versions</h3>
+				<ul>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				</ul>
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vitis Data Analytics Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../hw_guide.html">L1 Module User Guide</a> &raquo;</li>
+        
+          <li><a href="../internals.html">Design Internals</a> &raquo;</li>
+        
+      <li>Regular Expression Virtual Machine (regex-VM)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="regular-expression-virtual-machine-regex-vm">
+<span id="guide-regex-vm"></span><h1>Regular Expression Virtual Machine (regex-VM)<a class="headerlink" href="#regular-expression-virtual-machine-regex-vm" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The regex-VM aims at the work of converting unstructured texts, like log files, into structured ones. Therefore, state-of-art high-throughput matching algorithm for comparing one string with many patterns, like that used in hyperscan, cannot work well in our target context. We chose VM-based approach, as it allows us to offer drop-in replacement in popular data transformation tools with regex often written in dialect of Perl, Python or Ruby.</p>
+<p>The regex-VM consists of two parts: a software compiler written in C and a hardware virtual machine (VM) in C++.</p>
+<ol class="arabic simple">
+<li>Software compiler: compiles any regular expression given by user into an instruction list along with the corresponding bit-set map, number of instructions/character-classes/capturing-groups, and the name of each capturing group (if specified in input pattern).</li>
+<li>Hardware VM: which takes the outputs from the compiler mentioned above to construct a practical matcher to match the string given in message buffer, and emit a 2-bit match flag indicating whether the input string is matched with the pattern or an internal stack overflow is happened. Futhermore, if the input string is matched, the offset addresses for each capturing group is provided in the output offset buffer, users can find the sub-strings in interest by picking them out from the whole input string according to the information given in that buffer.</li>
+</ol>
+</div>
+<div class="section" id="user-guide">
+<h2>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h2>
+<p>Our regex-VM is implemented with VM approach, in which the pattern is translated into a series of instructions of a specialized VM, and the string being matched for drives the instruction jumps. We re-used VM instructions and compiler from popular <a class="reference external" href="https://github.com/kkos/oniguruma.git">Oniguruma</a> library, which is the foundation of current Ruby <a class="reference external" href="https://github.com/k-takata/Onigmo">regex implementation</a>, as our base.</p>
+<div class="section" id="regex-vm-coverage">
+<h3>Regex-VM Coverage<a class="headerlink" href="#regex-vm-coverage" title="Permalink to this headline">¶</a></h3>
+<p>Due to limited resources and a strict release timeline, in current release, we only provide the most frequently used OPs in the whole OP list given by Oniguruma library to support common regular expressions. This can be shown in the following table:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="64%" />
+<col width="36%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>OP list</td>
+<td>Supported</td>
+</tr>
+<tr class="row-even"><td>FINISH</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>END</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>STR_1</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>STR_2</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>STR_3</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>STR_4</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>STR_5</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>STR_N</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>STR_MB2N1</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>STR_MB2N2</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>STR_MB2N3</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>STR_MB2N</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>STR_MB3N</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>STR_MBN</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>CCLASS</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>CCLASS_MB</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>CCLASS_MIX</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>CCLASS_NOT</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>CCLASS_MB_NOT</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>CCLASS_MIX_NOT</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>ANYCHAR</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>ANYCHAR_ML</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>ANYCHAR_STAR</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>ANYCHAR_ML_STAR</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>ANYCHAR_STAR_PEEK_NEXT</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>ANYCHAR_ML_STAR_PEEK_NEXT</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>WORD</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>WORD_ASCII</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>NO_WROD</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>NO_WORD_ASCII</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>WORD_BOUNDARY</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>NO_WORD_BOUNDARY</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>WORD_BEGIN</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>WORD_END</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>TEXT_SEGMENT_BOUNDARY</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>BEGIN_BUF</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>END_BUF</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>BEGIN_LINE</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>END_LINE</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>SEMI_END_BUF</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>CHECK_POSITION</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>BACKREF1</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>BACKREF2</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>BACKREF_N</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>BACKREF_N_IC</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>BACKREF_MULTI</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>BACKREF_MULTI_IC</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>BACKREF_WITH_LEVEL</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>BACKREF_WITH_LEVEL_IC</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>BACKREF_CHECK</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>BACKREF_CHECK_WITH_LEVEL</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>MEM_START</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>MEM_START_PUSH</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>MEM_END_PUSH</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>MEM_END_PUSH_REC</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>MEM_END</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>MEM_END_REC</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>FAIL</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>JUMP</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>PUSH</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>PUSH_SUPER</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>POP</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>POP_TO_MARK</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>PUSH_OR_JUMP_EXACT1</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>PUSH_IF_PEEK_NEXT</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>REPEAT</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>REPEAT_NG</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>REPEAT_INC</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>REPEAT_INC_NG</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>EMPTY_CHECK_START</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>EMPTY_CHECK_END</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>EMPTY_CHECK_END_MEMST</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>EMPTY_CHECK_END_MEMST_PUSH</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>MOVE</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>STEP_BACK_START</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>STEP_BACK_NEXT</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>CUT_TO_MARK</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>MARK</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>SAVE_VAL</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>UPDATE_VAR</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>CALL</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>RETURN</td>
+<td>NO</td>
+</tr>
+<tr class="row-even"><td>CALLOUT_CONTECTS</td>
+<td>NO</td>
+</tr>
+<tr class="row-odd"><td>CALLOUT_NAME</td>
+<td>NO</td>
+</tr>
+</tbody>
+</table>
+<p>Therefore, the supported atomic regular expressions and their corresponding descriptions should be:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="84%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Regex</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">^</span></code></td>
+<td>asserts position at start of a line</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">$</span></code></td>
+<td>asserts position at the end of a line</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\A</span></code></td>
+<td>asserts position at start of the string</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\z</span></code></td>
+<td>asserts position at the end of the string</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\ca</span></code></td>
+<td>matches the control sequence <code class="docutils literal notranslate"><span class="pre">CTRL+a</span></code></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\C</span></code></td>
+<td>matches one data unit, even in UTF mode (best avoided)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\c\\</span></code></td>
+<td>matches the control sequence <code class="docutils literal notranslate"><span class="pre">CTRL+\</span></code></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\s</span></code></td>
+<td>matches any whitespace character (equal to <code class="docutils literal notranslate"><span class="pre">[\r\n\t\f\v</span> <span class="pre">]</span></code>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\S</span></code></td>
+<td>matches any non-whitespace character (equal to <code class="docutils literal notranslate"><span class="pre">[^\r\n\t\f\v</span> <span class="pre">]</span></code>)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\d</span></code></td>
+<td>matches a digit (equal to <code class="docutils literal notranslate"><span class="pre">[0-9]</span></code>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\D</span></code></td>
+<td>matches any character that’s not a digit (equal to <code class="docutils literal notranslate"><span class="pre">[^0-9]</span></code>)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\h</span></code></td>
+<td>matches any horizontal whitespace character (equal to <code class="docutils literal notranslate"><span class="pre">[[:blank:]]</span></code>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\H</span></code></td>
+<td>matches any character that’s not a horizontal whitespace character</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\w</span></code></td>
+<td>matches any word character (equal to <code class="docutils literal notranslate"><span class="pre">[a-zA-Z0-9_]</span></code>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\W</span></code></td>
+<td>matches any non-word character (equal to <code class="docutils literal notranslate"><span class="pre">[^a-zA-Z0-9_]</span></code>)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\^</span></code></td>
+<td>matches the character <code class="docutils literal notranslate"><span class="pre">^</span></code> literally</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\$</span></code></td>
+<td>matches the character <code class="docutils literal notranslate"><span class="pre">$</span></code> literally</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\N</span></code></td>
+<td>matches any non-newline character</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\g'0'</span></code></td>
+<td>recurses the 0th subpattern</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\o{101}</span></code></td>
+<td>matches the character <code class="docutils literal notranslate"><span class="pre">A</span></code> with index with <code class="docutils literal notranslate"><span class="pre">101(oct)</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\x61</span></code></td>
+<td>matches the character <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">(hex</span> <span class="pre">61)</span></code> literally</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">\x{1</span> <span class="pre">2}</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">(hex)</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">(hex)</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">\17</span></code></td>
+<td>matches the character <code class="docutils literal notranslate"><span class="pre">oct</span> <span class="pre">17</span></code> literally</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">abc</span></code></td>
+<td>matches the <code class="docutils literal notranslate"><span class="pre">abc</span></code> literally</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">.</span></code></td>
+<td>matches any character (except for line terminators)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">|</span></code></td>
+<td>alternative</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">[^a]</span></code></td>
+<td>match a single character not present in the list below</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">[a-c]</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, or <code class="docutils literal notranslate"><span class="pre">c</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">[abc]</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, or <code class="docutils literal notranslate"><span class="pre">c</span></code></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">[:upper:]</span></code></td>
+<td>matches a uppercase letter <code class="docutils literal notranslate"><span class="pre">[A-Z]</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">a?</span></code></td>
+<td>matches the <code class="docutils literal notranslate"><span class="pre">a</span></code> zero or one time (<strong>greedy</strong>)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">a*</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> between zero and unlimited times (<strong>greedy</strong>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">a+</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> between one and unlimited times (<strong>greedy</strong>)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">a??</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> between zero and one times (<strong>lazy</strong>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">a*?</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> between zero and unlimited times (<strong>lazy</strong>)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">a+?</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> between one and unlimited times (<strong>lazy</strong>)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">a{2}</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> exactly 2 times</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">a{0,}</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> between zero and unlimited times</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">a{1,2}</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">a</span></code> one or two times</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">{,}</span></code></td>
+<td>matches <code class="docutils literal notranslate"><span class="pre">{,}</span></code> literally</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">(?#blabla)</span></code></td>
+<td>comment <code class="docutils literal notranslate"><span class="pre">blabla</span></code></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">(a)</span></code></td>
+<td>capturing group, matches <code class="docutils literal notranslate"><span class="pre">a</span></code> literally</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">(?&lt;name1&gt;</span> <span class="pre">a)</span></code></td>
+<td>named capturing group <code class="docutils literal notranslate"><span class="pre">name1</span></code>, matches <code class="docutils literal notranslate"><span class="pre">a</span></code> literally</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">(?:)</span></code></td>
+<td>non-capturing group</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">(?i)</span></code></td>
+<td>match the remainder of the pattern with the following effective flags: gmi (i modifier: insensitive)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">(?&lt;!a)z</span></code></td>
+<td>matches any occurrence of <code class="docutils literal notranslate"><span class="pre">z</span></code> that is not preceded by <code class="docutils literal notranslate"><span class="pre">a</span></code> (negative look-behind)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">z(?!a)</span></code></td>
+<td>match any occurrence of <code class="docutils literal notranslate"><span class="pre">z</span></code> that is not followed by <code class="docutils literal notranslate"><span class="pre">a</span></code> (negative look-ahead)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition attention">
+<p class="first admonition-title">Attention</p>
+<ol class="last arabic simple">
+<li>Supported encoding method in current release is ASCII (extended ASCII codes are excluded).</li>
+<li>Nested repetition is not supported</li>
+</ol>
+</div>
+</div>
+<div class="section" id="regex-vm-usage">
+<h3>Regex-VM Usage<a class="headerlink" href="#regex-vm-usage" title="Permalink to this headline">¶</a></h3>
+<p>Before instantiating the hardware VM, users have to pre-compile their regular expression using the software compiler mentioned above first to check if the pattern is supported by the hardware VM. The compiler will give an error code <code class="docutils literal notranslate"><span class="pre">XF_UNSUPPORTED_OPCODE</span></code> if the pattern is not supported. A pass code <code class="docutils literal notranslate"><span class="pre">ONIG_NORMAL</span></code> along with the configurations (including instruction list, bit-set map etc.) will be given if the input is a valid pattern. Then, user should pass these configurations and the input message with its corresponding length in bytes to the hardware VM to trigger the matching process. The hardware VM will judge whether the input message is matched and provide the offset addresses for each capturing group in offset buffer.</p>
+<p>It is important to be noticed that only the internal stack buffer is hold in hardware VM, user should allocate memories for bit-set map, instruction buffer, message buffer accordingly, and offset buffer respectively outside the hardware instantiation.</p>
+<p>For the internal stack, its size is decided by the template parameter of the hardware VM. Since the storage resource it uses is URAM, the <code class="docutils literal notranslate"><span class="pre">STACK_SIZE</span></code> should better be set to be a multiple of 4096 for not wasting the space of individual URAM block. Moreover, it is critical to choose the internal stack size wisely as the hardware VM will overflow if the size is too small or no URAMs will be available on board for you to instantiate more PUs to improve the throughput.</p>
+<p><strong>Code Example</strong></p>
+<p>The following section gives a usage example for using regex-VM in C++ based HLS design.</p>
+<p>To use the regex-VM you need to:</p>
+<ol class="arabic simple">
+<li>Compile the software regular expression compiler by running <code class="docutils literal notranslate"><span class="pre">make</span></code> command in path <code class="docutils literal notranslate"><span class="pre">L1/tests/text/regex_vm/re_compile</span></code></li>
+<li>Include the <code class="docutils literal notranslate"><span class="pre">xf_re_compile.h</span></code> header in path <code class="docutils literal notranslate"><span class="pre">L1/include/sw/xf_data_analytics/text</span></code> and the <code class="docutils literal notranslate"><span class="pre">oniguruma.h</span></code> header in path <code class="docutils literal notranslate"><span class="pre">L1/tests/text/regex_vm/re_compile/lib/include</span></code></li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;oniguruma.h&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;xf_re_compile.h&quot;</span>
+</pre>
+<ol class="arabic simple" start="3">
+<li>Compile your regular expression by calling <code class="docutils literal notranslate"><span class="pre">xf_re_compile</span></code></li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">xf_re_compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">bitset</span><span class="p">,</span> <span class="n">instr_buff</span><span class="p">,</span> <span class="n">instr_num</span><span class="p">,</span> <span class="n">cclass_num</span><span class="p">,</span> <span class="n">cpgp_num</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</pre>
+<ol class="arabic simple" start="4">
+<li>Check the return value to see if its a valid pattern and supported by hardware VM. <code class="docutils literal notranslate"><span class="pre">ONIG_NORMAL</span></code> is returned if the pattern is valid, and <code class="docutils literal notranslate"><span class="pre">XF_UNSUPPORTED_OPCODE</span></code> is returned if it’s not supported currently.</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">!=</span> <span class="n">XF_UNSUPPORTED_OPCODE</span> <span class="o">&amp;&amp;</span> <span class="n">r</span> <span class="o">==</span> <span class="n">ONIG_NORMAL</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// calling hardware VM here for acceleration</span>
+<span class="p">}</span>
+</pre>
+<ol class="arabic simple" start="5">
+<li>Once the regular expression is verified as a supported pattern, you may call hardware VM to match any message you want by</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="c1">// for data types used in VM</span>
+<span class="cp">#include</span> <span class="cpf">&quot;ap_int.h&quot;</span><span class="cp"></span>
+<span class="c1">// header for hardware VM implementation</span>
+<span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/text/regexVM.hpp&quot;</span><span class="cp"></span>
+
+<span class="c1">// allocate memory for bit-set map</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">bitset</span><span class="p">[</span><span class="mi">8</span> <span class="o">*</span> <span class="n">cclass_num</span><span class="p">];</span>
+<span class="c1">// allocate memory for instruction buffer (derived from software compiler)</span>
+<span class="kt">uint64_t</span> <span class="n">instr_buff</span><span class="p">[</span><span class="n">instr_num</span><span class="p">];</span>
+<span class="c1">// allocate memory for message</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">msg_buff</span><span class="p">[</span><span class="n">MESSAGE_SIZE</span><span class="p">];</span>
+<span class="c1">// set up input message buffer according to input string</span>
+<span class="kt">unsigned</span> <span class="n">str_len</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">((</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">in_str</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">str_len</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>  <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">str_len</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">msg_buff</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">range</span><span class="p">((</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">k</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span> <span class="o">=</span> <span class="n">in_str</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">k</span><span class="p">];</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// pad white-space at the end</span>
+            <span class="n">msg_buff</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">range</span><span class="p">((</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">k</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span> <span class="o">=</span> <span class="sc">&#39; &#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// allocate memory for offset addresses for each capturing group</span>
+<span class="kt">uint16_t</span> <span class="n">offset_buff</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">cpgp_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)];</span>
+<span class="c1">// initialize offset buffer</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">CAP_GRP_NUM</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">offset_buff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span> <span class="n">match</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="c1">// call for hardware acceleration (basic hardware VM implementation)</span>
+<span class="n">xf</span><span class="o">::</span><span class="n">data_analytics</span><span class="o">::</span><span class="nl">text</span><span class="p">:</span><span class="n">regexVM</span><span class="o">&lt;</span><span class="n">STACK_SIZE</span><span class="o">&gt;</span><span class="p">((</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span><span class="p">)</span><span class="n">bitset</span><span class="p">,</span> <span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span><span class="p">)</span><span class="n">instr_buff</span><span class="p">,</span> <span class="n">msg_buff</span><span class="p">,</span> <span class="n">str_len</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">offset_buff</span><span class="p">);</span>
+<span class="c1">// or call for hardware acceleration (performance optimized hardware VM implementation)</span>
+<span class="n">xf</span><span class="o">::</span><span class="n">data_analytics</span><span class="o">::</span><span class="nl">text</span><span class="p">:</span><span class="n">regexVM_opt</span><span class="o">&lt;</span><span class="n">STACK_SIZE</span><span class="o">&gt;</span><span class="p">((</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span><span class="p">)</span><span class="n">bitset</span><span class="p">,</span> <span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span><span class="p">)</span><span class="n">instr_buff</span><span class="p">,</span> <span class="n">msg_buff</span><span class="p">,</span> <span class="n">str_len</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">offset_buff</span><span class="p">);</span>
+</pre>
+<p>The match flag and offset addresses for each capturing group are presented in <code class="docutils literal notranslate"><span class="pre">match</span></code> and <code class="docutils literal notranslate"><span class="pre">offset_buff</span></code> respectively with the format shown in the tables below.</p>
+<p>Truth table for the 2-bit output <code class="docutils literal notranslate"><span class="pre">match</span></code> flag of hardware VM:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Value</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>0</td>
+<td>mismatched</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>matched</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>internal stack overflow</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>reserved for future use</td>
+</tr>
+</tbody>
+</table>
+<p>Arrangement of the offset buffer <code class="docutils literal notranslate"><span class="pre">offsetBuff</span></code>:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Address</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td>0</td>
+<td>start position of the whole matched string</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>end position of the whole matched string</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>start position of the 1st capturing group</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>end position of the 1st capturing group</td>
+</tr>
+<tr class="row-even"><td>4</td>
+<td>start position of the 2nd capturing group</td>
+</tr>
+<tr class="row-odd"><td>5</td>
+<td>end position of the 2nd capturing group</td>
+</tr>
+<tr class="row-even"><td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="implemention">
+<h2>Implemention<a class="headerlink" href="#implemention" title="Permalink to this headline">¶</a></h2>
+<p>If you go into the details of the implementation of hardware VM, you may find even the basic version of hardware VM is significantly different from the one in Oniguruma, let alone the performance optimized one. Thus, this section is especially for developers who wants to add more OPs to the VM by themselves or who are extremely interested in our design.</p>
+<p>The first thing you want to conquer will be the software compiler. Once you have a full understanding of a specific OP in Oniguruma, you have to add it to the corresponding instruction with the format acceptable for the hardware VM. The 64-bit instruction format for communication between software compiler and hardware VM can be explained like this:</p>
+<a class="reference internal image-reference" href="../../_images/instruction_format.png"><img alt="Instruction Format" class="align-center" src="../../_images/instruction_format.png" style="width: 80%;" /></a>
+<p>Then, if the OP you want to add is related to a jump/push operation on the OP address, the absolute address must be provided at the first while-loop in the source code of the software compiler for calculation of the address which will be put into instruction list later. The rest information related to this OP and the calculated address should be pack into one instruction at the second while-loop. So far, the software compiler part is done.</p>
+<p>Location of the source of the software compiler: <code class="docutils literal notranslate"><span class="pre">L1/src/sw/xf_re_compile.c</span></code></p>
+<p>Finally, add the corresponding logic to the hardware VM based on your understanding of the OP and test it accordingly. Once the test passed, you may start optimizing the implemtation which is extremely challenging and tricky.</p>
+<p>Let me introduce you what we’ve done currently for optimizing the hardware VM. Hope it will inspire you to some extent.</p>
+<ol class="arabic simple">
+<li>Simplify the internal logic for each OP we added as mush as we can.</li>
+<li>Merge the newly added OP into another if possible to let them share the same logic.</li>
+<li>Offload runtime calculations to software compiler for pre-calculation if possible to improve the runtime performance.</li>
+<li>Separate the data flow and control flow, do pre-fetch and post-store operations to improve memory access efficiency.</li>
+<li>Resolve the read-and-write dependency of on-chip RAMs by caching intermediate data in registers to avoid unnecessary accesses.</li>
+<li>Execute a predict (2nd) instruction in each iteration to accelerate the process under specific circumstances. (performance optimized version executes 2 instructions / 3 cycles)</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>For the following scenarios, the predict instruction will not be executed:</p>
+<ol class="last arabic simple">
+<li>Read/write the internal stack simultaneously</li>
+<li>OP for 2nd instruction is any_char_star, pop_to_mark, or mem_start_push</li>
+<li>Jump on OP address happened in 1st instruction</li>
+<li>Read/write the offset buffer simultaneously</li>
+<li>Pointer for input string moves in 1st instruction and 2nd instruction goes into the OP which needs character comparision</li>
+<li>Write the offset buffer simultaneously</li>
+</ol>
+</div>
+</div>
+<div class="section" id="profiling">
+<h2>Profiling<a class="headerlink" href="#profiling" title="Permalink to this headline">¶</a></h2>
+<p>The hardware resource utilization of hardware VM is shown in the table below (performance optimized version at FMax = 352MHz).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="11%" />
+<col width="10%" />
+<col width="13%" />
+<col width="13%" />
+<col width="10%" />
+<col width="8%" />
+<col width="8%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Primitive</td>
+<td>CLB</td>
+<td>LUT</td>
+<td>FF</td>
+<td>BRAM</td>
+<td>URAM</td>
+<td>DSP</td>
+<td>SRL</td>
+</tr>
+<tr class="row-even"><td>hardware VM</td>
+<td>305</td>
+<td>1690</td>
+<td>973</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="writeToDataFrame.html" class="btn btn-neutral float-right" title="WriteToDataFrame" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="svm_predict.html" class="btn btn-neutral float-left" title="Internals of svm_predict" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2020, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>
