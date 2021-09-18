@@ -1,0 +1,29 @@
+.. index:: pair: class; xf::blas::ConfigDict
+.. _doxid-classxf_1_1blas_1_1_config_dict:
+.. _cid-xf::blas::configdict:
+
+class xf::blas::ConfigDict
+==========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "handle.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_config_dict_1a53e8b0c004440932d7dfad438cc5d9a1:
+.. _cid-xf::blas::configdict::m_dict:
+.. _doxid-classxf_1_1blas_1_1_config_dict_1ad61cb41ea384e0a00253e212ec52d0e5:
+.. _cid-xf::blas::configdict::instance:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	unordered_map <string, string> m_dict
+

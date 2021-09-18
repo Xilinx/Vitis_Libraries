@@ -1,0 +1,30 @@
+.. index:: pair: class; xf::blas::Gemm <float, t_KBufferDim, t_ParEntriesM, t_ParEntriesN, float>
+.. _doxid-classxf_1_1blas_1_1_gemm_3_01float_00_01t___k_buffer_dim_00_01t___par_entries_m_00_01t___par_entries_n_00_01float_01_4:
+.. _cid-xf::blas::gemm-4:
+
+template class xf::blas::Gemm <float, t_KBufferDim, t_ParEntriesM, t_ParEntriesN, float>
+========================================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "gemm.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_gemm_3_01float_00_01t___k_buffer_dim_00_01t___par_entries_m_00_01t___par_entries_n_00_01float_01_4_1ab3ca3bdb7cde2dc368542e94d46af0b1:
+.. _cid-xf::blas::gemm::gemm-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    unsigned int t_KBufferDim,
+	    unsigned int t_ParEntriesM,
+	    unsigned int t_ParEntriesN
+	    >
+	class Gemm <float, t_KBufferDim, t_ParEntriesM, t_ParEntriesN, float>
+

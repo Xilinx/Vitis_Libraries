@@ -1,0 +1,59 @@
+.. index:: pair: class; xf::blas::Gemv
+.. _doxid-classxf_1_1blas_1_1_gemv:
+.. _cid-xf::blas::gemv-2:
+
+template class xf::blas::Gemv
+=============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "gemv.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_gemv_1a95aa4db8fd4744b40134a9a797a58e1a:
+.. _cid-xf::blas::gemv::ddrwidetype:
+.. _doxid-classxf_1_1blas_1_1_gemv_1aed409a04d5e60bbc96df1b9fcfb8c73c:
+.. _cid-xf::blas::gemv::ddrstream:
+.. _doxid-classxf_1_1blas_1_1_gemv_1a424f3923a3a49dd004a50cd8df1779bf:
+.. _cid-xf::blas::gemv::paramstream:
+.. _doxid-classxf_1_1blas_1_1_gemv_1a27216123e036ab6babd5fec63b47dd99:
+.. _cid-xf::blas::gemv::gemvargstype:
+.. _doxid-classxf_1_1blas_1_1_gemv_1a9f769f320a059e325321d0e7e4dc325b:
+.. _cid-xf::blas::gemv::t_colblocklength:
+.. _doxid-classxf_1_1blas_1_1_gemv_1ac495ed0ba2b7590c679e770f4ff15e7b:
+.. _cid-xf::blas::gemv::t_rowblocklength:
+.. _doxid-classxf_1_1blas_1_1_gemv_1a280f35909842984f3b69fa2b6a636ffc:
+.. _cid-xf::blas::gemv::gemv_blocks:
+.. _doxid-classxf_1_1blas_1_1_gemv_1acb16c9139a8b938476dfc00426379b0e:
+.. _cid-xf::blas::gemv::rungemv:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_FloatType,
+	    unsigned int t_DdrWidth,
+	    unsigned int t_colMemWords,
+	    unsigned int t_rowMemWords,
+	    unsigned int t_kVectorBlocks,
+	    unsigned int t_mVectorBlocks
+	    >
+	class Gemv
+
+	// typedefs
+
+	typedef WideType <t_FloatType, t_DdrWidth> DdrWideType
+	typedef hls::stream <typename WideType <t_FloatType, t_DdrWidth>::t_TypeInt> DdrStream
+	typedef hls::stream <unsigned int> ParamStream
+	typedef :ref:`GemvArgs<doxid-classxf_1_1blas_1_1_gemv_args>` GemvArgsType
+
+	// fields
+
+	static const unsigned int t_colBlockLength
+	static const unsigned int t_rowBlockLength
+

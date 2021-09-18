@@ -1,0 +1,29 @@
+.. index:: pair: class; xf::blas::BLASHostHandle
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_handle:
+.. _cid-xf::blas::blashosthandle:
+
+class xf::blas::BLASHostHandle
+==============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "handle.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_handle_1a122dcae3c38f4b18b4437cc37d6d9e50:
+.. _cid-xf::blas::blashosthandle::m_handleptr:
+.. _doxid-classxf_1_1blas_1_1_b_l_a_s_host_handle_1a739fa6a537f3a1ee4f347577ab27975b:
+.. _cid-xf::blas::blashosthandle::instance:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	unordered_map <unsigned int, vector <shared_ptr <:ref:`BLASHost<doxid-classxf_1_1blas_1_1_b_l_a_s_host>`>>> m_handlePtr
+

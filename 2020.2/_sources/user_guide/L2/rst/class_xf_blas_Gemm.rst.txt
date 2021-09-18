@@ -1,0 +1,32 @@
+.. index:: pair: class; xf::blas::Gemm
+.. _doxid-classxf_1_1blas_1_1_gemm:
+.. _cid-xf::blas::gemm-3:
+
+template class xf::blas::Gemm
+=============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "gemm.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_gemm_1a0e6fb47ef9e3ec67b57459d101aa8c41:
+.. _cid-xf::blas::gemm::gemm:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_KBufferDim,
+	    unsigned int t_ParEntriesM,
+	    unsigned int t_ParEntriesN = t_ParEntriesM,
+	    typename t_MacDataType = t_DataType
+	    >
+	class Gemm
+

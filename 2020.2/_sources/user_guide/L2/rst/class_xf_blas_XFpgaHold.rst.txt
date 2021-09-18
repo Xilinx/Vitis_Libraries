@@ -1,0 +1,29 @@
+.. index:: pair: class; xf::blas::XFpgaHold
+.. _doxid-classxf_1_1blas_1_1_x_fpga_hold:
+.. _cid-xf::blas::xfpgahold:
+
+class xf::blas::XFpgaHold
+=========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_x_fpga_hold_1a05c7dfc4cd54f22eef33e93cdc0c9b9a:
+.. _cid-xf::blas::xfpgahold::m_xfpgaptr:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_hold_1a461f513f6ed90ea3e42aeac44da118e0:
+.. _cid-xf::blas::xfpgahold::instance:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	unordered_map <unsigned int, shared_ptr <:ref:`XFpga<doxid-classxf_1_1blas_1_1_x_fpga>`>> m_xFpgaPtr
+
