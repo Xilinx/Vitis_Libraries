@@ -1,0 +1,873 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vitis Database Library, GQE, kernel, api" name="keywords" />
+<meta content="The GQE kernel application programming interface reference." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GQE Kernel Configuration APIs" href="kernel_config.html" />
+    <link rel="prev" title="GQE Kernel Design" href="kernel_design.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search"
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search"
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Database Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2020.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Vitis Database Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design_flows.html">Design Flows</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guide/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="L2.html">L2 GQE Kernel User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kernel_design.html">GQE Kernel Design</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GQE Kernel APIs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gqeaggr">gqeAggr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gqejoin">gqeJoin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gqepart">gqePart</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_config.html">GQE Kernel Configuration APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L3.html">L3 GQE Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/tpc_h.html">TPC-H Queries with GQE</a></li>
+</ul>
+
+            
+			
+				<h3>Versions</h3>
+				<ul>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				</ul>
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Database Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="L2.html">L2 GQE Kernel User Guide</a> &raquo;</li>
+        
+      <li>GQE Kernel APIs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gqe-kernel-apis">
+<span id="gqe-kernel-api"></span><h1>GQE Kernel APIs<a class="headerlink" href="#gqe-kernel-apis" title="Permalink to this headline">¶</a></h1>
+<p>These APIs are implemented as OpenCL kernels:</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="gqeaggr">
+<span id="cid-gqeaggr"></span><span id="doxid-gqe-kernel-aggr-v2-8hpp-1ada14f1c5f99c310ca719be1dff660d3b"></span><h2>gqeAggr<a class="headerlink" href="#gqeaggr" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_database/gqe_kernel_aggr_v2.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">gqeAggr</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in0</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in1</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in2</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in3</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in4</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in5</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in6</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_in7</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;</span> <span class="n">buf_metain</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;</span> <span class="n">buf_metaout</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out0</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out1</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out2</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out3</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out4</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out5</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out6</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out7</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out8</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out9</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out10</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out11</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out12</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out13</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out14</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_out15</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_cfg</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_result_info</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">ping_buf0</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">ping_buf1</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">ping_buf2</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">ping_buf3</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">pong_buf0</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">pong_buf1</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">pong_buf2</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">pong_buf3</span> <span class="p">[]</span>
+    <span class="p">)</span>
+</pre>
+<p>GQE Aggr Kernel.</p>
+<p>For detailed document, see <a class="reference internal" href="kernel_design.html#gqe-kernel-design"><span class="std std-ref">GQE Kernel Design</span></a>.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>buf_in0</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-even"><td>buf_in1</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-odd"><td>buf_in2</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-even"><td>buf_in3</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-odd"><td>buf_in4</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-even"><td>buf_in5</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-odd"><td>buf_in6</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-even"><td>buf_in7</td>
+<td>input table buffer.</td>
+</tr>
+<tr class="row-odd"><td>nrow</td>
+<td>input row number.</td>
+</tr>
+<tr class="row-even"><td>buf_out</td>
+<td>output table buffer.</td>
+</tr>
+<tr class="row-odd"><td>buf_cfg</td>
+<td>input configuration buffer.</td>
+</tr>
+<tr class="row-even"><td>buf_result_info</td>
+<td>output information buffer.</td>
+</tr>
+<tr class="row-odd"><td>ping_buf0</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-even"><td>ping_buf1</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-odd"><td>ping_buf2</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-even"><td>ping_buf3</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-odd"><td>pong_buf0</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-even"><td>pong_buf1</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-odd"><td>pong_buf2</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+<tr class="row-even"><td>pong_buf3</td>
+<td>gqeAggr’s temporal buffer for storing overflow.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gqejoin">
+<span id="cid-gqejoin"></span><span id="doxid-gqe-kernel-join-v2-8hpp-1a8ea6abab98287c700b3596e6710268bf"></span><h2>gqeJoin<a class="headerlink" href="#gqejoin" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_database/gqe_kernel_join_v2.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">gqeJoin</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A1</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A2</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A3</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A4</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A5</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A6</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A7</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">buf_A8</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="kt">size_t</span> <span class="n">_build_probe_flag</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;</span> <span class="n">tin_meta</span> <span class="p">[</span><span class="mi">24</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;</span> <span class="n">tout_meta</span> <span class="p">[</span><span class="mi">24</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C1</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C2</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C3</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C4</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C5</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C6</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C7</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_C8</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1ab4abc4b2266800f3082eb40a2e348aa9"><span class="std std-ref">VEC_LEN</span></a><span></span><span class="o">&gt;</span> <span class="n">buf_D</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf0</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf1</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf2</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf3</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf4</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf5</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf6</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">htb_buf7</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf0</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf1</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf2</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf3</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf4</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf5</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf6</span> <span class="p">[</span><span class="mi">8000</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><a class="reference internal" href="../rst_2/global.html#doxid-gqe-kernel-part-v2-8hpp-1a044dcca86ec2bb97c01fe14bce2f7900"><span class="std std-ref">TPCH_INT_SZ</span></a><span></span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">stb_buf7</span> <span class="p">[</span><span class="mi">8000</span><span class="p">]</span>
+    <span class="p">)</span>
+</pre>
+<p>GQE join kernel.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_build_probe_flag</td>
+<td>kernel mode flag.</td>
+</tr>
+<tr class="row-even"><td>buf_A</td>
+<td>input table buffer</td>
+</tr>
+<tr class="row-odd"><td>buf_C</td>
+<td>output table buffer</td>
+</tr>
+<tr class="row-even"><td>htb_buf</td>
+<td>hash table.</td>
+</tr>
+<tr class="row-odd"><td>stb_buf</td>
+<td>overflow region of hash table.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gqepart">
+<span id="cid-gqepart"></span><span id="doxid-gqe-kernel-part-v2-8hpp-1af7017a456513937bbf6cbe02478b2bd6"></span><h2>gqePart<a class="headerlink" href="#gqepart" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_database/gqe_kernel_part_v2.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">gqePart</span> <span class="p">(</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">k_depth</span><span class="p">,</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">col_index</span><span class="p">,</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">bit_num</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A1</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A2</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A3</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A4</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A5</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A6</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A7</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_A8</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;</span> <span class="n">tin_meta</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;</span> <span class="n">tout_meta</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B1</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B2</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B3</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B4</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B5</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B6</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B7</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_B8</span> <span class="p">[],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">16</span><span class="o">&gt;</span> <span class="n">buf_D</span> <span class="p">[]</span>
+    <span class="p">)</span>
+</pre>
+<p>GQE partition kernel.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>k_depth</td>
+<td>depth of each hash bucket in URAM</td>
+</tr>
+<tr class="row-even"><td>col_index</td>
+<td>index of input column</td>
+</tr>
+<tr class="row-odd"><td>bit_num</td>
+<td>number of defined partition, log2(number of partition)</td>
+</tr>
+<tr class="row-even"><td>buf_A</td>
+<td>input table buffer</td>
+</tr>
+<tr class="row-odd"><td>buf_B</td>
+<td>output table buffer</td>
+</tr>
+<tr class="row-even"><td>buf_D</td>
+<td>configuration buffer</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">GQE has been tested on Alveo U280 card, and makes use of both HBM and DDR.
+While other cards like U250 and U200 are not supported out-of-box,
+porting and gaining acceleration is surely possible, with tailoring and tuning.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kernel_config.html" class="btn btn-neutral float-right" title="GQE Kernel Configuration APIs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kernel_design.html" class="btn btn-neutral float-left" title="GQE Kernel Design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+      <span class="lastupdated">
+        Last updated on November 15, 2020.
+      </span>
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2020, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>

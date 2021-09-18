@@ -1,0 +1,1623 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vitis Database Library, GQE, kernel, api" name="keywords" />
+<meta content="The GQE kernel application programming interface reference." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Benchmark" href="../benchmark.html" />
+    <link rel="prev" title="GQE L3 Design" href="gqe_l3_design.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://github.com/Xilinx/Image-Collateral/blob/main/xilinx-header-logo.svg?raw=true" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search"
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search"
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Database Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2021.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Vitis Database Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design_flows.html">Design Flows</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guide/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="L2.html">L2 GQE Kernel User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="L3.html">L3 GQE Overlay User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gqe_l3_design.html">GQE L3 Design</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GQE L3 APIs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-table">class xf::database::gqe::Table</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#methods">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-joiner">class xf::database::gqe::Joiner</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-bloomfilter">class xf::database::gqe::BloomFilter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-filter">class xf::database::gqe::Filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-aggregator">class xf::database::gqe::Aggregator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id15">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16">Methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/tpc_h.html">TPC-H Queries with GQE</a></li>
+</ul>
+
+            
+			
+				<h3>Versions</h3>
+				<ul>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				</ul>
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Database Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="L3.html">L3 GQE Overlay User Guide</a> &raquo;</li>
+        
+      <li>GQE L3 APIs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gqe-l3-apis">
+<span id="gqe-l3-api"></span><h1>GQE L3 APIs<a class="headerlink" href="#gqe-l3-apis" title="Permalink to this headline">¶</a></h1>
+<p>These APIs are implemented as excutable classes for providing a structure-clean and easy-of-use software user interface.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="class-xf-database-gqe-table">
+<span id="cid-xf-database-gqe-table"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table"></span><span id="index-0"></span><h2>class xf::database::gqe::Table<a class="headerlink" href="#class-xf-database-gqe-table" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_table.hpp&quot;</span>
+</pre>
+<div class="section" id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<p>handling column-related works (name, section, pointer, etc.)</p>
+<pre class="highlight overview-code-block literal-block">
+
+</pre>
+</div>
+<div class="section" id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="table">
+<span id="cid-xf-database-gqe-table-table"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a81d6c691df2f1fffd9c38c3fa8962dc6"></span><h4>Table<a class="headerlink" href="#table" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">Table</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">)</span>
+</pre>
+<p>construct of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_name</td>
+<td>name of the table.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="addcol">
+<span id="cid-xf-database-gqe-table-addcol"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1aecb11abfadae78c7f64783bbbb8290a2"></span><h4>addCol<a class="headerlink" href="#addcol" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="addcol-overload-1">
+<h5>addCol overload (1)<a class="headerlink" href="#addcol-overload-1" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <span class="kt">void</span><span class="o">*</span> <span class="n">_ptr</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">row_num</span>
+    <span class="p">)</span>
+</pre>
+<p>add one column into the <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> with user-provided buffer pointer.</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , tab_o_col0, 10000);</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_name</td>
+<td>column name</td>
+</tr>
+<tr class="row-even"><td>type_size</td>
+<td>size of the column element data type in bytes</td>
+</tr>
+<tr class="row-odd"><td>_ptr</td>
+<td>user-provided column buffer pointer</td>
+</tr>
+<tr class="row-even"><td>row_num</td>
+<td>number of rows</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="addcol-overload-2">
+<span id="cid-xf-database-gqe-table-addcol-2"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a0b9945acfb0c45dfa77981df9638936c"></span><h5>addCol overload (2)<a class="headerlink" href="#addcol-overload-2" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">row_num</span>
+    <span class="p">)</span>
+</pre>
+<p>allocate buffer for one column and add it into the <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , 10000);</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_name</td>
+<td>column name</td>
+</tr>
+<tr class="row-even"><td>type_size</td>
+<td>size of the column element data type in bytes</td>
+</tr>
+<tr class="row-odd"><td>row_num</td>
+<td>number of rows</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="addcol-overload-3">
+<span id="cid-xf-database-gqe-table-addcol-3"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a9db404881985e6e33e8c5509d7202965"></span><h5>addCol overload (3)<a class="headerlink" href="#addcol-overload-3" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">dat_list</span>
+    <span class="p">)</span>
+</pre>
+<p>create one column with several sections by loading rows from data file.</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , {file1.dat,file2.dat});</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_name</td>
+<td>column name</td>
+</tr>
+<tr class="row-even"><td>type_size</td>
+<td>size of the column element data type in bytes</td>
+</tr>
+<tr class="row-odd"><td>dat_list</td>
+<td>data file list</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="addcol-overload-4">
+<span id="cid-xf-database-gqe-table-addcol-4"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a4a9adadbb8136a0bf35cb9f529752e2b"></span><h5>addCol overload (4)<a class="headerlink" href="#addcol-overload-4" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="k">struct</span> <a class="reference internal" href="../rst_3/struct_xf_database_gqe_ColPtr.html#doxid-structxf-1-1database-1-1gqe-1-1-col-ptr"><span class="std std-ref">ColPtr</span></a><span></span><span class="o">&gt;</span> <span class="n">ptr_pairs</span>
+    <span class="p">)</span>
+</pre>
+<p>create one column with several sections by user-provided pointer list</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , {{ptr1,10000},{ptr2,20000}});</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_name</td>
+<td>column name</td>
+</tr>
+<tr class="row-even"><td>type_size</td>
+<td>size of the column element data type in bytes</td>
+</tr>
+<tr class="row-odd"><td>ptr_pairs</td>
+<td>vector of (ptr,row_num) pairs</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="genrowidwithvalidation">
+<span id="cid-xf-database-gqe-table-genrowidwithvalidation"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a6f499a32564587cdaae4713a59a8ad8c"></span><h4>genRowIDWithValidation<a class="headerlink" href="#genrowidwithvalidation" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="genrowidwithvalidation-overload-1">
+<h5>genRowIDWithValidation overload (1)<a class="headerlink" href="#genrowidwithvalidation-overload-1" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">genRowIDWithValidation</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_rowid_name</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_valid_name</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">_rowid_en</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">_valid_en</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">char</span><span class="o">*&gt;</span> <span class="n">validationPtrVector</span>
+    <span class="p">)</span>
+</pre>
+<p>add validation column with user-provided validation pointer list</p>
+<p><strong>Caution</strong> This is an experimental-only API, will be deprecated in the next release.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_rowid_name</td>
+<td>name of row-id column</td>
+</tr>
+<tr class="row-even"><td>_valid_name</td>
+<td>name of validation bits column</td>
+</tr>
+<tr class="row-odd"><td>_rowid_en</td>
+<td>enable flag of row-id</td>
+</tr>
+<tr class="row-even"><td>_valid_en</td>
+<td>enable flag of validation bits</td>
+</tr>
+<tr class="row-odd"><td>validationPtrVector</td>
+<td>validation bits pointer list</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="genrowidwithvalidation-overload-2">
+<span id="cid-xf-database-gqe-table-genrowidwithvalidation-2"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a1e50b3dde5446b8dd64b3540a7aded98"></span><h5>genRowIDWithValidation overload (2)<a class="headerlink" href="#genrowidwithvalidation-overload-2" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">genRowIDWithValidation</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_rowid_name</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_valid_name</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">_rowid_en</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">_valid_en</span><span class="p">,</span>
+    <span class="kt">void</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">row_num</span>
+    <span class="p">)</span>
+</pre>
+<p>add validation column with user-provided pointer</p>
+<p><strong>Caution</strong> This is an experimental-only API, will be deprecated in the next release.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_rowid_name</td>
+<td>name of row-id column</td>
+</tr>
+<tr class="row-even"><td>_valid_name</td>
+<td>name of validation bits column</td>
+</tr>
+<tr class="row-odd"><td>_rowid_en</td>
+<td>enable flag of row-id</td>
+</tr>
+<tr class="row-even"><td>_valid_en</td>
+<td>enable flag of validation bits</td>
+</tr>
+<tr class="row-odd"><td>ptr</td>
+<td>validation bits column pointer</td>
+</tr>
+<tr class="row-even"><td>row_num</td>
+<td>number of rows</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="genrowidwithvalidation-overload-3">
+<span id="cid-xf-database-gqe-table-genrowidwithvalidation-3"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1ab0b1e6d84f51e16875a56152ac37f6d5"></span><h5>genRowIDWithValidation overload (3)<a class="headerlink" href="#genrowidwithvalidation-overload-3" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">genRowIDWithValidation</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_rowid_name</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_valid_name</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">_rowid_en</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">_valid_en</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">dat_list</span>
+    <span class="p">)</span>
+</pre>
+<p>add validation column with user-provided data file list</p>
+<p><strong>Caution</strong> This is an experimental-only API, will be deprecated in the next release.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_rowid_name</td>
+<td>name of row-id column</td>
+</tr>
+<tr class="row-even"><td>_valid_name</td>
+<td>name of validation bits column</td>
+</tr>
+<tr class="row-odd"><td>_rowid_en</td>
+<td>enable flag of row-id</td>
+</tr>
+<tr class="row-even"><td>_valid_en</td>
+<td>enable flag of validation bits</td>
+</tr>
+<tr class="row-odd"><td>dat_list</td>
+<td>data file list</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="setrownum">
+<span id="cid-xf-database-gqe-table-setrownum"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a8f9b4677129d43cb5ba95f862ee64cf2"></span><h4>setRowNum<a class="headerlink" href="#setrownum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setRowNum</span> <span class="p">(</span><span class="kt">int</span> <span class="n">_num</span><span class="p">)</span>
+</pre>
+<p>set number of rows for the entire table.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_num</td>
+<td>number of rows of the entire table</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getrownum">
+<span id="cid-xf-database-gqe-table-getrownum"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1aa32514f934ebc3b4f613af056bd002b8"></span><h4>getRowNum<a class="headerlink" href="#getrownum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">size_t</span> <span class="n">getRowNum</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get number of rows of the entire table.</p>
+<p class="rubric">Returns:</p>
+<p>number of rows of the entire table</p>
+</div>
+<div class="section" id="getsecrownum">
+<span id="cid-xf-database-gqe-table-getsecrownum"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a4d4a0a361ea159232842e98999259211"></span><h4>getSecRowNum<a class="headerlink" href="#getsecrownum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">size_t</span> <span class="n">getSecRowNum</span> <span class="p">(</span><span class="kt">int</span> <span class="n">sid</span><span class="p">)</span> <span class="k">const</span>
+</pre>
+<p>get number of rows for the specified section.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>sid</td>
+<td>section ID</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>number of rows of the specified section</p>
+</div>
+<div class="section" id="getcolnum">
+<span id="cid-xf-database-gqe-table-getcolnum"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a79fc3e057ecac0dbea0209d69624d55f"></span><h4>getColNum<a class="headerlink" href="#getcolnum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">size_t</span> <span class="n">getColNum</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get number of columns.</p>
+<p class="rubric">Returns:</p>
+<p>number of columns of the table.</p>
+</div>
+<div class="section" id="getsecnum">
+<span id="cid-xf-database-gqe-table-getsecnum"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a6533bf39db7d2af4c290e1014e66b9f9"></span><h4>getSecNum<a class="headerlink" href="#getsecnum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">size_t</span> <span class="n">getSecNum</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get number of sections.</p>
+<p class="rubric">Returns:</p>
+<p>number of sections of the table.</p>
+</div>
+<div class="section" id="checksecnum">
+<span id="cid-xf-database-gqe-table-checksecnum"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a4901fb461c1bd875f142f5d56327515d"></span><h4>checkSecNum<a class="headerlink" href="#checksecnum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">checkSecNum</span> <span class="p">(</span><span class="kt">int</span> <span class="n">sec_l</span><span class="p">)</span>
+</pre>
+<p>divide the columns evenly if section number is greater than 0.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>sec_l</td>
+<td>number of sections, if 0, do nothing since everything is done by addCol with json input.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getcoltypesize">
+<span id="cid-xf-database-gqe-table-getcoltypesize"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a70b045ce2b4ba3e7f53ac47470385a76"></span><h4>getColTypeSize<a class="headerlink" href="#getcoltypesize" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">size_t</span> <span class="n">getColTypeSize</span> <span class="p">(</span><span class="kt">int</span> <span class="n">cid</span><span class="p">)</span> <span class="k">const</span>
+</pre>
+<p>get column data type size.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>cid</td>
+<td>column ID</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>date type size of input column id.</p>
+</div>
+<div class="section" id="getcolpointer">
+<span id="cid-xf-database-gqe-table-getcolpointer"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1ad70e677cc8a60cf824765dd0d42ac68c"></span><h4>getColPointer<a class="headerlink" href="#getcolpointer" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">char</span><span class="o">*</span> <span class="n">getColPointer</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">_slice_num</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="k">const</span>
+</pre>
+<p>get buffer pointer.</p>
+<p>when getColPointer(2,4,1), it means the 2nd column was divied into 4 sections, return the pointer of the 2nd section</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>i</td>
+<td>column id</td>
+</tr>
+<tr class="row-even"><td>_slice_num</td>
+<td>divide column i into _slice_num parts</td>
+</tr>
+<tr class="row-odd"><td>j</td>
+<td>get the j’th part pointer after dividing</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>column buffer pointer</p>
+</div>
+<div class="section" id="getvalcolpointer">
+<span id="cid-xf-database-gqe-table-getvalcolpointer"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a1e33e138857d20a75f5007c9ec5068ea"></span><h4>getValColPointer<a class="headerlink" href="#getvalcolpointer" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">char</span><span class="o">*</span> <span class="n">getValColPointer</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">_slice_num</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">j</span>
+    <span class="p">)</span> <span class="k">const</span>
+</pre>
+<p>get the validation buffer pointer</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>_slice_num</td>
+<td>number of sections of the validation column</td>
+</tr>
+<tr class="row-even"><td>j</td>
+<td>the index of the section</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>the pointer of the specified section</p>
+</div>
+<div class="section" id="cid-xf-database-gqe-table-getcolpointer-2">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a7b6bab1d0032edbb8074a1510d5702ec"></span><span id="id1"></span><h4>getColPointer<a class="headerlink" href="#cid-xf-database-gqe-table-getcolpointer-2" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">char</span><span class="o">*</span> <span class="n">getColPointer</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="k">const</span>
+</pre>
+<p>get column pointer.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>i</td>
+<td>column id</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>column pointer</p>
+</div>
+<div class="section" id="setcolnames">
+<span id="cid-xf-database-gqe-table-setcolnames"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1ad55e40d9135a66cced048a33bc4559e9"></span><h4>setColNames<a class="headerlink" href="#setcolnames" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setColNames</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">col_names</span><span class="p">)</span>
+</pre>
+<p>set col_names</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>col_name</td>
+<td>column name list</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getcolnames">
+<span id="cid-xf-database-gqe-table-getcolnames"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a1bb1d127d2e93dc016a77f62da29f0fc"></span><h4>getColNames<a class="headerlink" href="#getcolnames" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">getColNames</span> <span class="p">()</span>
+</pre>
+<p>get col_names</p>
+<p class="rubric">Returns:</p>
+<p>list of column names</p>
+</div>
+<div class="section" id="getrowidcolname">
+<span id="cid-xf-database-gqe-table-getrowidcolname"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a6ad3edf9c50f65bbc989b98e85456202"></span><h4>getRowIDColName<a class="headerlink" href="#getrowidcolname" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getRowIDColName</span> <span class="p">()</span>
+</pre>
+<p>get the name of the row-id column</p>
+</div>
+<div class="section" id="getvalidcolname">
+<span id="cid-xf-database-gqe-table-getvalidcolname"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a57cbf6ccdace23e60f3f860ea09e5a03"></span><h4>getValidColName<a class="headerlink" href="#getvalidcolname" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getValidColName</span> <span class="p">()</span>
+</pre>
+<p>get the name of the validation bits column</p>
+</div>
+<div class="section" id="getrowidenableflag">
+<span id="cid-xf-database-gqe-table-getrowidenableflag"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1ae492806de81934fc180a119b887e0978"></span><h4>getRowIDEnableFlag<a class="headerlink" href="#getrowidenableflag" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">bool</span> <span class="n">getRowIDEnableFlag</span> <span class="p">()</span>
+</pre>
+<p>get row-id enable flag</p>
+</div>
+<div class="section" id="getvalidenableflag">
+<span id="cid-xf-database-gqe-table-getvalidenableflag"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a08da60d1eb594df2793402dbe0a77aa9"></span><h4>getValidEnableFlag<a class="headerlink" href="#getvalidenableflag" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">bool</span> <span class="n">getValidEnableFlag</span> <span class="p">()</span>
+</pre>
+<p>get validation bits enable flag</p>
+</div>
+<div class="section" id="id2">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a28a340c8c4bc9d14d7f42d5086696095"></span><span id="id3"></span><h4>~Table<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="o">~</span><span class="n">Table</span> <span class="p">()</span>
+</pre>
+<p>deconstructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
+</div>
+<div class="section" id="info">
+<span id="cid-xf-database-gqe-table-info"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a23fb976531c02f4815ea368f39e1dd93"></span><h4>info<a class="headerlink" href="#info" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">info</span> <span class="p">()</span>
+</pre>
+<p>print information of the table</p>
+</div>
+</div>
+</div>
+<div class="section" id="class-xf-database-gqe-joiner">
+<span id="cid-xf-database-gqe-joiner"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner"></span><span id="index-1"></span><h2>class xf::database::gqe::Joiner<a class="headerlink" href="#class-xf-database-gqe-joiner" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_join.hpp&quot;</span>
+</pre>
+<div class="section" id="id4">
+<h3>Overview<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-joiner-joiner">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a77c3fddc720e9a1695412a06ef55b506"></span><span></span><span class="k">class</span> <span class="nl">Joiner</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">xf::database::gqe::Base</span></a>
+</pre>
+<div class="section" id="inherited-members">
+<h4>Inherited Members<a class="headerlink" href="#inherited-members" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight overview-inherited-code-block literal-block">
+
+</pre>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>Methods<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="joiner">
+<span id="id6"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a22bf68fe65d8d5f8e0a48be47f9f1ea6"></span><h4>Joiner<a class="headerlink" href="#joiner" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">Joiner</span> <span class="p">(</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a><span></span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span>
+</pre>
+<p>constructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Joiner.html#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> .</p>
+<p>Passing <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> obj to <a class="reference internal" href="../rst_3/class_xf_database_gqe_Joiner.html#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> class. Splitting <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> (OpenCL context, program, commandqueue, host/device buffers creation/allocation etc.) and <a class="reference internal" href="../rst_3/class_xf_database_gqe_Joiner.html#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> Init, guaranteens OpenCL stuff are not released after each join call. So the joiner may launch multi-times.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>obj</td>
+<td>the <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> instance.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="run">
+<span id="cid-xf-database-gqe-joiner-run"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a141481944b58c4dd1d7ecd41777200cb"></span><h4>run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<a class="reference internal" href="../rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">run</span> <span class="p">(</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_a</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_a</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_b</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_b</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">join_str</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_c</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">join_type</span> <span class="o">=</span> <a class="reference internal" href="../rst_3/namespace_xf_database_gqe.html#doxid-namespacexf-1-1database-1-1gqe-1a48260a37f3c58f033217c43cdfe10380a0190ab4db681e407952c182bd745834d"><span class="std std-ref">INNER_JOIN</span></a><span></span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_JoinStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-join-strategy-base"><span class="std std-ref">JoinStrategyBase</span></a><span></span><span class="o">*</span> <span class="n">strategyimp</span> <span class="o">=</span> <span class="k">nullptr</span>
+    <span class="p">)</span>
+</pre>
+<p>Run join with the input arguments defined strategy, which includes.</p>
+<ul class="simple">
+<li>solution: the join solution (direct-join or partation-join)</li>
+<li>sec_o: left table sec number</li>
+<li>sec_l: right table sec number</li>
+<li>slice_num: the slice number that used in probe</li>
+<li>log_part, the partition number of left/right table</li>
+<li>coef_exp_partO: the expansion coefficient of table O result buffer size / input buffer size, this param affects the output buffer size, but not the perf</li>
+<li>coef_exp_partL: the expansion coefficient of table L result buffer size / input buffer size, this param affects the output buffer size, but not the perf</li>
+<li>coef_exp_join: the expansion coefficient of result buffer size / input buffer size, this param affects the output buffer size, but not the perf</li>
+</ul>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">auto</span> <span class="n">smanual</span> <span class="o">=</span> <span class="n">new</span> <span class="n">gqe</span><span class="p">::</span><span class="n">JoinStrategyManualSet</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">sec_o</span><span class="p">,</span> <span class="n">sec_l</span><span class="p">,</span> <span class="n">slice_num</span><span class="p">,</span> <span class="n">log_part</span><span class="p">,</span> <span class="n">coef_exp_partO</span><span class="p">,</span>
+<span class="n">coef_exp_partL</span><span class="p">,</span> <span class="n">coef_exp_join</span><span class="p">);</span>
+
+  <span class="n">ErrCode</span> <span class="n">err</span> <span class="o">=</span> <span class="n">bigjoin</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+      <span class="n">tab_o</span><span class="p">,</span> <span class="s2">&quot;o_rowid &gt; 0&quot;</span><span class="p">,</span>
+      <span class="n">tab_l</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;o_orderkey = l_orderkey&quot;</span><span class="p">,</span>
+      <span class="n">tab_c</span><span class="p">,</span> <span class="s2">&quot;c1=l_orderkey, c2=o_rowid, c3=l_rowid&quot;</span><span class="p">,</span>
+      <span class="n">gqe</span><span class="p">::</span><span class="n">INNER_JOIN</span><span class="p">,</span>
+      <span class="n">smanual</span><span class="p">);</span>
+  <span class="n">delete</span> <span class="n">smanual</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> tab_o filter condition like “o_rowid &gt; 0”, o_rowid is the col name of tab_o when no filter conditions, given empty fitler condition “”</p>
+<p>The join condition like “left_join_key_0=right_join_key_0” when dual key join is enabled, using comma as the seperator in join condition, e.g. “left_join_key_0=right_join_key_0,left_join_key_1=right_join_key_1”</p>
+<p>Output strings are like “output_c0 = tab_a_col/tab_b_col”, when several columns are output, using comma as the seperator</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>tab_a</td>
+<td>left table</td>
+</tr>
+<tr class="row-even"><td>filter_a</td>
+<td>filter condition of left table</td>
+</tr>
+<tr class="row-odd"><td>tab_b</td>
+<td>right table</td>
+</tr>
+<tr class="row-even"><td>filter_b</td>
+<td>filter condition of right table</td>
+</tr>
+<tr class="row-odd"><td>join_str</td>
+<td>join condition(s)</td>
+</tr>
+<tr class="row-even"><td>tab_c</td>
+<td>result table</td>
+</tr>
+<tr class="row-odd"><td>output_str</td>
+<td>output columns</td>
+</tr>
+<tr class="row-even"><td>join_type</td>
+<td>INNER_JOIN(default) | SEMI_JOIN | ANTI_JOIN.</td>
+</tr>
+<tr class="row-odd"><td>strategyimp</td>
+<td>pointer to an object of <a class="reference internal" href="../rst_3/class_xf_database_gqe_JoinStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-join-strategy-base"><span class="std std-ref">JoinStrategyBase</span></a> or its derived type.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="class-xf-database-gqe-bloomfilter">
+<span id="cid-xf-database-gqe-bloomfilter"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"></span><span id="index-2"></span><h2>class xf::database::gqe::BloomFilter<a class="headerlink" href="#class-xf-database-gqe-bloomfilter" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_bloomfilter.hpp&quot;</span>
+</pre>
+<div class="section" id="id7">
+<h3>Overview<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight overview-code-block literal-block">
+
+</pre>
+</div>
+<div class="section" id="id8">
+<h3>Methods<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="bloomfilter">
+<span id="cid-xf-database-gqe-bloomfilter-bloomfilter"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1a287ea566e4c895ac6c3513cab7c02465"></span><h4>BloomFilter<a class="headerlink" href="#bloomfilter" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">BloomFilter</span> <span class="p">(</span>
+    <span class="kt">uint64_t</span> <span class="n">num_keys</span><span class="p">,</span>
+    <span class="kt">float</span> <span class="n">fpp</span> <span class="o">=</span> <span class="mf">0.05f</span>
+    <span class="p">)</span>
+</pre>
+<p>constructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_BloomFilter.html#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a></p>
+<p>Calculates the size of the bloom-filter based on the number of unique keys and the equation provided in: <a class="reference external" href="https://en.wikipedia.org/wiki/Bloom_filter">https://en.wikipedia.org/wiki/Bloom_filter</a>, as well as allocates buffer for the internal hash-table</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>num_keys</td>
+<td>number of unique keys to be built into the hash-table of the bloom-filter</td>
+</tr>
+<tr class="row-even"><td>fpp</td>
+<td>false positive probability (5% by default)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="build">
+<span id="cid-xf-database-gqe-bloomfilter-build"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1a8d75546775f2906a40655869197f9793"></span><h4>build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">build</span> <span class="p">(</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span> <span class="n">tab_in</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">col_names</span>
+    <span class="p">)</span>
+</pre>
+<p>build the hash-table with the given key column from input table,</p>
+<p>key_names_str should be comma separated, e.g. “key0, key1”</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>tab_in</td>
+<td>input table</td>
+</tr>
+<tr class="row-even"><td>key_names_str</td>
+<td>key column names (comma separated) of the input table to be built into hash-table</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="merge">
+<span id="cid-xf-database-gqe-bloomfilter-merge"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1a0144360175a09504e9946b192ffdc894"></span><h4>merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">merge</span> <span class="p">(</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_BloomFilter.html#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a><span></span><span class="o">&amp;</span> <span class="n">bf_in</span><span class="p">)</span>
+</pre>
+<p>merge the input bloom-filter into the current one</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>bf_in</td>
+<td>input bloom-filter</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gethashtable">
+<span id="cid-xf-database-gqe-bloomfilter-gethashtable"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1a83ddfb0e0f5edcdcda38d463b2c9de2e"></span><h4>getHashTable<a class="headerlink" href="#gethashtable" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;**</span> <span class="n">getHashTable</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get the bloom-filter hash-table</p>
+<p class="rubric">Returns:</p>
+<p>hash-table of the bloom-filter</p>
+</div>
+<div class="section" id="getbloomfiltersize">
+<span id="cid-xf-database-gqe-bloomfilter-getbloomfiltersize"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1af2f614f55c0ac429bc96cac0d5b7ae64"></span><h4>getBloomFilterSize<a class="headerlink" href="#getbloomfiltersize" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">uint64_t</span> <span class="n">getBloomFilterSize</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get the bloom-filter size</p>
+<p class="rubric">Returns:</p>
+<p>size of the bloom-filter</p>
+</div>
+</div>
+</div>
+<div class="section" id="class-xf-database-gqe-filter">
+<span id="cid-xf-database-gqe-filter"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-filter"></span><span id="index-3"></span><h2>class xf::database::gqe::Filter<a class="headerlink" href="#class-xf-database-gqe-filter" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_filter.hpp&quot;</span>
+</pre>
+<div class="section" id="id9">
+<h3>Overview<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="k">class</span> <span class="nl">Filter</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">xf::database::gqe::Base</span></a>
+</pre>
+<div class="section" id="id10">
+<h4>Inherited Members<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight overview-inherited-code-block literal-block">
+
+</pre>
+</div>
+</div>
+<div class="section" id="id11">
+<h3>Methods<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="filter">
+<span id="cid-xf-database-gqe-filter-filter"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-filter-1a4b9fbc3e64605089f56e83d43708f45f"></span><h4>Filter<a class="headerlink" href="#filter" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">Filter</span> <span class="p">(</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a><span></span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span>
+</pre>
+<p>constructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Filter.html#doxid-classxf-1-1database-1-1gqe-1-1-filter"><span class="std std-ref">Filter</span></a> .</p>
+<p>Initializes hardware as well as loads binary to FPGA by class <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">Base</span></a> &amp; <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a></p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>obj</td>
+<td><a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> class object</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id12">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-filter-1a9c0e755b89861cc38663352c907deefa"></span><span id="id13"></span><h4>~Filter<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="o">~</span><span class="n">Filter</span> <span class="p">()</span>
+</pre>
+<p>deconstructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Filter.html#doxid-classxf-1-1database-1-1gqe-1-1-filter"><span class="std std-ref">Filter</span></a> .</p>
+<p>clProgram, commandQueue, and Context will be released by class <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">Base</span></a></p>
+</div>
+<div class="section" id="cid-xf-database-gqe-filter-run">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-filter-1a2df733163fb12a6abdfcfb8c88eaf346"></span><span id="id14"></span><h4>run<a class="headerlink" href="#cid-xf-database-gqe-filter-run" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<a class="reference internal" href="../rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">run</span> <span class="p">(</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_in</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">input_str</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_BloomFilter.html#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a><span></span><span class="o">&amp;</span> <span class="n">bf_in</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_condition</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_out</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/struct_xf_database_gqe_StrategySet.html#doxid-structxf-1-1database-1-1gqe-1-1-strategy-set"><span class="std std-ref">StrategySet</span></a><span></span> <span class="n">params</span>
+    <span class="p">)</span>
+</pre>
+<p>gqeFilter run function.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">err_code</span> <span class="o">=</span> <span class="n">Filter</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">tab_in</span><span class="p">,</span>
+    <span class="s2">&quot;l_orderkey&quot;</span><span class="p">,</span>
+    <span class="n">bf_in</span><span class="p">,</span>
+    <span class="s2">&quot;19940101&lt;=l_orderdate &amp;&amp; l_orderdate&lt;19950101&quot;</span><span class="p">,</span>
+    <span class="n">tab_c1</span><span class="p">,</span>
+    <span class="s2">&quot;c1=l_extendedprice, c2=l_discount, c3=o_orderdate, c4=l_orderkey&quot;</span><span class="p">,</span>
+    <span class="n">params</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Input filter_condition like “19940101&lt;=l_orderdate &amp;&amp; l_orderdate&lt;19950101”, l_orderdate must be exsisted in colunm names of the input table, when no filter conditions, input “”</p>
+<p>Input key name(s) string like “l_orderkey_0”, when enable dual key join, use comma as seperator, “l_orderkey_0, l_orderkey_1”</p>
+<p>Output mapping is like “output_c0 = tab_in_col”, when contains several columns, use comma as seperator</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>tab_in</td>
+<td>input table</td>
+</tr>
+<tr class="row-even"><td>input_str</td>
+<td>key column names(s) of the input table to be bloom-filtered</td>
+</tr>
+<tr class="row-odd"><td>bf_in</td>
+<td>input bloom-filter from which the hash-table used</td>
+</tr>
+<tr class="row-even"><td>filter_condition</td>
+<td>filter condition used in dynamic filter</td>
+</tr>
+<tr class="row-odd"><td>tab_out</td>
+<td>result table</td>
+</tr>
+<tr class="row-even"><td>output_str</td>
+<td>output column mapping</td>
+</tr>
+<tr class="row-odd"><td>params</td>
+<td><a class="reference internal" href="../rst_3/struct_xf_database_gqe_StrategySet.html#doxid-structxf-1-1database-1-1gqe-1-1-strategy-set"><span class="std std-ref">StrategySet</span></a> struct contatins number of sections of the input table. params.sec_l = 0: uses section info from input table; params.sec_l &gt;= 1: separates input table into params.sec_l sections evenly</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>error code</p>
+</div>
+</div>
+</div>
+<div class="section" id="class-xf-database-gqe-aggregator">
+<span id="cid-xf-database-gqe-aggregator"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggregator"></span><span id="index-4"></span><h2>class xf::database::gqe::Aggregator<a class="headerlink" href="#class-xf-database-gqe-aggregator" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_database/gqe_aggr.hpp&quot;</span>
+</pre>
+<div class="section" id="id15">
+<h3>Overview<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-aggregator-aggregator">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-aggregator-1a5aaf25962d1d10f4a2e6b2edf64c788e"></span>
+</pre>
+</div>
+<div class="section" id="id16">
+<h3>Methods<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="aggregator">
+<span id="id17"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggregator-1a04a196d3e3a9e31ee4db57d2548acd3b"></span><h4>Aggregator<a class="headerlink" href="#aggregator" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">Aggregator</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">xclbin</span><span class="p">)</span>
+</pre>
+<p>construct of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Aggregator.html#doxid-classxf-1-1database-1-1gqe-1-1-aggregator"><span class="std std-ref">Aggregator</span></a> .</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>xclbin</td>
+<td>xclbin path</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aggregate">
+<span id="cid-xf-database-gqe-aggregator-aggregate"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggregator-1a84e65484d5c77b5c71de28564e56e885"></span><h4>aggregate<a class="headerlink" href="#aggregate" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<a class="reference internal" href="../rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">aggregate</span> <span class="p">(</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_in</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><a class="reference internal" href="../rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a><span></span><span class="o">&gt;</span> <span class="n">evals_info</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_str</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">group_keys_str</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_out</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a><span></span><span class="o">*</span> <span class="n">strategyImp</span> <span class="o">=</span> <span class="k">nullptr</span>
+    <span class="p">)</span>
+</pre>
+<p>aggregate function.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">err_code</span> <span class="o">=</span> <span class="n">bigaggr</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">tab_l</span><span class="p">,</span> <span class="o">//</span><span class="nb">input</span> <span class="n">table</span>
+                             <span class="p">{{</span><span class="s2">&quot;l_extendedprice * (-l_discount+c2) / 100&quot;</span><span class="p">,</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">}},</span>
+                              <span class="p">{</span><span class="s2">&quot;l_extendedprice * (-l_discount+c2) * (l_tax+c3) / 10000&quot;</span><span class="p">,</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">}}</span>
+                             <span class="p">},</span> <span class="o">//</span> <span class="n">evaluation</span>
+                             <span class="s2">&quot;l_shipdate&lt;=19980902&quot;</span><span class="p">,</span> <span class="o">//</span><span class="nb">filter</span>
+                             <span class="s2">&quot;l_returnflag,l_linestatus&quot;</span><span class="p">,</span> <span class="o">//</span> <span class="n">group</span> <span class="n">keys</span>
+                             <span class="s2">&quot;c0=l_returnflag, c1=l_linestatus,c2=sum(eval0),c3=sum(eval1)&quot;</span><span class="p">,</span> <span class="o">//</span> <span class="n">mapping</span>
+                             <span class="n">tab_c</span><span class="p">,</span> <span class="o">//</span><span class="n">output</span> <span class="n">table</span>
+                             <span class="n">sptr</span><span class="p">);</span> <span class="o">//</span><span class="n">strategy</span>
+</pre></div>
+</div>
+<p>Input filter_str like “19940101&lt;=o_orderdate &amp;&amp; o_orderdate&lt;19950101”, o_orderdate and o_orderdate must be exsisted colunm names in input table when no filter conditions, input “”</p>
+<p>Input evaluation information as a struct <a class="reference internal" href="../rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a> , creata a valid Evaluation struct using initializer list, e.g. {“l_extendedprice * (-l_discount+c2) / 100”, {0, 100}} <a class="reference internal" href="../rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a> has two members: evaluation string and evaluation constants. In the evaluation string, you can input a final division calculation. Divisor only supports: 10,100,1000,10000 In the evaluation constants, input a constant for each column, if no constant, like “l_extendedprice” above, input zero.</p>
+<p>Input Group keys in a string, like “group_key0, group_key1”, use comma as seperator</p>
+<p>Output strings are like “c0=tab_in_col1, c1=tab_in_col2”, when contains several columns, use comma as seperator</p>
+<p>StrategyImp class pointer of derived class of <a class="reference internal" href="../rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a> .</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>tab_in</td>
+<td>input table</td>
+</tr>
+<tr class="row-even"><td>evals_info</td>
+<td>Evalutaion information</td>
+</tr>
+<tr class="row-odd"><td>filter_str</td>
+<td>filter condition</td>
+</tr>
+<tr class="row-even"><td>group_keys_str</td>
+<td>group keys</td>
+</tr>
+<tr class="row-odd"><td>out_ptr</td>
+<td>output list, output1 = tab_a_col1</td>
+</tr>
+<tr class="row-even"><td>tab_out</td>
+<td>result table</td>
+</tr>
+<tr class="row-odd"><td>strategyImp</td>
+<td>pointer to an object of <a class="reference internal" href="../rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a> or its derived type.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../benchmark.html" class="btn btn-neutral float-right" title="Benchmark" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gqe_l3_design.html" class="btn btn-neutral float-left" title="GQE L3 Design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+      <span class="lastupdated">
+        Last updated on June 09, 2021.
+      </span>
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2021, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>
