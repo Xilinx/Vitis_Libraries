@@ -1,0 +1,1647 @@
+.. _global-namespace:
+
+Global Namespace
+================
+
+.. index:: pair: namespace; global
+
+.. toctree::
+	:hidden:
+
+	namespace_xf.rst
+
+
+
+
+
+.. _doxid-gzip__compress__test_8cpp_1a71b6920cf692f538de456ea06f336b21:
+.. _cid-in_dt:
+.. _doxid-gzip__compress__test_8cpp_1a4f203c55023e1cdce2d580daad8b1248:
+.. _cid-out_dt:
+.. _doxid-gzip__compress__test_8cpp_1a6cf1574bec363f26113eee1889dcc11c:
+.. _cid-size_dt:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a7ddda1be7486c4f06f7f47327469deb3:
+.. _cid-in_t:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a1c8370222d54bc6e88185077f2072593:
+.. _cid-out_t:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a7ddda1be7486c4f06f7f47327469deb3:
+.. _cid-in_t-2:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a1c8370222d54bc6e88185077f2072593:
+.. _cid-out_t-2:
+.. _doxid-lz4__compress__test_8cpp_1a488a8f4be3eaad5790117e9b3297c9b5:
+.. _cid-compressd_dt:
+.. _doxid-lz4__compress__test_8cpp_1a5921c2f43549ef06a6a5536d7e23fa20:
+.. _cid-lz4_compressd_dt:
+.. _doxid-lz4__compress__test_8cpp_1a9a83df29f064e06bf91866483ed9c633:
+.. _cid-uintv_t:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1ad5287380cd5b3558778addf82066e2ea:
+.. _cid-data_t:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1aa536968aeb2ae66204731fac0404eb0b:
+.. _cid-data_t-2:
+.. _doxid-lz4__decompress_2lz4__decompress__test_8cpp_1a488a8f4be3eaad5790117e9b3297c9b5:
+.. _cid-compressd_dt-2:
+.. _doxid-lz4__decompress_2lz4__decompress__test_8cpp_1a9a83df29f064e06bf91866483ed9c633:
+.. _cid-uintv_t-2:
+.. _doxid-lz4__multibyte__decompress_2lz4__decompress__test_8cpp_1a002f301281a414b6df608085a738d237:
+.. _cid-uintv_t-3:
+.. _doxid-lz4__packer__test_8cpp_1aa536968aeb2ae66204731fac0404eb0b:
+.. _cid-data_t-3:
+.. _doxid-snappy__compress__test_8cpp_1a9a83df29f064e06bf91866483ed9c633:
+.. _cid-uintv_t-4:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1a488a8f4be3eaad5790117e9b3297c9b5:
+.. _cid-compressd_dt-3:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1a9a83df29f064e06bf91866483ed9c633:
+.. _cid-uintv_t-5:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1ab7d6ceb2de15b53f2dbafdd90033e854:
+.. _cid-uints_t:
+.. _doxid-snappy__multibyte__decompress_2snappy__decompress__test_8cpp_1ab7d6ceb2de15b53f2dbafdd90033e854:
+.. _cid-uints_t-2:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1aa536968aeb2ae66204731fac0404eb0b:
+.. _cid-data_t-4:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1aa536968aeb2ae66204731fac0404eb0b:
+.. _cid-data_t-5:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1aa536968aeb2ae66204731fac0404eb0b:
+.. _cid-data_t-6:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1a71b6920cf692f538de456ea06f336b21:
+.. _cid-in_dt-2:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1a4f203c55023e1cdce2d580daad8b1248:
+.. _cid-out_dt-2:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1a6cf1574bec363f26113eee1889dcc11c:
+.. _cid-size_dt-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a4c19b8c502f8745b3346cd50f2ec17c5:
+.. _cid-frequency:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a9aaf60302d13641a1e4922bb7936024c:
+.. _cid-codeword:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1a71b6920cf692f538de456ea06f336b21:
+.. _cid-in_dt-3:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1a4f203c55023e1cdce2d580daad8b1248:
+.. _cid-out_dt-3:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1a6cf1574bec363f26113eee1889dcc11c:
+.. _cid-size_dt-3:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a7ddda1be7486c4f06f7f47327469deb3:
+.. _cid-in_t-3:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a1c8370222d54bc6e88185077f2072593:
+.. _cid-out_t-3:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a7ddda1be7486c4f06f7f47327469deb3:
+.. _cid-in_t-4:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a1c8370222d54bc6e88185077f2072593:
+.. _cid-out_t-4:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a7ddda1be7486c4f06f7f47327469deb3:
+.. _cid-in_t-5:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a1c8370222d54bc6e88185077f2072593:
+.. _cid-out_t-5:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a71b6920cf692f538de456ea06f336b21:
+.. _cid-in_dt-4:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a4f203c55023e1cdce2d580daad8b1248:
+.. _cid-out_dt-4:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a6cf1574bec363f26113eee1889dcc11c:
+.. _cid-size_dt-4:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a71b6920cf692f538de456ea06f336b21:
+.. _cid-in_dt-5:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a4f203c55023e1cdce2d580daad8b1248:
+.. _cid-out_dt-5:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a6cf1574bec363f26113eee1889dcc11c:
+.. _cid-size_dt-5:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a7ddda1be7486c4f06f7f47327469deb3:
+.. _cid-in_t-6:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a1c8370222d54bc6e88185077f2072593:
+.. _cid-out_t-6:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1aafef94611fb3989f913ba51f6035ea9f:
+.. _cid-data_t-7:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1aafef94611fb3989f913ba51f6035ea9f:
+.. _cid-data_t-8:
+.. _doxid-zlib__huffman__test_8cpp_1a4c19b8c502f8745b3346cd50f2ec17c5:
+.. _cid-frequency-2:
+.. _doxid-zlib__huffman__test_8cpp_1a9aaf60302d13641a1e4922bb7936024c:
+.. _cid-codeword-2:
+.. _doxid-zlib__treegen__test_8cpp_1a4c19b8c502f8745b3346cd50f2ec17c5:
+.. _cid-frequency-3:
+.. _doxid-zlib__treegen__test_8cpp_1a9aaf60302d13641a1e4922bb7936024c:
+.. _cid-codeword-3:
+.. _doxid-fixed__codes_8hpp_1af031cec084d4844fbe51e3a10ccfdb6b:
+.. _cid-fixed_litml_op:
+.. _doxid-fixed__codes_8hpp_1a64e230b03012317baab66f05a1cc22d8:
+.. _cid-fixed_litml_bits:
+.. _doxid-fixed__codes_8hpp_1a1d19cf4f687a698ef924eee0b86447df:
+.. _cid-fixed_litml_val:
+.. _doxid-lz4__compress_8hpp_1ad911d341705f8d9fc3e2c3079ed13e7d:
+.. _cid-c_gmemburstsize:
+.. _doxid-snappy__compress_8hpp_1ad911d341705f8d9fc3e2c3079ed13e7d:
+.. _cid-c_gmemburstsize-2:
+.. _doxid-zlib__specs_8hpp_1ad9b35bd5633acb11aa4db5c956cccf89:
+.. _cid-gz_max_literal_count:
+.. _doxid-zlib__specs_8hpp_1aed8b468c373c3401e2af70122b1d5212:
+.. _cid-c_maxbits:
+.. _doxid-zlib__specs_8hpp_1a66b60e9811f90e433b7a786a8c34528d:
+.. _cid-c_literals:
+.. _doxid-zlib__specs_8hpp_1a8f3938935d169bc3cdd0e65873295c8a:
+.. _cid-c_lengthcodes:
+.. _doxid-zlib__specs_8hpp_1aa61fb557cac504a5e4760d4337866481:
+.. _cid-c_literalcodes:
+.. _doxid-zlib__specs_8hpp_1af007d8e69f77ccee6c60221ece6b5500:
+.. _cid-c_distancecodes:
+.. _doxid-zlib__specs_8hpp_1a05fd51dbacbf2483151b9b12efecf84e:
+.. _cid-c_blcodes:
+.. _doxid-zlib__specs_8hpp_1a66ebe0fb5de1315ebfc111ef5f77c17c:
+.. _cid-c_heapsize:
+.. _doxid-zlib__specs_8hpp_1a3402d4f467937297d453283dc667d072:
+.. _cid-c_maxblbits:
+.. _doxid-zlib__specs_8hpp_1aab8aed1e72a2caa40893ff66e9c27c75:
+.. _cid-c_reuseprevblen:
+.. _doxid-zlib__specs_8hpp_1ab4e5a2f3cd2bc5a36507555afeab4392:
+.. _cid-c_reusezeroblen:
+.. _doxid-zlib__specs_8hpp_1a78fdd357204e516e803a39b46d0a8854:
+.. _cid-c_reusezeroblen7:
+.. _doxid-zlib__specs_8hpp_1aea12a0f1bc99e33345fa2e3cd8b6bf93:
+.. _cid-c_fixeddecoder:
+.. _doxid-zlib__specs_8hpp_1a3e852a31d5d2ba9a2f404adf82c05894:
+.. _cid-c_dynamicdecoder:
+.. _doxid-zlib__specs_8hpp_1adbe74b4fb21cc2f09ddcb06ed41912d5:
+.. _cid-c_fulldecoder:
+.. _doxid-zlib__specs_8hpp_1a3bc12ee4cd7d96f4cc7ab7de4cbaeaa4:
+.. _cid-c_frequency_bits:
+.. _doxid-zlib__specs_8hpp_1aed7e7e390c6f3c71cd9abd256dc8e410:
+.. _cid-c_codeword_bits:
+.. _doxid-zlib__specs_8hpp_1a66392522e2c2b62a579b9c66ecc90be2:
+.. _cid-c_litcodecount:
+.. _doxid-zlib__specs_8hpp_1a894534dcb5ca390f15dc998de608fc2b:
+.. _cid-c_dstcodecount:
+.. _doxid-zlib__specs_8hpp_1af323ad881c469e783bf9f1fa6724fbc9:
+.. _cid-c_blncodecount:
+.. _doxid-zlib__specs_8hpp_1aa789fdd979783acccc477d4c1c6fd612:
+.. _cid-c_maxcodebits:
+.. _doxid-zlib__specs_8hpp_1a2987f897afff8fba4ee3c553dffbf5f7:
+.. _cid-c_maxblcodebits:
+.. _doxid-zlib__tables_8hpp_1a256f536c4276dd017793e524e36a2550:
+.. _cid-c_length_codes:
+.. _doxid-zlib__tables_8hpp_1a45d99c025717b6329db54b3259d0590d:
+.. _cid-c_max_match:
+.. _doxid-zlib__tables_8hpp_1aaf0d85ccb848979fb66f167f99046386:
+.. _cid-c_min_match:
+.. _doxid-zlib__tables_8hpp_1af1ce04f35f3051e8875b49f5b5e36205:
+.. _cid-c_distance_codes:
+.. _doxid-zlib__tables_8hpp_1ab07e5172be57d7882e9d6da5edfadb63:
+.. _cid-length_code:
+.. _doxid-zlib__tables_8hpp_1a1a7094161bcabeeded287fabe1074db8:
+.. _cid-dist_code:
+.. _doxid-zlib__tables_8hpp_1a6291a53f02483751affd349b4eb3e6a7:
+.. _cid-base_dist:
+.. _doxid-zlib__tables_8hpp_1a2f6f4514b1a427b16f7f510a04cf52d7:
+.. _cid-base_length:
+.. _doxid-zlib__tables_8hpp_1a2a91c5b4f5c091ff4e4b2cdb548e189d:
+.. _cid-lit_code_fixed:
+.. _doxid-zlib__tables_8hpp_1ad15de557d00423c9c2d7c4b439a480b7:
+.. _cid-lit_blen_fixed:
+.. _doxid-zlib__tables_8hpp_1a119176401fd2210c0f66d27e1ff8c779:
+.. _cid-dist_codes_fixed:
+.. _doxid-zlib__tables_8hpp_1a507e060b93d01bbccd0cbe7ec54151f2:
+.. _cid-dist_blen_fixed:
+.. _doxid-M_2adler32__test_8cpp_1abef6191f29d977fdd91fcdc1238e83d2:
+.. _cid-parallel_bytes:
+.. _doxid-M_2adler32__test_8cpp_1aad014e7028336b0af8fd30364f828540:
+.. _cid-const_size:
+.. _doxid-M_2adler32__test_8cpp_1a2a11fc532cdce87944bf66379dfb0d5e:
+.. _cid-host_buffer_size:
+.. _doxid-M_2adler32__test_8cpp_1a357efe733a7c22b7085b96ee56533461:
+.. _cid-c_size:
+.. _doxid-checksum32__test_8cpp_1af869f8158070f62437cc3f9e3ff7dacc:
+.. _cid-adler32:
+.. _doxid-checksum32__test_8cpp_1a8b2c3beacf1f6437b6f9049850068927:
+.. _cid-crc32:
+.. _doxid-checksum32__test_8cpp_1ae4aefcf243812791f6f5ce5b62574a00:
+.. _cid-checksum_mode:
+.. _doxid-checksum32__test_8cpp_1adc7d1bb9f1c3944d5606535d3c2cf21d:
+.. _cid-parallel_byte:
+.. _doxid-checksum32__test_8cpp_1aad014e7028336b0af8fd30364f828540:
+.. _cid-const_size-2:
+.. _doxid-checksum32__test_8cpp_1a2a11fc532cdce87944bf66379dfb0d5e:
+.. _cid-host_buffer_size-2:
+.. _doxid-checksum32__test_8cpp_1a357efe733a7c22b7085b96ee56533461:
+.. _cid-c_size-2:
+.. _doxid-crc32__test_8cpp_1a36832708dad78893034aa0608ee2d970:
+.. _cid-w:
+.. _doxid-crc32__test_8cpp_1a2a11fc532cdce87944bf66379dfb0d5e:
+.. _cid-host_buffer_size-3:
+.. _doxid-M_2crc32__test_8cpp_1adc7d1bb9f1c3944d5606535d3c2cf21d:
+.. _cid-parallel_byte-2:
+.. _doxid-M_2crc32__test_8cpp_1aad014e7028336b0af8fd30364f828540:
+.. _cid-const_size-3:
+.. _doxid-M_2crc32__test_8cpp_1a2a11fc532cdce87944bf66379dfb0d5e:
+.. _cid-host_buffer_size-4:
+.. _doxid-M_2crc32__test_8cpp_1a357efe733a7c22b7085b96ee56533461:
+.. _cid-c_size-3:
+.. _doxid-gzip__compress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-4:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-2:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-2:
+.. _doxid-lz4__compress__test_8cpp_1a90e94fa767ab685964e185a2312f4e84:
+.. _cid-c_minmatch:
+.. _doxid-lz4__compress__test_8cpp_1aa87903b65dd833279a1e723c3331a5ff:
+.. _cid-c_matchlevel:
+.. _doxid-lz4__compress__test_8cpp_1ada9477e7fec935d378d850bffc7ed10f:
+.. _cid-c_minoffset:
+.. _doxid-lz4__compress__test_8cpp_1aa8a2fe89d8804efb8439270357f45313:
+.. _cid-c_lz4maxliteralcount:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-5:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a41e7aa8a39193cbd5bb7f0676e9cc6f4:
+.. _cid-c_csize:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-6:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a41e7aa8a39193cbd5bb7f0676e9cc6f4:
+.. _cid-c_csize-2:
+.. _doxid-lz4__packer__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-7:
+.. _doxid-lz4__packer__test_8cpp_1a41e7aa8a39193cbd5bb7f0676e9cc6f4:
+.. _cid-c_csize-3:
+.. _doxid-mm2multStream__test_8cpp_1a667e870699a3a6e7fe7c43aea7991654:
+.. _cid-c_no_blocks:
+.. _doxid-mm2multStream__test_8cpp_1a72958c293640a4e261967a808cd686f5:
+.. _cid-c_insizev:
+.. _doxid-mm2multStream__test_8cpp_1a61b4768177f8c7ca788f7555c8e83ded:
+.. _cid-c_noelements:
+.. _doxid-new_2mm2multStream__test_8cpp_1a667e870699a3a6e7fe7c43aea7991654:
+.. _cid-c_no_blocks-2:
+.. _doxid-new_2mm2multStream__test_8cpp_1a72958c293640a4e261967a808cd686f5:
+.. _cid-c_insizev-2:
+.. _doxid-new_2mm2multStream__test_8cpp_1a61b4768177f8c7ca788f7555c8e83ded:
+.. _cid-c_noelements-2:
+.. _doxid-mm2sNb__test_8cpp_1a667e870699a3a6e7fe7c43aea7991654:
+.. _cid-c_no_blocks-3:
+.. _doxid-mm2sNb__test_8cpp_1a72958c293640a4e261967a808cd686f5:
+.. _cid-c_insizev-3:
+.. _doxid-mm2sNb__test_8cpp_1a61b4768177f8c7ca788f7555c8e83ded:
+.. _cid-c_noelements-3:
+.. _doxid-mm2sSimple__test_8cpp_1a72958c293640a4e261967a808cd686f5:
+.. _cid-c_insizev-4:
+.. _doxid-snappy__compress__test_8cpp_1a90e94fa767ab685964e185a2312f4e84:
+.. _cid-c_minmatch-2:
+.. _doxid-snappy__compress__test_8cpp_1ad67f6da6c4e62107a209ae25f6eed03e:
+.. _cid-c_snappymaxliteralstream:
+.. _doxid-upSizer__test_8cpp_1a4bd89ae3274f17ed07a6df2c7594f8cb:
+.. _cid-c_factor:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-8:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a41e7aa8a39193cbd5bb7f0676e9cc6f4:
+.. _cid-c_csize-4:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a9e7482b62b7a71559d492c9370543d58:
+.. _cid-c_size-9:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1ad76b799b3142a5e7a2a10b6575037409:
+.. _cid-c_csize-5:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a9e7482b62b7a71559d492c9370543d58:
+.. _cid-c_size-10:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1ad76b799b3142a5e7a2a10b6575037409:
+.. _cid-c_csize-6:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-11:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-3:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-3:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-12:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-4:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-4:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-5:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-5:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-6:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-6:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-13:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-14:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-7:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-7:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-15:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a938c826286e3aa0c70c56600f4779e34:
+.. _cid-c_constdepth:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1ada4db287d69d0ecf0029908f10d9a6e0:
+.. _cid-c_size-16:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a938c826286e3aa0c70c56600f4779e34:
+.. _cid-c_constdepth-2:
+.. _doxid-zlib__huffman__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-8:
+.. _doxid-zlib__huffman__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-8:
+.. _doxid-zlib__treegen__test_8cpp_1a0d0188781e21e7aa1d5552851b6e6dde:
+.. _cid-sizeof_in-9:
+.. _doxid-zlib__treegen__test_8cpp_1aeaacba8bb8a8fc303473562c18a713c5:
+.. _cid-sizeof_out-9:
+.. _doxid-adler32__test_8cpp_1a687370d816a77ad61c82012ada0c5d00:
+.. _cid-hls_adler32:
+.. _doxid-adler32__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main:
+.. _doxid-M_2adler32__test_8cpp_1a19b044b1a0275f2b806c1144c5f7470f:
+.. _cid-hls_adler32mm:
+.. _doxid-M_2adler32__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-2:
+.. _doxid-checksum32__test_8cpp_1a066ecd90203730db92fa8bf5b631212b:
+.. _cid-hls_checksum32mm:
+.. _doxid-checksum32__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-3:
+.. _doxid-crc32__test_8cpp_1a78c8a1f5eba9c14b348744252d904130:
+.. _cid-hls_crc32:
+.. _doxid-crc32__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-4:
+.. _doxid-M_2crc32__test_8cpp_1af585c6b6ab249fc72b277473edf93b4b:
+.. _cid-hls_crc32mm:
+.. _doxid-M_2crc32__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-5:
+.. _doxid-downsizer__test_8cpp_1a1967a1377590fd3dc726bc25fea19cd3:
+.. _cid-streamdownsizerrun:
+.. _doxid-downsizer__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-6:
+.. _doxid-gzip__compress__test_8cpp_1a9a551f7a945e60f8d08c44dbc14b5239:
+.. _cid-hls_gzipcompressstreaming:
+.. _doxid-gzip__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-7:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a60c085e78c664f312d780a71f820445e:
+.. _cid-gzipdecompressenginerun:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a11872dca9215b2f498cc580d3e92f3a3:
+.. _cid-validatefile:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-8:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1ab6daeef41e63e0e4e7bcf18264308383:
+.. _cid-gzipmultibytedecompressenginerun:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a11872dca9215b2f498cc580d3e92f3a3:
+.. _cid-validatefile-2:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-9:
+.. _doxid-lz4__compress__test_8cpp_1a100dcf2623f67d7a9b40120efe68db8f:
+.. _cid-lz4compressenginerun:
+.. _doxid-lz4__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-10:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1aed15bbcd29d4e7cfe15fa0ca5afb078e:
+.. _cid-hls_lz4compressmm32bitsingleengine:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-11:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1ad30d5b87ac2c7b6ef014c108edd3d3ca:
+.. _cid-hls_lz4compressmutiplestreams:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-12:
+.. _doxid-lz4__decompress_2lz4__decompress__test_8cpp_1a32314c48c583ead93c8cacfaf99158c3:
+.. _cid-lz4decompressenginerun:
+.. _doxid-lz4__decompress_2lz4__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-13:
+.. _doxid-lz4__multibyte__decompress_2lz4__decompress__test_8cpp_1ac79ed9515d35f41ec9dfd3be3a478ffb:
+.. _cid-lz4decompressenginerun-2:
+.. _doxid-lz4__multibyte__decompress_2lz4__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-14:
+.. _doxid-lz4__packer__test_8cpp_1ae987d536078e7418396d49cccae7a63c:
+.. _cid-hls_lz4compresspacker:
+.. _doxid-lz4__packer__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-15:
+.. _doxid-mm2multStream__test_8cpp_1a5ea626435de1d461ee47ac5fc60624d0:
+.. _cid-hls_mm2multstream:
+.. _doxid-mm2multStream__test_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4:
+.. _cid-main-16:
+.. _doxid-new_2mm2multStream__test_8cpp_1a5ea626435de1d461ee47ac5fc60624d0:
+.. _cid-hls_mm2multstream-2:
+.. _doxid-new_2mm2multStream__test_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4:
+.. _cid-main-17:
+.. _doxid-mm2sNb__test_8cpp_1a030638cfeb2e0ac376293b2389bf7bef:
+.. _cid-hls_mm2snb:
+.. _doxid-mm2sNb__test_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4:
+.. _cid-main-18:
+.. _doxid-mm2sSimple__test_8cpp_1a1f4d9124d0f8118efd9824ba97e8a484:
+.. _cid-hls_mm2ssimple:
+.. _doxid-mm2sSimple__test_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4:
+.. _cid-main-19:
+.. _doxid-snappy__compress__test_8cpp_1ab9a24f2c8fc8c55d582a519ecc8c99d3:
+.. _cid-snappycompressenginerun:
+.. _doxid-snappy__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-20:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1adf81fe1337c404118447c16aadb8853d:
+.. _cid-snappydecompressenginerun:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-21:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1a7b9ab1768f74ef153aac4c2a04934180:
+.. _cid-snappymulticoredec:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1ac8197c0c9f056ca3f34e5b00cba86977:
+.. _cid-processfile:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-22:
+.. _doxid-snappy__multibyte__decompress_2snappy__decompress__test_8cpp_1abd996c701d6a1ca78fd6749dd918ac4e:
+.. _cid-snappydecompressenginerun-2:
+.. _doxid-snappy__multibyte__decompress_2snappy__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-23:
+.. _doxid-upSizer__test_8cpp_1a3f447eb8753c87fbc68990e735ab4e13:
+.. _cid-hls_streamupsizer:
+.. _doxid-upSizer__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-24:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a8da534b7aee6a452eadeb7ea0dbfbcc4:
+.. _cid-hls_zlibcompresssingleengine:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-25:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a3423229435be92cbf3733f6b2758148d:
+.. _cid-hls_zlibcompressmultipleengine:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-26:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a3423229435be92cbf3733f6b2758148d:
+.. _cid-hls_zlibcompressmultipleengine-2:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-27:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1af2bd9e21d40b77b49a157dbba4ec68da:
+.. _cid-hls_zlibcompressstreaming:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-28:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a129f9275f5c8ea24b6bf565a8ba6a2a9:
+.. _cid-lz77compress:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1af771a7059168a64386048293ca27f9ea:
+.. _cid-treegenmm:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1ade152a8b38de850fd40b50891ca2eb4f:
+.. _cid-huffencpreprocess:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1ab1422963738941a8c578d416ceefe539:
+.. _cid-zlibhuffmanencoder:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a1b79a9a1d362b5bfc8b8e6d142584358:
+.. _cid-gethuffoutsize:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a27fdd047d64a0b849a4ebe5889952cfe:
+.. _cid-zlibcompress:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a8767d09e14308c9e15fae1f7309a5d52:
+.. _cid-zlibdecompress:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1aeb76d18ee571854d982bb08a880e7db3:
+.. _cid-validatefile-3:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-29:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1af2bd9e21d40b77b49a157dbba4ec68da:
+.. _cid-hls_zlibcompressstreaming-2:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-30:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a72b99a5e69f4b7050e2fcc22f6ec9e99:
+.. _cid-zlibdecompressenginerun:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a11872dca9215b2f498cc580d3e92f3a3:
+.. _cid-validatefile-4:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-31:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a72b99a5e69f4b7050e2fcc22f6ec9e99:
+.. _cid-zlibdecompressenginerun-2:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a11872dca9215b2f498cc580d3e92f3a3:
+.. _cid-validatefile-5:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-32:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a72b99a5e69f4b7050e2fcc22f6ec9e99:
+.. _cid-zlibdecompressenginerun-3:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a11872dca9215b2f498cc580d3e92f3a3:
+.. _cid-validatefile-6:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-33:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a4cbdf5a81aa28137e20b7bb263744653:
+.. _cid-zlibdecompressparser:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1acfde8714d9cf915e56026838a03464fc:
+.. _cid-hls_zlibdecompressstreaming:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1af2bd9e21d40b77b49a157dbba4ec68da:
+.. _cid-hls_zlibcompressstreaming-3:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1af6922ba402c3cdd8891ca64dfafd22b6:
+.. _cid-validate:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-34:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a4cbdf5a81aa28137e20b7bb263744653:
+.. _cid-zlibdecompressparser-2:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1acfde8714d9cf915e56026838a03464fc:
+.. _cid-hls_zlibdecompressstreaming-2:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1af2bd9e21d40b77b49a157dbba4ec68da:
+.. _cid-hls_zlibcompressstreaming-4:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-35:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1afd1dde66b8aa40670e2e6f449551bc28:
+.. _cid-zlibmultibytedecompressenginerun:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-36:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a5e941c02b26b07b3a61e851b76548daf:
+.. _cid-hls_zlibmultibytedecompress:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-37:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a5e941c02b26b07b3a61e851b76548daf:
+.. _cid-hls_zlibmultibytedecompress-2:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-38:
+.. _doxid-zlib__huffman__test_8cpp_1a129f9275f5c8ea24b6bf565a8ba6a2a9:
+.. _cid-lz77compress-2:
+.. _doxid-zlib__huffman__test_8cpp_1af771a7059168a64386048293ca27f9ea:
+.. _cid-treegenmm-2:
+.. _doxid-zlib__huffman__test_8cpp_1ade152a8b38de850fd40b50891ca2eb4f:
+.. _cid-huffencpreprocess-2:
+.. _doxid-zlib__huffman__test_8cpp_1ab1422963738941a8c578d416ceefe539:
+.. _cid-zlibhuffmanencoder-2:
+.. _doxid-zlib__huffman__test_8cpp_1a1b79a9a1d362b5bfc8b8e6d142584358:
+.. _cid-gethuffoutsize-2:
+.. _doxid-zlib__huffman__test_8cpp_1a27fdd047d64a0b849a4ebe5889952cfe:
+.. _cid-zlibcompress-2:
+.. _doxid-zlib__huffman__test_8cpp_1a8767d09e14308c9e15fae1f7309a5d52:
+.. _cid-zlibdecompress-2:
+.. _doxid-zlib__huffman__test_8cpp_1aeb76d18ee571854d982bb08a880e7db3:
+.. _cid-validatefile-7:
+.. _doxid-zlib__huffman__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-39:
+.. _doxid-zlib__treegen__test_8cpp_1a129f9275f5c8ea24b6bf565a8ba6a2a9:
+.. _cid-lz77compress-3:
+.. _doxid-zlib__treegen__test_8cpp_1af771a7059168a64386048293ca27f9ea:
+.. _cid-treegenmm-3:
+.. _doxid-zlib__treegen__test_8cpp_1ade152a8b38de850fd40b50891ca2eb4f:
+.. _cid-huffencpreprocess-3:
+.. _doxid-zlib__treegen__test_8cpp_1ab1422963738941a8c578d416ceefe539:
+.. _cid-zlibhuffmanencoder-3:
+.. _doxid-zlib__treegen__test_8cpp_1a1b79a9a1d362b5bfc8b8e6d142584358:
+.. _cid-gethuffoutsize-3:
+.. _doxid-zlib__treegen__test_8cpp_1a27fdd047d64a0b849a4ebe5889952cfe:
+.. _cid-zlibcompress-3:
+.. _doxid-zlib__treegen__test_8cpp_1a8767d09e14308c9e15fae1f7309a5d52:
+.. _cid-zlibdecompress-3:
+.. _doxid-zlib__treegen__test_8cpp_1aeb76d18ee571854d982bb08a880e7db3:
+.. _cid-validatefile-8:
+.. _doxid-zlib__treegen__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-40:
+.. _doxid-zstd__decompress__test_8cpp_1aff70840f91c5939621fa5177eaca1fb5:
+.. _cid-getdataportwidth:
+.. _doxid-zstd__decompress__test_8cpp_1ad1a43039028d3cb2e7060cfdf9b3e4e0:
+.. _cid-getfilesize:
+.. _doxid-zstd__decompress__test_8cpp_1a0b90ccc3f75483619c70a19067a5017a:
+.. _cid-decompressframe:
+.. _doxid-zstd__decompress__test_8cpp_1a0e11cf700d2550aa21e708d1fd7e3a22:
+.. _cid-validatefile-9:
+.. _doxid-zstd__decompress__test_8cpp_1a0ddf1224851353fc92bfbff6f499fa97:
+.. _cid-main-41:
+.. _doxid-upSizer__test_8cpp_1ad4da4e8993f480f2b3c7d8fbebd947b5:
+.. _cid-aop:
+.. _doxid-downsizer__test_8cpp_1ad4da4e8993f480f2b3c7d8fbebd947b5:
+.. _cid-aop-2:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-2:
+.. _doxid-gzip__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-3:
+.. _doxid-lz4__packer__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-4:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-5:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-6:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-7:
+.. _doxid-mm2sSimple__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-8:
+.. _doxid-mm2multStream__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-9:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-10:
+.. _doxid-new_2mm2multStream__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-11:
+.. _doxid-mm2sNb__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-12:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-13:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-14:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1a22a79078d4bc53268ab86f316856248f:
+.. _cid-block_length-15:
+.. _doxid-lz4__packer__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-2:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-3:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-4:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-5:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-6:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-7:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-8:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-9:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-10:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-11:
+.. _doxid-gzip__compress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-12:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1ad51ded0bbd705f02f73fc60c0b721ced:
+.. _cid-block_size-13:
+.. _doxid-zlib__treegen__test_8cpp_1a9cb9f49d4ce20962a777d05bc7e530ca:
+.. _cid-bltree_size:
+.. _doxid-zlib__huffman__test_8cpp_1a9cb9f49d4ce20962a777d05bc7e530ca:
+.. _cid-bltree_size-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a9cb9f49d4ce20962a777d05bc7e530ca:
+.. _cid-bltree_size-3:
+.. _doxid-new_2mm2multStream__test_8cpp_1a703e079cb598d615c750d24ec7432617:
+.. _cid-burst_size:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a703e079cb598d615c750d24ec7432617:
+.. _cid-burst_size-2:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a703e079cb598d615c750d24ec7432617:
+.. _cid-burst_size-3:
+.. _doxid-mm2sNb__test_8cpp_1a703e079cb598d615c750d24ec7432617:
+.. _cid-burst_size-4:
+.. _doxid-mm2sSimple__test_8cpp_1a703e079cb598d615c750d24ec7432617:
+.. _cid-burst_size-5:
+.. _doxid-mm2multStream__test_8cpp_1a703e079cb598d615c750d24ec7432617:
+.. _cid-burst_size-6:
+.. _doxid-mm2sSimple__test_8cpp_1a9fd648de902924f3e3896c971e0cb4b0:
+.. _cid-byte_cnt:
+.. _doxid-mm2multStream__test_8cpp_1a9fd648de902924f3e3896c971e0cb4b0:
+.. _cid-byte_cnt-2:
+.. _doxid-new_2mm2multStream__test_8cpp_1a9fd648de902924f3e3896c971e0cb4b0:
+.. _cid-byte_cnt-3:
+.. _doxid-mm2sNb__test_8cpp_1a9fd648de902924f3e3896c971e0cb4b0:
+.. _cid-byte_cnt-4:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-4:
+.. _doxid-lz4__packer__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-5:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-6:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-7:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-8:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-9:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-10:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a902297f4f3d7998dc763ae5fc1b05ad7:
+.. _cid-const_size-11:
+.. _doxid-zlib__treegen__test_8cpp_1a05216c357020a68f3aa13417f0f28417:
+.. _cid-dict_ele_width:
+.. _doxid-zlib__huffman__test_8cpp_1a05216c357020a68f3aa13417f0f28417:
+.. _cid-dict_ele_width-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a05216c357020a68f3aa13417f0f28417:
+.. _cid-dict_ele_width-3:
+.. _doxid-zlib__huffman__test_8cpp_1a55382a9a0b26bb7dfc5df2ecd43cb500:
+.. _cid-dtree_size:
+.. _doxid-zlib__treegen__test_8cpp_1a55382a9a0b26bb7dfc5df2ecd43cb500:
+.. _cid-dtree_size-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a55382a9a0b26bb7dfc5df2ecd43cb500:
+.. _cid-dtree_size-3:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1aea5b892271ca6a52f19eb510c4fd14cc:
+.. _cid-d_history_size:
+.. _doxid-zlib__treegen__test_8cpp_1aea5b892271ca6a52f19eb510c4fd14cc:
+.. _cid-d_history_size-2:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1aea5b892271ca6a52f19eb510c4fd14cc:
+.. _cid-d_history_size-3:
+.. _doxid-zlib__huffman__test_8cpp_1aea5b892271ca6a52f19eb510c4fd14cc:
+.. _cid-d_history_size-4:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1aea5b892271ca6a52f19eb510c4fd14cc:
+.. _cid-d_history_size-5:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a3d9ad5678c6633fb87f879d25370f22e:
+.. _cid-d_low_offset:
+.. _doxid-zlib__huffman__test_8cpp_1a3d9ad5678c6633fb87f879d25370f22e:
+.. _cid-d_low_offset-2:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a3d9ad5678c6633fb87f879d25370f22e:
+.. _cid-d_low_offset-3:
+.. _doxid-zlib__treegen__test_8cpp_1a3d9ad5678c6633fb87f879d25370f22e:
+.. _cid-d_low_offset-4:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a3d9ad5678c6633fb87f879d25370f22e:
+.. _cid-d_low_offset-5:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1aa5cb0dbefe46e8050624fa056bd9fb39:
+.. _cid-d_max_offset:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1aa5cb0dbefe46e8050624fa056bd9fb39:
+.. _cid-d_max_offset-2:
+.. _doxid-zlib__huffman__test_8cpp_1aa5cb0dbefe46e8050624fa056bd9fb39:
+.. _cid-d_max_offset-3:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1aa5cb0dbefe46e8050624fa056bd9fb39:
+.. _cid-d_max_offset-4:
+.. _doxid-zlib__treegen__test_8cpp_1aa5cb0dbefe46e8050624fa056bd9fb39:
+.. _cid-d_max_offset-5:
+.. _doxid-zlib__huffman__test_8cpp_1a9e7596921a3a653bf68d7049f1cfbf24:
+.. _cid-extra_blcodes:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a9e7596921a3a653bf68d7049f1cfbf24:
+.. _cid-extra_blcodes-2:
+.. _doxid-zlib__treegen__test_8cpp_1a9e7596921a3a653bf68d7049f1cfbf24:
+.. _cid-extra_blcodes-3:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a469c5697051b4de0f4a250234348df44:
+.. _cid-flg_byte:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a469c5697051b4de0f4a250234348df44:
+.. _cid-flg_byte-2:
+.. _doxid-mm2s_8hpp_1a4ef9636ea91e8374d90b2df0834b35a3:
+.. _cid-get_diff_if_big:
+.. _doxid-s2mm_8hpp_1a4ef9636ea91e8374d90b2df0834b35a3:
+.. _cid-get_diff_if_big-2:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-2:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-3:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-4:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-5:
+.. _doxid-lz4__packer__test_8cpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-6:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1adc4507285c666c55ff263d92d799cab5:
+.. _cid-gmem_datawidth:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1adc4507285c666c55ff263d92d799cab5:
+.. _cid-gmem_datawidth-2:
+.. _doxid-lz4__packer__test_8cpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-2:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-3:
+.. _doxid-zlib__compress_2zlib__compress__test_8cpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-4:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-5:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-6:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-2:
+.. _doxid-lz4__decompress_2lz4__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-3:
+.. _doxid-snappy__multibyte__decompress_2snappy__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-4:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-5:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-6:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-7:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-8:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-9:
+.. _doxid-lz4__multibyte__decompress_2lz4__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-10:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-11:
+.. _doxid-adler32__test_8cpp_1a497efa0991ba86ef9bb13ec59e253984:
+.. _cid-host_buffer_size-5:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a9270283cdb1f4d58ec0343f948d36866:
+.. _cid-host_chunk_size:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a9270283cdb1f4d58ec0343f948d36866:
+.. _cid-host_chunk_size-2:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-2:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-3:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-4:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-5:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-6:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-7:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-8:
+.. _doxid-zlib__huffman__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-9:
+.. _doxid-zlib__treegen__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-10:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-11:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-12:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a22cc227948847ddc754312ad3e2fab7a:
+.. _cid-huffman_type-13:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1af300fa39531c5b9d4fa8832a06dff6fb:
+.. _cid-huff_loop:
+.. _doxid-new_2mm2multStream__test_8cpp_1abcf72cd23bdafb47b19023d91b4c107d:
+.. _cid-input_size:
+.. _doxid-mm2multStream__test_8cpp_1abcf72cd23bdafb47b19023d91b4c107d:
+.. _cid-input_size-2:
+.. _doxid-mm2sSimple__test_8cpp_1abcf72cd23bdafb47b19023d91b4c107d:
+.. _cid-input_size-3:
+.. _doxid-mm2sNb__test_8cpp_1abcf72cd23bdafb47b19023d91b4c107d:
+.. _cid-input_size-4:
+.. _doxid-mm2sNb__test_8cpp_1a1218cb96254117845ba0f1c6b061ec24:
+.. _cid-input_size_in_mb:
+.. _doxid-mm2multStream__test_8cpp_1a1218cb96254117845ba0f1c6b061ec24:
+.. _cid-input_size_in_mb-2:
+.. _doxid-new_2mm2multStream__test_8cpp_1a1218cb96254117845ba0f1c6b061ec24:
+.. _cid-input_size_in_mb-3:
+.. _doxid-mm2sSimple__test_8cpp_1a1218cb96254117845ba0f1c6b061ec24:
+.. _cid-input_size_in_mb-4:
+.. _doxid-snappy__compress_8hpp_1aa97b62b50c39c309ceca39ddaeed7027:
+.. _cid-insize_range_14bit:
+.. _doxid-snappy__compress_8hpp_1a0d98fd116626aa66a21993825b219cc0:
+.. _cid-insize_range_21bit:
+.. _doxid-snappy__compress_8hpp_1aaac531efcf6147e702ff7c51cde9996d:
+.. _cid-insize_range_7bit:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-2:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-3:
+.. _doxid-zlib__huffman__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-4:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-5:
+.. _doxid-zlib__treegen__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-6:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-7:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-8:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1afd6d27c07e247a6a14b7bfcfba6ed39e:
+.. _cid-in_bitwidth-9:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-2:
+.. _doxid-mm2multStream__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-3:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-4:
+.. _doxid-mm2sSimple__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-5:
+.. _doxid-gzip__compress__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-6:
+.. _doxid-new_2mm2multStream__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-7:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-8:
+.. _doxid-mm2sNb__test_8cpp_1ac72548514bc22caaf95629ce80a12885:
+.. _cid-in_datawidth-9:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1a8874b5016667259c23cc9a32e88c4ffd:
+.. _cid-krnl_in_datawidth:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1a8874b5016667259c23cc9a32e88c4ffd:
+.. _cid-krnl_in_datawidth-2:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1aacad3ec09810f316135bebba814daeac:
+.. _cid-krnl_out_datawidth:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1aacad3ec09810f316135bebba814daeac:
+.. _cid-krnl_out_datawidth-2:
+.. _doxid-zlib__huffman__test_8cpp_1a9af9ff5960d0ec384e8ada602ec65fd1:
+.. _cid-least_val:
+.. _doxid-zlib__treegen__test_8cpp_1a9af9ff5960d0ec384e8ada602ec65fd1:
+.. _cid-least_val-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a9af9ff5960d0ec384e8ada602ec65fd1:
+.. _cid-least_val-3:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-2:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-3:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-4:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-5:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-6:
+.. _doxid-zlib__treegen__test_8cpp_1a5b89ad0599c454b953aab3bb714067a7:
+.. _cid-ltree_size:
+.. _doxid-zlib__huffman__test_8cpp_1a5b89ad0599c454b953aab3bb714067a7:
+.. _cid-ltree_size-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a5b89ad0599c454b953aab3bb714067a7:
+.. _cid-ltree_size-3:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit:
+.. _doxid-lz4__compress__test_8cpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-2:
+.. _doxid-snappy__compress__test_8cpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-3:
+.. _doxid-zlib__treegen__test_8cpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-4:
+.. _doxid-zlib__huffman__test_8cpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-5:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a61ebf417522c9f6f36c6623886d67213:
+.. _cid-magic_byte_1:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a61ebf417522c9f6f36c6623886d67213:
+.. _cid-magic_byte_1-2:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a3c514dc2fccf4d4a857502f6b853afa3:
+.. _cid-magic_byte_2:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a3c514dc2fccf4d4a857502f6b853afa3:
+.. _cid-magic_byte_2-2:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1ae57b794fe4bc9aac64890749cce69b89:
+.. _cid-magic_byte_3:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1ae57b794fe4bc9aac64890749cce69b89:
+.. _cid-magic_byte_3-2:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a2ca2da98990a1a3fa8f45b0aea8ccbd5:
+.. _cid-magic_byte_4:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a2ca2da98990a1a3fa8f45b0aea8ccbd5:
+.. _cid-magic_byte_4-2:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a1d5b46c8f8353fdceb2d12dc593a7da8:
+.. _cid-magic_header_size:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a1d5b46c8f8353fdceb2d12dc593a7da8:
+.. _cid-magic_header_size-2:
+.. _doxid-snappy__compress_8hpp_1a1a9ea1ca92a8c051263ff8018004ad91:
+.. _cid-marker:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len:
+.. _doxid-zlib__treegen__test_8cpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-2:
+.. _doxid-snappy__compress__test_8cpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-3:
+.. _doxid-lz4__compress__test_8cpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-4:
+.. _doxid-zlib__huffman__test_8cpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-5:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a32e585b69aa9798cd0335f8e8ff8404d:
+.. _cid-match_level:
+.. _doxid-zlib__treegen__test_8cpp_1a32e585b69aa9798cd0335f8e8ff8404d:
+.. _cid-match_level-2:
+.. _doxid-zlib__huffman__test_8cpp_1a32e585b69aa9798cd0335f8e8ff8404d:
+.. _cid-match_level-3:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a51c241e7ad52441b8d4c1fd5f498b3b9:
+.. _cid-max_bits:
+.. _doxid-zlib__treegen__test_8cpp_1a51c241e7ad52441b8d4c1fd5f498b3b9:
+.. _cid-max_bits-2:
+.. _doxid-zlib__huffman__test_8cpp_1a51c241e7ad52441b8d4c1fd5f498b3b9:
+.. _cid-max_bits-3:
+.. _doxid-snappy__compress__test_8cpp_1a388d7cbd7167357dd8aa63c2c90e3b8a:
+.. _cid-max_lit_count:
+.. _doxid-lz4__compress__test_8cpp_1a388d7cbd7167357dd8aa63c2c90e3b8a:
+.. _cid-max_lit_count-2:
+.. _doxid-snappy__compress__test_8cpp_1ad13a6e3dfd4f5858c1c0e4d81b7e7237:
+.. _cid-max_lit_stream_size:
+.. _doxid-snappy__compress__test_8cpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len:
+.. _doxid-zlib__treegen__test_8cpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-2:
+.. _doxid-lz4__compress__test_8cpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-3:
+.. _doxid-zlib__huffman__test_8cpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-4:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-5:
+.. _doxid-lz4__multibyte__decompress_2lz4__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-2:
+.. _doxid-snappy__decompress_2snappy__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-3:
+.. _doxid-lz4__decompress_2lz4__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-4:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-5:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-6:
+.. _doxid-snappy__multibyte__decompress_2snappy__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-7:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-8:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-9:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-10:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-11:
+.. _doxid-zlib__treegen__test_8cpp_1ac1f29ba54415975a2fa23e276fdf8a0f:
+.. _cid-min_block_size:
+.. _doxid-zlib__huffman__test_8cpp_1ac1f29ba54415975a2fa23e276fdf8a0f:
+.. _cid-min_block_size-2:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1ac1f29ba54415975a2fa23e276fdf8a0f:
+.. _cid-min_block_size-3:
+.. _doxid-zlib__huffman__test_8cpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match-2:
+.. _doxid-zlib__treegen__test_8cpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match-3:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes-2:
+.. _doxid-snappy__multibyte__decompress_2snappy__decompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes-3:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes-4:
+.. _doxid-zlib__decompress__mm__4pb_2zlibMultibyteDecompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes-5:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes-6:
+.. _doxid-zlib__decompress__mm__8pb_2zlibMultibyteDecompress__test_8cpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes-7:
+.. _doxid-snappy__dualcore__decompress_2snappy__decompress__test_8cpp_1a622293b32ccc06f19e7f568ba80a2390:
+.. _cid-num_blocks:
+.. _doxid-lz4__compress__test_8cpp_1a52cab5c557e96dc15148629e854d6d5e:
+.. _cid-offset_window:
+.. _doxid-snappy__compress__test_8cpp_1a52cab5c557e96dc15148629e854d6d5e:
+.. _cid-offset_window-2:
+.. _doxid-zlib__dec__full__huffman_2zlib__decompress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-2:
+.. _doxid-zlib__treegen__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-3:
+.. _doxid-zlib__huffman__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-4:
+.. _doxid-gzip__dec__full__huffman_2gzip__decompress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-5:
+.. _doxid-zlib__multibyte__decompress_2zlib__decompress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-6:
+.. _doxid-zlib__dec__dynamic__huffman_2zlib__decompress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-7:
+.. _doxid-gzip__multibyte__decompress_2gzip__decompress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-8:
+.. _doxid-zlib__dec__fixed__huffman_2zlib__decompress__test_8cpp_1a559bf091d2e63d19dfeb3785f3861ac7:
+.. _cid-out_bitwidth-9:
+.. _doxid-zlib__lz77_2zlib__compress__test_8cpp_1a589b7a395b2f5673eff3157cd143f349:
+.. _cid-out_bytes:
+.. _doxid-zlib__huffman__test_8cpp_1a589b7a395b2f5673eff3157cd143f349:
+.. _cid-out_bytes-2:
+.. _doxid-zlib__treegen__test_8cpp_1a589b7a395b2f5673eff3157cd143f349:
+.. _cid-out_bytes-3:
+.. _doxid-mm2multStream__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-2:
+.. _doxid-zlib__dec__static__streaming_2zlib__decompress__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-3:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-4:
+.. _doxid-new_2mm2multStream__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-5:
+.. _doxid-mm2sSimple__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-6:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-7:
+.. _doxid-gzip__compress__test_8cpp_1a76e5c1164ef139f833d3396cf22e3585:
+.. _cid-out_datawidth-8:
+.. _doxid-mm32bit__single__engine_2lz4__compress__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block:
+.. _doxid-snappy__compress__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-2:
+.. _doxid-mm2sNb__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-3:
+.. _doxid-multistreams_2lz4__compress__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-4:
+.. _doxid-zlib__compress__6pe__32kb_2zlib__compress__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-5:
+.. _doxid-new_2mm2multStream__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-6:
+.. _doxid-s2mm_8hpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-7:
+.. _doxid-zlib__compress__4pe__32kb_2zlib__compress__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-8:
+.. _doxid-mm2multStream__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-9:
+.. _doxid-lz4__compress__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-10:
+.. _doxid-lz4__packer__test_8cpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-11:
+.. _doxid-lz4__multibyte__decompress_2lz4__decompress__test_8cpp_1a5671cac6ae31db708a6823422ee18dc3:
+.. _cid-parallel_bytes-2:
+.. _doxid-zstd__decompress__test_8cpp_1aac4e25a61ab7e7fd39b594cc799e006c:
+.. _cid-parallel_bytes_read:
+.. _doxid-fixed__codes_8hpp_1a3484009f3611210b8f0ae50915529cbf:
+.. _cid-stable_size:
+.. _doxid-huffman__decoder_8hpp_1a3484009f3611210b8f0ae50915529cbf:
+.. _cid-stable_size-2:
+.. _doxid-gzip__compress__test_8cpp_1abd652b6c07d1e0ae5ef8b0b63e5aceb4:
+.. _cid-strategy:
+.. _doxid-zlib__static__compress__streaming_2zlib__compress__test_8cpp_1abd652b6c07d1e0ae5ef8b0b63e5aceb4:
+.. _cid-strategy-2:
+.. _doxid-zlib__decompress__streaming_2zlib__decompress__test_8cpp_1abd652b6c07d1e0ae5ef8b0b63e5aceb4:
+.. _cid-strategy-3:
+.. _doxid-zlib__compress__streaming_2zlib__compress__test_8cpp_1abd652b6c07d1e0ae5ef8b0b63e5aceb4:
+.. _cid-strategy-4:
+.. _doxid-mm2s_8hpp_1af822cc6d6c80c4dc0f9272f962956e02:
+.. _cid-stream_utils_mm2s_if_not_full:
+.. _doxid-s2mm_8hpp_1aaf549fd2531abbabcac7248e9ea6f123:
+.. _cid-stream_utils_s2mm_if_not_empty:
+.. _doxid-s2mm_8hpp_1ac41d4db060c4e595bac71a508f88b1ed:
+.. _cid-stream_utils_s2mm_read_size:
+.. _doxid-adler32__test_8cpp_1a649b8f01fd6c0f47ff3cbddaeba63bfb:
+.. _cid-w-2:
+.. _doxid-zstd__decompress__test_8cpp_1ab3f68d59e815ea166f8c983bc6e85c5b:
+.. _cid-window_size:
+.. _doxid-zstd__decompress__test_8cpp_1af40e9be722023b6e21ccee655b2f58b9:
+.. _cid-zstd:
+.. _doxid-zstd__decompress__test_8cpp_1a663d5804aee12e3655c9fb8aca8a56bd:
+.. _cid-zstd_block_size_kb:
+.. _doxid-lz__optional_8hpp_1a3a3a3795eafe60850be8b44dad7bdcf7:
+.. _cid-d_code:
+.. _doxid-huffman__encoder_8hpp_1a3a3a3795eafe60850be8b44dad7bdcf7:
+.. _cid-d_code-2:
+.. _doxid-upSizer__test_8cpp_1af96e853dc90e46299bcaaf0d43ece570:
+.. _cid-datasize:
+.. _doxid-downsizer__test_8cpp_1ab4ba6b6aac3a716a25c08754581ecd3d:
+.. _cid-inwidth:
+.. _doxid-upSizer__test_8cpp_1ab4ba6b6aac3a716a25c08754581ecd3d:
+.. _cid-inwidth-2:
+.. _doxid-downsizer__test_8cpp_1aef85b89ce1ce33e845db129f53742e74:
+.. _cid-outwidth:
+.. _doxid-upSizer__test_8cpp_1aef85b89ce1ce33e845db129f53742e74:
+.. _cid-outwidth-2:
+.. _doxid-downsizer__test_8cpp_1aef3ea664e2fed0d161d695b93af99361:
+.. _cid-testdatalen:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`xf<doxid-namespacexf>`
+	    namespace :ref:`xf::compression<doxid-namespacexf_1_1compression>`
+	        namespace :ref:`xf::compression::details<doxid-namespacexf_1_1compression_1_1details>`
+
+	// typedefs
+
+	typedef ap_axiu <IN_DATAWIDTH, 0, 0, 0> in_dT
+	typedef ap_axiu <OUT_DATAWIDTH, 0, 0, 0> out_dT
+	typedef ap_axiu <32, 0, 0, 0> size_dT
+	typedef ap_uint <IN_BITWIDTH> in_t
+	typedef ap_uint <OUT_BITWIDTH> out_t
+	typedef ap_uint <IN_BITWIDTH> in_t
+	typedef ap_uint <OUT_BITWIDTH> out_t
+	typedef ap_uint <32> compressd_dt
+	typedef ap_uint <64> lz4_compressd_dt
+	typedef ap_uint <8> uintV_t
+	typedef ap_uint <32> data_t
+	typedef ap_uint <512> data_t
+	typedef ap_uint <32> compressd_dt
+	typedef ap_uint <8> uintV_t
+	typedef ap_uint <PARALLEL_BYTES*8> uintV_t
+	typedef ap_uint <512> data_t
+	typedef ap_uint <8> uintV_t
+	typedef ap_uint <32> compressd_dt
+	typedef ap_uint <8> uintV_t
+	typedef ap_uint <MULTIPLE_BYTES*8> uintS_t
+	typedef ap_uint <MULTIPLE_BYTES*8> uintS_t
+	typedef ap_uint <512> data_t
+	typedef ap_uint <512> data_t
+	typedef ap_uint <512> data_t
+	typedef ap_axiu <IN_DATAWIDTH, 0, 0, 0> in_dT
+	typedef ap_axiu <OUT_DATAWIDTH, 0, 0, 0> out_dT
+	typedef ap_axiu <32, 0, 0, 0> size_dT
+	typedef xf::compression::Frequency Frequency
+	typedef :ref:`xf::compression::Codeword<doxid-structxf_1_1compression_1_1Codeword>` Codeword
+	typedef ap_axiu <IN_DATAWIDTH, 0, 0, 0> in_dT
+	typedef ap_axiu <OUT_DATAWIDTH, 0, 0, 0> out_dT
+	typedef ap_axiu <32, 0, 0, 0> size_dT
+	typedef ap_uint <IN_BITWIDTH> in_t
+	typedef ap_uint <OUT_BITWIDTH> out_t
+	typedef ap_uint <IN_BITWIDTH> in_t
+	typedef ap_uint <OUT_BITWIDTH> out_t
+	typedef ap_uint <IN_BITWIDTH> in_t
+	typedef ap_uint <OUT_BITWIDTH> out_t
+	typedef ap_axiu <IN_DATAWIDTH, 0, 0, 0> in_dT
+	typedef ap_axiu <OUT_DATAWIDTH, 0, 0, 0> out_dT
+	typedef ap_axiu <32, 0, 0, 0> size_dT
+	typedef ap_axiu <IN_DATAWIDTH, 0, 0, 0> in_dT
+	typedef ap_axiu <OUT_DATAWIDTH, 0, 0, 0> out_dT
+	typedef ap_axiu <32, 0, 0, 0> size_dT
+	typedef ap_uint <IN_BITWIDTH> in_t
+	typedef ap_uint <OUT_BITWIDTH> out_t
+	typedef ap_uint <GMEM_DATAWIDTH> data_t
+	typedef ap_uint <GMEM_DATAWIDTH> data_t
+	typedef xf::compression::Frequency Frequency
+	typedef :ref:`xf::compression::Codeword<doxid-structxf_1_1compression_1_1Codeword>` Codeword
+	typedef xf::compression::Frequency Frequency
+	typedef :ref:`xf::compression::Codeword<doxid-structxf_1_1compression_1_1Codeword>` Codeword
+
+	// global variables
+
+	const uint8_t fixed_litml_op[STABLE_SIZE]
+	const uint8_t fixed_litml_bits[STABLE_SIZE]
+	const uint16_t fixed_litml_val[STABLE_SIZE]
+	const int c_gmemBurstSize
+	const int c_gmemBurstSize
+	const int gz_max_literal_count
+	const auto c_maxBits
+	const auto c_literals
+	const auto c_lengthCodes
+	const auto c_literalCodes
+	const auto c_distanceCodes
+	const auto c_blCodes
+	const auto c_heapSize
+	const auto c_maxBlBits
+	const auto c_reusePrevBlen
+	const auto c_reuseZeroBlen
+	const auto c_reuseZeroBlen7
+	const auto c_fixedDecoder
+	const auto c_dynamicDecoder
+	const auto c_fullDecoder
+	const uint16_t c_frequency_bits
+	const uint16_t c_codeword_bits
+	const uint16_t c_litCodeCount
+	const uint16_t c_dstCodeCount
+	const uint16_t c_blnCodeCount
+	const uint16_t c_maxCodeBits
+	const uint16_t c_maxBLCodeBits
+	const uint16_t c_length_codes
+	const uint16_t c_max_match
+	const uint16_t c_min_match
+	const uint16_t c_distance_codes
+	const uint8_t length_code[c_max_match-c_min_match+1]
+	const uint8_t dist_code[512]
+	const uint16_t base_dist[c_distance_codes]
+	const uint8_t base_length[c_length_codes]
+	const uint16_t lit_code_fixed[]
+	const ap_uint <4> lit_blen_fixed[]
+	const uint16_t dist_codes_fixed[]
+	const ap_uint <4> dist_blen_fixed[]
+	auto constexpr PARALLEL_BYTES
+	auto constexpr CONST_SIZE
+	auto constexpr HOST_BUFFER_SIZE
+	auto constexpr c_size
+	auto constexpr ADLER32
+	auto constexpr CRC32
+	auto constexpr CHECKSUM_MODE
+	auto constexpr PARALLEL_BYTE
+	auto constexpr CONST_SIZE
+	auto constexpr HOST_BUFFER_SIZE
+	auto constexpr c_size
+	auto constexpr W
+	auto constexpr HOST_BUFFER_SIZE
+	auto constexpr PARALLEL_BYTE
+	auto constexpr CONST_SIZE
+	auto constexpr HOST_BUFFER_SIZE
+	auto constexpr c_size
+	const uint32_t c_size
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	int const c_minMatch
+	int const c_matchLevel
+	int const c_minOffset
+	int const c_lz4MaxLiteralCount
+	const uint32_t c_size
+	const uint32_t c_csize
+	const uint32_t c_size
+	const uint32_t c_csize
+	const uint32_t c_size
+	const uint32_t c_csize
+	const uint32_t c_no_blocks
+	const uint32_t c_inSizeV
+	const uint32_t c_noElements
+	const uint32_t c_no_blocks
+	const uint32_t c_inSizeV
+	const uint32_t c_noElements
+	const uint32_t c_no_blocks
+	const uint32_t c_inSizeV
+	const uint32_t c_noElements
+	const uint32_t c_inSizeV
+	int const c_minMatch
+	const int c_snappyMaxLiteralStream
+	int const c_factor
+	const uint32_t c_size
+	const uint32_t c_csize
+	constexpr uint32_t c_size
+	constexpr uint32_t c_csize
+	constexpr uint32_t c_size
+	constexpr uint32_t c_csize
+	const uint32_t c_size
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t c_size
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t c_size
+	const uint32_t c_size
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t c_size
+	const uint32_t c_constDepth
+	const uint32_t c_size
+	const uint32_t c_constDepth
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+	const uint32_t sizeof_in
+	const uint32_t sizeof_out
+
+	// macros
+
+	#define AOP
+	#define AOP
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_LENGTH
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLOCK_SIZE
+	#define BLTREE_SIZE
+	#define BLTREE_SIZE
+	#define BLTREE_SIZE
+	#define BURST_SIZE
+	#define BURST_SIZE
+	#define BURST_SIZE
+	#define BURST_SIZE
+	#define BURST_SIZE
+	#define BURST_SIZE
+	#define BYTE_CNT
+	#define BYTE_CNT
+	#define BYTE_CNT
+	#define BYTE_CNT
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define CONST_SIZE
+	#define DICT_ELE_WIDTH
+	#define DICT_ELE_WIDTH
+	#define DICT_ELE_WIDTH
+	#define DTREE_SIZE
+	#define DTREE_SIZE
+	#define DTREE_SIZE
+	#define D_HISTORY_SIZE
+	#define D_HISTORY_SIZE
+	#define D_HISTORY_SIZE
+	#define D_HISTORY_SIZE
+	#define D_HISTORY_SIZE
+	#define D_LOW_OFFSET
+	#define D_LOW_OFFSET
+	#define D_LOW_OFFSET
+	#define D_LOW_OFFSET
+	#define D_LOW_OFFSET
+	#define D_MAX_OFFSET
+	#define D_MAX_OFFSET
+	#define D_MAX_OFFSET
+	#define D_MAX_OFFSET
+	#define D_MAX_OFFSET
+	#define EXTRA_BLCODES
+	#define EXTRA_BLCODES
+	#define EXTRA_BLCODES
+	#define FLG_BYTE
+	#define FLG_BYTE
+
+	#define GET_DIFF_IF_BIG( \
+	    x, \
+	    y \
+	    )
+
+	#define GET_DIFF_IF_BIG( \
+	    x, \
+	    y \
+	    )
+
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_DATAWIDTH
+	#define GMEM_DATAWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HOST_BUFFER_SIZE
+	#define HOST_CHUNK_SIZE
+	#define HOST_CHUNK_SIZE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFFMAN_TYPE
+	#define HUFF_LOOP
+	#define INPUT_SIZE
+	#define INPUT_SIZE
+	#define INPUT_SIZE
+	#define INPUT_SIZE
+	#define INPUT_SIZE_IN_MB
+	#define INPUT_SIZE_IN_MB
+	#define INPUT_SIZE_IN_MB
+	#define INPUT_SIZE_IN_MB
+	#define INSIZE_RANGE_14BIT
+	#define INSIZE_RANGE_21BIT
+	#define INSIZE_RANGE_7BIT
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_BITWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define IN_DATAWIDTH
+	#define KRNL_IN_DATAWIDTH
+	#define KRNL_IN_DATAWIDTH
+	#define KRNL_OUT_DATAWIDTH
+	#define KRNL_OUT_DATAWIDTH
+	#define LEAST_VAL
+	#define LEAST_VAL
+	#define LEAST_VAL
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LTREE_SIZE
+	#define LTREE_SIZE
+	#define LTREE_SIZE
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define MAGIC_BYTE_1
+	#define MAGIC_BYTE_1
+	#define MAGIC_BYTE_2
+	#define MAGIC_BYTE_2
+	#define MAGIC_BYTE_3
+	#define MAGIC_BYTE_3
+	#define MAGIC_BYTE_4
+	#define MAGIC_BYTE_4
+	#define MAGIC_HEADER_SIZE
+	#define MAGIC_HEADER_SIZE
+	#define MARKER
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEVEL
+	#define MATCH_LEVEL
+	#define MATCH_LEVEL
+	#define MAX_BITS
+	#define MAX_BITS
+	#define MAX_BITS
+	#define MAX_LIT_COUNT
+	#define MAX_LIT_COUNT
+	#define MAX_LIT_STREAM_SIZE
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MIN_BLOCK_SIZE
+	#define MIN_BLOCK_SIZE
+	#define MIN_BLOCK_SIZE
+	#define MIN_MATCH
+	#define MIN_MATCH
+	#define MIN_MATCH
+	#define MULTIPLE_BYTES
+	#define MULTIPLE_BYTES
+	#define MULTIPLE_BYTES
+	#define MULTIPLE_BYTES
+	#define MULTIPLE_BYTES
+	#define MULTIPLE_BYTES
+	#define MULTIPLE_BYTES
+	#define NUM_BLOCKS
+	#define OFFSET_WINDOW
+	#define OFFSET_WINDOW
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BITWIDTH
+	#define OUT_BYTES
+	#define OUT_BYTES
+	#define OUT_BYTES
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define OUT_DATAWIDTH
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BYTES
+	#define PARALLEL_BYTES_READ
+	#define STABLE_SIZE
+	#define STABLE_SIZE
+	#define STRATEGY
+	#define STRATEGY
+	#define STRATEGY
+	#define STRATEGY
+
+	#define STREAM_UTILS_MM2S_IF_NOT_FULL( \
+	    bIdx, \
+	    outStream, \
+	    is_full, \
+	    read_idx, \
+	    write_idx, \
+	    local_buffer \
+	    )
+
+	#define STREAM_UTILS_S2MM_IF_NOT_EMPTY( \
+	    i, \
+	    instream, \
+	    burst_size, \
+	    input_size, \
+	    read_size, \
+	    write_size, \
+	    write_idx \
+	    )
+
+	#define STREAM_UTILS_S2MM_READ_SIZE( \
+	    i, \
+	    instream, \
+	    end_of_stream \
+	    )
+
+	#define W
+	#define WINDOW_SIZE
+	#define ZSTD
+	#define ZSTD_BLOCK_SIZE_KB
+
+	#define d_code( \
+	    dist, \
+	    dist_code \
+	    )
+
+	#define d_code( \
+	    dist, \
+	    dist_code \
+	    )
+
+	#define dataSize
+	#define inWidth
+	#define inWidth
+	#define outWidth
+	#define outWidth
+	#define testDataLen
+

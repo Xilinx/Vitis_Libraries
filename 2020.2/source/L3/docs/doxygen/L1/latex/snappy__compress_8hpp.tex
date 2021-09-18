@@ -1,0 +1,44 @@
+\hypertarget{snappy__compress_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/snappy\-\_\-compress.hpp File Reference}
+\label{snappy__compress_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/snappy\-\_\-compress.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/snappy\-\_\-compress.\-hpp}}
+}
+
+
+Header for modules used in snappy compression kernel.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{snappy__compress_8hpp_a1a9ea1ca92a8c051263ff8018004ad91}{\#define {\bfseries M\-A\-R\-K\-E\-R}~255}\label{snappy__compress_8hpp_a1a9ea1ca92a8c051263ff8018004ad91}
+
+\item 
+\hypertarget{snappy__compress_8hpp_aaac531efcf6147e702ff7c51cde9996d}{\#define {\bfseries I\-N\-S\-I\-Z\-E\-\_\-\-R\-A\-N\-G\-E\-\_\-7\-B\-I\-T}~(1 $<$$<$ 7)}\label{snappy__compress_8hpp_aaac531efcf6147e702ff7c51cde9996d}
+
+\item 
+\hypertarget{snappy__compress_8hpp_aa97b62b50c39c309ceca39ddaeed7027}{\#define {\bfseries I\-N\-S\-I\-Z\-E\-\_\-\-R\-A\-N\-G\-E\-\_\-14\-B\-I\-T}~(1 $<$$<$ 14)}\label{snappy__compress_8hpp_aa97b62b50c39c309ceca39ddaeed7027}
+
+\item 
+\hypertarget{snappy__compress_8hpp_a0d98fd116626aa66a21993825b219cc0}{\#define {\bfseries I\-N\-S\-I\-Z\-E\-\_\-\-R\-A\-N\-G\-E\-\_\-21\-B\-I\-T}~(1 $<$$<$ 21)}\label{snappy__compress_8hpp_a0d98fd116626aa66a21993825b219cc0}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a74a095dc3fd5d151e216e95f1393d8a2}{{\footnotesize template$<$int M\-A\-X\-\_\-\-L\-I\-T\-\_\-\-C\-O\-U\-N\-T, int M\-A\-X\-\_\-\-L\-I\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E, int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-U\-N\-I\-T\-S$>$ }\\void {\bfseries xf\-::compression\-::details\-::snappy\-Compress\-Part1} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&lit\-\_\-out\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 64 $>$ $>$ \&len\-Offset\-\_\-\-Stream, uint32\-\_\-t input\-\_\-size, uint32\-\_\-t max\-\_\-lit\-\_\-limit\mbox{[}P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-U\-N\-I\-T\-S\mbox{]}, uint32\-\_\-t index)}\label{namespacexf_1_1compression_1_1details_a74a095dc3fd5d151e216e95f1393d8a2}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{snappy__compress_8hpp_ad911d341705f8d9fc3e2c3079ed13e7d}{const int {\bfseries c\-\_\-gmem\-Burst\-Size} = 32}\label{snappy__compress_8hpp_ad911d341705f8d9fc3e2c3079ed13e7d}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in snappy compression kernel. This file is part of Vitis Data Compression Library. 

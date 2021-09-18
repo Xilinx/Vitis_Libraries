@@ -1,0 +1,81 @@
+\hypertarget{lz4__p2p__decompress__kernel_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-p2p\-\_\-decompress\-\_\-kernel.hpp File Reference}
+\label{lz4__p2p__decompress__kernel_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-p2p\-\_\-decompress\-\_\-kernel.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-p2p\-\_\-decompress\-\_\-kernel.\-hpp}}
+}
+
+
+Header for L\-Z4 P2\-P decompression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-p2p.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__p2p__decompress__kernel_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{lz4__p2p__decompress__kernel_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{lz4__p2p__decompress__kernel_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{lz4__p2p__decompress__kernel_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__p2p__decompress__kernel_8hpp_a115ff88a67a2fbf026601b36211766cf}{xil\-Lz4\-P2\-P\-Decompress} (const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$in, xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$out, \hyperlink{structunpackerBlockInfo}{dt\-\_\-block\-Info} $\ast$b\-Obj, \hyperlink{structunpackerChunkInfo}{dt\-\_\-chunk\-Info} $\ast$c\-Obj, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t compute\-\_\-unit, uint8\-\_\-t total\-\_\-no\-\_\-cu, uint32\-\_\-t num\-\_\-blocks)
+\begin{DoxyCompactList}\small\item\em L\-Z4 P2\-P decompression kernel is responsible for decompressing data which is in L\-Z4 encoded form. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for L\-Z4 P2\-P decompression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__p2p__decompress__kernel_8hpp_a115ff88a67a2fbf026601b36211766cf}{\index{lz4\-\_\-p2p\-\_\-decompress\-\_\-kernel.\-hpp@{lz4\-\_\-p2p\-\_\-decompress\-\_\-kernel.\-hpp}!xil\-Lz4\-P2\-P\-Decompress@{xil\-Lz4\-P2\-P\-Decompress}}
+\index{xil\-Lz4\-P2\-P\-Decompress@{xil\-Lz4\-P2\-P\-Decompress}!lz4_p2p_decompress_kernel.hpp@{lz4\-\_\-p2p\-\_\-decompress\-\_\-kernel.\-hpp}}
+\subsubsection[{xil\-Lz4\-P2\-P\-Decompress}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-P2\-P\-Decompress (
+\begin{DoxyParamCaption}
+\item[{const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{in, }
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{out, }
+\item[{{\bf dt\-\_\-block\-Info} $\ast$}]{b\-Obj, }
+\item[{{\bf dt\-\_\-chunk\-Info} $\ast$}]{c\-Obj, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{compute\-\_\-unit, }
+\item[{uint8\-\_\-t}]{total\-\_\-no\-\_\-cu, }
+\item[{uint32\-\_\-t}]{num\-\_\-blocks}
+\end{DoxyParamCaption}
+)}}\label{lz4__p2p__decompress__kernel_8hpp_a115ff88a67a2fbf026601b36211766cf}
+
+
+L\-Z4 P2\-P decompression kernel is responsible for decompressing data which is in L\-Z4 encoded form. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input stream width \\
+\hline
+{\em out} & output stream width \\
+\hline
+{\em in\-\_\-block\-\_\-size} & input size \\
+\hline
+{\em in\-\_\-compress\-\_\-size} & output size \\
+\hline
+{\em block\-\_\-start\-\_\-idx} & start index of block \\
+\hline
+{\em no\-\_\-blocks} & number of blocks for each compute unit \\
+\hline
+{\em block\-\_\-size\-\_\-in\-\_\-kb} & block input size \\
+\hline
+{\em compute\-\_\-unit} & particular compute unit \\
+\hline
+{\em total\-\_\-no\-\_\-cu} & number of compute units \\
+\hline
+{\em num\-\_\-blocks} & number of blocks base don host buffersize \\
+\hline
+\end{DoxyParams}

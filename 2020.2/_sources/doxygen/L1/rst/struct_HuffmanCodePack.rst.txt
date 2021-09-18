@@ -1,0 +1,29 @@
+.. index:: pair: struct; HuffmanCodePack
+.. _doxid-structHuffmanCodePack:
+.. _cid-huffmancodepack:
+
+template struct HuffmanCodePack
+===============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structHuffmanCodePack_1aa2295f73eeb2ba7c0957cd4f21fa68c0:
+.. _cid-huffmancodepack::all:
+.. _doxid-structHuffmanCodePack_1a75ff7e7e6dc3752a71136ea8f43943f3:
+.. _cid-huffmancodepack::code:
+.. _doxid-structHuffmanCodePack_1ad868e7d2bc683d315ddddbf05610c06c:
+.. _cid-huffmancodepack::bitlen:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    int CODE_LEN,
+	    int STROBE_DWIDTH = maxBitsUsed(CODE_LEN)
+	    >
+	struct HuffmanCodePack
+

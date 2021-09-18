@@ -1,0 +1,40 @@
+\hypertarget{huffman__decoder_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/huffman\-\_\-decoder.hpp File Reference}
+\label{huffman__decoder_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/huffman\-\_\-decoder.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/huffman\-\_\-decoder.\-hpp}}
+}
+
+
+Header for module used in Z\-L\-I\-B decompress kernel.  
+
+
+{\ttfamily \#include \char`\"{}fixed\-\_\-codes.\-hpp\char`\"{}}\\*
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bfseries e\-Huffman\-Type} \{ {\bfseries F\-I\-X\-E\-D} = 0, 
+{\bfseries D\-Y\-N\-A\-M\-I\-C}, 
+{\bfseries F\-U\-L\-L}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_afa70d91815e25d8f2ccde2744295b4e6}{{\footnotesize template$<$typename T $>$ }\\T {\bfseries xf\-::compression\-::details\-::reg} (T d)}\label{namespacexf_1_1compression_1_1details_afa70d91815e25d8f2ccde2744295b4e6}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a770ecb93b216c9c507d03927d66a8ed9}{{\footnotesize template$<$int Byte\-Gen\-Loop\-I\-I = 1$>$ }\\uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::huffman\-Bytegen\-Static} (uint64\-\_\-t \&\-\_\-bitbuffer, uint8\-\_\-t \&bits\-\_\-cntr, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, uint32\-\_\-t \&in\-\_\-cntr, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&in\-Stream, const uint8\-\_\-t $\ast$array\-\_\-codes\-\_\-op, const uint8\-\_\-t $\ast$array\-\_\-codes\-\_\-bits, const uint16\-\_\-t $\ast$array\-\_\-codes\-\_\-val)}\label{namespacexf_1_1compression_1_1details_a770ecb93b216c9c507d03927d66a8ed9}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a4d722e497319735fadc5f428d6a048eb}{{\footnotesize template$<$int Byte\-Gen\-Loop\-I\-I = 1$>$ }\\uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::huffman\-Bytegen} (uint64\-\_\-t \&\-\_\-bitbuffer, uint8\-\_\-t \&bits\-\_\-cntr, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, uint32\-\_\-t \&in\-\_\-cntr, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&in\-Stream, const uint32\-\_\-t $\ast$array\-\_\-codes, const uint32\-\_\-t $\ast$array\-\_\-codes\-\_\-extra, const uint32\-\_\-t $\ast$array\-\_\-codes\-\_\-dist, const uint32\-\_\-t $\ast$array\-\_\-codes\-\_\-dist\-\_\-extra)}\label{namespacexf_1_1compression_1_1details_a4d722e497319735fadc5f428d6a048eb}
+
+\item 
+void {\bfseries xf\-::compression\-::details\-::code\-\_\-generator\-\_\-array\-\_\-dyn} (uint8\-\_\-t curr\-\_\-table, uint16\-\_\-t $\ast$lens, uint32\-\_\-t codes, uint32\-\_\-t $\ast$table, uint32\-\_\-t $\ast$table\-\_\-extra, uint32\-\_\-t bits)
+\item 
+{\footnotesize template$<$e\-Huffman\-Type D\-E\-C\-O\-D\-E\-R = F\-U\-L\-L, int Byte\-Gen\-Loop\-I\-I = 1$>$ }\\void {\bfseries xf\-::compression\-::huffman\-Decoder} (hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em This module is Z\-L\-I\-B/\-G\-Z\-I\-P Fixed, Dynamic and Stored block supported decoder. It takes Z\-L\-I\-B/\-G\-Z\-I\-P Huffman encoded data as input and generates decoded data in L\-Z77 format (Literal, Length, Offset). \end{DoxyCompactList}\item 
+\hypertarget{namespacexf_1_1compression_a044b8de258f5f3685c980094b2127d93}{{\footnotesize template$<$e\-Huffman\-Type D\-E\-C\-O\-D\-E\-R = F\-U\-L\-L, int Byte\-Gen\-Loop\-I\-I = 2$>$ }\\void {\bfseries xf\-::compression\-::huffman\-Decoder\-Stream} (hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Size, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size)}\label{namespacexf_1_1compression_a044b8de258f5f3685c980094b2127d93}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for module used in Z\-L\-I\-B decompress kernel. This file is part of Vitis Data Compression Library. 

@@ -1,0 +1,23 @@
+.. index:: pair: enum; xf::compression::details::blockStatus
+.. _doxid-namespacexf_1_1compression_1_1details_1a6c42410de2377dfd27b82c580cd14f1c:
+.. _cid-xf::compression::details::blockstatus:
+
+enum xf::compression::details::blockStatus
+==========================================
+
+
+
+
+
+.. _doxid-namespacexf_1_1compression_1_1details_1a6c42410de2377dfd27b82c580cd14f1ca8606daf54b43713aa66f20d8043a6157:
+.. _cid-xf::compression::details::blockstatus::pending:
+.. _doxid-namespacexf_1_1compression_1_1details_1a6c42410de2377dfd27b82c580cd14f1ca1dce15eaf59f8ee5b62793f6cfe55fc8:
+.. _cid-xf::compression::details::blockstatus::finish:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	PENDING = 0
+	FINISH = 1
+

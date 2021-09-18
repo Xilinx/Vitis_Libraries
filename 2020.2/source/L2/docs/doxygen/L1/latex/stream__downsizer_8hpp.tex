@@ -1,0 +1,49 @@
+\hypertarget{stream__downsizer_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/stream\-\_\-downsizer.hpp File Reference}
+\label{stream__downsizer_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/stream\-\_\-downsizer.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/stream\-\_\-downsizer.\-hpp}}
+}
+
+
+Header for stream downsizer module.  
+
+
+{\ttfamily \#include \char`\"{}compress\-\_\-utils.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ae84233ea81ccc7a071fc0761d1d06694}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::pass\-Downsizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_1_1details_ae84233ea81ccc7a071fc0761d1d06694}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a623b515f9688ebf3b6acafecb9ca2a43}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::receive\-Buffer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, 1 $>$ $>$ \&out\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 17 $>$ $>$ \&input\-Size)}\label{namespacexf_1_1compression_1_1details_a623b515f9688ebf3b6acafecb9ca2a43}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a3a4469461bdcf7e2dec2b5f7be5fd179}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::buffer\-Downsizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, 1 $>$ $>$ \&out\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 17 $>$ $>$ \&input\-Size)}\label{namespacexf_1_1compression_1_1details_a3a4469461bdcf7e2dec2b5f7be5fd179}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ad796453e8f6115376106fe107985f83b}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int S\-I\-Z\-E\-\_\-\-D\-W\-I\-D\-T\-H = 4$>$ }\\void {\bfseries xf\-::compression\-::details\-::buffer\-Downsizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H+S\-I\-Z\-E\-\_\-\-D\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, 1 $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_1_1details_ad796453e8f6115376106fe107985f83b}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_af68ac464cb213b0b3b59b6464b7916dc}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::simple\-Stream\-Down\-Sizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_1_1details_af68ac464cb213b0b3b59b6464b7916dc}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aca5262c0ef56566384554e0ff2e5a1c9}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, class S\-I\-Z\-E\-\_\-\-D\-T  = uint32\-\_\-t$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream\-Down\-Sizer\-Size} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream)}\label{namespacexf_1_1compression_1_1details_aca5262c0ef56566384554e0ff2e5a1c9}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ae1d1ee5e6b5974ed982902149e5b4da0}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int S\-I\-Z\-E\-\_\-\-D\-W\-I\-D\-T\-H = 24$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream\-Down\-Sizer\-Size} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ S\-I\-Z\-E\-\_\-\-D\-W\-I\-D\-T\-H $>$ $>$ \&data\-Size\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, 1 $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_1_1details_ae1d1ee5e6b5974ed982902149e5b4da0}
+
+\item 
+{\footnotesize template$<$class S\-I\-Z\-E\-\_\-\-D\-T , int I\-N\-\_\-\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream\-Downsizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, S\-I\-Z\-E\-\_\-\-D\-T input\-\_\-size)
+\item 
+{\footnotesize template$<$class S\-I\-Z\-E\-\_\-\-D\-T , int I\-N\-\_\-\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream\-Downsizer\-P2\-P} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, S\-I\-Z\-E\-\_\-\-D\-T input\-\_\-size, S\-I\-Z\-E\-\_\-\-D\-T input\-\_\-start\-\_\-idx)
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ae7509896961fcffe698baf1ea8ee2603}{{\footnotesize template$<$int I\-N\-\_\-\-W\-I\-D\-T\-H, int P\-A\-C\-K\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream\-Down\-Sizer\-P2\-P\-Comp} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-C\-K\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Stream\-Size, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Stream\-Size, uint32\-\_\-t no\-\_\-blocks)}\label{namespacexf_1_1compression_1_1details_ae7509896961fcffe698baf1ea8ee2603}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for stream downsizer module. This file is part of Vitis Data Compression Library. 

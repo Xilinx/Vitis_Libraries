@@ -1,0 +1,63 @@
+\hypertarget{lz4__multibyte__decompress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-multibyte\-\_\-decompress\-\_\-stream.hpp File Reference}
+\label{lz4__multibyte__decompress__stream_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-multibyte\-\_\-decompress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-multibyte\-\_\-decompress\-\_\-stream.\-hpp}}
+}
+
+
+C++ Header for lz4 multibyte decompression stream kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}kernel\-\_\-stream\-\_\-utils.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__multibyte__decompress__stream_8hpp_a31a6872795fec3b57775c7e0059fee83}{\#define {\bfseries M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}~65536}\label{lz4__multibyte__decompress__stream_8hpp_a31a6872795fec3b57775c7e0059fee83}
+
+\item 
+\hypertarget{lz4__multibyte__decompress__stream_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}{\#define {\bfseries H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E}~M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}\label{lz4__multibyte__decompress__stream_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}
+
+\item 
+\hypertarget{lz4__multibyte__decompress__stream_8hpp_aea11fa4250caea9197c4d4dc91d14d96}{\#define {\bfseries M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S}~8}\label{lz4__multibyte__decompress__stream_8hpp_aea11fa4250caea9197c4d4dc91d14d96}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__multibyte__decompress__stream_8hpp_a7e7ff4bd37fbe77fe7ac81a84d744eb0}{xil\-Lz4\-Decompress\-Stream} (hls\-::stream$<$ ap\-\_\-axiu$<$ M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S $\ast$8, 0, 0, 0 $>$ $>$ \&inaxistream, hls\-::stream$<$ ap\-\_\-axiu$<$ M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S $\ast$8, 0, 0, 0 $>$ $>$ \&outaxistream, hls\-::stream$<$ ap\-\_\-axiu$<$ 32, 0, 0, 0 $>$ $>$ \&outaxistreamsize, uint32\-\_\-t input\-Size)
+\begin{DoxyCompactList}\small\item\em Snappy decompression streaming kernel takes compressed data as input from kernel axi stream and process in block based fashion and writes the raw data to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+C++ Header for lz4 multibyte decompression stream kernel. This file is part of X\-F Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__multibyte__decompress__stream_8hpp_a7e7ff4bd37fbe77fe7ac81a84d744eb0}{\index{lz4\-\_\-multibyte\-\_\-decompress\-\_\-stream.\-hpp@{lz4\-\_\-multibyte\-\_\-decompress\-\_\-stream.\-hpp}!xil\-Lz4\-Decompress\-Stream@{xil\-Lz4\-Decompress\-Stream}}
+\index{xil\-Lz4\-Decompress\-Stream@{xil\-Lz4\-Decompress\-Stream}!lz4_multibyte_decompress_stream.hpp@{lz4\-\_\-multibyte\-\_\-decompress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Lz4\-Decompress\-Stream}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-Decompress\-Stream (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S $\ast$8, 0, 0, 0 $>$ $>$ \&}]{inaxistream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S $\ast$8, 0, 0, 0 $>$ $>$ \&}]{outaxistream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 32, 0, 0, 0 $>$ $>$ \&}]{outaxistreamsize, }
+\item[{uint32\-\_\-t}]{input\-Size}
+\end{DoxyParamCaption}
+)}}\label{lz4__multibyte__decompress__stream_8hpp_a7e7ff4bd37fbe77fe7ac81a84d744eb0}
+
+
+Snappy decompression streaming kernel takes compressed data as input from kernel axi stream and process in block based fashion and writes the raw data to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em inaxistream} & input kernel axi stream for compressed data \\
+\hline
+{\em outaxistream} & output kernel axi stream for decompressed data \\
+\hline
+{\em input\-Size} & input data size \\
+\hline
+\end{DoxyParams}

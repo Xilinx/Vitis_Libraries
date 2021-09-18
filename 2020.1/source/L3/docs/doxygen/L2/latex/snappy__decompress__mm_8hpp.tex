@@ -1,0 +1,77 @@
+\hypertarget{snappy__decompress__mm_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/snappy\-\_\-decompress\-\_\-mm.hpp File Reference}
+\label{snappy__decompress__mm_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/snappy\-\_\-decompress\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/snappy\-\_\-decompress\-\_\-mm.\-hpp}}
+}
+
+
+C++ Header for snappy decompression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}snappy\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{snappy__decompress__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{snappy__decompress__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{snappy__decompress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{snappy__decompress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\item 
+\hypertarget{snappy__decompress__mm_8hpp_a31a6872795fec3b57775c7e0059fee83}{\#define {\bfseries M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}~65536}\label{snappy__decompress__mm_8hpp_a31a6872795fec3b57775c7e0059fee83}
+
+\item 
+\hypertarget{snappy__decompress__mm_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}{\#define {\bfseries H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E}~M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}\label{snappy__decompress__mm_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{snappy__decompress__mm_8hpp_a70f1512f5f9d55b4aadc6baf57f6d6d6}{xil\-Snappy\-Decompress} (const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$in, xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$out, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t $\ast$in\-\_\-compress\-\_\-size, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t no\-\_\-blocks)
+\begin{DoxyCompactList}\small\item\em Snappy decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+C++ Header for snappy decompression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{snappy__decompress__mm_8hpp_a70f1512f5f9d55b4aadc6baf57f6d6d6}{\index{snappy\-\_\-decompress\-\_\-mm.\-hpp@{snappy\-\_\-decompress\-\_\-mm.\-hpp}!xil\-Snappy\-Decompress@{xil\-Snappy\-Decompress}}
+\index{xil\-Snappy\-Decompress@{xil\-Snappy\-Decompress}!snappy_decompress_mm.hpp@{snappy\-\_\-decompress\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Snappy\-Decompress}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Snappy\-Decompress (
+\begin{DoxyParamCaption}
+\item[{const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{in, }
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-block\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-compress\-\_\-size, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{no\-\_\-blocks}
+\end{DoxyParamCaption}
+)}}\label{snappy__decompress__mm_8hpp_a70f1512f5f9d55b4aadc6baf57f6d6d6}
+
+
+Snappy decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input compressed data \\
+\hline
+{\em out} & output raw data \\
+\hline
+{\em in\-\_\-block\-\_\-size} & input block size of each block \\
+\hline
+{\em in\-\_\-compress\-\_\-size} & compress size of each block \\
+\hline
+{\em block\-\_\-size\-\_\-in\-\_\-kb} & block size in bytes \\
+\hline
+{\em no\-\_\-blocks} & number of blocks \\
+\hline
+\end{DoxyParams}

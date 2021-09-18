@@ -1,0 +1,33 @@
+.. index:: pair: class; xf::compression::memoryManager
+.. _doxid-classxf_1_1compression_1_1memoryManager:
+.. _cid-xf::compression::memorymanager:
+
+class xf::compression::memoryManager
+====================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-classxf_1_1compression_1_1memoryManager_1a7dbe2116b13a6585e857333d3236dbaa:
+.. _cid-xf::compression::memorymanager::memorymanager:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1abace02214443eb83b221922b4223f410:
+.. _cid-xf::compression::memorymanager::~memorymanager:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1a7b4e6c8d1559bad53004de3aa1374f97:
+.. _cid-xf::compression::memorymanager::create_host_buffer:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1a41ec4b8844024a9681b5b2169d409498:
+.. _cid-xf::compression::memorymanager::createbuffer:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1aa556e1b841b4c2caf857dcca3cf61e2b:
+.. _cid-xf::compression::memorymanager::getbuffer:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1ad6c764d30b210653e405ec3e1922ccdc:
+.. _cid-xf::compression::memorymanager::peekbuffer:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1a4f063f42fc29f958f793b68e197afe59:
+.. _cid-xf::compression::memorymanager::getlastbuffer:
+.. _doxid-classxf_1_1compression_1_1memoryManager_1a5dc666affd08f2316ebb6bf5033c647d:
+.. _cid-xf::compression::memorymanager::ispending:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+

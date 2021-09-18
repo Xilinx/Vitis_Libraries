@@ -1,0 +1,53 @@
+\hypertarget{crc32__mm_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/crc32\-\_\-mm.hpp File Reference}
+\label{crc32__mm_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/crc32\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/crc32\-\_\-mm.\-hpp}}
+}
+
+
+Header for Crc32 Kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}checksum\-\_\-wrapper.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{crc32__mm_8hpp_a5671cac6ae31db708a6823422ee18dc3}{\#define {\bfseries P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S}~16}\label{crc32__mm_8hpp_a5671cac6ae31db708a6823422ee18dc3}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{crc32__mm_8hpp_a28eb1b17e7d1936bd0beaf57f41e59b3}{xil\-Crc32} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $\ast$in, ap\-\_\-uint$<$ 32 $>$ $\ast$crc\-Data, uint32\-\_\-t in\-Size)
+\begin{DoxyCompactList}\small\item\em Crc32 kernel takes the raw data as input and generates the crc32 result. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Crc32 Kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{crc32__mm_8hpp_a28eb1b17e7d1936bd0beaf57f41e59b3}{\index{crc32\-\_\-mm.\-hpp@{crc32\-\_\-mm.\-hpp}!xil\-Crc32@{xil\-Crc32}}
+\index{xil\-Crc32@{xil\-Crc32}!crc32_mm.hpp@{crc32\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Crc32}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Crc32 (
+\begin{DoxyParamCaption}
+\item[{const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $\ast$}]{in, }
+\item[{ap\-\_\-uint$<$ 32 $>$ $\ast$}]{crc\-Data, }
+\item[{uint32\-\_\-t}]{in\-Size}
+\end{DoxyParamCaption}
+)}}\label{crc32__mm_8hpp_a28eb1b17e7d1936bd0beaf57f41e59b3}
+
+
+Crc32 kernel takes the raw data as input and generates the crc32 result. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em crc\-Data} & C\-R\-C data \\
+\hline
+{\em in\-Size} & input size \\
+\hline
+\end{DoxyParams}

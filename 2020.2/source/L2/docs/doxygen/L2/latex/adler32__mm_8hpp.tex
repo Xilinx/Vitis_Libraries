@@ -1,0 +1,53 @@
+\hypertarget{adler32__mm_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/adler32\-\_\-mm.hpp File Reference}
+\label{adler32__mm_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/adler32\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/adler32\-\_\-mm.\-hpp}}
+}
+
+
+Header for Adler32 Kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}checksum\-\_\-wrapper.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{adler32__mm_8hpp_a5671cac6ae31db708a6823422ee18dc3}{\#define {\bfseries P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S}~16}\label{adler32__mm_8hpp_a5671cac6ae31db708a6823422ee18dc3}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{adler32__mm_8hpp_a35c098de6db9183cc37a5c34735c77da}{xil\-Adler32} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $\ast$in, ap\-\_\-uint$<$ 32 $>$ $\ast$adler\-Data, uint32\-\_\-t in\-Size)
+\begin{DoxyCompactList}\small\item\em Adler32 kernel takes the raw data as input and generates the adler32 result. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Adler32 Kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{adler32__mm_8hpp_a35c098de6db9183cc37a5c34735c77da}{\index{adler32\-\_\-mm.\-hpp@{adler32\-\_\-mm.\-hpp}!xil\-Adler32@{xil\-Adler32}}
+\index{xil\-Adler32@{xil\-Adler32}!adler32_mm.hpp@{adler32\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Adler32}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Adler32 (
+\begin{DoxyParamCaption}
+\item[{const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $\ast$}]{in, }
+\item[{ap\-\_\-uint$<$ 32 $>$ $\ast$}]{adler\-Data, }
+\item[{uint32\-\_\-t}]{in\-Size}
+\end{DoxyParamCaption}
+)}}\label{adler32__mm_8hpp_a35c098de6db9183cc37a5c34735c77da}
+
+
+Adler32 kernel takes the raw data as input and generates the adler32 result. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em adler\-Data} & Adler data \\
+\hline
+{\em in\-Size} & input size \\
+\hline
+\end{DoxyParams}

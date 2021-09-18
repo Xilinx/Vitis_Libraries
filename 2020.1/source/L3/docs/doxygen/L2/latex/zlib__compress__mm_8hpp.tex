@@ -1,0 +1,62 @@
+\hypertarget{zlib__compress__mm_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-compress\-\_\-mm.hpp File Reference}
+\label{zlib__compress__mm_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-compress\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-compress\-\_\-mm.\-hpp}}
+}
+
+
+Header for Zlib compression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-compress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zlib__compress__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{zlib__compress__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{zlib__compress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{zlib__compress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\item 
+\hypertarget{zlib__compress__mm_8hpp_a34e91124cf151e996607c5c7b5e3d99b}{\#define {\bfseries Z\-L\-I\-B\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E}~0x10000}\label{zlib__compress__mm_8hpp_a34e91124cf151e996607c5c7b5e3d99b}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{zlib__compress__mm_8hpp_af4f5215f418363730bd1e2f9a8a75f2a}{xil\-Zlib\-Compress\-Full} (const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$in, xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$out, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em Z\-L\-I\-B compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Zlib compression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{zlib__compress__mm_8hpp_af4f5215f418363730bd1e2f9a8a75f2a}{\index{zlib\-\_\-compress\-\_\-mm.\-hpp@{zlib\-\_\-compress\-\_\-mm.\-hpp}!xil\-Zlib\-Compress\-Full@{xil\-Zlib\-Compress\-Full}}
+\index{xil\-Zlib\-Compress\-Full@{xil\-Zlib\-Compress\-Full}!zlib_compress_mm.hpp@{zlib\-\_\-compress\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Zlib\-Compress\-Full}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Zlib\-Compress\-Full (
+\begin{DoxyParamCaption}
+\item[{const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{in, }
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{compressd\-\_\-size, }
+\item[{uint32\-\_\-t}]{input\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{zlib__compress__mm_8hpp_af4f5215f418363730bd1e2f9a8a75f2a}
+
+
+Z\-L\-I\-B compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em out} & output compressed data \\
+\hline
+{\em compressd\-\_\-size} & compressed output size of each block \\
+\hline
+{\em input\-\_\-size} & input data size \\
+\hline
+\end{DoxyParams}

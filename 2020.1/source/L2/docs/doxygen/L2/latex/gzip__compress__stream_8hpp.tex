@@ -1,0 +1,68 @@
+\hypertarget{gzip__compress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/gzip\-\_\-compress\-\_\-stream.hpp File Reference}
+\label{gzip__compress__stream_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/gzip\-\_\-compress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/gzip\-\_\-compress\-\_\-stream.\-hpp}}
+}
+
+
+Header for Gzip compression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-compress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gzip__compress__stream_8hpp_a9fb9d47552c9537a75e0f7b3fe60b84c}{\#define {\bfseries G\-M\-E\-M\-\_\-\-I\-N\-\_\-\-D\-W\-I\-D\-T\-H}~8}\label{gzip__compress__stream_8hpp_a9fb9d47552c9537a75e0f7b3fe60b84c}
+
+\item 
+\hypertarget{gzip__compress__stream_8hpp_adfff3f27bcc44d0a4940ffb891400f69}{\#define {\bfseries G\-M\-E\-M\-\_\-\-O\-U\-T\-\_\-\-D\-W\-I\-D\-T\-H}~16}\label{gzip__compress__stream_8hpp_adfff3f27bcc44d0a4940ffb891400f69}
+
+\item 
+\hypertarget{gzip__compress__stream_8hpp_a34e91124cf151e996607c5c7b5e3d99b}{\#define {\bfseries Z\-L\-I\-B\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E}~32768}\label{gzip__compress__stream_8hpp_a34e91124cf151e996607c5c7b5e3d99b}
+
+\item 
+\hypertarget{gzip__compress__stream_8hpp_abd652b6c07d1e0ae5ef8b0b63e5aceb4}{\#define {\bfseries S\-T\-R\-A\-T\-E\-G\-Y}~0}\label{gzip__compress__stream_8hpp_abd652b6c07d1e0ae5ef8b0b63e5aceb4}
+
+\item 
+\hypertarget{gzip__compress__stream_8hpp_a7ff5bf4cf84133d3024a191f1af2f282}{\#define {\bfseries M\-I\-N\-\_\-\-B\-L\-C\-K\-\_\-\-S\-I\-Z\-E}~1024}\label{gzip__compress__stream_8hpp_a7ff5bf4cf84133d3024a191f1af2f282}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{gzip__compress__stream_8hpp_a29ff2669ebc6c588ce24bb063fa9ce2e}{xil\-Gzip\-Compress\-Streaming} (hls\-::stream$<$ ap\-\_\-axiu$<$ G\-M\-E\-M\-\_\-\-I\-N\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-axiu$<$ G\-M\-E\-M\-\_\-\-O\-U\-T\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&out\-Stream, hls\-::stream$<$ ap\-\_\-axiu$<$ 32, 0, 0, 0 $>$ $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-axiu$<$ 32, 0, 0, 0 $>$ $>$ \&out\-Size\-Stream)
+\begin{DoxyCompactList}\small\item\em G\-Z\-I\-P compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Gzip compression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{gzip__compress__stream_8hpp_a29ff2669ebc6c588ce24bb063fa9ce2e}{\index{gzip\-\_\-compress\-\_\-stream.\-hpp@{gzip\-\_\-compress\-\_\-stream.\-hpp}!xil\-Gzip\-Compress\-Streaming@{xil\-Gzip\-Compress\-Streaming}}
+\index{xil\-Gzip\-Compress\-Streaming@{xil\-Gzip\-Compress\-Streaming}!gzip_compress_stream.hpp@{gzip\-\_\-compress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Gzip\-Compress\-Streaming}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Gzip\-Compress\-Streaming (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ G\-M\-E\-M\-\_\-\-I\-N\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&}]{in\-Stream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ G\-M\-E\-M\-\_\-\-O\-U\-T\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&}]{out\-Stream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 32, 0, 0, 0 $>$ $>$ \&}]{in\-Size\-Stream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 32, 0, 0, 0 $>$ $>$ \&}]{out\-Size\-Stream}
+\end{DoxyParamCaption}
+)}}\label{gzip__compress__stream_8hpp_a29ff2669ebc6c588ce24bb063fa9ce2e}
+
+
+G\-Z\-I\-P compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-Stream} & input raw data \\
+\hline
+{\em in\-Size\-Stream} & input data size \\
+\hline
+{\em out\-Stream} & output compressed data \\
+\hline
+{\em out\-Size\-Stream} & compressed output data size \\
+\hline
+\end{DoxyParams}

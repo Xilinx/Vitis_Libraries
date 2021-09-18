@@ -1,0 +1,150 @@
+\hypertarget{zstd__specs_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-specs.hpp File Reference}
+\label{zstd__specs_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-specs.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-specs.\-hpp}}
+}
+
+
+Custom data types, constants and stored tables for use in Z\-S\-T\-D decompress kernel.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structxf_1_1compression_1_1details_1_1FseBSState}{xf\-::compression\-::details\-::\-Fse\-B\-S\-State}
+\item 
+struct \hyperlink{structxf_1_1compression_1_1details_1_1HuffmanTable}{xf\-::compression\-::details\-::\-Huffman\-Table}
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bfseries xf\-Block\-Type\-\_\-t} \{ {\bfseries R\-A\-W\-\_\-\-B\-L\-O\-C\-K} = 0, 
+{\bfseries R\-L\-E\-\_\-\-B\-L\-O\-C\-K}, 
+{\bfseries C\-M\-P\-\_\-\-B\-L\-O\-C\-K}, 
+{\bfseries I\-N\-V\-A\-L\-I\-D\-\_\-\-B\-L\-O\-C\-K}
+ \}
+\item 
+enum {\bfseries xf\-Lit\-Block\-Type\-\_\-t} \{ {\bfseries R\-A\-W\-\_\-\-L\-B\-L\-O\-C\-K} = 0, 
+{\bfseries R\-L\-E\-\_\-\-L\-B\-L\-O\-C\-K}, 
+{\bfseries C\-M\-P\-\_\-\-L\-B\-L\-O\-C\-K}, 
+{\bfseries T\-R\-E\-E\-L\-E\-S\-S\-\_\-\-L\-B\-L\-O\-C\-K}
+ \}
+\item 
+enum {\bfseries xf\-Symbol\-Comp\-Mode\-\_\-t} \{ {\bfseries P\-R\-E\-D\-E\-F\-I\-N\-E\-D\-\_\-\-M\-O\-D\-E} = 0, 
+{\bfseries R\-L\-E\-\_\-\-M\-O\-D\-E}, 
+{\bfseries F\-S\-E\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-E\-D\-\_\-\-M\-O\-D\-E}, 
+{\bfseries R\-E\-P\-E\-A\-T\-\_\-\-M\-O\-D\-E}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a81b8829b883c73e1ba72820ab7efa231}{{\footnotesize template$<$int D\-W\-I\-D\-T\-H = 16$>$ }\\struct {\bfseries xf\-::compression\-::details\-::\-\_\-\-\_\-attribute\-\_\-\-\_\-} ((packed)) Sequence\-\_\-dt}\label{namespacexf_1_1compression_1_1details_a81b8829b883c73e1ba72820ab7efa231}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ad2f92bd8ad0484616117ed1f8edff418}{uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::bits\-Used31} (uint32\-\_\-t x)}\label{namespacexf_1_1compression_1_1details_ad2f92bd8ad0484616117ed1f8edff418}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_af0973f8098d0bc2b36895bb18f114076}{const ap\-\_\-uint$<$ 32 $>$ {\bfseries xf\-::compression\-::details\-::c\-\_\-magic\-Number} = 0x\-F\-D2\-F\-B528}\label{namespacexf_1_1compression_1_1details_af0973f8098d0bc2b36895bb18f114076}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ac41ab3888211b8baa2f0b8a8649d89a2}{const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-skip\-Frame\-Magic\-Number} = 0x184\-D2\-A50}\label{namespacexf_1_1compression_1_1details_ac41ab3888211b8baa2f0b8a8649d89a2}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_acdf4e787d33b6a56c6df277e4ba7b2e0}{const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-skippable\-Frame\-Mask} = 0x\-F\-F\-F\-F\-F\-F\-F0}\label{namespacexf_1_1compression_1_1details_acdf4e787d33b6a56c6df277e4ba7b2e0}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a08e0a3833d4ed52ebf2b49e67d0c03ea}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Zstd\-Hf\-Bits} = 11}\label{namespacexf_1_1compression_1_1details_a08e0a3833d4ed52ebf2b49e67d0c03ea}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aa72e9aca9df9ba01b0c9566eccaec595}{const uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Char\-Lit} = 35}\label{namespacexf_1_1compression_1_1details_aa72e9aca9df9ba01b0c9566eccaec595}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aee0636e4766a5eb602c10ca85a128e9f}{const uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Char\-Def\-Offset} = 28}\label{namespacexf_1_1compression_1_1details_aee0636e4766a5eb602c10ca85a128e9f}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a99c49ef59d0154605c00f4a3f3a1721b}{const uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Char\-Offset} = 31}\label{namespacexf_1_1compression_1_1details_a99c49ef59d0154605c00f4a3f3a1721b}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a0a3ca4d9d70ac73d03b0b9500c46fb2e}{const uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Char\-Matchlen} = 52}\label{namespacexf_1_1compression_1_1details_a0a3ca4d9d70ac73d03b0b9500c46fb2e}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ab7994e878ff57fe609f63175aa4c22a4}{const uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Char\-Huffman} = 255}\label{namespacexf_1_1compression_1_1details_ab7994e878ff57fe609f63175aa4c22a4}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aed153a9a20cb966c5643d65a77033b33}{const uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Lit\-V} = 255}\label{namespacexf_1_1compression_1_1details_aed153a9a20cb966c5643d65a77033b33}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_af1c51e7e3c73449a52b8589afd9ffcd9}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Code\-L\-L} = 35}\label{namespacexf_1_1compression_1_1details_af1c51e7e3c73449a52b8589afd9ffcd9}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ac9f74faaaf3800dbbad28641ea2f7552}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Code\-M\-L} = 52}\label{namespacexf_1_1compression_1_1details_ac9f74faaaf3800dbbad28641ea2f7552}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ac4eb60945f978173187a54a2c793e5f5}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-max\-Code\-O\-F} = 31}\label{namespacexf_1_1compression_1_1details_ac4eb60945f978173187a54a2c793e5f5}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aee54eb6ea2829dcc5d3ba1d49aeb3c86}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-fse\-Max\-Table\-Log\-H\-F} = 6}\label{namespacexf_1_1compression_1_1details_aee54eb6ea2829dcc5d3ba1d49aeb3c86}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a984863c176d7f2511bdb98216bb800ad}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-fse\-Max\-Table\-Log\-L\-L} = 9}\label{namespacexf_1_1compression_1_1details_a984863c176d7f2511bdb98216bb800ad}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a51a2fdb681dc1c1002b6c9e1153ec88a}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-fse\-Max\-Table\-Log\-M\-L} = 9}\label{namespacexf_1_1compression_1_1details_a51a2fdb681dc1c1002b6c9e1153ec88a}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a731d5c43b681947772d28e7e451c48fd}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-fse\-Max\-Table\-Log\-O\-F} = 8}\label{namespacexf_1_1compression_1_1details_a731d5c43b681947772d28e7e451c48fd}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a5d5e0b569d6c8846ca3e7b08d4f23cfc}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-fse\-Min\-Table\-Log} = 5}\label{namespacexf_1_1compression_1_1details_a5d5e0b569d6c8846ca3e7b08d4f23cfc}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a2ed93bd39c0a5acaca48dbdfbd73af98}{const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-fse\-Max\-Table\-Log} = 12}\label{namespacexf_1_1compression_1_1details_a2ed93bd39c0a5acaca48dbdfbd73af98}
+
+\item 
+const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-base\-L\-L} \mbox{[}c\-\_\-max\-Char\-Lit+1\mbox{]}
+\item 
+const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-base\-M\-L} \mbox{[}c\-\_\-max\-Char\-Matchlen+1\mbox{]}
+\item 
+const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-extra\-Bits\-L\-L} \mbox{[}c\-\_\-max\-Char\-Lit+1\mbox{]}
+\item 
+const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-extra\-Bits\-M\-L} \mbox{[}c\-\_\-max\-Char\-Matchlen+1\mbox{]}
+\item 
+const int16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-default\-Distribution} \mbox{[}c\-\_\-max\-Char\-Lit+c\-\_\-max\-Char\-Def\-Offset+c\-\_\-max\-Char\-Matchlen+3\mbox{]}
+\item 
+const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-litlen\-Code} \mbox{[}64\mbox{]}
+\item 
+const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-matlen\-Code} \mbox{[}128\mbox{]}
+\item 
+const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-bit\-Mask} \mbox{[}32\mbox{]}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_adcfcfcf8ddd0500be8993e1a1ef939f3}{const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-litlen\-Delta\-Code} = 19}\label{namespacexf_1_1compression_1_1details_adcfcfcf8ddd0500be8993e1a1ef939f3}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a12db7117af0081155cefbf7dd5622647}{const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-matlen\-Delta\-Code} = 36}\label{namespacexf_1_1compression_1_1details_a12db7117af0081155cefbf7dd5622647}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aceff134a680a046fff4d57e176f2307a}{const uint32\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-rtb\-Table} \mbox{[}8\mbox{]} = \{0, 473195, 504333, 520860, 550000, 700000, 750000, 830000\}}\label{namespacexf_1_1compression_1_1details_aceff134a680a046fff4d57e176f2307a}
+
+\item 
+uint16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-test\-Seq\-Data} \mbox{[}70\mbox{]}\mbox{[}3\mbox{]}
+\item 
+const char {\bfseries xf\-::compression\-::details\-::c\-\_\-test\-Lit\-Data} \mbox{[}462\mbox{]}
+\item 
+const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-hf\-Code\-Table} \mbox{[}122\mbox{]}
+\item 
+const uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-hf\-Bitlen\-Table} \mbox{[}122\mbox{]}
+\item 
+const int16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-lit\-Norm\-Table} \mbox{[}64\mbox{]}
+\item 
+const int16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-ll\-Norm\-Table} \mbox{[}64\mbox{]}
+\item 
+const int16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-ml\-Norm\-Table} \mbox{[}64\mbox{]}
+\item 
+const int16\-\_\-t {\bfseries xf\-::compression\-::details\-::c\-\_\-of\-Norm\-Table} \mbox{[}64\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Custom data types, constants and stored tables for use in Z\-S\-T\-D decompress kernel. This file is part of Vitis Data Compression Library. 

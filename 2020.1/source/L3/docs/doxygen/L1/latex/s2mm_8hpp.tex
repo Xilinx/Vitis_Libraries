@@ -1,0 +1,140 @@
+\hypertarget{s2mm_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/s2mm.hpp File Reference}
+\label{s2mm_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/s2mm.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/s2mm.\-hpp}}
+}
+
+
+Header for modules used for streaming to memory mapped interface conversion.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}iostream\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{s2mm_8hpp_a4ef9636ea91e8374d90b2df0834b35a3}{\#define {\bfseries G\-E\-T\-\_\-\-D\-I\-F\-F\-\_\-\-I\-F\-\_\-\-B\-I\-G}(x, y)~(x $>$ y) ? (x -\/ y) \-: 0}\label{s2mm_8hpp_a4ef9636ea91e8374d90b2df0834b35a3}
+
+\item 
+\#define {\bfseries S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E}(i, instream, end\-\_\-of\-\_\-stream)
+\item 
+\#define {\bfseries S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y}(i, instream, burst\-\_\-size, input\-\_\-size, read\-\_\-size, write\-\_\-size, write\-\_\-idx)
+\item 
+\hypertarget{s2mm_8hpp_a0532714a43e57d86b6e5002db6924684}{\#define {\bfseries P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-L\-O\-C\-K}~8}\label{s2mm_8hpp_a0532714a43e57d86b6e5002db6924684}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_acd2f1db69080b3f4884dccdf77887db1}{{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K = 4, int D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 32768$>$ }\\void {\bfseries xf\-::compression\-::details\-::mult\-Stream2\-M\-M\-N\-B} (hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ bool $>$ in\-Stream\-Eos\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ in\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ in\-Cmp\-Blk\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ in\-Base\-Idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, uint32\-\_\-t $\ast$compressed\-Size)}\label{namespacexf_1_1compression_1_1details_acd2f1db69080b3f4884dccdf77887db1}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ad4bb36dab857c636e666c1e1cc61a38c}{{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K = 4, int G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 32768$>$ }\\void {\bfseries xf\-::compression\-::details\-::mult\-Stream2\-M\-M\-Block\-Receiver} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ bool $>$ in\-Stream\-Eos\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ bool $>$ in\-File\-Eos\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ total\-Out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ in\-Base\-Idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, uint32\-\_\-t $\ast$out\-Size)}\label{namespacexf_1_1compression_1_1details_ad4bb36dab857c636e666c1e1cc61a38c}
+
+\item 
+{\footnotesize template$<$int I\-N\-\_\-\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream2mm\-Upsizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&in\-Stream\-Eos, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Size\-Stream)
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::single\-Stream2mm} (hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Size\-Stream, hls\-::stream$<$ uint64\-\_\-t $>$ \&out\-Size\-Stream, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out\-Size)
+\item 
+{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::stream2\-M\-M} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&in\-Stream\-Eos, hls\-::stream$<$ uint64\-\_\-t $>$ \&out\-Size\-Stream, ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out\-Size)
+\item 
+{\footnotesize template$<$int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E, int D\-A\-T\-A\-W\-I\-D\-T\-H, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K$>$ }\\void {\bfseries xf\-::compression\-::details\-::mult\-Stream2mm\-Size} (hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint16\-\_\-t $>$ in\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ total\-Out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, const uint32\-\_\-t output\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, uint32\-\_\-t out\-Size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]})
+\item 
+{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K = 8, int G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::mult\-Stream2\-M\-M} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ bool $>$ in\-Stream\-Eos\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ total\-Out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, const uint32\-\_\-t output\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, uint32\-\_\-t out\-Size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]})
+\item 
+{\footnotesize template$<$class S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T , int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K = 8, int G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::mult\-Stream2\-M\-M\-Freq} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ bool $>$ in\-Stream\-Eos\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ total\-Out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ in\-Stream\-Tree\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, const uint32\-\_\-t output\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T out\-Size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\mbox{]}, S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T $\ast$dyn\-\_\-ltree\-\_\-freq, S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T $\ast$dyn\-\_\-dtree\-\_\-freq)
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a22e2608ae1b846d0c147df7a20956104}{{\footnotesize template$<$class S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T , int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E, int D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-\_\-compress} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, const uint32\-\_\-t output\-\_\-idx\mbox{[}P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-L\-O\-C\-K\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-0, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-1, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-2, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-3, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-4, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-5, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-6, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream\-\_\-7, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-0, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-1, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-2, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-3, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-4, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-5, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-6, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Size\-\_\-7, S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T output\-\_\-size\mbox{[}P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-L\-O\-C\-K\mbox{]})}\label{namespacexf_1_1compression_1_1details_a22e2608ae1b846d0c147df7a20956104}
+
+\item 
+{\footnotesize template$<$class S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T , int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E, int D\-A\-T\-A\-W\-I\-D\-T\-H, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-Nb} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, const uint32\-\_\-t output\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const S\-T\-R\-E\-A\-M\-\_\-\-S\-I\-Z\-E\-\_\-\-D\-T input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E, int D\-A\-T\-A\-W\-I\-D\-T\-H, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-Nb} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, const uint32\-\_\-t output\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ in\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ bool $>$ end\-Of\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-Eos\-Stream\-Simple} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream)
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-Eos\-Simple} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size, uint32\-\_\-t $\ast$output\-\_\-size)
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-Simple} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, uint32\-\_\-t output\-\_\-size)
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm\-Stream\-Simple} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&in\-Stream\-Eo\-S)
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aa6cd8ade48dfed49e3968210f79d4320}{{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm} (hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Stream\-Size)}\label{namespacexf_1_1compression_1_1details_aa6cd8ade48dfed49e3968210f79d4320}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used for streaming to memory mapped interface conversion. This file is part of Vitis Data Compression Library. 
+
+\subsection{Macro Definition Documentation}
+\hypertarget{s2mm_8hpp_aaf549fd2531abbabcac7248e9ea6f123}{\index{s2mm.\-hpp@{s2mm.\-hpp}!S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y@{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y}}
+\index{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y@{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y}!s2mm.hpp@{s2mm.\-hpp}}
+\subsubsection[{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-E\-M\-P\-T\-Y(
+\begin{DoxyParamCaption}
+\item[{}]{i, }
+\item[{}]{instream, }
+\item[{}]{burst\-\_\-size, }
+\item[{}]{input\-\_\-size, }
+\item[{}]{read\-\_\-size, }
+\item[{}]{write\-\_\-size, }
+\item[{}]{write\-\_\-idx}
+\end{DoxyParamCaption}
+)}}\label{s2mm_8hpp_aaf549fd2531abbabcac7248e9ea6f123}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+burst\_size[i] = c\_max\_burst\_size;                                                                         \(\backslash\)
+    if (end\_of\_stream.range(i, i) && ((input\_size[i] - write\_size[i]) < burst\_size[i])) \{                  
+         \(\backslash\)
+        burst\_size[i] = GET\_DIFF\_IF\_BIG(input\_size[i], write\_size[i]);                                     
+         \(\backslash\)
+    \}                                                                                                      
+         \(\backslash\)
+    if (((read\_size[i] - write\_size[i]) < burst\_size[i]) && (input\_size[i] > read\_size[i])) \{              
+         \(\backslash\)
+        bool is\_empty = instream.empty();                                                                  
+         \(\backslash\)
+        if (!is\_empty) \{                                                                                   
+         \(\backslash\)
+            local\_buffer[i][write\_idx[i]] = instream.read();                                               
+         \(\backslash\)
+            write\_idx[i] += 1;                                                                             
+         \(\backslash\)
+            read\_size[i] += 64;                                                                            
+         \(\backslash\)
+            is\_pending.range(i, i) = \textcolor{keyword}{true};                                                                 
+         \(\backslash\)
+        \} \textcolor{keywordflow}{else} \{                                                                                           
+         \(\backslash\)
+            is\_pending.range(i, i) = \textcolor{keyword}{false};                                                                
+         \(\backslash\)
+        \}                                                                                                  
+         \(\backslash\)
+    \} \textcolor{keywordflow}{else} \{                                                                                               
+         \(\backslash\)
+        if (burst\_size[i]) done = \textcolor{keyword}{true};                                                                    
+         \(\backslash\)
+        if (read\_size[i] >= input\_size[i]) is\_pending.range(i, i) = \textcolor{keyword}{false};                                 
+         \(\backslash\)
+    \}
+\end{DoxyCode}
+\hypertarget{s2mm_8hpp_ac41d4db060c4e595bac71a508f88b1ed}{\index{s2mm.\-hpp@{s2mm.\-hpp}!S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E@{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E}}
+\index{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E@{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E}!s2mm.hpp@{s2mm.\-hpp}}
+\subsubsection[{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-S2\-M\-M\-\_\-\-R\-E\-A\-D\-\_\-\-S\-I\-Z\-E(
+\begin{DoxyParamCaption}
+\item[{}]{i, }
+\item[{}]{instream, }
+\item[{}]{end\-\_\-of\-\_\-stream}
+\end{DoxyParamCaption}
+)}}\label{s2mm_8hpp_ac41d4db060c4e595bac71a508f88b1ed}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\textcolor{keywordflow}{if} (!end\_of\_stream.range(i, i) && !instream.empty()) \{      \(\backslash\)
+        uint16\_t tmpValue = instream.read();                    \(\backslash\)
+        input\_size[i] += tmpValue;                              \(\backslash\)
+        if (tmpValue == 0) end\_of\_stream.range(i, i) = 1;       \(\backslash\)
+    \}
+\end{DoxyCode}

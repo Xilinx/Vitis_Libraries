@@ -1,0 +1,50 @@
+.. index:: pair: struct; xlibData
+.. _doxid-structxlibData:
+.. _cid-xlibdata:
+
+struct xlibData
+===============
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxlibData_1aae3bf4ee1c43a225f30608342c055a48:
+.. _cid-xlibdata::in_buf:
+.. _doxid-structxlibData_1ab4e50cde44c135a807b7f9b12ea62ac8:
+.. _cid-xlibdata::out_buf:
+.. _doxid-structxlibData_1a7a176e85c1843a722fa47cb82d759b07:
+.. _cid-xlibdata::input_size:
+.. _doxid-structxlibData_1ad4e9193559fc872f3ed148ddb3b32062:
+.. _cid-xlibdata::output_size:
+.. _doxid-structxlibData_1ae9403a54b065162b97a38588e85bc32f:
+.. _cid-xlibdata::level:
+.. _doxid-structxlibData_1a80237a47cdb64fe118a8b6eb34c45e07:
+.. _cid-xlibdata::strategy:
+.. _doxid-structxlibData_1a822c511d79a90b76ac605299260e7ded:
+.. _cid-xlibdata::window_bits:
+.. _doxid-structxlibData_1a60f13588ad585222601a2bcac3380ab0:
+.. _cid-xlibdata::adler32:
+.. _doxid-structxlibData_1a9c4814f8637fa6929fcc40f3632908d5:
+.. _cid-xlibdata::flush:
+.. _doxid-structxlibData_1a357a9a7ecd00182a9aa6c9f1222221ba:
+.. _cid-xlibdata::u50_xclbin:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	uint8_t* in_buf
+	uint8_t* out_buf
+	uint64_t input_size
+	uint64_t output_size
+	int level
+	int strategy
+	int window_bits
+	uint32_t adler32
+	int flush
+	std::string u50_xclbin
+

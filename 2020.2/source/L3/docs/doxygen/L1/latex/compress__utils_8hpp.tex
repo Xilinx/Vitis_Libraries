@@ -1,0 +1,41 @@
+\hypertarget{compress__utils_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/compress\-\_\-utils.hpp File Reference}
+\label{compress__utils_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/compress\-\_\-utils.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/compress\-\_\-utils.\-hpp}}
+}
+
+
+Header for common data types and functions used in internal modules in library.  
+
+
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structIntVectorPack}{Int\-Vector\-Pack$<$ D\-A\-T\-A\-W\-I\-D\-T\-H, V\-E\-C\-\_\-\-L\-E\-N, S\-T\-R\-O\-B\-E\-\_\-\-D\-W\-I\-D\-T\-H $>$}
+\item 
+struct \hyperlink{structDSVectorPack}{D\-S\-Vector\-Pack$<$ D\-S\-T, V\-E\-C\-\_\-\-L\-E\-N, D\-S\-\_\-\-D\-W\-I\-D\-T\-H, S\-T\-R\-O\-B\-E\-\_\-\-D\-W\-I\-D\-T\-H $>$}
+\item 
+struct \hyperlink{structHuffmanCodePack}{Huffman\-Code\-Pack$<$ C\-O\-D\-E\-\_\-\-L\-E\-N, S\-T\-R\-O\-B\-E\-\_\-\-D\-W\-I\-D\-T\-H $>$}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{compress__utils_8hpp_aa6c62bcb50241a5fdc9b339e317769d8}{constexpr int {\bfseries max\-Bits\-Used} (int max\-Val)}\label{compress__utils_8hpp_aa6c62bcb50241a5fdc9b339e317769d8}
+
+\item 
+\hypertarget{compress__utils_8hpp_aff70840f91c5939621fa5177eaca1fb5}{constexpr int {\bfseries get\-Data\-Port\-Width} (int max\-Val)}\label{compress__utils_8hpp_aff70840f91c5939621fa5177eaca1fb5}
+
+\item 
+\hypertarget{compress__utils_8hpp_a1534755c90c658a217bbfe65d8d3cac9}{{\footnotesize template$<$int D\-W\-I\-D\-T\-H$>$ }\\uint8\-\_\-t {\bfseries count\-Set\-Bits} (ap\-\_\-uint$<$ D\-W\-I\-D\-T\-H $>$ val)}\label{compress__utils_8hpp_a1534755c90c658a217bbfe65d8d3cac9}
+
+\item 
+\hypertarget{compress__utils_8hpp_af2802612f3a35af27c0bddc18a3af9d0}{{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int V\-E\-C\-\_\-\-L\-E\-N$>$ }\\struct {\bfseries \-\_\-\-\_\-attribute\-\_\-\-\_\-} ((packed)) Int\-Vector\-Stream\-\_\-dt}\label{compress__utils_8hpp_af2802612f3a35af27c0bddc18a3af9d0}
+
+\item 
+\hypertarget{compress__utils_8hpp_a0ee0a8f210b7d9e3e159e7871b200f6e}{{\footnotesize template$<$int C\-O\-D\-E\-\_\-\-L\-E\-N$>$ }\\struct {\bfseries \-\_\-\-\_\-attribute\-\_\-\-\_\-} ((packed)) Huffman\-Code\-\_\-dt}\label{compress__utils_8hpp_a0ee0a8f210b7d9e3e159e7871b200f6e}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for common data types and functions used in internal modules in library. This file is part of Vitis Data Compression Library. 

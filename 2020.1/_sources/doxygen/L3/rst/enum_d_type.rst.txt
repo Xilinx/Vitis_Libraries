@@ -1,0 +1,17 @@
+.. index:: pair: enum; d_type
+.. _doxid-zlib_8hpp_1a505e39af05f260eba9fc403d2a4ac54b:
+.. _cid-d_type:
+
+enum d_type
+===========
+
+
+
+
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+

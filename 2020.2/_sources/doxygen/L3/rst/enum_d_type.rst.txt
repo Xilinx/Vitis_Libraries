@@ -1,0 +1,26 @@
+.. index:: pair: enum; d_type
+.. _doxid-zlib_8hpp_1a505e39af05f260eba9fc403d2a4ac54b:
+.. _cid-d_type:
+
+enum d_type
+===========
+
+
+
+
+
+.. _doxid-zlib_8hpp_1a505e39af05f260eba9fc403d2a4ac54baaac65e0072e6ff1f4c3209d2fdd8730a:
+.. _cid-d_type::dynamic:
+.. _doxid-zlib_8hpp_1a505e39af05f260eba9fc403d2a4ac54ba9b5eccb7f8f027c46f2018d07c74f384:
+.. _cid-d_type::fixed:
+.. _doxid-zlib_8hpp_1a505e39af05f260eba9fc403d2a4ac54bad08f8ac0aa8dfb59589824359772459e:
+.. _cid-d_type::full:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	DYNAMIC = 0
+	FIXED = 1
+	FULL = 2
+

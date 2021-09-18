@@ -1,0 +1,29 @@
+.. index:: pair: enum; xf::compression::details::xfSymbolCompMode_t
+.. _doxid-namespacexf_1_1compression_1_1details_1afd3849f7542231d41330a5d235ac5bb7:
+.. _cid-xf::compression::details::xfsymbolcompmode_t:
+
+enum xf::compression::details::xfSymbolCompMode_t
+=================================================
+
+
+
+
+
+.. _doxid-namespacexf_1_1compression_1_1details_1afd3849f7542231d41330a5d235ac5bb7ac77c2b5a7ece44f556a7da591940a246:
+.. _cid-xf::compression::details::xfsymbolcompmode_t::predefined_mode:
+.. _doxid-namespacexf_1_1compression_1_1details_1afd3849f7542231d41330a5d235ac5bb7a546fa2113907ac13f9c6d4da01ee77e8:
+.. _cid-xf::compression::details::xfsymbolcompmode_t::rle_mode:
+.. _doxid-namespacexf_1_1compression_1_1details_1afd3849f7542231d41330a5d235ac5bb7acab496a668ec191f79c26a44fa03f808:
+.. _cid-xf::compression::details::xfsymbolcompmode_t::fse_compressed_mode:
+.. _doxid-namespacexf_1_1compression_1_1details_1afd3849f7542231d41330a5d235ac5bb7a691fe7dbb6d51653af0c4ee95678173e:
+.. _cid-xf::compression::details::xfsymbolcompmode_t::repeat_mode:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	PREDEFINED_MODE = 0
+	RLE_MODE 
+	FSE_COMPRESSED_MODE 
+	REPEAT_MODE 
+

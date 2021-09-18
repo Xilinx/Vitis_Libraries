@@ -1,0 +1,58 @@
+\hypertarget{checksum__mm_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/checksum\-\_\-mm.hpp File Reference}
+\label{checksum__mm_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/checksum\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/checksum\-\_\-mm.\-hpp}}
+}
+
+
+Header for Checksum Kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}checksum\-\_\-wrapper.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{checksum__mm_8hpp_a5671cac6ae31db708a6823422ee18dc3}{\#define {\bfseries P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S}~16}\label{checksum__mm_8hpp_a5671cac6ae31db708a6823422ee18dc3}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{checksum__mm_8hpp_ab23593c0de276883039ae3aa40821ed9}{xil\-Checksum32} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $\ast$in, ap\-\_\-uint$<$ 32 $>$ $\ast$init\-Data, uint32\-\_\-t in\-Size, bool checksum\-Type)
+\begin{DoxyCompactList}\small\item\em Checksum kernel takes the raw data as input and generates the checksum result. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Checksum Kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{checksum__mm_8hpp_ab23593c0de276883039ae3aa40821ed9}{\index{checksum\-\_\-mm.\-hpp@{checksum\-\_\-mm.\-hpp}!xil\-Checksum32@{xil\-Checksum32}}
+\index{xil\-Checksum32@{xil\-Checksum32}!checksum_mm.hpp@{checksum\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Checksum32}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Checksum32 (
+\begin{DoxyParamCaption}
+\item[{const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $\ast$}]{in, }
+\item[{ap\-\_\-uint$<$ 32 $>$ $\ast$}]{init\-Data, }
+\item[{uint32\-\_\-t}]{in\-Size, }
+\item[{bool}]{checksum\-Type}
+\end{DoxyParamCaption}
+)}}\label{checksum__mm_8hpp_ab23593c0de276883039ae3aa40821ed9}
+
+
+Checksum kernel takes the raw data as input and generates the checksum result. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em init\-Data} & input Initial data \\
+\hline
+{\em out\-Data} & output checksum \\
+\hline
+{\em in\-Size} & input size \\
+\hline
+{\em checksum\-Type} & C\-R\-C/\-A\-D\-L\-E\-R \\
+\hline
+\end{DoxyParams}

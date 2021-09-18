@@ -1,0 +1,17 @@
+.. index:: pair: enum; list_mode
+.. _doxid-zlib_8hpp_1aad11276a757f9cae59a334fcbec9adce:
+.. _cid-list_mode-2:
+
+enum list_mode
+==============
+
+
+
+
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+

@@ -1,0 +1,52 @@
+\hypertarget{zstd__decompress_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-decompress.hpp File Reference}
+\label{zstd__decompress_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-decompress.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-decompress.\-hpp}}
+}
+
+
+Header for modules used in Z\-S\-T\-D compression kernel.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zstd\-\_\-fse\-\_\-decoder.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}zstd\-\_\-specs.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aead948b89283392ba14aa4e2cd775364}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, int L\-M\-O\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::align\-Literals} (hls\-::stream$<$ bool $>$ \&litlen\-Valid\-Stream, hls\-::stream$<$ bool $>$ \&new\-Block\-Flag\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&in\-Lit\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&in\-Lit\-Len\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&lit\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&lit\-Len\-Stream)}\label{namespacexf_1_1compression_1_1details_aead948b89283392ba14aa4e2cd775364}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ad1fef11bfbaa7976170ac0289149800a}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B, int L\-M\-O\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::decode\-Sequence} (hls\-::stream$<$ bool $>$ \&seq\-Valid\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&seq\-Meta\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&fse\-Table\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&seq\-Decode\-In\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&lit\-Len\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&offset\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&mat\-Len\-Stream, hls\-::stream$<$ bool $>$ \&litlen\-Valid\-Stream, hls\-::stream$<$ bool $>$ \&new\-Block\-Flag\-Stream)}\label{namespacexf_1_1compression_1_1details_ad1fef11bfbaa7976170ac0289149800a}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ac88d5e30a85909798b8e2d2d76045dc7}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B$>$ }\\void {\bfseries xf\-::compression\-::details\-::decode\-Literals} (hls\-::stream$<$ bool $>$ \&lit\-Valid\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&lit\-Meta\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&fse\-Table\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&lit\-Decode\-In\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&literal\-Stream)}\label{namespacexf_1_1compression_1_1details_ac88d5e30a85909798b8e2d2d76045dc7}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a9817273869c09f7f24fac8c8cbf01153}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::parse\-Block\-Gen\-F\-S\-E\-Table} (hls\-::stream$<$ bool $>$ \&block\-Valid\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&block\-Meta\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&zstd\-In\-Stream, hls\-::stream$<$ bool $>$ \&lit\-Valid\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&lit\-Meta\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&fse\-Table\-Lit\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&lit\-Decode\-In\-Stream, hls\-::stream$<$ bool $>$ \&seq\-Valid\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&seq\-Meta\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&fse\-Table\-Seq\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&seq\-Decode\-In\-Stream)}\label{namespacexf_1_1compression_1_1details_a9817273869c09f7f24fac8c8cbf01153}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_af794760ed1a637febab2aa5d50cdf406}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::parse\-Frames\-And\-Blocks} (hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 4 $>$ $>$ \&in\-Strobe, hls\-::stream$<$ bool $>$ \&block\-Valid\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&block\-Meta\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&zstd\-Block\-Stream)}\label{namespacexf_1_1compression_1_1details_af794760ed1a637febab2aa5d50cdf406}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_afa11f878052c7c9a51056c32ccb0eb83}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B, int L\-M\-O\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::decompress\-Multi\-Frames} (hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 4 $>$ $>$ \&in\-Strobe, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&literal\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&lit\-Len\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&offset\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ L\-M\-O\-\_\-\-W\-I\-D\-T\-H $>$ $>$ \&mat\-Len\-Stream, hls\-::stream$<$ bool $>$ \&litlen\-Valid\-Stream, hls\-::stream$<$ bool $>$ \&new\-Block\-Flag\-Stream)}\label{namespacexf_1_1compression_1_1details_afa11f878052c7c9a51056c32ccb0eb83}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a785daf028b8b105af008e3a7afeb03fd}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::k\-Stream\-Read\-Zstd\-Decomp} (hls\-::stream$<$ ap\-\_\-axiu$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, 0, 0, 0 $>$ $>$ \&in\-K\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&zstd\-Core\-In\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 4 $>$ $>$ \&in\-Strobe)}\label{namespacexf_1_1compression_1_1details_a785daf028b8b105af008e3a7afeb03fd}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aaec7d8f8425fe78347d90059d6eda3af}{{\footnotesize template$<$int S\-T\-R\-E\-A\-M\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::k\-Stream\-Write\-Zstd\-Decomp} (hls\-::stream$<$ ap\-\_\-axiu$<$ S\-T\-R\-E\-A\-M\-\_\-\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&out\-K\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ S\-T\-R\-E\-A\-M\-\_\-\-W\-I\-D\-T\-H+(S\-T\-R\-E\-A\-M\-\_\-\-W\-I\-D\-T\-H/8)$>$ $>$ \&out\-Data\-Stream)}\label{namespacexf_1_1compression_1_1details_aaec7d8f8425fe78347d90059d6eda3af}
+
+\item 
+{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B, int L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T, int L\-M\-O\-\_\-\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::zstd\-Decompress\-Stream} (hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 4 $>$ $>$ \&in\-Strobe, hls\-::stream$<$ ap\-\_\-uint$<$(8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E)+P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $>$ $>$ \&out\-Stream)
+\begin{DoxyCompactList}\small\item\em This module decompresses the Z\-Std compressed file read from input stream. It reads the input stream till valid strobe input is provided. It produces the decompressed data at the output stream. \end{DoxyCompactList}\item 
+{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B, int L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T, int L\-M\-O\-\_\-\-W\-I\-D\-T\-H = 15$>$ }\\void {\bfseries xf\-::compression\-::zstd\-Decompress\-Core} (hls\-::stream$<$ ap\-\_\-axiu$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, 0, 0, 0 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-axiu$<$ 8 $\ast$P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E, 0, 0, 0 $>$ $>$ \&out\-Stream)
+\begin{DoxyCompactList}\small\item\em This module decompresses the Z\-Std compressed file read from input stream. It reads the input stream till the given input size. It produces the decompressed data at the output stream. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in Z\-S\-T\-D compression kernel. Header for modules used in Z\-S\-T\-D decompress kernel.
+
+This file is part of Vitis Data Compression Library. 

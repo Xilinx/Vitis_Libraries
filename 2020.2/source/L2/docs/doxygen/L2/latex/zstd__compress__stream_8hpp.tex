@@ -1,0 +1,69 @@
+\hypertarget{zstd__compress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zstd\-\_\-compress\-\_\-stream.hpp File Reference}
+\label{zstd__compress__stream_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zstd\-\_\-compress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zstd\-\_\-compress\-\_\-stream.\-hpp}}
+}
+
+
+Header for Zstd compression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zstd\-\_\-compress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zstd__compress__stream_8hpp_aff3125e71ad597500b9c62e1d6a5505a}{\#define {\bfseries S\-T\-R\-E\-A\-M\-\_\-\-I\-N\-\_\-\-D\-W\-I\-D\-T\-H}~8}\label{zstd__compress__stream_8hpp_aff3125e71ad597500b9c62e1d6a5505a}
+
+\item 
+\hypertarget{zstd__compress__stream_8hpp_a1460bfb52dcdb6d1d219dd91c1b9b5d7}{\#define {\bfseries S\-T\-R\-E\-A\-M\-\_\-\-O\-U\-T\-\_\-\-D\-W\-I\-D\-T\-H}~32}\label{zstd__compress__stream_8hpp_a1460bfb52dcdb6d1d219dd91c1b9b5d7}
+
+\item 
+\hypertarget{zstd__compress__stream_8hpp_a663d5804aee12e3655c9fb8aca8a56bd}{\#define {\bfseries Z\-S\-T\-D\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B}~32}\label{zstd__compress__stream_8hpp_a663d5804aee12e3655c9fb8aca8a56bd}
+
+\item 
+\hypertarget{zstd__compress__stream_8hpp_a7ff5bf4cf84133d3024a191f1af2f282}{\#define {\bfseries M\-I\-N\-\_\-\-B\-L\-C\-K\-\_\-\-S\-I\-Z\-E}~1024}\label{zstd__compress__stream_8hpp_a7ff5bf4cf84133d3024a191f1af2f282}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{zstd__compress__stream_8hpp_a547c2894fa791ee0204896e664d02bb3}{xil\-Zstd\-Compress} (hls\-::stream$<$ ap\-\_\-axiu$<$ S\-T\-R\-E\-A\-M\-\_\-\-I\-N\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&axi\-In\-Stream, hls\-::stream$<$ ap\-\_\-axiu$<$ S\-T\-R\-E\-A\-M\-\_\-\-O\-U\-T\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&axi\-Out\-Stream)
+\begin{DoxyCompactList}\small\item\em Z\-S\-T\-D compression kernel takes input data from axi stream and compresses it into multiple frames having 1 block each and writes the compressed data to output axi stream. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zstd__compress__stream_8hpp_a4ceebe88be906b2ab421a44a1f95f952}{constexpr int {\bfseries c\-\_\-window\-Size} = Z\-S\-T\-D\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B $\ast$ 1024}\label{zstd__compress__stream_8hpp_a4ceebe88be906b2ab421a44a1f95f952}
+
+\item 
+\hypertarget{zstd__compress__stream_8hpp_a6fa00b4f7ba6a72145356d5eb86fd1f1}{constexpr int {\bfseries c\-\_\-block\-Size} = Z\-S\-T\-D\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B $\ast$ 1024}\label{zstd__compress__stream_8hpp_a6fa00b4f7ba6a72145356d5eb86fd1f1}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Zstd compression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{zstd__compress__stream_8hpp_a547c2894fa791ee0204896e664d02bb3}{\index{zstd\-\_\-compress\-\_\-stream.\-hpp@{zstd\-\_\-compress\-\_\-stream.\-hpp}!xil\-Zstd\-Compress@{xil\-Zstd\-Compress}}
+\index{xil\-Zstd\-Compress@{xil\-Zstd\-Compress}!zstd_compress_stream.hpp@{zstd\-\_\-compress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Zstd\-Compress}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Zstd\-Compress (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ S\-T\-R\-E\-A\-M\-\_\-\-I\-N\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&}]{axi\-In\-Stream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ S\-T\-R\-E\-A\-M\-\_\-\-O\-U\-T\-\_\-\-D\-W\-I\-D\-T\-H, 0, 0, 0 $>$ $>$ \&}]{axi\-Out\-Stream}
+\end{DoxyParamCaption}
+)}}\label{zstd__compress__stream_8hpp_a547c2894fa791ee0204896e664d02bb3}
+
+
+Z\-S\-T\-D compression kernel takes input data from axi stream and compresses it into multiple frames having 1 block each and writes the compressed data to output axi stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-Stream} & input raw data \\
+\hline
+{\em out\-Stream} & output compressed data \\
+\hline
+\end{DoxyParams}

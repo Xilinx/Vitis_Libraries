@@ -1,0 +1,66 @@
+\hypertarget{huffman__encoder_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/huffman\-\_\-encoder.hpp File Reference}
+\label{huffman__encoder_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/huffman\-\_\-encoder.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/huffman\-\_\-encoder.\-hpp}}
+}
+
+
+Header for module used in Z\-L\-I\-B huffman kernel.  
+
+
+{\ttfamily \#include \char`\"{}compress\-\_\-utils.\-hpp\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-tables.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{huffman__encoder_8hpp_a3a3a3795eafe60850be8b44dad7bdcf7}{\#define {\bfseries d\-\_\-code}(dist, dist\-\_\-code)~((dist) $<$ 256 ? dist\-\_\-code\mbox{[}dist\mbox{]} \-: dist\-\_\-code\mbox{[}256 + ((dist) $>$$>$ 7)\mbox{]})}\label{huffman__encoder_8hpp_a3a3a3795eafe60850be8b44dad7bdcf7}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a4514e7a3b29e8d9faccacfe93f3ae074}{void {\bfseries xf\-::compression\-::details\-::bit\-Packing\-Size} (hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&in\-Stream\-Size, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Stream\-Size)}\label{namespacexf_1_1compression_1_1details_a4514e7a3b29e8d9faccacfe93f3ae074}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ae7d4f24e5f1514f409fc63d5f7c1eb75}{void {\bfseries xf\-::compression\-::details\-::bit\-Packing} (hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&in\-Stream\-Size, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&compressed\-Size)}\label{namespacexf_1_1compression_1_1details_ae7d4f24e5f1514f409fc63d5f7c1eb75}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_abad1c24cfe28638848e1ea8f5b1ec1c4}{void {\bfseries xf\-::compression\-::details\-::bit\-Packing\-Static} (hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&in\-Stream\-Size, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eos, hls\-::stream$<$ bool $>$ \&out\-File\-Eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&compressed\-Size, hls\-::stream$<$ bool $>$ \&in\-Eos)}\label{namespacexf_1_1compression_1_1details_abad1c24cfe28638848e1ea8f5b1ec1c4}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a0e1aa4e4675dd558d93e23c895c785d7}{void {\bfseries xf\-::compression\-::details\-::bit\-Packing\-Static} (hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ c\-\_\-max\-Bits $>$, 1 $>$ $>$ \&in\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 2 $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_1_1details_a0e1aa4e4675dd558d93e23c895c785d7}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_abea1e5e6d5c3c2da9604d2f75000180c}{void {\bfseries xf\-::compression\-::details\-::bit\-Packing\-Stream} (hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&in\-Stream\-Size, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eos, hls\-::stream$<$ bool $>$ \&out\-File\-Eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&compressed\-Size, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Size)}\label{namespacexf_1_1compression_1_1details_abea1e5e6d5c3c2da9604d2f75000180c}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ad36efa076a0ee2d85798ee7c1e1eec55}{void {\bfseries xf\-::compression\-::details\-::bit\-Packing\-Stream} (hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ c\-\_\-max\-Bits $>$, 1 $>$ $>$ \&in\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 2 $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_1_1details_ad36efa076a0ee2d85798ee7c1e1eec55}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a6fccb4ac9f0b4d1113cc7bf9c599fa82}{void {\bfseries xf\-::compression\-::details\-::huffman\-Encoder} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&out\-Stream\-Size, uint32\-\_\-t input\-\_\-size, const uint16\-\_\-t $\ast$litmtree\-\_\-code, const ap\-\_\-uint$<$ 4 $>$ $\ast$litmtree\-\_\-blen, const uint16\-\_\-t $\ast$distree\-\_\-codes, const ap\-\_\-uint$<$ 4 $>$ $\ast$dtree\-\_\-blen)}\label{namespacexf_1_1compression_1_1details_a6fccb4ac9f0b4d1113cc7bf9c599fa82}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a6213a1db5920bee63013eaecf9fafb7f}{void {\bfseries xf\-::compression\-::details\-::huffman\-Encoder\-Static} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&out\-Stream\-Size, hls\-::stream$<$ bool $>$ \&in\-Eos, const uint16\-\_\-t $\ast$litmtree\-\_\-code, const ap\-\_\-uint$<$ 4 $>$ $\ast$litmtree\-\_\-blen, const uint16\-\_\-t $\ast$distree\-\_\-codes, const ap\-\_\-uint$<$ 4 $>$ $\ast$dtree\-\_\-blen)}\label{namespacexf_1_1compression_1_1details_a6213a1db5920bee63013eaecf9fafb7f}
+
+\item 
+void {\bfseries xf\-::compression\-::details\-::huffman\-Processing\-Unit} (hls\-::stream$<$ ap\-\_\-uint$<$ 9 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&input\-Size\-Stream)
+\begin{DoxyCompactList}\small\item\em This module does updates lz77 byte data to 32bit data. \end{DoxyCompactList}\item 
+void {\bfseries xf\-::compression\-::details\-::huffman\-Processing\-Unit\-Static} (hls\-::stream$<$ ap\-\_\-uint$<$ 9 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&in\-Eos, hls\-::stream$<$ bool $>$ \&end\-Of\-Block)
+\begin{DoxyCompactList}\small\item\em This module does updates lz77 byte data to 32bit data. \end{DoxyCompactList}\item 
+void {\bfseries xf\-::compression\-::details\-::huffman\-Processing\-Unit} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 9, 1 $>$ $>$ \&in\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 32, 1 $>$ $>$ \&out\-Stream)
+\begin{DoxyCompactList}\small\item\em This module does updates lz77 byte data to 32bit data. \end{DoxyCompactList}\item 
+\hypertarget{namespacexf_1_1compression_a4bd401d476f31738f64f7f892dd7739e}{void {\bfseries xf\-::compression\-::huffman\-Encoder\-Static} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&out\-Stream\-Size, hls\-::stream$<$ bool $>$ \&in\-Eob, hls\-::stream$<$ bool $>$ \&in\-Eos)}\label{namespacexf_1_1compression_a4bd401d476f31738f64f7f892dd7739e}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a4dc6c0d8c5bec8dac092499910965156}{void {\bfseries xf\-::compression\-::huffman\-Encoder\-Static} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 32, 1 $>$ $>$ \&in\-Stream, hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ c\-\_\-max\-Bits $>$, 1 $>$ $>$ \&out\-Stream)}\label{namespacexf_1_1compression_a4dc6c0d8c5bec8dac092499910965156}
+
+\item 
+void {\bfseries xf\-::compression\-::huffman\-Encoder\-Stream} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&out\-Stream\-Size, hls\-::stream$<$ uint32\-\_\-t $>$ \&input\-Size, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Codes, hls\-::stream$<$ uint8\-\_\-t $>$ \&in\-Stream\-Code\-Size)
+\begin{DoxyCompactList}\small\item\em This module does zlib/gzip dynamic huffman encoding. \end{DoxyCompactList}\item 
+void {\bfseries xf\-::compression\-::huffman\-Encoder\-Stream} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 32, 1 $>$ $>$ \&in\-Stream, hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ c\-\_\-max\-Bits $>$, 1 $>$ $>$ \&huf\-Code\-In\-Stream, hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ c\-\_\-max\-Bits $>$, 1 $>$ $>$ \&huf\-Code\-Out\-Stream)
+\begin{DoxyCompactList}\small\item\em This module does zlib/gzip dynamic huffman encoding. \end{DoxyCompactList}\item 
+void {\bfseries xf\-::compression\-::huffman\-Encoder} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Stream, hls\-::stream$<$ uint8\-\_\-t $>$ \&out\-Stream\-Size, uint32\-\_\-t input\-\_\-size, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Stream\-Codes, hls\-::stream$<$ uint8\-\_\-t $>$ \&in\-Stream\-Code\-Size)
+\begin{DoxyCompactList}\small\item\em This module does zlib/gzip dynamic huffman encoding. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for module used in Z\-L\-I\-B huffman kernel. This file is part of Vitis Data Compression Library. 

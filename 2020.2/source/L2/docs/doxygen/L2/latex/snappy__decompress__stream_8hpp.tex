@@ -1,0 +1,61 @@
+\hypertarget{snappy__decompress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/snappy\-\_\-decompress\-\_\-stream.hpp File Reference}
+\label{snappy__decompress__stream_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/snappy\-\_\-decompress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/snappy\-\_\-decompress\-\_\-stream.\-hpp}}
+}
+
+
+C++ Header for snappy decompression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}kernel\-\_\-stream\-\_\-utils.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}snappy\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{snappy__decompress__stream_8hpp_a31a6872795fec3b57775c7e0059fee83}{\#define {\bfseries M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}~65536}\label{snappy__decompress__stream_8hpp_a31a6872795fec3b57775c7e0059fee83}
+
+\item 
+\hypertarget{snappy__decompress__stream_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}{\#define {\bfseries H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E}~M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}\label{snappy__decompress__stream_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{snappy__decompress__stream_8hpp_aa787a86f1a30dca6c949102e74d9b802}{xil\-Snappy\-Decompress\-Stream} (hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&inaxistream, hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&outaxistream, uint32\-\_\-t input\-Size, uint32\-\_\-t output\-Size)
+\begin{DoxyCompactList}\small\item\em Snappy decompression streaming kernel takes compressed data as input from kernel axi stream and process in block based fashion and writes the raw data to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+C++ Header for snappy decompression kernel. This file is part of X\-F Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{snappy__decompress__stream_8hpp_aa787a86f1a30dca6c949102e74d9b802}{\index{snappy\-\_\-decompress\-\_\-stream.\-hpp@{snappy\-\_\-decompress\-\_\-stream.\-hpp}!xil\-Snappy\-Decompress\-Stream@{xil\-Snappy\-Decompress\-Stream}}
+\index{xil\-Snappy\-Decompress\-Stream@{xil\-Snappy\-Decompress\-Stream}!snappy_decompress_stream.hpp@{snappy\-\_\-decompress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Snappy\-Decompress\-Stream}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Snappy\-Decompress\-Stream (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&}]{inaxistream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&}]{outaxistream, }
+\item[{uint32\-\_\-t}]{input\-Size, }
+\item[{uint32\-\_\-t}]{output\-Size}
+\end{DoxyParamCaption}
+)}}\label{snappy__decompress__stream_8hpp_aa787a86f1a30dca6c949102e74d9b802}
+
+
+Snappy decompression streaming kernel takes compressed data as input from kernel axi stream and process in block based fashion and writes the raw data to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em inaxistream} & input kernel axi stream for compressed data \\
+\hline
+{\em outaxistream} & output kernel axi stream for decompressed data \\
+\hline
+{\em input\-Size} & input data size \\
+\hline
+\end{DoxyParams}

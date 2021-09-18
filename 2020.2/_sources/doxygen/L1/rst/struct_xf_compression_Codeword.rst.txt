@@ -1,0 +1,26 @@
+.. index:: pair: struct; xf::compression::Codeword
+.. _doxid-structxf_1_1compression_1_1Codeword:
+.. _cid-xf::compression::codeword:
+
+struct xf::compression::Codeword
+================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxf_1_1compression_1_1Codeword_1a6045eb37d7c73f8a4ea0e644fc151662:
+.. _cid-xf::compression::codeword::codeword:
+.. _doxid-structxf_1_1compression_1_1Codeword_1a1833cbef40b9839df77d45984b6879f1:
+.. _cid-xf::compression::codeword::bitlength:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	ap_uint <c_maxBits> codeword
+	ap_uint <c_tgnBitlengthBits> bitlength
+

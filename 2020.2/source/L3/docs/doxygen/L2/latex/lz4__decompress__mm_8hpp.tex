@@ -1,0 +1,77 @@
+\hypertarget{lz4__decompress__mm_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-decompress\-\_\-mm.hpp File Reference}
+\label{lz4__decompress__mm_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-decompress\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-decompress\-\_\-mm.\-hpp}}
+}
+
+
+Header for L\-Z4 decompression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__decompress__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{lz4__decompress__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{lz4__decompress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{lz4__decompress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\item 
+\hypertarget{lz4__decompress__mm_8hpp_a31a6872795fec3b57775c7e0059fee83}{\#define {\bfseries M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}~65536}\label{lz4__decompress__mm_8hpp_a31a6872795fec3b57775c7e0059fee83}
+
+\item 
+\hypertarget{lz4__decompress__mm_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}{\#define {\bfseries H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E}~M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}\label{lz4__decompress__mm_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__decompress__mm_8hpp_acf6728ba62074fd173cb146ecb59433e}{xil\-Lz4\-Decompress} (const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$in, xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$out, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t $\ast$in\-\_\-compress\-\_\-size, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t no\-\_\-blocks)
+\begin{DoxyCompactList}\small\item\em L\-Z4 decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for L\-Z4 decompression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__decompress__mm_8hpp_acf6728ba62074fd173cb146ecb59433e}{\index{lz4\-\_\-decompress\-\_\-mm.\-hpp@{lz4\-\_\-decompress\-\_\-mm.\-hpp}!xil\-Lz4\-Decompress@{xil\-Lz4\-Decompress}}
+\index{xil\-Lz4\-Decompress@{xil\-Lz4\-Decompress}!lz4_decompress_mm.hpp@{lz4\-\_\-decompress\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Lz4\-Decompress}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-Decompress (
+\begin{DoxyParamCaption}
+\item[{const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{in, }
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-block\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-compress\-\_\-size, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{no\-\_\-blocks}
+\end{DoxyParamCaption}
+)}}\label{lz4__decompress__mm_8hpp_acf6728ba62074fd173cb146ecb59433e}
+
+
+L\-Z4 decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input compressed data \\
+\hline
+{\em out} & output raw data \\
+\hline
+{\em in\-\_\-block\-\_\-size} & input block size of each block \\
+\hline
+{\em in\-\_\-compress\-\_\-size} & compress size of each block \\
+\hline
+{\em block\-\_\-size\-\_\-in\-\_\-kb} & block size in bytes \\
+\hline
+{\em no\-\_\-blocks} & number of blocks \\
+\hline
+\end{DoxyParams}

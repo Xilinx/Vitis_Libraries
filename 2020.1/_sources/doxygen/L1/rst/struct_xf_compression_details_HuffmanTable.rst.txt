@@ -1,0 +1,26 @@
+.. index:: pair: struct; xf::compression::details::HuffmanTable
+.. _doxid-structxf_1_1compression_1_1details_1_1HuffmanTable:
+.. _cid-xf::compression::details::huffmantable:
+
+struct xf::compression::details::HuffmanTable
+=============================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxf_1_1compression_1_1details_1_1HuffmanTable_1aacb5ca2feeb278e5ea4e143d63612beb:
+.. _cid-xf::compression::details::huffmantable::bitlen:
+.. _doxid-structxf_1_1compression_1_1details_1_1HuffmanTable_1adac0932855f14f60ce604f2066670fea:
+.. _cid-xf::compression::details::huffmantable::symbol:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	ap_uint <4> bitlen
+	ap_uint <8> symbol
+

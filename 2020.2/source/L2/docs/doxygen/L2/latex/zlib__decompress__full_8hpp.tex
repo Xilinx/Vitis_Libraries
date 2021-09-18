@@ -1,0 +1,77 @@
+\hypertarget{zlib__decompress__full_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zlib\-\_\-decompress\-\_\-full.hpp File Reference}
+\label{zlib__decompress__full_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zlib\-\_\-decompress\-\_\-full.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zlib\-\_\-decompress\-\_\-full.\-hpp}}
+}
+
+
+Header for zlib decompression full kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}huffman\-\_\-decoder.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-config.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zlib__decompress__full_8hpp_af2cda7e0f4a90b5bd73b287e9a52cb24}{\#define {\bfseries L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-L\-I\-M\-I\-T}~32768}\label{zlib__decompress__full_8hpp_af2cda7e0f4a90b5bd73b287e9a52cb24}
+
+\item 
+\hypertarget{zlib__decompress__full_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}{\#define {\bfseries H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E}~L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-L\-I\-M\-I\-T}\label{zlib__decompress__full_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}
+
+\item 
+\hypertarget{zlib__decompress__full_8hpp_a2b8f8e3bbe3f6e707f3f920dfeb2be7b}{\#define {\bfseries L\-O\-W\-\_\-\-O\-F\-F\-S\-E\-T}~10}\label{zlib__decompress__full_8hpp_a2b8f8e3bbe3f6e707f3f920dfeb2be7b}
+
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zlib__decompress__full_8hpp_a1de5b3ef983c9da56ce0a3bb2f14ef9f}{typedef ap\-\_\-uint$<$ k\-G\-Mem\-D\-Width $>$ {\bfseries uint\-Mem\-Width\-\_\-t}}\label{zlib__decompress__full_8hpp_a1de5b3ef983c9da56ce0a3bb2f14ef9f}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{zlib__decompress__full_8hpp_a44b0f3636bbd9564d7c362f8828ab564}{xil\-Decompress\-Full} (uint32\-\_\-t input\-\_\-size, hls\-::stream$<$ ap\-\_\-axiu$<$ k\-G\-Mem\-D\-Width, 0, 0, 0 $>$ $>$ \&inaxistreamd, hls\-::stream$<$ ap\-\_\-axiu$<$ k\-G\-Mem\-D\-Width, 0, 0, 0 $>$ $>$ \&outaxistreamd, hls\-::stream$<$ ap\-\_\-axiu$<$ 64, 0, 0, 0 $>$ $>$ \&sizestreamd)
+\begin{DoxyCompactList}\small\item\em Zlib decompression full kernel top function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zlib__decompress__full_8hpp_a0d8869dc9b7f41e0a2ecb27547f7e58c}{const int {\bfseries k\-G\-Mem\-D\-Width} = 32}\label{zlib__decompress__full_8hpp_a0d8869dc9b7f41e0a2ecb27547f7e58c}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for zlib decompression full kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{zlib__decompress__full_8hpp_a44b0f3636bbd9564d7c362f8828ab564}{\index{zlib\-\_\-decompress\-\_\-full.\-hpp@{zlib\-\_\-decompress\-\_\-full.\-hpp}!xil\-Decompress\-Full@{xil\-Decompress\-Full}}
+\index{xil\-Decompress\-Full@{xil\-Decompress\-Full}!zlib_decompress_full.hpp@{zlib\-\_\-decompress\-\_\-full.\-hpp}}
+\subsubsection[{xil\-Decompress\-Full}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Decompress\-Full (
+\begin{DoxyParamCaption}
+\item[{uint32\-\_\-t}]{input\-\_\-size, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ k\-G\-Mem\-D\-Width, 0, 0, 0 $>$ $>$ \&}]{inaxistreamd, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ k\-G\-Mem\-D\-Width, 0, 0, 0 $>$ $>$ \&}]{outaxistreamd, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 64, 0, 0, 0 $>$ $>$ \&}]{sizestreamd}
+\end{DoxyParamCaption}
+)}}\label{zlib__decompress__full_8hpp_a44b0f3636bbd9564d7c362f8828ab564}
+
+
+Zlib decompression full kernel top function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\-\_\-size} & input size \\
+\hline
+{\em inaxistreamd} & input kernel axi stream \\
+\hline
+{\em outaxistreamd} & output kernel axi stream \\
+\hline
+\end{DoxyParams}

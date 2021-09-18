@@ -1,0 +1,75 @@
+\hypertarget{lz4__compress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-compress\-\_\-stream.hpp File Reference}
+\label{lz4__compress__stream_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-compress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-compress\-\_\-stream.\-hpp}}
+}
+
+
+Header for L\-Z4 compression stream based kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}kernel\-\_\-stream\-\_\-utils.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-compress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-compress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__compress__stream_8hpp_a388d7cbd7167357dd8aa63c2c90e3b8a}{\#define {\bfseries M\-A\-X\-\_\-\-L\-I\-T\-\_\-\-C\-O\-U\-N\-T}~4096}\label{lz4__compress__stream_8hpp_a388d7cbd7167357dd8aa63c2c90e3b8a}
+
+\item 
+\hypertarget{lz4__compress__stream_8hpp_a7984ceb1ff48ac91172976b91ed43f60}{\#define {\bfseries M\-I\-N\-\_\-\-M\-A\-T\-C\-H}~4}\label{lz4__compress__stream_8hpp_a7984ceb1ff48ac91172976b91ed43f60}
+
+\item 
+\hypertarget{lz4__compress__stream_8hpp_af2cda7e0f4a90b5bd73b287e9a52cb24}{\#define {\bfseries L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-L\-I\-M\-I\-T}~65536}\label{lz4__compress__stream_8hpp_af2cda7e0f4a90b5bd73b287e9a52cb24}
+
+\item 
+\hypertarget{lz4__compress__stream_8hpp_a52cab5c557e96dc15148629e854d6d5e}{\#define {\bfseries O\-F\-F\-S\-E\-T\-\_\-\-W\-I\-N\-D\-O\-W}~L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-L\-I\-M\-I\-T}\label{lz4__compress__stream_8hpp_a52cab5c557e96dc15148629e854d6d5e}
+
+\item 
+\hypertarget{lz4__compress__stream_8hpp_a0532714a43e57d86b6e5002db6924684}{\#define {\bfseries P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-L\-O\-C\-K}~8}\label{lz4__compress__stream_8hpp_a0532714a43e57d86b6e5002db6924684}
+
+\item 
+\hypertarget{lz4__compress__stream_8hpp_a773437eda00419e55ebcf14bf1ef5a4d}{\#define {\bfseries M\-A\-X\-\_\-\-M\-A\-T\-C\-H\-\_\-\-L\-E\-N}~255}\label{lz4__compress__stream_8hpp_a773437eda00419e55ebcf14bf1ef5a4d}
+
+\item 
+\hypertarget{lz4__compress__stream_8hpp_a113fb963ba98e31e3c41eb9599b1497d}{\#define {\bfseries M\-A\-T\-C\-H\-\_\-\-L\-E\-N}~6}\label{lz4__compress__stream_8hpp_a113fb963ba98e31e3c41eb9599b1497d}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__compress__stream_8hpp_a60b10683a7f866e64836d3a7130d4daf}{xil\-Lz4\-Compress\-Stream} (hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&inaxistream, hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&outaxistream, uint32\-\_\-t input\-Size)
+\begin{DoxyCompactList}\small\item\em L\-Z4 compression streaming kernel. It takes input from axi kernel stream and writes compressed data back to output axi kernel stream. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for L\-Z4 compression stream based kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__compress__stream_8hpp_a60b10683a7f866e64836d3a7130d4daf}{\index{lz4\-\_\-compress\-\_\-stream.\-hpp@{lz4\-\_\-compress\-\_\-stream.\-hpp}!xil\-Lz4\-Compress\-Stream@{xil\-Lz4\-Compress\-Stream}}
+\index{xil\-Lz4\-Compress\-Stream@{xil\-Lz4\-Compress\-Stream}!lz4_compress_stream.hpp@{lz4\-\_\-compress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Lz4\-Compress\-Stream}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-Compress\-Stream (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&}]{inaxistream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&}]{outaxistream, }
+\item[{uint32\-\_\-t}]{input\-Size}
+\end{DoxyParamCaption}
+)}}\label{lz4__compress__stream_8hpp_a60b10683a7f866e64836d3a7130d4daf}
+
+
+L\-Z4 compression streaming kernel. It takes input from axi kernel stream and writes compressed data back to output axi kernel stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em inaxistream} & Input axi kernel stream \\
+\hline
+{\em outaxistream} & Output axi kernel stream \\
+\hline
+{\em input\-Size} & Input compressed data size \\
+\hline
+\end{DoxyParams}

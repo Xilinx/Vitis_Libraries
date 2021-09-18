@@ -1,0 +1,26 @@
+.. index:: pair: enum; xf::compression::eHuffmanType
+.. _doxid-namespacexf_1_1compression_1aa1aa80766d59d3c350c68fd7bab47d49:
+.. _cid-xf::compression::ehuffmantype:
+
+enum xf::compression::eHuffmanType
+==================================
+
+
+
+
+
+.. _doxid-namespacexf_1_1compression_1aa1aa80766d59d3c350c68fd7bab47d49ad304a4f33f5245896caed6fa949b4448:
+.. _cid-xf::compression::ehuffmantype::fixed:
+.. _doxid-namespacexf_1_1compression_1aa1aa80766d59d3c350c68fd7bab47d49a77c1d2e0c55525fbc06e57b5d5d926b8:
+.. _cid-xf::compression::ehuffmantype::dynamic:
+.. _doxid-namespacexf_1_1compression_1aa1aa80766d59d3c350c68fd7bab47d49a3860a246144c8677f31132933dd84e66:
+.. _cid-xf::compression::ehuffmantype::full:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	FIXED = 0
+	DYNAMIC 
+	FULL 
+

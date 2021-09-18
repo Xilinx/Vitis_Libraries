@@ -1,0 +1,49 @@
+.. index:: pair: class; zlibDriver
+.. _doxid-classzlibDriver:
+.. _cid-zlibdriver:
+
+class zlibDriver
+================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-classzlibDriver_1aac5df3ec5fa4a4b9176b5cd1c7fa8b21:
+.. _cid-zlibdriver::xilinxhwdeflate:
+.. _doxid-classzlibDriver_1ad258546d6000ab464f4fd006e4d31492:
+.. _cid-zlibdriver::xilinxhwcompress:
+.. _doxid-classzlibDriver_1a23c281eeb6d90000f2ffc3ff2d91053c:
+.. _cid-zlibdriver::xilinxhwuncompress:
+.. _doxid-classzlibDriver_1a0a2b440d8023eb944d8d5f788089f126:
+.. _cid-zlibdriver::zlibdriver:
+.. _doxid-classzlibDriver_1a20f4e9cd9033f356001da4c7ebfc7db1:
+.. _cid-zlibdriver::~zlibdriver:
+.. _doxid-classzlibDriver_1a5f64f2eee66d23270b084470e7d972d9:
+.. _cid-zlibdriver::getstatus:
+.. _doxid-classzlibDriver_1ae94889732c3e2e128f3fa7ab1578a995:
+.. _cid-zlibdriver::struct_update:
+.. _doxid-classzlibDriver_1a03573fbdc2208c50695b09d42493d19f:
+.. _cid-zlibdriver::getzlibinstance:
+.. _doxid-classzlibDriver_1ab92f52f879fce464cf131f21540c82f6:
+.. _cid-zlibdriver::allocatecu:
+.. _doxid-classzlibDriver_1ab291d3ab12bd571c59d2e46171230933:
+.. _cid-zlibdriver::geterrstatus:
+.. _doxid-classzlibDriver_1ad141f629c1225a8254848407dc4ecf96:
+.. _cid-zlibdriver::getzlibptr:
+.. _doxid-classzlibDriver_1a7ab5372e9a3ed91d0496365d7575c5b4:
+.. _cid-zlibdriver::releasezlibcu:
+.. _doxid-classzlibDriver_1a95aa0cb5cbfb47555669a1d80d01e41d:
+.. _cid-zlibdriver::isdecompresseligible:
+.. _doxid-classzlibDriver_1a7c213382833f41d525be9075e3a95785:
+.. _cid-zlibdriver::setdecompresseligibility:
+.. _doxid-classzlibDriver_1a857c13e4ee000ab2d8019480642113ba:
+.. _cid-zlibdriver::xilinxhwinflate:
+.. _doxid-classzlibDriver_1a86000ba72a29785a371f7f8da08a7a8f:
+.. _cid-zlibdriver::copydata:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+

@@ -1,0 +1,31 @@
+.. index:: pair: struct; DSVectorPack
+.. _doxid-structDSVectorPack:
+.. _cid-dsvectorpack:
+
+template struct DSVectorPack
+============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structDSVectorPack_1ae7581fa6653b77c197fabf35a38e4ecb:
+.. _cid-dsvectorpack::all:
+.. _doxid-structDSVectorPack_1aa623ef3038393ef7519ee1de15ebeaca:
+.. _cid-dsvectorpack::data:
+.. _doxid-structDSVectorPack_1ac33d85940e3ae535d8ecccf9939019e8:
+.. _cid-dsvectorpack::operator:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    class DST,
+	    int VEC_LEN,
+	    int DS_DWIDTH,
+	    int STROBE_DWIDTH = maxBitsUsed(VEC_LEN)
+	    >
+	struct DSVectorPack
+

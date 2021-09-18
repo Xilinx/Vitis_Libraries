@@ -1,0 +1,29 @@
+.. index:: pair: struct; xf::compression::details::FseBSState
+.. _doxid-structxf_1_1compression_1_1details_1_1FseBSState:
+.. _cid-xf::compression::details::fsebsstate:
+
+struct xf::compression::details::FseBSState
+===========================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxf_1_1compression_1_1details_1_1FseBSState_1a9d488289f66782dd34b217c4bd0e69f3:
+.. _cid-xf::compression::details::fsebsstate::symbol:
+.. _doxid-structxf_1_1compression_1_1details_1_1FseBSState_1a8684516bd49a1fbcf9472100e044648c:
+.. _cid-xf::compression::details::fsebsstate::bitcount:
+.. _doxid-structxf_1_1compression_1_1details_1_1FseBSState_1aeb57ea51030f2185be44284aa5d0e045:
+.. _cid-xf::compression::details::fsebsstate::nextstate:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	uint8_t symbol
+	uint8_t bitCount
+	uint16_t nextState
+

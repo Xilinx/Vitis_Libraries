@@ -1,0 +1,29 @@
+.. index:: pair: enum; design_flow
+.. _doxid-zlib__old_8hpp_1aef56e0bc795163b0e86610d47b36da8d:
+.. _cid-design_flow:
+
+enum design_flow
+================
+
+
+
+
+
+.. _doxid-zlib_8hpp_1aef56e0bc795163b0e86610d47b36da8da4bfd4126fb448ad2ddd370ba11b4a77b:
+.. _cid-design_flow::xilinx_gzip:
+.. _doxid-zlib_8hpp_1aef56e0bc795163b0e86610d47b36da8da1b379f2cb262971632efd209cefd1f4b:
+.. _cid-design_flow::xilinx_zlib:
+.. _doxid-zlib__old_8hpp_1aef56e0bc795163b0e86610d47b36da8da4bfd4126fb448ad2ddd370ba11b4a77b:
+.. _cid-design_flow::xilinx_gzip-2:
+.. _doxid-zlib__old_8hpp_1aef56e0bc795163b0e86610d47b36da8da1b379f2cb262971632efd209cefd1f4b:
+.. _cid-design_flow::xilinx_zlib-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	XILINX_GZIP 
+	XILINX_ZLIB 
+	XILINX_GZIP 
+	XILINX_ZLIB 
+
