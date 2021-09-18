@@ -1,0 +1,5 @@
+{
+    "id": "xf_SPARSE",
+    "name": "Vitis SPARSE Library",
+    "description": "Vitis SPARSE Library is an Vitis library for accelerating linear algebra functions for handling sparse matrices."
+}
