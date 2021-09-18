@@ -1,0 +1,122 @@
+
+.. _isp: 
+
+Image Sensor Processing pipeline
+================================
+
+Image Sensor Processing (ISP) is a pipeline of image processing functions processing the raw image from the sensor. 
+
+Current ISP includes following 4 blocks:
+
+-  Black level correction : Black level leads to the whitening of image in dark region and perceived loss of overall
+	contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
+-  BPC (Bad pixel correction) : An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
+-  Gain Control : The Gain control module improves the overall brightness of the image.
+-  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
+-  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
+-  Colorcorrection matrix : corrects color suitable for display or video system.
+-  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
+-  Autoexposurecorrection : This function automatically attempts to correct the exposure level of captured image and also improves contrast of the image.
+
+Current design example demonstrates how to use ISP functions in a pipeline. User can include other modules (like gamma correction, color conversion, resize etc) based on their need.
+
+
+The following example demonstrates the ISP pipeline.
+
+.. code:: c
+
+			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
+
+					#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
+					#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
+
+					#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=1
+					#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=1
+
+					if (!flag) {
+						ISPpipeline(img_inp, img_out, height, width, hist0, hist1, histogram0, histogram1, igain_0, igain_1);
+						flag = 1;
+
+					} else {
+						ISPpipeline(img_inp, img_out, height, width, hist1, hist0, histogram1, histogram0, igain_1, igain_0);
+						flag = 0;
+					}
+				}
+				
+			void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+                 ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                 unsigned short height,
+                 unsigned short width,
+                 uint32_t hist0[3][HIST_SIZE],
+                 uint32_t hist1[3][HIST_SIZE],
+                 uint32_t hist_aec1[1][256],
+                 uint32_t hist_aec2[1][256],
+                 int gain0[3],
+                 int gain1[3]) {
+				
+				#pragma HLS INLINE OFF
+				
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> lsc_out(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
+				
+					#pragma HLS stream variable=bpc_out.data dim=1 depth=2
+					#pragma HLS stream variable=gain_out.data dim=1 depth=2
+					#pragma HLS stream variable=demosaic_out.data dim=1 depth=2
+					#pragma HLS stream variable=imgInput1.data dim=1 depth=2
+					#pragma HLS stream variable=imgInput2.data dim=1 depth=2
+					#pragma HLS stream variable=impop.data dim=1 depth=2
+					#pragma HLS stream variable=_dst.data dim=1 depth=2
+					#pragma HLS stream variable=ltm_in.data dim=1 depth=2
+					#pragma HLS stream variable=lsc_out.data dim=1 depth=2
+					#pragma HLS stream variable=aecin.data dim=1 depth=2
+					
+				    #pragma HLS DATAFLOW
+					
+					float inputMin = 0.0f;
+					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+					float outputMin = 0.0f;
+					float outputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+					float p = 0.2f;
+					float thresh = 0.6f;
+
+					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+
+					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,
+																									mul_fact);
+
+					xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput2, bpc_out);
+					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(bpc_out, gain_out);
+					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
+
+					if (WB_TYPE) {
+						xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE>(
+							demosaic_out, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
+						xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE>(
+							impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
+					} else {
+						xf::cv::AWBChannelGain<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(demosaic_out, impop, p, gain0);
+						xf::cv::AWBGainUpdate<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(impop, ltm_in, p, gain1);
+					}
+
+					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, lsc_out);
+
+					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, 65536, XF_NPPC>(lsc_out, aecin);
+
+					if (AEC_EN) {
+						xf::cv::autoexposurecorrection<XF_LTM_T, XF_LTM_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC>(
+							aecin, _dst, hist_aec1, hist_aec2);
+
+						xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, img_out);
+					}
+
+					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, img_out);
+				}

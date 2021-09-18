@@ -1,0 +1,86 @@
+
+.. _quantizationdithering:
+
+Quantization & Dithering
+========================
+
+This algorithm dithers input image using Floyd-Steinberg dithering method. It is commonly used by image manipulation software, for example when an image is converted into GIF format each pixel intensity value is quantized to 8 bit i.e. 256 colors. 
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template <int IN_TYPE, int OUT_TYPE, int ROWS, int COLS, int SCALE_FACTOR, int MAX_REPRESENTED_VALUE, int NPC>
+   void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& stream_in,
+                                xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& stream_out)
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table balanceWhite Parameter Description
+
+   +-----------------------+------------------------------------------------------+
+   | Parameter             | Description                                          |
+   +=======================+======================================================+
+   | IN_TYPE               | Input pixel type. It should be XF_8UC1, XF_8UC3,     |
+   |                       | XF_10UC1, XF_10UC3, XF_12UC1,  XF_12UC3,  XF_16UC1,  |
+   |                       | or XF_16UC3. Note XF_<PIXEL_BITWIDTH>UC<NUM_CHANNELS>|
+   +-----------------------+------------------------------------------------------+
+   | OUT_TYPE              | Output pixel type. It should be XF_8UC1, XF_8UC3,    |
+   |                       | XF_10UC1, XF_10UC3, XF_12UC1,  XF_12UC3,  XF_16UC1,  |
+   |                       | or XF_16UC3. Output PIXEL_WIDTH should less than or  |
+   |                       | equal to input PIXEL_BITWIDTH                        |   
+   +-----------------------+------------------------------------------------------+
+   | ROWS                  | Maximum height of input and output image             |
+   +-----------------------+------------------------------------------------------+
+   | COLS                  | Maximum width of input and output image. In case of  |
+   |                       | N-pixel parallelism, width should be multiple of N.  |
+   +-----------------------+------------------------------------------------------+
+   | SCALE_FACTOR          | The SCALE_FACTOR must be power of 2 & less than or   |
+   |                       | equal to 2^(output PIXEL_BITWIDTH)                   |
+   +-----------------------+------------------------------------------------------+
+   | MAX_REPRESENTED_VALUE | The MAX_REPRESENTED_VALUE must be equal to           |
+   |                       | equal to 2^(input PIXEL_BITWIDTH)                    |   
+   +-----------------------+------------------------------------------------------+
+   | NPC                   | Number of pixels to be processed per cycle; possible |
+   |                       | options is XF_NPPC1 or XF_NPPC2                      |
+   +-----------------------+------------------------------------------------------+
+   | stream_in             | Input image                                          |
+   +-----------------------+------------------------------------------------------+
+   | stream_out            | Output image                                         |
+   +-----------------------+------------------------------------------------------+   
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.2 tool for the Xilinx xcu200-fsgd2104-2-e FPGA, to process a RGB image with a resolution of 1024x676 & pixel width 16 bit and quantized it to 8 bit pixel width.
+
+.. table:: Table balanceWhite Resource Utilization Summary
+
+   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+   |   Operating Mode   |   Operating Frequency   |  Utilization Estimate                                                |
+   +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+   |                    |                         |  BRAM_18K                |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+   +====================+=========================+==========================+==============+========+=========+=========+
+   | 1 pixel            | 300                     | 11                       | 10           | 7592   | 5765    | 1582    |
+   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+   | 2 pixel            | 300                     | 14                       | 12           | 8150   | 6945    | 1749    |
+   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool for the Xilinx xcu200-fsgd2104-2-e FPGA,  to process a RGB image with a resolution of 1024x676 & pixel width 16 bit and quantized it to 8 bit pixel width.
+
+.. table:: Table balanceWhite Function Performance Estimate Summary
+
+   +----------------+---------------------+------------------+
+   | Operating Mode | Operating Frequency | Latency Estimate |
+   |                |                     |                  |
+   |                | (MHz)               | **Max (ms)**     |
+   +================+=====================+==================+
+   | 1 pixel        | 300                 | 2.8              |
+   +----------------+---------------------+------------------+
+   | 2 pixel        | 300                 | 1.58             |
+   +----------------+---------------------+------------------+

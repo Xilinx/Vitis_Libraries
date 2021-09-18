@@ -1,0 +1,84 @@
+.. _autoexposurecorrection:
+
+Autoexposurecorrection
+======================
+
+Auto exposure correction improves contrast and brightness of the image and also corrects the exposure of the input frame. The algorithm uses luminence histogram equalization to improve overall exposure and contrast of the image.
+Luminence (V) is extracted after converting input image to HSV color space. Once the algorthm is applied the image is converted back to RGB color space.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+   template <int SRC_T, int DST_T, int SIN_CHANNEL_TYPE, int ROWS, int COLS, int NPC = 1>
+   void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                               uint32_t hist_array1[1][256],
+                               uint32_t hist_array2[1][256])
+
+.. rubric:: Parameter Descriptions
+
+The following table describes template parameters and arguments of the function.
+
+.. table:: Table AEC Parameter Description
+
+   +------------------+------------------------------------------------------+
+   | Parameter        | Description                                          |
+   +==================+======================================================+
+   | SRC_T            | Input pixel type. 8-bit unsigned 3 channel is        |
+   |                  | supported (XF_8UC3).                                 |
+   +------------------+------------------------------------------------------+
+   | DST_T            | Output pixel type. 8-bit unsigned 3 channel is       |
+   |                  | supported (XF_8UC3).                                 |
+   +------------------+------------------------------------------------------+
+   | ROWS             | Maximum height of input and output image             |
+   +------------------+------------------------------------------------------+
+   | COLS             | Maximum width of input and output image. In case of  |
+   |                  | N-pixel parallelism, width should be multiple of N.  |
+   +------------------+------------------------------------------------------+
+   | SIN_CHANNEL_TYPE | Single channel type. should be XF_8UC1               |
+   +------------------+------------------------------------------------------+
+   | NPC              | Number of pixels to be processed per cycle; possible |
+   |                  | options is XF_NPPC1, XF_NPPC2 AND so on              |
+   +------------------+------------------------------------------------------+
+   | src              | Input image                                          |
+   +------------------+------------------------------------------------------+
+   | dst              | Output image                                         |
+   +------------------+------------------------------------------------------+
+   | hist_array1      | Histogram array                                      |
+   +------------------+------------------------------------------------------+
+   | hist_array2      | Histogram array                                      |
+   +------------------+------------------------------------------------------+
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of kernel in different configurations, generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table AEC Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel            | 300                     | 4                        | 18           | 6713   | 2996    | 1103    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    | 2 pixel            | 300                     | 4                        | 27           | 7618   | 3705    | 1257    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in
+different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table AEC Function Performance Estimate Summary
+
++--------------------+-------------------------+---------------------------------------------+
+|   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+|                    |   (MHz)                 | **Max (ms)**                                |
++====================+=========================+=============================================+
+| 1 pixel            | 300                     | 7                                           |
++--------------------+-------------------------+---------------------------------------------+
+| 2 pixel            | 300                     | 3.7                                         |
++--------------------+-------------------------+---------------------------------------------+
