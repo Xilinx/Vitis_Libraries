@@ -1,0 +1,14 @@
+.. index:: pair: namespace; blas
+.. _doxid-namespacexf_1_1blas:
+.. _cid-blas:
+
+namespace blas
+==============
+
+.. toctree::
+	:hidden:
+
+
+
+
+

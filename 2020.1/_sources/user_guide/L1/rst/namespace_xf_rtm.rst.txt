@@ -1,0 +1,321 @@
+.. index:: pair: namespace; rtm
+.. _doxid-namespacexf_1_1rtm:
+.. _cid-xf::rtm:
+
+namespace rtm
+=============
+
+.. toctree::
+	:hidden:
+
+	class_xf_rtm_RTM.rst
+	class_xf_rtm_Stencil2D.rst
+
+
+
+.. _doxid-namespacexf_1_1rtm_1a32a3a67564545d6a5147712b399d09de:
+.. _cid-xf::rtm::wide2stream:
+.. _doxid-namespacexf_1_1rtm_1a1a0f42c32a47dacd84497efa88c7f5f5:
+.. _cid-xf::rtm::stream2wide:
+.. _doxid-namespacexf_1_1rtm_1a7501b1fc8e0cea89045ce4f33ee79b1a:
+.. _cid-xf::rtm::streamconversion:
+.. _doxid-namespacexf_1_1rtm_1a998193360f61dcd5df596a6976f57503:
+.. _cid-xf::rtm::conv2stream:
+.. _doxid-namespacexf_1_1rtm_1a949ed4de1156a3fd577db7762ede6759:
+.. _cid-xf::rtm::conv2wide:
+.. _doxid-namespacexf_1_1rtm_1a39acee299b4b8041c963ce8668d9ff3a:
+.. _cid-xf::rtm::duplicate:
+.. _doxid-namespacexf_1_1rtm_1a62a63eb988fff490a83fe9c73336b6bc:
+.. _cid-xf::rtm::dataconsumer:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// classes
+
+	template <
+	    typename t_DataType,
+	    int t_Order,
+	    int t_MaxDim = 1024,
+	    int t_MaxB = 40,
+	    int t_PE = t_Order / 2
+	    >
+	class :ref:`RTM<doxid-classxf_1_1rtm_1_1_r_t_m>` 
+
+	template <
+	    typename t_DataType,
+	    int t_Order,
+	    int t_MaxDim = 1024,
+	    int t_PE = 1
+	    >
+	class :ref:`Stencil2D<doxid-classxf_1_1rtm_1_1_stencil2_d>` 
+
+
+
+
+
+.. FunctionSection
+
+.. _doxid-namespacexf_1_1rtm_1a73a472935cc43e84882baf13795b2f25:
+.. _cid-xf::rtm::memselstream:
+
+memSelStream
+------------
+
+
+.. code-block:: cpp
+	
+	#include "dataMover.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_InterfaceType,
+	    typename t_DataType
+	    >
+	void memSelStream (
+	    unsigned int p_n,
+	    unsigned int p_k,
+	    t_InterfaceType* p_mem0,
+	    t_InterfaceType* p_mem1,
+	    hls::stream <t_DataType>& p_str
+	    )
+
+memSelStream reads data alternatively from two memory addresses to a stream
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_InterfaceType
+
+        - is the datatype in memory
+
+    *
+        - t_DataType
+
+        - is the datatype in of the stream
+
+    *
+        - p_n
+
+        - is the number of data to be read
+
+    *
+        - p_k
+
+        - is the selection
+
+    *
+        - p_mem0
+
+        - is the first memory port
+
+    *
+        - p_mem1
+
+        - is the second memory port
+
+    *
+        - p_str
+
+        - is the output stream
+
+.. _doxid-namespacexf_1_1rtm_1a0f7e498d51bf5cf37430af07c90a2321:
+.. _cid-xf::rtm::streamselmem:
+
+streamSelMem
+------------
+
+
+.. code-block:: cpp
+	
+	#include "dataMover.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_InterfaceType,
+	    typename t_DataType
+	    >
+	void streamSelMem (
+	    unsigned int p_n,
+	    unsigned int p_k,
+	    t_InterfaceType* p_mem0,
+	    t_InterfaceType* p_mem1,
+	    hls::stream <t_DataType>& p_str
+	    )
+
+streamSelMem reads write alternatively to two memory addresses from a stream
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_InterfaceType
+
+        - is the datatype in memory
+
+    *
+        - t_DataType
+
+        - is the datatype in of the stream
+
+    *
+        - p_n
+
+        - is the number of data to be read
+
+    *
+        - p_k
+
+        - is the selection
+
+    *
+        - p_mem0
+
+        - is the first memory port
+
+    *
+        - p_mem1
+
+        - is the second memory port
+
+    *
+        - p_str
+
+        - is the input stream
+
+.. _doxid-namespacexf_1_1rtm_1ad4416b2b99ac0659ea157ff5db101628:
+.. _cid-xf::rtm::wide2stream-2:
+
+wide2stream
+-----------
+
+
+.. code-block:: cpp
+	
+	#include "dataMover.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    unsigned int t_DataWidth,
+	    unsigned int t_Multi
+	    >
+	void wide2stream (
+	    unsigned int p_n,
+	    hls::stream <ap_uint <t_DataWidth*t_Multi>>& p_wide,
+	    hls::stream <ap_uint <t_DataWidth>>& p_str
+	    )
+
+wide2stream converts an integer of wide datawidth to an integer of base datawidth
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataWidth
+
+        - is the base datawidth
+
+    *
+        - t_Multi
+
+        - is the factor between two datawidth
+
+    *
+        - p_n
+
+        - is the number of data to be read
+
+    *
+        - p_wide
+
+        - is the input stream of wide datawidth
+
+    *
+        - p_str
+
+        - is the output stream of base datawidth
+
+.. _doxid-namespacexf_1_1rtm_1ad37e3efab40f0012158bbab9a42e7f07:
+.. _cid-xf::rtm::stream2wide-2:
+
+stream2wide
+-----------
+
+
+.. code-block:: cpp
+	
+	#include "dataMover.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    unsigned int t_DataWidth,
+	    unsigned int t_Multi
+	    >
+	void stream2wide (
+	    unsigned int p_n,
+	    hls::stream <ap_uint <t_DataWidth>>& p_str,
+	    hls::stream <ap_uint <t_DataWidth*t_Multi>>& p_wide
+	    )
+
+stream2wide converts an integer of base datawidth to an integer of wide datawidth
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataWidth
+
+        - is the base datawidth
+
+    *
+        - t_Multi
+
+        - is the factor between two datawidth
+
+    *
+        - p_n
+
+        - is the number of data to be read
+
+    *
+        - p_str
+
+        - is the input stream of base datawidth
+
+    *
+        - p_wide
+
+        - is the output stream of wide datawidth
+

@@ -1,0 +1,276 @@
+.. index:: pair: class; xf::rtm::Stencil2D
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d:
+.. _cid-xf::rtm::stencil2d:
+
+template class xf::rtm::Stencil2D
+=================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "stencil.hpp"
+
+
+Overview
+~~~~~~~~
+
+:ref:`Stencil2D <doxid-classxf_1_1rtm_1_1_stencil2_d>` class defines isotrophic laplacian operation and time iterations function.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the basic wavefield datatype
+
+    *
+        - t_Order
+
+        - is the spatial discretization order
+
+    *
+        - t_MaxDim
+
+        - is the maximum height this kernel can process
+
+    *
+        - t_PE
+
+        - is the number of processing elements
+
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1af21b3a4674c09f904dc597abe856aff7:
+.. _cid-xf::rtm::stencil2d::t_widetype:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054:
+.. _cid-xf::rtm::stencil2d::t_intype:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a6c4aaa280892989c4fa6532e3f030ecc:
+.. _cid-xf::rtm::stencil2d::t_pairtype:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1ac12ea29a4ca2e3173829f4c98d5dce4b:
+.. _cid-xf::rtm::stencil2d::t_pairintype:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1ab31b86003351737745c83923198520f7:
+.. _cid-xf::rtm::stencil2d::t_numdata:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a457febc35a8200c730606f3329c11987:
+.. _cid-xf::rtm::stencil2d::t_halforder:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1aff7831789b802dae84b7daed2cb18fc8:
+.. _cid-xf::rtm::stencil2d::t_fifodepth:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a99aba4dc506c3cf8da5885b9e97085fc:
+.. _cid-xf::rtm::stencil2d::stencil2d:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1aa5fcb90ec52f6937596808f578fa7035:
+.. _cid-xf::rtm::stencil2d::laplacian:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a5c6ba09106264654bb55e371b986ad02:
+.. _cid-xf::rtm::stencil2d::split:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1aa0082ce57291e0e619aa478690c1ad7e:
+.. _cid-xf::rtm::stencil2d::calculate:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1aace6aee9e8b97d426d48e69a8b840f1d:
+.. _cid-xf::rtm::stencil2d::getx:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1aa670525c3bc82555d5173b556a55d6ae:
+.. _cid-xf::rtm::stencil2d::getz:
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a5b49598a6e7479611c0fec77b52aa2a3:
+.. _cid-xf::rtm::stencil2d::getarea:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    int t_Order,
+	    int t_MaxDim = 1024,
+	    int t_PE = 1
+	    >
+	class Stencil2D
+
+	    // direct descendants
+
+	    template <
+	        typename t_DataType,
+	        int t_Order,
+	        int t_MaxDim = 1024,
+	        int t_MaxB = 40,
+	        int t_PE = t_Order / 2
+	        >
+	    class :ref:`xf::rtm::RTM<doxid-classxf_1_1rtm_1_1_r_t_m>` 
+
+	// typedefs
+
+	typedef blas::WideType <t_DataType, t_PE> t_WideType
+	typedef t_WideType::t_TypeInt t_InType
+	typedef blas::WideType <:ref:`t_InType<doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054>`, :ref:`t_NumData<doxid-classxf_1_1rtm_1_1_stencil2_d_1ab31b86003351737745c83923198520f7>`, t_WideType::t_TypeWidth> t_PairType
+	typedef t_PairType::t_TypeInt t_PairInType
+
+	// fields
+
+	static const unsigned int t_NumData
+	static const unsigned int t_HalfOrder
+	static const unsigned int t_FifoDepth
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a7048a54d7b67accb3e1140fe65934619:
+.. _cid-xf::rtm::stencil2d::setcoef:
+
+setCoef
+-------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void setCoef (
+	    const t_DataType* p_coefz,
+	    const t_DataType* p_coefx
+	    )
+
+setCoef set the coefficients for stencil kernel
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_coefz
+
+        - is the coefficents along z-direction
+
+    *
+        - p_coefx
+
+        - is the coefficents along x-direction
+
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a9d7b239e326ec3d65c5b05711a0b177c:
+.. _cid-xf::rtm::stencil2d::setdim:
+
+setDim
+------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void setDim (
+	    const unsigned int p_z,
+	    const unsigned int p_x
+	    )
+
+setDim set the dimension of the wavefields
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_z
+
+        - is the dimension of z-direction
+
+    *
+        - p_x
+
+        - is the dimension of x-direction
+
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a6656f8168d4714bb1e076aa9e24c34ed:
+.. _cid-xf::rtm::stencil2d::laplacian-2:
+
+laplacian
+---------
+
+
+laplacian overload (1)
+++++++++++++++++++++++
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void laplacian (
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054>`>& p_in,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054>`>& p_pin,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054>`>& p_out
+	    )
+
+laplacian computes the laplacian of an given wavefield
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_in
+
+        - is the input wavefield stream
+
+    *
+        - p_pin
+
+        - is a copy of p_in
+
+    *
+        - p_pout
+
+        - is a stream of laplacian results
+
+.. _doxid-classxf_1_1rtm_1_1_stencil2_d_1a80145a23e4373b26ba39056bedfa12f2:
+.. _cid-xf::rtm::stencil2d::fdtime:
+
+FDTime
+------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void FDTime (
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054>`>& p_v2dt2,
+	    hls::stream <:ref:`t_InType<doxid-classxf_1_1rtm_1_1_stencil2_d_1afac22bc21b95320381d4eeb29ffad054>`>& p_cpvt,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1rtm_1_1_stencil2_d_1ac12ea29a4ca2e3173829f4c98d5dce4b>`>& p_in,
+	    hls::stream <:ref:`t_PairInType<doxid-classxf_1_1rtm_1_1_stencil2_d_1ac12ea29a4ca2e3173829f4c98d5dce4b>`>& p_out,
+	    bool p_sw = false
+	    )
+
+FDTime computes the time iteration for FDTD.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_v2dt2
+
+        - is the pow(v * dt, 2)
+
+    *
+        - p_cpvt
+
+        - is a copy of p_v2dt2
+
+    *
+        - p_in
+
+        - is a stream of input wavefield
+
+    *
+        - p_pout
+
+        - is a stream of output wavefield
+

@@ -1,0 +1,60 @@
+.. _global-namespace:
+
+Global Namespace
+================
+
+.. index:: pair: namespace; global
+
+.. toctree::
+	:hidden:
+
+	namespace_blas.rst
+	namespace_std.rst
+	namespace_xf.rst
+
+
+
+
+
+.. _doxid-stencil3d_8hpp_1a977369729d1e675805d027e974f5687a:
+.. _cid-val:
+.. _doxid-update__pk_8hpp_1a1e28a98d6538d972a52d2eada36681f8:
+.. _cid-xf_hpc_cg_update_pk_hpp:
+.. _doxid-update__rk_8hpp_1aa6273aa7363ee3b1a9d3f879b51ecdcb:
+.. _cid-xf_hpc_cg_update_rk_hpp:
+.. _doxid-domain3d_8hpp_1ac39d9cef6a5e030ba8d9e11121054268:
+.. _cid-max:
+.. _doxid-domain3d_8hpp_1abb702d8b501669a23aa0ab3b281b9384:
+.. _cid-min:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`blas<doxid-namespacexf_1_1blas>`
+	namespace :ref:`std<doxid-namespacestd>`
+	namespace :ref:`xf<doxid-namespacexf>`
+	    namespace :ref:`xf::hpc<doxid-namespacexf_1_1hpc>`
+	        namespace :ref:`xf::hpc::cg<doxid-namespacexf_1_1hpc_1_1cg>`
+	        namespace :ref:`xf::hpc::mlp<doxid-namespacexf_1_1hpc_1_1mlp>`
+	        namespace :ref:`xf::hpc::rtm<doxid-namespacexf_1_1hpc_1_1rtm>`
+
+	// global variables
+
+	static const unsigned int VAL
+
+	// macros
+
+	#define XF_HPC_CG_UPDATE_PK_HPP
+	#define XF_HPC_CG_UPDATE_RK_HPP
+
+	#define max( \
+	    x, \
+	    y \
+	    )
+
+	#define min( \
+	    x, \
+	    y \
+	    )
+

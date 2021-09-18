@@ -1,0 +1,19 @@
+.. index:: pair: namespace; cg
+.. _doxid-namespacexf_1_1hpc_1_1cg:
+.. _cid-xf::hpc::cg:
+
+namespace cg
+============
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a14735c961f0c24e657623051b2253910:
+.. _cid-xf::hpc::cg::control:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+

@@ -1,0 +1,44 @@
+.. index:: pair: class; xf::hpc::cg::Task
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task:
+.. _cid-xf::hpc::cg::task:
+
+template class xf::hpc::cg::Task
+================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "tasks.hpp"
+
+
+
+
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1a28ba00bcf2a199935cd35a30e0d29bed:
+.. _cid-xf::hpc::cg::task::task:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1aa2156176aaeec6df6ba24788a00ec098:
+.. _cid-xf::hpc::cg::task::setres:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1aacc49680eee4757578555301a786ba5f:
+.. _cid-xf::hpc::cg::task::setmaxiter:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1ae64ecc3c76844bc846eefad4ef86a197:
+.. _cid-xf::hpc::cg::task::settols:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1ae4587578de8fa8b8624f46935e1be081:
+.. _cid-xf::hpc::cg::task::setiter:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1aef10a13e21c25ca7468fd9c39f2429b5:
+.. _cid-xf::hpc::cg::task::gettols:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1a16f2a6760ffb73df9fd045ed8622a938:
+.. _cid-xf::hpc::cg::task::getiter:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1a10db785e2c6726fa47f9d06e8e197fa0:
+.. _cid-xf::hpc::cg::task::getres:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1aa900337b45dc5fafba8b17d7641fdbf0:
+.. _cid-xf::hpc::cg::task::increase:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_task_1aa4cf27dd6a2530319f1029905c7b30ef:
+.. _cid-xf::hpc::cg::task::meettol:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <typename t_DataType>
+	class Task
+

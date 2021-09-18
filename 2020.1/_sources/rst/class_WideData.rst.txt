@@ -1,0 +1,33 @@
+.. index:: pair: class; WideData
+.. _doxid-class_wide_data:
+.. _cid-widedata:
+
+template class WideData
+=======================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "types.hpp"
+
+
+
+
+.. _doxid-class_wide_data_1a2a21718483faa1e32107739586afede8:
+.. _cid-widedata::widedata:
+.. _doxid-class_wide_data_1a0fa1b07cfeb329a43fe180a4fef9b3f4:
+.. _cid-widedata::operator:
+.. _doxid-class_wide_data_1a7347ba880fa7d8b87d9c2420f97c40dd:
+.. _cid-widedata::operator-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_DataSize
+	    >
+	class WideData
+

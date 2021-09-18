@@ -1,0 +1,264 @@
+.. index:: pair: namespace; rtm
+.. _doxid-namespacexf_1_1hpc_1_1rtm:
+.. _cid-xf::hpc::rtm:
+
+namespace rtm
+=============
+
+.. toctree::
+	:hidden:
+
+
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+
+
+
+
+.. FunctionSection
+
+.. _doxid-namespacexf_1_1hpc_1_1rtm_1a04f515cbc5b5e414ee55f8a5f8ea4b87:
+.. _cid-xf::hpc::rtm::forward:
+
+forward
+-------
+
+
+forward overload (1)
+++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "rtm3d/rtmforward.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    int t_NumFSMs,
+	    typename t_DataType,
+	    typename t_InType,
+	    typename t_UpbType,
+	    typename t_RTM,
+	    typename t_Domain
+	    >
+	void forward (
+	    bool p_sel,
+	    const t_Domain& p_domain,
+	    t_RTM p_sm [t_NumFSMs],
+	    const unsigned int p_t,
+	    const t_DataType* p_src,
+	    const t_InType* p_v2dt2,
+	    t_InType* p_pi0,
+	    t_InType* p_pi1,
+	    t_InType* p_po0,
+	    t_InType* p_po1,
+	    t_InType* p_ppi0,
+	    t_InType* p_ppi1,
+	    t_InType* p_ppo0,
+	    t_InType* p_ppo1,
+	    t_UpbType* p_upb
+	    )
+
+forward function is composed by multiple forward streaming modules
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_sel
+
+        - determins the port id to read or write
+
+    *
+        - p_domain
+
+        - the domain partition object
+
+    *
+        - p_sm
+
+        - an array of streaming module objects
+
+    *
+        - p_t
+
+        - the start time step in the current process
+
+    *
+        - p_src
+
+        - the source wavefiled
+
+    *
+        - p_v2dt2
+
+        - the velocity model v^2 * dt^2
+
+    *
+        - p_pi0
+
+        - the first input memory of pressure wavefield at t-1
+
+    *
+        - p_pi1
+
+        - the second input memory of pressure wavefield at t-1
+
+    *
+        - p_po0
+
+        - the first output memory of pressure wavefield at t-1
+
+    *
+        - p_po1
+
+        - the second output memory of pressure wavefield at t-1
+
+    *
+        - p_ppi0
+
+        - the first input memory of pressure wavefield at t-2
+
+    *
+        - p_ppi1
+
+        - the second input memory of pressure wavefield at t-2
+
+    *
+        - p_ppo0
+
+        - the first output memory of pressure wavefield at t-2
+
+    *
+        - p_ppo1
+
+        - the second output memory of pressure wavefield at t-2
+
+    *
+        - p_upb
+
+        - the memory to store the upper-boundary data
+
+.. _doxid-namespacexf_1_1hpc_1_1rtm_1a03a825375a6685ed9d6b3be3b975fe18:
+.. _cid-xf::hpc::rtm::forward-2:
+
+forward overload (2)
+++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "rtm3d/rtmforward.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    int t_NumFSMs,
+	    typename t_DataType,
+	    typename t_InType,
+	    typename t_RTM,
+	    typename t_Domain
+	    >
+	void forward (
+	    bool p_sel,
+	    const t_Domain& p_domain,
+	    t_RTM p_sm [t_NumFSMs],
+	    const t_DataType* p_src,
+	    const t_InType* p_v2dt2,
+	    t_InType* p_pi0,
+	    t_InType* p_pi1,
+	    t_InType* p_po0,
+	    t_InType* p_po1,
+	    t_InType* p_ppi0,
+	    t_InType* p_ppi1,
+	    t_InType* p_ppo0,
+	    t_InType* p_ppo1
+	    )
+
+forward function composed by multiple forward streaming modules
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - p_sel
+
+        - determins the port id to read or write
+
+    *
+        - p_domain
+
+        - the domain partition object
+
+    *
+        - p_sm
+
+        - an array of streaming module objects
+
+    *
+        - p_src
+
+        - the source wavefiled
+
+    *
+        - p_v2dt2
+
+        - the velocity model v^2 * dt^2
+
+    *
+        - p_pi0
+
+        - the first input memory of pressure wavefield at t-1
+
+    *
+        - p_pi1
+
+        - the second input memory of pressure wavefield at t-1
+
+    *
+        - p_po0
+
+        - the first output memory of pressure wavefield at t-1
+
+    *
+        - p_po1
+
+        - the second output memory of pressure wavefield at t-1
+
+    *
+        - p_ppi0
+
+        - the first input memory of pressure wavefield at t-2
+
+    *
+        - p_ppi1
+
+        - the second input memory of pressure wavefield at t-2
+
+    *
+        - p_ppo0
+
+        - the first output memory of pressure wavefield at t-2
+
+    *
+        - p_ppo1
+
+        - the second output memory of pressure wavefield at t-2
+

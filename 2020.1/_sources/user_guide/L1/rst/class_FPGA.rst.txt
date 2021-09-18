@@ -1,0 +1,31 @@
+.. index:: pair: class; FPGA
+.. _doxid-class_f_p_g_a:
+.. _cid-fpga:
+
+class FPGA
+==========
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fpga.hpp"
+
+
+class :ref:`FPGA <doxid-class_f_p_g_a>` is used to manage :ref:`FPGA <doxid-class_f_p_g_a>` info
+
+.. _doxid-class_f_p_g_a_1a127bb01ebce9885573d82e525ebdb5ad:
+.. _cid-fpga::fpga:
+.. _doxid-class_f_p_g_a_1ac633d8d247693a29b3db796a7700a2ff:
+.. _cid-fpga::createkernel:
+.. _doxid-class_f_p_g_a_1ab4cc1bbb9df69d5483b2d04f12265f80:
+.. _cid-fpga::getcontext:
+.. _doxid-class_f_p_g_a_1a8b5a25dd319cd485a8b7899c530d5dfa:
+.. _cid-fpga::getcommandqueue:
+.. _doxid-class_f_p_g_a_1a5f76e3085fa69a981f5178656402fdf4:
+.. _cid-fpga::operator:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
