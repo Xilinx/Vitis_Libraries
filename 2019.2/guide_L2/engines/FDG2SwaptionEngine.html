@@ -1,0 +1,686 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Finite-Difference, FDM, Bermudan Swaption" name="keywords" />
+<meta content="The pricing engine is based on Finite-difference methods (FDM) to estimate the value of Bermudan Swaption using the two-additive-factor gaussian (G2) model." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../../_static/js/jquery.min.js"></script>	
+	  <script type="text/javascript" src="../../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../../_static/js/common-ui-all.min.js"></script>		
+    <script type="text/javascript" src="../../_static/js/header-footer.min.js"></script>	
+    <script type="text/javascript" src="../../_static/js/jquery-ui.min.js"></script>	
+    <script type="text/javascript" src="../../_static/js/CoveoJsSearch.Lazy.min.js"></script>	
+    <script type="text/javascript" src="../../_static/js/linkid.js"></script>		
+    <script type="text/javascript" src="../../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Internal Design of Tree Bermudan Swaption Engine" href="TreeEngine.html" />
+    <link rel="prev" title="Internal Design of Finite-Difference Hull-White Bermudan Swaption Pricing Engine" href="FDHullWhiteEngine.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search" 
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a> 
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search" 
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Quantitative Finance Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rel.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../models_and_methods.html">Pricing Models and Numerical Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L1/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../L2.html">L2 Kernel User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../overview.html">Pricing Engine Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../kernel_design.html">Pricing Engine Kernel Design</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="MCEuropeanEngine.html">Internal Design of European Option Pricing Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCEuropeanHestonEngine.html">Internal Design of MCEuropeanHestonEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCAsianEngines.html">Internal Design of Asian Option Pricing Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCDigitalEngine.html">Internal Design of Digital Option Pricing Engines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCBarrierEngine.html">Internal Design of Barrier Option Pricing Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCCliquetEngine.html">Internal Design of Cliquet Option Pricing Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCAmericanEngine.html">Internal Design of American Option Pricing Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCMultiAssetEuropeanHestonEngine.html">Internal Design of MCMultiAssetEuropeanHestonEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCHullWhiteCapFloorEngine.html">Internal Design of MCHullWhiteCapFloorEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MCEuropeanHestonGreeksEngine.html">Internal Design of MCEuropeanHestonGreeksEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CFBlackScholesMerton.html">Internal Design of Closed Form Black-Scholes-Merton</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CFHeston.html">Internal Design of Closed Form Heston</a></li>
+<li class="toctree-l3"><a class="reference internal" href="M76.html">Internal Design of Closed Form Merton 76</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GarmanKohlhagen.html">Internal Design of Garman Kohlhagen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Quanto.html">Internal Design of Quanto</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BTCRR.html">Internal Design of Cox-Ross-Rubinstein Binomial Tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FDHullWhiteEngine.html">Internal Design of Finite-Difference Hull-White Bermudan Swaption Pricing Engine</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Internal Design of Finite-Difference G2 Bermudan Swaption Pricing Engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mesher">Mesher</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#differential-operator">Differential operator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#profiling">Profiling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="TreeEngine.html">Internal Design of Tree Bermudan Swaption Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CPICapFloorEngine.html">Internal Design of CPI CapFloor Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="InflationCapFloorEngine.html">Internal Design of Inflation CapFloor Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ZCDiscountingBondEngine.html">Internal Design of Zero Coupon Bond Engine</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kernel_api.html">Pricing Engine Kernel APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kernel_benchmark.html">Pricing Engines Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../other_engines.html">Other Engine Kernel Design</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L3/L3.html">L3 Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmark/benchmark.html">Quality and Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vitis Quantitative Finance Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../L2.html">L2 Kernel User Guide</a> &raquo;</li>
+        
+          <li><a href="../kernel_design.html">Pricing Engine Kernel Design</a> &raquo;</li>
+        
+      <li>Internal Design of Finite-Difference G2 Bermudan Swaption Pricing Engine</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="internal-design-of-finite-difference-g2-bermudan-swaption-pricing-engine">
+<h1>Internal Design of Finite-Difference G2 Bermudan Swaption Pricing Engine<a class="headerlink" href="#internal-design-of-finite-difference-g2-bermudan-swaption-pricing-engine" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The pricing engine is based on Finite-difference methods (FDM) to estimate the value of Bermudan Swaption. Here, we used the two-additive-factor gaussian (G2) model instead of single-factor Hull-White model. The concept of finite-difference methods is introduced in the article <cite>Internal Design of Finite-difference Hull-White Bermudan Swaption Pricing Engine</cite>.</p>
+<p>For a swaption, the owner is allowed to enter the swap on several pre-specified dates as well as coupon dates of the underlying swap. Notice that we evaluate the value of the swaption as a payer who pay the fixed leg and receive the floating leg of the interest rates.</p>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>The pricing process of Finite-Difference G2 Bermudan Swaption engine is shown in the figure below:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/fdmg2swaptionengine.PNG"><img alt="pricing process of FdmG2SwaptionEngine" src="../../_images/fdmg2swaptionengine.PNG" style="width: 60%;" /></a>
+</div>
+<p>As we can see from the figure, the engine has three main modules: Initialization, calculate and NPV. The former one is responsible for engine initialization: reading specific time points of the swaption from BRAM and setting initial values. The second part is the main process that contains model initialization, meshers initialization using Ornstein-Uhlenbeck process, and builds up the derivative on x and y dimension.</p>
+<p>The main logic of the engine is coded in the rollback method. We go backwards from a later time(maturity) to an earlier time in a given number of steps. This gives us a length <span class="math notranslate nohighlight">\(dt\)</span> for each step, which is set as the time step for the evolver. Then we start going back step by step, each time going from the current time <cite>t</cite> to the next time, <span class="math notranslate nohighlight">\(t-dt\)</span>. We have just made the step from <span class="math notranslate nohighlight">\(t_{4}\)</span> to <span class="math notranslate nohighlight">\(t_{3}\)</span> as described in the following paragraph, and it will set the control variable <cite>hit</cite> to true. It will also decrease the step size of the evolver <span class="math notranslate nohighlight">\(t_{4}-s\)</span>. It will lead to the stopping time point, immediately after performing the step. Another similar change of step would happen if there were  more than one stopping times in a single step; the code would then step from one to the other. Finally, the code will enter the hitted branch. It performs the remaining step <span class="math notranslate nohighlight">\(s-t_{3}\)</span> and then resets the step of the evolver to the default value.So the process is ready for the next regular step to <span class="math notranslate nohighlight">\(t_{2}\)</span>. Notice the last time is <span class="math notranslate nohighlight">\(stopping\_time[1]\)</span> instead of <span class="math notranslate nohighlight">\(stopping\_time[0]\)</span>.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/fdmg2swaptionenginerollback.PNG"><img alt="evolveback process of FdmG2SwaptionEngine" src="../../_images/fdmg2swaptionenginerollback.PNG" style="width: 100%;" /></a>
+</div>
+</div>
+<div class="section" id="mesher">
+<h2>Mesher<a class="headerlink" href="#mesher" title="Permalink to this headline">¶</a></h2>
+<p>The important component to be build a two-dimensional mesher, which builds the full mesh by composing a 1-D mesh at every dimension of the problem. In the implementation of 2-D mesher, we employ Ornstein-Uhlenbeck process twice with different g2 model arguments. The mesher have two arrays for locations that contain two set of points <span class="math notranslate nohighlight">\(x_{0},x_{1},..,x_{n-1}\)</span> and <span class="math notranslate nohighlight">\(y_{0},y_{1},...,y_{n-1}\)</span> discretizing the domain for <cite>x</cite> any <cite>y</cite>. For convenience, it also pre-computes two groups of array <cite>dplus</cite> and <cite>dminus</cite> whose <cite>i-th</cite> elements contain <span class="math notranslate nohighlight">\((x_{i+1}-x_{i})\)</span> and <span class="math notranslate nohighlight">\((x_{i}-x_{i-1})\)</span> respectively. Mesher is shown in the following figure:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/fdmg2swaptionenginemeshers.PNG"><img alt="mesher of FdmG2SwaptionEngine" src="../../_images/fdmg2swaptionenginemeshers.PNG" style="width: 100%;" /></a>
+</div>
+<p>As you see, the points in the mesher that we need change the price of the asset. The <cite>applyTo</cite> method, which modifies the array of asset values in place, must also check that the condition applies at the given time. It would compare the option values to the intrinsic values, and choose the maximum value.</p>
+</div>
+<div class="section" id="differential-operator">
+<h2>Differential operator<a class="headerlink" href="#differential-operator" title="Permalink to this headline">¶</a></h2>
+<p>The finite-difference framework defines generic operators for the first and second derivative along a given direction, and we declare the structure named <cite>TripleBandLinearOp</cite> which contains the <cite>lower</cite>, <cite>diag</cite> and <cite>upper</cite> arrays with the correct values (for instance, the coefficients of <span class="math notranslate nohighlight">\(f(x_{i-1})\)</span>, <span class="math notranslate nohighlight">\(f(x_{i})\)</span> and <span class="math notranslate nohighlight">\(f(x_{i+1})\)</span> in the equation for <span class="math notranslate nohighlight">\(\frac{\partial f}{\partial x}(x_{i})\)</span>) based on the 2-D mesher. Here, we also define a structure named <cite>NinePointLinearOp</cite> which contains the nine neighbors, managing the stencils arguments used in the cross-defivative <span class="math notranslate nohighlight">\(\frac{\partial^{2} f}{\partial x_{i} \partial y_{j}}\)</span> along two directions. The <cite>TripleBandLinearOp</cite> and <cite>NinePointLinearOp</cite> are shown in the fugure below. Notice a represents x direction, b represents y direction and c represents nine neighbors.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/fdmg2swaptionenginederivative.PNG"><img alt="mesher of FdmG2SwaptionEngine" src="../../_images/fdmg2swaptionenginederivative.PNG" style="width: 100%;" /></a>
+</div>
+<p>You may find the details about differential operator and evolution scheme introduced in <cite>Internal Design of Finite-difference Hull-White Bermudan Swaption Pricing Engine</cite>.</p>
+</div>
+<div class="section" id="profiling">
+<h2>Profiling<a class="headerlink" href="#profiling" title="Permalink to this headline">¶</a></h2>
+<p>The hardware resource utilizations and timing performance for a single finite-difference g2 bermudan swaption prcing engine with <span class="math notranslate nohighlight">\(\_xGrid*\_yGrid*steps=50*50*100\)</span> are listed in <a class="reference internal" href="#tab1"><span class="std std-numref">Table 7</span></a> below:</p>
+<span id="tab1"></span><table border="1" class="docutils align-center" id="id1">
+<caption><span class="caption-number">Table 7 </span><span class="caption-text">Hardware resources for single finite-difference G2 bermudan swaption pricing engine</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="22%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>BRAM</td>
+<td>DSP</td>
+<td>FF</td>
+<td>LUT</td>
+<td>CLB</td>
+<td>SRL</td>
+<td>clock period(ns)</td>
+</tr>
+<tr class="row-even"><td>108</td>
+<td>535</td>
+<td>160881</td>
+<td>158990</td>
+<td>32294</td>
+<td>4098</td>
+<td>3.321</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+	  
+	  
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="TreeEngine.html" class="btn btn-neutral float-right" title="Internal Design of Tree Bermudan Swaption Engine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="FDHullWhiteEngine.html" class="btn btn-neutral float-left" title="Internal Design of Finite-Difference Hull-White Bermudan Swaption Pricing Engine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+  </div>	  
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+  
+  
+
+  
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2019, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+			
+			underscoreSetup();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,758 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="fintech, RNG, Random Number Generator, Monte Carlo, Mersenne Twister, NRNG, UDRNG, normal distributed, uniform distributed" name="keywords" />
+<meta content="Random Number Generator (RNG) is one of the core utilities needed by Monte Carlo Simulation." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../../_static/js/jquery.min.js"></script>	
+	  <script type="text/javascript" src="../../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../../_static/js/common-ui-all.min.js"></script>		
+    <script type="text/javascript" src="../../_static/js/header-footer.min.js"></script>	
+    <script type="text/javascript" src="../../_static/js/jquery-ui.min.js"></script>	
+    <script type="text/javascript" src="../../_static/js/CoveoJsSearch.Lazy.min.js"></script>	
+    <script type="text/javascript" src="../../_static/js/linkid.js"></script>		
+    <script type="text/javascript" src="../../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Singular Value Decomposition (SVD)" href="../SVD/SVD.html" />
+    <link rel="prev" title="L1 Module User Guide" href="../L1.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search" 
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a> 
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search" 
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Quantitative Finance Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rel.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../models_and_methods.html">Pricing Models and Numerical Methods</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../L1.html">L1 Module User Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../L1.html#core-utility">Core Utility</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Random Number Generator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uniform-distributed-random-number-generator">Uniform Distributed Random Number Generator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#normal-distributed-random-number-generator-nrng">Normal Distributed Random Number Generator (NRNG)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../SVD/SVD.html">Singular Value Decomposition (SVD)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../TRSV/TRSV.html">Tridiagonal Matrix Solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Pentadiag/Pentadiag.html">Pentadiagonal Matrix Solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../SobolRsg/sobolrsg.html">Sobol Sequence Generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../brownian/bb.html">Brownian Bridge Transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../StochasticProcess/stochastic_process1d.html">Stochastic Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../StochasticProcess/ornsteinuhlenbeck_process.html">Ornstein-Uhlenbeck Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fdmmesher/fdmmesher.html">Meshers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../NumericalIntegration/NumericalIntegration.html">Numerical Integration Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../L1.html#l1-module-apis">L1 Module APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L2/L2.html">L2 Kernel User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L3/L3.html">L3 Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmark/benchmark.html">Quality and Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vitis Quantitative Finance Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../L1.html">L1 Module User Guide</a> &raquo;</li>
+        
+      <li>Random Number Generator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="random-number-generator">
+<h1>Random Number Generator<a class="headerlink" href="#random-number-generator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p><cite>Random Number Generator</cite> (RNG) is one of the core utilities needed by Monte Carlo Simulation.
+We provide RNGs that generate uniform distribution and normal distribution. The detailed supported RNGs are listed below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="31%" />
+<col width="17%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">RNG name</th>
+<th class="head">Distribution generated</th>
+<th class="head">DataType supported</th>
+<th class="head">Underlying Algorithm</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>MT19937</td>
+<td>Uniform Distribution in (0,1)</td>
+<td>float, double</td>
+<td>Mersenne Twister (MT19937)</td>
+</tr>
+<tr class="row-odd"><td>MT2203</td>
+<td>Uniform Distribution in (0,1)</td>
+<td>float, double</td>
+<td>Mersenne Twister (MT2203)</td>
+</tr>
+<tr class="row-even"><td>MT19937IcnRng</td>
+<td>Normal Distribution N(0,1)</td>
+<td>float, double</td>
+<td>Inverse CDF Transformation</td>
+</tr>
+<tr class="row-odd"><td>MT2203IcnRng</td>
+<td>Normal Distribution N(0,1)</td>
+<td>float, double</td>
+<td>Inverse CDF Transformation</td>
+</tr>
+<tr class="row-even"><td>MT19937BoxMullerNomralRng</td>
+<td>Normal Distribution N(0,1)</td>
+<td>float, double</td>
+<td>Box Muller Transformation</td>
+</tr>
+<tr class="row-odd"><td>MultiVariateNormalRng</td>
+<td>Multi Variate Normal Distribution</td>
+<td>float, double</td>
+<td>Cholesky Decomposition</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="uniform-distributed-random-number-generator">
+<h2>Uniform Distributed Random Number Generator<a class="headerlink" href="#uniform-distributed-random-number-generator" title="Permalink to this headline">¶</a></h2>
+<p>Uniform Distributed Random Number Generator is the foundation of all RNGs.
+In this implementation, we use the Mersenne Twister Algorithm (MT19937 and MT2203) as the underlying algorithm.</p>
+<p>Reference: <a class="reference external" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.315.6296&amp;rep=rep1&amp;type=pdf">Mersenne Twister</a>.</p>
+<div class="section" id="algorithm">
+<h3>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h3>
+<p>The basic element of Mersenne Twister (MT) Algorithm is vector, a <span class="math notranslate nohighlight">\(w\)</span> bits unsigned integer.
+The MT Algorithm generates a sequence of vectors, which are considered to be uniform distributed in <span class="math notranslate nohighlight">\((0, 2^w - 1)\)</span>.
+These vectors could be mapped to (0,1) after dividing by <span class="math notranslate nohighlight">\(2^w\)</span>.</p>
+<p>The basic algorithm is composed of two parts. First part is an iterative formula as shown below:</p>
+<div class="math notranslate nohighlight">
+\[X_{k + n} = X_{k + m} \bigoplus (X_{k}^u|X_{k+1}^l)A\]</div>
+<a class="reference internal image-reference" href="../../_images/iteration_formula.png"><img alt="Diagram of MCEuropeanHestonEngine" class="align-center" src="../../_images/iteration_formula.png" style="width: 80%;" /></a>
+<p>Where <span class="math notranslate nohighlight">\(X_{k + n}\)</span> denotes the <span class="math notranslate nohighlight">\(k\)</span> th vector it produced, given <span class="math notranslate nohighlight">\(X_0\)</span>, <span class="math notranslate nohighlight">\(X_1\)</span>,…, <span class="math notranslate nohighlight">\(X_{n - 1}\)</span> as initial vectors.
+<span class="math notranslate nohighlight">\(X_{k}^u\)</span> means the upper <span class="math notranslate nohighlight">\(w - r\)</span> bits of <span class="math notranslate nohighlight">\(X_{k}\)</span>, <span class="math notranslate nohighlight">\(X_{k + 1}^l\)</span> means the lower <span class="math notranslate nohighlight">\(r\)</span> bits of <span class="math notranslate nohighlight">\(X_{k + 1}\)</span>.
+<span class="math notranslate nohighlight">\((X_{k}^u|X_{k+1}^l)\)</span> is just combination of upper <span class="math notranslate nohighlight">\(w - r\)</span> bits of <span class="math notranslate nohighlight">\(X_{k}\)</span> and lower <span class="math notranslate nohighlight">\(r\)</span> bits of <span class="math notranslate nohighlight">\(X_{k + 1}\)</span>.
+<span class="math notranslate nohighlight">\(\bigoplus\)</span> is bitwise addition. The multiplication of <span class="math notranslate nohighlight">\(A\)</span> could be done by bits operations:</p>
+<div class="math notranslate nohighlight">
+\[XA = shiftright(X) \:\:\: if X[0] = 0\]</div>
+<div class="math notranslate nohighlight">
+\[XA = shiftright(X)\bigoplus a \:\:\: if X[0] = 1\]</div>
+<p>Where <span class="math notranslate nohighlight">\(a\)</span> is a constant vector.</p>
+<p>The second part is tempering, which consists of four steps below.</p>
+<div class="math notranslate nohighlight">
+\[Y = X \bigoplus (X &gt;&gt; u)\]</div>
+<div class="math notranslate nohighlight">
+\[Y = Y \bigoplus ((Y &lt;&lt; s) \:\: AND \:\: b )\]</div>
+<div class="math notranslate nohighlight">
+\[Y = Y \bigoplus ((Y &lt;&lt; t) \:\: AND \:\: c )\]</div>
+<div class="math notranslate nohighlight">
+\[Z = Y \bigoplus (Y &gt;&gt; l)\]</div>
+<p>Where <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(s\)</span>, <span class="math notranslate nohighlight">\(t\)</span>, and <span class="math notranslate nohighlight">\(l\)</span> are constant parameters indicate shift length, <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span> are two const vectors.</p>
+<p>A combination of <span class="math notranslate nohighlight">\(w\)</span>, <span class="math notranslate nohighlight">\(n\)</span>, <span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(m\)</span>, <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(s\)</span>, <span class="math notranslate nohighlight">\(t\)</span>, <span class="math notranslate nohighlight">\(l\)</span>, <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> determines a variation of Mersenne Twister.
+Only a limited combination could work.</p>
+</div>
+<div class="section" id="implementation-details">
+<h3>Implementation Details<a class="headerlink" href="#implementation-details" title="Permalink to this headline">¶</a></h3>
+<p>The optimization happens in the first part.
+We don’t store all history of vectors generated, only the last <span class="math notranslate nohighlight">\(n\)</span> vectors.
+We use a circular queue in BRAMs to store these values.
+Depth of BRAM is set to be least 2’s power that larger than n.
+This will make the calculation of the address simpler.
+By keeping and updating the address of the starting vector, we can always calculate the address of vectors we need to access.</p>
+<a class="reference internal image-reference" href="../../_images/circular_queue.png"><img alt="Circular Queue of vectors" class="align-center" src="../../_images/circular_queue.png" style="width: 80%;" /></a>
+<p>To generate k-th vector, we need 3 read ops, for <span class="math notranslate nohighlight">\(X_{k}\)</span>, <span class="math notranslate nohighlight">\(X_{k + 1}\)</span> and <span class="math notranslate nohighlight">\(X_{k + m}\)</span>.
+In the next iteration, we need to read <span class="math notranslate nohighlight">\(X_{k + 1}\)</span>, <span class="math notranslate nohighlight">\(X_{k + 2}\)</span> and <span class="math notranslate nohighlight">\(X_{k + m + 1}\)</span>.
+This means we only need to read <span class="math notranslate nohighlight">\(X_{k + 2}\)</span> and <span class="math notranslate nohighlight">\(X_{k + m + 1}\)</span>, since we could save <span class="math notranslate nohighlight">\(X_{k + 1}\)</span> in a register.
+So, we need 2 read accesses at different vectors and 1 write access for generating the new vector.
+Since BRAM only allows 2 read or write accesses at a single cycle, it’s not capable of generating the new vector at each clock cycle.
+In the implementation, we copy the identical vectors to different BRAMs, and each of them provides sufficient read or write access port.</p>
+<a class="reference internal image-reference" href="../../_images/dup_queue.png"><img alt="Duplicated vectors." class="align-center" src="../../_images/dup_queue.png" style="width: 80%;" /></a>
+</div>
+</div>
+<div class="section" id="normal-distributed-random-number-generator-nrng">
+<h2>Normal Distributed Random Number Generator (NRNG)<a class="headerlink" href="#normal-distributed-random-number-generator-nrng" title="Permalink to this headline">¶</a></h2>
+<p>NRNG is the most useful RNG in Monte Carlo Simulation.
+We provide two kinds of NRNG: Inverse Cumulative Distributed Function based NRNG and Box-Muller transformation based NRNG.</p>
+<div class="section" id="inverse-cumulative-distribution-transformation-based-rng">
+<h3>Inverse cumulative distribution transformation based RNG<a class="headerlink" href="#inverse-cumulative-distribution-transformation-based-rng" title="Permalink to this headline">¶</a></h3>
+<p>For a certain distribution of random variable <span class="math notranslate nohighlight">\(Z\)</span>, it has a corresponding cumulative distribution function <span class="math notranslate nohighlight">\(\Psi(x)\)</span>.
+This function measures the probability that <span class="math notranslate nohighlight">\(Z &lt; x\)</span>.
+Since <span class="math notranslate nohighlight">\(\Psi(x)\)</span> is monotonically increasing function, it has an inverse function <span class="math notranslate nohighlight">\(\Psi^{-1}(x)\)</span>.
+It is mathematically approved that for uniform-distributed random variable <span class="math notranslate nohighlight">\(U\)</span> in range (0, 1),
+<span class="math notranslate nohighlight">\(\Psi^{-1}(U)\)</span> is also a random variable and its cumulative distribution function is <span class="math notranslate nohighlight">\(\Psi(x)\)</span>.</p>
+<p>We have two versions of Inverse Cumulative Distribution Function (ICDF) with the data type of float or double, details of algorithms could be found from reference papers.
+Both of them use fractional polynomial approximation method.
+They both have two branches for value from different input range and they share similar logics.
+To save DSPs, we combined the two branches and manually binding calculation to the same hardware resource to get the same performance and accuracy.
+Take ICDF with float data type as an example, the basic approximation formula is (main fractional polynomial approximation part, not all) shown as below:</p>
+<div class="math notranslate nohighlight">
+\[y = \frac {(((a_3 x) + a_2)x + a_1) + a_0}{((b_3 x) + b_2)x + b_1}   \:\:\:\: if x &lt; x_{lower} \:\:or\:\: x &gt; x_{upper}\]</div>
+<div class="math notranslate nohighlight">
+\[y = \frac {((c_2 x) + c_1)x + c_0}{(d_2 x) + d_1}   \:\:\:\: if \:x_{lower}&lt; x &lt; x_{upper}\]</div>
+<p>Although these two conditions have different formulas, they can merge into one formula with parameters configured by which range that <span class="math notranslate nohighlight">\(x\)</span> belongs to.
+As shown in the diagram below, if parameters took the value at left, it would become the first formula above. If at right, it would become the second formula above.</p>
+<a class="reference internal image-reference" href="../../_images/combine_branch.png"><img alt="Combine branch" class="align-center" src="../../_images/combine_branch.png" style="width: 80%;" /></a>
+<p>References: <a class="reference external" href="http://csg.sph.umich.edu/abecasis/gas_power_calculator/algorithm-as-241-the-percentage-points-of-the-normal-distribution.pdf">AS 241</a>, <a class="reference external" href="http://home.online.no/~pjacklam/notes/invnorm/index.html">Acklam</a>.</p>
+</div>
+<div class="section" id="box-muller-transformation-based-nrng">
+<h3>Box-Muller transformation based NRNG<a class="headerlink" href="#box-muller-transformation-based-nrng" title="Permalink to this headline">¶</a></h3>
+<p>Box-Muller transformation takes two uniformed distributed random numbers to generate two normal-distributed random number.
+Although it is an efficient method, it could not hold certain algebra characteristics of input uniformed distributed random number serials,
+especially when we need NRNG in low-discrepancy serials.
+It’s not the first choice of NRNG in the current stage.</p>
+<div class="math notranslate nohighlight">
+\[Z_0 = \sqrt[2]{-2\ln{U_1}}\cos{2\pi U_2}\]</div>
+<div class="math notranslate nohighlight">
+\[Z_1 = \sqrt[2]{-2\ln{U_1}}\sin{2\pi U_2}\]</div>
+<p>To smooth output, Box-Muller implementation takes 1 uniformed random number at each call of next(),
+outputs 1 normal distributed random number which is already generated and cached.
+When 2 inputs have been cached, it performs Box-Muller transformation above and generates the next two normal-distributed random numbers.</p>
+<a class="reference internal image-reference" href="../../_images/smooth_input_output.png"><img alt="Smooth input and ouput" class="align-center" src="../../_images/smooth_input_output.png" style="width: 80%;" /></a>
+</div>
+<div class="section" id="multi-variate-normal-distribution-rng">
+<h3>Multi Variate Normal Distribution RNG<a class="headerlink" href="#multi-variate-normal-distribution-rng" title="Permalink to this headline">¶</a></h3>
+<p>Multi-variate normal distribution RNG output N random variates. Each variate’s distribution is N(0, 1), and these variates have a certain correlation.
+To generate such variates, this RNG needs to set up the lower triangle matrix first, which is the result of the Cholesky decomposition of the correlation matrix.
+This implementation supports an even number of variate which is 2N. Instead of storing a 2N-by-2N matrix, we only store the N*(2N+1) non-zero elements.
+The storage scheme is as below. This RNG needs to pre-calculate a certain number of random numbers before it can output the right random number.</p>
+<a class="reference internal image-reference" href="../../_images/ltm_structure.png"><img alt="Storage of Lower Triangle Matrix" class="align-center" src="../../_images/ltm_structure.png" style="width: 80%;" /></a>
+<p>Put the storage scheme aside, the basic working principle is using one underlying random number generator to produce several independent random numbers.
+Every 2N independent random numbers compose a vector. By multiplying this vector with the lower triangle matrix, we get the result vector.
+Elements of result vector are multi-variate normal distribution random numbers, which have the pre-set correlation.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+	  
+	  
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../SVD/SVD.html" class="btn btn-neutral float-right" title="Singular Value Decomposition (SVD)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../L1.html" class="btn btn-neutral float-left" title="L1 Module User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+  </div>	  
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+  
+  
+
+  
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2019, Xilinx
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+			
+			underscoreSetup();
+		</script>
+	</body>
+</html>
