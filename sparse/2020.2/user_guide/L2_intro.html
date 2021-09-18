@@ -1,0 +1,672 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vitis Sparse Matrix Library, kernel" name="keywords" />
+<meta content="The kernel implementation to support cscmv opreation." name="description" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>	
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>		
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>	
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>	
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>	
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>		
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CSCMV Kernel APIs" href="L2_api.html" />
+    <link rel="prev" title="L2 Kernel User Guide" href="L2_user_guide.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search" 
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a> 
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a> 
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search" 
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Sparse Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2020.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="L1_user_guide.html">L1 Primitives User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="L2_user_guide.html">L2 Kernel User Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CSCMV Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#matrix-partitioning-and-device-memory-layout">1. Matrix partitioning and device memory layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-functionality-of-the-cus">2. The functionality of the CUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-and-test-the-design">3. Build and test the design</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="L2_api.html">CSCMV Kernel APIs</a></li>
+</ul>
+</li>
+</ul>
+
+            
+			<p class="caption"><span class="caption-text">This Page</span></p>
+				<ul class="current">
+				  <li class="toctree-l1"><a href="../_sources/user_guide/L2_intro.rst.txt"
+						rel="nofollow">Show Source</a></li>						
+				</ul>
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Sparse Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="L2_user_guide.html">L2 Kernel User Guide</a> &raquo;</li>
+        
+      <li>CSCMV Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user_guide/L2_intro.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cscmv-overview">
+<span id="l2-intro"></span><h1>CSCMV Overview<a class="headerlink" href="#cscmv-overview" title="Permalink to this headline">¶</a></h1>
+<p>As shown in the figure below, the CSCMV accelerator implemented on the Alveo U280 card consists of a group of CUs (compute units, the instances of Vitis Kernels) connected via AXI STREAMs. In this design, 16 (out ot 32) HBM channels are used to store a sparse matrix NNZ values and row indices. Each HBM channel drives a dedicated computation path involving <code class="docutils literal notranslate"><span class="pre">xBarCol</span></code> and <code class="docutils literal notranslate"><span class="pre">cscRow</span></code> to perform the SpMV operation for the portion of the sparse matrix data stored in this HBM channel. In total, 16 SpMV operations are performed simultaneously for different parts of the sparse matrix data. Thanks to the CSC format storage of the sparse matrix, the input dense vector has a high degree of reusability. This reuability addressed in the <code class="docutils literal notranslate"><span class="pre">bufTransColVec</span></code> and <code class="docutils literal notranslate"><span class="pre">bufTransNnzCol</span></code> CUs and the low device memory access overhead addressed in the <code class="docutils literal notranslate"><span class="pre">loadCol</span></code> CU provide sufficient data throughput to allow the 16 parallel computattion paths to run at 300MHz to achieve highest performance. The highlights of this architecture are:</p>
+<ul class="simple">
+<li>Using AXI streams to connect a great number of CUs (37 CUs in this design) to allow massive parallelism being realized in the hardware</li>
+<li>Leveraging different device memories to reduce the memory access overhead and  meet the computattion paths’ data throughput requirements</li>
+<li>Minimanizing the SLR (Super Logic Region) crossing logic to achieve higher clock rate</li>
+</ul>
+<img alt="cscmv Diagram" class="align-center" src="../_images/cscmv.png" />
+<p>Although the above hardware architecture offers high computation power, it alone doesn’t provide a guarantee for the high system level performance. To achieve that, the sparse matrix data has to be partitioned evenly across the HBM channels. The following paragraghs present the details of the matrix partitioning strategy implemented in the software, the device memory layouts that facilitate the parition metadata decoding, the functionality of the CUs and the steps for building and simulating the design with Vitis 2020.2.</p>
+<div class="section" id="matrix-partitioning-and-device-memory-layout">
+<h2>1. Matrix partitioning and device memory layout<a class="headerlink" href="#matrix-partitioning-and-device-memory-layout" title="Permalink to this headline">¶</a></h2>
+<p>As illustrated in the figure below, the matrix partitioning steps implemnted in the software are:</p>
+<img alt="cscmv Diagram" class="align-center" src="../_images/partition.png" />
+<ul class="simple">
+<li>Partition the entire matrix into blocks according to the on-chip row and column buffer sizes, shown as “on-chip row buffer size” and “on-chip col buffer size” in the figure. The “on-chip col buffer size” and the “on-chip row buffer size” can be defined at hardware compile time by macro <code class="docutils literal notranslate"><span class="pre">SPARSE_maxColMemBlocks</span></code> and <code class="docutils literal notranslate"><span class="pre">SPARSE_maxRowBlocks</span></code>. For the Alveo U280 card, the following fomula shows how to compute the number of rows and columns in each on-chip matrix block.</li>
+</ul>
+<pre class="highlight literal-block">
+<span></span>number of columns in each <span class="nv">block</span> <span class="o">=</span> SPARSE_maxColMemBlocks * <span class="m">16</span>
+number of rows in each <span class="nv">block</span> <span class="o">=</span> SPARSE_maxRowBlocks * <span class="m">4</span>
+</pre>
+<ul class="simple">
+<li>Partition each block evenly into chunks along the column. The number of chuncks are decided at hardeware compile time by macro <code class="docutils literal notranslate"><span class="pre">SPARSE_hbmChannels</span></code>. In this design 16 HBM channels are used.</li>
+<li>According to their HBM channel ID, these data chunks are aseembled into different host memory regions, which will be migrated to different HBM channels on the device during runtime. For example, as shown in the figure above, the <code class="docutils literal notranslate"><span class="pre">red</span></code> data chunks in each block will be assembled into one memory block and migrated to HBM channel 0 on the device.</li>
+</ul>
+<p>The matrix block partition information is stored in the DDR and HBM channels. The <code class="docutils literal notranslate"><span class="pre">loadCol</span></code> and <code class="docutils literal notranslate"><span class="pre">readWriteHbm</span></code> CUs will decode this information and retrieve the data correspondingly. As shown in the figure above, there are following three sections in each device memory.</p>
+<ul>
+<li><p class="first">Parameter summary section. This section is used to store number of parameter descriptions. The size (number of bytes) of this section is defined by macro <code class="docutils literal notranslate"><span class="pre">SPARSE_paramOffset</span></code>, which is 1024 in the figure above.</p>
+</li>
+<li><p class="first">Parameter section. This section is used to store the parameter descriptions of data blocks. Each parameter description normally includes the address offset, the number of parallelly processed matrix/vector entries, the min/max indices in the blocks and etc.</p>
+</li>
+<li><p class="first">Data section. This section is used to store matrix and vector data. The data inforamtion of DDR and HBM device memories are given below.</p>
+<blockquote>
+<div><ul class="simple">
+<li>DDR0: dense input vector data. Each DDR access produces 16 FP32 data entries.</li>
+<li>DDR1: column pointers of the NNZs in a sparse matrix. Each DDR access produces 16 column pointer values for 16 NNZs.</li>
+<li>HBM channels: row indices and values of the NNZs in a sparse matrix. Each access of one single HBM channels produces 4 values and 4 row indices data for 4 NNZs.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="the-functionality-of-the-cus">
+<h2>2. The functionality of the CUs<a class="headerlink" href="#the-functionality-of-the-cus" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>The <code class="docutils literal notranslate"><span class="pre">loadCol</span></code> CU reads the input dense column vector and the NNZ column pointer entries from two physically separated DDR device memories DDR0 and DDR1 as shown in the figure above, and send them to the <code class="docutils literal notranslate"><span class="pre">bufTransColVec</span></code> and <code class="docutils literal notranslate"><span class="pre">bufTransNnzCol</span></code> CUs to buffer and select entries for each computation path connected to each HBM channel.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">bufTransColVec</span></code> CU reads the input dense vector entries that belong to each block, split them into chuncks for each HBM channel, buffer all those chunks (16 in total in this design) and transmit the data to its corresponding <code class="docutils literal notranslate"><span class="pre">xBarCol</span></code> CU.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">bufTransNnzCol</span></code> CU reads the column pointer entries that belong to each block, split them into chuncks for each HBM channels, buffer all those chunks (16 in total in this design) and transmit the data to its corresponding <code class="docutils literal notranslate"><span class="pre">xBarCol</span></code> CU.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">xBarCol</span></code> CUs, one for each HBM channel, select the input dense vector entries according to the NNZs’ column pointer entries and send the result to <code class="docutils literal notranslate"><span class="pre">cscRow</span></code> CUs for computations.</li>
+<li>Each <code class="docutils literal notranslate"><span class="pre">cscRow</span></code> CU reads the value and row indices of NNZs from one HBM channel and multiplies the values with their corresponding column entries received from the connected <code class="docutils literal notranslate"><span class="pre">xBarCol</span></code> CU, and accumulates the results along the row indices.</li>
+<li>Each <code class="docutils literal notranslate"><span class="pre">readWriteHbm</span></code> CU connects to 8 HBM channels, and reads the NNZs’ value and row indices from those connected HBM channels and send the results to the corresponding <code class="docutils literal notranslate"><span class="pre">cscRow</span></code> CUs. It also collects the results from 8 <code class="docutils literal notranslate"><span class="pre">cscRow</span></code> CUs and writes them back to the corresponding HBM channels. In total, 2 <code class="docutils literal notranslate"><span class="pre">readWriteHbm</span></code> CUs are used to connect to 16 HBM channels.</li>
+</ul>
+</div>
+<div class="section" id="build-and-test-the-design">
+<h2>3. Build and test the design<a class="headerlink" href="#build-and-test-the-design" title="Permalink to this headline">¶</a></h2>
+<p>To build and test the design on Linux platform, please make sure your <strong>XILINX_VITIS</strong> and <strong>XILINX_XRT</strong> environment variables are set up correctly and point to the corresponding <strong>Vitis 2020.2</strong> locations. Once your environment is set up properly, please navigate to the <strong>L2/tests/csmv</strong> directory and follow the steps below to run emulation and launch accelerator on Alveo U280.</p>
+<ul class="simple">
+<li>To run software emulation, please enter following commands. Please replace the <strong>$XILINX_VITIS</strong> with your Vitis 2020.2 installation location. The software emulation treats each CU as a dataflow module, and uses a wrapper called <code class="docutils literal notranslate"><span class="pre">cscmvSeqKernel</span></code> as the top module to run the software emulation process. This is purely used for C++ level functionality test.</li>
+</ul>
+<pre class="highlight literal-block">
+<span></span>make cleanall
+make run <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span><span class="nv">$XILINX_VITIS</span>/platforms  <span class="nv">DEVICE</span><span class="o">=</span><span class="nv">$XILINX_VITIS</span>/platform/xilinx_u280_xdma_201920_1/xilinx_u280_xdma_201920_1.xpfm  <span class="nv">TARGET</span><span class="o">=</span>sw_emu
+</pre>
+<ul class="simple">
+<li>To run hardware emulation, please enter following commands. Please replace the <strong>$XILINX_VITIS</strong> with your Vitis 2020.2 installation location.</li>
+</ul>
+<pre class="highlight literal-block">
+<span></span>make cleanall
+make run <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span><span class="nv">$XILINX_VITIS</span>/platforms  <span class="nv">DEVICE</span><span class="o">=</span><span class="nv">$XILINX_VITIS</span>/platform/xilinx_u280_xdma_201920_1/xilinx_u280_xdma_201920_1.xpfm  <span class="nv">TARGET</span><span class="o">=</span>hw_emu
+</pre>
+<ul class="simple">
+<li>To build and launch the hardware accelerator on the Alveo U280, please enter following commands. Please replace the <strong>$XILINX_VITIS</strong> with your Vitis 2020.2 installation location.</li>
+</ul>
+<pre class="highlight literal-block">
+<span></span>make cleanall
+make run <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span><span class="nv">$XILINX_VITIS</span>/platforms  <span class="nv">DEVICE</span><span class="o">=</span><span class="nv">$XILINX_VITIS</span>/platform/xilinx_u280_xdma_201920_1/xilinx_u280_xdma_201920_1.xpfm  <span class="nv">TARGET</span><span class="o">=</span>hw
+</pre>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+	  
+	  
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="L2_api.html" class="btn btn-neutral float-right" title="CSCMV Kernel APIs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="L2_user_guide.html" class="btn btn-neutral float-left" title="L2 Kernel User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+      <span class="lastupdated">
+        Last updated on September 04, 2020.
+      </span>
+
+    </p>
+  </div>	  
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>     	    
+	    
+	    
+  
+  
+    
+  
+  
+
+  
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2019, Xilinx Inc.
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+			
+			underscoreSetup();
+		</script>
+	</body>
+</html>
