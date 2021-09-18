@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta content="GESVDJ, SVD, Jacobi, symmetric, matrix, Decomposition, Singular" name="keywords" />
+<meta content="The singular value decomposition (SVD) is a very useful technique for dealing with general dense matrix problems." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Header information provided by Emily-->
+    <meta name="Language" content="en">
+    <meta name="Location" content="us">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/favicon.ico">
+  
+  <title>Singular Value Decomposition for symmetric matrix (GESVDJ) &mdash; Vitis Solver Library 2019.2 release documentation</title>
+  
+<!-- Header information provided by Emily-->
+    <meta name="apple-itunes-app" content="app-id=1063287962">
+    <meta name="google-play-app" content="app-id=com.marketing.xilinxgo">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://kit.fontawesome.com/d3dd8c60ed.js"></script>
+    
+   
+    <link rel="stylesheet" href="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.css" type="text/css" />
+    
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/etc.clientlibs/clientlibs/granite/jquery-ui.min.js"><!----></script>
+    <script type="text/javascript" src="https://www.xilinx.com/xx/rebrand/r40/header-footer.min.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css">
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Singular Value Decomposition for general matrix (GESVJ)" href="../gesvj/gesvj.html" />
+    <link rel="prev" title="Matrix Decomposition" href="../../L2_methods.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="xilinx-bs3">
+    <noindex>
+        <header data-component="header">
+            <nav class="navbar navbar-default">
+                <div class="container main-nav">
+                    <div class="row">
+                        <div class="col-xs-5 col-sm-2 logo-column">
+                            <div class="logo">
+                                <a href="https://www.xilinx.com/">
+                                    <img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc" />
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-8 navbar-column">
+                            <div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+                                <ul class="nav navbar-nav nav-justified">
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://developer.xilinx.com/">
+                                            Developers
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://www.xilinx.com/support.html">
+                                            Support
+                                        </a>
+                                    </li>
+                                    <li class="accordion-toggle-icons" data-component="toggle-dropdown">
+                                        <a href="https://forums.xilinx.com/">
+                                            Forums
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mini-nav col-sm-2">
+                            <button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </noindex>
+</div>
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Solver Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Library Overview</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../L2.html">L2 Module User Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../L2.html#supported-numerical-methods">Supported Numerical Methods</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../L2_methods.html">Matrix Decomposition</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Singular Value Decomposition for symmetric matrix (GESVDJ)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gesvj/gesvj.html">Singular Value Decomposition for general matrix (GESVJ)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../geqrf/geqrf.html">General QR Decomposition (GEQRF)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getrf/getrf.html">Lower-Upper Decomposition (GETRF)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getrf_nopivot/getrf_nopivot.html">Lower-Upper Decomposition (GETRF_NOPIVOT)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../potrf/potrf.html">Cholesky Decomposition for SPD matrix (POTRF)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../L2_methods.html#linear-solver">Linear Solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../L2_methods.html#eigenvalue-solver">Eigenvalue Solver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../L2.html#level-ii-apis">Level II APIs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark.html">Quality and Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Vitis Solver Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../L2.html">L2 Module User Guide</a> &raquo;</li>
+        
+          <li><a href="../../L2_methods.html">Matrix Decomposition</a> &raquo;</li>
+        
+      <li>Singular Value Decomposition for symmetric matrix (GESVDJ)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="singular-value-decomposition-for-symmetric-matrix-gesvdj">
+<h1>Singular Value Decomposition for symmetric matrix (GESVDJ)<a class="headerlink" href="#singular-value-decomposition-for-symmetric-matrix-gesvdj" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The <cite>singular value decomposition</cite> (SVD) is a very useful technique for dealing with general dense matrix problems. Recent years, SVD has become a computationally viable tool for solving a wide variety of problems raised in many practical applications, such as least squares data fitting, image compression, facial recognition, principal component analysis, latent semantic analysis, and computing the 2-norm, condition number, and numerical rank of a matrix.</p>
+<p>For more information, please refer <strong>“Jack Dongarra, Mark Gates, Azzam Haidar. The Singular Value Decomposition: Anatomy of Optimizing an Algorithm for Extreme Scale. 2018 SIAM Review, vol.60, No.4, pp.808-865”</strong></p>
+</div>
+<div class="section" id="theory">
+<h2>Theory<a class="headerlink" href="#theory" title="Permalink to this headline">¶</a></h2>
+<p>The SVD of m-by-m symmetric matrix A is given by</p>
+<div class="math notranslate nohighlight">
+\[A = U \Sigma U^T\]</div>
+<p>where <span class="math notranslate nohighlight">\(U\)</span> is an orthogonal (unitary) matrix and <span class="math notranslate nohighlight">\(\Sigma\)</span> is an m-by-m matrix with real diagonal elements.</p>
+<p>There are two dominant categories of SVD algorithms for dense matrix: bidiagonalization methods and Jacobi methods. The classical bidiagonalization method is a long sequential calculation, the oPGA has no advantage in the calculation. In contrast, Jacobi methods apply plane rotations to the entire matrix A. Two-sided Jacobi methods iteratively apply rotations on both sides of the matrix A to bring it to diagonal form, while one-sided Hestenes Jacobi methods apply rotations on one side to orthogonalize the columns of matrix A, and bring <span class="math notranslate nohighlight">\(A^TA\)</span> to diagonal form. While Jacobi methods are often slow than bidiagonalization methods, they have a better potential in unrolling and pipelining.</p>
+<div class="section" id="jacobi-methods">
+<h3>Jacobi Methods<a class="headerlink" href="#jacobi-methods" title="Permalink to this headline">¶</a></h3>
+<p>Jacobi uses a sequence of plane rotations to reduce a symmetric matrix A to a diagonal matrix</p>
+<div class="math notranslate nohighlight">
+\[A_{0} = A,   \&gt; A_{k+1} = J_{k}^{T}A_{k}J_{k},   \&gt; A_{k} \rightarrow \Sigma \&gt; as \&gt; k \rightarrow \infty\]</div>
+<p>Each plane rotation, <span class="math notranslate nohighlight">\(J_{k} = J_{k}(i, j, \theta)\)</span>, now called a Jacobi or Givens rotation</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{equation*}
+    J_{k}(i, j, \theta)=\begin{vmatrix}
+        I &amp;\,  &amp;  &amp;  &amp; \\
+        \, &amp;\,c &amp;  &amp;s &amp; \\
+        \, &amp;\,  &amp;I &amp;  &amp; \\
+        \, &amp;-s  &amp;  &amp;c &amp; \\
+        &amp; &amp;\,  &amp;  &amp;  &amp;I
+    \end{vmatrix}
+\end{equation*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(c=cos \theta\)</span> and <span class="math notranslate nohighlight">\(s=sin \theta\)</span>. The angle <span class="math notranslate nohighlight">\(\theta\)</span> is chosen to eliminate the pair <span class="math notranslate nohighlight">\(a_{ij}\)</span>, <span class="math notranslate nohighlight">\(a_{ji}\)</span> by applying <span class="math notranslate nohighlight">\(J(i,j, \theta )\)</span> on the left and right of <span class="math notranslate nohighlight">\(A\)</span>, which can be viewed as the 2x2 eigenvalue problem</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{equation*}
+ \hat{J}_{(k)}^{T} \hat{A}_{(k)} \hat{J}_{(k)}= \begin{vmatrix}
+   \, c &amp;s \\
+     -s &amp;c
+     \end{vmatrix}^{T} \begin{vmatrix}
+     a_{ii} &amp;a_{ij} \\
+     a_{ji} &amp;a_{jj}
+     \end{vmatrix} \begin{vmatrix}
+     d_{ii}  &amp;0 \\
+         0   &amp;d_{jj}
+         \end{vmatrix}= \hat{A}_{(k+1)}
+\end{equation*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\hat{A}\)</span> is a 2X2 submatrix of matrix A. After the Givens rotations of the whole matrix A, the off-diagonal value of A will be reduced to zero-like value after 3-15 times iteration of the process.</p>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../gesvj/gesvj.html" class="btn btn-neutral float-right" title="Singular Value Decomposition for general matrix (GESVJ)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../../L2_methods.html" class="btn btn-neutral float-left" title="Matrix Decomposition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p>
+        
+        &copy; Copyright 2019, Xilinx
+
+    </p>
+  </div>
+<!--
+    
+    
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+-->
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
