@@ -1,0 +1,26 @@
+.. index:: pair: enum; list_mode
+.. _doxid-zlib_8hpp_1aad11276a757f9cae59a334fcbec9adce:
+.. _cid-list_mode:
+
+enum list_mode
+==============
+
+
+
+
+
+.. _doxid-zlib_8hpp_1aad11276a757f9cae59a334fcbec9adceae4df797b06cc24c8192f25a603d79464:
+.. _cid-list_mode::only_compress:
+.. _doxid-zlib_8hpp_1aad11276a757f9cae59a334fcbec9adceaa7b21e7371bad81f2535bad7862e7ef2:
+.. _cid-list_mode::only_decompress:
+.. _doxid-zlib_8hpp_1aad11276a757f9cae59a334fcbec9adcea62825087f4f990d9eef3439945ec8559:
+.. _cid-list_mode::comp_decomp:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	ONLY_COMPRESS 
+	ONLY_DECOMPRESS 
+	COMP_DECOMP 
+

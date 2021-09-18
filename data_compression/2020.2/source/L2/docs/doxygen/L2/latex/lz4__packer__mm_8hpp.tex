@@ -1,0 +1,83 @@
+\hypertarget{lz4__packer__mm_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-packer\-\_\-mm.hpp File Reference}
+\label{lz4__packer__mm_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-packer\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-packer\-\_\-mm.\-hpp}}
+}
+
+
+Header for L\-Z4 packer kernel.  
+
+
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-packer.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__packer__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{lz4__packer__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{lz4__packer__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{lz4__packer__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__packer__mm_8hpp_a294ce21f5608a3ce72fab891321a3542}{typedef ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H $>$ {\bfseries uint512\-\_\-t}}\label{lz4__packer__mm_8hpp_a294ce21f5608a3ce72fab891321a3542}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__packer__mm_8hpp_afa35f5fc638e38ef2a98aa15c6fccc5d}{xil\-Lz4\-Packer} (uint512\-\_\-t $\ast$in, uint512\-\_\-t $\ast$out, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t $\ast$encoded\-\_\-size, uint512\-\_\-t $\ast$orig\-\_\-input\-\_\-data, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t no\-\_\-blocks, uint32\-\_\-t xxhash\-Val, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em L\-Z4 packer kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for L\-Z4 packer kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__packer__mm_8hpp_afa35f5fc638e38ef2a98aa15c6fccc5d}{\index{lz4\-\_\-packer\-\_\-mm.\-hpp@{lz4\-\_\-packer\-\_\-mm.\-hpp}!xil\-Lz4\-Packer@{xil\-Lz4\-Packer}}
+\index{xil\-Lz4\-Packer@{xil\-Lz4\-Packer}!lz4_packer_mm.hpp@{lz4\-\_\-packer\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Lz4\-Packer}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-Packer (
+\begin{DoxyParamCaption}
+\item[{uint512\-\_\-t $\ast$}]{in, }
+\item[{uint512\-\_\-t $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{compressd\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-block\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{encoded\-\_\-size, }
+\item[{uint512\-\_\-t $\ast$}]{orig\-\_\-input\-\_\-data, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{no\-\_\-blocks, }
+\item[{uint32\-\_\-t}]{xxhash\-Val, }
+\item[{uint32\-\_\-t}]{input\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{lz4__packer__mm_8hpp_afa35f5fc638e38ef2a98aa15c6fccc5d}
+
+
+L\-Z4 packer kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em out} & output compressed data \\
+\hline
+{\em compressd\-\_\-size} & compressed output size of each block \\
+\hline
+{\em in\-\_\-block\-\_\-size} & input block size of each block \\
+\hline
+{\em encoded\-\_\-size} & encoded size of each block \\
+\hline
+{\em orig\-\_\-input\-\_\-data} & raw input data \\
+\hline
+{\em block\-\_\-size\-\_\-in\-\_\-kb} & input block size in bytes \\
+\hline
+{\em no\-\_\-blocks} & number of input blocks \\
+\hline
+{\em xxhash\-Val} & Hash Value \\
+\hline
+{\em input\-\_\-size} & Total Input File Size \\
+\hline
+\end{DoxyParams}

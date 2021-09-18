@@ -1,0 +1,26 @@
+.. index:: pair: struct; xf::compression::Symbol
+.. _doxid-structxf_1_1compression_1_1Symbol:
+.. _cid-xf::compression::symbol:
+
+struct xf::compression::Symbol
+==============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxf_1_1compression_1_1Symbol_1abfb2379c9cebaad8fed374f5d95c99e0:
+.. _cid-xf::compression::symbol::value:
+.. _doxid-structxf_1_1compression_1_1Symbol_1aae386e791b6d55a0731e52bc6328806d:
+.. _cid-xf::compression::symbol::frequency:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	ap_uint <c_tgnSymbolBits> value
+	Frequency frequency
+

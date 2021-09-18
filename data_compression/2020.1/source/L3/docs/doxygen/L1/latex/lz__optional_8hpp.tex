@@ -1,0 +1,39 @@
+\hypertarget{lz__optional_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz\-\_\-optional.hpp File Reference}
+\label{lz__optional_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz\-\_\-optional.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz\-\_\-optional.\-hpp}}
+}
+
+
+Header for modules used in L\-Z4 and snappy compression kernels.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-tables.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz__optional_8hpp_a3a3a3795eafe60850be8b44dad7bdcf7}{\#define {\bfseries d\-\_\-code}(dist, dist\-\_\-code)~((dist) $<$ 256 ? dist\-\_\-code\mbox{[}dist\mbox{]} \-: dist\-\_\-code\mbox{[}256 + ((dist) $>$$>$ 7)\mbox{]})}\label{lz__optional_8hpp_a3a3a3795eafe60850be8b44dad7bdcf7}
+
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_a9d41d94c1981c79849a420c8a6a75aa4}{typedef ap\-\_\-uint$<$ 32 $>$ {\bfseries xf\-::compression\-::compressd\-\_\-dt}}\label{namespacexf_1_1compression_a9d41d94c1981c79849a420c8a6a75aa4}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$int M\-A\-T\-C\-H\-\_\-\-L\-E\-N, int O\-F\-F\-S\-E\-T\-\_\-\-W\-I\-N\-D\-O\-W$>$ }\\void {\bfseries xf\-::compression\-::lz\-Best\-Match\-Filter} (hls\-::stream$<$ compressd\-\_\-dt $>$ \&in\-Stream, hls\-::stream$<$ compressd\-\_\-dt $>$ \&out\-Stream, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em Objective of this module is to pick character with higher match length in the offset window range. \end{DoxyCompactList}\item 
+{\footnotesize template$<$int M\-A\-X\-\_\-\-M\-A\-T\-C\-H\-\_\-\-L\-E\-N, int B\-O\-O\-S\-T\-E\-R\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-W\-I\-N\-D\-O\-W = 16 $\ast$ 1024, int L\-E\-F\-T\-\_\-\-B\-Y\-T\-E\-S = 64$>$ }\\void {\bfseries xf\-::compression\-::lz\-Booster} (hls\-::stream$<$ compressd\-\_\-dt $>$ \&in\-Stream, hls\-::stream$<$ compressd\-\_\-dt $>$ \&out\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Size)
+\begin{DoxyCompactList}\small\item\em This module helps in improving the compression ratio. Finds a better match length by performing more character matches with supported max match, while maintaining an offset window. Booster offset Window template argument (default value is 16\-K) internally consume B\-R\-A\-M memory to implement history window. Higher the booster value can give better compression ratio but will consume more B\-R\-A\-M resources. \end{DoxyCompactList}\item 
+{\footnotesize template$<$int M\-A\-X\-\_\-\-M\-A\-T\-C\-H\-\_\-\-L\-E\-N, int B\-O\-O\-S\-T\-E\-R\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-W\-I\-N\-D\-O\-W = 16 $\ast$ 1024, int L\-E\-F\-T\-\_\-\-B\-Y\-T\-E\-S = 64$>$ }\\void {\bfseries xf\-::compression\-::lz\-Booster} (hls\-::stream$<$ compressd\-\_\-dt $>$ \&in\-Stream, hls\-::stream$<$ compressd\-\_\-dt $>$ \&out\-Stream, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em This module helps in improving the compression ratio. Finds a better match length by performing more character matches with supported max match, while maintaining an offset window. Booster offset Window template argument (default value is 16\-K) internally consume B\-R\-A\-M memory to implement history window. Higher the booster value can give better compression ratio but will consume more B\-R\-A\-M resources. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in L\-Z4 and snappy compression kernels. This file is part of Vitis Data Compression Library. 

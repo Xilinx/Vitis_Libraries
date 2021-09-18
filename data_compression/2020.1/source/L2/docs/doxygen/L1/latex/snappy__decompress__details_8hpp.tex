@@ -1,0 +1,37 @@
+\hypertarget{snappy__decompress__details_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/snappy\-\_\-decompress\-\_\-details.hpp File Reference}
+\label{snappy__decompress__details_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/snappy\-\_\-decompress\-\_\-details.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/snappy\-\_\-decompress\-\_\-details.\-hpp}}
+}
+
+
+Internal modules used for snappy decompression.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}snappy\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a5950cb8c27c23ca36e1cc0d33de4db6e}{{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S, int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 64, class S\-I\-Z\-E\-\_\-\-D\-T  = ap\-\_\-uint$<$17$>$$>$ }\\void {\bfseries xf\-::compression\-::details\-::lz\-Multi\-Block\-Packer} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ lz\-Data\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ bool $>$ lz\-Stream\-Eos\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ lz\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream)}\label{namespacexf_1_1compression_1_1details_a5950cb8c27c23ca36e1cc0d33de4db6e}
+
+\item 
+\hypertarget{namespacexf_1_1compression_ab72d81b4948f8749c9c6b8873cc2eca5}{{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S, int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 64, class S\-I\-Z\-E\-\_\-\-D\-T  = ap\-\_\-uint$<$17$>$$>$ }\\void {\bfseries xf\-::compression\-::snappy\-Block\-Decoder} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&block\-Data\-Stream, hls\-::stream$<$ dt\-\_\-block\-Info $>$ \&block\-Info\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&lz\-Data\-Stream, hls\-::stream$<$ bool $>$ \&lz\-Stream\-Eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&lz\-Size\-Stream)}\label{namespacexf_1_1compression_ab72d81b4948f8749c9c6b8873cc2eca5}
+
+\item 
+\hypertarget{namespacexf_1_1compression_aabd3e4c8a43db65490824f975e92ea27}{{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S, int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 64, class S\-I\-Z\-E\-\_\-\-D\-T  = ap\-\_\-uint$<$17$>$$>$ }\\void {\bfseries xf\-::compression\-::snappy\-Multi\-Core\-Decompress} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream)}\label{namespacexf_1_1compression_aabd3e4c8a43db65490824f975e92ea27}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a3f0585a5a401d0e5ef37f51a0ff8b103}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, class S\-I\-Z\-E\-\_\-\-D\-T  = ap\-\_\-uint$<$17$>$$>$ }\\void {\bfseries xf\-::compression\-::snappy\-Decompress\-Engine} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eo\-S, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream, const uint32\-\_\-t \-\_\-input\-\_\-size)}\label{namespacexf_1_1compression_a3f0585a5a401d0e5ef37f51a0ff8b103}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a6b66eb2ae79da7623edf83492ef1318c}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, class S\-I\-Z\-E\-\_\-\-D\-T  = ap\-\_\-uint$<$17$>$$>$ }\\void {\bfseries xf\-::compression\-::snappy\-Decompress\-Core\-Engine} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eo\-S, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&block\-Size\-Stream)}\label{namespacexf_1_1compression_a6b66eb2ae79da7623edf83492ef1318c}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Internal modules used for snappy decompression. This file is part of Vitis Data Compression Library. 

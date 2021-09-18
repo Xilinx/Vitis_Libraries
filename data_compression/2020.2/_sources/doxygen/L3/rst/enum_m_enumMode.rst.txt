@@ -1,0 +1,23 @@
+.. index:: pair: enum; m_enumMode
+.. _doxid-zlibDriver_8hpp_1a995bb549a5502374f53fed9e0e5736af:
+.. _cid-m_enummode:
+
+enum m_enumMode
+===============
+
+
+
+
+
+.. _doxid-zlibDriver_8hpp_1a995bb549a5502374f53fed9e0e5736afa292608eb1b4ca0932e01c8eb82b481ca:
+.. _cid-m_enummode::xilinx_deflate:
+.. _doxid-zlibDriver_8hpp_1a995bb549a5502374f53fed9e0e5736afa170205b104eea600b1745f12b8410350:
+.. _cid-m_enummode::xilinx_inflate:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	XILINX_DEFLATE = 1
+	XILINX_INFLATE 
+

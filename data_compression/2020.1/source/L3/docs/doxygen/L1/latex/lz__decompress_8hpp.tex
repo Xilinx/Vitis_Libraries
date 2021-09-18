@@ -1,0 +1,33 @@
+\hypertarget{lz__decompress_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz\-\_\-decompress.hpp File Reference}
+\label{lz__decompress_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz\-\_\-decompress.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz\-\_\-decompress.\-hpp}}
+}
+
+
+Header for modules used in L\-Z4 and snappy decompression kernels.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, int L\-O\-W\-\_\-\-O\-F\-F\-S\-E\-T = 8$>$ }\\void {\bfseries xf\-::compression\-::lz\-Decompress} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $>$ $>$ \&out\-Stream, uint32\-\_\-t original\-\_\-size)
+\begin{DoxyCompactList}\small\item\em This module writes the literals to the output stream as it is and when match length and offset are read, the literals will be read from the local dictionary based on offset until match length. \end{DoxyCompactList}\item 
+{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, class S\-I\-Z\-E\-\_\-\-D\-T  = uint8\-\_\-t, class S\-I\-Z\-E\-\_\-\-O\-F\-F\-S\-E\-T  = ap\-\_\-uint$<$16$>$$>$ }\\void {\bfseries xf\-::compression\-::lz\-Multi\-Byte\-Decompress} (hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&litlen\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&lit\-Stream, hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-O\-F\-F\-S\-E\-T $>$ \&offset\-Stream, hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&matchlen\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, hls\-::stream$<$ uint64\-\_\-t $>$ \&size\-Out\-Stream)
+\begin{DoxyCompactList}\small\item\em This module writes the literals to the output stream as it is and when match length and offset are read, the literals will be read from the local dictionary based on offset until match length. This module can process data in parallel defined by P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S template argument. \end{DoxyCompactList}\item 
+\hypertarget{namespacexf_1_1compression_a7acac729182c466dd5fd6775e572503c}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, class S\-I\-Z\-E\-\_\-\-D\-T  = uint16\-\_\-t$>$ }\\void {\bfseries xf\-::compression\-::lz\-Multi\-Byte\-Decoder} (hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&litlen\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&lit\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&offset\-Stream, hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&matchlen\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&end\-Of\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&size\-Out\-Stream)}\label{namespacexf_1_1compression_a7acac729182c466dd5fd6775e572503c}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a3d01e67994093b8e6c2ca9429cd93f92}{{\footnotesize template$<$int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, int L\-O\-W\-\_\-\-O\-F\-F\-S\-E\-T = 8$>$ }\\void {\bfseries xf\-::compression\-::lz\-Decompress\-Zlib\-Eos} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&in\-Stream\-\_\-eos, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-\_\-eos, hls\-::stream$<$ uint64\-\_\-t $>$ \&out\-Size\-\_\-val)}\label{namespacexf_1_1compression_a3d01e67994093b8e6c2ca9429cd93f92}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a11f2294f8063becd363f224f1c5c1efd}{{\footnotesize template$<$int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E, int L\-O\-W\-\_\-\-O\-F\-F\-S\-E\-T = 8$>$ }\\void {\bfseries xf\-::compression\-::lz\-Decompress\-Zlib\-Eos\-Stream} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&in\-Stream\-\_\-eos, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-\_\-eos, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-\_\-val, hls\-::stream$<$ uint32\-\_\-t $>$ \&in\-Size)}\label{namespacexf_1_1compression_a11f2294f8063becd363f224f1c5c1efd}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in L\-Z4 and snappy decompression kernels. This file is part of Vitis Data Compression Library. 

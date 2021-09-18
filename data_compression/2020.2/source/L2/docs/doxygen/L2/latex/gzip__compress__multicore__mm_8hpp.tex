@@ -1,0 +1,69 @@
+\hypertarget{gzip__compress__multicore__mm_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/gzip\-\_\-compress\-\_\-multicore\-\_\-mm.hpp File Reference}
+\label{gzip__compress__multicore__mm_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/gzip\-\_\-compress\-\_\-multicore\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/gzip\-\_\-compress\-\_\-multicore\-\_\-mm.\-hpp}}
+}
+
+
+Header for Gzip compression multicore kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-compress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gzip__compress__multicore__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~64}\label{gzip__compress__multicore__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{gzip__compress__multicore__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~128}\label{gzip__compress__multicore__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\item 
+\hypertarget{gzip__compress__multicore__mm_8hpp_a28c30d200452ac445a090302da3570b4}{\#define {\bfseries U\-R\-A\-M\-\_\-\-B\-U\-F\-F\-E\-R}~0}\label{gzip__compress__multicore__mm_8hpp_a28c30d200452ac445a090302da3570b4}
+
+\item 
+\hypertarget{gzip__compress__multicore__mm_8hpp_a8be76cad55a58def34b6ac6c148cabc7}{\#define {\bfseries N\-U\-M\-\_\-\-C\-O\-R\-E\-S}~8}\label{gzip__compress__multicore__mm_8hpp_a8be76cad55a58def34b6ac6c148cabc7}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{gzip__compress__multicore__mm_8hpp_a30b04906fa48674e9e86259166a5a147}{xil\-Gzip\-Comp\-Block} (const ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H $>$ $\ast$in, ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H $>$ $\ast$out, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t $\ast$checksum\-Data, uint32\-\_\-t input\-\_\-size, bool checksum\-Type)
+\begin{DoxyCompactList}\small\item\em G\-Z\-I\-P compression kernel takes the raw data as input from D\-D\-R and compresses the data using num cores and writes the output to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for Gzip compression multicore kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{gzip__compress__multicore__mm_8hpp_a30b04906fa48674e9e86259166a5a147}{\index{gzip\-\_\-compress\-\_\-multicore\-\_\-mm.\-hpp@{gzip\-\_\-compress\-\_\-multicore\-\_\-mm.\-hpp}!xil\-Gzip\-Comp\-Block@{xil\-Gzip\-Comp\-Block}}
+\index{xil\-Gzip\-Comp\-Block@{xil\-Gzip\-Comp\-Block}!gzip_compress_multicore_mm.hpp@{gzip\-\_\-compress\-\_\-multicore\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Gzip\-Comp\-Block}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Gzip\-Comp\-Block (
+\begin{DoxyParamCaption}
+\item[{const ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H $>$ $\ast$}]{in, }
+\item[{ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H $>$ $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{compressd\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{checksum\-Data, }
+\item[{uint32\-\_\-t}]{input\-\_\-size, }
+\item[{bool}]{checksum\-Type}
+\end{DoxyParamCaption}
+)}}\label{gzip__compress__multicore__mm_8hpp_a30b04906fa48674e9e86259166a5a147}
+
+
+G\-Z\-I\-P compression kernel takes the raw data as input from D\-D\-R and compresses the data using num cores and writes the output to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em out} & output compressed data \\
+\hline
+{\em compressd\-\_\-size} & compressed output size of each block \\
+\hline
+{\em input\-\_\-size} & input data size \\
+\hline
+\end{DoxyParams}

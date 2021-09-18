@@ -1,0 +1,29 @@
+.. index:: pair: enum; xf::compression::details::xfBlockType_t
+.. _doxid-namespacexf_1_1compression_1_1details_1a88050bf85d276c17c47c4170fcce3ad5:
+.. _cid-xf::compression::details::xfblocktype_t:
+
+enum xf::compression::details::xfBlockType_t
+============================================
+
+
+
+
+
+.. _doxid-namespacexf_1_1compression_1_1details_1a88050bf85d276c17c47c4170fcce3ad5a1914f112eb56481ed74cd3d232b4b5ab:
+.. _cid-xf::compression::details::xfblocktype_t::raw_block:
+.. _doxid-namespacexf_1_1compression_1_1details_1a88050bf85d276c17c47c4170fcce3ad5a0d8f69682e6cf4277d521186b6d0b955:
+.. _cid-xf::compression::details::xfblocktype_t::rle_block:
+.. _doxid-namespacexf_1_1compression_1_1details_1a88050bf85d276c17c47c4170fcce3ad5ac71f41b5900ae54dd90035cbd33367a5:
+.. _cid-xf::compression::details::xfblocktype_t::cmp_block:
+.. _doxid-namespacexf_1_1compression_1_1details_1a88050bf85d276c17c47c4170fcce3ad5a03040c31b73bfda0db3ad5f4c2ed6dff:
+.. _cid-xf::compression::details::xfblocktype_t::invalid_block:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	RAW_BLOCK = 0
+	RLE_BLOCK 
+	CMP_BLOCK 
+	INVALID_BLOCK 
+

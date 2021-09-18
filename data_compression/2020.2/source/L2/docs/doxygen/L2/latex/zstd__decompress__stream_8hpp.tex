@@ -1,0 +1,67 @@
+\hypertarget{zstd__decompress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zstd\-\_\-decompress\-\_\-stream.hpp File Reference}
+\label{zstd__decompress__stream_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zstd\-\_\-decompress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/zstd\-\_\-decompress\-\_\-stream.\-hpp}}
+}
+
+
+Header for zstd decompression streaming kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}zstd\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zstd__decompress__stream_8hpp_a663d5804aee12e3655c9fb8aca8a56bd}{\#define {\bfseries Z\-S\-T\-D\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B}~32}\label{zstd__decompress__stream_8hpp_a663d5804aee12e3655c9fb8aca8a56bd}
+
+\item 
+\hypertarget{zstd__decompress__stream_8hpp_aea11fa4250caea9197c4d4dc91d14d96}{\#define {\bfseries M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S}~4}\label{zstd__decompress__stream_8hpp_aea11fa4250caea9197c4d4dc91d14d96}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{zstd__decompress__stream_8hpp_aeea49d48062b7c49a017d53c2306c500}{xil\-Zstd\-Decompress\-Stream} (hls\-::stream$<$ ap\-\_\-axiu$<$ c\-\_\-stream\-D\-Width, 0, 0, 0 $>$ $>$ \&inaxistreamd, hls\-::stream$<$ ap\-\_\-axiu$<$ c\-\_\-stream\-D\-Width, 0, 0, 0 $>$ $>$ \&outaxistreamd)
+\begin{DoxyCompactList}\small\item\em This is full Z\-Standard decompression streaming kernel function. It supports all block sizes and supports window size upto 128\-K\-B. It takes entire Z\-Std compressed file as input and produces decompressed file at the kernel output stream. This kernel does not use D\-D\-R memory, it uses streams instead. Intermediate data is stored in internal B\-R\-A\-Ms and stream F\-I\-F\-Os, which helps to attain better decompression throughput. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zstd__decompress__stream_8hpp_a27707621a3274cdafb1ab0696884b32a}{const int {\bfseries c\-\_\-stream\-D\-Width} = 8 $\ast$ M\-U\-L\-T\-I\-P\-L\-E\-\_\-\-B\-Y\-T\-E\-S}\label{zstd__decompress__stream_8hpp_a27707621a3274cdafb1ab0696884b32a}
+
+\item 
+\hypertarget{zstd__decompress__stream_8hpp_a0e740c1bd2d162754ee0a8bbfc25533e}{const int {\bfseries c\-\_\-window\-Size} = Z\-S\-T\-D\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E\-\_\-\-K\-B $\ast$ 1024}\label{zstd__decompress__stream_8hpp_a0e740c1bd2d162754ee0a8bbfc25533e}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for zstd decompression streaming kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{zstd__decompress__stream_8hpp_aeea49d48062b7c49a017d53c2306c500}{\index{zstd\-\_\-decompress\-\_\-stream.\-hpp@{zstd\-\_\-decompress\-\_\-stream.\-hpp}!xil\-Zstd\-Decompress\-Stream@{xil\-Zstd\-Decompress\-Stream}}
+\index{xil\-Zstd\-Decompress\-Stream@{xil\-Zstd\-Decompress\-Stream}!zstd_decompress_stream.hpp@{zstd\-\_\-decompress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Zstd\-Decompress\-Stream}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Zstd\-Decompress\-Stream (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ c\-\_\-stream\-D\-Width, 0, 0, 0 $>$ $>$ \&}]{inaxistreamd, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ c\-\_\-stream\-D\-Width, 0, 0, 0 $>$ $>$ \&}]{outaxistreamd}
+\end{DoxyParamCaption}
+)}}\label{zstd__decompress__stream_8hpp_aeea49d48062b7c49a017d53c2306c500}
+
+
+This is full Z\-Standard decompression streaming kernel function. It supports all block sizes and supports window size upto 128\-K\-B. It takes entire Z\-Std compressed file as input and produces decompressed file at the kernel output stream. This kernel does not use D\-D\-R memory, it uses streams instead. Intermediate data is stored in internal B\-R\-A\-Ms and stream F\-I\-F\-Os, which helps to attain better decompression throughput. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\-\_\-size} & input size \\
+\hline
+{\em inaxistreamd} & input kernel axi stream \\
+\hline
+{\em outaxistreamd} & output kernel axi stream \\
+\hline
+{\em sizestreamd} & output size kernel axi stream \\
+\hline
+\end{DoxyParams}

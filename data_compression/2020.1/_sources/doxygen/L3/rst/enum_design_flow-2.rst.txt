@@ -1,0 +1,17 @@
+.. index:: pair: enum; design_flow
+.. _doxid-zlib_8hpp_1aef56e0bc795163b0e86610d47b36da8d:
+.. _cid-design_flow-2:
+
+enum design_flow
+================
+
+
+
+
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+

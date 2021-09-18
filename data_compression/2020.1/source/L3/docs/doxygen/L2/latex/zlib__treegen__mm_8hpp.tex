@@ -1,0 +1,57 @@
+\hypertarget{zlib__treegen__mm_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-treegen\-\_\-mm.hpp File Reference}
+\label{zlib__treegen__mm_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-treegen\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-treegen\-\_\-mm.\-hpp}}
+}
+
+
+Header for tree generator kernel used in zlib compression.  
+
+
+{\ttfamily \#include \char`\"{}zlib\-\_\-specs.\-hpp\char`\"{}}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}huffman\-\_\-treegen.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{zlib__treegen__mm_8hpp_a1e8e726c83065c6452fefa9796a7f311}{xil\-Treegen\-Kernel} (uint32\-\_\-t $\ast$dyn\-\_\-ltree\-\_\-freq, uint32\-\_\-t $\ast$dyn\-\_\-dtree\-\_\-freq, uint32\-\_\-t $\ast$dyn\-\_\-bltree\-\_\-freq, uint32\-\_\-t $\ast$dyn\-\_\-ltree\-\_\-codes, uint32\-\_\-t $\ast$dyn\-\_\-dtree\-\_\-codes, uint32\-\_\-t $\ast$dyn\-\_\-bltree\-\_\-codes, uint32\-\_\-t $\ast$dyn\-\_\-ltree\-\_\-blen, uint32\-\_\-t $\ast$dyn\-\_\-dtree\-\_\-blen, uint32\-\_\-t $\ast$dyn\-\_\-bltree\-\_\-blen, uint32\-\_\-t $\ast$max\-\_\-codes, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t input\-\_\-size, uint32\-\_\-t blocks\-\_\-per\-\_\-chunk)
+\begin{DoxyCompactList}\small\item\em This is a resource optimized version of huffman treegen kernel. It takes literal and distance frequency data as input through single input stream and generates dynamic huffman codes and bit length data which is output through a single output stream. This kernel does not use D\-D\-R in any way and is optimised for both speed and low resource usage. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for tree generator kernel used in zlib compression. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{zlib__treegen__mm_8hpp_a1e8e726c83065c6452fefa9796a7f311}{\index{zlib\-\_\-treegen\-\_\-mm.\-hpp@{zlib\-\_\-treegen\-\_\-mm.\-hpp}!xil\-Treegen\-Kernel@{xil\-Treegen\-Kernel}}
+\index{xil\-Treegen\-Kernel@{xil\-Treegen\-Kernel}!zlib_treegen_mm.hpp@{zlib\-\_\-treegen\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Treegen\-Kernel}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Treegen\-Kernel (
+\begin{DoxyParamCaption}
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-ltree\-\_\-freq, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-dtree\-\_\-freq, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-bltree\-\_\-freq, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-ltree\-\_\-codes, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-dtree\-\_\-codes, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-bltree\-\_\-codes, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-ltree\-\_\-blen, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-dtree\-\_\-blen, }
+\item[{uint32\-\_\-t $\ast$}]{dyn\-\_\-bltree\-\_\-blen, }
+\item[{uint32\-\_\-t $\ast$}]{max\-\_\-codes, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{input\-\_\-size, }
+\item[{uint32\-\_\-t}]{blocks\-\_\-per\-\_\-chunk}
+\end{DoxyParamCaption}
+)}}\label{zlib__treegen__mm_8hpp_a1e8e726c83065c6452fefa9796a7f311}
+
+
+This is a resource optimized version of huffman treegen kernel. It takes literal and distance frequency data as input through single input stream and generates dynamic huffman codes and bit length data which is output through a single output stream. This kernel does not use D\-D\-R in any way and is optimised for both speed and low resource usage. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em freq\-Stream} & 24-\/bit input stream for getting frequency data \\
+\hline
+{\em code\-Stream} & 20-\/bit output stream sending huffman codes and bit-\/lengths data \\
+\hline
+\end{DoxyParams}

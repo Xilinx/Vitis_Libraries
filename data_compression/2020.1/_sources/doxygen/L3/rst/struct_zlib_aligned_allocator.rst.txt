@@ -1,0 +1,34 @@
+.. index:: pair: struct; zlib_aligned_allocator
+.. _doxid-structzlib__aligned__allocator:
+.. _cid-zlib_aligned_allocator:
+
+template struct zlib_aligned_allocator
+======================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structzlib__aligned__allocator_1adfcc99fcd81e0b0c4dbd26ea51cb9986:
+.. _cid-zlib_aligned_allocator::value_type:
+.. _doxid-structzlib__aligned__allocator_1a7bb6564c8ff34ec174e22a82e3259318:
+.. _cid-zlib_aligned_allocator::allocate:
+.. _doxid-structzlib__aligned__allocator_1a536bca0042d96f416eec564fedc24dcd:
+.. _cid-zlib_aligned_allocator::construct:
+.. _doxid-structzlib__aligned__allocator_1a2cc7874853131a3de9a8947075f6237b:
+.. _cid-zlib_aligned_allocator::deallocate:
+.. _doxid-structzlib__aligned__allocator_1a193f6feac7c4efcaae2ed95dbb169d11:
+.. _cid-zlib_aligned_allocator::deallocate-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <typename T>
+	struct zlib_aligned_allocator
+
+	// typedefs
+
+	typedef T value_type
+

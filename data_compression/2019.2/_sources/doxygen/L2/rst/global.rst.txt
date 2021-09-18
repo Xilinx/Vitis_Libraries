@@ -1,0 +1,1504 @@
+.. _global-namespace:
+
+Global Namespace
+================
+
+.. index:: pair: namespace; global
+
+.. toctree::
+	:hidden:
+
+	struct_unpackerBlockInfo.rst
+	struct_unpackerChunkInfo.rst
+
+
+
+.. _doxid-lz4__compress__mm_8hpp_1af27f773cdfd227e856284c7de91d3a19:
+.. _cid-uintinv_t:
+.. _doxid-lz4__compress__mm_8hpp_1a28f5f40def06ad99db10fa6795f482e1:
+.. _cid-uintoutv_t:
+.. _doxid-lz4__p2p_8hpp_1a3046bb9c8b9d12db457d2278527e29a3:
+.. _cid-dt_blockinfo:
+.. _doxid-lz4__p2p_8hpp_1af27f46b38e12acde6714f2bf00e3919a:
+.. _cid-dt_chunkinfo:
+.. _doxid-lz4__packer__mm_8hpp_1a294ce21f5608a3ce72fab891321a3542:
+.. _cid-uint512_t:
+.. _doxid-zlib__decompress__stream_8hpp_1a1de5b3ef983c9da56ce0a3bb2f14ef9f:
+.. _cid-uintmemwidth_t:
+.. _doxid-zlib__decompress__stream_8hpp_1a0d8869dc9b7f41e0a2ecb27547f7e58c:
+.. _cid-kgmemdwidth:
+.. _doxid-zlib__parallelbyte__decompress__fixed_8hpp_1ad68a1011334d4e6ac69b734b80d8abcc:
+.. _cid-xildecompressfixed:
+.. _doxid-zlib__parallelbyte__decompress__full_8hpp_1a7943ff985fec922aff454a337bf73543:
+.. _cid-xildecompressfull:
+.. _doxid-zlib__parallelbyte__decompress__stream_8hpp_1adb53918756cdae61c1205cc789b77c43:
+.. _cid-xildecompressstream:
+.. _doxid-zlib__decompress__stream_8hpp_1a00e7bb9cb1d2e52bea5f56b836b0f534:
+.. _cid-decoder_type:
+.. _doxid-zlib__parallelbyte__decompress__fixed_8hpp_1a00e7bb9cb1d2e52bea5f56b836b0f534:
+.. _cid-decoder_type-2:
+.. _doxid-zlib__parallelbyte__decompress__full_8hpp_1a00e7bb9cb1d2e52bea5f56b836b0f534:
+.. _cid-decoder_type-3:
+.. _doxid-zlib__parallelbyte__decompress__stream_8hpp_1a00e7bb9cb1d2e52bea5f56b836b0f534:
+.. _cid-decoder_type-4:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a05216c357020a68f3aa13417f0f28417:
+.. _cid-dict_ele_width:
+.. _doxid-lz4__p2p__decompress__kernel_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size:
+.. _doxid-lz4__multibyte__decompress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-2:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-3:
+.. _doxid-lz4__packer__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-4:
+.. _doxid-lz4__decompress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-5:
+.. _doxid-lz4__compress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-6:
+.. _doxid-snappy__decompress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-7:
+.. _doxid-snappy__compress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-8:
+.. _doxid-zlib__huffman__enc__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-9:
+.. _doxid-snappy__multibyte__decompress__mm_8hpp_1a339363060eacccb8cf32c45034c8fde5:
+.. _cid-gmem_burst_size-10:
+.. _doxid-lz4__p2p_8hpp_1adc4507285c666c55ff263d92d799cab5:
+.. _cid-gmem_datawidth:
+.. _doxid-lz4__packer__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth:
+.. _doxid-snappy__multibyte__decompress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-2:
+.. _doxid-lz4__p2p__decompress__kernel_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-3:
+.. _doxid-lz4__multibyte__decompress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-4:
+.. _doxid-lz4__unpacker__kernel_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-5:
+.. _doxid-zlib__huffman__enc__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-6:
+.. _doxid-snappy__decompress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-7:
+.. _doxid-snappy__compress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-8:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-9:
+.. _doxid-lz4__decompress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-10:
+.. _doxid-lz4__compress__mm_8hpp_1a1512e047741436f48d2ee378518f724f:
+.. _cid-gmem_dwidth-11:
+.. _doxid-zlib__parallelbyte__decompress__stream_8hpp_1ac3c365f20f41fc6eb820bb5026dd6cf1:
+.. _cid-high_fmax_ii:
+.. _doxid-zlib__parallelbyte__decompress__fixed_8hpp_1ac3c365f20f41fc6eb820bb5026dd6cf1:
+.. _cid-high_fmax_ii-2:
+.. _doxid-zlib__parallelbyte__decompress__full_8hpp_1ac3c365f20f41fc6eb820bb5026dd6cf1:
+.. _cid-high_fmax_ii-3:
+.. _doxid-snappy__decompress__mm_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size:
+.. _doxid-snappy__decompress__stream_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-2:
+.. _doxid-lz4__decompress__stream_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-3:
+.. _doxid-snappy__multibyte__decompress__mm_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-4:
+.. _doxid-lz4__decompress__mm_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-5:
+.. _doxid-snappy__multibyte__decompress__stream_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-6:
+.. _doxid-zlib__decompress__stream_8hpp_1a43034bdd0ae7c6267b05ff35ae97cddf:
+.. _cid-history_size-7:
+.. _doxid-zlib__parallelbyte__decompress__full_8hpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset:
+.. _doxid-zlib__decompress__stream_8hpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-2:
+.. _doxid-zlib__parallelbyte__decompress__fixed_8hpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-3:
+.. _doxid-zlib__parallelbyte__decompress__stream_8hpp_1a2b8f8e3bbe3f6e707f3f920dfeb2be7b:
+.. _cid-low_offset-4:
+.. _doxid-zlib__decompress__stream_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit:
+.. _doxid-snappy__compress__stream_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-2:
+.. _doxid-zlib__parallelbyte__decompress__stream_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-3:
+.. _doxid-snappy__compress__mm_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-4:
+.. _doxid-lz4__compress__mm_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-5:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-6:
+.. _doxid-lz4__compress__stream_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-7:
+.. _doxid-zlib__parallelbyte__decompress__fixed_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-8:
+.. _doxid-zlib__parallelbyte__decompress__full_8hpp_1af2cda7e0f4a90b5bd73b287e9a52cb24:
+.. _cid-lz_max_offset_limit-9:
+.. _doxid-lz4__compress__stream_8hpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-2:
+.. _doxid-lz4__compress__mm_8hpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-3:
+.. _doxid-snappy__compress__mm_8hpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-4:
+.. _doxid-snappy__compress__stream_8hpp_1a113fb963ba98e31e3c41eb9599b1497d:
+.. _cid-match_len-5:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a32e585b69aa9798cd0335f8e8ff8404d:
+.. _cid-match_level:
+.. _doxid-lz4__compress__mm_8hpp_1a388d7cbd7167357dd8aa63c2c90e3b8a:
+.. _cid-max_lit_count:
+.. _doxid-snappy__compress__mm_8hpp_1a388d7cbd7167357dd8aa63c2c90e3b8a:
+.. _cid-max_lit_count-2:
+.. _doxid-lz4__compress__stream_8hpp_1a388d7cbd7167357dd8aa63c2c90e3b8a:
+.. _cid-max_lit_count-3:
+.. _doxid-snappy__compress__stream_8hpp_1a388d7cbd7167357dd8aa63c2c90e3b8a:
+.. _cid-max_lit_count-4:
+.. _doxid-snappy__compress__stream_8hpp_1ad13a6e3dfd4f5858c1c0e4d81b7e7237:
+.. _cid-max_lit_stream_size:
+.. _doxid-snappy__compress__mm_8hpp_1ad13a6e3dfd4f5858c1c0e4d81b7e7237:
+.. _cid-max_lit_stream_size-2:
+.. _doxid-lz4__compress__mm_8hpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len:
+.. _doxid-lz4__compress__stream_8hpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-2:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-3:
+.. _doxid-snappy__compress__mm_8hpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-4:
+.. _doxid-snappy__compress__stream_8hpp_1a773437eda00419e55ebcf14bf1ef5a4d:
+.. _cid-max_match_len-5:
+.. _doxid-snappy__decompress__mm_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset:
+.. _doxid-lz4__decompress__mm_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-2:
+.. _doxid-snappy__multibyte__decompress__stream_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-3:
+.. _doxid-snappy__decompress__stream_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-4:
+.. _doxid-lz4__decompress__stream_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-5:
+.. _doxid-lz4__multibyte__decompress__mm_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-6:
+.. _doxid-snappy__multibyte__decompress__mm_8hpp_1a31a6872795fec3b57775c7e0059fee83:
+.. _cid-max_offset-7:
+.. _doxid-lz4__compress__mm_8hpp_1ac1f29ba54415975a2fa23e276fdf8a0f:
+.. _cid-min_block_size:
+.. _doxid-snappy__compress__mm_8hpp_1ac1f29ba54415975a2fa23e276fdf8a0f:
+.. _cid-min_block_size-2:
+.. _doxid-lz4__compress__stream_8hpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match:
+.. _doxid-lz4__compress__mm_8hpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match-2:
+.. _doxid-snappy__compress__mm_8hpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match-3:
+.. _doxid-snappy__compress__stream_8hpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match-4:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a7984ceb1ff48ac91172976b91ed43f60:
+.. _cid-min_match-5:
+.. _doxid-snappy__multibyte__decompress__stream_8hpp_1aea11fa4250caea9197c4d4dc91d14d96:
+.. _cid-multiple_bytes:
+.. _doxid-snappy__compress__stream_8hpp_1a52cab5c557e96dc15148629e854d6d5e:
+.. _cid-offset_window:
+.. _doxid-snappy__compress__mm_8hpp_1a52cab5c557e96dc15148629e854d6d5e:
+.. _cid-offset_window-2:
+.. _doxid-lz4__compress__mm_8hpp_1a52cab5c557e96dc15148629e854d6d5e:
+.. _cid-offset_window-3:
+.. _doxid-lz4__compress__stream_8hpp_1a52cab5c557e96dc15148629e854d6d5e:
+.. _cid-offset_window-4:
+.. _doxid-zlib__lz77__compress__mm_8hpp_1a589b7a395b2f5673eff3157cd143f349:
+.. _cid-out_bytes:
+.. _doxid-lz4__compress__stream_8hpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block:
+.. _doxid-snappy__compress__stream_8hpp_1a0532714a43e57d86b6e5002db6924684:
+.. _cid-parallel_block-2:
+.. _doxid-lz4__multibyte__decompress__mm_8hpp_1a38c6b1c0067a4f62ea435184ef6ac219:
+.. _cid-parallel_byte:
+.. _doxid-snappy__multibyte__decompress__mm_8hpp_1a38c6b1c0067a4f62ea435184ef6ac219:
+.. _cid-parallel_byte-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// typedefs
+
+	typedef ap_uint <8> uintInV_t
+	typedef ap_uint <8> uintOutV_t
+	typedef struct :ref:`unpackerBlockInfo<doxid-structunpackerBlockInfo>` dt_blockInfo
+	typedef struct :ref:`unpackerChunkInfo<doxid-structunpackerChunkInfo>` dt_chunkInfo
+	typedef ap_uint <GMEM_DWIDTH> uint512_t
+	typedef ap_uint <kGMemDWidth> uintMemWidth_t
+
+	// structs
+
+	struct :ref:`unpackerBlockInfo<doxid-structunpackerBlockInfo>` 
+	struct :ref:`unpackerChunkInfo<doxid-structunpackerChunkInfo>` 
+
+	// global variables
+
+	const int kGMemDWidth
+
+	// macros
+
+	#define DECODER_TYPE
+	#define DECODER_TYPE
+	#define DECODER_TYPE
+	#define DECODER_TYPE
+	#define DICT_ELE_WIDTH
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_BURST_SIZE
+	#define GMEM_DATAWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define GMEM_DWIDTH
+	#define HIGH_FMAX_II
+	#define HIGH_FMAX_II
+	#define HIGH_FMAX_II
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define HISTORY_SIZE
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LOW_OFFSET
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define LZ_MAX_OFFSET_LIMIT
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEN
+	#define MATCH_LEVEL
+	#define MAX_LIT_COUNT
+	#define MAX_LIT_COUNT
+	#define MAX_LIT_COUNT
+	#define MAX_LIT_COUNT
+	#define MAX_LIT_STREAM_SIZE
+	#define MAX_LIT_STREAM_SIZE
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_MATCH_LEN
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MAX_OFFSET
+	#define MIN_BLOCK_SIZE
+	#define MIN_BLOCK_SIZE
+	#define MIN_MATCH
+	#define MIN_MATCH
+	#define MIN_MATCH
+	#define MIN_MATCH
+	#define MIN_MATCH
+	#define MULTIPLE_BYTES
+	#define OFFSET_WINDOW
+	#define OFFSET_WINDOW
+	#define OFFSET_WINDOW
+	#define OFFSET_WINDOW
+	#define OUT_BYTES
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BLOCK
+	#define PARALLEL_BYTE
+	#define PARALLEL_BYTE
+
+
+.. FunctionSection
+
+Global Functions
+~~~~~~~~~~~~~~~~
+
+.. _doxid-lz4__compress__mm_8hpp_1aa11e26152bb864a14a1b2019faf0dee9:
+.. _cid-xillz4compress:
+
+xilLz4Compress
+--------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_compress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4Compress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* compressd_size,
+	    uint32_t* in_block_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t input_size
+	    )
+
+LZ4 compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input raw data
+
+    *
+        - out
+
+        - output compressed data
+
+    *
+        - compressd_size
+
+        - compressed output size of each block
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - block_size_in_kb
+
+        - input block size in bytes
+
+    *
+        - input_size
+
+        - input data size
+
+.. _doxid-lz4__compress__stream_8hpp_1a60b10683a7f866e64836d3a7130d4daf:
+.. _cid-xillz4compressstream:
+
+xilLz4CompressStream
+--------------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_compress_stream.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4CompressStream (
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& inaxistream,
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& outaxistream,
+	    uint32_t inputSize
+	    )
+
+LZ4 compression streaming kernel. It takes input from axi kernel stream and writes compressed data back to output axi kernel stream.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - inaxistream
+
+        - Input axi kernel stream
+
+    *
+        - outaxistream
+
+        - Output axi kernel stream
+
+    *
+        - inputSize
+
+        - Input compressed data size
+
+.. _doxid-lz4__decompress__mm_8hpp_1acf6728ba62074fd173cb146ecb59433e:
+.. _cid-xillz4decompress:
+
+xilLz4Decompress
+----------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_decompress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4Decompress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* in_block_size,
+	    uint32_t* in_compress_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t no_blocks
+	    )
+
+LZ4 decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input compressed data
+
+    *
+        - out
+
+        - output raw data
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - in_compress_size
+
+        - compress size of each block
+
+    *
+        - block_size_in_kb
+
+        - block size in bytes
+
+    *
+        - no_blocks
+
+        - number of blocks
+
+.. _doxid-lz4__decompress__stream_8hpp_1a30127c29afa9819235396bcf49617435:
+.. _cid-xillz4decompressstream:
+
+xilLz4DecompressStream
+----------------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_decompress_stream.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4DecompressStream (
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& inaxistream,
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& outaxistream,
+	    uint32_t inputSize,
+	    uint32_t outputSize
+	    )
+
+LZ4 decompression streaming kernel. It takes input from axi kernel stream and writes decompressed data back to output axi kernel stream.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - inaxistream
+
+        - Input axi kernel stream
+
+    *
+        - outaxistream
+
+        - Output axi kernel stream
+
+    *
+        - inputSize
+
+        - Input compressed data size
+
+    *
+        - outputSize
+
+        - Output decompressed data size
+
+.. _doxid-lz4__multibyte__decompress__mm_8hpp_1a125e46ad8f1530bf082e0a0956597a97:
+.. _cid-xillz4decompress-2:
+
+xilLz4Decompress
+----------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_multibyte_decompress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4Decompress (
+	    const ap_uint <PARALLEL_BYTE*8>* in,
+	    ap_uint <PARALLEL_BYTE*8>* out,
+	    uint32_t* in_block_size,
+	    uint32_t* in_compress_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t no_blocks
+	    )
+
+LZ4 decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input compressed data
+
+    *
+        - out
+
+        - output raw data
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - in_compress_size
+
+        - compress size of each block
+
+    *
+        - block_size_in_kb
+
+        - block size in bytes
+
+    *
+        - no_blocks
+
+        - number of blocks
+
+.. _doxid-lz4__p2p__decompress__kernel_8hpp_1a115ff88a67a2fbf026601b36211766cf:
+.. _cid-xillz4p2pdecompress:
+
+xilLz4P2PDecompress
+-------------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_p2p_decompress_kernel.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4P2PDecompress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    :ref:`dt_blockInfo<doxid-structunpackerBlockInfo>`* bObj,
+	    :ref:`dt_chunkInfo<doxid-structunpackerChunkInfo>`* cObj,
+	    uint32_t block_size_in_kb,
+	    uint32_t compute_unit,
+	    uint8_t total_no_cu,
+	    uint32_t num_blocks
+	    )
+
+LZ4 P2P decompression kernel is responsible for decompressing data which is in LZ4 encoded form.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input stream width
+
+    *
+        - out
+
+        - output stream width
+
+    *
+        - in_block_size
+
+        - input size
+
+    *
+        - in_compress_size
+
+        - output size
+
+    *
+        - block_start_idx
+
+        - start index of block
+
+    *
+        - no_blocks
+
+        - number of blocks for each compute unit
+
+    *
+        - block_size_in_kb
+
+        - block input size
+
+    *
+        - compute_unit
+
+        - particular compute unit
+
+    *
+        - total_no_cu
+
+        - number of compute units
+
+    *
+        - num_blocks
+
+        - number of blocks base don host buffersize
+
+.. _doxid-lz4__packer__mm_8hpp_1afa35f5fc638e38ef2a98aa15c6fccc5d:
+.. _cid-xillz4packer:
+
+xilLz4Packer
+------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_packer_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4Packer (
+	    uint512_t* in,
+	    uint512_t* out,
+	    uint32_t* compressd_size,
+	    uint32_t* in_block_size,
+	    uint32_t* encoded_size,
+	    uint512_t* orig_input_data,
+	    uint32_t block_size_in_kb,
+	    uint32_t no_blocks,
+	    uint32_t xxhashVal,
+	    uint32_t input_size
+	    )
+
+LZ4 packer kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input raw data
+
+    *
+        - out
+
+        - output compressed data
+
+    *
+        - compressd_size
+
+        - compressed output size of each block
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - encoded_size
+
+        - encoded size of each block
+
+    *
+        - orig_input_data
+
+        - raw input data
+
+    *
+        - block_size_in_kb
+
+        - input block size in bytes
+
+    *
+        - no_blocks
+
+        - number of input blocks
+
+    *
+        - xxhashVal
+
+        - Hash Value
+
+    *
+        - input_size
+
+        - Total Input File Size
+
+.. _doxid-lz4__unpacker__kernel_8hpp_1ace3994d66db1ef5e0adad95a23c24e01:
+.. _cid-xillz4unpacker:
+
+xilLz4Unpacker
+--------------
+
+
+.. code-block:: cpp
+	
+	#include "lz4_unpacker_kernel.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz4Unpacker (
+	    const xf::compression::uintMemWidth_t* in,
+	    :ref:`dt_blockInfo<doxid-structunpackerBlockInfo>`* bObj,
+	    :ref:`dt_chunkInfo<doxid-structunpackerChunkInfo>`* cObj,
+	    uint32_t block_size_in_kb,
+	    uint8_t first_chunk,
+	    uint8_t total_no_cu,
+	    uint32_t num_blocks
+	    )
+
+LZ4 unpacker kernel is responsible in unpacking LZ4 compressed block information.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input stream width
+
+    *
+        - in_block_size
+
+        - input block size
+
+    *
+        - in_compress_size
+
+        - input compress size
+
+    *
+        - block_start_idx
+
+        - start index of each input block
+
+    *
+        - no_blocks_per_cu
+
+        - number of blocks for each compute unit
+
+    *
+        - original_size
+
+        - original file size
+
+    *
+        - in_start_index
+
+        - input start index
+
+    *
+        - no_blocks
+
+        - number of blocks
+
+    *
+        - block_size_in_kb
+
+        - size of each block
+
+    *
+        - first_chunk
+
+        - first chunk to determine header
+
+    *
+        - total_no_cu
+
+        - number of decompress compute units
+
+    *
+        - num_blocks
+
+        - number of blocks based on host buffersize
+
+.. _doxid-snappy__compress__mm_8hpp_1a32ebd0013229e97db7baeba58ba3a54a:
+.. _cid-xilsnappycompress:
+
+xilSnappyCompress
+-----------------
+
+
+.. code-block:: cpp
+	
+	#include "snappy_compress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilSnappyCompress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* compressd_size,
+	    uint32_t* in_block_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t input_size
+	    )
+
+Snappy compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input raw data
+
+    *
+        - out
+
+        - output compressed data
+
+    *
+        - compressd_size
+
+        - compressed output size of each block
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - block_size_in_kb
+
+        - input block size in bytes
+
+    *
+        - input_size
+
+        - input data size
+
+.. _doxid-snappy__compress__stream_8hpp_1abc67939ecd54d3df5c9639ca5cce74c3:
+.. _cid-xilsnappycompressstream:
+
+xilSnappyCompressStream
+-----------------------
+
+
+.. code-block:: cpp
+	
+	#include "snappy_compress_stream.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilSnappyCompressStream (
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& inaxistream,
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& outaxistream,
+	    uint32_t inputSize
+	    )
+
+Snappy compression streaming kernel takes the raw data as input from kernel axi stream and compresses the data in block based fashion and writes the output to kernel axi stream.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - inaxistream
+
+        - input kernel axi stream for raw data
+
+    *
+        - outaxistream
+
+        - output kernel axi stream for compressed data
+
+    *
+        - inputSize
+
+        - input data size
+
+.. _doxid-snappy__decompress__mm_8hpp_1a70f1512f5f9d55b4aadc6baf57f6d6d6:
+.. _cid-xilsnappydecompress:
+
+xilSnappyDecompress
+-------------------
+
+
+.. code-block:: cpp
+	
+	#include "snappy_decompress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilSnappyDecompress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* in_block_size,
+	    uint32_t* in_compress_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t no_blocks
+	    )
+
+Snappy decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input compressed data
+
+    *
+        - out
+
+        - output raw data
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - in_compress_size
+
+        - compress size of each block
+
+    *
+        - block_size_in_kb
+
+        - block size in bytes
+
+    *
+        - no_blocks
+
+        - number of blocks
+
+.. _doxid-snappy__decompress__stream_8hpp_1aa787a86f1a30dca6c949102e74d9b802:
+.. _cid-xilsnappydecompressstream:
+
+xilSnappyDecompressStream
+-------------------------
+
+
+.. code-block:: cpp
+	
+	#include "snappy_decompress_stream.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilSnappyDecompressStream (
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& inaxistream,
+	    hls::stream <ap_axiu <8, 0, 0, 0>>& outaxistream,
+	    uint32_t inputSize,
+	    uint32_t outputSize
+	    )
+
+Snappy decompression streaming kernel takes compressed data as input from kernel axi stream and process in block based fashion and writes the raw data to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - inaxistream
+
+        - input kernel axi stream for compressed data
+
+    *
+        - outaxistream
+
+        - output kernel axi stream for decompressed data
+
+    *
+        - inputSize
+
+        - input data size
+
+.. _doxid-snappy__multibyte__decompress__mm_8hpp_1a70f1512f5f9d55b4aadc6baf57f6d6d6:
+.. _cid-xilsnappydecompress-2:
+
+xilSnappyDecompress
+-------------------
+
+
+.. code-block:: cpp
+	
+	#include "snappy_multibyte_decompress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilSnappyDecompress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* in_block_size,
+	    uint32_t* in_compress_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t no_blocks
+	    )
+
+Snappy decompression kernel takes compressed data as input and process in block based fashion and writes the raw data to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input compressed data
+
+    *
+        - out
+
+        - output raw data
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - in_compress_size
+
+        - compress size of each block
+
+    *
+        - block_size_in_kb
+
+        - block size in bytes
+
+    *
+        - no_blocks
+
+        - number of blocks
+
+.. _doxid-snappy__multibyte__decompress__stream_8hpp_1a62f91adb69f2d10747dec5b1220198b0:
+.. _cid-xilsnappydecompressstream-2:
+
+xilSnappyDecompressStream
+-------------------------
+
+
+.. code-block:: cpp
+	
+	#include "snappy_multibyte_decompress_stream.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilSnappyDecompressStream (
+	    hls::stream <ap_axiu <MULTIPLE_BYTES*8, 0, 0, 0>>& inaxistream,
+	    hls::stream <ap_axiu <MULTIPLE_BYTES*8, 0, 0, 0>>& outaxistream,
+	    hls::stream <ap_axiu <32, 0, 0, 0>>& outaxistreamsize,
+	    uint32_t inputSize
+	    )
+
+Snappy decompression streaming kernel takes compressed data as input from kernel axi stream and process in block based fashion and writes the raw data to global memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - inaxistream
+
+        - input kernel axi stream for compressed data
+
+    *
+        - outaxistream
+
+        - output kernel axi stream for decompressed data
+
+    *
+        - inputSize
+
+        - input data size
+
+.. _doxid-zlib__decompress__stream_8hpp_1acecbaf1b713e6f8bbdf0047a6596d388:
+.. _cid-xildecompressstream-2:
+
+xilDecompressStream
+-------------------
+
+
+.. code-block:: cpp
+	
+	#include "zlib_decompress_stream.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilDecompressStream (
+	    uint32_t input_size,
+	    hls::stream <ap_axiu <kGMemDWidth, 0, 0, 0>>& inaxistreamd,
+	    hls::stream <ap_axiu <kGMemDWidth, 0, 0, 0>>& outaxistreamd,
+	    hls::stream <ap_axiu <64, 0, 0, 0>>& sizestreamd
+	    )
+
+Zlib decompression stream kernel top function.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - input_size
+
+        - input size
+
+    *
+        - inaxistreamd
+
+        - input kernel axi stream
+
+    *
+        - outaxistreamd
+
+        - output kernel axi stream
+
+.. _doxid-zlib__huffman__enc__mm_8hpp_1a4aa715bde9401101a5332c02b5e94fb7:
+.. _cid-xilhuffmankernel:
+
+xilHuffmanKernel
+----------------
+
+
+.. code-block:: cpp
+	
+	#include "zlib_huffman_enc_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilHuffmanKernel (
+	    xf::compression::uintMemWidth_t* in,
+	    uint32_t* lit_freq,
+	    uint32_t* dist_freq,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* in_block_size,
+	    uint32_t* compressd_size,
+	    uint32_t block_size_in_kb,
+	    uint32_t input_size
+	    )
+
+Huffman kernel top function. This is an initial version of Huffman Kernel which does block based bit packing process. It uses dynamic huffman codes and bit lengths to encode the LZ77 (Byte Compressed Data) output. This version operates on 1MB block data per engine as this is suitable for use cases where raw data is over >100MB and compression ratio is over 2.5x in order to achieve best throughput. This can be further optimized to achieve better throughput for smaller file usecase.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input stream
+
+    *
+        - out
+
+        - output stream
+
+    *
+        - in_block_size
+
+        - input block size
+
+    *
+        - compressd_size
+
+        - output compressed size
+
+    *
+        - dyn_litmtree_codes
+
+        - input literal and match length codes
+
+    *
+        - dyn_distree_codes
+
+        - input distance codes
+
+    *
+        - dyn_bitlentree_codes
+
+        - input bit-length codes
+
+    *
+        - dyn_litmtree_blen
+
+        - input literal and match length bit length data
+
+    *
+        - dyn_dtree_blen
+
+        - input distance bit length data
+
+    *
+        - dyn_bitlentree_blen
+
+        - input bit-length of bit length data
+
+    *
+        - dyn_max_codes
+
+        - input maximum codes
+
+    *
+        - block_size_in_kb
+
+        - input block size in bytes
+
+    *
+        - input_size
+
+        - input data size
+
+.. _doxid-zlib__lz77__compress__mm_8hpp_1ad11932c3613ace790b1e555f6928707b:
+.. _cid-xillz77compress:
+
+xilLz77Compress
+---------------
+
+
+.. code-block:: cpp
+	
+	#include "zlib_lz77_compress_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilLz77Compress (
+	    const xf::compression::uintMemWidth_t* in,
+	    xf::compression::uintMemWidth_t* out,
+	    uint32_t* compressd_size,
+	    uint32_t* in_block_size,
+	    uint32_t* dyn_ltree_freq,
+	    uint32_t* dyn_dtree_freq,
+	    uint32_t block_size_in_kb,
+	    uint32_t input_size
+	    )
+
+LZ77 compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. LZ77 is a byte based compression scheme. The resulting output from this kernel is represented in packet form of 32bit length <Literal, Match Length, Distance>. It also generates output of literal and distance frequencies for dynamic huffman tree generation. The output generated by this kernel is referred by TreeGen and Huffman Kernels.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input stream
+
+    *
+        - out
+
+        - output stream
+
+    *
+        - compressd_size
+
+        - compressed output size of each block
+
+    *
+        - in_block_size
+
+        - input block size of each block
+
+    *
+        - dyn_ltree_freq
+
+        - literal frequency data
+
+    *
+        - dyn_dtree_freq
+
+        - distance frequency data
+
+    *
+        - block_size_in_kb
+
+        - input block size in bytes
+
+    *
+        - input_size
+
+        - input data size
+
+.. _doxid-zlib__treegen__mm_8hpp_1a1e8e726c83065c6452fefa9796a7f311:
+.. _cid-xiltreegenkernel:
+
+xilTreegenKernel
+----------------
+
+
+.. code-block:: cpp
+	
+	#include "zlib_treegen_mm.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xilTreegenKernel (
+	    uint32_t* dyn_ltree_freq,
+	    uint32_t* dyn_dtree_freq,
+	    uint32_t* dyn_bltree_freq,
+	    uint32_t* dyn_ltree_codes,
+	    uint32_t* dyn_dtree_codes,
+	    uint32_t* dyn_bltree_codes,
+	    uint32_t* dyn_ltree_blen,
+	    uint32_t* dyn_dtree_blen,
+	    uint32_t* dyn_bltree_blen,
+	    uint32_t* max_codes,
+	    uint32_t block_size_in_kb,
+	    uint32_t input_size,
+	    uint32_t blocks_per_chunk
+	    )
+
+This is a resource optimized version of huffman treegen kernel. It takes literal and distance frequency data as input through single input stream and generates dynamic huffman codes and bit length data which is output through a single output stream. This kernel does not use DDR in any way and is optimised for both speed and low resource usage.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - freqStream
+
+        - 24-bit input stream for getting frequency data
+
+    *
+        - codeStream
+
+        - 20-bit output stream sending huffman codes and bit-lengths data
+

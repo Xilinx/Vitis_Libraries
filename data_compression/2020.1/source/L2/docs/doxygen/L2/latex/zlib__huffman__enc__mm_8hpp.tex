@@ -1,0 +1,88 @@
+\hypertarget{zlib__huffman__enc__mm_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-huffman\-\_\-enc\-\_\-mm.hpp File Reference}
+\label{zlib__huffman__enc__mm_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-huffman\-\_\-enc\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/zlib\-\_\-huffman\-\_\-enc\-\_\-mm.\-hpp}}
+}
+
+
+Header for huffman kernel used in zlib compression.  
+
+
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zlib\-\_\-specs.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}huffman\-\_\-encoder.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{zlib__huffman__enc__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{zlib__huffman__enc__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{zlib__huffman__enc__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{zlib__huffman__enc__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{zlib__huffman__enc__mm_8hpp_a4aa715bde9401101a5332c02b5e94fb7}{xil\-Huffman\-Kernel} (xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$in, uint32\-\_\-t $\ast$lit\-\_\-freq, uint32\-\_\-t $\ast$dist\-\_\-freq, xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$out, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em Huffman kernel top function. This is an initial version of Huffman Kernel which does block based bit packing process. It uses dynamic huffman codes and bit lengths to encode the L\-Z77 (Byte Compressed Data) output. This version operates on 1\-M\-B block data per engine as this is suitable for use cases where raw data is over $>$100\-M\-B and compression ratio is over 2.\-5x in order to achieve best throughput. This can be further optimized to achieve better throughput for smaller file usecase. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for huffman kernel used in zlib compression. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{zlib__huffman__enc__mm_8hpp_a4aa715bde9401101a5332c02b5e94fb7}{\index{zlib\-\_\-huffman\-\_\-enc\-\_\-mm.\-hpp@{zlib\-\_\-huffman\-\_\-enc\-\_\-mm.\-hpp}!xil\-Huffman\-Kernel@{xil\-Huffman\-Kernel}}
+\index{xil\-Huffman\-Kernel@{xil\-Huffman\-Kernel}!zlib_huffman_enc_mm.hpp@{zlib\-\_\-huffman\-\_\-enc\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Huffman\-Kernel}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Huffman\-Kernel (
+\begin{DoxyParamCaption}
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{in, }
+\item[{uint32\-\_\-t $\ast$}]{lit\-\_\-freq, }
+\item[{uint32\-\_\-t $\ast$}]{dist\-\_\-freq, }
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-block\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{compressd\-\_\-size, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{input\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{zlib__huffman__enc__mm_8hpp_a4aa715bde9401101a5332c02b5e94fb7}
+
+
+Huffman kernel top function. This is an initial version of Huffman Kernel which does block based bit packing process. It uses dynamic huffman codes and bit lengths to encode the L\-Z77 (Byte Compressed Data) output. This version operates on 1\-M\-B block data per engine as this is suitable for use cases where raw data is over $>$100\-M\-B and compression ratio is over 2.\-5x in order to achieve best throughput. This can be further optimized to achieve better throughput for smaller file usecase. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input stream \\
+\hline
+{\em out} & output stream \\
+\hline
+{\em in\-\_\-block\-\_\-size} & input block size \\
+\hline
+{\em compressd\-\_\-size} & output compressed size \\
+\hline
+{\em dyn\-\_\-litmtree\-\_\-codes} & input literal and match length codes \\
+\hline
+{\em dyn\-\_\-distree\-\_\-codes} & input distance codes \\
+\hline
+{\em dyn\-\_\-bitlentree\-\_\-codes} & input bit-\/length codes \\
+\hline
+{\em dyn\-\_\-litmtree\-\_\-blen} & input literal and match length bit length data \\
+\hline
+{\em dyn\-\_\-dtree\-\_\-blen} & input distance bit length data \\
+\hline
+{\em dyn\-\_\-bitlentree\-\_\-blen} & input bit-\/length of bit length data \\
+\hline
+{\em dyn\-\_\-max\-\_\-codes} & input maximum codes \\
+\hline
+{\em block\-\_\-size\-\_\-in\-\_\-kb} & input block size in bytes \\
+\hline
+{\em input\-\_\-size} & input data size \\
+\hline
+\end{DoxyParams}

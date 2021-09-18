@@ -1,0 +1,35 @@
+.. index:: pair: enum; comp_decom_flows
+.. _doxid-zlib__old_8hpp_1a8eb459d4c8cba9871238a9a94c8d861f:
+.. _cid-comp_decom_flows-2:
+
+enum comp_decom_flows
+=====================
+
+
+
+
+
+.. _doxid-zlib_8hpp_1a8eb459d4c8cba9871238a9a94c8d861fa627abe5a430420baf29ebe1940a7f2fb:
+.. _cid-comp_decom_flows::both:
+.. _doxid-zlib_8hpp_1a8eb459d4c8cba9871238a9a94c8d861fac3c49ff8a3b00b7f1d1a555b26e8ed24:
+.. _cid-comp_decom_flows::comp_only:
+.. _doxid-zlib_8hpp_1a8eb459d4c8cba9871238a9a94c8d861fae066d6a731f269864fc28d8ae3a5f820:
+.. _cid-comp_decom_flows::decomp_only:
+.. _doxid-zlib__old_8hpp_1a8eb459d4c8cba9871238a9a94c8d861fa627abe5a430420baf29ebe1940a7f2fb:
+.. _cid-comp_decom_flows::both-2:
+.. _doxid-zlib__old_8hpp_1a8eb459d4c8cba9871238a9a94c8d861fac3c49ff8a3b00b7f1d1a555b26e8ed24:
+.. _cid-comp_decom_flows::comp_only-2:
+.. _doxid-zlib__old_8hpp_1a8eb459d4c8cba9871238a9a94c8d861fae066d6a731f269864fc28d8ae3a5f820:
+.. _cid-comp_decom_flows::decomp_only-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	BOTH 
+	COMP_ONLY 
+	DECOMP_ONLY 
+	BOTH 
+	COMP_ONLY 
+	DECOMP_ONLY 
+

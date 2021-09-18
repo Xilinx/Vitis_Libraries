@@ -1,0 +1,101 @@
+\hypertarget{lz4__compress__mm_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/lz4\-\_\-compress\-\_\-mm.hpp File Reference}
+\label{lz4__compress__mm_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/lz4\-\_\-compress\-\_\-mm.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L2/include/lz4\-\_\-compress\-\_\-mm.\-hpp}}
+}
+
+
+Header for L\-Z4 compression kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-compress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-upsizer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-compress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__compress__mm_8hpp_ac1f29ba54415975a2fa23e276fdf8a0f}{\#define {\bfseries M\-I\-N\-\_\-\-B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E}~128}\label{lz4__compress__mm_8hpp_ac1f29ba54415975a2fa23e276fdf8a0f}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a1512e047741436f48d2ee378518f724f}{\#define {\bfseries G\-M\-E\-M\-\_\-\-D\-W\-I\-D\-T\-H}~512}\label{lz4__compress__mm_8hpp_a1512e047741436f48d2ee378518f724f}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}{\#define {\bfseries G\-M\-E\-M\-\_\-\-B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E}~16}\label{lz4__compress__mm_8hpp_a339363060eacccb8cf32c45034c8fde5}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_af2cda7e0f4a90b5bd73b287e9a52cb24}{\#define {\bfseries L\-Z\-\_\-\-M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T\-\_\-\-L\-I\-M\-I\-T}~65536}\label{lz4__compress__mm_8hpp_af2cda7e0f4a90b5bd73b287e9a52cb24}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a7984ceb1ff48ac91172976b91ed43f60}{\#define {\bfseries M\-I\-N\-\_\-\-M\-A\-T\-C\-H}~4}\label{lz4__compress__mm_8hpp_a7984ceb1ff48ac91172976b91ed43f60}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a773437eda00419e55ebcf14bf1ef5a4d}{\#define {\bfseries M\-A\-X\-\_\-\-M\-A\-T\-C\-H\-\_\-\-L\-E\-N}~255}\label{lz4__compress__mm_8hpp_a773437eda00419e55ebcf14bf1ef5a4d}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a52cab5c557e96dc15148629e854d6d5e}{\#define {\bfseries O\-F\-F\-S\-E\-T\-\_\-\-W\-I\-N\-D\-O\-W}~(64 $\ast$ 1024)}\label{lz4__compress__mm_8hpp_a52cab5c557e96dc15148629e854d6d5e}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a113fb963ba98e31e3c41eb9599b1497d}{\#define {\bfseries M\-A\-T\-C\-H\-\_\-\-L\-E\-N}~6}\label{lz4__compress__mm_8hpp_a113fb963ba98e31e3c41eb9599b1497d}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a388d7cbd7167357dd8aa63c2c90e3b8a}{\#define {\bfseries M\-A\-X\-\_\-\-L\-I\-T\-\_\-\-C\-O\-U\-N\-T}~4096}\label{lz4__compress__mm_8hpp_a388d7cbd7167357dd8aa63c2c90e3b8a}
+
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__compress__mm_8hpp_af27f773cdfd227e856284c7de91d3a19}{typedef ap\-\_\-uint$<$ 8 $>$ {\bfseries uint\-In\-V\-\_\-t}}\label{lz4__compress__mm_8hpp_af27f773cdfd227e856284c7de91d3a19}
+
+\item 
+\hypertarget{lz4__compress__mm_8hpp_a28f5f40def06ad99db10fa6795f482e1}{typedef ap\-\_\-uint$<$ 8 $>$ {\bfseries uint\-Out\-V\-\_\-t}}\label{lz4__compress__mm_8hpp_a28f5f40def06ad99db10fa6795f482e1}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__compress__mm_8hpp_aa11e26152bb864a14a1b2019faf0dee9}{xil\-Lz4\-Compress} (const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$in, xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$out, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em L\-Z4 compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for L\-Z4 compression kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__compress__mm_8hpp_aa11e26152bb864a14a1b2019faf0dee9}{\index{lz4\-\_\-compress\-\_\-mm.\-hpp@{lz4\-\_\-compress\-\_\-mm.\-hpp}!xil\-Lz4\-Compress@{xil\-Lz4\-Compress}}
+\index{xil\-Lz4\-Compress@{xil\-Lz4\-Compress}!lz4_compress_mm.hpp@{lz4\-\_\-compress\-\_\-mm.\-hpp}}
+\subsubsection[{xil\-Lz4\-Compress}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-Compress (
+\begin{DoxyParamCaption}
+\item[{const xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{in, }
+\item[{xf\-::compression\-::uint\-Mem\-Width\-\_\-t $\ast$}]{out, }
+\item[{uint32\-\_\-t $\ast$}]{compressd\-\_\-size, }
+\item[{uint32\-\_\-t $\ast$}]{in\-\_\-block\-\_\-size, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-in\-\_\-kb, }
+\item[{uint32\-\_\-t}]{input\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{lz4__compress__mm_8hpp_aa11e26152bb864a14a1b2019faf0dee9}
+
+
+L\-Z4 compression kernel takes the raw data as input and compresses the data in block based fashion and writes the output to global memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input raw data \\
+\hline
+{\em out} & output compressed data \\
+\hline
+{\em compressd\-\_\-size} & compressed output size of each block \\
+\hline
+{\em in\-\_\-block\-\_\-size} & input block size of each block \\
+\hline
+{\em block\-\_\-size\-\_\-in\-\_\-kb} & input block size in bytes \\
+\hline
+{\em input\-\_\-size} & input data size \\
+\hline
+\end{DoxyParams}

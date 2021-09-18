@@ -1,0 +1,211 @@
+.. _global-namespace:
+
+Global Namespace
+================
+
+.. index:: pair: namespace; global
+
+.. toctree::
+	:hidden:
+
+	namespace_xf.rst
+	enum_comp_decom_flows.rst
+	enum_d_type.rst
+	enum_list_mode.rst
+	struct_zlib_aligned_allocator.rst
+	class_xfLz4.rst
+	class_xflz4.rst
+
+
+
+.. _doxid-zlib_8hpp_1ad9b35bd5633acb11aa4db5c956cccf89:
+.. _cid-gz_max_literal_count:
+.. _doxid-zlib_8hpp_1aa9a92cabfa369f71d6b6285b15059adf:
+.. _cid-page_aligned_mem:
+.. _doxid-zlib_8hpp_1a96399867993f3809d30539ff8539a122:
+.. _cid-c_cloutofresource:
+.. _doxid-zlib_8hpp_1aea4dfb6b2f96facda796133a36920a35:
+.. _cid-c_clinvalidbin:
+.. _doxid-zlib_8hpp_1a0a5f2e8dfa0f44d70ca5ed7555e90755:
+.. _cid-c_clinvalidvalue:
+.. _doxid-lz4__p2p__comp_8hpp_1ad223ab5d6ee4fdb68734b1ec47434119:
+.. _cid-validate:
+.. _doxid-zlib_8hpp_1ad223ab5d6ee4fdb68734b1ec47434119:
+.. _cid-validate-2:
+.. _doxid-zlib_8hpp_1ad0c954b8ec4a79b70e4ccefa858db6cf:
+.. _cid-get_file_size:
+.. _doxid-lz4__p2p__comp_8hpp_1a62f02bce640abc082ca8383428984e2f:
+.. _cid-block_size_in_kb:
+.. _doxid-zlib_8hpp_1a62f02bce640abc082ca8383428984e2f:
+.. _cid-block_size_in_kb-2:
+.. _doxid-lz4__p2p__dec_8hpp_1a62f02bce640abc082ca8383428984e2f:
+.. _cid-block_size_in_kb-3:
+.. _doxid-zlib_8hpp_1ad272e29baec01866b067889193a3dbf9:
+.. _cid-decomp_out_size:
+.. _doxid-zlib_8hpp_1a41a2a00442d29ee8ae5ea5cfaff3b2cd:
+.. _cid-delete_obj:
+.. _doxid-zlib_8hpp_1afab454f24ad9ba3d2f57644542ec10d0:
+.. _cid-din_buffercount:
+.. _doxid-zlib_8hpp_1ad0087fc93002214177123e3fd500dd62:
+.. _cid-dout_buffercount:
+.. _doxid-zlib_8hpp_1a06e3d68792ba2ad788bc586d0dd54906:
+.. _cid-error_status:
+.. _doxid-zlib_8hpp_1a497efa0991ba86ef9bb13ec59e253984:
+.. _cid-host_buffer_size:
+.. _doxid-lz4__p2p__comp_8hpp_1a497efa0991ba86ef9bb13ec59e253984:
+.. _cid-host_buffer_size-2:
+.. _doxid-lz4__p2p__dec_8hpp_1a497efa0991ba86ef9bb13ec59e253984:
+.. _cid-host_buffer_size-3:
+.. _doxid-zlib_8hpp_1aa9b8dcc02cea15aab8e3d0b7860327a7:
+.. _cid-input_buffer_size:
+.. _doxid-lz4__p2p__dec_8hpp_1a1841fd1a462d245d8c73dce55e2f45da:
+.. _cid-kb:
+.. _doxid-zlib_8hpp_1a34a3f51f1b4059900ade7a809650bdb9:
+.. _cid-max_ccomp_units:
+.. _doxid-lz4__p2p__comp_8hpp_1a58cec436353470a8402a6f0349f4cc1e:
+.. _cid-max_compute_units:
+.. _doxid-zlib_8hpp_1aeee31cc414f8963dcf14c86eafce1192:
+.. _cid-max_cr:
+.. _doxid-zlib_8hpp_1ac20f268e718bbd18834a14979b0cc365:
+.. _cid-max_ddcomp_units:
+.. _doxid-lz4__p2p__dec_8hpp_1aa28faef0aa5fe8f67529021398d0e7a1:
+.. _cid-max_in_buffer_partition:
+.. _doxid-lz4__p2p__dec_8hpp_1a9232f98f138c9ca956eb89381243a8a3:
+.. _cid-max_in_buffer_size:
+.. _doxid-zlib_8hpp_1ac0cd6e80757eac5e6534e8b103aa9857:
+.. _cid-max_number_blocks:
+.. _doxid-lz4__p2p__comp_8hpp_1ac0cd6e80757eac5e6534e8b103aa9857:
+.. _cid-max_number_blocks-2:
+.. _doxid-lz4__p2p__dec_8hpp_1ac0cd6e80757eac5e6534e8b103aa9857:
+.. _cid-max_number_blocks-3:
+.. _doxid-zlib_8hpp_1a29a61474854edfeed19457644161249f:
+.. _cid-output_buffer_size:
+.. _doxid-zlib_8hpp_1a2a7255f41772a29d279fba9f19e75cb6:
+.. _cid-overlap_buf_count:
+.. _doxid-lz4__p2p__comp_8hpp_1a2a7255f41772a29d279fba9f19e75cb6:
+.. _cid-overlap_buf_count-2:
+.. _doxid-zlib_8hpp_1ab562c4921caffd3dec9193c150565ba8:
+.. _cid-parallel_engines:
+.. _doxid-zlib_8hpp_1ac94b15892797c30b68ccb920d6e597a3:
+.. _cid-zocl_check:
+.. _doxid-zlib_8hpp_1af1eaa856f4af8ef3e07bb7ddddcc5979:
+.. _cid-zocl_check_2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// namespaces
+
+	namespace :ref:`xf<doxid-namespacexf>`
+	    namespace :ref:`xf::compression<doxid-namespacexf_1_1compression>`
+
+	// enums
+
+	enum :ref:`comp_decom_flows<doxid-zlib_8hpp_1a8eb459d4c8cba9871238a9a94c8d861f>`
+	enum :ref:`d_type<doxid-zlib_8hpp_1a505e39af05f260eba9fc403d2a4ac54b>`
+	enum :ref:`list_mode<doxid-zlib_8hpp_1aad11276a757f9cae59a334fcbec9adce>`
+
+	// structs
+
+	template <typename T>
+	struct :ref:`zlib_aligned_allocator<doxid-structzlib__aligned__allocator>` 
+
+	// classes
+
+	class :ref:`xfLz4<doxid-classxfLz4>` 
+	class :ref:`xflz4<doxid-classxflz4>` 
+
+	// global variables
+
+	const int gz_max_literal_count
+	constexpr auto page_aligned_mem
+	constexpr auto c_clOutOfResource
+	constexpr auto c_clinvalidbin
+	constexpr auto c_clinvalidvalue
+
+	// macros
+
+	#define BLOCK_SIZE_IN_KB
+	#define :ref:`BLOCK_SIZE_IN_KB<doxid-lz4_8hpp_1a62f02bce640abc082ca8383428984e2f>`
+	#define BLOCK_SIZE_IN_KB
+	#define BLOCK_SIZE_IN_KB
+	#define DECOMP_OUT_SIZE
+	#define DELETE_OBJ(buffer)
+	#define DIN_BUFFERCOUNT
+	#define DOUT_BUFFERCOUNT
+	#define ERROR_STATUS(call)
+	#define :ref:`HOST_BUFFER_SIZE<doxid-lz4_8hpp_1a497efa0991ba86ef9bb13ec59e253984>`
+	#define HOST_BUFFER_SIZE
+	#define HOST_BUFFER_SIZE
+	#define HOST_BUFFER_SIZE
+	#define INPUT_BUFFER_SIZE
+	#define KB
+	#define MAX_CCOMP_UNITS
+	#define :ref:`MAX_COMPUTE_UNITS<doxid-lz4_8hpp_1a58cec436353470a8402a6f0349f4cc1e>`
+	#define MAX_COMPUTE_UNITS
+	#define MAX_CR
+	#define MAX_DDCOMP_UNITS
+	#define MAX_IN_BUFFER_PARTITION
+	#define MAX_IN_BUFFER_SIZE
+	#define MAX_NUMBER_BLOCKS
+	#define MAX_NUMBER_BLOCKS
+	#define MAX_NUMBER_BLOCKS
+	#define OUTPUT_BUFFER_SIZE
+	#define :ref:`OVERLAP_BUF_COUNT<doxid-lz4_8hpp_1a2a7255f41772a29d279fba9f19e75cb6>`
+	#define OVERLAP_BUF_COUNT
+	#define OVERLAP_BUF_COUNT
+	#define PARALLEL_ENGINES
+
+	#define ZOCL_CHECK( \
+	    error, \
+	    call, \
+	    eflag, \
+	    expected \
+	    )
+
+	#define ZOCL_CHECK_2( \
+	    error, \
+	    call, \
+	    eflag, \
+	    expected_1, \
+	    expected_2 \
+	    )
+
+Macros
+------
+
+.. _doxid-lz4_8hpp_1a62f02bce640abc082ca8383428984e2f:
+.. _cid-block_size_in_kb-4:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	#define BLOCK_SIZE_IN_KB
+
+Default block size
+
+.. _doxid-lz4_8hpp_1a497efa0991ba86ef9bb13ec59e253984:
+.. _cid-host_buffer_size-4:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	#define HOST_BUFFER_SIZE
+
+Maximum host buffer used to operate per kernel invocation
+
+.. _doxid-lz4_8hpp_1a58cec436353470a8402a6f0349f4cc1e:
+.. _cid-max_compute_units-2:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	#define MAX_COMPUTE_UNITS
+
+Maximum compute units supported
+
+.. _doxid-lz4_8hpp_1a2a7255f41772a29d279fba9f19e75cb6:
+.. _cid-overlap_buf_count-3:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	#define OVERLAP_BUF_COUNT
+
+Value below is used to associate with Overlapped buffers, ideally overlapped execution requires 2 resources per invocation
+

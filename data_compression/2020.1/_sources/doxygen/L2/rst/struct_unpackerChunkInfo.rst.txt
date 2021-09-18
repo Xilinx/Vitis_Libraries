@@ -1,0 +1,35 @@
+.. index:: pair: struct; unpackerChunkInfo
+.. _doxid-structunpackerChunkInfo:
+.. _cid-unpackerchunkinfo:
+
+struct unpackerChunkInfo
+========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structunpackerChunkInfo_1ae0cfab878c9220194e5bd27d8cda4066:
+.. _cid-unpackerchunkinfo::instartidx:
+.. _doxid-structunpackerChunkInfo_1ae0c63fe150a2862355abaa9105ccfa8b:
+.. _cid-unpackerchunkinfo::originalsize:
+.. _doxid-structunpackerChunkInfo_1aa5dd30f0efca1cd503347e400f002d75:
+.. _cid-unpackerchunkinfo::numblocks:
+.. _doxid-structunpackerChunkInfo_1aa298c12f402078e95acef4dfac17c1e1:
+.. _cid-unpackerchunkinfo::numblockspercu:
+.. _doxid-structunpackerChunkInfo_1a27ef665c9e23274a53566dc78e489dd9:
+.. _cid-unpackerchunkinfo::padding:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	uint32_t inStartIdx
+	uint32_t originalSize
+	uint32_t numBlocks
+	uint32_t numBlocksPerCU[2]
+	uint32_t padding[(GMEM_DATAWIDTH/32)-5]
+

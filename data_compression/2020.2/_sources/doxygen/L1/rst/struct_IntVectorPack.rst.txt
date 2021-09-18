@@ -1,0 +1,30 @@
+.. index:: pair: struct; IntVectorPack
+.. _doxid-structIntVectorPack:
+.. _cid-intvectorpack:
+
+template struct IntVectorPack
+=============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structIntVectorPack_1a923b26f3622f0ddb7bae2db1d666ca92:
+.. _cid-intvectorpack::all:
+.. _doxid-structIntVectorPack_1ac5540c06957195f35751569ecd8a35b9:
+.. _cid-intvectorpack::data:
+.. _doxid-structIntVectorPack_1ab09a8720b5b20bacea13a218237fc2d6:
+.. _cid-intvectorpack::operator:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    int DATAWIDTH,
+	    int VEC_LEN,
+	    int STROBE_DWIDTH = maxBitsUsed(VEC_LEN)
+	    >
+	struct IntVectorPack
+

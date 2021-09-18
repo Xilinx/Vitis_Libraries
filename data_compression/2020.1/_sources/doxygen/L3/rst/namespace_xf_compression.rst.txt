@@ -1,0 +1,38 @@
+.. index:: pair: namespace; compression
+.. _doxid-namespacexf_1_1compression:
+.. _cid-xf::compression:
+
+namespace compression
+=====================
+
+.. toctree::
+	:hidden:
+
+	struct_xf_compression_buffers.rst
+	class_xf_compression_memoryManager.rst
+	class_xf_compression_xfLz4.rst
+	class_xf_compression_xfZlib.rst
+
+
+
+
+
+.. _doxid-namespacexf_1_1compression_1aa9069b0e2abd3593758030de16d2e6e4:
+.. _cid-xf::compression::event_compress_cb:
+.. _doxid-namespacexf_1_1compression_1ae9795d41dc2661a9db65a16f2e82385c:
+.. _cid-xf::compression::event_checksum_cb:
+.. _doxid-namespacexf_1_1compression_1a0e9974804ba17379a7b96631b8ac39b6:
+.. _cid-xf::compression::event_cb:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// structs
+
+	struct :ref:`buffers<doxid-structxf_1_1compression_1_1buffers>` 
+
+	// classes
+
+	class :ref:`memoryManager<doxid-classxf_1_1compression_1_1memoryManager>` 
+	class :ref:`xfLz4<doxid-classxf_1_1compression_1_1xfLz4>` 
+	class :ref:`xfZlib<doxid-classxf_1_1compression_1_1xfZlib>` 
+

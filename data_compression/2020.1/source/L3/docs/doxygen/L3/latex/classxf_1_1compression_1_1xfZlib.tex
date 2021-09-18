@@ -1,0 +1,437 @@
+\hypertarget{classxf_1_1compression_1_1xfZlib}{\section{xf\-:\-:compression\-:\-:xf\-Zlib Class Reference}
+\label{classxf_1_1compression_1_1xfZlib}\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}}
+}
+
+
+{\ttfamily \#include $<$zlib.\-hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_aac31d05070fc44eaa7b73e39d1e55387}{compress\-\_\-buffer} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t input\-\_\-size, uint32\-\_\-t host\-\_\-buffer\-\_\-size=H\-O\-S\-T\-\_\-\-B\-U\-F\-F\-E\-R\-\_\-\-S\-I\-Z\-E, int cu=0)
+\begin{DoxyCompactList}\small\item\em This method does the overlapped execution of compression where data transfers and kernel computation are overlapped. \end{DoxyCompactList}\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_aa6fc980499fbe77fb8c760362140cc97}{deflate\-\_\-buffer} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t \&input\-\_\-size, bool \&last\-\_\-data, bool last\-\_\-buffer, const std\-::string \&cu)
+\begin{DoxyCompactList}\small\item\em This method does the overlapped execution of decompression where data transfers and kernel computation are overlapped. \end{DoxyCompactList}\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a5dc1443008daebba8e3aa47c1962434a}{decompress} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t actual\-\_\-size, size\-\_\-t max\-\_\-outbuf\-\_\-size, int cu\-\_\-run=0)
+\begin{DoxyCompactList}\small\item\em This method does serial execution of decompression where data transfers and kernel execution in serial manner. \end{DoxyCompactList}\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_aed3a52d3bcb4e2603d367a559c85e175}{compress} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t input\-\_\-size, int cu, int level=1, int strategy=0, int window\-\_\-bits=15)
+\begin{DoxyCompactList}\small\item\em This A\-P\-I does end to end compression in a single call. \end{DoxyCompactList}\item 
+uint64\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a4dae7f3471aa3788ffc0c11a9b6196fc}{compress\-\_\-file} (std\-::string \&in\-File\-\_\-name, std\-::string \&out\-File\-\_\-name, uint64\-\_\-t input\-\_\-size, int cu\-\_\-run=0)
+\begin{DoxyCompactList}\small\item\em This method does file operations and invokes compress A\-P\-I which internally does zlib compression on F\-P\-G\-A in overlapped manner. \end{DoxyCompactList}\item 
+uint32\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a847206ba337f6811dbd477c1533586c3}{decompress\-\_\-file} (std\-::string \&in\-File\-\_\-name, std\-::string \&out\-File\-\_\-name, uint64\-\_\-t input\-\_\-size, int cu\-\_\-run)
+\begin{DoxyCompactList}\small\item\em This method does file operations and invokes decompress A\-P\-I which internally does zlib decompression on F\-P\-G\-A in overlapped manner. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_aa2477f22a23fc8ce1ffa8c968c588f29}{uint64\-\_\-t {\bfseries get\-\_\-event\-\_\-duration\-\_\-ns} (const cl\-::\-Event \&event)}\label{classxf_1_1compression_1_1xfZlib_aa2477f22a23fc8ce1ffa8c968c588f29}
+
+\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a6bfce462da5c36380222b69972dfbfd4}{\hyperlink{classxf_1_1compression_1_1xfZlib_a6bfce462da5c36380222b69972dfbfd4}{xf\-Zlib} (const std\-::string \&binary\-File, uint8\-\_\-t cd\-\_\-flow, const cl\-::\-Device \&device, const cl\-\_\-context\-\_\-properties \&platform, enum design\-\_\-flow dflow=X\-I\-L\-I\-N\-X\-\_\-\-G\-Z\-I\-P)}\label{classxf_1_1compression_1_1xfZlib_a6bfce462da5c36380222b69972dfbfd4}
+
+\begin{DoxyCompactList}\small\item\em Constructor responsible for creating various host/device buffers. This skips the creation of platform and device steps. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a7712b200970e31a07526a43b40661dfe}{\hyperlink{classxf_1_1compression_1_1xfZlib_a7712b200970e31a07526a43b40661dfe}{xf\-Zlib} (const std\-::string \&binary\-File, uint8\-\_\-t c\-\_\-max\-\_\-cr=M\-A\-X\-\_\-\-C\-R, uint8\-\_\-t cd\-\_\-flow=B\-O\-T\-H, uint8\-\_\-t device\-\_\-id=0, uint8\-\_\-t profile=0, uint8\-\_\-t d\-\_\-type=D\-Y\-N\-A\-M\-I\-C, enum design\-\_\-flow dflow=X\-I\-L\-I\-N\-X\-\_\-\-G\-Z\-I\-P)}\label{classxf_1_1compression_1_1xfZlib_a7712b200970e31a07526a43b40661dfe}
+
+\begin{DoxyCompactList}\small\item\em Constructor responsible for creating various host/device buffers. \end{DoxyCompactList}\item 
+int \hyperlink{classxf_1_1compression_1_1xfZlib_a50efe5b6226616a043af9044323a982a}{init} (const std\-::string \&binary\-File, uint8\-\_\-t dtype, bool skip\-Platform\-Check=false)
+\begin{DoxyCompactList}\small\item\em Open\-C\-L setup initialization. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a161a134c573011f422026e83597b96b3}{void \hyperlink{classxf_1_1compression_1_1xfZlib_a161a134c573011f422026e83597b96b3}{release} ()}\label{classxf_1_1compression_1_1xfZlib_a161a134c573011f422026e83597b96b3}
+
+\begin{DoxyCompactList}\small\item\em Open\-C\-L setup release. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a6904dbfc6bf5a6f9917fb727ed5e391d}{\hyperlink{classxf_1_1compression_1_1xfZlib_a6904dbfc6bf5a6f9917fb727ed5e391d}{$\sim$xf\-Zlib} ()}\label{classxf_1_1compression_1_1xfZlib_a6904dbfc6bf5a6f9917fb727ed5e391d}
+
+\begin{DoxyCompactList}\small\item\em Release host/device memory. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a287855eea3200b5fb64a09bce2e19f67}{int \hyperlink{classxf_1_1compression_1_1xfZlib_a287855eea3200b5fb64a09bce2e19f67}{error\-\_\-code} (void)}\label{classxf_1_1compression_1_1xfZlib_a287855eea3200b5fb64a09bce2e19f67}
+
+\begin{DoxyCompactList}\small\item\em error\-\_\-code of a Open\-C\-L call \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a334578509391cdb59adf3fc8dada79eb}{uint32\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a334578509391cdb59adf3fc8dada79eb}{get\-\_\-checksum} (void)}\label{classxf_1_1compression_1_1xfZlib_a334578509391cdb59adf3fc8dada79eb}
+
+\begin{DoxyCompactList}\small\item\em returns check sum value (C\-R\-C32/\-Adler32) \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_aa0659ec7543b798f008891b160deeed3}{void \hyperlink{classxf_1_1compression_1_1xfZlib_aa0659ec7543b798f008891b160deeed3}{set\-\_\-checksum} (uint32\-\_\-t cval)}\label{classxf_1_1compression_1_1xfZlib_aa0659ec7543b798f008891b160deeed3}
+
+\begin{DoxyCompactList}\small\item\em set check sum value (C\-R\-C32/\-Adler32) \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_ac893340263a91d6429824fa68e93d39e}{std\-::string \hyperlink{classxf_1_1compression_1_1xfZlib_ac893340263a91d6429824fa68e93d39e}{get\-Compress\-Kernel} (int index)}\label{classxf_1_1compression_1_1xfZlib_ac893340263a91d6429824fa68e93d39e}
+
+\begin{DoxyCompactList}\small\item\em get compress kernel name \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a396520949b83c409a780da720a35ce01}{std\-::string \hyperlink{classxf_1_1compression_1_1xfZlib_a396520949b83c409a780da720a35ce01}{get\-De\-Compress\-Kernel} (int index)}\label{classxf_1_1compression_1_1xfZlib_a396520949b83c409a780da720a35ce01}
+
+\begin{DoxyCompactList}\small\item\em get decompress kernel name \end{DoxyCompactList}\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_ab52ee4c6869563448f489cd3c81dd2da}{compress\-\_\-buffer} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t actual\-\_\-size, bool last\-\_\-buffer=true, uint32\-\_\-t host\-\_\-buffer\-\_\-size=H\-O\-S\-T\-\_\-\-B\-U\-F\-F\-E\-R\-\_\-\-S\-I\-Z\-E, int cu=0)
+\begin{DoxyCompactList}\small\item\em This method does the overlapped execution of compression where data transfers and kernel computation are overlapped. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a055669f3d7d7dfe98761b48b0b3ae307}{size\-\_\-t {\bfseries deflate\-\_\-buffer} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t \&input\-\_\-size, bool \&last\-\_\-data, bool last\-\_\-buffer, std\-::string cu)}\label{classxf_1_1compression_1_1xfZlib_a055669f3d7d7dfe98761b48b0b3ae307}
+
+\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a5dc1443008daebba8e3aa47c1962434a}{decompress} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t actual\-\_\-size, size\-\_\-t max\-\_\-outbuf\-\_\-size, int cu\-\_\-run=0)
+\begin{DoxyCompactList}\small\item\em This method does serial execution of decompression where data transfers and kernel execution in serial manner. \end{DoxyCompactList}\item 
+size\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_aed3a52d3bcb4e2603d367a559c85e175}{compress} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, size\-\_\-t input\-\_\-size, int cu, int level=1, int strategy=0, int window\-\_\-bits=15)
+\begin{DoxyCompactList}\small\item\em This A\-P\-I does end to end compression in a single call. \end{DoxyCompactList}\item 
+uint64\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a4dae7f3471aa3788ffc0c11a9b6196fc}{compress\-\_\-file} (std\-::string \&in\-File\-\_\-name, std\-::string \&out\-File\-\_\-name, uint64\-\_\-t input\-\_\-size, int cu\-\_\-run=0)
+\begin{DoxyCompactList}\small\item\em This method does file operations and invokes compress A\-P\-I which internally does zlib compression on F\-P\-G\-A in overlapped manner. \end{DoxyCompactList}\item 
+uint32\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a847206ba337f6811dbd477c1533586c3}{decompress\-\_\-file} (std\-::string \&in\-File\-\_\-name, std\-::string \&out\-File\-\_\-name, uint64\-\_\-t input\-\_\-size, int cu\-\_\-run)
+\begin{DoxyCompactList}\small\item\em This method does file operations and invokes decompress A\-P\-I which internally does zlib decompression on F\-P\-G\-A in overlapped manner. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_aa2477f22a23fc8ce1ffa8c968c588f29}{uint64\-\_\-t {\bfseries get\-\_\-event\-\_\-duration\-\_\-ns} (const cl\-::\-Event \&event)}\label{classxf_1_1compression_1_1xfZlib_aa2477f22a23fc8ce1ffa8c968c588f29}
+
+\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a7712b200970e31a07526a43b40661dfe}{\hyperlink{classxf_1_1compression_1_1xfZlib_a7712b200970e31a07526a43b40661dfe}{xf\-Zlib} (const std\-::string \&binary\-File, uint8\-\_\-t c\-\_\-max\-\_\-cr=M\-A\-X\-\_\-\-C\-R, uint8\-\_\-t cd\-\_\-flow=B\-O\-T\-H, uint8\-\_\-t device\-\_\-id=0, uint8\-\_\-t profile=0, uint8\-\_\-t d\-\_\-type=D\-Y\-N\-A\-M\-I\-C, enum design\-\_\-flow dflow=X\-I\-L\-I\-N\-X\-\_\-\-G\-Z\-I\-P)}\label{classxf_1_1compression_1_1xfZlib_a7712b200970e31a07526a43b40661dfe}
+
+\begin{DoxyCompactList}\small\item\em Constructor responsible for creating various host/device buffers. \end{DoxyCompactList}\item 
+int \hyperlink{classxf_1_1compression_1_1xfZlib_a87f13a66b1928934295c46677666fabe}{init} (const std\-::string \&binary\-File, uint8\-\_\-t dtype)
+\begin{DoxyCompactList}\small\item\em Open\-C\-L setup initialization. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a161a134c573011f422026e83597b96b3}{void \hyperlink{classxf_1_1compression_1_1xfZlib_a161a134c573011f422026e83597b96b3}{release} ()}\label{classxf_1_1compression_1_1xfZlib_a161a134c573011f422026e83597b96b3}
+
+\begin{DoxyCompactList}\small\item\em Open\-C\-L setup release. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a6904dbfc6bf5a6f9917fb727ed5e391d}{\hyperlink{classxf_1_1compression_1_1xfZlib_a6904dbfc6bf5a6f9917fb727ed5e391d}{$\sim$xf\-Zlib} ()}\label{classxf_1_1compression_1_1xfZlib_a6904dbfc6bf5a6f9917fb727ed5e391d}
+
+\begin{DoxyCompactList}\small\item\em Release host/device memory. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a287855eea3200b5fb64a09bce2e19f67}{int \hyperlink{classxf_1_1compression_1_1xfZlib_a287855eea3200b5fb64a09bce2e19f67}{error\-\_\-code} (void)}\label{classxf_1_1compression_1_1xfZlib_a287855eea3200b5fb64a09bce2e19f67}
+
+\begin{DoxyCompactList}\small\item\em error\-\_\-code of a Open\-C\-L call \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a334578509391cdb59adf3fc8dada79eb}{uint32\-\_\-t \hyperlink{classxf_1_1compression_1_1xfZlib_a334578509391cdb59adf3fc8dada79eb}{get\-\_\-checksum} (void)}\label{classxf_1_1compression_1_1xfZlib_a334578509391cdb59adf3fc8dada79eb}
+
+\begin{DoxyCompactList}\small\item\em returns check sum value (C\-R\-C32/\-Adler32) \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_aa0659ec7543b798f008891b160deeed3}{void \hyperlink{classxf_1_1compression_1_1xfZlib_aa0659ec7543b798f008891b160deeed3}{set\-\_\-checksum} (uint32\-\_\-t cval)}\label{classxf_1_1compression_1_1xfZlib_aa0659ec7543b798f008891b160deeed3}
+
+\begin{DoxyCompactList}\small\item\em set check sum value (C\-R\-C32/\-Adler32) \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_ac893340263a91d6429824fa68e93d39e}{std\-::string \hyperlink{classxf_1_1compression_1_1xfZlib_ac893340263a91d6429824fa68e93d39e}{get\-Compress\-Kernel} (int index)}\label{classxf_1_1compression_1_1xfZlib_ac893340263a91d6429824fa68e93d39e}
+
+\begin{DoxyCompactList}\small\item\em get compress kernel name \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a396520949b83c409a780da720a35ce01}{std\-::string \hyperlink{classxf_1_1compression_1_1xfZlib_a396520949b83c409a780da720a35ce01}{get\-De\-Compress\-Kernel} (int index)}\label{classxf_1_1compression_1_1xfZlib_a396520949b83c409a780da720a35ce01}
+
+\begin{DoxyCompactList}\small\item\em get decompress kernel name \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classxf_1_1compression_1_1xfZlib_a393c9d64b05e11a609d1c06c6c912dc9}{void {\bfseries xf\-::compression\-::event\-\_\-cb} (cl\-\_\-event event, cl\-\_\-int cmd\-\_\-status, void $\ast$data)}\label{classxf_1_1compression_1_1xfZlib_a393c9d64b05e11a609d1c06c6c912dc9}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{classxf_1_1compression_1_1xfZlib}{xf\-Zlib} class. Class containing methods for Zlib compression and decompression to be executed on host side. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classxf_1_1compression_1_1xfZlib_aed3a52d3bcb4e2603d367a559c85e175}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!compress@{compress}}
+\index{compress@{compress}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{compress}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::compress (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t}]{input\-\_\-size, }
+\item[{int}]{cu, }
+\item[{int}]{level = {\ttfamily 1}, }
+\item[{int}]{strategy = {\ttfamily 0}, }
+\item[{int}]{window\-\_\-bits = {\ttfamily 15}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_aed3a52d3bcb4e2603d367a559c85e175}
+
+
+This A\-P\-I does end to end compression in a single call. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em input\-\_\-size} & input size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_aed3a52d3bcb4e2603d367a559c85e175}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!compress@{compress}}
+\index{compress@{compress}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{compress}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::compress (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t}]{input\-\_\-size, }
+\item[{int}]{cu, }
+\item[{int}]{level = {\ttfamily 1}, }
+\item[{int}]{strategy = {\ttfamily 0}, }
+\item[{int}]{window\-\_\-bits = {\ttfamily 15}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_aed3a52d3bcb4e2603d367a559c85e175}
+
+
+This A\-P\-I does end to end compression in a single call. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em input\-\_\-size} & input size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_aac31d05070fc44eaa7b73e39d1e55387}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!compress\-\_\-buffer@{compress\-\_\-buffer}}
+\index{compress\-\_\-buffer@{compress\-\_\-buffer}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{compress\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::compress\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t}]{input\-\_\-size, }
+\item[{uint32\-\_\-t}]{host\-\_\-buffer\-\_\-size = {\ttfamily HOST\-\_\-BUFFER\-\_\-SIZE}, }
+\item[{int}]{cu = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_aac31d05070fc44eaa7b73e39d1e55387}
+
+
+This method does the overlapped execution of compression where data transfers and kernel computation are overlapped. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em input\-\_\-size} & input size \\
+\hline
+{\em host\-\_\-buffer\-\_\-size} & buffer size for kernel \\
+\hline
+{\em cu} & comput unit name \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_ab52ee4c6869563448f489cd3c81dd2da}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!compress\-\_\-buffer@{compress\-\_\-buffer}}
+\index{compress\-\_\-buffer@{compress\-\_\-buffer}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{compress\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::compress\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t}]{actual\-\_\-size, }
+\item[{bool}]{last\-\_\-buffer = {\ttfamily true}, }
+\item[{uint32\-\_\-t}]{host\-\_\-buffer\-\_\-size = {\ttfamily HOST\-\_\-BUFFER\-\_\-SIZE}, }
+\item[{int}]{cu = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_ab52ee4c6869563448f489cd3c81dd2da}
+
+
+This method does the overlapped execution of compression where data transfers and kernel computation are overlapped. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+{\em last\-\_\-buffer} & \\
+\hline
+{\em host\-\_\-buffer\-\_\-size} & host buffer size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a4dae7f3471aa3788ffc0c11a9b6196fc}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!compress\-\_\-file@{compress\-\_\-file}}
+\index{compress\-\_\-file@{compress\-\_\-file}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{compress\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}uint64\-\_\-t xf\-::compression\-::xf\-Zlib\-::compress\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{in\-File\-\_\-name, }
+\item[{std\-::string \&}]{out\-File\-\_\-name, }
+\item[{uint64\-\_\-t}]{input\-\_\-size, }
+\item[{int}]{cu\-\_\-run = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a4dae7f3471aa3788ffc0c11a9b6196fc}
+
+
+This method does file operations and invokes compress A\-P\-I which internally does zlib compression on F\-P\-G\-A in overlapped manner. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-File\-\_\-name} & input file name \\
+\hline
+{\em out\-File\-\_\-name} & output file name \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a4dae7f3471aa3788ffc0c11a9b6196fc}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!compress\-\_\-file@{compress\-\_\-file}}
+\index{compress\-\_\-file@{compress\-\_\-file}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{compress\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}uint64\-\_\-t xf\-::compression\-::xf\-Zlib\-::compress\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{in\-File\-\_\-name, }
+\item[{std\-::string \&}]{out\-File\-\_\-name, }
+\item[{uint64\-\_\-t}]{input\-\_\-size, }
+\item[{int}]{cu\-\_\-run = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a4dae7f3471aa3788ffc0c11a9b6196fc}
+
+
+This method does file operations and invokes compress A\-P\-I which internally does zlib compression on F\-P\-G\-A in overlapped manner. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-File\-\_\-name} & input file name \\
+\hline
+{\em out\-File\-\_\-name} & output file name \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a5dc1443008daebba8e3aa47c1962434a}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!decompress@{decompress}}
+\index{decompress@{decompress}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{decompress}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::decompress (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t}]{actual\-\_\-size, }
+\item[{size\-\_\-t}]{max\-\_\-outbuf\-\_\-size, }
+\item[{int}]{cu\-\_\-run = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a5dc1443008daebba8e3aa47c1962434a}
+
+
+This method does serial execution of decompression where data transfers and kernel execution in serial manner. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+{\em cu\-\_\-run} & compute unit number \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a5dc1443008daebba8e3aa47c1962434a}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!decompress@{decompress}}
+\index{decompress@{decompress}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{decompress}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::decompress (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t}]{actual\-\_\-size, }
+\item[{size\-\_\-t}]{max\-\_\-outbuf\-\_\-size, }
+\item[{int}]{cu\-\_\-run = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a5dc1443008daebba8e3aa47c1962434a}
+
+
+This method does serial execution of decompression where data transfers and kernel execution in serial manner. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+{\em cu\-\_\-run} & compute unit number \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a847206ba337f6811dbd477c1533586c3}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!decompress\-\_\-file@{decompress\-\_\-file}}
+\index{decompress\-\_\-file@{decompress\-\_\-file}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{decompress\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t xf\-::compression\-::xf\-Zlib\-::decompress\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{in\-File\-\_\-name, }
+\item[{std\-::string \&}]{out\-File\-\_\-name, }
+\item[{uint64\-\_\-t}]{input\-\_\-size, }
+\item[{int}]{cu\-\_\-run}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a847206ba337f6811dbd477c1533586c3}
+
+
+This method does file operations and invokes decompress A\-P\-I which internally does zlib decompression on F\-P\-G\-A in overlapped manner. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-File\-\_\-name} & input file name \\
+\hline
+{\em out\-File\-\_\-name} & output file name \\
+\hline
+{\em input\-\_\-size} & input size \\
+\hline
+{\em cu\-\_\-run} & compute unit number \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a847206ba337f6811dbd477c1533586c3}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!decompress\-\_\-file@{decompress\-\_\-file}}
+\index{decompress\-\_\-file@{decompress\-\_\-file}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{decompress\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t xf\-::compression\-::xf\-Zlib\-::decompress\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{in\-File\-\_\-name, }
+\item[{std\-::string \&}]{out\-File\-\_\-name, }
+\item[{uint64\-\_\-t}]{input\-\_\-size, }
+\item[{int}]{cu\-\_\-run}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a847206ba337f6811dbd477c1533586c3}
+
+
+This method does file operations and invokes decompress A\-P\-I which internally does zlib decompression on F\-P\-G\-A in overlapped manner. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-File\-\_\-name} & input file name \\
+\hline
+{\em out\-File\-\_\-name} & output file name \\
+\hline
+{\em input\-\_\-size} & input size \\
+\hline
+{\em cu\-\_\-run} & compute unit number \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_aa6fc980499fbe77fb8c760362140cc97}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!deflate\-\_\-buffer@{deflate\-\_\-buffer}}
+\index{deflate\-\_\-buffer@{deflate\-\_\-buffer}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{deflate\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t xf\-::compression\-::xf\-Zlib\-::deflate\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{size\-\_\-t \&}]{input\-\_\-size, }
+\item[{bool \&}]{last\-\_\-data, }
+\item[{bool}]{last\-\_\-buffer, }
+\item[{const std\-::string \&}]{cu}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_aa6fc980499fbe77fb8c760362140cc97}
+
+
+This method does the overlapped execution of decompression where data transfers and kernel computation are overlapped. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em input\-\_\-size} & input size \\
+\hline
+{\em last\-\_\-data} & last compressed output buffer \\
+\hline
+{\em last\-\_\-buffer} & last input buffer \\
+\hline
+{\em cu} & comput unit name \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a50efe5b6226616a043af9044323a982a}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!init@{init}}
+\index{init@{init}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}int xf\-::compression\-::xf\-Zlib\-::init (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{binary\-File, }
+\item[{uint8\-\_\-t}]{dtype, }
+\item[{bool}]{skip\-Platform\-Check = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a50efe5b6226616a043af9044323a982a}
+
+
+Open\-C\-L setup initialization. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em binary\-File} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfZlib_a87f13a66b1928934295c46677666fabe}{\index{xf\-::compression\-::xf\-Zlib@{xf\-::compression\-::xf\-Zlib}!init@{init}}
+\index{init@{init}!xf::compression::xfZlib@{xf\-::compression\-::xf\-Zlib}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}int xf\-::compression\-::xf\-Zlib\-::init (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{binary\-File, }
+\item[{uint8\-\_\-t}]{dtype}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfZlib_a87f13a66b1928934295c46677666fabe}
+
+
+Open\-C\-L setup initialization. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em binary\-File} & \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L3/include/zlib.\-hpp\item 
+/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L3/include/zlib\-\_\-old.\-hpp\end{DoxyCompactItemize}

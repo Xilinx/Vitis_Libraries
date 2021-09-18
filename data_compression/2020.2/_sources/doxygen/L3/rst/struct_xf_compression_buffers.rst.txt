@@ -1,0 +1,82 @@
+.. index:: pair: struct; xf::compression::buffers
+.. _doxid-structxf_1_1compression_1_1buffers:
+.. _cid-xf::compression::buffers:
+
+struct xf::compression::buffers
+===============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxf_1_1compression_1_1buffers_1a7ea25c35afd613391b3b61631dbb6674:
+.. _cid-xf::compression::buffers::h_buf_in:
+.. _doxid-structxf_1_1compression_1_1buffers_1a83e27807381db1d7724b15a882f24029:
+.. _cid-xf::compression::buffers::h_buf_zlibout:
+.. _doxid-structxf_1_1compression_1_1buffers_1a1d868ed92a6977a82855088059db56d9:
+.. _cid-xf::compression::buffers::h_compresssize:
+.. _doxid-structxf_1_1compression_1_1buffers_1aae0071e1a4ed540c0eaab1bd03b17073:
+.. _cid-xf::compression::buffers::h_status:
+.. _doxid-structxf_1_1compression_1_1buffers_1a80d76bbf20b504dd22459649f9f067e4:
+.. _cid-xf::compression::buffers::buffer_input:
+.. _doxid-structxf_1_1compression_1_1buffers_1a6bdf1f1668be3348a6c873cab5397991:
+.. _cid-xf::compression::buffers::buffer_zlib_output:
+.. _doxid-structxf_1_1compression_1_1buffers_1a2cbd05777fa99cdd3f8b6b7065175b37:
+.. _cid-xf::compression::buffers::buffer_compress_size:
+.. _doxid-structxf_1_1compression_1_1buffers_1ab2b9c3c6b64fc16f12ea07f47da940b8:
+.. _cid-xf::compression::buffers::buffer_status:
+.. _doxid-structxf_1_1compression_1_1buffers_1a1861ace8053ed2c13ab89ea2930ba6d7:
+.. _cid-xf::compression::buffers::input_size:
+.. _doxid-structxf_1_1compression_1_1buffers_1ac5966460c9c1cdf0b1788cdbd6f5154f:
+.. _cid-xf::compression::buffers::store_size:
+.. _doxid-structxf_1_1compression_1_1buffers_1ac616c2e506c9645444effb67c3b1a465:
+.. _cid-xf::compression::buffers::allocated_size:
+.. _doxid-structxf_1_1compression_1_1buffers_1a0ce3c454c580f2027e0796d454cd30e4:
+.. _cid-xf::compression::buffers::wr_event:
+.. _doxid-structxf_1_1compression_1_1buffers_1a4fd659a33f8f0298605415dd42f92799:
+.. _cid-xf::compression::buffers::rd_event:
+.. _doxid-structxf_1_1compression_1_1buffers_1ae2e6d8ae62559fc3084ec9183dd75e12:
+.. _cid-xf::compression::buffers::cmp_event:
+.. _doxid-structxf_1_1compression_1_1buffers_1a1841f2e58b1dfcea72e10b1dc5760f21:
+.. _cid-xf::compression::buffers::chk_wr_event:
+.. _doxid-structxf_1_1compression_1_1buffers_1a7eb1c54115cc8f4a352fe55244dec57c:
+.. _cid-xf::compression::buffers::chk_event:
+.. _doxid-structxf_1_1compression_1_1buffers_1a2b6968d5742069499c3dfb2a6c931db7:
+.. _cid-xf::compression::buffers::compress_finish:
+.. _doxid-structxf_1_1compression_1_1buffers_1a57ea9701dc47c60cc639d0ba520e2e3b:
+.. _cid-xf::compression::buffers::copy_done:
+.. _doxid-structxf_1_1compression_1_1buffers_1a466c8a11999f831539460966f7c6761f:
+.. _cid-xf::compression::buffers::is_finish:
+.. _doxid-structxf_1_1compression_1_1buffers_1a4bd7dd2ddd2401a4aae9bb75b58a1a3d:
+.. _cid-xf::compression::buffers::is_copyfinish:
+.. _doxid-structxf_1_1compression_1_1buffers_1a4e4c29d5dd403c8712d6f22091bf2ac9:
+.. _cid-xf::compression::buffers::reset:
+.. _doxid-structxf_1_1compression_1_1buffers_1a5c924234f3c795ac01a6f973cc8ef819:
+.. _cid-xf::compression::buffers::buffers:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	uint8_t* h_buf_in
+	uint8_t* h_buf_zlibout
+	uint32_t* h_compressSize
+	uint32_t* h_status
+	cl::Buffer* buffer_input
+	cl::Buffer* buffer_zlib_output
+	cl::Buffer* buffer_compress_size
+	cl::Buffer* buffer_status
+	uint32_t input_size
+	uint32_t store_size
+	uint32_t allocated_size
+	cl::Event wr_event
+	cl::Event rd_event
+	cl::Event cmp_event
+	cl::Event chk_wr_event
+	cl::Event chk_event
+	bool compress_finish
+	bool copy_done
+

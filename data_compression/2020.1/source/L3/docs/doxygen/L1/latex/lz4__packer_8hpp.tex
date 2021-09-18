@@ -1,0 +1,31 @@
+\hypertarget{lz4__packer_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz4\-\_\-packer.hpp File Reference}
+\label{lz4__packer_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz4\-\_\-packer.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz4\-\_\-packer.\-hpp}}
+}
+
+
+Header for module used in L\-Z4 packer kernel.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include \char`\"{}mm2s.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}s2mm.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}block\-\_\-packer.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-specs.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_acad558825c7be1d299bd8a26e74519a3}{{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::mm2slz4\-Packer} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$orig\-\_\-input\-\_\-data, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Stream\-Size, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t no\-\_\-blocks, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t xxhash\-Val, uint32\-\_\-t input\-\_\-size)}\label{namespacexf_1_1compression_acad558825c7be1d299bd8a26e74519a3}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a4713ff751908810fa768b2a56dea6ab3}{{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::lz4\-Packer\-M\-M} (ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$orig\-\_\-input\-\_\-data, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$out, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t $\ast$packer\-Compressed\-Size, uint32\-\_\-t xxhash\-Val, uint32\-\_\-t block\-\_\-length, uint32\-\_\-t no\-\_\-blocks, uint32\-\_\-t input\-\_\-size)}\label{namespacexf_1_1compression_a4713ff751908810fa768b2a56dea6ab3}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for module used in L\-Z4 packer kernel. This file is part of Vitis Data Compression Library. 

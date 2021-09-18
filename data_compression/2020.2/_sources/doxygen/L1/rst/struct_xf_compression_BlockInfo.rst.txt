@@ -1,0 +1,26 @@
+.. index:: pair: struct; xf::compression::BlockInfo
+.. _doxid-structxf_1_1compression_1_1BlockInfo:
+.. _cid-xf::compression::blockinfo:
+
+struct xf::compression::BlockInfo
+=================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structxf_1_1compression_1_1BlockInfo_1a5a047270fafd37883e9864301ba875ce:
+.. _cid-xf::compression::blockinfo::compresssize:
+.. _doxid-structxf_1_1compression_1_1BlockInfo_1a7441cde438d96163a8dc49e8b0682c92:
+.. _cid-xf::compression::blockinfo::storedblock:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	ap_uint <17> compressSize
+	bool storedBlock
+

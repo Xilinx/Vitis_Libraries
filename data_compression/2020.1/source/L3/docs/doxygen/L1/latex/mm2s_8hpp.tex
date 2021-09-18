@@ -1,0 +1,111 @@
+\hypertarget{mm2s_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/mm2s.hpp File Reference}
+\label{mm2s_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/mm2s.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/mm2s.\-hpp}}
+}
+
+
+Header for modules used for memory mapped to streaming interface conversion.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{mm2s_8hpp_a4ef9636ea91e8374d90b2df0834b35a3}{\#define {\bfseries G\-E\-T\-\_\-\-D\-I\-F\-F\-\_\-\-I\-F\-\_\-\-B\-I\-G}(x, y)~(x $>$ y) ? (x -\/ y) \-: 0}\label{mm2s_8hpp_a4ef9636ea91e8374d90b2df0834b35a3}
+
+\item 
+\#define {\bfseries S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L}(b\-Idx, out\-Stream, is\-\_\-full, read\-\_\-idx, write\-\_\-idx, local\-\_\-buffer)
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_a499ffa6d30e499c112e1ff0d30f74217}{typedef ap\-\_\-uint$<$ k\-G\-Mem\-D\-Width $>$ {\bfseries xf\-::compression\-::uint\-Mem\-Width\-\_\-t}}\label{namespacexf_1_1compression_a499ffa6d30e499c112e1ff0d30f74217}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_af84cf7c562c7d70f49c7ce56685b7301}{{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E, int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream\-M\-M1} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint16\-\_\-t $>$ out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ out\-Lz77\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})}\label{namespacexf_1_1compression_1_1details_af84cf7c562c7d70f49c7ce56685b7301}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a39cc8d2d24db2e98ebe3eae9c46005ef}{{\footnotesize template$<$int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 8, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S = 8, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 32768, int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream1} (const ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, const uint32\-\_\-t input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})}\label{namespacexf_1_1compression_1_1details_a39cc8d2d24db2e98ebe3eae9c46005ef}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_aa6507e33da30673a39e9989a1a1e691f}{{\footnotesize template$<$int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 8, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S = 4, int B\-L\-O\-C\-K\-\_\-\-S\-I\-Z\-E = 32768, int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream\-Block\-Generator} (const ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint32\-\_\-t $>$ out\-Base\-Idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, uint32\-\_\-t input\-\_\-size)}\label{namespacexf_1_1compression_1_1details_aa6507e33da30673a39e9989a1a1e691f}
+
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2s\-Nb} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, const uint32\-\_\-t \-\_\-input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S, int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream} (const ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, const uint32\-\_\-t input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S, int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream\-Simple} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ uint16\-\_\-t $>$ out\-Size\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream\-Down\-Sizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream)
+\item 
+{\footnotesize template$<$int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 8, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S = 8, int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2mult\-Stream\-Size} (const ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, const uint32\-\_\-t input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2\-Single\-Stream} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&out\-Size\-Stream, const uint32\-\_\-t \-\_\-input\-\_\-size)
+\item 
+{\footnotesize template$<$int I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2\-Stream\-Down\-Sizer} (hls\-::stream$<$ ap\-\_\-uint$<$ I\-N\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&in\-Stream, hls\-::stream$<$ uint16\-\_\-t $>$ \&in\-Size\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream)
+\item 
+{\footnotesize template$<$int O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H, int G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H = 512, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E = 16$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2\-Stream} (const ap\-\_\-uint$<$ G\-M\-E\-M\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ O\-U\-T\-\_\-\-D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, const uint32\-\_\-t \-\_\-input\-\_\-size)
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E, int N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2s\-Nb\-Round\-Off} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, const uint32\-\_\-t \-\_\-input\-\_\-idx\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ out\-Stream\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]}, const uint32\-\_\-t \-\_\-input\-\_\-size\mbox{[}N\-U\-M\-\_\-\-B\-L\-O\-C\-K\-S\mbox{]})
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2s\-Simple} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&outstream, uint32\-\_\-t input\-Size)
+\item 
+{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2s\-Simple} (const ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $\ast$in, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&outstream, uint32\-\_\-t input\-Size)
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a3b0202f258df8649bc8fdac943b165d0}{{\footnotesize template$<$int D\-A\-T\-A\-W\-I\-D\-T\-H, int B\-U\-R\-S\-T\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2s} (const uint\-Mem\-Width\-\_\-t $\ast$in, uint\-Mem\-Width\-\_\-t $\ast$head\-\_\-prev\-\_\-blk, uint\-Mem\-Width\-\_\-t $\ast$orig\-\_\-input\-\_\-data, hls\-::stream$<$ ap\-\_\-uint$<$ D\-A\-T\-A\-W\-I\-D\-T\-H $>$ $>$ \&out\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Stream\-Size, uint32\-\_\-t $\ast$compressd\-\_\-size, uint32\-\_\-t $\ast$in\-\_\-block\-\_\-size, uint32\-\_\-t no\-\_\-blocks, uint32\-\_\-t block\-\_\-size\-\_\-in\-\_\-kb, uint32\-\_\-t head\-\_\-res\-\_\-size, uint32\-\_\-t offset)}\label{namespacexf_1_1compression_1_1details_a3b0202f258df8649bc8fdac943b165d0}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_a06e4c8be7794b2cad357e9eda2cfca68}{const int {\bfseries xf\-::compression\-::k\-G\-Mem\-D\-Width} = 512}\label{namespacexf_1_1compression_a06e4c8be7794b2cad357e9eda2cfca68}
+
+\item 
+\hypertarget{namespacexf_1_1compression_ae3b31fa1202254120d2c391b1df0692c}{const int {\bfseries xf\-::compression\-::c\-\_\-l\-Tree\-Size} = 1024}\label{namespacexf_1_1compression_ae3b31fa1202254120d2c391b1df0692c}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a63e73826ad983458349297e4b1e70db8}{const int {\bfseries xf\-::compression\-::c\-\_\-d\-Tree\-Size} = 64}\label{namespacexf_1_1compression_a63e73826ad983458349297e4b1e70db8}
+
+\item 
+\hypertarget{namespacexf_1_1compression_abee5cdb5326bba1c4643ec20c5560bb4}{const int {\bfseries xf\-::compression\-::c\-\_\-b\-L\-Tree\-Size} = 64}\label{namespacexf_1_1compression_abee5cdb5326bba1c4643ec20c5560bb4}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a9a710f6021ff8fcdfb109306161d635e}{const int {\bfseries xf\-::compression\-::c\-\_\-max\-Code\-Size} = 16}\label{namespacexf_1_1compression_a9a710f6021ff8fcdfb109306161d635e}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used for memory mapped to streaming interface conversion. This file is part of Vitis Data Compression Library. 
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mm2s_8hpp_af822cc6d6c80c4dc0f9272f962956e02}{\index{mm2s.\-hpp@{mm2s.\-hpp}!S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L@{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L}}
+\index{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L@{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L}!mm2s.hpp@{mm2s.\-hpp}}
+\subsubsection[{S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-T\-R\-E\-A\-M\-\_\-\-U\-T\-I\-L\-S\-\_\-\-M\-M2\-S\-\_\-\-I\-F\-\_\-\-N\-O\-T\-\_\-\-F\-U\-L\-L(
+\begin{DoxyParamCaption}
+\item[{}]{b\-Idx, }
+\item[{}]{out\-Stream, }
+\item[{}]{is\-\_\-full, }
+\item[{}]{read\-\_\-idx, }
+\item[{}]{write\-\_\-idx, }
+\item[{}]{local\-\_\-buffer}
+\end{DoxyParamCaption}
+)}}\label{mm2s_8hpp_af822cc6d6c80c4dc0f9272f962956e02}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+is\_full.range(bIdx, bIdx) = outStream.full();                                                  \(\backslash\)
+    if (!is\_full.range(bIdx, bIdx) && (read\_idx[bIdx] != write\_idx[bIdx])) \{                       \(\backslash\)
+        outStream << local\_buffer[bIdx][read\_idx[bIdx]];                                           \(\backslash\)
+        read\_idx[bIdx] += 1;                                                                       \(\backslash\)
+    \}
+\end{DoxyCode}

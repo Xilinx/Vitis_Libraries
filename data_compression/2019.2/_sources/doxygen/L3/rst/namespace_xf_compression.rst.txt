@@ -1,0 +1,25 @@
+.. index:: pair: namespace; compression
+.. _doxid-namespacexf_1_1compression:
+.. _cid-xf::compression:
+
+namespace compression
+=====================
+
+.. toctree::
+	:hidden:
+
+	class_xf_compression_xfLz4.rst
+	class_xf_compression_xfZlib.rst
+
+
+
+
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// classes
+
+	class :ref:`xfLz4<doxid-classxf_1_1compression_1_1xfLz4>` 
+	class :ref:`xfZlib<doxid-classxf_1_1compression_1_1xfZlib>` 
+

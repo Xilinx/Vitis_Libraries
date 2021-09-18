@@ -1,0 +1,60 @@
+\hypertarget{zstd__encoders_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-encoders.hpp File Reference}
+\label{zstd__encoders_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-encoders.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/zstd\-\_\-encoders.\-hpp}}
+}
+
+
+Header for modules used in Z\-S\-T\-D compression kernel.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}zstd\-\_\-specs.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}compress\-\_\-utils.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ad34e43bfc2c788a488aa7975c6a5bb62}{{\footnotesize template$<$int M\-A\-X\-\_\-\-B\-I\-T\-S$>$ }\\void {\bfseries xf\-::compression\-::details\-::zstd\-Huff\-Bit\-Packer} (hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ M\-A\-X\-\_\-\-B\-I\-T\-S $>$, 1 $>$ $>$ \&hf\-Encoded\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 2 $>$ $>$ \&hf\-Bit\-Stream)}\label{namespacexf_1_1compression_1_1details_ad34e43bfc2c788a488aa7975c6a5bb62}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a3249cc010c24daeb311579d7d7b76eb1}{{\footnotesize template$<$int M\-A\-X\-\_\-\-B\-I\-T\-S, int I\-N\-S\-T\-A\-N\-C\-E\-S = 1$>$ }\\void {\bfseries xf\-::compression\-::details\-::zstd\-Huffman\-Encoder} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 1 $>$ $>$ \&in\-Val\-Stream, hls\-::stream$<$ bool $>$ \&rle\-Flag\-Stream, hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ M\-A\-X\-\_\-\-B\-I\-T\-S $>$, 1 $>$ $>$ \&hf\-Code\-Stream, hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Huffman\-Code\-\_\-dt$<$ M\-A\-X\-\_\-\-B\-I\-T\-S $>$, 1 $>$ $>$ \&hf\-Encoded\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&hf\-Lit\-Meta\-Stream)}\label{namespacexf_1_1compression_1_1details_a3249cc010c24daeb311579d7d7b76eb1}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a0f239bf58235aa6c5d03be7ae9396755}{uint8\-\_\-t {\bfseries xf\-::compression\-::details\-::get\-Optimal\-Table\-Log} (const uint8\-\_\-t max\-Log, uint16\-\_\-t symbol\-Size, uint16\-\_\-t current\-Max\-Code)}\label{namespacexf_1_1compression_1_1details_a0f239bf58235aa6c5d03be7ae9396755}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ac8d166936f424584d8aa741e3c3fe27f}{{\footnotesize template$<$int M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H = 17$>$ }\\void {\bfseries xf\-::compression\-::details\-::normalize\-Freq} (ap\-\_\-uint$<$ M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H $>$ $\ast$in\-Freq, uint16\-\_\-t symbol\-Size, uint16\-\_\-t cur\-Max\-Code\-Val, uint8\-\_\-t table\-Log, int16\-\_\-t $\ast$norm\-Table)}\label{namespacexf_1_1compression_1_1details_ac8d166936f424584d8aa741e3c3fe27f}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a7fc6178753059f379a66a6439bcf83c3}{{\footnotesize template$<$int M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H = 17$>$ }\\void {\bfseries xf\-::compression\-::details\-::normalized\-Table\-Gen} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H, 1 $>$ $>$ \&in\-Freq\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 16, 1 $>$ $>$ norm\-Table\-Stream\mbox{[}2\mbox{]})}\label{namespacexf_1_1compression_1_1details_a7fc6178753059f379a66a6439bcf83c3}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a0ec7aca44dfb13513cd99d48c8fb8e2c}{void {\bfseries xf\-::compression\-::details\-::fse\-Header\-Gen} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 16, 1 $>$ $>$ \&norm\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 2 $>$ $>$ \&fse\-Header\-Stream)}\label{namespacexf_1_1compression_1_1details_a0ec7aca44dfb13513cd99d48c8fb8e2c}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a0076202ec4cd1a1c84df27dbadfc7c57}{void {\bfseries xf\-::compression\-::details\-::fse\-Encoding\-Table\-Gen} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 16, 1 $>$ $>$ \&norm\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Table\-Stream)}\label{namespacexf_1_1compression_1_1details_a0076202ec4cd1a1c84df27dbadfc7c57}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a1c980691ea075e292deea233197eab27}{void {\bfseries xf\-::compression\-::details\-::separate\-Lit\-Seq\-Table\-Streams} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Lit\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Seq\-Table\-Stream)}\label{namespacexf_1_1compression_1_1details_a1c980691ea075e292deea233197eab27}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a4b365d7c459617dbd48d6cabe4af1d48}{{\footnotesize template$<$int M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H = 17$>$ }\\void {\bfseries xf\-::compression\-::details\-::fse\-Table\-Gen} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H, 1 $>$ $>$ \&in\-Freq\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 2 $>$ $>$ \&fse\-Header\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Lit\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Seq\-Table\-Stream)}\label{namespacexf_1_1compression_1_1details_a4b365d7c459617dbd48d6cabe4af1d48}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a4cf82d05384e7a9960ae0da84462bb63}{bool {\bfseries xf\-::compression\-::details\-::read\-Fse\-Table} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Table\-Stream, ap\-\_\-uint$<$ 36 $>$ $\ast$fse\-State\-Bits\-Table, uint16\-\_\-t $\ast$fse\-Next\-State\-Table, uint8\-\_\-t \&table\-Log, uint16\-\_\-t \&max\-Freq\-L\-L)}\label{namespacexf_1_1compression_1_1details_a4cf82d05384e7a9960ae0da84462bb63}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ab8cbded998b91305f96f88694c68fe40}{{\footnotesize template$<$int B\-I\-T\-S\-T\-R\-E\-A\-M\-\_\-\-D\-W\-I\-D\-T\-H = 64$>$ }\\void {\bfseries xf\-::compression\-::details\-::fse\-Encode\-Symbol} (uint8\-\_\-t symbol, ap\-\_\-uint$<$ 36 $>$ $\ast$fse\-State\-Bits\-Table, uint16\-\_\-t $\ast$fse\-Next\-State\-Table, uint16\-\_\-t \&fse\-State, ap\-\_\-uint$<$ B\-I\-T\-S\-T\-R\-E\-A\-M\-\_\-\-D\-W\-I\-D\-T\-H $>$ \&bitstream, uint8\-\_\-t \&bit\-Count, bool is\-Init)}\label{namespacexf_1_1compression_1_1details_ab8cbded998b91305f96f88694c68fe40}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_ade4d7cf7d969cc8674fe2f5afecd8f90}{void {\bfseries xf\-::compression\-::details\-::fse\-Encode\-Lit\-Header} (hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 4, 1 $>$ $>$ \&huf\-Weight\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Lit\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 2 $>$ $>$ \&encoded\-Out\-Stream)}\label{namespacexf_1_1compression_1_1details_ade4d7cf7d969cc8674fe2f5afecd8f90}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a901ee77e7f4c843a5afeff4cc4f31d21}{{\footnotesize template$<$int M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H$>$ }\\void {\bfseries xf\-::compression\-::details\-::fse\-Encode\-Sequences} (hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Sequence\-\_\-dt$<$ M\-A\-X\-\_\-\-F\-R\-E\-Q\-\_\-\-D\-W\-I\-D\-T\-H $>$, 1 $>$ $>$ \&in\-Seq\-Stream, hls\-::stream$<$ D\-S\-Vector\-Stream\-\_\-dt$<$ Sequence\-\_\-dt$<$ 8 $>$, 1 $>$ $>$ \&in\-Seq\-Code\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 36, 1 $>$ $>$ \&fse\-Seq\-Table\-Stream, hls\-::stream$<$ Int\-Vector\-Stream\-\_\-dt$<$ 8, 4 $>$ $>$ \&encoded\-Out\-Stream)}\label{namespacexf_1_1compression_1_1details_a901ee77e7f4c843a5afeff4cc4f31d21}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in Z\-S\-T\-D compression kernel. This file is part of Vitis Data Compression Library. 

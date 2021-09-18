@@ -1,0 +1,63 @@
+\hypertarget{lz4__decompress__stream_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-decompress\-\_\-stream.hpp File Reference}
+\label{lz4__decompress__stream_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-decompress\-\_\-stream.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L2/include/lz4\-\_\-decompress\-\_\-stream.\-hpp}}
+}
+
+
+Header for L\-Z4 decompression streaming kernel.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ap\-\_\-axi\-\_\-sdata.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}kernel\-\_\-stream\-\_\-utils.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-optional.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-decompress.\-hpp\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{lz4__decompress__stream_8hpp_a31a6872795fec3b57775c7e0059fee83}{\#define {\bfseries M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}~65536}\label{lz4__decompress__stream_8hpp_a31a6872795fec3b57775c7e0059fee83}
+
+\item 
+\hypertarget{lz4__decompress__stream_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}{\#define {\bfseries H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E}~M\-A\-X\-\_\-\-O\-F\-F\-S\-E\-T}\label{lz4__decompress__stream_8hpp_a43034bdd0ae7c6267b05ff35ae97cddf}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{lz4__decompress__stream_8hpp_a30127c29afa9819235396bcf49617435}{xil\-Lz4\-Decompress\-Stream} (hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&inaxistream, hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&outaxistream, uint32\-\_\-t input\-Size, uint32\-\_\-t output\-Size)
+\begin{DoxyCompactList}\small\item\em L\-Z4 decompression streaming kernel. It takes input from axi kernel stream and writes decompressed data back to output axi kernel stream. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for L\-Z4 decompression streaming kernel. This file is part of Vitis Data Compression Library. 
+
+\subsection{Function Documentation}
+\hypertarget{lz4__decompress__stream_8hpp_a30127c29afa9819235396bcf49617435}{\index{lz4\-\_\-decompress\-\_\-stream.\-hpp@{lz4\-\_\-decompress\-\_\-stream.\-hpp}!xil\-Lz4\-Decompress\-Stream@{xil\-Lz4\-Decompress\-Stream}}
+\index{xil\-Lz4\-Decompress\-Stream@{xil\-Lz4\-Decompress\-Stream}!lz4_decompress_stream.hpp@{lz4\-\_\-decompress\-\_\-stream.\-hpp}}
+\subsubsection[{xil\-Lz4\-Decompress\-Stream}]{\setlength{\rightskip}{0pt plus 5cm}void xil\-Lz4\-Decompress\-Stream (
+\begin{DoxyParamCaption}
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&}]{inaxistream, }
+\item[{hls\-::stream$<$ ap\-\_\-axiu$<$ 8, 0, 0, 0 $>$ $>$ \&}]{outaxistream, }
+\item[{uint32\-\_\-t}]{input\-Size, }
+\item[{uint32\-\_\-t}]{output\-Size}
+\end{DoxyParamCaption}
+)}}\label{lz4__decompress__stream_8hpp_a30127c29afa9819235396bcf49617435}
+
+
+L\-Z4 decompression streaming kernel. It takes input from axi kernel stream and writes decompressed data back to output axi kernel stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em inaxistream} & Input axi kernel stream \\
+\hline
+{\em outaxistream} & Output axi kernel stream \\
+\hline
+{\em input\-Size} & Input compressed data size \\
+\hline
+{\em output\-Size} & Output decompressed data size \\
+\hline
+\end{DoxyParams}

@@ -1,0 +1,296 @@
+.. index:: pair: class; xf::compression::xfLz4
+.. _doxid-classxf_1_1compression_1_1xfLz4:
+.. _cid-xf::compression::xflz4:
+
+class xf::compression::xfLz4
+============================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "lz4.hpp"
+
+
+Overview
+~~~~~~~~
+
+:ref:`xfLz4 <doxid-classxf_1_1compression_1_1xfLz4>` class.
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+
+.. FunctionSection
+
+Methods
+~~~~~~~
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1a842fe00ba79eb9301b37bb32c12c076f:
+.. _cid-xf::compression::xflz4::init:
+
+init
+----
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	int init (
+	    const std::string& binaryFile,
+	    uint8_t flow,
+	    uint32_t block_size_kb
+	    )
+
+Initialize the class object.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - binaryFile
+
+        - file to be read
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1a7b49cab9833b4c0fd72f0802b82f55dd:
+.. _cid-xf::compression::xflz4::release:
+
+release
+-------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	int release ()
+
+release
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1a45a50df3cff6267dc53e40173782abb3:
+.. _cid-xf::compression::xflz4::compress:
+
+compress
+--------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	uint64_t compress (
+	    uint8_t* in,
+	    uint8_t* out,
+	    uint64_t actual_size,
+	    uint32_t host_buffer_size,
+	    bool file_list_flag
+	    )
+
+This module does the sequential execution of compression where all the I/O operations and kernel execution are done one after another in sequential order.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input byte sequence
+
+    *
+        - out
+
+        - output byte sequence
+
+    *
+        - actual_size
+
+        - input size
+
+    *
+        - host_buffer_size
+
+        - host buffer size
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1a65869a4ddc168cee2717d6a1ec307050:
+.. _cid-xf::compression::xflz4::decompress:
+
+decompress
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	uint64_t decompress (
+	    uint8_t* in,
+	    uint8_t* out,
+	    uint64_t actual_size,
+	    uint64_t original_size,
+	    uint32_t host_buffer_size,
+	    bool file_list_flag
+	    )
+
+Decompress.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input byte sequence
+
+    *
+        - out
+
+        - output byte sequence
+
+    *
+        - actual_size
+
+        - input size
+
+    *
+        - original_size
+
+        - original size
+
+    *
+        - host_buffer_size
+
+        - host buffer size
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1a014c00651904af5d39700bac287effb9:
+.. _cid-xf::compression::xflz4::decompressfile:
+
+decompressFile
+--------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	uint64_t decompressFile (
+	    std::string& inFile_name,
+	    std::string& outFile_name,
+	    uint64_t actual_size,
+	    bool file_list_flag,
+	    bool m_flow
+	    )
+
+This module does the memory mapped execution of decompression where the I/O operations and kernel execution is done in sequential order.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - in
+
+        - input byte sequence
+
+    *
+        - out
+
+        - output byte sequence
+
+    *
+        - actual_size
+
+        - input size
+
+    *
+        - original_size
+
+        - original size
+
+    *
+        - host_buffer_size
+
+        - host buffer size
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1a71de6fcf62d9257dfd50c11eae2225d0:
+.. _cid-xf::compression::xflz4::compressfile:
+
+compressFile
+------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	uint64_t compressFile (
+	    std::string& inFile_name,
+	    std::string& outFile_name,
+	    uint64_t actual_size,
+	    bool file_list_flag,
+	    bool m_flow
+	    )
+
+This module is provided to support compress API and it's not recommended to use for high throughput.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - inFile_name
+
+        - input file name
+
+    *
+        - outFile_name
+
+        - output file name
+
+    *
+        - actual_size
+
+        - input size
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1ae424eb8b26ebc94d6812a8e96da1a6b6:
+.. _cid-xf::compression::xflz4::xflz4:
+
+xfLz4
+-----
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfLz4 ()
+
+Class constructor.
+
+.. _doxid-classxf_1_1compression_1_1xfLz4_1acb8256eddba24bb3049737ba2771fd98:
+.. _cid-xf::compression::xflz4::~xflz4:
+
+~xfLz4
+------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	~xfLz4 ()
+
+Class destructor.
+

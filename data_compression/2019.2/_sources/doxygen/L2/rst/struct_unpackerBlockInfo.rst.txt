@@ -1,0 +1,32 @@
+.. index:: pair: struct; unpackerBlockInfo
+.. _doxid-structunpackerBlockInfo:
+.. _cid-unpackerblockinfo:
+
+struct unpackerBlockInfo
+========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-structunpackerBlockInfo_1a741d08923eefe7ae2979c3f511af6b57:
+.. _cid-unpackerblockinfo::compressedsize:
+.. _doxid-structunpackerBlockInfo_1add12586bec0bc42280a57955c79836fc:
+.. _cid-unpackerblockinfo::blocksize:
+.. _doxid-structunpackerBlockInfo_1ad1ff9bae24778d0633e2f0e6a47f1546:
+.. _cid-unpackerblockinfo::blockstartidx:
+.. _doxid-structunpackerBlockInfo_1a8898717738b6d1e46890f71340badd1d:
+.. _cid-unpackerblockinfo::padding:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	uint32_t compressedSize
+	uint32_t blockSize
+	uint32_t blockStartIdx
+	uint32_t padding[(GMEM_DATAWIDTH/32)-3]
+

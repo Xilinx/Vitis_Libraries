@@ -1,0 +1,50 @@
+\hypertarget{checksum__wrapper_8hpp}{\section{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/checksum\-\_\-wrapper.hpp File Reference}
+\label{checksum__wrapper_8hpp}\index{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/checksum\-\_\-wrapper.\-hpp@{/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L1/include/hw/checksum\-\_\-wrapper.\-hpp}}
+}
+
+
+Header for modules used in Z\-L\-I\-B/\-G\-Z\-I\-P compression kernel.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}xf\-\_\-security/adler32.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}xf\-\_\-security/crc32.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stream\-\_\-downsizer.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a540e772583334e7e55f459963f84a284}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::details\-::mm2s32} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $\ast$8 $>$ $\ast$in, const ap\-\_\-uint$<$ 32 $>$ $\ast$in\-Checksum\-Data, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Checksum\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Len\-Stream, hls\-::stream$<$ bool $>$ \&out\-Len\-Stream\-Eos, ap\-\_\-uint$<$ 32 $>$ input\-Size)}\label{namespacexf_1_1compression_1_1details_a540e772583334e7e55f459963f84a284}
+
+\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a9f7fc7dc6f5d23afbe445ed247252b83}{{\footnotesize template$<$int I\-N\-W\-I\-D\-T\-H = 32$>$ }\\void {\bfseries xf\-::compression\-::details\-::s2mm32} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Stream, hls\-::stream$<$ bool $>$ \&in\-Stream\-Eos, ap\-\_\-uint$<$ 32 $>$ $\ast$out\-Checksum\-Data)}\label{namespacexf_1_1compression_1_1details_a9f7fc7dc6f5d23afbe445ed247252b83}
+
+\item 
+{\footnotesize template$<$int W$>$ }\\void {\bfseries xf\-::compression\-::details\-::crc32} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&crc\-Init\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$W $>$ $>$ \&in\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 5 $>$ $>$ \&in\-Pack\-Len\-Strm, hls\-::stream$<$ bool $>$ \&end\-In\-Pack\-Len\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Strm, hls\-::stream$<$ bool $>$ \&end\-Out\-Strm)
+\begin{DoxyCompactList}\small\item\em crc32 computes the C\-R\-C32 check value of an input data. \end{DoxyCompactList}\item 
+\hypertarget{namespacexf_1_1compression_1_1details_a9f48c52902f05781179ed4852d71a14a}{{\footnotesize template$<$int W$>$ }\\void {\bfseries xf\-::compression\-::details\-::adler32} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&adler\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ W $\ast$8 $>$ $>$ \&in\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 5 $>$ $>$ \&in\-Pack\-Len\-Strm, hls\-::stream$<$ bool $>$ \&end\-In\-Pack\-Len\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Strm, hls\-::stream$<$ bool $>$ \&end\-Out\-Strm)}\label{namespacexf_1_1compression_1_1details_a9f48c52902f05781179ed4852d71a14a}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a063f86a9b69a976ad8dd84c8e535174e}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::adler32\-\_\-mm} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $\ast$8 $>$ $\ast$in, ap\-\_\-uint$<$ 32 $>$ $\ast$adler\-Data, ap\-\_\-uint$<$ 32 $>$ input\-Size)}\label{namespacexf_1_1compression_a063f86a9b69a976ad8dd84c8e535174e}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a2513635c481ab1f0bed0f2f436180b84}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::crc32\-\_\-mm} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $\ast$8 $>$ $\ast$in, ap\-\_\-uint$<$ 32 $>$ $\ast$crc\-Data, ap\-\_\-uint$<$ 32 $>$ input\-Size)}\label{namespacexf_1_1compression_a2513635c481ab1f0bed0f2f436180b84}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a6e9230c0ea9b2019011e7d1abd5722d1}{{\footnotesize template$<$int W$>$ }\\void {\bfseries xf\-::compression\-::checksum32} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&checksum\-Init\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$W $>$ $>$ \&in\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Len\-Strm, hls\-::stream$<$ bool $>$ \&end\-In\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Strm, hls\-::stream$<$ bool $>$ \&end\-Out\-Strm, bool checksum\-Type)}\label{namespacexf_1_1compression_a6e9230c0ea9b2019011e7d1abd5722d1}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a754f89277f925886a0ea5da992c74a1a}{{\footnotesize template$<$int W$>$ }\\void {\bfseries xf\-::compression\-::checksum32} (hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&checksum\-Init\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 8 $\ast$W $>$ $>$ \&in\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&in\-Len\-Strm, hls\-::stream$<$ bool $>$ \&end\-In\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Strm, hls\-::stream$<$ bool $>$ \&end\-Out\-Strm, hls\-::stream$<$ ap\-\_\-uint$<$ 2 $>$ $>$ \&checksum\-Type\-Strm)}\label{namespacexf_1_1compression_a754f89277f925886a0ea5da992c74a1a}
+
+\item 
+\hypertarget{namespacexf_1_1compression_adfc37ba9b4d2b1123413970b6a2f23ce}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E$>$ }\\void {\bfseries xf\-::compression\-::checksum32\-\_\-mm} (const ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E $\ast$8 $>$ $\ast$in, ap\-\_\-uint$<$ 32 $>$ $\ast$checksum\-Data, ap\-\_\-uint$<$ 32 $>$ input\-Size, const bool checksum\-Type)}\label{namespacexf_1_1compression_adfc37ba9b4d2b1123413970b6a2f23ce}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in Z\-L\-I\-B/\-G\-Z\-I\-P compression kernel. This file is part of Vitis Data Compression Library. 

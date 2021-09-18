@@ -1,0 +1,25 @@
+.. index:: pair: class; xfLz4
+.. _doxid-classxfLz4:
+.. _cid-xflz4:
+
+class xfLz4
+===========
+
+.. toctree::
+	:hidden:
+
+
+
+
+
+.. _doxid-classxfLz4_1aa8ba8ffba63ceb3d39a1600ccc36b227:
+.. _cid-xflz4::xflz4:
+.. _doxid-classxfLz4_1a528f929539a52ae3693c8427da480ba6:
+.. _cid-xflz4::decompress_in_line_multiple_files:
+.. _doxid-classxfLz4_1a506db4fdf6e240ceee97c156cf8695bd:
+.. _cid-xflz4::~xflz4:
+.. _doxid-classxfLz4_1ae646fa73ab42f5b86172d5bedb18f8bd:
+.. _cid-xflz4::get_file_size:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+

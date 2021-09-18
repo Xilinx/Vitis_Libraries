@@ -1,0 +1,54 @@
+\hypertarget{lz4__decompress_8hpp}{\section{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz4\-\_\-decompress.hpp File Reference}
+\label{lz4__decompress_8hpp}\index{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz4\-\_\-decompress.\-hpp@{/wrk/xhdhdnobkup3/rbhartar/xfc/zstd/docs/master\-Update/gh\-\_\-pages/xf\-\_\-compression/\-L1/include/hw/lz4\-\_\-decompress.\-hpp}}
+}
+
+
+Header for modules used in L\-Z4 decompression kernel.  
+
+
+{\ttfamily \#include \char`\"{}hls\-\_\-stream.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz\-\_\-decompress.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lz4\-\_\-specs.\-hpp\char`\"{}}\\*
+{\ttfamily \#include $<$ap\-\_\-int.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structxf_1_1compression_1_1lz4BlockInfo}{xf\-::compression\-::lz4\-Block\-Info}
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_ace06702fa203fa573a6dbf4690ec6e03}{typedef struct \\*
+\hyperlink{structxf_1_1compression_1_1lz4BlockInfo}{xf\-::compression\-::lz4\-Block\-Info} {\bfseries xf\-::compression\-::dt\-\_\-lz4\-Block\-Info}}\label{namespacexf_1_1compression_ace06702fa203fa573a6dbf4690ec6e03}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacexf_1_1compression_aaae093543d5c5d7be652efd45c19cd9f}{{\footnotesize template$<$typename T $>$ }\\T {\bfseries xf\-::compression\-::reg} (T d)}\label{namespacexf_1_1compression_aaae093543d5c5d7be652efd45c19cd9f}
+
+\item 
+\hypertarget{namespacexf_1_1compression_acdcd7f74593138e3fc256f5102fb2bec}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S$>$ }\\void {\bfseries xf\-::compression\-::lz4\-Header\-Processing} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ dt\-\_\-lz4\-Block\-Info $>$ \&block\-Info\-Stream, const uint32\-\_\-t input\-Size)}\label{namespacexf_1_1compression_acdcd7f74593138e3fc256f5102fb2bec}
+
+\item 
+void {\bfseries xf\-::compression\-::lz4\-Decompress} (hls\-::stream$<$ ap\-\_\-uint$<$ 8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, uint32\-\_\-t input\-\_\-size)
+\begin{DoxyCompactList}\small\item\em This module reads the compressed data from input stream and decodes the offset, match length and literals by processing in various decompress states. \end{DoxyCompactList}\item 
+\hypertarget{namespacexf_1_1compression_a9ba7799d962d77fb60488ab2d3280e87}{void {\bfseries xf\-::compression\-::lz4\-Decompress\-Simple} (hls\-::stream$<$ ap\-\_\-uint$<$ 8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 32 $>$ $>$ \&out\-Stream, uint32\-\_\-t input\-\_\-size, bool uncomp\-\_\-flag)}\label{namespacexf_1_1compression_a9ba7799d962d77fb60488ab2d3280e87}
+
+\item 
+\hypertarget{namespacexf_1_1compression_af40eaeb7fb0cb1d4ffeb3e2158a0f2ff}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, class S\-I\-Z\-E\-\_\-\-D\-T  = uint32\-\_\-t$>$ }\\void {\bfseries xf\-::compression\-::lz4\-Multi\-Byte\-Decompress} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&litlen\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&lit\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ 16 $>$ $>$ \&offset\-Stream, hls\-::stream$<$ S\-I\-Z\-E\-\_\-\-D\-T $>$ \&matchlen\-Stream, hls\-::stream$<$ dt\-\_\-lz4\-Block\-Info $>$ \&block\-Info\-Stream)}\label{namespacexf_1_1compression_af40eaeb7fb0cb1d4ffeb3e2158a0f2ff}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a2c9512d50b1338eed41902b82a4d6bde}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::lz4\-Core\-Decompress\-Engine} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eo\-S, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream, hls\-::stream$<$ uint32\-\_\-t $>$ \&block\-Size\-Stream)}\label{namespacexf_1_1compression_a2c9512d50b1338eed41902b82a4d6bde}
+
+\item 
+\hypertarget{namespacexf_1_1compression_a35649dfabbaaf9eeb28519c691885f87}{{\footnotesize template$<$int P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S, int H\-I\-S\-T\-O\-R\-Y\-\_\-\-S\-I\-Z\-E$>$ }\\void {\bfseries xf\-::compression\-::lz4\-Decompress\-Engine} (hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&in\-Stream, hls\-::stream$<$ ap\-\_\-uint$<$ P\-A\-R\-A\-L\-L\-E\-L\-\_\-\-B\-Y\-T\-E\-S $\ast$8 $>$ $>$ \&out\-Stream, hls\-::stream$<$ bool $>$ \&out\-Stream\-Eo\-S, hls\-::stream$<$ uint32\-\_\-t $>$ \&out\-Size\-Stream, const uint32\-\_\-t \-\_\-input\-\_\-size)}\label{namespacexf_1_1compression_a35649dfabbaaf9eeb28519c691885f87}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Header for modules used in L\-Z4 decompression kernel. This file is part of Vitis Data Compression Library. 

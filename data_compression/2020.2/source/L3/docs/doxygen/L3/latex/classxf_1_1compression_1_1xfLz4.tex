@@ -1,0 +1,165 @@
+\hypertarget{classxf_1_1compression_1_1xfLz4}{\section{xf\-:\-:compression\-:\-:xf\-Lz4 Class Reference}
+\label{classxf_1_1compression_1_1xfLz4}\index{xf\-::compression\-::xf\-Lz4@{xf\-::compression\-::xf\-Lz4}}
+}
+
+
+{\ttfamily \#include $<$lz4.\-hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classxf_1_1compression_1_1xfLz4_a842fe00ba79eb9301b37bb32c12c076f}{init} (const std\-::string \&binary\-File, uint8\-\_\-t flow, uint32\-\_\-t block\-\_\-size\-\_\-kb)
+\begin{DoxyCompactList}\small\item\em Initialize the class object. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfLz4_a7b49cab9833b4c0fd72f0802b82f55dd}{int \hyperlink{classxf_1_1compression_1_1xfLz4_a7b49cab9833b4c0fd72f0802b82f55dd}{release} ()}\label{classxf_1_1compression_1_1xfLz4_a7b49cab9833b4c0fd72f0802b82f55dd}
+
+\begin{DoxyCompactList}\small\item\em release \end{DoxyCompactList}\item 
+uint64\-\_\-t \hyperlink{classxf_1_1compression_1_1xfLz4_a45a50df3cff6267dc53e40173782abb3}{compress} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, uint64\-\_\-t actual\-\_\-size, uint32\-\_\-t host\-\_\-buffer\-\_\-size, bool file\-\_\-list\-\_\-flag)
+\begin{DoxyCompactList}\small\item\em This module does the sequential execution of compression where all the I/\-O operations and kernel execution are done one after another in sequential order. \end{DoxyCompactList}\item 
+uint64\-\_\-t \hyperlink{classxf_1_1compression_1_1xfLz4_a65869a4ddc168cee2717d6a1ec307050}{decompress} (uint8\-\_\-t $\ast$in, uint8\-\_\-t $\ast$out, uint64\-\_\-t actual\-\_\-size, uint64\-\_\-t original\-\_\-size, uint32\-\_\-t host\-\_\-buffer\-\_\-size, bool file\-\_\-list\-\_\-flag)
+\begin{DoxyCompactList}\small\item\em Decompress. \end{DoxyCompactList}\item 
+uint64\-\_\-t \hyperlink{classxf_1_1compression_1_1xfLz4_a014c00651904af5d39700bac287effb9}{decompress\-File} (std\-::string \&in\-File\-\_\-name, std\-::string \&out\-File\-\_\-name, uint64\-\_\-t actual\-\_\-size, bool file\-\_\-list\-\_\-flag, bool m\-\_\-flow)
+\begin{DoxyCompactList}\small\item\em This module does the memory mapped execution of decompression where the I/\-O operations and kernel execution is done in sequential order. \end{DoxyCompactList}\item 
+uint64\-\_\-t \hyperlink{classxf_1_1compression_1_1xfLz4_a71de6fcf62d9257dfd50c11eae2225d0}{compress\-File} (std\-::string \&in\-File\-\_\-name, std\-::string \&out\-File\-\_\-name, uint64\-\_\-t actual\-\_\-size, bool file\-\_\-list\-\_\-flag, bool m\-\_\-flow)
+\begin{DoxyCompactList}\small\item\em This module is provided to support compress A\-P\-I and it's not recommended to use for high throughput. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfLz4_ae424eb8b26ebc94d6812a8e96da1a6b6}{\hyperlink{classxf_1_1compression_1_1xfLz4_ae424eb8b26ebc94d6812a8e96da1a6b6}{xf\-Lz4} ()}\label{classxf_1_1compression_1_1xfLz4_ae424eb8b26ebc94d6812a8e96da1a6b6}
+
+\begin{DoxyCompactList}\small\item\em Class constructor. \end{DoxyCompactList}\item 
+\hypertarget{classxf_1_1compression_1_1xfLz4_acb8256eddba24bb3049737ba2771fd98}{\hyperlink{classxf_1_1compression_1_1xfLz4_acb8256eddba24bb3049737ba2771fd98}{$\sim$xf\-Lz4} ()}\label{classxf_1_1compression_1_1xfLz4_acb8256eddba24bb3049737ba2771fd98}
+
+\begin{DoxyCompactList}\small\item\em Class destructor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{classxf_1_1compression_1_1xfLz4}{xf\-Lz4} class. Class containing methods for L\-Z4 compression and decompression to be executed on host side. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classxf_1_1compression_1_1xfLz4_a45a50df3cff6267dc53e40173782abb3}{\index{xf\-::compression\-::xf\-Lz4@{xf\-::compression\-::xf\-Lz4}!compress@{compress}}
+\index{compress@{compress}!xf::compression::xfLz4@{xf\-::compression\-::xf\-Lz4}}
+\subsubsection[{compress}]{\setlength{\rightskip}{0pt plus 5cm}uint64\-\_\-t xf\-::compression\-::xf\-Lz4\-::compress (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{uint64\-\_\-t}]{actual\-\_\-size, }
+\item[{uint32\-\_\-t}]{host\-\_\-buffer\-\_\-size, }
+\item[{bool}]{file\-\_\-list\-\_\-flag}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfLz4_a45a50df3cff6267dc53e40173782abb3}
+
+
+This module does the sequential execution of compression where all the I/\-O operations and kernel execution are done one after another in sequential order. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+{\em host\-\_\-buffer\-\_\-size} & host buffer size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfLz4_a71de6fcf62d9257dfd50c11eae2225d0}{\index{xf\-::compression\-::xf\-Lz4@{xf\-::compression\-::xf\-Lz4}!compress\-File@{compress\-File}}
+\index{compress\-File@{compress\-File}!xf::compression::xfLz4@{xf\-::compression\-::xf\-Lz4}}
+\subsubsection[{compress\-File}]{\setlength{\rightskip}{0pt plus 5cm}uint64\-\_\-t xf\-::compression\-::xf\-Lz4\-::compress\-File (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{in\-File\-\_\-name, }
+\item[{std\-::string \&}]{out\-File\-\_\-name, }
+\item[{uint64\-\_\-t}]{actual\-\_\-size, }
+\item[{bool}]{file\-\_\-list\-\_\-flag, }
+\item[{bool}]{m\-\_\-flow}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfLz4_a71de6fcf62d9257dfd50c11eae2225d0}
+
+
+This module is provided to support compress A\-P\-I and it's not recommended to use for high throughput. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in\-File\-\_\-name} & input file name \\
+\hline
+{\em out\-File\-\_\-name} & output file name \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfLz4_a65869a4ddc168cee2717d6a1ec307050}{\index{xf\-::compression\-::xf\-Lz4@{xf\-::compression\-::xf\-Lz4}!decompress@{decompress}}
+\index{decompress@{decompress}!xf::compression::xfLz4@{xf\-::compression\-::xf\-Lz4}}
+\subsubsection[{decompress}]{\setlength{\rightskip}{0pt plus 5cm}uint64\-\_\-t xf\-::compression\-::xf\-Lz4\-::decompress (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t $\ast$}]{in, }
+\item[{uint8\-\_\-t $\ast$}]{out, }
+\item[{uint64\-\_\-t}]{actual\-\_\-size, }
+\item[{uint64\-\_\-t}]{original\-\_\-size, }
+\item[{uint32\-\_\-t}]{host\-\_\-buffer\-\_\-size, }
+\item[{bool}]{file\-\_\-list\-\_\-flag}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfLz4_a65869a4ddc168cee2717d6a1ec307050}
+
+
+Decompress. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+{\em original\-\_\-size} & original size \\
+\hline
+{\em host\-\_\-buffer\-\_\-size} & host buffer size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfLz4_a014c00651904af5d39700bac287effb9}{\index{xf\-::compression\-::xf\-Lz4@{xf\-::compression\-::xf\-Lz4}!decompress\-File@{decompress\-File}}
+\index{decompress\-File@{decompress\-File}!xf::compression::xfLz4@{xf\-::compression\-::xf\-Lz4}}
+\subsubsection[{decompress\-File}]{\setlength{\rightskip}{0pt plus 5cm}uint64\-\_\-t xf\-::compression\-::xf\-Lz4\-::decompress\-File (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{in\-File\-\_\-name, }
+\item[{std\-::string \&}]{out\-File\-\_\-name, }
+\item[{uint64\-\_\-t}]{actual\-\_\-size, }
+\item[{bool}]{file\-\_\-list\-\_\-flag, }
+\item[{bool}]{m\-\_\-flow}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfLz4_a014c00651904af5d39700bac287effb9}
+
+
+This module does the memory mapped execution of decompression where the I/\-O operations and kernel execution is done in sequential order. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & input byte sequence \\
+\hline
+{\em out} & output byte sequence \\
+\hline
+{\em actual\-\_\-size} & input size \\
+\hline
+{\em original\-\_\-size} & original size \\
+\hline
+{\em host\-\_\-buffer\-\_\-size} & host buffer size \\
+\hline
+\end{DoxyParams}
+\hypertarget{classxf_1_1compression_1_1xfLz4_a842fe00ba79eb9301b37bb32c12c076f}{\index{xf\-::compression\-::xf\-Lz4@{xf\-::compression\-::xf\-Lz4}!init@{init}}
+\index{init@{init}!xf::compression::xfLz4@{xf\-::compression\-::xf\-Lz4}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}int xf\-::compression\-::xf\-Lz4\-::init (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{binary\-File, }
+\item[{uint8\-\_\-t}]{flow, }
+\item[{uint32\-\_\-t}]{block\-\_\-size\-\_\-kb}
+\end{DoxyParamCaption}
+)}}\label{classxf_1_1compression_1_1xfLz4_a842fe00ba79eb9301b37bb32c12c076f}
+
+
+Initialize the class object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em binary\-File} & file to be read \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/wrk/xhdhdnobkup3/meghanat/xf\-\_\-compression/\-L3/include/lz4.\-hpp\end{DoxyCompactItemize}
