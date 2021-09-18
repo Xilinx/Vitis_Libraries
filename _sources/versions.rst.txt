@@ -1,0 +1,21 @@
+.. 
+   Copyright 2019 Xilinx, Inc.
+
+.. meta::
+   :keywords: Vitis, tutorials, core, development
+   :description: Learn how to develop accelerated applications using the Vitis core development kit.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+##################
+Previous Versions
+##################
+
+Vitis library documentation is organized by release version.
+
+Use the following links to browse the Vitis library documentation for a specific release.
+
+* `2019.2 <https://xilinx.github.io/Vitis_Libraries/>`_
+
+      
