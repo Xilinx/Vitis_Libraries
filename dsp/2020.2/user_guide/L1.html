@@ -1,0 +1,1743 @@
+
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2-Dimensional(Matrix) FFT L1 FPGA Module" href="L1_2dfft.html" />
+    <link rel="prev" title="Release Note" href="../release.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="header parbase aem-GridColumn aem-GridColumn--default--12">
+								<noindex>
+									<header data-component="header">
+										<nav class="navbar navbar-default aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid main-nav">
+													<div class="row">
+														<div class="col-xs-12">
+															<div class="logo-column">
+																<div class="logo">
+																	<a href="https://www.xilinx.com/">
+																	<img src="https://www.xilinx.com/etc.clientlibs/site/clientlibs/xilinx/all/resources/imgs/header/xilinx-header-logo.svg" title="Xilinx Inc"/>
+																	</a>
+																</div>
+															</div>
+															<div class="navbar-column">
+																<div class="navbar navbar-collapse collapse" id="xilinx-main-menu">
+																	<div class="mobile-search-container">
+																		<div id="headerSearchBox" class="headerSearch"
+																			data-component="header-search"
+																			data-redirect-if-empty="false"
+																			data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																			data-coveo-organization-id="xilinxcomprode2rjoqok">
+																			<div class='coveo-search-section'>
+																				<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																				<ul class="dropdown-menu options">
+																					<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																						<a href="#">
+																						All</a>
+																					</li>
+																					<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com//products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Silicon Devices</a>
+																					</li>
+																					<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com//products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Boards and Kits</a>
+																					</li>
+																					<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com//products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																						<a href="#">
+																						Intellectual Property</a>
+																					</li>
+																					<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																						<a href="#">
+																						Support</a>
+																						<ul>
+																							<li data-label="Documentation" data-action-link="https://www.xilinx.com//support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																								<a href="#">
+																								Documentation</a>
+																							</li>
+																							<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com//support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																								<a href="#">
+																								Knowledge Base</a>
+																							</li>
+																							<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																								<a href="#">
+																								Community Forums</a>
+																							</li>
+																						</ul>
+																					</li>
+																					<li data-label="Partners" data-action-link="https://www.xilinx.com//alliance/member-keyword-search.html" data-search-hub="Partner">
+																						<a href="#">
+																						Partners</a>
+																					</li>
+																					<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																						<a href="#">
+																						Videos</a>
+																					</li>
+																					<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																						<a href="#">
+																						Press</a>
+																					</li>
+																				</ul>
+																				<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																				<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																			</div>
+																		</div>
+																	</div>
+																	<ul class="nav navbar-nav nav-justified">
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/applications.html">
+																			Applications</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/products/silicon-devices.html">
+																			Products</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://developer.xilinx.com/">
+																			Developers</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/support.html">
+																			Support</a>
+																		</li>
+																		<li class="accordion-toggle-icons" data-component="toggle-dropdown">
+																			<a href="https://www.xilinx.com/about/company-overview.html">
+																			About</a>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+															<script type="text/javascript" src="../_static/js/gtm.js"></script>
+															<!--<div class="mini-nav">
+																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
+																<span></span>
+																<span></span>
+																<span></span>
+																<span></span>
+																</button>
+																<ul class="list-inline">
+																	<li class="dropdown user-menu">
+																		<button data-toggle="dropdown">
+																		<span class="sr-only">Account</span>
+																		<span class="fas fa-user"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li>
+																				<a href="https://www.xilinx.com/myprofile/subscriptions.html">
+																				My Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/registration/create-account.html">
+																				Create Account</a>
+																			</li>
+																			<li>
+																				<a href="https://www.xilinx.com/bin/protected/en/signout">
+																				Sign Out</a>
+																			</li>
+																		</ul>
+																	</li>
+																	<li class="hidden-xs">
+																		<button data-function="search-toggle">
+																		<span class="sr-only">Search</span>
+																		<span class="far fa-search"></span>
+																		</button>
+																	</li>
+																</ul>
+															</div>
+															-->
+															<div class="search-container">
+																<div id="headerSearchBox" class="headerSearch"
+																	data-component="header-search"
+																	data-redirect-if-empty="false"
+																	data-coveo-access-token="xxa237d4dd-f0aa-47fc-9baa-af9121851b33"
+																	data-coveo-organization-id="xilinxcomprode2rjoqok">
+																	<div class='coveo-search-section'>
+																		<div class="CoveoAnalytics" data-search-hub="Site"></div>
+																		<ul class="dropdown-menu options">
+																			<li class="option" data-label="All" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-search-hub="Site">
+																				<a href="#">
+																				All</a>
+																			</li>
+																			<li data-label="Silicon Devices" data-action-link="https://www.xilinx.com/products/silicon-devices/si-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Silicon Devices</a>
+																			</li>
+																			<li data-label="Boards and Kits" data-action-link="https://www.xilinx.com/products/boards-and-kits/bk-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Boards and Kits</a>
+																			</li>
+																			<li data-label="Intellectual Property" data-action-link="https://www.xilinx.com/products/intellectual-property/ip-keyword-search.html" data-search-hub="Product">
+																				<a href="#">
+																				Intellectual Property</a>
+																			</li>
+																			<li data-label="Support" class="option" data-action-link="https://www.xilinx.com/search/support-keyword-search.html" data-search-hub="Support">
+																				<a href="#">
+																				Support</a>
+																				<ul>
+																					<li data-label="Documentation" data-action-link="https://www.xilinx.com/support/documentation-navigation/documentation-keyword-search.html" data-search-hub="Document">
+																						<a href="#">
+																						Documentation</a>
+																					</li>
+																					<li data-label="Knowledge Base" data-action-link="https://www.xilinx.com/support/answer-navigation/answer-keyword-search.html" data-search-hub="AnswerRecord">
+																						<a href="#">
+																						Knowledge Base</a>
+																					</li>
+																					<li data-label="Community Forums" data-action-link="https://www.xilinx.com/search/forums-keyword-search.html" data-search-hub="Forums">
+																						<a href="#">
+																						Community Forums</a>
+																					</li>
+																				</ul>
+																			</li>
+																			<li data-label="Partners" data-action-link="https://www.xilinx.com/alliance/member-keyword-search.html" data-search-hub="Partner">
+																				<a href="#">
+																				Partners</a>
+																			</li>
+																			<li data-label="Videos" data-action-link="https://www.xilinx.com/video/video-keyword-search.html" data-search-hub="Video">
+																				<a href="#">
+																				Videos</a>
+																			</li>
+																			<li data-label="Press" data-action-link="https://www.xilinx.com/search/press-keyword-search.html" data-search-hub="Press">
+																				<a href="#">
+																				Press</a>
+																			</li>
+																		</ul>
+																		<a href="#" class="btn dropdown-toggle value" data-toggle="dropdown"></a>
+																		<div class="CoveoSearchbox" data-id="coveosearchbox" data-action-link="https://www.xilinx.com/search/site-keyword-search.html" data-placeholder="Search Xilinx"></div>
+																	</div>
+																</div>
+																<button data-function="search-toggle">
+																<span class="sr-only">Search</span>
+																<span class="far fa-times"></span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</nav>
+									</header>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis DSP Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2020.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">L1 User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1-Dimensional(Line) FFT L1 FPGA Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-instance-support">Multi-Instance Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-type-support-for-synthesis">Data Type Support for Synthesis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-point">Fixed Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#floating-point">Floating Point</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#managing-bit-growth-in-fft-stages">Managing Bit Growth in FFT Stages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ssr-fft-grow-to-max-width">SSR_FFT_GROW_TO_MAX_WIDTH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssr-fft-scale">SSR_FFT_SCALE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssr-fft-no-scale">SSR_FFT_NO_SCALE</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configurations-for-fixed-point-implementation-recommended-flow">Configurations for Fixed Point Implementation (Recommended Flow)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start-with-floating-point-model">Start With Floating Point Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-point-modeling-and-implementation">Fixed Point Modeling and Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fixed-point-model">Fixed Point Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#selecting-bit-widths-for-inputs">Selecting Bit Widths for Inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#twiddle-factor-or-sine-cosine-lookup-table-quantization">Twiddle Factor or Sine/Cosine Lookup Table Quantization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#choosing-the-best-scaling-mode">Choosing the Best Scaling Mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssr-fft-no-scaling">SSR_FFT_NO_SCALING</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">SSR_FFT_GROW_TO_MAX_WIDTH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">SSR_FFT_SCALE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#d-ssr-fft-library-usage">1-D SSR FFT Library Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-point-1-d-ssr-fft-usage">Fixed Point 1-D SSR FFT Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#floating-point-1-d-ssr-fft-usage">Floating Point 1-D SSR FFT Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-ssr-fft-input-array-reading-and-writing-considerations">1-D SSR FFT Input Array Reading and Writing Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-ssr-fft-usage-in-dataflow-region-streaming-non-streaming-connections">1-D SSR FFT Usage in Dataflow Region, Streaming/Non-Streaming Connections</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#streaming-connection">Streaming Connection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#non-streaming-connection">Non-Streaming Connection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#d-fft-examples">1-D FFT Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#d-fixed-point-fft-example">1-D Fixed Point FFT Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compiling-and-building-example-hls-project">Compiling and Building Example HLS Project</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#d-floating-point-fft-example">1-D Floating Point FFT Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Compiling and Building Example HLS Project</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#d-fft-tests">1-D FFT Tests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#launching-an-individual-test">Launching an Individual Test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#launching-all-the-tests-collectivey">Launching all the Tests Collectivey</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#l1-performance-benchmarks-and-qor">L1 Performance Benchmarks and QoR</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#d-fixed-point-fft">1-D Fixed Point FFT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-floating-point-fp32-fft">1-D Floating Point (fp32) FFT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L1_2dfft.html">2-Dimensional(Matrix) FFT L1 FPGA Module</a></li>
+</ul>
+
+            
+			
+			<p class="caption"><span class="caption-text">This Page</span></p>
+				<ul class="current">
+				  <li class="toctree-l1"><a href="../_sources/user_guide/L1.rst.txt"
+						rel="nofollow">Show Source</a></li>
+				</ul>
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis DSP Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>1-Dimensional(Line) FFT L1 FPGA Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user_guide/L1.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="toctree-wrapper compound" id="l1-fft-label">
+<p class="caption"><span class="caption-text">Table of Contents</span><a class="headerlink" href="#l1-fft-label" title="Permalink to this toctree">¶</a></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1-Dimensional(Line) FFT L1 FPGA Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-instance-support">Multi-Instance Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-type-support-for-synthesis">Data Type Support for Synthesis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-point">Fixed Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#floating-point">Floating Point</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#managing-bit-growth-in-fft-stages">Managing Bit Growth in FFT Stages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ssr-fft-grow-to-max-width">SSR_FFT_GROW_TO_MAX_WIDTH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssr-fft-scale">SSR_FFT_SCALE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssr-fft-no-scale">SSR_FFT_NO_SCALE</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configurations-for-fixed-point-implementation-recommended-flow">Configurations for Fixed Point Implementation (Recommended Flow)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start-with-floating-point-model">Start With Floating Point Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-point-modeling-and-implementation">Fixed Point Modeling and Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#d-ssr-fft-library-usage">1-D SSR FFT Library Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-point-1-d-ssr-fft-usage">Fixed Point 1-D SSR FFT Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#floating-point-1-d-ssr-fft-usage">Floating Point 1-D SSR FFT Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-ssr-fft-input-array-reading-and-writing-considerations">1-D SSR FFT Input Array Reading and Writing Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-ssr-fft-usage-in-dataflow-region-streaming-non-streaming-connections">1-D SSR FFT Usage in Dataflow Region, Streaming/Non-Streaming Connections</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#d-fft-examples">1-D FFT Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#d-fixed-point-fft-example">1-D Fixed Point FFT Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-floating-point-fft-example">1-D Floating Point FFT Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-fft-tests">1-D FFT Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#l1-performance-benchmarks-and-qor">L1 Performance Benchmarks and QoR</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#d-fixed-point-fft">1-D Fixed Point FFT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-floating-point-fp32-fft">1-D Floating Point (fp32) FFT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="dimensional-line-fft-l1-fpga-module">
+<h1>1-Dimensional(Line) FFT L1 FPGA Module<a class="headerlink" href="#dimensional-line-fft-l1-fpga-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<span id="fixed-fft-params-struct-label"></span><h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Vitis DSP Library offers a fully synthesizable Super Sample data Rate (SSR) FFT with a systolic
+architecture to process multiple input samples every clock cycle. The number of samples
+processed in parallel per cycle is denoted by the SSR factor. The FFT is implemented as a C++
+template function that synthesizes into a streaming architecture. The FFT architecture used for implementation can be parameterized through template parameters, which are grouped in a C++ struct of type <strong>ssr_fft_default_params</strong>. A new structure can be defined by extending the default structure and re-defining required member constants as follows:</p>
+<pre class="highlight literal-block">
+<span></span><span class="k">struct</span> <span class="nl">ssr_fft_fix_params</span><span class="p">:</span><span class="n">ssr_fft_default_params</span>
+<span class="p">{</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">R</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">scaling_mode_enum</span> <span class="n">scaling_mode</span> <span class="o">=</span> <span class="n">SSR_FFT_NO_SCALING</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">fft_output_order_enum</span> <span class="n">output_data_order</span> <span class="o">=</span> <span class="n">SSR_FFT_NATURAL</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">twiddle_table_word_length</span> <span class="o">=</span> <span class="mi">18</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">twiddle_table_integer_part_length</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">transform_direction_enum</span> <span class="n">transform_direction</span> <span class="o">=</span> <span class="n">FORWARD_TRANSFORM</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">butterfly_rnd_mode_enum</span> <span class="n">butterfly_rnd_mode</span> <span class="o">=</span> <span class="n">TRN</span><span class="p">;</span>
+<span class="p">};</span>
+</pre>
+<p>The structure above defines:</p>
+<ul class="simple">
+<li>N: Size or length of transform</li>
+<li>R: The number of samples to be processed in parallel SSR Factor and radix of FFT algorithm used</li>
+<li>scaling_mode: The scaling mode as enumeration type (FFT has three different scaling modes)</li>
+<li>output_data_order: Which will decided if data will be in natural order or digit reversed transposed order</li>
+<li>twiddle_table_word_length: Defines total number of bits to be used for storing twiddle table factors</li>
+<li>twiddle_table_integer_part_length: The number of integer bits used for storing integer part of twiddles</li>
+<li>transform_direction : Defines the direction of transform, inverse transform (IFFT) or forward transform (FFT)</li>
+<li>butterfly_rnd_mode : Defines the rounding mode used by butterflies in FFT stages</li>
+</ul>
+</div>
+<div class="section" id="multi-instance-support">
+<h2>Multi-Instance Support<a class="headerlink" href="#multi-instance-support" title="Permalink to this headline">¶</a></h2>
+<p>Single-instance example:</p>
+<pre class="highlight literal-block">
+<span></span><span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">fftParams</span><span class="o">&gt;&lt;</span><span class="n">ssr_fft_fix_params</span><span class="o">&gt;</span><span class="p">(...);</span>
+</pre>
+<p>The current release of Vitis FFT supports the use of multiple instances of 1-D SSR FFT in a single design. To enable the use of multiple instances, the fft function takes as an input a new template parameter besides the parameter structure. This parameter gets a default value if no value is provided for it. But if multiple instance support is required, all the instances used should be provided with the unique integer template parameter, like:</p>
+<pre class="highlight literal-block">
+<span></span><span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">fftParams</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;&lt;</span><span class="n">ssr_fft_fix_params</span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">fftParams</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;&lt;</span><span class="n">ssr_fft_fix_params</span><span class="o">&gt;</span><span class="p">(...);</span>
+</pre>
+</div>
+<div class="section" id="data-type-support-for-synthesis">
+<h2>Data Type Support for Synthesis<a class="headerlink" href="#data-type-support-for-synthesis" title="Permalink to this headline">¶</a></h2>
+<p>Currently 1-D SSR FFT supports fixed point and floating point complex inputs for synthesis.</p>
+<div class="section" id="fixed-point">
+<h3>Fixed Point<a class="headerlink" href="#fixed-point" title="Permalink to this headline">¶</a></h3>
+<p>The fixed point FFT implementation is based on fixed point data types <strong>std::complex&lt;ap_fixed&lt;&gt;&gt;</strong> which are used for synthesis and implementation. It is possible to use floating point types <strong>std::complex&lt;float&gt;</strong> and <strong>std::complex&lt;double&gt;</strong> for simulation but these floating point complex models will consume massive resources if synthesized to hardware.
+For the best results with fixed point type, limit the data bit width to 27 bits (integer + fraction) as it helps to map multiplication and addition within FFT butterflies directly onto a single DSP block. Larger inputs can be used but may lead to slower Fmax and more resource utilization. Finally, note that the complex exponential/twiddle factor storage is on 18 bits (16F+2I bits). The selection of 18-bit is made keeping in view the 18x27 multipliers available within DSP blocks on Xilinx FPGAs.</p>
+</div>
+<div class="section" id="floating-point">
+<span id="float-fft-params-struct-label"></span><h3>Floating Point<a class="headerlink" href="#floating-point" title="Permalink to this headline">¶</a></h3>
+<p>1-D SSR FFT also supports synthesis for single or double precision floating point type. For synthesizing a complex floating point type, it is required that std::complex type not to be used as a complex wrapper. Since this wrapper has some issues and it is required that a wrapper class provided with the Vitis DSP library called <strong>complex_wrapper&lt;…&gt;</strong> is used for wrapping complex float numbers.
+Also while synthesizing floating point 1-D SSR FFT the parameters in the structure which carry information such as scaling mode, twiddle factor storage bits, butterfly rounding mode etc. which are only related to fixed point data-path, carry no meaning. Instead FFT parameter structure can simply define relevant parameters as shown below:</p>
+<pre class="highlight literal-block">
+<span></span><span class="k">struct</span> <span class="nl">ssr_fft_fix_params</span><span class="p">:</span><span class="n">ssr_fft_default_params</span>
+<span class="p">{</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">R</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">fft_output_order_enum</span> <span class="n">output_data_order</span> <span class="o">=</span> <span class="n">SSR_FFT_NATURAL</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">transform_direction_enum</span> <span class="n">transform_direction</span> <span class="o">=</span> <span class="n">FORWARD_TRANSFORM</span><span class="p">;</span>
+<span class="p">};</span>
+</pre>
+</div>
+</div>
+<div class="section" id="managing-bit-growth-in-fft-stages">
+<h2>Managing Bit Growth in FFT Stages<a class="headerlink" href="#managing-bit-growth-in-fft-stages" title="Permalink to this headline">¶</a></h2>
+<p>The bit growth management is required for fixed point implementation only. The FFT supports three different modes to manage bit growth between FFT stages. These three modes can be used to allow bit growth in every stage, or use scaling in every stage without any
+bit growth, or allow bit growth until 27 bits and then start using scaling. The detailed description for the different modes are as follows:</p>
+<div class="section" id="ssr-fft-grow-to-max-width">
+<h3>SSR_FFT_GROW_TO_MAX_WIDTH<a class="headerlink" href="#ssr-fft-grow-to-max-width" title="Permalink to this headline">¶</a></h3>
+<p>When the scaling_mode constant in the parameter structure is set to SSR_FFT_GROW_TO_MAX_WIDTH, it specifies growth from stage to stage, starting from the first stage to a specified max bit width. The output bit width grows until 27 bits and then saturates. The output bit width grows by log2(R) bits in every stage, and then
+maxes outs at 27 bits to keep the butterﬂy operation mapping to DSPs. This option is useful
+when the initial input bit width is less than 27 bits.</p>
+</div>
+<div class="section" id="ssr-fft-scale">
+<h3>SSR_FFT_SCALE<a class="headerlink" href="#ssr-fft-scale" title="Permalink to this headline">¶</a></h3>
+<p>When the scaling_mode constant in the parameter structure is set to SSR_FFT_SCALE, it enables scaling of outputs in every stage. The output is scaled in every stage and loses precision. An FFT with size L and Radix=SSR=R has logR(L) stages. This option is useful when the input bit width is already close to 27 bits and it is required that the output does not grow beyond 27 bits so that multiplication can be mapped to DSPs.</p>
+</div>
+<div class="section" id="ssr-fft-no-scale">
+<h3>SSR_FFT_NO_SCALE<a class="headerlink" href="#ssr-fft-no-scale" title="Permalink to this headline">¶</a></h3>
+<p>When the scaling_mode constant in the parameter structure is set
+to SSR_FFT_NO_SCALE, the bit growth is allowed in every stage and the output grows
+unbounded by log2(R) in every stage. This setting can be useful when high precision is
+required. However, if the output bit width grows beyond 27 bits, the multiplication may not
+map to only DSPs, but also start using FPGA fabric logic in combination. This may reduce the
+clock speed and increase resource utilization.</p>
+</div>
+</div>
+<div class="section" id="configurations-for-fixed-point-implementation-recommended-flow">
+<h2>Configurations for Fixed Point Implementation (Recommended Flow)<a class="headerlink" href="#configurations-for-fixed-point-implementation-recommended-flow" title="Permalink to this headline">¶</a></h2>
+<p>1-D SSR FFT supports multiple scaling modes and provides options to define input bit-widths and bit-width required to store exponential values (sin/cos in look-up tables). The signal to noise ratio
+that defines the quality of the output signal depends on the choice of these different parameters and
+also on the quantification scheme used for converting real valued continuous signal or ﬂoating point
+signal to fixed point. The range and the resolution of the signal, essentially the integer bits and
+the fraction bits, should be selected carefully to have good signal-to-noise ratio (SNR) at the
+output of the FFT. Following is the recommended ﬂow for working with 1-D SSR FFT HLS IP for fixed point implementation.</p>
+<div class="section" id="start-with-floating-point-model">
+<h3>Start With Floating Point Model<a class="headerlink" href="#start-with-floating-point-model" title="Permalink to this headline">¶</a></h3>
+<p>Currently, 1-D SSR FFT can be used with ap_fxied&lt;&gt;, ﬂoat, and double types. The following table list
+the support for synthesis and simulation.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="32%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">Synthesis</th>
+<th class="head">Simulation</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>std::complex &lt;ap_fixed &lt;&gt;&gt;</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>std::complex&lt;float&gt;</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>std::complex&lt;double&gt;</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr class="row-odd"><td>complex_wrapper&lt;double&gt;</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+<tr class="row-even"><td>complex_wrapper&lt;float&gt;</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+</tbody>
+</table>
+<p>The recommended starting point is to start with ﬂoat/double inner type in <strong>std::complex&lt;&gt;</strong>
+and verify the SNR against a reference model, such as the Matlab/Python/Octave/Simulink
+whichever modeling language or tool is used by generating golden test vectors. The
+synthesizable version of the 1-D SSR FFT currently supports ap_fixed&lt;&gt; and float as inner type, so the next
+step in case of fixed point implementation is to start experimenting with a fixed point model.</p>
+</div>
+<div class="section" id="fixed-point-modeling-and-implementation">
+<h3>Fixed Point Modeling and Implementation<a class="headerlink" href="#fixed-point-modeling-and-implementation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fixed-point-model">
+<h4>Fixed Point Model<a class="headerlink" href="#fixed-point-model" title="Permalink to this headline">¶</a></h4>
+<p>Once working with the fixed point model, the recommended scaling mode to start with is
+<strong>SSR_FFT_NO_SCALING</strong>. The input bit-widths should be selected as follows.
+Create an initial fixed point model with type <strong>ap_fixed&lt;WL, IL&gt;</strong>. The overall input type is
+<strong>std::complex &lt;ap_fixed&lt;WL, IL&gt;</strong>, essentially storing the real and imaginary parts of the
+input.
+These parts are:</p>
+<ul class="simple">
+<li>IL: Integer bits, selected based on the input range</li>
+<li>WL: Word Length = IL + FL, where FL is the Fraction Bit Width, selected based on input resolution</li>
+</ul>
+<p>In this case, 1-D SSR FFT internally does not use any scaling because of scaling mode selection.
+Therefore, no potential scaling errors will be seen at the output. With scaling mode set to no
+scaling, you can experiment with other fixed point parameters such as integer bits and fraction
+bits used to represent the input samples. The simplistic approach would be to select bits required
+to represent the input based on the input range and resolution but depending on the other input
+characteristic user can optimize these bit widths.</p>
+</div>
+<div class="section" id="selecting-bit-widths-for-inputs">
+<h4>Selecting Bit Widths for Inputs<a class="headerlink" href="#selecting-bit-widths-for-inputs" title="Permalink to this headline">¶</a></h4>
+<p>The selection of input bit width depends on the input data characteristics and the required
+resolution, and is a data-dependent choice essentially depending on range and resolution of the
+test data. For simulation purposes, you can select an arbitrarily large number of bits for
+representing integer and fraction bits. For implementation, you must make an optimal choice
+keeping in mind the required SNR.
+The recommended strategy is to do the following:</p>
+<ul class="simple">
+<li>Keep the scaling mode fixed to <strong>SSR_FFT_NO_SCALING</strong></li>
+<li>Change the input bits for integer and fraction representation by observing the signal to noise ratio at the output of 1-D SSR FFT</li>
+<li>Reduce the bit widths such that the output SNR requirement is met by the minimum required bits</li>
+</ul>
+<p>Once the SNR requirements are met, you can proceed to other fixed point optimizations, such as
+bits required to store complex exponential tables and 1-D SSR FFT output scaling options.</p>
+</div>
+<div class="section" id="twiddle-factor-or-sine-cosine-lookup-table-quantization">
+<h4>Twiddle Factor or Sine/Cosine Lookup Table Quantization<a class="headerlink" href="#twiddle-factor-or-sine-cosine-lookup-table-quantization" title="Permalink to this headline">¶</a></h4>
+<p>You can change the number of bits used to quantize the sin/cos table (twiddle factors/complex
+exponential). The recommended setting is total 18 bits and 2 bits for the fraction. This setting
+ensures that during multiplication, the twiddle/sin/cos input can map to the 18-bit input of the
+DSP block in Xilinx® FPGAs. The model can synthesize and work for other large bit widths, but
+performance might be worse due to multiplication operations not mapping to a single DSP
+block and being implemented using multiple DSP blocks and/or FPGA fabric.
+The twiddle factor width reduction can be useful when the initial setting for twiddle factor
+storage is larger than 18 bits. By default, it is set to use 18 bits with 2 bits reserved for the signed
+integer part. The 2 bits are essentially needed to accurately represent a range of numbers from +1 to -1 (for sin/cos) in the table.</p>
+</div>
+<div class="section" id="choosing-the-best-scaling-mode">
+<h4>Choosing the Best Scaling Mode<a class="headerlink" href="#choosing-the-best-scaling-mode" title="Permalink to this headline">¶</a></h4>
+<p>After the choice for input bit width and twiddle factors is made with no scaling, which gives
+acceptable SNR or root mean square (RMS) error at the output of fixed point 1-D SSR FFT, you can
+start to experiment with the choice of scaling modes. Three different scaling modes are available
+with 1-D SSR FFT. The recommended strategy is to start with <strong>SSR_FFT_NO_SCALING</strong>. If there is an
+acceptable SNR/RMS error at the output, switch to <strong>SSR_FFT_GROW_TO_MAX_WIDTHi</strong>. If there is
+still an acceptable SNR/RMS error, switch to <strong>SSR_FFT_SCALE</strong> and observe the SNR/RMS again if it
+is acceptable keep using <strong>SSR_FFT_SCALE</strong>, otherwise revert back to another mode which gives
+acceptable SNR/RMS error at the output.</p>
+</div>
+<div class="section" id="ssr-fft-no-scaling">
+<h4>SSR_FFT_NO_SCALING<a class="headerlink" href="#ssr-fft-no-scaling" title="Permalink to this headline">¶</a></h4>
+<p>This is the recommended mode to start with. It performs no scaling but the output bit width
+grows in every stage by log2(R=SSR). For example, if the size of FFT is N=64 and SSR=R=4 is
+selected, then 1-D SSR FFT has log4 (64) = 3 stages. If the input bit width is W, the output bit width is
+W+3*2=W+6. Therefore, the output would have grown by logR(N)*log2(R) bits.
+SSR_FFT_NO_SCALING preserves the accuracy of the computation, but at maximum hardware
+cost. The 1-D SSR FFT computation is done in stages with one stage feeding the next stage, so
+essentially it is a pipeline of stages.
+One of the downfalls of uncontrolled bit growth is that at some point, in a certain stage when
+output widths of one stage increase beyond a limit where multiplication operation cannot map to DSP
+blocks on the FPGA, the design performance in terms of speed may fall considerably. For
+example, for a given design with logR(N) * log2(R) + Input Bit Width(IL+FL) &gt; max(DSP
+Block Multiplier Inputs), you might consider using one of the other two available scaling
+schemes. For Xilinx DSP48 blocks with 18x27 multipliers, the condition will be logR(N) * log2(R) + Input Bit Width &gt; 27.</p>
+</div>
+<div class="section" id="id1">
+<h4>SSR_FFT_GROW_TO_MAX_WIDTH<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>In this mode, a hybrid approach is used. Initially the bit growth is allowed if there is any room for
+growth. If in the starting FFT stages, the output bit-widths are smaller than what can be mapped
+to DSP blocks, it allows the bit growth. When the bit width grows beyond what can be mapped
+to DSP blocks, it will start scaling the output.</p>
+</div>
+<div class="section" id="id2">
+<h4>SSR_FFT_SCALE<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>When you know that for a given 1-D FFT size N and SSR factor, the output will grow beyond a limit
+which DSP multiplier blocks cannot handle on a given FPGA device, you have the option to set
+the scaling on for every stage by selecting the SSR_FFT_SCALE option. This option scales the
+output in every stage by right shifting the output by log2 (SSR=R) in every stage.
+The recommended flow only provides a guideline for creating a fixed point model and discusses
+options available for it in 1-D SSR FFT. Depending on the design SNR/RMS requirements the user is
+required to carefully select all these parameters keeping in view different performance and
+SNR/RMS requirements for given application.</p>
+</div>
+</div>
+</div>
+<div class="section" id="d-ssr-fft-library-usage">
+<h2>1-D SSR FFT Library Usage<a class="headerlink" href="#d-ssr-fft-library-usage" title="Permalink to this headline">¶</a></h2>
+<p>Following sections describe how to use FFT from Vitis DSP Library.</p>
+<div class="section" id="fixed-point-1-d-ssr-fft-usage">
+<h3>Fixed Point 1-D SSR FFT Usage<a class="headerlink" href="#fixed-point-1-d-ssr-fft-usage" title="Permalink to this headline">¶</a></h3>
+<p>The Vitis 1-D FFT L1 module can be used in a C++ HLS design by:
+1- cloning the Vitis DSP Library git repository and add the following path to compiler include path:</p>
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/include/hw/vitis_fft/fixed/</span></code></div></blockquote>
+<p>2- Include <code class="docutils literal notranslate"><span class="pre">vt_fft.hpp</span></code></p>
+<p>3- Use namespace <code class="docutils literal notranslate"><span class="pre">xf::dsp::fft</span></code></p>
+<p>4- Define fft parameter structure say call it <code class="docutils literal notranslate"><span class="pre">params_fix</span></code> by extending <code class="docutils literal notranslate"><span class="pre">ssr_fft_default_params</span></code> like <a class="reference internal" href="#fixed-fft-params-struct-label"><span class="std std-ref">Defining 1-D FFT Parameter Structure</span></a></p>
+<p>5- call <code class="docutils literal notranslate"><span class="pre">fft&lt;params_fix&gt;(input_array,output_array)</span></code></p>
+<p>The following section gives usage examples and explains some other interface level details for use in C++ based
+HLS design.
+To use the 1-D SSR FFT L1 module:</p>
+<ol class="arabic simple">
+<li>Include the <code class="docutils literal notranslate"><span class="pre">vt_fft.hpp</span></code> header:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;vt_fft.hpp&quot;</span>
+</pre>
+<ol class="arabic simple" start="2">
+<li>Use namespace <code class="docutils literal notranslate"><span class="pre">xf::dsp::fft</span></code></li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="p">;</span>
+</pre>
+<ol class="arabic simple" start="3">
+<li>Define a C++ structure that extends <code class="docutils literal notranslate"><span class="pre">ssr_fft_default_params</span></code>:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="k">struct</span> <span class="nl">params_fix</span><span class="p">:</span><span class="n">ssr_fft_default_params</span>
+<span class="p">{</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span><span class="o">-</span><span class="n">SSR_FFT_L</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">R</span><span class="o">=</span><span class="n">SSR_FFT_R</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">scaling_mode_enum</span>
+        <span class="n">scaling_mode</span><span class="o">=</span><span class="n">SSR_FFT_GROW_TO_MAX_WIDTH</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="n">fft_output_order_enum</span>
+        <span class="n">output_data_order</span><span class="o">=</span><span class="n">SSR_FFT_NATURAL</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">twiddle_table_word_length</span><span class="o">=</span><span class="mi">18</span><span class="p">;</span>
+        <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">twiddle_table_intger_part_length</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+<span class="p">};</span>
+</pre>
+<ol class="arabic simple" start="4">
+<li>Call 1-D SSR FFT as follows:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="n">fft</span><span class="o">&lt;</span><span class="n">params_fix</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inD</span><span class="p">,</span><span class="n">outD</span><span class="p">);</span>
+<span class="c1">//OR</span>
+<span class="n">fft</span><span class="o">&lt;</span><span class="n">params_fix</span><span class="p">,</span><span class="n">IID</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inD</span><span class="p">,</span><span class="n">outD</span><span class="p">);</span>
+<span class="c1">// IID: is a constant giving instance ID</span>
+</pre>
+<p>where inD and outD are 2-dimensional complex arrays of ap_fixed, float or double type,
+synthesis and simulation use is already explained in the previous table. The I/O arrays can be
+declared as follows:</p>
+<p><strong>Fixed Point Type</strong>
+First define input type, then using type traits calculate output type
+based on ssr_fft_params struct (output type calculation takes in consideration scaling
+mode based bit-growth and input bit-widths).</p>
+</div>
+<div class="section" id="floating-point-1-d-ssr-fft-usage">
+<h3>Floating Point 1-D SSR FFT Usage<a class="headerlink" href="#floating-point-1-d-ssr-fft-usage" title="Permalink to this headline">¶</a></h3>
+<p>The Vitis 1-D FFT L1 module can be used in a C++ HLS design by:</p>
+<p>1- Cloning the Vitis DSP Library git repository and add the following path to compiler include path:</p>
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/include/hw/vitis_fft/float/</span></code></div></blockquote>
+<p>2- Include <code class="docutils literal notranslate"><span class="pre">vt_fft.hpp</span></code></p>
+<p>3- Use namespace <code class="docutils literal notranslate"><span class="pre">xf::dsp::fft</span></code></p>
+<p>4- Define fft parameter structure lets say call it <code class="docutils literal notranslate"><span class="pre">params_float</span></code> by extending <code class="docutils literal notranslate"><span class="pre">ssr_fft_default_params</span></code> like <a class="reference internal" href="#float-fft-params-struct-label"><span class="std std-ref">Defining 1-D FFT Parameter Structure</span></a></p>
+<p>5- call <code class="docutils literal notranslate"><span class="pre">fft&lt;params_float&gt;(input_array,output_array)</span></code></p>
+<p>The following section gives usage examples and explains some other interface level details for use in C++ based
+HLS design.
+To use the 1-D SSR FFT L1 module:</p>
+<ol class="arabic simple">
+<li>Include the <code class="docutils literal notranslate"><span class="pre">vt_fft.hpp</span></code> header:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;vt_fft.hpp&quot;</span>
+</pre>
+<ol class="arabic simple" start="2">
+<li>Use namespace <code class="docutils literal notranslate"><span class="pre">xf::dsp::fft</span></code></li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="p">;</span>
+</pre>
+<ol class="arabic simple" start="3">
+<li>Define a C++ structure that extends ssr_fft_default_params:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="k">struct</span> <span class="nl">params_float</span><span class="p">:</span><span class="n">ssr_fft_default_params</span>
+<span class="p">{</span>
+   <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+   <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">R</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+   <span class="k">static</span> <span class="k">const</span> <span class="n">fft_output_order_enum</span> <span class="n">output_data_order</span> <span class="o">=</span> <span class="n">SSR_FFT_NATURAL</span><span class="p">;</span>
+   <span class="k">static</span> <span class="k">const</span> <span class="n">transform_direction_enum</span> <span class="n">transform_direction</span> <span class="o">=</span> <span class="n">FORWARD_TRANSFORM</span><span class="p">;</span>
+<span class="p">};</span>
+</pre>
+<ol class="arabic simple" start="4">
+<li>Call 1-D SSR FFT as follows:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="n">fft</span><span class="o">&lt;</span><span class="n">params_float</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inD</span><span class="p">,</span><span class="n">outD</span><span class="p">);</span>
+<span class="c1">//OR</span>
+<span class="n">fft</span><span class="o">&lt;</span><span class="n">ssr_fft_params</span><span class="p">,</span><span class="n">IID</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inD</span><span class="p">,</span><span class="n">outD</span><span class="p">);</span>
+<span class="c1">// IID: is a constant giving instance ID</span>
+</pre>
+<p>where inD and outD are 2-dimensional complex arrays of ap_fixed, float or double type,
+synthesis and simulation use is already explained in the previous table. The I/O arrays can be
+declared as follows:</p>
+<p><strong>Fixed Point Type</strong>:
+First define input type, then using type traits calculate output type
+based on ssr_fft_params struct (output type calculation takes into consideration scaling
+mode based bit-growth and input bit-widths not relevant for type float).</p>
+<pre class="highlight literal-block">
+<span></span><span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="n">I_TYPE</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="o">::</span><span class="n">ssr_fft_output_type</span><span class="o">&lt;</span><span class="n">ssr_fft_params</span><span class="p">,</span><span class="n">I_TYPE</span><span class="o">&gt;::</span><span class="n">t_ssr_fft_out</span> <span class="n">O_TYPE</span><span class="p">;</span>
+<span class="n">I_TYPE</span> <span class="n">inD</span><span class="p">[</span><span class="n">SSR_FFT_R</span><span class="p">][</span><span class="n">SSR_FFT_L</span><span class="o">/</span><span class="n">SSR_FFT_R</span><span class="p">];</span>
+<span class="n">O_TYPE</span> <span class="n">outD</span> <span class="p">[</span><span class="n">R</span><span class="p">][</span><span class="n">L</span><span class="o">/</span><span class="n">R</span><span class="p">];</span>
+</pre>
+<p>Here SSR_FFT_R defines SSR factor and SSR_FFT_L defines the size of the FFT transform.</p>
+<p><strong>Float/Double Type</strong>:
+First define the double/float input type, then using type traits calculate output type based on ssr_fft_params struct.
+For float types the output type calculation will return the same type as input.</p>
+<pre class="highlight literal-block">
+<span></span><span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span> <span class="kt">float</span><span class="o">/</span><span class="kt">double</span> <span class="o">&gt;</span> <span class="n">I_TYPE</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="n">hls</span><span class="o">::</span><span class="n">ssr_fft</span><span class="o">::</span><span class="n">ssr_fft_output_type</span><span class="o">&lt;</span><span class="n">ssr_fft_params</span><span class="p">,</span><span class="n">I_TYPE</span><span class="o">&gt;::</span><span class="n">t_ssr_fft_out</span> <span class="n">O_TYPE</span><span class="p">;</span>
+<span class="n">I_TYPE</span> <span class="n">inD</span><span class="p">[</span><span class="n">SSR_FFT_R</span><span class="p">][</span><span class="n">SSR_FFT_L</span><span class="o">/</span><span class="n">SSR_FFT_R</span><span class="p">];</span>
+<span class="n">O_TYPE</span> <span class="n">outD</span><span class="p">[</span><span class="n">SSR_FFT_R</span><span class="p">][</span><span class="n">SSR_FFT_L</span><span class="o">/</span><span class="n">SSR_FFT_R</span><span class="p">];</span>
+</pre>
+</div>
+<div class="section" id="d-ssr-fft-input-array-reading-and-writing-considerations">
+<h3>1-D SSR FFT Input Array Reading and Writing Considerations<a class="headerlink" href="#d-ssr-fft-input-array-reading-and-writing-considerations" title="Permalink to this headline">¶</a></h3>
+<p>After synthesis, 1-D SSR FFT HLS IP maps to a processing block with buffer interface at both the input
+and output.</p>
+<p>If user requires a streaming 1-D FFT block with FIFO interface at both the input and output, as shown in the following figure:</p>
+<a class="reference internal image-reference" href="../_images/1-ssr_fft_blk_dia.jpg"><img alt="doc tool flow" class="align-center" src="../_images/1-ssr_fft_blk_dia.jpg" style="width: 40%;" /></a>
+<p>They should skip the wrapper <strong>fft</strong> with the buffer-to-stream transformation blocks named array2Stream and stream2Array,
+and directly call the <strong>innerFFT</strong> function in <strong>FFTWrapper</strong> struct.
+If input and output arrays are declared as the following:</p>
+<pre class="highlight literal-block">
+<span></span><span class="n">I_TYPE</span> <span class="n">inD</span><span class="p">[</span><span class="n">R</span><span class="p">][</span><span class="n">L</span><span class="o">/</span><span class="n">R</span><span class="p">];</span>
+<span class="n">O_TYPE</span> <span class="n">outD</span><span class="p">[</span><span class="n">R</span><span class="p">][</span><span class="n">L</span><span class="o">/</span><span class="n">R</span><span class="p">];</span>
+</pre>
+<p>The dimensions with size L/R will be mapped to time and dimension with size R mapped to one
+stream which is R-wide. This mapping places some constraints on how these arrays can be read
+and written to by consumers and producers while writing C++ design using 1-D SSR FFT. These
+constraints stem from the physical mapping of array dimensions to time and parallel wide-accesses.</p>
+<p>All of these constraints will be well handled by <strong>array2Stream</strong> and <strong>stream2Array</strong> blocks,
+user could ignore those details by calling the wrapper with buffer interface instead of the internal streaming block <strong>innerFFT</strong>.
+If the streaming block is required, the read and write on <strong>innerFFT</strong> can be performed as follows:</p>
+<ol class="arabic simple">
+<li>Declares the input and output streams explicitly with corresponding stream depth:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="c1">// input stream of innerFFT</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">I_TYPE</span><span class="p">,</span> <span class="n">FIFO_DEPTH</span><span class="o">&gt;</span> <span class="n">inStrm</span><span class="p">[</span><span class="n">R</span><span class="p">];</span>
+<span class="c1">// output stream of innerFFT</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">O_TYPE</span><span class="p">,</span> <span class="n">FIFO_DEPTH</span><span class="o">&gt;</span> <span class="n">outStrm</span><span class="p">[</span><span class="n">R</span><span class="p">];</span>
+</pre>
+<ol class="arabic simple" start="2">
+<li>Feeds data to the input FIFO, or eats from the output one:</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">L</span> <span class="o">/</span> <span class="n">R</span><span class="p">;</span> <span class="n">t</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">R</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span>
+        <span class="p">{</span>
+    <span class="n">inStrm</span><span class="p">[</span><span class="n">r</span><span class="p">].</span><span class="n">write</span><span class="p">(</span><span class="n">inD</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]);</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">L</span> <span class="o">/</span> <span class="n">R</span><span class="p">;</span> <span class="n">t</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">R</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span>
+        <span class="p">{</span>
+    <span class="n">outD</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">outStrm</span><span class="p">[</span><span class="n">r</span><span class="p">].</span><span class="n">read</span><span class="p">();</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+<p>3. If the 1-D SSR FFT IP is facing another HLS IP in the input chain or output chain, the inner loop
+doing reading and writing should be unrolled.</p>
+</div>
+<div class="section" id="d-ssr-fft-usage-in-dataflow-region-streaming-non-streaming-connections">
+<h3>1-D SSR FFT Usage in Dataflow Region, Streaming/Non-Streaming Connections<a class="headerlink" href="#d-ssr-fft-usage-in-dataflow-region-streaming-non-streaming-connections" title="Permalink to this headline">¶</a></h3>
+<p>1-D SSR FFT internally relies heavily on HLS dataflow optimization. The potential use case for 1-D SSR
+FFT could interconnect with an FFT input or output in two ways:</p>
+<ul class="simple">
+<li>Streaming Connection</li>
+<li>Non-Streaming Connections</li>
+</ul>
+<div class="section" id="streaming-connection">
+<h4>Streaming Connection<a class="headerlink" href="#streaming-connection" title="Permalink to this headline">¶</a></h4>
+<p>In the case of a streaming connection at the input, the scenario should look as follows:</p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#pragma HLS DATAFLOW</span>
+<span class="n">in_dummy_proc</span> <span class="p">(...,</span> <span class="n">fft_in</span><span class="p">);</span>
+<span class="n">innerFFT</span><span class="o">&lt;</span><span class="n">template_param_needed</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fft_in</span><span class="p">,</span> <span class="n">fft_out</span><span class="p">);</span>
+<span class="n">out_dummy_proc</span><span class="p">(</span><span class="n">fft_out</span><span class="p">,</span> <span class="p">....)</span>
+<span class="p">...</span>
+<span class="p">...</span>
+<span class="p">...</span>
+</pre>
+<p>The constraint for input producer is that it should produce an array of stream. The constraint for output consumers is that it should consume an array of stream. These constraints are also described in previous sections.</p>
+</div>
+<div class="section" id="non-streaming-connection">
+<h4>Non-Streaming Connection<a class="headerlink" href="#non-streaming-connection" title="Permalink to this headline">¶</a></h4>
+<p>The current version of the 1-D SSR FFT naturally support non-streaming connection at the output and input.</p>
+<pre class="highlight literal-block">
+<span></span><span class="c1">// just call it</span>
+<span class="n">fft</span><span class="o">&lt;</span><span class="n">params_float</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inD</span><span class="p">,</span> <span class="n">outD</span><span class="p">);</span>
+<span class="c1">//OR</span>
+<span class="n">fft</span><span class="o">&lt;</span><span class="n">ssr_fft_params</span><span class="p">,</span> <span class="n">IID</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inD</span><span class="p">,</span> <span class="n">outD</span><span class="p">);</span>
+<span class="c1">// IID: is a constant giving instance ID</span>
+</pre>
+</div>
+</div>
+</div>
+<div class="section" id="d-fft-examples">
+<h2>1-D FFT Examples<a class="headerlink" href="#d-fft-examples" title="Permalink to this headline">¶</a></h2>
+<p>The following sections provides brief details of examples provided for 1-D Super Sample Rate FFT.</p>
+<div class="section" id="d-fixed-point-fft-example">
+<h3>1-D Fixed Point FFT Example<a class="headerlink" href="#d-fixed-point-fft-example" title="Permalink to this headline">¶</a></h3>
+<p>The example below follows the sequence of steps described in previous sections to do a transform on impulse signal. The listing give below  <code class="docutils literal notranslate"><span class="pre">data_path.hpp</span></code> describes the datapath, by defining size, SSR, data-path bit-widths, scaling mode, out order etc. It also includes top level library interface header <code class="docutils literal notranslate"><span class="pre">vt_fft.hpp</span></code>  which gives to <code class="docutils literal notranslate"><span class="pre">fft</span></code>  function defined in namespace <code class="docutils literal notranslate"><span class="pre">xf::dsp::fft</span></code></p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#ifndef _DATA_PATH_H_</span>
+<span class="cp">#define _DATA_PATH_H_</span>
+<span class="cp">#include</span> <span class="cpf">&lt;ap_fixed.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;complex&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;vt_fft.hpp&quot;</span><span class="cp"></span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="p">;</span>
+
+<span class="c1">// Define FFT Size and Super Sample Rate</span>
+<span class="cp">#define FFT_LEN 16</span>
+<span class="cp">#define SSR 4</span>
+<span class="c1">// Define fixed point input/output bit-widths</span>
+<span class="cp">#define IN_WL 16</span>
+<span class="cp">#define IN_IL 2</span>
+<span class="cp">#define TW_WL 16</span>
+<span class="cp">#define TW_IL 2</span>
+
+<span class="c1">//Define FFT instane ID, every instance created should have unique ID</span>
+<span class="cp">#define IID 0</span>
+
+<span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="n">IN_WL</span><span class="p">,</span> <span class="n">IN_IL</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">T_in</span><span class="p">;</span>
+
+<span class="cm">/* Define parameter structure for FFT that defines</span>
+<span class="cm"> * holds , size, SSR, scaling mode, output order sin/cos</span>
+<span class="cm"> * bit resoulation for storage*/</span>
+<span class="k">struct</span> <span class="nl">fftParams</span> <span class="p">:</span> <span class="n">ssr_fft_default_params</span> <span class="p">{</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="n">FFT_LEN</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">R</span> <span class="o">=</span> <span class="n">SSR</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="n">scaling_mode_enum</span> <span class="n">scaling_mode</span> <span class="o">=</span> <span class="n">SSR_FFT_NO_SCALING</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="n">fft_output_order_enum</span> <span class="n">output_data_order</span> <span class="o">=</span> <span class="n">SSR_FFT_NATURAL</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">twiddle_table_word_length</span> <span class="o">=</span> <span class="n">TW_WL</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">twiddle_table_intger_part_length</span> <span class="o">=</span> <span class="n">TW_IL</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">// Using type traits calculate the output type given FFT param struct</span>
+<span class="c1">// and the input type</span>
+<span class="k">typedef</span> <span class="n">ssr_fft_output_type</span><span class="o">&lt;</span><span class="n">fftParams</span><span class="p">,</span> <span class="n">T_in</span><span class="o">&gt;::</span><span class="n">t_ssr_fft_out</span> <span class="n">T_out</span><span class="p">;</span>
+
+<span class="cp">#endif // _DATA_PATH_H_</span>
+</pre>
+<p>The listing <code class="docutils literal notranslate"><span class="pre">top_module.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">top_module.cpp</span></code> declare and define top level module. The top level function here is very simple it only wraps the core SSR FFT function call in a top level wrapper called  <code class="docutils literal notranslate"><span class="pre">fft_top</span></code></p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;data_path.hpp&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;hls_stream.h&gt;</span><span class="cp"></span>
+
+<span class="kt">void</span> <span class="nf">fft_top</span><span class="p">(</span><span class="n">T_in</span> <span class="n">p_inData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">],</span> <span class="n">T_out</span> <span class="n">p_outData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">]);</span>
+</pre>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;top_module.hpp&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;data_path.hpp&quot;</span><span class="cp"></span>
+
+<span class="kt">void</span> <span class="nf">fft_top</span><span class="p">(</span><span class="n">T_in</span> <span class="n">p_inData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">],</span> <span class="n">T_out</span> <span class="n">p_outData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">fftParams</span><span class="p">,</span> <span class="n">IID</span><span class="o">&gt;</span><span class="p">(</span><span class="n">p_inData</span><span class="p">,</span> <span class="n">p_outData</span><span class="p">);</span>
+<span class="p">}</span>
+</pre>
+<p>The listing below gives main funtion that generates impulse data for FFT input in a 2-dimensional array which is SSRx(Size/SRR) and feeds it to top level which produces a 2-dimensional output array of same dimensions. The impulse input produces a step which is verified and test declared as passed.</p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;top_module.hpp&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">T_in</span> <span class="n">inData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">];</span>
+    <span class="n">T_out</span> <span class="n">outData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">inData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="k">else</span>
+                <span class="n">inData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Added Dummy loop iterations</span>
+        <span class="c1">// to make II measurable in cosim</span>
+        <span class="n">fft_top</span><span class="p">(</span><span class="n">inData</span><span class="p">,</span> <span class="n">outData</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">errs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">].</span><span class="n">real</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">outData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">].</span><span class="n">imag</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">errs</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;--Input Impulse:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">inData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;--Output Step fuction:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">outData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">errs</span><span class="p">;</span>
+<span class="p">}</span>
+</pre>
+<div class="section" id="compiling-and-building-example-hls-project">
+<h4>Compiling and Building Example HLS Project<a class="headerlink" href="#compiling-and-building-example-hls-project" title="Permalink to this headline">¶</a></h4>
+<p>Before compiling and running the example it is required to setup the path to HLS compiler which can be done as follows:
+change the setting of environment variable <strong>TA_PATH</strong> to point to the installation path of your Vitis, and run following command to set up the environment.</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">export</span> <span class="nv">XILINX_VITIS</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vitis/2020.2
+<span class="nb">export</span> <span class="nv">XILINX_VIVADO</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vivado/2020.2
+<span class="nb">source</span> <span class="si">${</span><span class="nv">XILINX_VIVADO</span><span class="si">}</span>/settings64.sh
+</pre>
+<p>The example discussed above is also provided as an example and available at the following path : <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/examples/1Dfix_impluse</span></code> it can be simulated, synthesized or co-simulated as follows:
+Simply go to the directory <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/examples/1Dfix_impluse</span></code> and simulate, build and co-simulate project using : <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">XPART='xcu200-fsgd2104-2-e'</span> <span class="pre">CSIM=1</span> <span class="pre">CSYNTH=1</span> <span class="pre">COSIM=1</span></code> you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target.</p>
+</div>
+</div>
+<div class="section" id="d-floating-point-fft-example">
+<h3>1-D Floating Point FFT Example<a class="headerlink" href="#d-floating-point-fft-example" title="Permalink to this headline">¶</a></h3>
+<p>The use of floating point SSR FFT is very similar to fixed point FFT the following listing  <code class="docutils literal notranslate"><span class="pre">data_path.hpp</span></code> gives parameter struct
+which is simple as compared to fixed point since data-path constants scaling type, input bit-widths etc are not required for floatig point case.
+It essentially requires declaration of Size and SSR factor and output data order by default is set to natural order, if required it can be changed to digital reversed transposed.</p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#ifndef _DATA_PATH_H_</span>
+<span class="cp">#define _DATA_PATH_H_</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;ap_fixed.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;complex&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;vt_fft.hpp&quot;</span><span class="cp"></span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="p">;</span>
+
+<span class="c1">// Define FFT Size and Super Sample Rate</span>
+<span class="cp">#define FFT_LEN 16</span>
+<span class="cp">#define SSR 4</span>
+
+<span class="k">typedef</span> <span class="n">complex_wrapper</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span> <span class="n">T_in</span><span class="p">;</span>
+<span class="cp">#define IID 0</span>
+
+<span class="c1">// Define parameter structure for FFT</span>
+<span class="k">struct</span> <span class="nl">fftParams</span> <span class="p">:</span> <span class="n">ssr_fft_default_params</span> <span class="p">{</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="n">FFT_LEN</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">R</span> <span class="o">=</span> <span class="n">SSR</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// typedef ssr_fft_output_type&lt;fftParams,T_in&gt;::t_ssr_fft_out T_out;</span>
+<span class="k">typedef</span> <span class="n">T_in</span> <span class="n">T_out</span><span class="p">;</span>
+
+<span class="cp">#endif // _DATA_PATH_H_</span>
+</pre>
+<p>The following two listings <code class="docutils literal notranslate"><span class="pre">top_moduel.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">top_module.cpp</span></code> give top level module decleration and definition only.</p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;data_path.hpp&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;hls_stream.h&gt;</span><span class="cp"></span>
+
+<span class="kt">void</span> <span class="nf">fft_top</span><span class="p">(</span><span class="n">T_in</span> <span class="n">p_inData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">],</span> <span class="n">T_out</span> <span class="n">p_outData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">]);</span>
+</pre>
+<pre class="highlight literal-block">
+<span></span>    <span class="cp">#include</span> <span class="cpf">&quot;top_module.hpp&quot;</span><span class="cp"></span>
+    <span class="cp">#include</span> <span class="cpf">&quot;data_path.hpp&quot;</span><span class="cp"></span>
+
+    <span class="kt">void</span> <span class="nf">fft_top</span><span class="p">(</span><span class="n">T_in</span> <span class="n">p_inData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">],</span> <span class="n">T_out</span> <span class="n">p_outData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">])</span> <span class="p">{</span>
+        <span class="n">xf</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">fft</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">fftParams</span><span class="p">,</span> <span class="n">IID</span><span class="o">&gt;</span><span class="p">(</span><span class="n">p_inData</span><span class="p">,</span> <span class="n">p_outData</span><span class="p">);</span>
+<span class="p">}</span>
+</pre>
+<p>The listing below <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> gives main function which creates an impulse input and verfies if the correct output is produced. The only significant change w.r.t to fixed point is the data type declaration and the param struct otherwise this example is very the same like the use of fixed point FFT.</p>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;top_module.hpp&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">T_in</span> <span class="n">inData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">];</span>
+    <span class="n">T_out</span> <span class="n">outData</span><span class="p">[</span><span class="n">SSR</span><span class="p">][</span><span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">inData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="k">else</span>
+                <span class="n">inData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Added Dummy loop iterations</span>
+        <span class="c1">// to make II measurable in cosim</span>
+        <span class="n">fft_top</span><span class="p">(</span><span class="n">inData</span><span class="p">,</span> <span class="n">outData</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">errs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">].</span><span class="n">real</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">outData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">].</span><span class="n">imag</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">errs</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;--Input Impulse:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">inData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;--Output Step fuction:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">FFT_LEN</span> <span class="o">/</span> <span class="n">SSR</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">outData</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;===============================================================&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">errs</span><span class="p">;</span>
+<span class="p">}</span>
+</pre>
+<div class="section" id="id3">
+<h4>Compiling and Building Example HLS Project<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>Before compiling and running the example it is required to setup the path to HLS compiler which can be done as follows:
+change the setting of environment variable <strong>TA_PATH</strong> to point to the installation path of your Vitis, and run following command to set up the environment.</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">export</span> <span class="nv">XILINX_VITIS</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vitis/2020.2
+<span class="nb">export</span> <span class="nv">XILINX_VIVADO</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vivado/2020.2
+<span class="nb">source</span> <span class="si">${</span><span class="nv">XILINX_VIVADO</span><span class="si">}</span>/settings64.sh
+</pre>
+<p>The example discussed above is also provided as an example and available at the following path : <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/examples/1Dfloat_impluse</span></code> it can be simulated, synthesized or co-simulated as follows:
+Simply go to the directory <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/examples/1Dfloat_impluse</span></code> and simulate, build and co-simulate project using : <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">XPART='xcu200-fsgd2104-2-e'</span> <span class="pre">CSIM=1</span> <span class="pre">CSYNTH=1</span> <span class="pre">COSIM=1</span></code> you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target</p>
+</div>
+</div>
+<div class="section" id="d-fft-tests">
+<h3>1-D FFT Tests<a class="headerlink" href="#d-fft-tests" title="Permalink to this headline">¶</a></h3>
+<p>Different tests are provided for fixed point and floating point 1-D FFT. These tests can be ran individually using the makefile or they can all be lauched at the same time by using a provided script. All the 1-D FFT tests are in folder <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/tests/hw/1dfft</span></code></p>
+<div class="section" id="launching-an-individual-test">
+<h4>Launching an Individual Test<a class="headerlink" href="#launching-an-individual-test" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt>To launch an individual test first it is required to setup environment for lanching Vitis HLS Compiler which can be done as follows:</dt>
+<dd>setup of environment variable <strong>TA_PATH</strong> to point to the installation path of your Vitis, and run following commands to set up the environment.</dd>
+</dl>
+<pre class="highlight literal-block">
+<span></span><span class="nb">export</span> <span class="nv">XILINX_VITIS</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vitis/2020.2
+<span class="nb">export</span> <span class="nv">XILINX_VIVADO</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vivado/2020.2
+<span class="nb">source</span> <span class="si">${</span><span class="nv">XILINX_VIVADO</span><span class="si">}</span>/settings64.sh
+</pre>
+<p>Once the environment settings are done an individual test can be launched by going to test folder (any folder inside sub-directory at any level of <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/test/hw/1dfft</span></code> that has a Makefile is a test) and running the make command :</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">XPART='xcu200-fsgd2104-2-e'</span> <span class="pre">CSIM=1</span> <span class="pre">CSYNTH=1</span> <span class="pre">COSIM=1</span></code>  you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target</p>
+</div>
+<div class="section" id="launching-all-the-tests-collectivey">
+<h4>Launching all the Tests Collectivey<a class="headerlink" href="#launching-all-the-tests-collectivey" title="Permalink to this headline">¶</a></h4>
+<p>Scripts are provided in <code class="docutils literal notranslate"><span class="pre">REPO_PATH/dsp/L1/test/</span></code> to find and launch all the tests inside the repo. These scripts will try to find all the tests within this <code class="docutils literal notranslate"><span class="pre">test</span></code> folder and launch them one by one, printing the summary of tests passed. To launch this script first create a file called <code class="docutils literal notranslate"><span class="pre">set_env.sh</span></code> that sets up Vitis HLS compiler paths and should look something like this:</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">export</span> <span class="nv">TA_PATH</span><span class="o">=</span><span class="s2">&quot;LOCAL VITIS INSTALL PATH&quot;</span>
+<span class="nb">export</span> <span class="nv">XILINX_VITIS</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vitis/2020.2
+<span class="nb">export</span> <span class="nv">XILINX_VIVADO</span><span class="o">=</span><span class="si">${</span><span class="nv">TA_PATH</span><span class="si">}</span>/Vivado/2020.2
+<span class="nb">source</span> <span class="si">${</span><span class="nv">XILINX_VIVADO</span><span class="si">}</span>/settings64.sh
+</pre>
+<p>Once the install paths are setup, launch the bash script named <code class="docutils literal notranslate"><span class="pre">run_all_cosim_tests.sh</span></code> to run all the tests.</p>
+</div>
+</div>
+</div>
+<div class="section" id="l1-performance-benchmarks-and-qor">
+<h2>L1 Performance Benchmarks and QoR<a class="headerlink" href="#l1-performance-benchmarks-and-qor" title="Permalink to this headline">¶</a></h2>
+<p>The FFT throughput (initiation interval) can be calculated as L/R where R is the SSR value and L
+is the number of samples to be transformed. The possible values for R (SSR values) are: 2,4,8,16.
+These values allow for a Fmax range of <strong>300-550 MHz</strong> when targeting the slowest of UltraScale+
+speed-grade devices.</p>
+<div class="section" id="d-fixed-point-fft">
+<h3>1-D Fixed Point FFT<a class="headerlink" href="#d-fixed-point-fft" title="Permalink to this headline">¶</a></h3>
+<p>Following table gives the performance of 1-dimensional FFT for 27 bit fixed point complex input. Different SSR factors and FFT sizes are reported for comparison in terms of performance and resource utilization. The synthesis is performed for Alveo U250 FPGA part. From the table it is clear that SSR FFT when synthezied with size upto 4K can run with fmax ranging from 500 to 300 MHz. The results are reported for post place and route. The routing and placement is done using standard Vivado place and route flow no manual floorplanning or routing is done at all.</p>
+<table border="1" class="docutils align-center" id="id4">
+<caption><span class="caption-text">1-D Fixed Point FFT Performance and QoR Results</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Size</th>
+<th class="head">SSR</th>
+<th class="head">fmax(MHz)</th>
+<th class="head">Performance (GSPS)</th>
+<th class="head">Performance (2D-FFT/Sec) xMillion</th>
+<th class="head">Performance (GOPs)</th>
+<th class="head">DSPs</th>
+<th class="head">LUT (x1000)</th>
+<th class="head">FF (x1000)</th>
+<th class="head">BRAM</th>
+<th class="head">CP(ns)</th>
+<th class="head">II (Cycles)</th>
+<th class="head">FPGA/BOARD</th>
+<th class="head">Bandwidth (Gbytes/sec)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1024</td>
+<td>2</td>
+<td>526</td>
+<td>1.05</td>
+<td>1.03</td>
+<td>52.53</td>
+<td>36</td>
+<td>12</td>
+<td>22</td>
+<td>14</td>
+<td>1.9</td>
+<td>513</td>
+<td>U250</td>
+<td>8.40</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>2</td>
+<td>526</td>
+<td>1.05</td>
+<td>0.26</td>
+<td>63.13</td>
+<td>44</td>
+<td>25</td>
+<td>27</td>
+<td>34</td>
+<td>1.9</td>
+<td>2049</td>
+<td>U250</td>
+<td>8.42</td>
+</tr>
+<tr class="row-even"><td>1024</td>
+<td>4</td>
+<td>513</td>
+<td>2.04</td>
+<td>2.00</td>
+<td>102.17</td>
+<td>48</td>
+<td>16</td>
+<td>24</td>
+<td>20</td>
+<td>2.0</td>
+<td>257</td>
+<td>U250</td>
+<td>16.35</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>4</td>
+<td>518</td>
+<td>2.07</td>
+<td>0.51</td>
+<td>124.23</td>
+<td>60</td>
+<td>30</td>
+<td>29</td>
+<td>39</td>
+<td>1.9</td>
+<td>1025</td>
+<td>U250</td>
+<td>16.56</td>
+</tr>
+<tr class="row-even"><td>1024</td>
+<td>8</td>
+<td>455</td>
+<td>3.61</td>
+<td>3.52</td>
+<td>180.41</td>
+<td>99</td>
+<td>32.4</td>
+<td>52.7</td>
+<td>34</td>
+<td>2.2</td>
+<td>129</td>
+<td>U250</td>
+<td>28.87</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>8</td>
+<td>417</td>
+<td>3.33</td>
+<td>0.81</td>
+<td>199.61</td>
+<td>104</td>
+<td>42.6</td>
+<td>45.5</td>
+<td>45</td>
+<td>2.4</td>
+<td>513</td>
+<td>U250</td>
+<td>26.61</td>
+</tr>
+<tr class="row-even"><td>1024</td>
+<td>16</td>
+<td>370</td>
+<td>5.83</td>
+<td>5.70</td>
+<td>291.74</td>
+<td>172</td>
+<td>66</td>
+<td>85</td>
+<td>62</td>
+<td>2.7</td>
+<td>65</td>
+<td>U250</td>
+<td>46.68</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>16</td>
+<td>298</td>
+<td>4.74</td>
+<td>1.16</td>
+<td>284.60</td>
+<td>200</td>
+<td>80</td>
+<td>74</td>
+<td>62</td>
+<td>3.4</td>
+<td>257</td>
+<td>U250</td>
+<td>37.95</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="d-floating-point-fp32-fft">
+<h3>1-D Floating Point (fp32) FFT<a class="headerlink" href="#d-floating-point-fp32-fft" title="Permalink to this headline">¶</a></h3>
+<p>Following table gives the performance of 1-dimensional FFT floating point (fp32) complex input under similar setting as used for fixed point 1-D FFT. For floating point types generally the resource usages is larger than fixed point because of larger data-path and need for more complicated compute units for doing operations such as addition, multiplication, comparison etc. The results are reported for post place and route. The routing and placement is done using standard Vivado place and route flow no manual floorplanning or routing is done at all.</p>
+<table border="1" class="docutils align-center" id="id5">
+<caption><span class="caption-text">1-D Floating Point (FP32) FFT Performance and QoR Results</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Size</th>
+<th class="head">SSR</th>
+<th class="head">fmax(MHz)</th>
+<th class="head">Performance (GSPS)</th>
+<th class="head">Performance (2D-FFT/Sec) xMillion</th>
+<th class="head">Performance (GOPs)</th>
+<th class="head">DSPs</th>
+<th class="head">LUT (x1000)</th>
+<th class="head">FF (x1000)</th>
+<th class="head">BRAM</th>
+<th class="head">CP(ns)</th>
+<th class="head">II (Cycles)</th>
+<th class="head">FPGA/BOARD</th>
+<th class="head">Bandwidth (Gbytes/sec)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1024</td>
+<td>2</td>
+<td>500</td>
+<td>0.998050682</td>
+<td>0.974658869</td>
+<td>49.90253411</td>
+<td>554</td>
+<td>45.3</td>
+<td>91.3</td>
+<td>24</td>
+<td>2</td>
+<td>513</td>
+<td>U250</td>
+<td>7.984405458</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>2</td>
+<td>476.1904762</td>
+<td>0.95191615</td>
+<td>0.232401404</td>
+<td>57.11496897</td>
+<td>670</td>
+<td>66</td>
+<td>110</td>
+<td>50</td>
+<td>2.1</td>
+<td>2049</td>
+<td>U250</td>
+<td>7.615329197</td>
+</tr>
+<tr class="row-even"><td>1024</td>
+<td>4</td>
+<td>384.6153846</td>
+<td>1.532475307</td>
+<td>1.496557917</td>
+<td>76.62376534</td>
+<td>812</td>
+<td>71.9</td>
+<td>137.4</td>
+<td>31</td>
+<td>2.6</td>
+<td>257</td>
+<td>U250</td>
+<td>12.25980245</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>4</td>
+<td>366.3003663</td>
+<td>1.463772</td>
+<td>0.357366211</td>
+<td>87.82632002</td>
+<td>986</td>
+<td>98</td>
+<td>166</td>
+<td>62</td>
+<td>2.73</td>
+<td>1025</td>
+<td>U250</td>
+<td>11.710176</td>
+</tr>
+<tr class="row-even"><td>1024</td>
+<td>8</td>
+<td>367.6470588</td>
+<td>2.918376653</td>
+<td>2.8499772</td>
+<td>145.9188326</td>
+<td>1424</td>
+<td>129.8</td>
+<td>247</td>
+<td>52</td>
+<td>2.72</td>
+<td>129</td>
+<td>U250</td>
+<td>23.34701322</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>8</td>
+<td>322.5806452</td>
+<td>2.575614664</td>
+<td>0.628812174</td>
+<td>154.5368798</td>
+<td>1606</td>
+<td>158</td>
+<td>268</td>
+<td>78</td>
+<td>3.1</td>
+<td>513</td>
+<td>U250</td>
+<td>20.60491731</td>
+</tr>
+<tr class="row-even"><td>1024</td>
+<td>16</td>
+<td>192.3076923</td>
+<td>3.029585799</td>
+<td>2.958579882</td>
+<td>151.4792899</td>
+<td>3072</td>
+<td>283</td>
+<td>520</td>
+<td>91</td>
+<td>5.2</td>
+<td>65</td>
+<td>U250</td>
+<td>24.23668639</td>
+</tr>
+<tr class="row-odd"><td>4096</td>
+<td>16</td>
+<td>100</td>
+<td>1.593774319</td>
+<td>0.389105058</td>
+<td>95.62645914</td>
+<td>3664</td>
+<td>380</td>
+<td>592</td>
+<td>46</td>
+<td>10</td>
+<td>257</td>
+<td>U250</td>
+<td>12.75019455</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="L1_2dfft.html" class="btn btn-neutral float-right" title="2-Dimensional(Matrix) FFT L1 FPGA Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../release.html" class="btn btn-neutral float-left" title="Release Note" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+														<div class="col-md-pull-6 col-lg-pull-6 col-md-6 col-lg-6">
+															<span class="copyright">
+                                  
+                                  &copy; 2019-2020, Xilinx Inc.
+                              </span>
+															<ul class="list-inline sub-menu">
+																<li>
+																	<a href="https://www.xilinx.com/about/privacy-policy.html">Privacy</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/legal.html">Legal</a>
+																</li>
+																<li>
+																	<a href="https://www.xilinx.com/about/contact.html">Contact</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="quicklinks parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<noindex>
+						<span class="quickLinks">
+							<ul>
+								<li>
+									<a href="#top" class="btn backToTop">
+									<span class="fas fa-angle-up" aria-hidden="true"></span>
+									</a>
+								</li>
+							</ul>
+						</span>
+					</noindex>
+				</div>
+			</div>
+		</div>
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>
