@@ -8,7 +8,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_codec`. For getting the design,
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/codec/L2/demos#building). For getting the design,
 
 ```
    cd L2/demos/jpegDec
@@ -38,7 +38,7 @@ JPEG Decoder Input Arguments:
           -JPEGFile:  the path point to input *.jpg
 ```          
 
-Note: Default arguments are set in Makefile, you can use other :ref:`pictures` listed in the table.
+Note: Default arguments are set in Makefile, you can use other [pictures](https://github.com/Xilinx/Vitis_Libraries/tree/master/codec/L2/demos#pictures) listed in the table.
 
 * **Example output(Step 4)** 
 

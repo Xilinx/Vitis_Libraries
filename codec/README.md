@@ -11,12 +11,12 @@ The algorithms implemented by Codec Library include:
 
 ## Benchmark Result
 
-In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a good performance against several dataset, e.g. lena.png with latency of "value". For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/codec/2021.1/benchmark.html).
+In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a good performance against several dataset, e.g. lena.png with latency of "value". For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/codec/2021.2/benchmark.html).
 
 
 ## Documentations
 
-For more details of the Codec library, please refer to [xf_codec Library Documentation](https://xilinx.github.io/Vitis_Libraries/codec/2021.1/index.html).
+For more details of the Codec library, please refer to [xf_codec Library Documentation](https://xilinx.github.io/Vitis_Libraries/codec/2021.2/index.html).
 
 ## License
 

@@ -254,7 +254,7 @@ VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
 VPP_FLAGS += --hls.jobs 8
 VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-VPP_FLAGS += --config $(CUR_DIR)/conn_u200.cfg
+VPP_FLAGS += --config $(CUR_DIR)/conn_u200.cfg --hls.pre_tcl $(CUR_DIR)/hls_pre.tcl
 endif
 
 

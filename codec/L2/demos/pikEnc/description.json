@@ -1,7 +1,7 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx PIK Encoder Demo", 
-    "description": "", 
+    "description": "This example is based on Google's PIK, which was chosen as the base framework for JPEG XL. The pikEnc is based on the 'fast mode' of PIK which can provide better encoding efficnty than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. It can proved higher throughput and lower latency compared to software-based solutions", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u200"
@@ -14,7 +14,7 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u200.cfg"
+                        "--config PROJECT/conn_u200.cfg --hls.pre_tcl PROJECT/hls_pre.tcl"
                     ]
                 }
             }

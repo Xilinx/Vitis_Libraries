@@ -46,6 +46,8 @@ The data is used by benchmarks, our commonly used pictures are listed in table 1
     +--------------------+----------+-------------+
     |  lena_c_512.png    |    444   |   512*512   |
     +--------------------+----------+-------------+
+    |  1920x1080.png     |    444   |  1920*1080  |
+    +--------------------+----------+-------------+
 
 Performance
 -----------
@@ -64,7 +66,7 @@ png, jpg, pik, e.g. format, and the target device is set to Alveo U200.
     +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
     |  JPEG Decoder       |   android.jpg    |    1.515     |  243MHz  |  108.1K/23.1K  |   178/28    |    0/0     |     4/39   |
     +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |  PIK                |  lena_c_512.png  |     16.0     |  300MHz  |  150.9K/439.4K |    338/62   |    0/16    |     7/0    |
+    |  PIK Encoder        |  lena_c_512.png  |    16.0      |  300MHz  |  150.9K/439.4K |   338/62    |    0/16    |     7/0    |
     +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
 
 These are details for benchmark result and usage steps.
@@ -105,6 +107,6 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.1/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2021.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

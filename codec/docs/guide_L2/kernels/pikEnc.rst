@@ -13,11 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _l2_manual_pik_encoder:
+.. _l2_kernel_pik_encoder:
 
-========
+===========
 PIK Encoder
-========
+===========
 
 PIK Encoder example resides in ``L2/demos/pikEnc`` directory. The tutorial provides a step-by-step guide that covers commands for building and running kernel.
 

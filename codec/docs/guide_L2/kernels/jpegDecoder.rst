@@ -13,6 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. _l2_kernel_jpeg_decoder:
 
 *************************************************
 Internal Design of jpegDecoder

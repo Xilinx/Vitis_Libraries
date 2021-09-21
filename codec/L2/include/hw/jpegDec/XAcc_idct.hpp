@@ -491,7 +491,7 @@ void mcu_reorder(hls::stream<ap_uint<24> >& block_strm,
     int test = 0;
 
 #ifndef __SYNTHESIS__
-    fprintf(stderr, "mcu_reorder start\n");
+    printf("INFO : mcu_reorder start\n");
 #endif
 
     COLOR_FORMAT fmt = bas_info.format;
@@ -806,7 +806,7 @@ inline void kernelJpegDecoderTop(ap_uint<AXI_WIDTH>* jpeg_pointer,
 // clang-format on
 #ifndef __SYNTHESIS__
     if (rtn || (rtn2)) {
-        fprintf(stderr, "Warning: parser the bad case input file! \n");
+        printf("Warning: parser the bad case input file! \n");
     }
 #endif
 }
