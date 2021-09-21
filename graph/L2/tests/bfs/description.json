@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Breadth First Search Test", 
-    "description": "", 
+    "description": "Bread-first Search is an algorithm that traverse graph data structures. It starts from a source vertex and explores its neighbor vertices at the present depth level before moving on to the next depth level.", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

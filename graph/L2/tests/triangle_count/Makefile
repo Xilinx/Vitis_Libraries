@@ -126,16 +126,16 @@ endif
 # ######################### Host compiler global settings ############################
 ifneq ($(HOST_ARCH), x86)
 CXXFLAGS += --sysroot=$(SYSROOT)
-CXXFLAGS += -I$(SYSROOT)/usr/include/xrt -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 else
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 endif
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 CXXFLAGS += -I$(SYSROOT)/usr/include
@@ -310,7 +310,8 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh 
+	@echo '        cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh

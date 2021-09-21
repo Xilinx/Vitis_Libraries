@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx All Pair Sparse Matrix Jaccard Similarity ", 
-    "description": "", 
+    "description": "An example for computing jaccard similarity of all pair vectors in a sparse graph", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

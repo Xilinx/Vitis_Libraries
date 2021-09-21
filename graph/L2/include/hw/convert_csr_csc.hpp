@@ -32,6 +32,7 @@ namespace convert_csr_csc {
 
 template <typename DT, typename uint512, int K = 16, int W = 32>
 void calcuOffset(int vertexLen, uint512* degree, uint512* offset, uint512* offsetTmp) {
+#pragma HLS INLINE
     DT s = 0;
 loop_calcuOffset:
     for (int i = 0; i < (vertexLen + K) / K; i++) {

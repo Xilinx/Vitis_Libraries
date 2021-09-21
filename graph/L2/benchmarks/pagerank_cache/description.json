@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Page Rank Cache Benchmark", 
-    "description": "", 
+    "description": "An example for pagerank with 1 compute unit and cache to speed up random access HBM", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

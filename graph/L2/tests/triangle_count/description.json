@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Triangle Count Test", 
-    "description": "", 
+    "description": "Triangle counting is a community detection graph algorithm that is used to determine the number of triangles passing through each node in the graph. A triangle is a set of three nodes, where each node has a relationship to all other nodes", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

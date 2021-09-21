@@ -1,7 +1,7 @@
 {
     "gui": true,
     "name": "Xilinx Dense Similarity Test", 
-    "description": "", 
+    "description": "A simple test example for similarity function for dense graph.", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

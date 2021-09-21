@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx All Pair Sparse Matrix K-Nearest Neighbors ", 
-    "description": "", 
+    "description": "An example for computing K-Nearest Neighbors of all pair vectors in a sparse graph", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

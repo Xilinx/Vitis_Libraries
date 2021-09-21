@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx All Pair Dense Matrix Cosine Similarity ", 
-    "description": "", 
+    "description": "An example for computing cosine similarity of all pair vectors in dense graph or matrix", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

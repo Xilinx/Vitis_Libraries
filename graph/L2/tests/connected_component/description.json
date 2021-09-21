@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Connected Component Test", 
-    "description": "", 
+    "description": "In graph theory, a component, sometimes called a connected component, of an undirected graph is a subgraph in which any two vertices are connected to each other by paths, and which is connected to no additional vertices in the supergraph (from wikipedia)", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

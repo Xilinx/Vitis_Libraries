@@ -6,29 +6,30 @@ Vitis Graph Library is an open-sourced Vitis library written in C++ for accelera
 
 The algorithms implemented by Vitis Graph Library include:
 
-- Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor.
+- Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the 'weight' feature is supported by Cosin Similarity.
 - Centrality analysis: PageRank.
 - Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).
-- Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
-- Community Detection: Louvain Modularity (New for 2021.1), Label Propagation and Triangle Count.
-- Search: Breadth First Search and 2-Hop Search (New for 2021.1).
-- Graph Format: Calculate Degree and Format Convert between CSR and CSC.
+- Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
+- Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
+- Search: Breadth First Search, 2-Hop Search
+- Graph Format: Renumber(2021.2), Calculate Degree and Format Convert between CSR and CSC.
+
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/benchmark.html).
+In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/benchmark.html).
 
 ## Software level API
 
-`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/guide_L3/L3_internal/getting_started.html).
+`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/guide_L3/L3_internal/getting_started.html).
 
 ## Xilinx TigerGraph Integration
 
-Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/plugin/tigergraph_integration.html).
+Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/plugin/tigergraph_integration.html).
 
 ## Documentations
 
-For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/index.html).
+For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/index.html).
 
 ## License
 

@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Page Rank Weight Tests 2 channels", 
-    "description": "", 
+    "description": "An example for weighted pagerank with 2 channels", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Strongly Connected Components Test", 
-    "description": "", 
+    "description": "An example for the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

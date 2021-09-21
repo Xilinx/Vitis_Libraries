@@ -16,7 +16,7 @@
 
 source /opt/xilinx/xrt/setup.sh
 source /opt/xilinx/xrm/setup.sh
-source /opt/xilinx/Vitis/2020.1/settings64.sh
+source /opt/xilinx/Vitis/2021.2/settings64.sh
 export DEVICE=/opt/xilinx/platforms/xilinx_u50_gen3x16_xdma_201920_3/xilinx_u50_gen3x16_xdma_201920_3.xpfm
 cd ../../lib/
 ./build_so.sh

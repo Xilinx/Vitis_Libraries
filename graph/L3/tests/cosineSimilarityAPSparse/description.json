@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx All Pair Sparse Matrix Cosine Similarity ", 
-    "description": "", 
+    "description": "An example for computing cosine similarity of all pair vectors in sparse graph", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

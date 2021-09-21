@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Int Type Single Source Dense Matrix Cosine Similarity ", 
-    "description": "", 
+    "description": "An example for computing cosine similarity of a single vector in an integer dense graph", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

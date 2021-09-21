@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Convert Csc Csr Test", 
-    "description": "", 
+    "description": "ConvertCSCCSR is an algorithm used to transform CSC format input to CSR format input or CSR format input to CSC format input. The algorithm is quite easy, but due to DDR limits, we cannot get one data per clock, so in our design, we use several caches with depth ajustable to get much better performance.", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

@@ -33,4 +33,5 @@
 #include "hw/strongly_connected_components.hpp"
 #include "hw/triangle_count.hpp"
 #include "hw/twoHop.hpp"
+#include "hw/renumber.hpp"
 #endif

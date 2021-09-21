@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Single Source Dense Matrix K-Nearest Neighbors ", 
-    "description": "", 
+    "description": "An example for computing K-Nearest Neighbors of a single vector in a dense graph", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

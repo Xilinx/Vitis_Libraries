@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Calculate Degree Test", 
-    "description": "", 
+    "description": "CalcuDgree is an algorithm used to calculate indegree for CSR format input or outdegree for CSC format input. The algorithm is quite easy, but due to DDR limits, we cannot get one data per clock, so in our design, we use a cache with depth ajustable to get much better performance.", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

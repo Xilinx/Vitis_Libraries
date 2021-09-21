@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Page Rank personal Benchmark 2 channels", 
-    "description": "", 
+    "description": "An example for personal pagerank", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

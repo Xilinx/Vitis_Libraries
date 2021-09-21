@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Page Rank Benchmark", 
-    "description": "", 
+    "description": "An example for pagerank with only 1 compute unit", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"

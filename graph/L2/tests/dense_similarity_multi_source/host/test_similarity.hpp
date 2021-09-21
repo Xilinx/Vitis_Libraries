@@ -98,18 +98,18 @@ int computeSimilarity(std::string xclbinPath,
     // declare map of host buffers
     std::vector<cl_mem_ext_ptr_t> mext_o(3 * repInt + 4 * PUNUM + 1);
     for (int i = 0; i < PUNUM; i++) {
-        mext_o[4 * i + 0] = {XCL_BANK(0), weightDense[4 * i], 0};
-        mext_o[4 * i + 1] = {XCL_BANK(1), weightDense[4 * i + 1], 0};
-        mext_o[4 * i + 2] = {XCL_BANK(2), weightDense[4 * i + 2], 0};
-        mext_o[4 * i + 3] = {XCL_BANK(3), weightDense[4 * i + 3], 0};
+        mext_o[4 * i + 0] = {2, weightDense[4 * i], similarity_kernel[0]()};
+        mext_o[4 * i + 1] = {3, weightDense[4 * i + 1], similarity_kernel[0]()};
+        mext_o[4 * i + 2] = {4, weightDense[4 * i + 2], similarity_kernel[0]()};
+        mext_o[4 * i + 3] = {5, weightDense[4 * i + 3], similarity_kernel[0]()};
     }
 
-    mext_o[4 * PUNUM] = {XCL_BANK(0), sourceWeight, 0};
+    mext_o[4 * PUNUM] = {1, sourceWeight, similarity_kernel[0]()};
 
     for (int i = 0; i < repInt; i++) {
-        mext_o[4 * PUNUM + 1 + i] = {XCL_BANK(0), config[i], 0};
-        mext_o[4 * PUNUM + 1 + repInt + i] = {XCL_BANK(0), result_id[i], 0};
-        mext_o[4 * PUNUM + 1 + 2 * repInt + i] = {XCL_BANK(0), similarity[i], 0};
+        mext_o[4 * PUNUM + 1 + i] = {0, config[i], similarity_kernel[0]()};
+        mext_o[4 * PUNUM + 1 + repInt + i] = {6, result_id[i], similarity_kernel[0]()};
+        mext_o[4 * PUNUM + 1 + 2 * repInt + i] = {7, similarity[i], similarity_kernel[0]()};
     }
 
     // create device buffer and map dev buf to host buf

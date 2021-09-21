@@ -36,3 +36,5 @@ Design Internals
    ../guide_L1/primitives/denseSimilarity.rst
    kernels/twoHop.rst
    kernels/LouvainFast.rst
+   kernels/denseSimilarityCoeffs.rst
+   kernels/Renumbering.rst

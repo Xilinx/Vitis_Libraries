@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Single Source Sparse Matrix Jaccard Similarity ", 
-    "description": "", 
+    "description": "An example for computing jaccard similarity of a single vector in an sparse graph", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"
