@@ -47,7 +47,6 @@
                 "LIB_DIR/L3/benchmarks"
             ], 
             "symbols": [
-                "_GLIBCXX_USE_CXX11_ABI=0"
             ]
         }, 
         "linker": {

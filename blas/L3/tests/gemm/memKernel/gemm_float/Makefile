@@ -83,7 +83,6 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 #Include Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/gemm/gemm_test.cpp
 
-CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/L3/tests/gemm
 LDFLAGS += -luuid -lxrt_coreutil
@@ -98,13 +97,13 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
 
 # ################### Setting package and image directory #######################

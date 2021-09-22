@@ -54,24 +54,30 @@ class WideType {
 
    public:
     T& getVal(unsigned int i) {
+#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         assert(i < t_Width);
 #endif
         return (m_Val[i]);
     }
     T& operator[](unsigned int p_Idx) {
+#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         assert(p_Idx < t_Width);
 #endif
         return (m_Val[p_Idx]);
     }
     const T& operator[](unsigned int p_Idx) const {
+#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         assert(p_Idx < t_Width);
 #endif
         return (m_Val[p_Idx]);
     }
-    T* getValAddr() { return (&m_Val[0]); }
+    T* getValAddr() { 
+#pragma HLS INLINE
+        return (&m_Val[0]); 
+    }
 
     WideType() {
 #pragma HLS INLINE
@@ -85,6 +91,7 @@ class WideType {
     }
 
     void constructor(const WideType& wt) {
+#pragma HLS INLINE
         for (unsigned int i = 0; i < t_Width; i++)
 #pragma HLS UNROLL
             m_Val[i] = wt[i];
@@ -96,6 +103,7 @@ class WideType {
         constructor(p_val);
     }
     void constructor(const t_TypeInt& p_val) {
+#pragma HLS INLINE
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
             ap_uint<t_DataWidth> l_val = p_val.range(t_DataWidth * (1 + i) - 1, t_DataWidth * i);
@@ -109,6 +117,7 @@ class WideType {
         constructor(p_initScalar);
     }
     void constructor(const T p_initScalar) {
+#pragma HLS INLINE
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
             m_Val[i] = p_initScalar;
@@ -219,6 +228,7 @@ class WideType<T, 1, t_DataWidth, typename std::enable_if<std::is_same<ap_uint<t
 
    public:
     T& operator[](unsigned int p_Idx) {
+#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         assert(p_Idx == 0);
 #endif
@@ -226,13 +236,17 @@ class WideType<T, 1, t_DataWidth, typename std::enable_if<std::is_same<ap_uint<t
     }
 
     const T& operator[](unsigned int p_Idx) const {
+#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         assert(p_Idx == 0);
 #endif
         return m_Val;
     }
 
-    T* getValAddr() { return (&m_Val); }
+    T* getValAddr() { 
+#pragma HLS INLINE
+        return (&m_Val); 
+    }
 
     WideType() {}
 
@@ -508,14 +522,24 @@ class TaggedFloat {
     TaggedFloat() {}
     TaggedFloat(t_FloatType p_Val, bool p_Flush) : m_Val(p_Val), m_Flush(p_Flush) {}
     TaggedFloat(t_FloatType p_Val) : m_Val(p_Val), m_Flush(false) {}
-    t_FloatType& getVal() { return (m_Val); }
-    bool& getFlush() { return (m_Flush); }
+    t_FloatType& getVal() { 
+#pragma HLS INLINE
+        return (m_Val); 
+    }
+    bool& getFlush() { 
+#pragma HLS INLINE
+        return (m_Flush);
+    }
     TaggedFloat& operator=(t_FloatType p_Val) {
+#pragma HLS INLINE
         m_Val = p_Val;
         m_Flush = false;
         return (*this);
     }
-    t_FloatType& operator()() { return (m_Val); }
+    t_FloatType& operator()() { 
+#pragma HLS INLINE
+        return (m_Val); 
+    }
     void print(std::ostream& os) { os << std::setw(BLAS_FLOAT_WIDTH) << m_Val << "f" << m_Flush; }
     friend std::ostream& operator<<(std::ostream& os, TaggedFloat& p_Val) {
         p_Val.print(os);
@@ -551,8 +575,14 @@ class TaggedWideType {
     TaggedWideType(WideType<T, t_Width> p_Val, bool p_Flush, bool p_Exit)
         : m_Val(p_Val), m_Flush(p_Flush), m_Exit(p_Exit) {}
     TaggedWideType() {}
-    WideType<T, t_Width>& getVal() { return m_Val; }
-    T& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
+    WideType<T, t_Width>& getVal() { 
+#pragma HLS INLINE
+        return m_Val; 
+    }
+    T& operator[](unsigned int p_Idx) { 
+#pragma HLS INLINE
+        return (m_Val[p_Idx]); 
+    }
 
     bool getFlush() { return (m_Flush); }
     bool getExit() { return (m_Exit); }
@@ -636,8 +666,14 @@ class WindowRm {
     WindowRm() {
 #pragma HLS INLINE
     }
-    T& getval(unsigned int p_Row, unsigned int p_Col) { return m_Val.getVal(p_Row).getVal(p_Col); }
-    WideType<T, t_Cols>& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
+    T& getval(unsigned int p_Row, unsigned int p_Col) { 
+#pragma HLS INLINE
+        return m_Val.getVal(p_Row).getVal(p_Col); 
+    }
+    WideType<T, t_Cols>& operator[](unsigned int p_Idx) { 
+#pragma HLS INLINE
+        return (m_Val[p_Idx]); 
+    }
     void clear() {
     WINDOWRM_ROW:
         for (unsigned int row = 0; row < t_Rows; ++row) {
