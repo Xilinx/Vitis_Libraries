@@ -517,13 +517,10 @@
 <tr class="row-even"><td>initData</td>
 <td>input Initial data</td>
 </tr>
-<tr class="row-odd"><td>outData</td>
-<td>output checksum</td>
-</tr>
-<tr class="row-even"><td>inSize</td>
+<tr class="row-odd"><td>inSize</td>
 <td>input size</td>
 </tr>
-<tr class="row-odd"><td>checksumType</td>
+<tr class="row-even"><td>checksumType</td>
 <td>CRC/ADLER</td>
 </tr>
 </tbody>
@@ -625,21 +622,27 @@
 <tr class="row-odd"><td>compressd_size</td>
 <td>compressed output size of each block</td>
 </tr>
-<tr class="row-even"><td>input_size</td>
+<tr class="row-even"><td>checksumData</td>
+<td>checksum data</td>
+</tr>
+<tr class="row-odd"><td>input_size</td>
 <td>input data size</td>
+</tr>
+<tr class="row-even"><td>checksumTye</td>
+<td>checksum type</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="xilgzipcomp">
-<span id="cid-xilgzipcomp"></span><span id="doxid-gzip-compress-multicore-stream-8hpp-1acc3a3eb130ef91d2f3a065499bfe0869"></span><h3>xilGzipComp<a class="headerlink" href="#xilgzipcomp" title="Permalink to this headline">¶</a></h3>
+<span id="cid-xilgzipcomp"></span><span id="doxid-gzip-compress-multicore-stream-8hpp-1af976da25389fe5909f674a24f0ec74f1"></span><h3>xilGzipComp<a class="headerlink" href="#xilgzipcomp" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;gzip_compress_multicore_stream.hpp&quot;</span>
 </pre>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">xilGzipComp</span> <span class="p">(</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">GMEM_DWIDTH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inaxistream</span><span class="p">,</span>
-    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">GMEM_DWIDTH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outaxistream</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">GMEM_DWIDTH</span><span class="p">,</span> <span class="n">TUSER_DWIDTH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outaxistream</span>
     <span class="p">)</span>
 </pre>
 <p>GZIP streaming compression kernel takes the raw data as input from axi interface and compresses the data using num cores and writes the output to an axi interface.</p>
@@ -1175,6 +1178,9 @@
 <tr class="row-odd"><td>inputSize</td>
 <td>input data size</td>
 </tr>
+<tr class="row-even"><td>outputSize</td>
+<td>output data size</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1251,7 +1257,10 @@
 <tr class="row-even"><td>outaxistream</td>
 <td>output kernel axi stream for decompressed data</td>
 </tr>
-<tr class="row-odd"><td>inputSize</td>
+<tr class="row-odd"><td>outaxistreamsize</td>
+<td>output stream data size</td>
+</tr>
+<tr class="row-even"><td>inputSize</td>
 <td>input data size</td>
 </tr>
 </tbody>
@@ -1281,11 +1290,14 @@
 <tr class="row-odd"><td>inaxistream</td>
 <td>input kernel axi stream for compressed data</td>
 </tr>
-<tr class="row-even"><td>outaxistream</td>
+<tr class="row-even"><td>inaxistreamsize</td>
+<td>input stream data size</td>
+</tr>
+<tr class="row-odd"><td>outaxistream</td>
 <td>output kernel axi stream for decompressed data</td>
 </tr>
-<tr class="row-odd"><td>inputSize</td>
-<td>input data size</td>
+<tr class="row-even"><td>outaxistreamsize</td>
+<td>output stream data size</td>
 </tr>
 </tbody>
 </table>
@@ -1486,7 +1498,37 @@
 </table>
 </div>
 <div class="section" id="xilzstdcompress">
-<span id="cid-xilzstdcompress"></span><span id="doxid-zstd-compress-stream-8hpp-1a547c2894fa791ee0204896e664d02bb3"></span><h3>xilZstdCompress<a class="headerlink" href="#xilzstdcompress" title="Permalink to this headline">¶</a></h3>
+<span id="cid-xilzstdcompress"></span><span id="doxid-zstd-compress-multicore-stream-8hpp-1a547c2894fa791ee0204896e664d02bb3"></span><h3>xilZstdCompress<a class="headerlink" href="#xilzstdcompress" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="xilzstdcompress-overload-1">
+<h4>xilZstdCompress overload (1)<a class="headerlink" href="#xilzstdcompress-overload-1" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;zstd_compress_multicore_stream.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">xilZstdCompress</span> <span class="p">(</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">STREAM_IN_DWIDTH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">axiInStream</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">STREAM_OUT_DWIDTH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">axiOutStream</span>
+    <span class="p">)</span>
+</pre>
+<p>ZSTD compression kernel takes input data from axi stream and compresses it into multiple frames having 1 block each and writes the compressed data to output axi stream.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>inStream</td>
+<td>input raw data</td>
+</tr>
+<tr class="row-even"><td>outStream</td>
+<td>output compressed data</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="xilzstdcompress-overload-2">
+<span id="cid-xilzstdcompress-2"></span><span id="doxid-zstd-compress-stream-8hpp-1a547c2894fa791ee0204896e664d02bb3"></span><h4>xilZstdCompress overload (2)<a class="headerlink" href="#xilzstdcompress-overload-2" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;zstd_compress_stream.hpp&quot;</span>
 </pre>
@@ -1513,15 +1555,16 @@
 </tbody>
 </table>
 </div>
+</div>
 <div class="section" id="xilzstddecompressstream">
-<span id="cid-xilzstddecompressstream"></span><span id="doxid-zstd-decompress-stream-8hpp-1aeea49d48062b7c49a017d53c2306c500"></span><h3>xilZstdDecompressStream<a class="headerlink" href="#xilzstddecompressstream" title="Permalink to this headline">¶</a></h3>
+<span id="cid-xilzstddecompressstream"></span><span id="doxid-zstd-decompress-stream-8hpp-1a0b9cc782fef30eb6ecc417f90a6ab500"></span><h3>xilZstdDecompressStream<a class="headerlink" href="#xilzstddecompressstream" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;zstd_decompress_stream.hpp&quot;</span>
 </pre>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">xilZstdDecompressStream</span> <span class="p">(</span>
-    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">c_streamDWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inaxistreamd</span><span class="p">,</span>
-    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">c_streamDWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outaxistreamd</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">c_instreamDWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inaxistreamd</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_axiu</span> <span class="o">&lt;</span><span class="n">c_outstreamDWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outaxistreamd</span>
     <span class="p">)</span>
 </pre>
 <p>This is full ZStandard decompression streaming kernel function. It supports all block sizes and supports window size upto 128KB. It takes entire ZStd compressed file as input and produces decompressed file at the kernel output stream. This kernel does not use DDR memory, it uses streams instead. Intermediate data is stored in internal BRAMs and stream FIFOs, which helps to attain better decompression throughput.</p>
@@ -1532,17 +1575,11 @@
 <col width="80%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>input_size</td>
-<td>input size</td>
-</tr>
-<tr class="row-even"><td>inaxistreamd</td>
+<tr class="row-odd"><td>inaxistreamd</td>
 <td>input kernel axi stream</td>
 </tr>
-<tr class="row-odd"><td>outaxistreamd</td>
+<tr class="row-even"><td>outaxistreamd</td>
 <td>output kernel axi stream</td>
-</tr>
-<tr class="row-even"><td>sizestreamd</td>
-<td>output size kernel axi stream</td>
 </tr>
 </tbody>
 </table>
@@ -1579,7 +1616,7 @@
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on June 30, 2021.
+        Last updated on September 22, 2021.
       </span>
 
     </p>

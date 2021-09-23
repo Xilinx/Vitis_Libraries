@@ -56,8 +56,8 @@
   <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Xlinx LZ4 Streaming Decompression" href="lz4_dec_streaming_parallelByte8.html" />
-    <link rel="prev" title="Xilinx GZip Streaming Compression" href="gzipc.html" /> 
+    <link rel="next" title="Xilinx Zlib Streaming Compression" href="zlibc.html" />
+    <link rel="prev" title="Xilinx GZip Streaming 8KB Compression" href="gzipc_8KB.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -347,19 +347,25 @@
 <li class="toctree-l2"><a class="reference internal" href="demo.html">Demos</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="test.html">Tests</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="lz4_compress_streaming.html">Xlinx LZ4 Streaming Compression</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lz4_compress.html">Xlinx LZ4 Compression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="snappy_compress.html">Xlinx Snappy Compression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gzipc_block_mm.html">Xilinx GZip Compression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gzipc.html">Xilinx GZip Streaming Compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gzipc_16KB.html">Xilinx GZip Streaming 16KB Compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gzipc_8KB.html">Xilinx GZip Streaming 8KB Compression</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Xilinx GZip Static Streaming Compression</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#executable-usage">Executable Usage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#results">Results</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#standard-gzip-support">Standard GZip Support</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="zlibc.html">Xilinx Zlib Streaming Compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlibc_16KB.html">Xilinx Zlib Streaming 16KB Compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlibc_8KB.html">Xilinx Zlib Streaming 8KB Compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlibc_static.html">Xilinx Zlib Streaming Static Compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zstd_quadcore_compress.html">Xilinx ZSTD Compression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lz4_dec_streaming_parallelByte8.html">Xlinx LZ4 Streaming Decompression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="snappy_dec_streaming_parallelByte8.html">Xlinx Snappy Streaming Decompression</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gzip_decompress.html">Xilinx GZip Streaming Decompression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zstdd_32KB.html">Xilinx ZSTD Decompression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="test.html#build-instructions">Build Instructions</a></li>
 </ul>
 </li>
@@ -473,35 +479,7 @@
 <div class="section" id="resource-utilization">
 <h3>Resource Utilization<a class="headerlink" href="#resource-utilization" title="Permalink to this headline">¶</a></h3>
 <p>Table below presents resource utilization of Xilinx GZip static streaming compression kernels.
-The final Fmax achieved is 300MHz</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="28%" />
-<col width="14%" />
-<col width="17%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Flow</th>
-<th class="head">LUT</th>
-<th class="head">LUTMem</th>
-<th class="head">REG</th>
-<th class="head">BRAM</th>
-<th class="head">URAM</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>Compress</td>
-<td>33.2K</td>
-<td>2.3K</td>
-<td>36.8K</td>
-<td>45</td>
-<td>64</td>
-</tr>
-</tbody>
-</table>
+The final Fmax achieved is 300MHz.</p>
 </div>
 <div class="section" id="performance-data">
 <h3>Performance Data<a class="headerlink" href="#performance-data" title="Permalink to this headline">¶</a></h3>
@@ -522,7 +500,7 @@ unit.</p>
 <td>2 GB/s</td>
 </tr>
 <tr class="row-odd"><td>Average Compression Ratio</td>
-<td>2.25x (Silesia Benchmark)</td>
+<td>2.31x (Silesia Benchmark)</td>
 </tr>
 </tbody>
 </table>
@@ -530,7 +508,7 @@ unit.</p>
 </div>
 <div class="section" id="standard-gzip-support">
 <h2>Standard GZip Support<a class="headerlink" href="#standard-gzip-support" title="Permalink to this headline">¶</a></h2>
-<p>This application is compatible with standard Gzip/Zlib application (compress/decompres).</p>
+<p>This application is compatible with standard Gzip/Zlib application (compress/decompress).</p>
 </div>
 </div>
 
@@ -550,10 +528,10 @@ unit.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="lz4_dec_streaming_parallelByte8.html" class="btn btn-neutral float-right" title="Xlinx LZ4 Streaming Decompression" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="zlibc.html" class="btn btn-neutral float-right" title="Xilinx Zlib Streaming Compression" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="gzipc.html" class="btn btn-neutral float-left" title="Xilinx GZip Streaming Compression" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="gzipc_8KB.html" class="btn btn-neutral float-left" title="Xilinx GZip Streaming 8KB Compression" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -563,7 +541,7 @@ unit.</p>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on June 30, 2021.
+        Last updated on September 22, 2021.
       </span>
 
     </p>

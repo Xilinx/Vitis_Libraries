@@ -392,7 +392,7 @@
     
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>struct unpackerBlockInfo</li>
+      <li>enum xf::compression::FileFormat</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -409,17 +409,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="struct-unpackerblockinfo">
-<span id="cid-unpackerblockinfo"></span><span id="doxid-structunpackerblockinfo"></span><span id="index-0"></span><h1>struct unpackerBlockInfo<a class="headerlink" href="#struct-unpackerblockinfo" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-</div>
-<pre class="highlight overview-code-block literal-block" id="cid-unpackerblockinfo-padding">
-<span id="doxid-structunpackerblockinfo-1a8898717738b6d1e46890f71340badd1d"></span><span id="cid-unpackerblockinfo-blockstartidx"></span><span id="doxid-structunpackerblockinfo-1ad1ff9bae24778d0633e2f0e6a47f1546"></span><span id="cid-unpackerblockinfo-blocksize"></span><span id="doxid-structunpackerblockinfo-1add12586bec0bc42280a57955c79836fc"></span><span id="cid-unpackerblockinfo-compressedsize"></span><span id="doxid-structunpackerblockinfo-1a741d08923eefe7ae2979c3f511af6b57"></span><span></span><span class="c1">// fields</span>
+  <div class="section" id="enum-xf-compression-fileformat">
+<span id="cid-xf-compression-fileformat"></span><span id="doxid-namespacexf-1-1compression-1aa12eb067af8968e7de6f1d766953a036"></span><span id="index-0"></span><h1>enum xf::compression::FileFormat<a class="headerlink" href="#enum-xf-compression-fileformat" title="Permalink to this headline">¶</a></h1>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-compression-fileformat-zlib">
+<span id="doxid-namespacexf-1-1compression-1aa12eb067af8968e7de6f1d766953a036a2b39e131eb3a311eef2040c74f7e1e2c"></span><span id="cid-xf-compression-fileformat-both"></span><span id="doxid-namespacexf-1-1compression-1aa12eb067af8968e7de6f1d766953a036afd33555a509cef4a1d869ca13faa971f"></span><span></span><span class="c1">// enum values</span>
 
-<span class="kt">uint32_t</span> <span class="n">compressedSize</span>
-<span class="kt">uint32_t</span> <span class="n">blockSize</span>
-<span class="kt">uint32_t</span> <span class="n">blockStartIdx</span>
-<span class="kt">uint32_t</span> <span class="n">padding</span><span class="p">[(</span><span class="n">GMEM_DATAWIDTH</span><span class="o">/</span><span class="mi">32</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">BOTH</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">ZLIB</span> <span class="o">=</span> <span class="mi">1</span>
 </pre>
 </div>
 

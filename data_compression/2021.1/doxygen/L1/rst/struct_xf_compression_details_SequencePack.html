@@ -392,7 +392,7 @@
     
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>struct unpackerBlockInfo</li>
+      <li>template struct xf::compression::details::SequencePack</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -409,17 +409,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="struct-unpackerblockinfo">
-<span id="cid-unpackerblockinfo"></span><span id="doxid-structunpackerblockinfo"></span><span id="index-0"></span><h1>struct unpackerBlockInfo<a class="headerlink" href="#struct-unpackerblockinfo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="template-struct-xf-compression-details-sequencepack">
+<span id="cid-xf-compression-details-sequencepack"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack"></span><span id="index-0"></span><h1>template struct xf::compression::details::SequencePack<a class="headerlink" href="#template-struct-xf-compression-details-sequencepack" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<pre class="highlight overview-code-block literal-block" id="cid-unpackerblockinfo-padding">
-<span id="doxid-structunpackerblockinfo-1a8898717738b6d1e46890f71340badd1d"></span><span id="cid-unpackerblockinfo-blockstartidx"></span><span id="doxid-structunpackerblockinfo-1ad1ff9bae24778d0633e2f0e6a47f1546"></span><span id="cid-unpackerblockinfo-blocksize"></span><span id="doxid-structunpackerblockinfo-1add12586bec0bc42280a57955c79836fc"></span><span id="cid-unpackerblockinfo-compressedsize"></span><span id="doxid-structunpackerblockinfo-1a741d08923eefe7ae2979c3f511af6b57"></span><span></span><span class="c1">// fields</span>
-
-<span class="kt">uint32_t</span> <span class="n">compressedSize</span>
-<span class="kt">uint32_t</span> <span class="n">blockSize</span>
-<span class="kt">uint32_t</span> <span class="n">blockStartIdx</span>
-<span class="kt">uint32_t</span> <span class="n">padding</span><span class="p">[(</span><span class="n">GMEM_DATAWIDTH</span><span class="o">/</span><span class="mi">32</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-compression-details-sequencepack-setdata">
+<span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1a855abed121406ec12a65be4b1bbd90c4"></span><span id="cid-xf-compression-details-sequencepack-setoffset"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1a14950030c0654154ec164fcaaa375132"></span><span id="cid-xf-compression-details-sequencepack-setlitlen"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1abdf766d83ac04dede0b827d2bb915e41"></span><span id="cid-xf-compression-details-sequencepack-setmatlen"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1a4abedb2be5e5024f3bc36fe47868e706"></span><span id="cid-xf-compression-details-sequencepack-getdata"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1a52075ad7e728c8318854250dbfeded4c"></span><span id="cid-xf-compression-details-sequencepack-getoffset"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1a7cf34a9672750df9a8ff957b26eae8ba"></span><span id="cid-xf-compression-details-sequencepack-getlitlen"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1ac2c00821f4f5f70886a4ddc60e6883d9"></span><span id="cid-xf-compression-details-sequencepack-getmatlen"></span><span id="doxid-structxf-1-1compression-1-1details-1-1sequencepack-1a5455b6cba1c19ccb939f09bbf36ada09"></span><span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">OF_DWIDTH</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">LL_DWIDTH</span> <span class="o">=</span> <span class="n">OF_DWIDTH</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ML_DWIDTH</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">SequencePack</span>
 </pre>
 </div>
 

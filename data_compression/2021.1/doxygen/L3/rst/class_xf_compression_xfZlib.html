@@ -438,8 +438,8 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="#doxid-classxf-1-1compression-1-1xfzlib"><span class="std std-ref">xfZlib</span></a> class.</p>
-<pre class="highlight overview-code-block literal-block" id="cid-xf-compression-xfzlib-get-event-duration-ns">
-<span id="doxid-classxf-1-1compression-1-1xfzlib-1aa2477f22a23fc8ce1ffa8c968c588f29"></span><span id="cid-xf-compression-xfzlib-decompress-buffer"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a25be136469b32af77df2e6b382cf72a9"></span><span id="cid-xf-compression-xfzlib-inflate-buffer"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1ae5e7c4df9abebd664adca3efb0cbbc3c"></span><span id="cid-xf-compression-xfzlib-deflate-buffer"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1aaef8a2f58ca8dc2ae437dc9019e40fed"></span>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-compression-xfzlib-getdecompresskernel">
+<span id="doxid-classxf-1-1compression-1-1xfzlib-1a396520949b83c409a780da720a35ce01"></span><span id="cid-xf-compression-xfzlib-get-event-duration-ns"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1aa2477f22a23fc8ce1ffa8c968c588f29"></span><span id="cid-xf-compression-xfzlib-decompress-buffer"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a25be136469b32af77df2e6b382cf72a9"></span><span id="cid-xf-compression-xfzlib-inflate-buffer"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1ae5e7c4df9abebd664adca3efb0cbbc3c"></span><span id="cid-xf-compression-xfzlib-deflate-buffer"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1aaef8a2f58ca8dc2ae437dc9019e40fed"></span>
 </pre>
 </div>
 <div class="section" id="methods">
@@ -557,13 +557,16 @@
 <tr class="row-odd"><td>input_size</td>
 <td>input size</td>
 </tr>
-<tr class="row-even"><td>last_data</td>
+<tr class="row-even"><td>output_size</td>
+<td>input size</td>
+</tr>
+<tr class="row-odd"><td>last_data</td>
 <td>last compressed output buffer</td>
 </tr>
-<tr class="row-odd"><td>last_buffer</td>
+<tr class="row-even"><td>last_buffer</td>
 <td>last input buffer</td>
 </tr>
-<tr class="row-even"><td>cu</td>
+<tr class="row-odd"><td>cu</td>
 <td>comput unit name</td>
 </tr>
 </tbody>
@@ -598,7 +601,10 @@
 <tr class="row-odd"><td>actual_size</td>
 <td>input size</td>
 </tr>
-<tr class="row-even"><td>cu_run</td>
+<tr class="row-even"><td>max_outbuf_size</td>
+<td>Maximum output buffer size</td>
+</tr>
+<tr class="row-odd"><td>cu_run</td>
 <td>compute unit number</td>
 </tr>
 </tbody>
@@ -634,6 +640,18 @@
 <tr class="row-odd"><td>input_size</td>
 <td>input size</td>
 </tr>
+<tr class="row-even"><td>cu</td>
+<td>compute unit number</td>
+</tr>
+<tr class="row-odd"><td>level</td>
+<td>GZip/Zlib level</td>
+</tr>
+<tr class="row-even"><td>strategy</td>
+<td>GZip/Zlib strategy</td>
+</tr>
+<tr class="row-odd"><td>window_bits</td>
+<td>GZip/Zlib window size</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -661,8 +679,11 @@
 <tr class="row-even"><td>outFile_name</td>
 <td>output file name</td>
 </tr>
-<tr class="row-odd"><td>actual_size</td>
+<tr class="row-odd"><td>input_size</td>
 <td>input size</td>
+</tr>
+<tr class="row-even"><td>cu_run</td>
+<td>compute unit number</td>
 </tr>
 </tbody>
 </table>
@@ -716,7 +737,37 @@
     <span class="k">const</span> <span class="kt">int</span> <span class="n">bank_id</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="p">)</span>
 </pre>
-<p>Constructor responsible for creating various host/device buffers. This gets context created already with it so skips ocl platform, device and context creation as part of it.</p>
+<p>Libz supported constructor responsible for creating various host/device buffers. This gets context created already with it so skips ocl platform, device and context creation as part of it.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>binaryFile</td>
+<td>XCLBIN name</td>
+</tr>
+<tr class="row-even"><td>sb_opt</td>
+<td>Slave Bridge option</td>
+</tr>
+<tr class="row-odd"><td>context</td>
+<td>OpenCL context</td>
+</tr>
+<tr class="row-even"><td>program</td>
+<td>OpenCL program</td>
+</tr>
+<tr class="row-odd"><td>device</td>
+<td>OpenCL device</td>
+</tr>
+<tr class="row-even"><td>dflow</td>
+<td>GZip/Zlib flow</td>
+</tr>
+<tr class="row-odd"><td>bank_id</td>
+<td>Bank Id of a device</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="xfzlib-overload-2">
 <span id="cid-xf-compression-xfzlib-xfzlib-2"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a329922295001165915c6bce0ba7cbdbd"></span><h4>xfZlib overload (2)<a class="headerlink" href="#xfzlib-overload-2" title="Permalink to this headline">¶</a></h4>
@@ -735,6 +786,45 @@
     <span class="p">)</span>
 </pre>
 <p>Constructor responsible for creating various host/device buffers.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>binaryFile</td>
+<td>binaryFile</td>
+</tr>
+<tr class="row-even"><td>sb_opt</td>
+<td>Slave Bridge option</td>
+</tr>
+<tr class="row-odd"><td>c_max_cr</td>
+<td>Maximum compression ratio</td>
+</tr>
+<tr class="row-even"><td>cd_flow</td>
+<td>compress/decompress flow</td>
+</tr>
+<tr class="row-odd"><td>device_id</td>
+<td>device id</td>
+</tr>
+<tr class="row-even"><td>profile</td>
+<td>OpenCL profiling enble/disable</td>
+</tr>
+<tr class="row-odd"><td>d_type</td>
+<td>decompression kernel type (Dynamic/Full/Static)</td>
+</tr>
+<tr class="row-even"><td>dflow</td>
+<td>GZip/Zlib selection</td>
+</tr>
+<tr class="row-odd"><td>ccu</td>
+<td>Compression CU number</td>
+</tr>
+<tr class="row-even"><td>dcu</td>
+<td>Decompression CU number</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="init">
@@ -745,68 +835,49 @@
     <span class="kt">uint8_t</span> <span class="n">dtype</span>
     <span class="p">)</span>
 </pre>
-<p>OpenCL setup initialization.</p>
-<p class="rubric">Parameters:</p>
-<table border="1" class="colwidths-given docutils">
-<colgroup>
-<col width="20%" />
-<col width="80%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>binaryFile</td>
-<td>&#160;</td>
-</tr>
-</tbody>
-</table>
+<p>OpenCL setup initialization</p>
 </div>
 <div class="section" id="release">
 <span id="cid-xf-compression-xfzlib-release"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a161a134c573011f422026e83597b96b3"></span><h3>release<a class="headerlink" href="#release" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">release</span> <span class="p">()</span>
 </pre>
-<p>OpenCL setup release.</p>
+<p>OpenCL setup release</p>
 </div>
 <div class="section" id="id1">
 <span id="doxid-classxf-1-1compression-1-1xfzlib-1a6904dbfc6bf5a6f9917fb727ed5e391d"></span><span id="id2"></span><h3>~xfZlib<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="o">~</span><span class="n">xfZlib</span> <span class="p">()</span>
 </pre>
-<p>Release host/device memory.</p>
+<p>Release host/device memory</p>
 </div>
 <div class="section" id="error-code">
 <span id="cid-xf-compression-xfzlib-error-code"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a287855eea3200b5fb64a09bce2e19f67"></span><h3>error_code<a class="headerlink" href="#error-code" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">int</span> <span class="n">error_code</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </pre>
-<p>error_code of a OpenCL call</p>
+<p>Error_code of a OpenCL call</p>
 </div>
 <div class="section" id="get-checksum">
 <span id="cid-xf-compression-xfzlib-get-checksum"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a334578509391cdb59adf3fc8dada79eb"></span><h3>get_checksum<a class="headerlink" href="#get-checksum" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">uint32_t</span> <span class="n">get_checksum</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </pre>
-<p>returns check sum value (CRC32/Adler32)</p>
+<p>Returns check sum value (CRC32/Adler32)</p>
 </div>
 <div class="section" id="set-checksum">
 <span id="cid-xf-compression-xfzlib-set-checksum"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1aa0659ec7543b798f008891b160deeed3"></span><h3>set_checksum<a class="headerlink" href="#set-checksum" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">set_checksum</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">cval</span><span class="p">)</span>
 </pre>
-<p>set check sum value (CRC32/Adler32)</p>
+<p>Set check sum value (CRC32/Adler32)</p>
 </div>
 <div class="section" id="getcompresskernel">
 <span id="cid-xf-compression-xfzlib-getcompresskernel"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1ac893340263a91d6429824fa68e93d39e"></span><h3>getCompressKernel<a class="headerlink" href="#getcompresskernel" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getCompressKernel</span> <span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
 </pre>
-<p>get compress kernel name</p>
-</div>
-<div class="section" id="getdecompresskernel">
-<span id="cid-xf-compression-xfzlib-getdecompresskernel"></span><span id="doxid-classxf-1-1compression-1-1xfzlib-1a396520949b83c409a780da720a35ce01"></span><h3>getDeCompressKernel<a class="headerlink" href="#getdecompresskernel" title="Permalink to this headline">¶</a></h3>
-<pre class="highlight title-code-block literal-block">
-<span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getDeCompressKernel</span> <span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span>
-</pre>
-<p>get decompress kernel name</p>
+<p>Get compress kernel name</p>
 </div>
 </div>
 </div>
@@ -840,7 +911,7 @@
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on June 30, 2021.
+        Last updated on September 22, 2021.
       </span>
 
     </p>
