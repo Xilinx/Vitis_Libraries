@@ -23,7 +23,7 @@
 int main() {
     int nerr = 0;
     auto file = std::string("test.dat");
-    ap_uint<32> golden = 0xff7e73d8;
+    ap_uint<32> golden = 0x2589b2e0;
 
     std::ifstream ifs(file, std::ios::binary);
     if (!ifs) return 1;

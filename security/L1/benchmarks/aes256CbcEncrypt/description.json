@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx AES256CBC Encryption Benchmark", 
-    "description": "", 
+    "description": "AES256 CBC Mode Encryption Benchmark", 
     "flow": "vitis", 
     "platform_type": "", 
     "platform_whitelist": [

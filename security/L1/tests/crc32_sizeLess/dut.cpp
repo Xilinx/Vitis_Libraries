@@ -24,7 +24,7 @@
 
 void dut(hls::stream<ap_uint<32> >& crcInitStrm,
          hls::stream<ap_uint<8 * W> >& inStrm,
-         hls::stream<ap_uint<5> >& inPackLenStrm,
+         hls::stream<ap_uint<7> >& inPackLenStrm,
          hls::stream<bool>& endInPackLenStrm,
          hls::stream<ap_uint<32> >& outStrm,
          hls::stream<bool>& endOutStrm) {

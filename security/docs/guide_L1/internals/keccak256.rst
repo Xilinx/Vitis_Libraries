@@ -29,13 +29,12 @@ Keccak-256 Algorithms
 Overview
 ========
 
-Keccak-256 is a cryptographic hash function defined in: `The KECCAK SHA-3 submission-Version 3 [submit in 2011] <https://keccak.team/files/Keccak-submission-3.pdf
->`_.
+Keccak-256 is a cryptographic hash function defined in: `The KECCAK SHA-3 submission-Version 3 [submit in 2011] <https://keccak.team/files/Keccak-submission-3.pdf>`_.
 
-.. _`Algorithm Standard`: 
+
 Implementation on FPGA
 ======================
 
 Please refer to `SHA-3 implementation <https://gitenterprise.xilinx.com/sibow/xf_security/blob/master/docs/guide_L1/internals/sha3.rst#implementation-on-fpga>`_ for internal structure design.
-Padding rule is the only difference between two algorithm implementations: pad 0x01 in Keccak-256, while 0x06 in SHA-3.
 
+Padding rule is the only difference between two algorithm implementations: use 0x01 in Keccak-256 and 0x06 in SHA-3.

@@ -20,12 +20,12 @@
  * @brief This file contains top function of test case.
  */
 
-#include "xf_security/crc32.hpp"
+#include "xf_security/crc32c.hpp"
 #define W 64
 
 void dut(hls::stream<ap_uint<32> >& crcInitStrm,
          hls::stream<ap_uint<8 * W> >& inStrm,
-         hls::stream<ap_uint<7> >& inPackLenStrm,
-         hls::stream<bool>& endInPackStrm,
+         hls::stream<ap_uint<32> >& inLenStrm,
+         hls::stream<bool>& endInStrm,
          hls::stream<ap_uint<32> >& outStrm,
          hls::stream<bool>& endOutStrm);

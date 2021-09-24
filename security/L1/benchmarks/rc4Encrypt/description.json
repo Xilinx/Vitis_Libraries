@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx RC4 Encryption Benchmark", 
-    "description": "", 
+    "description": "RC4 Encryption Algorithm Benchmarking", 
     "flow": "vitis", 
     "platform_type": "", 
     "platform_whitelist": [

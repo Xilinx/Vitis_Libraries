@@ -93,39 +93,32 @@ void adler32(hls::stream<ap_uint<32> >& adlerStrm,
 #pragma HLS PIPELINE II = 1
 #pragma HLS loop_tripcount max = 100 min = 100
             inData = inStrm.read();
-            ap_uint<12> sTmp[W];
-#pragma HLS array_partition variable = sTmp dim = 1
-            for (int i = 0; i < W; i++) {
-#pragma HLS unroll
-                sTmp[i] = 0;
-                for (int j = 0; j <= i; j++) {
-                    sTmp[i] += inData(j * 8 + 7, j * 8);
-                }
+            ap_uint<12> sTmp0 = inData.range(7, 0);
+            ap_uint<16> sTmp1 = inData.range(7, 0);
+            for (int i = 1; i < W; i++) {
+                sTmp0 += inData.range(i * 8 + 7, i * 8);
+                sTmp1 += sTmp0;
             }
 
-            s2 += s1 * W;
-
-            if (W == 16) {
-                s2 += internal::treeAdd<12, 4>::f(sTmp);
-            } else if (W == 8) {
-                s2 += internal::treeAdd<12, 3>::f(sTmp);
-            } else if (W == 4) {
-                s2 += internal::treeAdd<12, 2>::f(sTmp);
-            } else if (W == 2) {
-                s2 += internal::treeAdd<12, 1>::f(sTmp);
-            } else if (W == 1) {
-                s2 += internal::treeAdd<12, 0>::f(sTmp);
-            }
-
+            ap_uint<32> sTmp2 = s1 * W + sTmp1;
             for (int j = 0; j <= W; j++) {
-                if (s2 >= internal::BASE[W - j]) {
-                    s2 -= internal::BASE[W - j];
+                if (sTmp2 >= internal::BASE[W - j]) {
+                    sTmp2 -= internal::BASE[W - j];
                     break;
                 }
             }
 
-            s1 += sTmp[W - 1];
-            if (s1 >= internal::BASE[0]) s1 -= internal::BASE[0];
+            if ((s2 + sTmp2) >= internal::BASE[0]) {
+                s2 -= (internal::BASE[0] - sTmp2);
+            } else {
+                s2 += sTmp2;
+            }
+
+            if ((s1 + sTmp0) >= internal::BASE[0]) {
+                s1 -= (internal::BASE[0] - sTmp0);
+            } else {
+                s1 += sTmp0;
+            }
         }
 
         for (int j = 0; j < len % W; j++) {
@@ -174,39 +167,33 @@ void adler32(hls::stream<ap_uint<32> >& adlerStrm,
 #pragma HLS PIPELINE II = 1
 #pragma HLS loop_tripcount max = 100 min = 100
             inData = inStrm.read();
-            ap_uint<12> sTmp[W];
-#pragma HLS array_partition variable = sTmp dim = 1
-            for (int i = 0; i < W; i++) {
-#pragma HLS unroll
-                sTmp[i] = 0;
-                for (int j = 0; j <= i; j++) {
-                    sTmp[i] += inData(j * 8 + 7, j * 8);
-                }
+            ap_uint<12> sTmp0 = inData.range(7, 0);
+            ap_uint<16> sTmp1 = inData.range(7, 0);
+            for (int i = 1; i < W; i++) {
+                sTmp0 += inData.range(i * 8 + 7, i * 8);
+                sTmp1 += sTmp0;
             }
 
-            s2 += s1 * W;
-
-            if (W == 16) {
-                s2 += internal::treeAdd<12, 4>::f(sTmp);
-            } else if (W == 8) {
-                s2 += internal::treeAdd<12, 3>::f(sTmp);
-            } else if (W == 4) {
-                s2 += internal::treeAdd<12, 2>::f(sTmp);
-            } else if (W == 2) {
-                s2 += internal::treeAdd<12, 1>::f(sTmp);
-            } else if (W == 1) {
-                s2 += internal::treeAdd<12, 0>::f(sTmp);
-            }
-
+            ap_uint<32> sTmp2 = s1 * W + sTmp1;
             for (int j = 0; j <= W; j++) {
-                if (s2 >= internal::BASE[W - j]) {
-                    s2 -= internal::BASE[W - j];
+                if (sTmp2 >= internal::BASE[W - j]) {
+                    sTmp2 -= internal::BASE[W - j];
                     break;
                 }
             }
 
-            s1 += sTmp[W - 1];
-            if (s1 >= internal::BASE[0]) s1 -= internal::BASE[0];
+            if ((s2 + sTmp2) >= internal::BASE[0]) {
+                s2 -= (internal::BASE[0] - sTmp2);
+            } else {
+                s2 += sTmp2;
+            }
+
+            if ((s1 + sTmp0) >= internal::BASE[0]) {
+                s1 -= (internal::BASE[0] - sTmp0);
+            } else {
+                s1 += sTmp0;
+            }
+
             inPackLen = inPackLenStrm.read();
         }
 
@@ -259,39 +246,32 @@ void adler32(hls::stream<ap_uint<32> >& adlerStrm,
 #pragma HLS loop_tripcount max = 100 min = 100
             inPackLen = inPackLenStrm.read();
             inData = inStrm.read();
-            ap_uint<12> sTmp[W];
-#pragma HLS array_partition variable = sTmp dim = 1
-            for (int i = 0; i < W; i++) {
-#pragma HLS unroll
-                sTmp[i] = 0;
-                for (int j = 0; j <= i; j++) {
-                    sTmp[i] += inData(j * 8 + 7, j * 8);
-                }
+            ap_uint<12> sTmp0 = inData.range(7, 0);
+            ap_uint<16> sTmp1 = inData.range(7, 0);
+            for (int i = 1; i < W; i++) {
+                sTmp0 += inData.range(i * 8 + 7, i * 8);
+                sTmp1 += sTmp0;
             }
 
-            s2 += s1 * W;
-
-            if (W == 16) {
-                s2 += internal::treeAdd<12, 4>::f(sTmp);
-            } else if (W == 8) {
-                s2 += internal::treeAdd<12, 3>::f(sTmp);
-            } else if (W == 4) {
-                s2 += internal::treeAdd<12, 2>::f(sTmp);
-            } else if (W == 2) {
-                s2 += internal::treeAdd<12, 1>::f(sTmp);
-            } else if (W == 1) {
-                s2 += internal::treeAdd<12, 0>::f(sTmp);
-            }
-
+            ap_uint<32> sTmp2 = s1 * W + sTmp1;
             for (int j = 0; j <= W; j++) {
-                if (s2 >= internal::BASE[W - j]) {
-                    s2 -= internal::BASE[W - j];
+                if (sTmp2 >= internal::BASE[W - j]) {
+                    sTmp2 -= internal::BASE[W - j];
                     break;
                 }
             }
 
-            s1 += sTmp[W - 1];
-            if (s1 >= internal::BASE[0]) s1 -= internal::BASE[0];
+            if ((s2 + sTmp2) >= internal::BASE[0]) {
+                s2 -= (internal::BASE[0] - sTmp2);
+            } else {
+                s2 += sTmp2;
+            }
+
+            if ((s1 + sTmp0) >= internal::BASE[0]) {
+                s1 -= (internal::BASE[0] - sTmp0);
+            } else {
+                s1 += sTmp0;
+            }
         }
 
         if (inPackLen != 0) {

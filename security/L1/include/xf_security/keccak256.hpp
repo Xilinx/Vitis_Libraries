@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef _XF_SECURITY_SHA3_HPP_
-#define _XF_SECURITY_SHA3_HPP_
+#ifndef _XF_SECURITY_KECCAK256_HPP_
+#define _XF_SECURITY_KECCAK256_HPP_
 
 #include <ap_int.h>
 #include <hls_stream.h>

@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx HMAC-SHA1 Benchmark", 
-    "description": "", 
+    "description": "HMAC-SHA1 Algorithm Benchmarking", 
     "flow": "vitis", 
     "platform_type": "", 
     "platform_whitelist": [

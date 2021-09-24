@@ -40,7 +40,7 @@ Implementation on FPGA
 For the CRC32 design, it can be specified as:
 
 - Width : 32
-- Poly  : 0xEDB88320
+- Poly  : 0xEDB88320 (crc32) or 0x82F63B78 (crc32c)
 - Init  : 0xFFFFFFFF
 - Way   : Lookup table
 

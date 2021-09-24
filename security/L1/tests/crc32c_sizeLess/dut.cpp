@@ -15,17 +15,18 @@
  */
 
 /**
- * @file dut.hpp
+ * @file dut.cpp
  *
  * @brief This file contains top function of test case.
  */
 
-#include "xf_security/crc32.hpp"
-#define W 64
+#include "dut.hpp"
 
 void dut(hls::stream<ap_uint<32> >& crcInitStrm,
          hls::stream<ap_uint<8 * W> >& inStrm,
          hls::stream<ap_uint<7> >& inPackLenStrm,
-         hls::stream<bool>& endInPackStrm,
+         hls::stream<bool>& endInPackLenStrm,
          hls::stream<ap_uint<32> >& outStrm,
-         hls::stream<bool>& endOutStrm);
+         hls::stream<bool>& endOutStrm) {
+    xf::security::crc32c<W>(crcInitStrm, inStrm, inPackLenStrm, endInPackLenStrm, outStrm, endOutStrm);
+}

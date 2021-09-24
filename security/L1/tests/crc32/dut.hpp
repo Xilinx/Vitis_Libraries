@@ -21,7 +21,7 @@
  */
 
 #include "xf_security/crc32.hpp"
-#define W 16
+#define W 64
 
 void dut(hls::stream<ap_uint<32> >& crcInitStrm,
          hls::stream<ap_uint<8 * W> >& inStrm,

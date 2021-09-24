@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx AES256CBC Decryption SC Benchmark", 
-    "description": "", 
+    "description": "AES256 CBC Mode Decryption Benchmark with System Compiler", 
     "flow": "vitis", 
     "platform_type": "", 
     "platform_whitelist": [

@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx CRC32 Benchmark", 
-    "description": "", 
+    "description": "CRC32 Checksum Algorithm Benchmarking", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50", 

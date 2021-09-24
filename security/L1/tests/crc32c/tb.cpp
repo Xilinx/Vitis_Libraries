@@ -23,7 +23,7 @@
 int main() {
     int nerr = 0;
     auto file = std::string("test.dat");
-    ap_uint<32> golden = 0xff7e73d8;
+    ap_uint<32> golden = 0x2589b2e0;
 
     std::ifstream ifs(file, std::ios::binary);
     if (!ifs) return 1;
@@ -38,28 +38,22 @@ int main() {
 
     hls::stream<ap_uint<32> > crcInitStrm;
     hls::stream<ap_uint<W * 8> > inStrm;
-    hls::stream<ap_uint<7> > inPackLenStrm;
-    hls::stream<bool> endInPackLenStrm;
+    hls::stream<ap_uint<32> > inLenStrm;
+    hls::stream<bool> endInStrm;
     hls::stream<ap_uint<32> > outStrm;
     hls::stream<bool> endOutStrm;
 
     for (int t = 0; t < 1; t++) {
-        crcInitStrm.write(~0);
-
         for (int i = 0; i < (size + W - 1) / W; i++) {
             inStrm.write(in[i]);
-            if ((i * W + W) <= size) {
-                inPackLenStrm.write(ap_uint<7>(W));
-            } else {
-                inPackLenStrm.write(ap_uint<7>(size % W));
-            }
         }
-        inPackLenStrm.write(ap_uint<7>(0));
-        endInPackLenStrm.write(false);
+        crcInitStrm.write(~0);
+        inLenStrm.write(size);
+        endInStrm.write(false);
     }
-    endInPackLenStrm.write(true);
+    endInStrm.write(true);
 
-    dut(crcInitStrm, inStrm, inPackLenStrm, endInPackLenStrm, outStrm, endOutStrm);
+    dut(crcInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
 
     for (int t = 0; t < 1; t++) {
         ap_uint<32> crc_out = outStrm.read();
