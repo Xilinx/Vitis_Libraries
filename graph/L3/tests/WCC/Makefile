@@ -247,7 +247,8 @@ endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
 	@echo 'export XILINX_XRT=/usr' >> run_script.sh
 	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh 
-	@echo '        cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
+	@echo '        cp platform_desc.txt /etc/xocl.txt' >> run_script.sh 
+	@echo 'fi' >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
 	@echo 'return_code=$$?' >> run_script.sh
