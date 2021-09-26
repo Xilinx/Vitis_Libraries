@@ -29,6 +29,13 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2021.2
+------
+
+The 2021.2 release provide support for:
+* KECCAK-256
+* CRC32C
+
 2021.1
 ------
 
