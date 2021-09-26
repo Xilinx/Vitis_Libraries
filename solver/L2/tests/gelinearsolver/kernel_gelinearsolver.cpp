@@ -21,16 +21,16 @@
 
 extern "C" void kernel_gelinearsolver_0(int na, double* dataA, double* dataB) {
 #pragma HLS INTERFACE m_axi port = dataA bundle = gmem0 offset = slave num_read_outstanding = \
-    16 max_read_burst_length = 32
+    16 max_read_burst_length = 32 num_write_outstanding = 16 max_write_burst_length = 32 latency = 128 depth = 1024
 #pragma HLS INTERFACE m_axi port = dataB bundle = gmem1 offset = slave num_read_outstanding = \
-    16 max_read_burst_length = 32
+    16 max_read_burst_length = 32 num_write_outstanding = 16 max_write_burst_length = 32 latency = 128 depth = 1024
 
 #pragma HLS INTERFACE s_axilite port = na bundle = control
 #pragma HLS INTERFACE s_axilite port = dataA bundle = control
 #pragma HLS INTERFACE s_axilite port = dataB bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    int info;
+    int info = 0;
     // Calling for cholesky core function
     xf::solver::gelinearsolver<double, MAXN, NCU>(na, dataA, LDB, dataB, na, LDB, info);
 }

@@ -182,6 +182,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/ext
+VPP_FLAGS += -g
 
 kernel_gelinearsolver_0_VPP_FLAGS +=  -D KERNEL_NAME=kernel_gelinearsolver_0
 kernel_gelinearsolver_0_VPP_FLAGS += --hls.clock 300000000:kernel_gelinearsolver_0

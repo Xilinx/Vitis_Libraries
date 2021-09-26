@@ -40,5 +40,6 @@ extern "C" void kernel_gesvdj_0(
     //  // Calling for svd core function
     int info;
     xf::solver::gesvdj<double, NA, 4>(matrixSize, dataA, matrixSize, sigma, dataU, matrixSize, dataV, matrixSize, info);
-    //xf::solver::gesvdj<double, NA, 8>(matrixSize, dataA, matrixSize, sigma, dataU, matrixSize, dataV, matrixSize, info);
+    // xf::solver::gesvdj<double, NA, 8>(matrixSize, dataA, matrixSize, sigma, dataU, matrixSize, dataV, matrixSize,
+    // info);
 }

@@ -28,18 +28,18 @@ namespace internal_gelinear {
 
 template <typename T, int N, int NCU>
 void trisolver_L(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU - 1) / NCU], T dataX[N]) {
-#pragma HLS inline off
+    //#pragma HLS inline off
 
     dataX[0] = dataB[0][0];
 Loop_row:
     for (int i = 1; i < n; i++) {
     Loop_col:
         for (int j = i / NCU; j < (n + NCU - 1) / NCU; j++) {
-#pragma HLS pipeline
+            //#pragma HLS pipeline
             for (int k = 0; k < NCU; k++) {
-#pragma HLS loop_tripcount min = NCU max = NCU
-#pragma HLS unroll factor = NCU
-#pragma HLS dependence variable = dataB inter false
+                //#pragma HLS loop_tripcount min = NCU max = NCU
+                //#pragma HLS unroll factor = NCU
+                //#pragma HLS dependence variable = dataB inter false
                 if ((j * NCU + k) < n) {
                     dataB[k][j] -= dataA[k][j][i - 1] * dataX[i - 1];
                 }
@@ -51,18 +51,18 @@ Loop_row:
 
 template <typename T, int N, int NCU>
 void trisolver_U(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU - 1) / NCU], T dataX[N]) {
-#pragma HLS inline off
+    //#pragma HLS inline off
 
     dataX[n - 1] = dataB[(n - 1) % NCU][(n - 1) / NCU] / dataA[(n - 1) % NCU][(n - 1) / NCU][n - 1];
 Loop_row:
     for (int i = n - 2; i >= 0; i--) {
     Loop_col:
         for (int j = i / NCU; j >= 0; j--) {
-#pragma HLS pipeline
+            //#pragma HLS pipeline
             for (int k = NCU - 1; k >= 0; k--) {
-#pragma HLS loop_tripcount min = NCU max = NCU
-#pragma HLS unroll factor = NCU
-#pragma HLS dependence variable = dataB inter false
+                //#pragma HLS loop_tripcount min = NCU max = NCU
+                //#pragma HLS unroll factor = NCU
+                //#pragma HLS dependence variable = dataB inter false
                 if ((j * NCU + k) < n - 1) dataB[k][j] -= dataA[k][j][i + 1] * dataX[i + 1];
             }
         }
@@ -73,7 +73,7 @@ Loop_row:
 template <typename T, int NRCU, int NMAX, int NCU>
 void getrf_core(int n, T A[NCU][NRCU][NMAX], int lda, int P[NMAX]) {
     for (int r = 0; r < n; r++) {
-#pragma HLS pipeline
+        //#pragma HLS pipeline
         P[r] = r;
     }
     internalgetrf::getrf_core<T, NRCU, NMAX, NCU>(n, n, A, P, n);
@@ -86,7 +86,7 @@ void solver(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU -
 
     for (int i = 0; i < (N + NCU - 1) / NCU; i++) {
         for (int k = 0; k < NCU; k++) {
-#pragma HLS pipeline
+            //#pragma HLS pipeline
             if ((i * NCU + k) < n) {
                 buf_i[k][i] = buf[i * NCU + k];
             } else {
@@ -98,7 +98,7 @@ void solver(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU -
     trisolver_U<T, N, NCU>(n, dataA, buf_i, buf_o);
 
     for (int i = 0; i < N; i++) {
-#pragma HLS pipeline
+        //#pragma HLS pipeline
         dataX[i] = buf_o[i];
     }
 }
@@ -111,7 +111,7 @@ void solver_core(int n, int j, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU
     int info;
     getrf_core<T, NRCU, N, NCU>(n, dataA, n, P);
     for (int i = 0; i < n; ++i) {
-#pragma HLS pipeline
+        //#pragma HLS pipeline
         dataC[i % NCU][i / NCU] = dataB[P[i] % NCU][P[i] / NCU];
     }
     solver<T, N, NCU>(n, dataA, dataC, dataX);
@@ -145,16 +145,16 @@ void gelinearsolver(int n, T* A, int b, T* B, int lda, int ldb, int& info) {
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
         static T matB[NCU][(NMAX + NCU - 1) / NCU];
-#pragma HLS array_partition variable = matA cyclic factor = NCU
-#pragma HLS array_partition variable = matB cyclic factor = NCU
-#pragma HLS resource variable = matA core = XPM_MEMORY uram
+        //#pragma HLS array_partition variable = matA cyclic factor = NCU
+        //#pragma HLS array_partition variable = matB cyclic factor = NCU
+        //#pragma HLS resource variable = matA core = XPM_MEMORY uram
 
         for (int j = 0; j < b; j++) {
         Loop_read:
             for (int r = 0; r < n; r++) {
                 for (int c = 0; c < n; c++) {
-#pragma HLS pipeline
-#pragma HLS dependence variable = A inter false
+                    //#pragma HLS pipeline
+                    //#pragma HLS dependence variable = A inter false
                     matA[r % NCU][r / NCU][c] = A[r * lda + c];
                     if (c == 0) {
                         matB[r % NCU][r / NCU] = B[r * ldb + j];
@@ -166,7 +166,7 @@ void gelinearsolver(int n, T* A, int b, T* B, int lda, int ldb, int& info) {
             internal_gelinear::solver_core<T, NMAX, NCU>(n, j, matA, matB, dataX);
 
             for (int r = 0; r < n; r++) {
-#pragma HLS pipeline
+                //#pragma HLS pipeline
                 B[r * ldb + j] = dataX[r];
             }
         }

@@ -22,9 +22,9 @@
 
 extern "C" void kernel_polinearsolver_0(int na, int nb, double* dataA, double* dataB) {
 #pragma HLS INTERFACE m_axi port = dataA bundle = gmem0 offset = slave num_read_outstanding = \
-    16 max_read_burst_length = 32
+    16 max_read_burst_length = 32 max_widen_bitwidth = 64
 #pragma HLS INTERFACE m_axi port = dataB bundle = gmem1 offset = slave num_read_outstanding = \
-    16 max_read_burst_length = 32
+    16 max_read_burst_length = 32 max_widen_bitwidth = 64
 
 #pragma HLS INTERFACE s_axilite port = na bundle = control
 #pragma HLS INTERFACE s_axilite port = nb bundle = control
