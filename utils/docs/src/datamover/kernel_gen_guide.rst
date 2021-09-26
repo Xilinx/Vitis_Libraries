@@ -43,20 +43,22 @@ Kernel Templates
 
 These kernel templates cannot be used as kernel top directly, they have to be instantiated by the Python script with the configurations coming from JSON.
 
-Currently, there are 7 types of kernels in 2 different categories:
+Currently, there are 9 types of kernels in 2 different categories:
 
 Data to AIE:
 
 - LoadDdrToStream: For loading data from PL's DDR to AIE through AXI stream
-- SendBramToStream: For sending data from on-chip BRAM to AIE through AXI stream
-- SendUramToStream: The same as ``SendBramToStream``, but the difference is that the source data is coming from URAM instead of BRAM
+- LoadDdrToStreamWithCounter: For loading data from PL's DDR to AIE through AXI stream and recording the data count sending to AIE 
+- SendRomToStream: For sending data from on-chip BRAM to AIE through AXI stream
+- SendRamToStream: The same as ``SendRomToStream``, but the difference is that the source data is coming from URAM instead of BRAM
 
 Data from AIE:
 
-- StoreStreamToDdr: For receiving data from AIE through AXI stream and save them to PL's DDR
-- ValidateStreamWithDdr: For receiving data from AIE through AXI stream and comparing with the goldens in PL's DDR, as well as putting the overall pass/fail flag into PL's DDR
-- ValidateStreamWithBram: For receiving data from AIE through AXI stream and comparing with the goldens in PL's BRAM, as well as putting the overall pass/fail flag into PL's DDR
-- ValidateStreamWithUram: For receiving data from AIE through AXI stream and comparing with the goldens in PL's URAM, as well as putting the overall pass/fail flag into PL's DDR
+- StoreStreamToMaster: For receiving data from AIE through AXI stream and save them to PL's DDR
+- StoreStreamToMasterWithCounter: For receiving data from AIE through AXI stream and saving them to PL's DDR, as well as recording the data count sending to DDR
+- ValidateStreamWithMaster: For receiving data from AIE through AXI stream and comparing with the goldens in PL's DDR, as well as putting the overall pass/fail flag into PL's DDR
+- ValidateStreamWithRom: For receiving data from AIE through AXI stream and comparing with the goldens in PL's BRAM, as well as putting the overall pass/fail flag into PL's DDR
+- ValidateStreamWithRam: For receiving data from AIE through AXI stream and comparing with the goldens in PL's URAM, as well as putting the overall pass/fail flag into PL's DDR
 
 **Example Kernel Specification (JSON)**
 
@@ -122,7 +124,7 @@ The ``StoreStreamToMater`` kernel should also have 2 data paths. As we want to l
     }
 
 
-Kindly refer to ``L2/tests/datamover`` for JSON format of all 7 types of kernels that can be generated.
+Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels that can be generated.
 
 Data Converter
 --------------

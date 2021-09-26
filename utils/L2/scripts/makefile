@@ -51,7 +51,7 @@ $(DEST_DIR)/dataConverter: $(XFLIB_DIR)/L2/src/sw/datamover/data_converter.cpp c
 	@$(CXX) -o $@ -I $(XILINX_VITIS)/include -I $(XILINX_HLS)/include -I $(XFLIB_DIR)/L1/include $< -std=c++14
 
 $(DEST_DIR)/py3env/.ok: $(DEST_DIR)/py3env/bin/activate
-	@echo "[INFO] Installing reqired python3 packages in venv..."
+	@echo "[INFO] Installing required python3 packages in venv..."
 	@(source $(DEST_DIR)/py3env/bin/activate; PYTHONPATH="" python3 $(DEST_DIR)/py3env/bin/pip install -r $(MK_DIR)/requirements.txt)
 	@touch $(DEST_DIR)/py3env/.ok
 

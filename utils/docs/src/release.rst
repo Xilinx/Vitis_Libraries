@@ -22,6 +22,13 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2021.2
+------
+
+In the 2021.2 release, add two Data-Mover implementation for debugging hw issue.
+* **LoadDdrToStreamWithCounter** : For loading data from PL's DDR to AIE through AXI stream and recording the data count sending to AIE.
+* **StoreStreamToMasterWithCounter** : For receiving data from AIE through AXI stream and saving them to PL's DDR, as well as recording the data count sending to DDR.
+
 2021.1
 ------
 
