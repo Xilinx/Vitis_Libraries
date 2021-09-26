@@ -304,7 +304,7 @@
             
             
               <div class="version">
-                2021.1
+                2021.2
               </div>
             
           
@@ -2686,7 +2686,7 @@ Confidentiality” The implementation is modified for better performance.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>W</td>
-<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16.</td>
+<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16, 32, 64.</td>
 </tr>
 <tr class="row-even"><td>crcInitStrm</td>
 <td>initialize crc32 value</td>
@@ -2710,7 +2710,7 @@ Confidentiality” The implementation is modified for better performance.</p>
 </table>
 </div>
 <div class="section" id="crc32-overload-2">
-<span id="cid-xf-security-crc32-2"></span><span id="doxid-namespacexf-1-1security-1ade96bdae2a80577b61b06f951b6bcb1b"></span><h3>crc32 overload (2)<a class="headerlink" href="#crc32-overload-2" title="Permalink to this headline">¶</a></h3>
+<span id="cid-xf-security-crc32-2"></span><span id="doxid-namespacexf-1-1security-1a2278349080adda5242a272c3a7f76820"></span><h3>crc32 overload (2)<a class="headerlink" href="#crc32-overload-2" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/crc32.hpp&quot;</span>
 </pre>
@@ -2719,7 +2719,7 @@ Confidentiality” The implementation is modified for better performance.</p>
 <span class="kt">void</span> <span class="n">crc32</span> <span class="p">(</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">crcInitStrm</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="n">W</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inStrm</span><span class="p">,</span>
-    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inPackLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">7</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inPackLenStrm</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endInPackLenStrm</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outStrm</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endOutStrm</span>
@@ -2734,7 +2734,106 @@ Confidentiality” The implementation is modified for better performance.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>W</td>
-<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16.</td>
+<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16, 32, 64.</td>
+</tr>
+<tr class="row-even"><td>crcInitStrm</td>
+<td>initialize crc32 value</td>
+</tr>
+<tr class="row-odd"><td>inStrm</td>
+<td>input messages to be checked</td>
+</tr>
+<tr class="row-even"><td>inPackLenStrm</td>
+<td>effetive lengths of input message pack, 1~W. 0 means end of message</td>
+</tr>
+<tr class="row-odd"><td>endInPackLenStrm</td>
+<td>end flag of inPackLenStrm, 1 “false” for 1 message, 1 “true” means no message anymore.</td>
+</tr>
+<tr class="row-even"><td>outStrm</td>
+<td>crc32 result to output</td>
+</tr>
+<tr class="row-odd"><td>endOutStrm</td>
+<td>end flag of outStrm</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="crc32c">
+<span id="cid-xf-security-crc32c"></span><span id="doxid-namespacexf-1-1security-1ac4c5237d2c251cd762d52ce0609a0c99"></span><h2>crc32c<a class="headerlink" href="#crc32c" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="crc32c-overload-1">
+<h3>crc32c overload (1)<a class="headerlink" href="#crc32c-overload-1" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/crc32c.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">W</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">crc32c</span> <span class="p">(</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">crcInitStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="n">W</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endInStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endOutStrm</span>
+    <span class="p">)</span>
+</pre>
+<p>crc32c computes the CRC32 (Castagnoli) check value of an input data.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>W</td>
+<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16, 32, 64.</td>
+</tr>
+<tr class="row-even"><td>crcInitStrm</td>
+<td>initialize crc32 value</td>
+</tr>
+<tr class="row-odd"><td>inStrm</td>
+<td>input messages to be checked</td>
+</tr>
+<tr class="row-even"><td>inLenStrm</td>
+<td>lengths of input message</td>
+</tr>
+<tr class="row-odd"><td>endInStrm</td>
+<td>end flag of inLenStrm</td>
+</tr>
+<tr class="row-even"><td>outStrm</td>
+<td>crc32 result to output</td>
+</tr>
+<tr class="row-odd"><td>endOutStrm</td>
+<td>end flag of outStrm</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="crc32c-overload-2">
+<span id="cid-xf-security-crc32c-2"></span><span id="doxid-namespacexf-1-1security-1affcde67b7d971166e307630b87ab8ccf"></span><h3>crc32c overload (2)<a class="headerlink" href="#crc32c-overload-2" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/crc32c.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">W</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">crc32c</span> <span class="p">(</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">crcInitStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="n">W</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">7</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inPackLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endInPackLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endOutStrm</span>
+    <span class="p">)</span>
+</pre>
+<p>crc32c computes the CRC32 (Castagnoli) check value of an input data.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>W</td>
+<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16, 32, 64.</td>
 </tr>
 <tr class="row-even"><td>crcInitStrm</td>
 <td>initialize crc32 value</td>
@@ -4085,6 +4184,47 @@ Confidentiality” The implementation is modified for better performance.</p>
 </tr>
 <tr class="row-even"><td>eHshStrm</td>
 <td>end flag of output stream hshStrm.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="keccak-256">
+<span id="cid-xf-security-keccak-256"></span><span id="doxid-namespacexf-1-1security-1aec9db452e181f4edb1375dcc9962a7c4"></span><h2>keccak_256<a class="headerlink" href="#keccak-256" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/keccak256.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">static</span> <span class="kt">void</span> <span class="n">keccak_256</span> <span class="p">(</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;&gt;&amp;</span> <span class="n">msgStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">128</span><span class="o">&gt;&gt;&amp;</span> <span class="n">msgLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endMsgLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;&gt;&amp;</span> <span class="n">digestStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endDigestStrm</span>
+    <span class="p">)</span>
+</pre>
+<p>Top function of KECCAK-256.</p>
+<p>The algorithm reference is : “The KECCAK SHA-3 submission-Version 3”.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>msgStrm</td>
+<td>The message being hashed.</td>
+</tr>
+<tr class="row-even"><td>msgLenStrm</td>
+<td>Message length in byte.</td>
+</tr>
+<tr class="row-odd"><td>endMsgLenStrm</td>
+<td>The flag to signal end of input message stream.</td>
+</tr>
+<tr class="row-even"><td>digestStrm</td>
+<td>Output digest stream.</td>
+</tr>
+<tr class="row-odd"><td>endDigestStrm</td>
+<td>End flag for output digest stream.</td>
 </tr>
 </tbody>
 </table>
