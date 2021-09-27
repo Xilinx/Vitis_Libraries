@@ -27,6 +27,7 @@ namespace xf {
 namespace compression {
 
 enum eHuffmanType { FIXED = 0, DYNAMIC, FULL };
+enum FileFormat { BOTH = 0, ZLIB = 1 };
 typedef ap_uint<32> bitBufferTypeLL;
 typedef ap_uint<48> bitBufferType;
 
@@ -53,7 +54,6 @@ void loadBitStreamLL(bitBufferTypeLL& bitbuffer,
                      hls::stream<ap_uint<16> >& inStream,
                      hls::stream<bool>& inEos,
                      bool& done) {
-#pragma HLS INLINE off
     if (bits_cntr < 16 && (done == false)) {
     loadBitStream:
         uint16_t tmp_dt = (uint16_t)inStream.read();
@@ -64,7 +64,6 @@ void loadBitStreamLL(bitBufferTypeLL& bitbuffer,
 }
 
 void discardBitStream(bitBufferType& bitbuffer, ap_uint<6>& bits_cntr, ap_uint<6> n_bits) {
-#pragma HLS INLINE off
     bitbuffer >>= n_bits;
     bits_cntr -= n_bits;
 }
@@ -435,7 +434,7 @@ void byteGen(bitBufferTypeLL& _bitbuffer,
              ap_uint<9>* bl5Codes,
              ap_uint<9>* bl6Codes,
              ap_uint<9>* bl7Codes,
-             uint16_t* lens,
+             ap_uint<5>* lens,
              hls::stream<bool>& inEos,
              hls::stream<ap_uint<16> >& inStream,
              ap_uint<9> nlen,
@@ -732,7 +731,7 @@ code_gen:
 }
 
 void code_generator_array_dyn_new(uint8_t curr_table,
-                                  uint16_t* lens,
+                                  ap_uint<5>* lens,
                                   ap_uint<9> codes,
                                   ap_uint<16>* codeOffsets,
                                   ap_uint<9>* bl1Codes,
@@ -834,7 +833,7 @@ CodeGen:
         }
     }
 }
-}
+} // namespace details
 
 /**
  * @brief This module is ZLIB/GZIP Fixed, Dynamic and Stored block supported
@@ -842,24 +841,27 @@ CodeGen:
  * decoded data in LZ77 format (Literal, Length, Offset).
  *
  * @tparam DECODER Fixed, Full, Dynamic huffman block support
- * @tparam ByteGenLoopII core bytegenerator loop initiation interval
- * @tparam USE_GZIP switch that controls GZIP/ZLIB header processing
+ * @tparam FORMAT switch that controls GZIP/ZLIB header processing
  *
  *
  * @param inStream input bit packed data
- * @param outStream output lz77 compressed output in the form of 32bit packets
- * (Literals, Match Length, Distances)
- * @param input_size input data size
+ * @param inEos input bit to mark end of file
+ * @param outStream output bytes for LZ module (Literal, Length, Offset)
+ * @param checkSum support checksum in gzip decompress
  */
-template <eHuffmanType DECODER = FULL>
+template <eHuffmanType DECODER = FULL, FileFormat FORMAT = BOTH>
 void huffmanDecoderLL(hls::stream<ap_uint<16> >& inStream,
                       hls::stream<bool>& inEos,
-                      hls::stream<ap_uint<16> >& outStream) {
+                      hls::stream<ap_uint<16> >& outStream
+#ifdef GZIP_DECOMPRESS_CHECKSUM
+                      ,
+                      hls::stream<ap_uint<32> >& checkSum
+#endif
+                      ) {
     bitBufferTypeLL bitbuffer = 0;
     ap_uint<6> bits_cntr = 0;
     bool isMultipleFiles = false;
     bool done = false;
-    details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
 huffmanDecoder_label0:
     while (done == false) {
         uint8_t current_op = 0;
@@ -876,20 +878,13 @@ huffmanDecoder_label0:
         ap_uint<9> dynamic_ndist = 0;
         ap_uint<5> dynamic_ncode = 0;
         ap_uint<9> dynamic_curInSize = 0;
-        uint16_t dynamic_lens[512];
-
-        uint8_t copy = 0;
+        ap_uint<5> dynamic_lens[318];
+#pragma HLS BIND_STORAGE variable = dynamic_lens type = ram_1p impl = lutram
 
         bool blocks_processed = false;
 
-        const uint16_t c_tcodesize = 2048;
-
-        uint32_t array_codes[512];
-        uint32_t array_codes_extra[512];
-        uint32_t array_codes_dist[512];
-        uint32_t array_codes_dist_extra[512];
-
         bool isGzip = false;
+        bool isZlib = false;
         // New huffman code
         ap_uint<16> codeOffsets[2][15];
 #pragma HLS ARRAY_PARTITION variable = codeOffsets dim = 1 complete
@@ -944,7 +939,7 @@ huffmanDecoder_label0:
         details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
         uint16_t magic_number = bitbuffer & 0xFFFF;
         details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
-        if (magic_number == 0x8b1f) {
+        if (magic_number == 0x8b1f && (FORMAT == BOTH)) {
             // GZIP Header Processing
             // Deflate mode & file name flag
             isGzip = true;
@@ -971,22 +966,30 @@ huffmanDecoder_label0:
             details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
             // If FLG is set to zero by using -n
             if (skip_fname) {
-            // Read file name
+                // Read file name
+                details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
+                lcl_tmp = bitbuffer & 0xFF;
+                details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)8);
             read_fname:
-                do {
+                while (lcl_tmp != 0) {
 #pragma HLS PIPELINE II = 1
+                    lcl_tmp = bitbuffer & 0xFF;
+
+                    bits_cntr -= 8;
+
                     if (bits_cntr < 16 && (done == false)) {
                         uint16_t tmp_data = inStream.read();
-                        bitbuffer += (bitBufferTypeLL)(tmp_data << bits_cntr);
+                        bitbuffer = (bitbuffer >> 8) | (bitBufferTypeLL)(tmp_data) << bits_cntr;
                         done = inEos.read();
                         bits_cntr += 16;
+                    } else {
+                        bitbuffer >>= 8;
                     }
-                    lcl_tmp = bitbuffer & 0xFF;
-                    details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)8);
-                } while (lcl_tmp != 0);
+                }
             }
         } else if ((magic_number & 0x00FF) != 0x0078) {
             blocks_processed = true;
+            isZlib = true;
         }
 
         if (isMultipleFiles) blocks_processed = true;
@@ -1014,19 +1017,23 @@ huffmanDecoder_label0:
 
                 if (DECODER == FULL) {
                     ap_uint<16> tmpVal = 0;
+                    details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
                 strd_blk_cpy:
                     for (uint16_t i = 0; i < store_length; i++) {
 #pragma HLS PIPELINE II = 1
-                        if (bits_cntr < 8 && (done == false)) {
-                            uint16_t tmp_dt = (uint16_t)inStream.read();
-                            bitbuffer += (bitBufferTypeLL)(tmp_dt) << bits_cntr;
-                            done = inEos.read();
-                            bits_cntr += 16;
-                        }
                         tmpVal.range(7, 0) = bitbuffer;
                         tmpVal.range(15, 8) = 0xF0;
                         outStream << tmpVal;
-                        details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)8);
+
+                        bits_cntr -= 8;
+                        if (bits_cntr < 16 && (done == false)) {
+                            uint16_t tmp_data = inStream.read();
+                            bitbuffer = (bitbuffer >> 8) | (bitBufferTypeLL)(tmp_data) << bits_cntr;
+                            done = inEos.read();
+                            bits_cntr += 16;
+                        } else {
+                            bitbuffer >>= 8;
+                        }
                     }
                 }
 
@@ -1054,7 +1061,7 @@ huffmanDecoder_label0:
                             done = inEos.read();
                             bits_cntr += 16;
                         }
-                        dynamic_lens[order[dynamic_curInSize++]] = (uint16_t)(bitbuffer & ((1 << 3) - 1));
+                        dynamic_lens[order[dynamic_curInSize++]] = bitbuffer & ((1 << 3) - 1);
                         details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)3);
                     }
 
@@ -1159,19 +1166,26 @@ huffmanDecoder_label0:
             if (dynamic_last) blocks_processed = true;
         } // While end
         // Checksum 4Bytes
-        if (isGzip) {
+        ap_uint<6> leftOverBits = bits_cntr % 8;
+        details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)leftOverBits);
+        ap_uint<32> chckVar = 0;
+        details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
+        chckVar.range(23, 16) = bitbuffer.range(15, 8);
+        chckVar.range(31, 24) = bitbuffer.range(7, 0);
+        details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
+        details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
+        chckVar.range(7, 0) = bitbuffer.range(15, 8);
+        chckVar.range(15, 8) = bitbuffer.range(7, 0);
+        details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
+#ifdef GZIP_DECOMPRESS_CHECKSUM
+        checkSum << chckVar;
+#endif
+        // FileSize in case of Gzip
+        if ((FORMAT == BOTH) && isGzip) {
             details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
             details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
             details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
             details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
-
-            details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
-            details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
-            details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
-            details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)16);
-            ap_uint<6> leftOverBits = bits_cntr % 8;
-            details::loadBitStreamLL(bitbuffer, bits_cntr, inStream, inEos, done);
-            details::discardBitStreamLL(bitbuffer, bits_cntr, (ap_uint<6>)leftOverBits);
         } else {
         consumeLeftOverData:
             while (done == false) {
@@ -1189,14 +1203,12 @@ huffmanDecoder_label0:
  * decoded data in LZ77 format (Literal, Length, Offset).
  *
  * @tparam DECODER Fixed, Full, Dynamic huffman block support
- * @tparam ByteGenLoopII core bytegenerator loop initiation interval
- * @tparam USE_GZIP switch that controls GZIP/ZLIB header processing
  *
  *
  * @param inStream input bit packed data
+ * @param inEos input end of stream
  * @param outStream output lz77 compressed output in the form of 32bit packets
  * (Literals, Match Length, Distances)
- * @param input_size input data size
  */
 template <eHuffmanType DECODER = FULL>
 void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
@@ -1484,6 +1496,6 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
     outStream << 1; // Adding Dummy Data for last end of stream case
 }
 
-} // Compression
-} // XF
+} // namespace compression
+} // namespace xf
 #endif // _XFCOMPRESSION_HUFFMAN_DECODER_HPP_

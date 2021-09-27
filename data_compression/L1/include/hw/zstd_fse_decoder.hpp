@@ -31,6 +31,7 @@
 #include <ap_int.h>
 
 #include "zstd_specs.hpp"
+#include "compress_utils.hpp"
 
 namespace xf {
 namespace compression {
@@ -73,10 +74,10 @@ send_data_main_loop:
     bytesInAcc = updBInAcc - bytesWritten;
 }
 
-template <uint8_t PARALLEL_BYTE>
+template <uint8_t IN_BYTES>
 int generateFSETable(hls::stream<uint32_t>& fseTableStream,
-                     hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
-                     ap_uint<8 * PARALLEL_BYTE * 2>& fseAcc,
+                     hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
+                     ap_uint<IN_BYTES * 8 * 2>& fseAcc,
                      uint8_t& bytesInAcc,
                      uint8_t& tableLog,
                      uint16_t maxChar,
@@ -84,7 +85,8 @@ int generateFSETable(hls::stream<uint32_t>& fseTableStream,
                      xfSymbolCompMode_t prevFseMode,
                      const int16_t* defDistTable,
                      int16_t* prevDistribution) {
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_inputByte = IN_BYTES;
+    const uint16_t c_streamWidth = 8 * c_inputByte;
     const uint16_t c_accRegWidth = c_streamWidth * 2;
     uint32_t bytesAvailable = bytesInAcc;
     uint8_t bitsAvailable = bytesInAcc * 8;
@@ -100,10 +102,10 @@ int generateFSETable(hls::stream<uint32_t>& fseTableStream,
     for (int i = 0; i < 64; ++i) normalizedCounter[i] = 0;
 
     if (fseMode == FSE_COMPRESSED_MODE) {
-        // read PARALLEL_BYTE bytes
-        if (bytesAvailable < PARALLEL_BYTE) {
+        // read input bytes
+        if (bytesAvailable < c_inputByte) {
             fseAcc.range((bitsAvailable + c_streamWidth - 1), bitsAvailable) = inStream.read();
-            bytesAvailable += PARALLEL_BYTE;
+            bytesAvailable += c_inputByte;
             bitsAvailable += c_streamWidth;
         }
         uint8_t accuracyLog = (fseAcc & 0xF) + 5;
@@ -119,10 +121,10 @@ int generateFSETable(hls::stream<uint32_t>& fseTableStream,
         while ((remaining > 1) & (charnum <= maxChar)) {
 #pragma HLS PIPELINE II = 1
             bitsConsumed = 0;
-            // read PARALLEL_BYTE bytes
-            if (bytesAvailable < PARALLEL_BYTE - 1) {
+            // read input bytes
+            if (bytesAvailable < c_inputByte - 1) {
                 fseAcc.range((bitsAvailable + c_streamWidth - 1), bitsAvailable) = inStream.read();
-                bytesAvailable += PARALLEL_BYTE;
+                bytesAvailable += c_inputByte;
                 bitsAvailable += c_streamWidth;
             }
             if (previous0) {
@@ -185,10 +187,10 @@ int generateFSETable(hls::stream<uint32_t>& fseTableStream,
     } else if (fseMode == RLE_MODE) {
         // next state for entire table is 0
         // accuracy log is 0
-        // read PARALLEL_BYTE bytes
+        // read input bytes
         if (bytesAvailable < 1) {
             fseAcc.range((bitsAvailable + c_streamWidth - 1), bitsAvailable) = inStream.read();
-            bytesAvailable += PARALLEL_BYTE;
+            bytesAvailable += c_inputByte;
             bitsAvailable += c_streamWidth;
         }
         uint8_t symbol = (uint8_t)fseAcc;
@@ -262,22 +264,28 @@ gen_fse_final_table:
     return totalBytesConsumed;
 }
 
-template <uint8_t PARALLEL_BYTE, uint8_t BLOCK_SIZE_KB, uint8_t BSWIDTH>
-void fseStreamStates(uint32_t* litFSETable,
-                     uint32_t* oftFSETable,
-                     uint32_t* mlnFSETable,
-                     ap_uint<BSWIDTH>* bitStream,
-                     int byteIndx,
-                     uint8_t lastByteValidBits,
-                     uint32_t seqCnt,
-                     uint8_t* accuracyLog,
-                     hls::stream<uint8_t>& symbolStream,
-                     hls::stream<ap_uint<32> >& bsWordStream,
-                     hls::stream<ap_uint<5> >& extraBitStream) {
+template <uint8_t IN_BYTES, uint8_t BLOCK_SIZE_KB>
+void fseStreamStatesLL(uint32_t* litFSETable,
+                       uint32_t* oftFSETable,
+                       uint32_t* mlnFSETable,
+                       ap_uint<IN_BYTES * 8>* bitStream,
+                       int byteIndx,
+                       uint8_t lastByteValidBits,
+                       uint32_t seqCnt,
+                       uint8_t* accuracyLog,
+                       hls::stream<uint8_t>& litsymbolStream,
+                       hls::stream<uint8_t>& mlsymbolStream,
+                       hls::stream<uint8_t>& ofsymbolStream,
+                       hls::stream<ap_uint<32> >& litbsWordStream,
+                       hls::stream<ap_uint<32> >& mlbsWordStream,
+                       hls::stream<ap_uint<32> >& ofbsWordStream,
+                       hls::stream<ap_uint<5> >& litextraBitStream,
+                       hls::stream<ap_uint<5> >& mlextraBitStream) {
     // fetch fse states from fse sequence bitstream and stream out for further processing
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint8_t c_inputByte = IN_BYTES;
+    const uint16_t c_streamWidth = 8 * c_inputByte;
     const uint16_t c_accRegWidth = c_streamWidth * 2;
-    const uint8_t c_bsBytes = BSWIDTH / 8;
+    const uint8_t c_bsBytes = c_streamWidth / 8;
 
     uint16_t fseStateLL, fseStateOF, fseStateML; // literal_length, offset, match_length states
     FseBSState bsStateLL, bsStateOF, bsStateML;  // offset, match_length and literal_length
@@ -286,7 +294,7 @@ void fseStreamStates(uint32_t* litFSETable,
     uint8_t bitsToRead = 0;
     uint8_t bytesToRead = 0;
 
-    acchbs.range(BSWIDTH - 1, 0) = bitStream[byteIndx--];
+    acchbs.range(c_streamWidth - 1, 0) = bitStream[byteIndx--];
     uint8_t byte_0 = acchbs.range(bitsInAcc - 1, bitsInAcc - 8);
 // find valid last bit, bitstream read in reverse order
 fsedseq_skip_zero:
@@ -301,11 +309,306 @@ fsedseq_skip_zero:
     }
 
 fsedseq_fill_acc:
-    while ((bitsInAcc + BSWIDTH < c_accRegWidth) && (byteIndx > -1)) {
+    while ((bitsInAcc + c_streamWidth < c_accRegWidth) && (byteIndx > -1)) {
 #pragma HLS PIPELINE II = 1
-        acchbs <<= BSWIDTH;
-        acchbs.range(BSWIDTH - 1, 0) = bitStream[byteIndx--];
-        bitsInAcc += BSWIDTH;
+        acchbs <<= c_streamWidth;
+        acchbs.range(c_streamWidth - 1, 0) = bitStream[byteIndx--];
+        bitsInAcc += c_streamWidth;
+    }
+    // Read literal_length, offset and match_length states from input stream
+    // get *accuracyLog bits from higher position in accuracyLog, mask out higher scrap bits
+    uint16_t mskLL = ((1 << accuracyLog[0]) - 1);
+    fseStateLL = ((acchbs >> (bitsInAcc - accuracyLog[0])) & mskLL);
+    uint16_t mskOF = ((1 << accuracyLog[1]) - 1);
+    fseStateOF = ((acchbs >> (bitsInAcc - (accuracyLog[0] + accuracyLog[1]))) & mskOF);
+    uint16_t mskML = ((1 << accuracyLog[2]) - 1);
+    fseStateML = ((acchbs >> (bitsInAcc - (accuracyLog[0] + accuracyLog[1] + accuracyLog[2]))) & mskML);
+
+    bitsInAcc -= (accuracyLog[0] + accuracyLog[1] + accuracyLog[2]);
+
+    enum FSEDState_t { READ_FSE = 0, GET_FSE };
+    FSEDState_t smState = READ_FSE;
+    uint8_t bitCntLML, bitCntLMO;
+    uint32_t bswLL, bswML, bswOF;
+    // read data to bitstream if necessary
+    if (bitsInAcc < c_streamWidth && byteIndx > -1) {
+        auto tmp = bitStream[byteIndx--];
+        acchbs = (acchbs << c_streamWidth) + tmp;
+        bitsInAcc += c_streamWidth;
+    }
+
+decode_sequence_bitStream:
+    while (seqCnt) {
+#pragma HLS PIPELINE II = 1
+        uint8_t processedBits = 0;
+        if (smState == READ_FSE) {
+            // get state values and stream
+            // stream fse metadata to decoding unit
+            // get the state codes for offset, match_length and literal_length
+            ap_uint<32> ofstateVal = oftFSETable[fseStateOF]; // offset
+            bsStateOF.symbol = ofstateVal.range(7, 0);
+            bsStateOF.bitCount = ofstateVal.range(15, 8);
+            bsStateOF.nextState = ofstateVal.range(31, 16);
+
+            uint8_t ofSymBits = bsStateOF.symbol; // also represents extra bits to be read, max 31-bits
+            ofsymbolStream << bsStateOF.symbol;
+            bswOF = acchbs >> (bitsInAcc - ofSymBits);
+
+            litbsWordStream << bswLL;
+            bitCntLMO = bsStateOF.bitCount;
+
+            ap_uint<32> mlstateVal = mlnFSETable[fseStateML]; // match_length
+            bsStateML.symbol = mlstateVal.range(7, 0);
+            bsStateML.bitCount = mlstateVal.range(15, 8);
+            bsStateML.nextState = mlstateVal.range(31, 16);
+
+            uint8_t mlextraBits = c_extraBitsML[bsStateML.symbol]; // max 16-bits
+            bswML = acchbs >> (bitsInAcc - ofSymBits - mlextraBits);
+            mlsymbolStream << bsStateML.symbol;
+            mlextraBitStream << mlextraBits;
+
+            bitCntLML = bsStateML.bitCount;
+            bitCntLMO += bsStateML.bitCount;
+
+            ofbsWordStream << bswOF;
+
+            ap_uint<32> litstateVal = litFSETable[fseStateLL]; // literal_length
+            bsStateLL.symbol = litstateVal.range(7, 0);
+            bsStateLL.bitCount = litstateVal.range(15, 8);
+            bsStateLL.nextState = litstateVal.range(31, 16);
+
+            uint8_t litextraBits = c_extraBitsLL[bsStateLL.symbol]; // max 16-bits
+            bswLL = acchbs >> (bitsInAcc - ofSymBits - mlextraBits - litextraBits);
+            litsymbolStream << bsStateLL.symbol;
+            litextraBitStream << litextraBits;
+
+            bitCntLML += bsStateLL.bitCount;
+            bitCntLMO += bsStateLL.bitCount;
+            mlbsWordStream << bswML;
+            processedBits = ofSymBits + litextraBits + mlextraBits;
+
+            mskLL = (((uint16_t)1 << bsStateLL.bitCount) - 1);
+            mskML = (((uint16_t)1 << bsStateML.bitCount) - 1);
+            mskOF = (((uint16_t)1 << bsStateOF.bitCount) - 1);
+
+            smState = GET_FSE;
+        } else if (smState == GET_FSE) {
+            processedBits = bitCntLMO;
+            // update state for next sequence
+            // read bits to get states for literal_length, match_length, offset
+            // accumulator must contain these many bits can be max 26-bits
+            fseStateLL = ((acchbs >> (bitsInAcc - bsStateLL.bitCount)) & mskLL);
+            fseStateLL += bsStateLL.nextState;
+
+            fseStateML = ((acchbs >> (bitsInAcc - bitCntLML)) & mskML);
+            fseStateML += bsStateML.nextState;
+
+            fseStateOF = ((acchbs >> (bitsInAcc - bitCntLMO)) & mskOF);
+            fseStateOF += bsStateOF.nextState;
+
+            --seqCnt;
+            smState = READ_FSE;
+        }
+        // read data to bitstream if necessary
+        if ((bitsInAcc - processedBits) < c_streamWidth && byteIndx > -1) {
+            auto tmp = bitStream[byteIndx--];
+            acchbs = (acchbs << c_streamWidth) + tmp;
+            bitsInAcc += c_streamWidth - processedBits;
+        } else {
+            bitsInAcc -= processedBits;
+        }
+    }
+    litbsWordStream << bswLL;
+}
+
+template <int LMO_WIDTH>
+void fseDecodeStatesLL(hls::stream<uint8_t>& litsymbolStream,
+                       hls::stream<uint8_t>& mlsymbolStream,
+                       hls::stream<uint8_t>& ofsymbolStream,
+                       hls::stream<ap_uint<32> >& litbsWordStream,
+                       hls::stream<ap_uint<32> >& mlbsWordStream,
+                       hls::stream<ap_uint<32> >& ofbsWordStream,
+                       hls::stream<ap_uint<5> >& litextraBitStream,
+                       hls::stream<ap_uint<5> >& mlextraBitStream,
+                       uint32_t seqCnt,
+                       uint32_t litCnt,
+                       ap_uint<LMO_WIDTH>* prevOffsets,
+                       hls::stream<ap_uint<LMO_WIDTH> >& litLenStream,
+                       hls::stream<ap_uint<LMO_WIDTH> >& offsetStream,
+                       hls::stream<ap_uint<LMO_WIDTH> >& matLenStream,
+                       hls::stream<bool>& litlenValidStream) {
+    // calculate literal length, match length and offset values, stream them for sequence execution
+    ap_uint<LMO_WIDTH> offsetVal;
+    ap_uint<LMO_WIDTH> litLenCode;
+    uint8_t ofi;
+    bool checkLL = false;
+    litbsWordStream.read(); // dump first word
+decode_sequence_codes:
+    while (seqCnt) {
+#pragma HLS PIPELINE II = 1
+        // calculate offset and set prev offsets
+        auto symbol = ofsymbolStream.read();
+        auto bsWord = ofbsWordStream.read();
+        auto extBit = symbol;
+        uint32_t extVal = bsWord & (((uint64_t)1 << extBit) - 1);
+        offsetVal = (1 << symbol) + extVal;
+
+        ofi = 3;
+        if (offsetVal > 3) {
+            offsetVal -= 3;
+            checkLL = false;
+        } else {
+            checkLL = true;
+        }
+        // calculate match length
+        symbol = mlsymbolStream.read();
+        bsWord = mlbsWordStream.read();
+        extBit = mlextraBitStream.read();
+        uint16_t extVal1 = (bsWord & (((uint64_t)1 << extBit) - 1));
+        ap_uint<LMO_WIDTH> matchLenCode = c_baseML[symbol] + extVal1;
+        matLenStream << matchLenCode;
+
+        // calculate literal length
+        symbol = litsymbolStream.read();
+        bsWord = litbsWordStream.read();
+        extBit = litextraBitStream.read();
+        extVal1 = (bsWord & (((uint64_t)1 << extBit) - 1));
+        litLenCode = c_baseLL[symbol] + extVal1;
+        litlenValidStream << 1;
+        litLenStream << litLenCode;
+        litCnt -= litLenCode;
+
+        // update offset as per literal length
+        if (checkLL) {
+            // repeat offsets 1 - 3
+            if (litLenCode == 0) {
+                if (offsetVal == 3) {
+                    offsetVal = prevOffsets[0] - 1;
+                    ofi = 2;
+                } else {
+                    ofi = offsetVal;
+                    offsetVal = prevOffsets[offsetVal];
+                }
+            } else {
+                ofi = offsetVal - 1;
+                offsetVal = prevOffsets[offsetVal - 1];
+            }
+        }
+        checkLL = false;
+        // OFFSET_WNU: write offset and update previous offsets
+        offsetStream << offsetVal;
+        // shift previous offsets
+        auto prev1 = prevOffsets[1];
+        if (ofi > 1) {
+            prevOffsets[2] = prev1;
+        }
+        if (ofi > 0) {
+            prevOffsets[1] = prevOffsets[0];
+            prevOffsets[0] = offsetVal;
+        }
+        --seqCnt;
+    }
+    if (litCnt > 0) {
+        litlenValidStream << 1;
+        litLenStream << litCnt;
+        matLenStream << 0;
+        offsetStream << 0;
+    }
+}
+
+template <uint8_t IN_BYTES = 4, uint8_t BLOCK_SIZE_KB, uint8_t LMO_WIDTH>
+void decodeSeqCoreLL(uint32_t* litFSETable,
+                     uint32_t* oftFSETable,
+                     uint32_t* mlnFSETable,
+                     ap_uint<IN_BYTES * 8>* bitStream,
+                     int bsIndx,
+                     uint8_t lastByteValidBits,
+                     uint32_t seqCnt,
+                     uint32_t litCnt,
+                     uint8_t* accuracyLog,
+                     ap_uint<LMO_WIDTH>* prevOffsets,
+                     hls::stream<ap_uint<LMO_WIDTH> >& litLenStream,
+                     hls::stream<ap_uint<LMO_WIDTH> >& offsetStream,
+                     hls::stream<ap_uint<LMO_WIDTH> >& matLenStream,
+                     hls::stream<bool>& litlenValidStream) {
+    // core module for decoding fse sequences
+    const uint8_t c_intlStreamDepth = 16;
+    // Internal streams
+    hls::stream<uint8_t> litsymbolStream("litsymbolStream");
+    hls::stream<uint8_t> mlsymbolStream("mlsymbolStream");
+    hls::stream<uint8_t> ofsymbolStream("ofsymbolStream");
+    hls::stream<ap_uint<32> > litbsWordStream("litbsWordStream");
+    hls::stream<ap_uint<32> > mlbsWordStream("mlbsWordStream");
+    hls::stream<ap_uint<32> > ofbsWordStream("ofbsWordStream");
+    hls::stream<ap_uint<5> > litextraBitStream("litextraBitStream");
+    hls::stream<ap_uint<5> > mlextraBitStream("mlextraBitStream");
+
+#pragma HLS STREAM variable = litsymbolStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = mlsymbolStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = ofsymbolStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = litbsWordStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = mlbsWordStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = ofbsWordStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = litextraBitStream depth = c_intlStreamDepth
+#pragma HLS STREAM variable = mlextraBitStream depth = c_intlStreamDepth
+
+#pragma HLS dataflow
+
+    fseStreamStatesLL<IN_BYTES, BLOCK_SIZE_KB>(litFSETable, oftFSETable, mlnFSETable, bitStream, bsIndx,
+                                               lastByteValidBits, seqCnt, accuracyLog, litsymbolStream, mlsymbolStream,
+                                               ofsymbolStream, litbsWordStream, mlbsWordStream, ofbsWordStream,
+                                               litextraBitStream, mlextraBitStream);
+
+    fseDecodeStatesLL<LMO_WIDTH>(litsymbolStream, mlsymbolStream, ofsymbolStream, litbsWordStream, mlbsWordStream,
+                                 ofbsWordStream, litextraBitStream, mlextraBitStream, seqCnt, litCnt, prevOffsets,
+                                 litLenStream, offsetStream, matLenStream, litlenValidStream);
+}
+
+template <uint8_t IN_BYTES, uint8_t BLOCK_SIZE_KB>
+void fseStreamStates(uint32_t* litFSETable,
+                     uint32_t* oftFSETable,
+                     uint32_t* mlnFSETable,
+                     ap_uint<IN_BYTES * 8>* bitStream,
+                     int byteIndx,
+                     uint8_t lastByteValidBits,
+                     uint32_t seqCnt,
+                     uint8_t* accuracyLog,
+                     hls::stream<uint8_t>& symbolStream,
+                     hls::stream<ap_uint<32> >& bsWordStream,
+                     hls::stream<ap_uint<5> >& extraBitStream) {
+    // fetch fse states from fse sequence bitstream and stream out for further processing
+    const uint8_t c_inputByte = IN_BYTES;
+    const uint16_t c_streamWidth = 8 * c_inputByte;
+    const uint16_t c_accRegWidth = c_streamWidth * 2;
+    const uint8_t c_bsBytes = c_streamWidth / 8;
+
+    uint16_t fseStateLL, fseStateOF, fseStateML; // literal_length, offset, match_length states
+    FseBSState bsStateLL, bsStateOF, bsStateML;  // offset, match_length and literal_length
+    ap_uint<c_accRegWidth> acchbs;
+    uint8_t bitsInAcc = lastByteValidBits;
+    uint8_t bitsToRead = 0;
+    uint8_t bytesToRead = 0;
+
+    acchbs.range(c_streamWidth - 1, 0) = bitStream[byteIndx--];
+    uint8_t byte_0 = acchbs.range(bitsInAcc - 1, bitsInAcc - 8);
+// find valid last bit, bitstream read in reverse order
+fsedseq_skip_zero:
+    for (uint8_t i = 7; i >= 0; --i) {
+#pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min = 1 max = 7
+        if ((byte_0 & (1 << i)) > 0) {
+            --bitsInAcc;
+            break;
+        }
+        --bitsInAcc; // discount higher bits which are zero
+    }
+
+fsedseq_fill_acc:
+    while ((bitsInAcc + c_streamWidth < c_accRegWidth) && (byteIndx > -1)) {
+#pragma HLS PIPELINE II = 1
+        acchbs <<= c_streamWidth;
+        acchbs.range(c_streamWidth - 1, 0) = bitStream[byteIndx--];
+        bitsInAcc += c_streamWidth;
     }
     // Read literal_length, offset and match_length states from input stream
     // get *accuracyLog bits from higher position in accuracyLog, mask out higher scrap bits
@@ -329,8 +632,8 @@ decode_sequence_bitStream:
         // read data to bitstream if necessary
         if (bitsInAcc < c_streamWidth && byteIndx > -1) {
             auto tmp = bitStream[byteIndx--];
-            acchbs = (acchbs << BSWIDTH) + tmp;
-            bitsInAcc += BSWIDTH;
+            acchbs = (acchbs << c_streamWidth) + tmp;
+            bitsInAcc += c_streamWidth;
         }
         uint32_t stateVal;
         uint8_t extraBits;
@@ -511,11 +814,11 @@ decode_sequence_codes:
     }
 }
 
-template <uint8_t PARALLEL_BYTE, uint8_t BLOCK_SIZE_KB, uint8_t BSWIDTH, uint8_t LMO_WIDTH>
+template <uint8_t IN_BYTES, uint8_t BLOCK_SIZE_KB, uint8_t LMO_WIDTH>
 void decodeSeqCore(uint32_t* litFSETable,
                    uint32_t* oftFSETable,
                    uint32_t* mlnFSETable,
-                   ap_uint<BSWIDTH>* bitStream,
+                   ap_uint<IN_BYTES * 8>* bitStream,
                    int bsIndx,
                    uint8_t lastByteValidBits,
                    uint32_t seqCnt,
@@ -539,18 +842,18 @@ void decodeSeqCore(uint32_t* litFSETable,
 
 #pragma HLS dataflow
 
-    fseStreamStates<PARALLEL_BYTE, BLOCK_SIZE_KB, BSWIDTH>(litFSETable, oftFSETable, mlnFSETable, bitStream, bsIndx,
-                                                           lastByteValidBits, seqCnt, accuracyLog, symbolStream,
-                                                           bsWordStream, extraBitStream);
+    fseStreamStates<IN_BYTES, BLOCK_SIZE_KB>(litFSETable, oftFSETable, mlnFSETable, bitStream, bsIndx,
+                                             lastByteValidBits, seqCnt, accuracyLog, symbolStream, bsWordStream,
+                                             extraBitStream);
 
     fseDecodeStates<LMO_WIDTH>(symbolStream, bsWordStream, extraBitStream, seqCnt, litCnt, prevOffsets, litLenStream,
                                offsetStream, matLenStream, litlenValidStream);
 }
 
-template <uint8_t PARALLEL_BYTE, uint8_t BLOCK_SIZE_KB, uint8_t LMO_WIDTH>
-inline void fseDecode(ap_uint<64> accword,
+template <uint8_t IN_BYTES, uint8_t BLOCK_SIZE_KB, uint8_t LMO_WIDTH, bool LOW_LATENCY = false>
+inline void fseDecode(ap_uint<IN_BYTES * 8 * 2> accword,
                       uint8_t bytesInAcc,
-                      hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
+                      hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
                       uint32_t* litFSETable,
                       uint32_t* oftFSETable,
                       uint32_t* mlnFSETable,
@@ -564,12 +867,12 @@ inline void fseDecode(ap_uint<64> accword,
                       hls::stream<ap_uint<LMO_WIDTH> >& matLenStream,
                       hls::stream<bool>& litlenValidStream) {
     // decode fse encoded bitstream using prebuilt fse tables
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint8_t c_inputByte = IN_BYTES;
+    const uint8_t c_streamWidth = 8 * c_inputByte;
     const uint16_t c_accRegWidth = c_streamWidth * 2;
-    const uint16_t c_BSWidth = c_streamWidth;
-    const uint8_t c_bsBytes = c_BSWidth / 8;
+    const uint8_t c_bsBytes = c_streamWidth / 8;
 
-    ap_uint<c_BSWidth> bitStream[(BLOCK_SIZE_KB * 1024) / c_bsBytes];
+    ap_uint<c_streamWidth> bitStream[(BLOCK_SIZE_KB * 1024) / c_bsBytes];
 #pragma HLS BIND_STORAGE variable = bitStream type = ram_t2p impl = uram
 
     uint8_t bitsInAcc = bytesInAcc * 8;
@@ -586,10 +889,10 @@ fsedseq_fill_bitstream:
         if (i < (const int)(remBlockSize - bytesInAcc)) {
             if (bytesInAcc < c_bsBytes) {
                 bsbuff.range(bitsInAcc + c_streamWidth - 1, bitsInAcc) = inStream.read();
-                updBInAcc += PARALLEL_BYTE;
+                updBInAcc += c_inputByte;
             }
         }
-        ap_uint<c_BSWidth> tmpv = bsbuff.range(c_BSWidth - 1, 0);
+        ap_uint<c_streamWidth> tmpv = bsbuff.range(c_streamWidth - 1, 0);
         bitStream[bsIdx++] = tmpv;
 
         if (i > (const int)(remBlockSize - c_bsBytes)) {
@@ -597,20 +900,26 @@ fsedseq_fill_bitstream:
             bsbuff >>= (bytesWritten * 8);
             updBInAcc -= bytesWritten;
         } else {
-            bsbuff >>= c_BSWidth;
+            bsbuff >>= c_streamWidth;
             updBInAcc -= c_bsBytes;
         }
     }
 
-    decodeSeqCore<PARALLEL_BYTE, BLOCK_SIZE_KB, c_BSWidth, LMO_WIDTH>(
-        litFSETable, oftFSETable, mlnFSETable, bitStream, bsIdx - 1, 8 * bytesWritten, seqCnt, litCount, accuracyLog,
-        prevOffsets, litLenStream, offsetStream, matLenStream, litlenValidStream);
+    if (LOW_LATENCY) {
+        decodeSeqCoreLL<IN_BYTES, BLOCK_SIZE_KB, LMO_WIDTH>(
+            litFSETable, oftFSETable, mlnFSETable, bitStream, bsIdx - 1, 8 * bytesWritten, seqCnt, litCount,
+            accuracyLog, prevOffsets, litLenStream, offsetStream, matLenStream, litlenValidStream);
+    } else {
+        decodeSeqCore<IN_BYTES, BLOCK_SIZE_KB, LMO_WIDTH>(litFSETable, oftFSETable, mlnFSETable, bitStream, bsIdx - 1,
+                                                          8 * bytesWritten, seqCnt, litCount, accuracyLog, prevOffsets,
+                                                          litLenStream, offsetStream, matLenStream, litlenValidStream);
+    }
 }
 
-template <uint8_t PARALLEL_BYTE>
-void fseDecodeHuffWeight(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
+template <uint8_t IN_BYTES>
+void fseDecodeHuffWeight(hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
                          uint32_t remSize,
-                         ap_uint<8 * PARALLEL_BYTE * 2>& accHuff,
+                         ap_uint<IN_BYTES * 8 * 2>& accHuff,
                          uint8_t& bytesInAcc,
                          uint8_t accuracyLog,
                          uint32_t* fseTable,
@@ -618,27 +927,30 @@ void fseDecodeHuffWeight(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                          uint16_t& weightCnt,
                          uint8_t& huffDecoderTableLog) {
     //#pragma HLS INLINE
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint8_t c_inputByte = IN_BYTES;
+    const uint8_t c_streamWidth = 8 * c_inputByte;
     uint8_t bitsInAcc = bytesInAcc * 8;
 
     uint8_t bitStream[128];
-    //#pragma HLS BIND_STORAGE variable = bitStream type = ram_t2p impl = bram
     int bsByteIndx = remSize - 1;
 
     // copy data from bitstream to buffer
-    uint32_t itrCnt = 1 + ((remSize - 1) / PARALLEL_BYTE);
+    uint32_t itrCnt = 1 + ((remSize - 1) / c_inputByte);
     uint32_t k = 0;
+    ap_uint<c_streamWidth> input;
+
 fseDecHF_read_input:
     for (uint32_t i = 0; i < itrCnt; ++i) {
-        accHuff.range(bitsInAcc + c_streamWidth - 1, bitsInAcc) = inStream.read();
+        input = inStream.read();
         bitsInAcc += c_streamWidth;
-        for (uint8_t j = 0; j < PARALLEL_BYTE && k < remSize; ++j, ++k) {
+        for (uint8_t j = 0; j < c_inputByte && k < remSize; ++j, ++k) {
 #pragma HLS PIPELINE II = 1
-            bitStream[k] = accHuff.range(7, 0);
-            accHuff >>= 8;
+            bitStream[k] = input.range(7, 0);
+            input >>= 8;
             bitsInAcc -= 8;
         }
     }
+    accHuff = input;
     bytesInAcc = bitsInAcc >> 3;
 
     // decode FSE bitStream using fse table to get huffman weights
@@ -654,7 +966,7 @@ fseDecHF_read_input:
     // find beginning of the stream
     accState = bitStream[bsByteIndx--];
     bitsInAcc = 8;
-    for (uint8_t i = 7; i >= 0; --i) {
+    for (ap_uint<4> i = 7; i >= 0; --i) {
 #pragma HLS UNROLL
         if ((accState & (1 << i)) > 0) {
             --bitsInAcc;
@@ -679,7 +991,7 @@ fseDecHF_read_input:
     // get readBits bits from higher position in accuracyLog, mask out higher scrap bits
     // read state 1
     bitsInAcc -= accuracyLog;
-    uint64_t msk = ((1 << accuracyLog) - 1);
+    uint16_t msk = ((1 << accuracyLog) - 1);
     fseState[0] = ((accState >> bitsInAcc) & msk);
     // read state 2
     bitsInAcc -= accuracyLog;
@@ -690,18 +1002,14 @@ fseDecHF_read_input:
     bool stateIdx = 0; // 0 for even, 1 for odd
     bool overflow = false;
     uint32_t totalWeights = 0;
+    // get the weight, bitCount and nextState
+    uint32_t stateVal = fseTable[fseState[stateIdx]];
+    uint8_t cw = (uint8_t)(stateVal & 0xFF);
+    weights[codeIdx++] = cw;
+    totalWeights += (1 << cw) >> 1;
 fse_decode_huff_weights:
-    while (1) {
+    for (; rembits >= 0;) {
 #pragma HLS PIPELINE II = 1
-        // get the weight, bitCount and nextState
-        uint32_t stateVal = fseTable[fseState[stateIdx]];
-        uint8_t cw = (uint8_t)(stateVal & 0xFF);
-        weights[codeIdx++] = cw;
-        totalWeights += (1 << cw) >> 1;
-
-        // overflow
-        if (rembits < 0) break;
-
         // get other values
         bsState[stateIdx].nextState = (stateVal >> 16) & 0x0000FFFF;
         bsState[stateIdx].bitCount = (stateVal >> 8) & 0x000000FF;
@@ -725,6 +1033,10 @@ fse_decode_huff_weights:
 
         // switch state flow
         stateIdx = (stateIdx + 1) & 1; // 0 if 1, 1 if 0
+        stateVal = fseTable[fseState[stateIdx]];
+        cw = (uint8_t)(stateVal & 0xFF);
+        weights[codeIdx++] = cw;
+        totalWeights += (1 << cw) >> 1;
     }
     huffDecoderTableLog = 1 + (31 - __builtin_clz(totalWeights));
     // add last weight
@@ -810,7 +1122,7 @@ void code_generator(uint8_t* weights,
     // regenerate huffman tree using literal bit-lengths
     typedef ap_uint<MAX_CODELEN + 1> LCL_Code_t;
     LCL_Code_t first_codeword[MAX_CODELEN + 1];
-    ap_uint<32> bitlen_histogram[MAX_CODELEN + 1];
+    ap_uint<8> bitlen_histogram[MAX_CODELEN + 1];
     ap_uint<4> bitlens[256];
 #pragma HLS ARRAY_PARTITION variable = first_codeword complete
 #pragma HLS ARRAY_PARTITION variable = bitlen_histogram complete
@@ -1064,15 +1376,16 @@ decode_huff_bitstream_outer:
     }
 }
 
-template <uint8_t PARALLEL_BYTE, int BS_WIDTH>
-void hfdDataFeader(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
+template <int IN_BYTES, int BS_WIDTH>
+void hfdDataFeader(hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
                    uint8_t streamCnt,
                    uint16_t* cmpSize,
-                   ap_uint<8 * PARALLEL_BYTE * 2> accHuff,
+                   ap_uint<IN_BYTES * 8 * 2> accHuff,
                    uint8_t bytesInAcc,
-                   hls::stream<ap_uint<BS_WIDTH> >& huffBitStream,
+                   hls::stream<IntVectorStream_dt<BS_WIDTH, 1> >& huffBitStream,
                    hls::stream<ap_uint<8> >& validBitCntStream) {
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint8_t c_inputByte = IN_BYTES;
+    const uint16_t c_streamWidth = 8 * c_inputByte;
     const uint16_t c_BSWidth = BS_WIDTH;
     const uint16_t c_accRegWidth = c_streamWidth * 2;
     const int c_bsPB = c_BSWidth / 8;
@@ -1153,9 +1466,12 @@ hfdl_dataStreamer:
         if (streamMode) {
             // write data to output stream
             uint32_t tmp = bitStream[rIdx];
-            huffBitStream << tmp;
+            // output register
+            IntVectorStream_dt<BS_WIDTH, 1> outValue;
+            outValue.data[0] = tmp;
             // update stream mode state
             if (rIdx == streamRLim[rsi]) {
+                outValue.strobe = 0;
                 ++rsi;
                 rIdx = streamRBgn[rsi];
                 smInc = (~smInc) + 1; // flip 1 and -1
@@ -1164,22 +1480,190 @@ hfdl_dataStreamer:
                 // either previous streamMode ended quicker than next fetchMode or streamCnt reached
                 if (wsi == rsi) streamMode = 0;
             } else {
+                outValue.strobe = 1;
                 rIdx -= smInc;
             }
+            huffBitStream << outValue;
         }
         // end condition
         if (!(fetchMode | streamMode)) done = 1;
     }
 }
 
-template <uint8_t PARALLEL_BYTE, int MAX_CODELEN, int BS_WIDTH>
-void hfdGetCodesStreamLiterals(uint16_t* cmpSize,
-                               uint16_t* decSize,
+template <int MAX_CODELEN, int BS_WIDTH>
+void hfdGetCodesStreamLiteralsLL(uint16_t* decSize,
+                                 uint8_t accuracyLog,
+                                 uint8_t streamCnt,
+                                 uint16_t weightCnt,
+                                 uint8_t* weights,
+                                 hls::stream<IntVectorStream_dt<BS_WIDTH, 1> >& huffBitStream,
+                                 hls::stream<ap_uint<8> >& validBitCntStream,
+                                 hls::stream<ap_uint<17> >& literalStream) {
+    const uint16_t c_HBFSize = 48;
+    const uint16_t c_BSWidth = BS_WIDTH;
+    const int c_bsPB = c_BSWidth / 8;
+
+    ap_uint<11> validCodeOffset[MAX_CODELEN + 1];
+    ap_uint<4> bitLen[MAX_CODELEN + 1];
+    ap_uint<8> symbol[2][MAX_CODELEN + 1];
+#pragma HLS ARRAY_PARTITION variable = validCodeOffset complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = bitLen complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = symbol complete dim = 0
+
+    // New huffman code
+    ap_uint<MAX_CODELEN + 1> codeOffsets[MAX_CODELEN + 1];
+#pragma HLS ARRAY_PARTITION variable = codeOffsets dim = 1 complete
+
+    ap_uint<8> bl1Code[2];
+    ap_uint<8> bl2Code[4];
+    ap_uint<8> bl3Code[8];
+    ap_uint<8> bl4Code[16];
+    ap_uint<8> bl5Code[32];
+    ap_uint<8> bl6Code[64];
+    ap_uint<8> bl7Code[128];
+    ap_uint<8> bl8Code[256];
+    ap_uint<8> bl9Code[256];
+    ap_uint<8> bl10Code[256];
+    ap_uint<8> bl11Code[256];
+#pragma HLS BIND_STORAGE variable = bl1Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl2Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl3Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl4Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl5Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl6Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl7Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl8Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl9Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl10Code type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = bl11Code type = ram_2p impl = lutram
+
+    // generate codes
+    code_generator<MAX_CODELEN>(weights, codeOffsets, bl1Code, bl2Code, bl3Code, bl4Code, bl5Code, bl6Code, bl7Code,
+                                bl8Code, bl9Code, bl10Code, bl11Code, accuracyLog, weightCnt);
+
+    ap_uint<17> outBuffer;
+decode_huff_bitstream_outer:
+    for (ap_uint<3> si = 0; si < streamCnt; ++si) {
+        // generate decompressed bytes from huffman encoded stream
+        ap_uint<c_HBFSize> acchbs = 0;
+        ap_uint<7> bitcnt = 0;
+
+        bitcnt = validBitCntStream.read();
+        // input register
+        auto inValue = huffBitStream.read();
+        acchbs.range(c_BSWidth - 1, 0) = inValue.data[0];
+        uint8_t byte_0 = acchbs.range(bitcnt - 1, bitcnt - 8);
+    // find valid last bit, bitstream read in reverse order
+    hufdlit_skip_zero:
+        for (uint8_t i = 7; i >= 0; --i) {
+#pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min = 1 max = 7
+            if ((byte_0 & (1 << i)) > 0) {
+                --bitcnt;
+                break;
+            }
+            --bitcnt; // discount higher bits which are zero
+        }
+        // shift to higher end
+        acchbs <<= (c_HBFSize - bitcnt);
+        const int c_msbBitCnt = c_HBFSize - c_BSWidth;
+
+        ap_uint<11> parallelAcc[MAX_CODELEN + 1];
+#pragma HLS ARRAY_PARTITION variable = parallelAcc complete
+        ap_uint<8> tmpBitLen = bitcnt;
+        bool readUpdFlag = ((tmpBitLen < 22) && (inValue.strobe == 1));
+        uint8_t shiftCnt = c_msbBitCnt - tmpBitLen;
+
+        ap_uint<c_HBFSize> tmp = 0;
+        if (readUpdFlag) {
+            inValue = huffBitStream.read();
+            tmp = inValue.data[0];
+            bitcnt += c_BSWidth;
+        }
+        ap_uint<c_HBFSize> acchbs1 = acchbs;
+        ap_uint<c_HBFSize> acchbs2 = tmp << shiftCnt;
+        acchbs = acchbs1 | acchbs2;
+
+        // pre-read one data
+        inValue = huffBitStream.read();
+
+    // decode huffman bitstreams
+    huf_dec_bitstream:
+        for (uint32_t outBytes = 0; outBytes < decSize[si]; outBytes += 2) {
+#pragma HLS PIPELINE II = 1
+
+            for (ap_uint<4> i = 0; i < MAX_CODELEN + 1; ++i) {
+#pragma HLS UNROLL
+                parallelAcc[i] = acchbs.range(c_HBFSize - 1 - i, c_HBFSize - MAX_CODELEN - i);
+                for (ap_uint<4> j = 0; j < MAX_CODELEN; ++j) {
+#pragma HLS UNROLL
+                    validCodeOffset[i].range(j, j) = (parallelAcc[i].range(10, 10 - j) >= codeOffsets[j]) ? 1 : 0;
+                }
+                bitLen[i] = 1 + ap_uint<6>(__builtin_ctz((unsigned int)(validCodeOffset[i])));
+            }
+
+            ap_uint<5> totalBitLen = bitLen[0] + bitLen[bitLen[0]];
+            ap_uint<7> tmpBitLen = bitcnt - totalBitLen;
+            ap_uint<5> shiftCnt = c_msbBitCnt - tmpBitLen;
+            if (tmpBitLen < 22) {
+                tmp = inValue.data[0];
+                bitcnt = c_BSWidth + tmpBitLen;
+            } else {
+                tmp = 0;
+                bitcnt = tmpBitLen;
+            }
+            ap_uint<c_HBFSize> acchbs1 = acchbs << totalBitLen;
+            ap_uint<c_HBFSize> acchbs2 = tmp << shiftCnt;
+            acchbs = acchbs1 | acchbs2;
+
+            bool readUpdFlag = ((tmpBitLen < 22) && (inValue.strobe == 1));
+            if (readUpdFlag) {
+                inValue = huffBitStream.read();
+            }
+            symbol[0][1] = bl1Code[parallelAcc[0].range(10, 10)];
+            symbol[0][2] = bl2Code[parallelAcc[0].range(10, 9)];
+            symbol[0][3] = bl3Code[parallelAcc[0].range(10, 8)];
+            symbol[0][4] = bl4Code[parallelAcc[0].range(10, 7)];
+            symbol[0][5] = bl5Code[parallelAcc[0].range(10, 6)];
+            symbol[0][6] = bl6Code[parallelAcc[0].range(10, 5)];
+            symbol[0][7] = bl7Code[parallelAcc[0].range(10, 4)];
+            symbol[0][8] = bl8Code[parallelAcc[0].range(10, 3)];
+            symbol[0][9] = bl9Code[ap_uint<8>(parallelAcc[0].range(10, 2))];
+            symbol[0][10] = bl10Code[ap_uint<8>(parallelAcc[0].range(10, 1))];
+            symbol[0][11] = bl11Code[ap_uint<8>(parallelAcc[0].range(10, 0))];
+
+            symbol[1][1] = bl1Code[parallelAcc[bitLen[0]].range(10, 10)];
+            symbol[1][2] = bl2Code[parallelAcc[bitLen[0]].range(10, 9)];
+            symbol[1][3] = bl3Code[parallelAcc[bitLen[0]].range(10, 8)];
+            symbol[1][4] = bl4Code[parallelAcc[bitLen[0]].range(10, 7)];
+            symbol[1][5] = bl5Code[parallelAcc[bitLen[0]].range(10, 6)];
+            symbol[1][6] = bl6Code[parallelAcc[bitLen[0]].range(10, 5)];
+            symbol[1][7] = bl7Code[parallelAcc[bitLen[0]].range(10, 4)];
+            symbol[1][8] = bl8Code[parallelAcc[bitLen[0]].range(10, 3)];
+            symbol[1][9] = bl9Code[ap_uint<8>(parallelAcc[bitLen[0]].range(10, 2))];
+            symbol[1][10] = bl10Code[ap_uint<8>(parallelAcc[bitLen[0]].range(10, 1))];
+            symbol[1][11] = bl11Code[ap_uint<8>(parallelAcc[bitLen[0]].range(10, 0))];
+
+            outBuffer.range(7, 0) = symbol[0][bitLen[0]];
+            outBuffer.range(15, 8) = symbol[1][bitLen[bitLen[0]]];
+            outBuffer.range(16, 16) = true;
+
+            // write the literal to output stream
+            literalStream << outBuffer;
+        }
+    }
+
+    outBuffer = 0;
+    literalStream << outBuffer;
+}
+
+template <int MAX_CODELEN, int BS_WIDTH>
+void hfdGetCodesStreamLiterals(uint16_t* decSize,
                                uint8_t accuracyLog,
                                uint8_t streamCnt,
                                uint16_t weightCnt,
                                uint8_t* weights,
-                               hls::stream<ap_uint<BS_WIDTH> >& huffBitStream,
+                               hls::stream<IntVectorStream_dt<BS_WIDTH, 1> >& huffBitStream,
                                hls::stream<ap_uint<8> >& validBitCntStream,
                                hls::stream<ap_uint<9> >& literalStream) {
     const uint16_t c_HBFSize = 32;
@@ -1228,11 +1712,13 @@ decode_huff_bitstream_outer:
     for (uint8_t si = 0; si < streamCnt; ++si) {
         // generate decompressed bytes from huffman encoded stream
         ap_uint<c_HBFSize> acchbs = 0;
-        uint8_t bitcnt = 0;
+        ap_uint<8> bitcnt = 0;
         uint32_t outBytes = 0;
 
         bitcnt = validBitCntStream.read();
-        acchbs.range(c_BSWidth - 1, 0) = huffBitStream.read();
+        // input register
+        auto inValue = huffBitStream.read();
+        acchbs.range(c_BSWidth - 1, 0) = inValue.data[0];
         uint8_t byte_0 = acchbs.range(bitcnt - 1, bitcnt - 8);
     // find valid last bit, bitstream read in reverse order
     hufdlit_skip_zero:
@@ -1250,8 +1736,9 @@ decode_huff_bitstream_outer:
         uint16_t byteIndx = c_bsPB; // just to verify with the compressed size
         const int msbBitCnt = c_HBFSize - c_BSWidth;
 
-        if (bitcnt < 16 && byteIndx < cmpSize[si]) {
-            uint32_t tmp = huffBitStream.read();
+        if ((bitcnt.range(4, 4) != 1) && (inValue.strobe == 1)) {
+            inValue = huffBitStream.read();
+            uint32_t tmp = inValue.data[0];
             acchbs += tmp << (msbBitCnt - bitcnt);
             bitcnt += c_BSWidth;
             byteIndx += c_bsPB;
@@ -1259,7 +1746,7 @@ decode_huff_bitstream_outer:
 
     // decode huffman bitstreams
     huf_dec_bitstream:
-        while (true) {
+        for (uint32_t outBytes = 0; outBytes < decSize[si]; outBytes += 1) {
 #pragma HLS PIPELINE II = 1
 
             for (uint8_t i = 0; i < MAX_CODELEN; ++i) {
@@ -1289,11 +1776,9 @@ decode_huff_bitstream_outer:
             outBuffer.range(8, 8) = true;
             literalStream << outBuffer;
 
-            ++outBytes;
-            if (outBytes == decSize[si]) break;
-
-            if (bitcnt < 16 && byteIndx < cmpSize[si]) {
-                uint32_t tmp = huffBitStream.read();
+            if ((bitcnt.range(4, 4) != 1) && (inValue.strobe == 1)) {
+                inValue = huffBitStream.read();
+                uint32_t tmp = inValue.data[0];
                 acchbs += tmp << (msbBitCnt - bitcnt);
                 bitcnt += c_BSWidth;
                 byteIndx += c_bsPB;
@@ -1305,29 +1790,116 @@ decode_huff_bitstream_outer:
     literalStream << outBuffer;
 }
 
-template <uint8_t PARALLEL_BYTE>
+template <uint8_t OUT_BYTES>
+void writeAccLiteralDataLL(hls::stream<ap_uint<17> >& byteStream,
+                           hls::stream<IntVectorStream_dt<OUT_BYTES * 8, 1> >& literalStream,
+                           uint16_t* decSize) {
+    const uint8_t c_outputByte = OUT_BYTES;
+    const int c_streamWidth = c_outputByte * 8;
+    ap_uint<c_streamWidth + 16> outBuffer;
+    ap_uint<4> writeIdx = 0;
+    uint8_t i = 0;
+    uint32_t outBytes = 0;
+    IntVectorStream_dt<OUT_BYTES * 8, 1> outValue;
+
+writeAccLiterals:
+    for (ap_uint<17> inData = byteStream.read(); inData.range(16, 16) == 1; inData = byteStream.read()) {
+#pragma HLS PIPELINE II = 1
+        outBytes += 2;
+        outBuffer.range((writeIdx + 1) * 8 - 1, writeIdx * 8) = inData.range(7, 0);
+        outBuffer.range((writeIdx + 2) * 8 - 1, (writeIdx + 1) * 8) = inData.range(15, 8);
+
+        if (outBytes <= decSize[i]) {
+            writeIdx += 2;
+        } else {
+            writeIdx += 1;
+        }
+
+        if (outBytes >= decSize[i]) {
+            i += 1;
+            outBytes = 0;
+        }
+
+        if (writeIdx >= c_outputByte) {
+            outValue.data[0] = outBuffer;
+            outValue.strobe = 1;
+            literalStream << outValue;
+            outBuffer >>= c_streamWidth;
+            writeIdx -= c_outputByte;
+        }
+    }
+
+    if (writeIdx) {
+        outValue.data[0] = outBuffer;
+        outValue.strobe = 1;
+        literalStream << outValue;
+    }
+    outValue.strobe = 0;
+    literalStream << outValue;
+}
+
+template <uint8_t OUT_BYTES>
 void writeAccLiteralData(hls::stream<ap_uint<9> >& byteStream,
-                         hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream) {
-    ap_uint<8 * PARALLEL_BYTE> outBuffer;
+                         hls::stream<IntVectorStream_dt<OUT_BYTES * 8, 1> >& literalStream) {
+    ap_uint<OUT_BYTES * 8> outBuffer;
+    IntVectorStream_dt<OUT_BYTES * 8, 1> outValue;
     ap_uint<4> writeIdx = 0;
 
+huffLitUpsizer:
     for (ap_uint<9> inData = byteStream.read(); inData.range(8, 8) == 1; inData = byteStream.read()) {
+#pragma HLS PIPELINE II = 1
         outBuffer.range((writeIdx + 1) * 8 - 1, writeIdx * 8) = inData.range(7, 0);
         writeIdx++;
-        if (writeIdx == PARALLEL_BYTE) {
-            literalStream << outBuffer;
+        if (writeIdx == OUT_BYTES) {
+            outValue.data[0] = outBuffer;
+            outValue.strobe = 1;
+            literalStream << outValue;
             writeIdx = 0;
         }
     }
 
     if (writeIdx) {
-        literalStream << outBuffer;
+        outValue.data[0] = outBuffer;
+        outValue.strobe = 1;
+        literalStream << outValue;
     }
+    outValue.strobe = 0;
+    literalStream << outValue;
 }
 
-template <uint8_t PARALLEL_BYTE, int MAX_CODELEN>
-void huffDecodeLitInternal(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
-                           ap_uint<8 * PARALLEL_BYTE * 2> accHuff,
+template <int IN_BYTES, int OUT_BYTES, int MAX_CODELEN>
+void huffDecodeLitInternalLL(hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
+                             ap_uint<IN_BYTES * 8 * 2> accHuff,
+                             uint8_t bytesInAcc,
+                             uint16_t* cmpSize,
+                             uint16_t* decSize,
+                             uint16_t* decSize1,
+                             uint8_t accuracyLog,
+                             uint8_t streamCnt,
+                             uint16_t weightCnt,
+                             uint8_t* weights,
+                             hls::stream<IntVectorStream_dt<OUT_BYTES * 8, 1> >& literalStream) {
+    const uint8_t c_BSWidth = 24;
+    const uint8_t c_symWidth = 17;
+    // internal streams
+    hls::stream<IntVectorStream_dt<c_BSWidth, 1> > huffBitStream("huffBitStream");
+    hls::stream<ap_uint<8> > validBitCntStream("validBitCntStream");
+    hls::stream<ap_uint<c_symWidth> > byteLiteralStream("byteLiteralStream");
+#pragma HLS STREAM variable = huffBitStream depth = 32
+#pragma HLS STREAM variable = validBitCntStream depth = 8
+#pragma HLS STREAM variable = byteLiteralStream depth = 8
+
+#pragma HLS DATAFLOW
+    hfdDataFeader<IN_BYTES, c_BSWidth>(inStream, streamCnt, cmpSize, accHuff, bytesInAcc, huffBitStream,
+                                       validBitCntStream);
+    hfdGetCodesStreamLiteralsLL<MAX_CODELEN, c_BSWidth>(decSize, accuracyLog, streamCnt, weightCnt, weights,
+                                                        huffBitStream, validBitCntStream, byteLiteralStream);
+    writeAccLiteralDataLL<OUT_BYTES>(byteLiteralStream, literalStream, decSize1);
+}
+
+template <int IN_BYTES, int OUT_BYTES, int MAX_CODELEN>
+void huffDecodeLitInternal(hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
+                           ap_uint<IN_BYTES * 8 * 2> accHuff,
                            uint8_t bytesInAcc,
                            uint16_t* cmpSize,
                            uint16_t* decSize,
@@ -1335,63 +1907,63 @@ void huffDecodeLitInternal(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                            uint8_t streamCnt,
                            uint16_t weightCnt,
                            uint8_t* weights,
-                           hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream) {
-    const uint16_t c_BSWidth = 16;
-    const uint16_t c_huffBSStreamDepth = 1024;
-    const uint8_t c_vbitCntStreamDepth = 8;
+                           hls::stream<IntVectorStream_dt<OUT_BYTES * 8, 1> >& literalStream) {
+    const uint8_t c_BSWidth = 16;
+    const uint8_t c_symWidth = 9;
     // internal streams
-    hls::stream<ap_uint<c_BSWidth> > huffBitStream("huffBitStream");
+    hls::stream<IntVectorStream_dt<c_BSWidth, 1> > huffBitStream("huffBitStream");
     hls::stream<ap_uint<8> > validBitCntStream("validBitCntStream");
-    hls::stream<ap_uint<9> > byteLiteralStream("byteLiteralStream");
-#pragma HLS STREAM variable = huffBitStream depth = c_huffBSStreamDepth
-#pragma HLS STREAM variable = validBitCntStream depth = c_vbitCntStreamDepth
-#pragma HLS STREAM variable = byteLiteralStream depth = 4
+    hls::stream<ap_uint<c_symWidth> > byteLiteralStream("byteLiteralStream");
+#pragma HLS STREAM variable = huffBitStream depth = 32
+#pragma HLS STREAM variable = validBitCntStream depth = 8
+#pragma HLS STREAM variable = byteLiteralStream depth = 8
 
 #pragma HLS DATAFLOW
 
-    hfdDataFeader<PARALLEL_BYTE, c_BSWidth>(inStream, streamCnt, cmpSize, accHuff, bytesInAcc, huffBitStream,
-                                            validBitCntStream);
-
-    hfdGetCodesStreamLiterals<PARALLEL_BYTE, MAX_CODELEN, c_BSWidth>(cmpSize, decSize, accuracyLog, streamCnt,
-                                                                     weightCnt, weights, huffBitStream,
-                                                                     validBitCntStream, byteLiteralStream);
-    writeAccLiteralData<PARALLEL_BYTE>(byteLiteralStream, literalStream);
+    hfdDataFeader<IN_BYTES, c_BSWidth>(inStream, streamCnt, cmpSize, accHuff, bytesInAcc, huffBitStream,
+                                       validBitCntStream);
+    hfdGetCodesStreamLiterals<MAX_CODELEN, c_BSWidth>(decSize, accuracyLog, streamCnt, weightCnt, weights,
+                                                      huffBitStream, validBitCntStream, byteLiteralStream);
+    writeAccLiteralData<OUT_BYTES>(byteLiteralStream, literalStream);
 }
 
-template <uint8_t PARALLEL_BYTE>
-void huffDecodeLiterals(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
+template <uint8_t IN_BYTES, uint8_t OUT_BYTES, int LMO_WIDTH, bool LOW_LATENCY = false>
+void huffDecodeLiterals(hls::stream<ap_uint<IN_BYTES * 8> >& inStream,
                         bool quadStream,
-                        ap_uint<8 * PARALLEL_BYTE * 2> accHuff,
+                        ap_uint<IN_BYTES * 8 * 2> accHuff,
                         uint8_t bytesInAcc,
-                        uint32_t remSize,
-                        uint32_t regeneratedSize,
+                        ap_uint<LMO_WIDTH> remSize,
+                        ap_uint<LMO_WIDTH> regeneratedSize,
                         uint8_t accuracyLog,
                         uint16_t weightCnt,
                         uint8_t* weights,
-                        hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream) {
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
-    const uint16_t c_accRegWidth = c_streamWidth * 2;
-    const uint16_t c_accRegWidthx3 = c_streamWidth * 3;
+                        hls::stream<IntVectorStream_dt<OUT_BYTES * 8, 1> >& literalStream) {
+    const uint8_t c_inputByte = IN_BYTES;
+    const uint16_t c_streamWidth = 8 * c_inputByte;
     const uint16_t c_maxCodeLen = 11;
     uint8_t streamCnt = 1;
     uint16_t decSize[4];
+    uint16_t decSize1[4];
     uint16_t cmpSize[4];
 #pragma HLS ARRAY_PARTITION variable = decSize complete
+#pragma HLS ARRAY_PARTITION variable = decSize1 complete
 #pragma HLS ARRAY_PARTITION variable = cmpSize complete
     // get stream sizes if 4 streams are present
     if (quadStream) {
         streamCnt = 4;
         // Jump table is 6 bytes long
         // read from input if needed
-        if (bytesInAcc < PARALLEL_BYTE) {
-            accHuff.range(((PARALLEL_BYTE + bytesInAcc) * 8) - 1, bytesInAcc * 8) = inStream.read();
-            bytesInAcc += PARALLEL_BYTE;
+        if (bytesInAcc < c_inputByte) {
+            accHuff.range(((c_inputByte + bytesInAcc) * 8) - 1, bytesInAcc * 8) = inStream.read();
+            bytesInAcc += c_inputByte;
         }
         // use 4 bytes
         // get decompressed size
-        uint32_t dcmpSize = (regeneratedSize + 3) / 4;
+        ap_uint<LMO_WIDTH> dcmpSize = (regeneratedSize + 3) / 4;
         decSize[0] = decSize[1] = decSize[2] = dcmpSize;
+        decSize1[0] = decSize1[1] = decSize1[2] = dcmpSize;
         decSize[3] = regeneratedSize - (dcmpSize * 3);
+        decSize1[3] = decSize[3];
 
         // get compressed size
         cmpSize[0] = accHuff;
@@ -1401,8 +1973,8 @@ void huffDecodeLiterals(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
         bytesInAcc -= 4;
         // read from input if needed
         if (bytesInAcc < 2) {
-            accHuff.range(((PARALLEL_BYTE + bytesInAcc) * 8) - 1, bytesInAcc * 8) = inStream.read();
-            bytesInAcc += PARALLEL_BYTE;
+            accHuff.range(((c_inputByte + bytesInAcc) * 8) - 1, bytesInAcc * 8) = inStream.read();
+            bytesInAcc += c_inputByte;
         }
         cmpSize[2] = accHuff;
         accHuff >>= 16;
@@ -1412,11 +1984,18 @@ void huffDecodeLiterals(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
         cmpSize[3] = remSize - (cmpSize[0] + cmpSize[1] + cmpSize[2]);
     } else {
         decSize[0] = regeneratedSize;
+        decSize1[0] = regeneratedSize;
         cmpSize[0] = remSize;
     }
     // parallel huffman decoding
-    huffDecodeLitInternal<PARALLEL_BYTE, c_maxCodeLen>(inStream, accHuff, bytesInAcc, cmpSize, decSize, accuracyLog,
-                                                       streamCnt, weightCnt, weights, literalStream);
+    if (LOW_LATENCY) {
+        huffDecodeLitInternalLL<IN_BYTES, OUT_BYTES, c_maxCodeLen>(inStream, accHuff, bytesInAcc, cmpSize, decSize,
+                                                                   decSize1, accuracyLog, streamCnt, weightCnt, weights,
+                                                                   literalStream);
+    } else {
+        huffDecodeLitInternal<IN_BYTES, OUT_BYTES, c_maxCodeLen>(
+            inStream, accHuff, bytesInAcc, cmpSize, decSize, accuracyLog, streamCnt, weightCnt, weights, literalStream);
+    }
 }
 
 } // details

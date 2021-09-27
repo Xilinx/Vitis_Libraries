@@ -8,7 +8,7 @@ Xilinx ZLIB 16KB Compress Streaming AXI Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-zlib_compress_test   29876 29250 156  24 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ========= ===== 
+Module                   LUT       FF        BRAM_18K  URAM 
+zlib_compress_test       56.8K     52.9K     321       48 
+======================== ========= ========= ========= ===== 

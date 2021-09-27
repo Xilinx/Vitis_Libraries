@@ -31,7 +31,7 @@ class lz4App : public compressApp {
      * @brief Initialize lz4App content
      *
      */
-    lz4App(const int argc, char** argv, bool is_seq, bool enable_profile = false);
+    lz4App(const int argc, char** argv, bool is_seq);
     /**
      * @brief lz4 block size
      *

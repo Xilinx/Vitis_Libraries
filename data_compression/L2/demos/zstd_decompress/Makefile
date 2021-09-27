@@ -108,7 +108,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 
-CXXFLAGS += -DMULTIPLE_BYTES=4 -DZSTD_BLOCK_SIZE_KB=32
+CXXFLAGS += -DZSTD_BLOCK_SIZE_KB=32
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
@@ -165,9 +165,10 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src
+VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 
-VPP_FLAGS += -DINZSTD=1 -DMULTIPLE_BYTES=4 -DZSTD_BLOCK_SIZE_KB=32 
+VPP_FLAGS += -DINZSTD=1 -DINPUT_BYTES=4 -DOUTPUT_BYTES=8 -DZSTD_BLOCK_SIZE_KB=32 
 
 # Kernel linker flags
 VPP_LDFLAGS_xilZstdDecompressStream_temp := --config $(CUR_DIR)/connectivity.cfg

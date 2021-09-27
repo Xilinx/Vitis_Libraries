@@ -8,7 +8,7 @@ Xilinx Gzip Multibyte Dynamic Block Streaming Decompress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-gzip_decompress_test 8988  6288  11   2 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ===== ===== 
+Module                   LUT       FF        BRAM  URAM 
+gzip_decompress_test     9.0K      6.3K      11    2 
+======================== ========= ========= ===== ===== 

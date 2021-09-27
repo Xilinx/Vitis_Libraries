@@ -103,6 +103,16 @@ else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
 
+#Check OS and setting env
+OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
+OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
+
+ifeq ($(OSDIST), centos)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+endif
+endif
+
 #Setting VPP
 VPP := v++
 

@@ -27,7 +27,7 @@
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp", 
             "zstd_decompress_test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include"
     }, 
     "testbench": {
         "source": [
@@ -35,7 +35,7 @@
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp", 
             "zstd_decompress_test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/../security/L1/include", 
         "ldflags": "", 
         "argv": {
             "hls_csim": "-f ${DESIGN_PATH}/sample.txt.zst", 

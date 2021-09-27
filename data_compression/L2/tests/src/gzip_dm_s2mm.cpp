@@ -87,7 +87,7 @@ void gzipS2MM(uintMemWidth_t* out,
               uint32_t* encoded_size,
               uint32_t cur_status,
               uint32_t readBlockSize,
-              hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& outAxiStream,
+              hls::stream<ap_axiu<OUTPUT_BYTES * 8, 0, 0, 0> >& outAxiStream,
               hls::stream<bool>& dcStatusStream) {
     hls::stream<uintMemWidth_t> outHlsStream("outputStream");
     hls::stream<bool> outHlsStream_eos("outputStreamSize");
@@ -101,11 +101,11 @@ void gzipS2MM(uintMemWidth_t* out,
 #pragma HLS STREAM variable = outsize_val depth = 3
 
 #pragma HLS dataflow
-    streamDataK2dmSync<MULTIPLE_BYTES * 8>(outHlsStream, outHlsStream_eos, readBlockSize, outsize_val, outAxiStream,
-                                           cur_status, dcStatusStream);
+    streamDataK2dmSync<OUTPUT_BYTES * 8>(outHlsStream, outHlsStream_eos, readBlockSize, outsize_val, outAxiStream,
+                                         cur_status, dcStatusStream);
 
-    xf::compression::details::s2mmEosSimple<MULTIPLE_BYTES * 8, kGMemBurstSize>(out, outHlsStream, outHlsStream_eos,
-                                                                                outsize_val, encoded_size);
+    xf::compression::details::s2mmEosSimple<OUTPUT_BYTES * 8, kGMemBurstSize>(out, outHlsStream, outHlsStream_eos,
+                                                                              outsize_val, encoded_size);
 }
 
 extern "C" {
@@ -113,19 +113,12 @@ void xilGzipS2MM(uintMemWidth_t* out,
                  uint32_t* encoded_size,
                  uint32_t* status_flag,
                  uint32_t read_block_size,
-                 hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& inStream) {
-    const int c_gmem0_width = MULTIPLE_BYTES * 8;
-#pragma HLS INTERFACE m_axi port = out max_widen_bitwidth = c_gmem0_width offset = slave bundle = \
-    gmem0 max_read_burst_length = 2 max_write_burst_length = 64 num_read_outstanding = 1 num_write_outstanding = 8
+                 hls::stream<ap_axiu<OUTPUT_BYTES * 8, 0, 0, 0> >& inStream) {
+#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem0 max_read_burst_length = \
+    2 max_write_burst_length = 64 num_read_outstanding = 1 num_write_outstanding = 8
 #pragma HLS INTERFACE m_axi port = encoded_size offset = slave bundle = gmem0
 #pragma HLS INTERFACE m_axi port = status_flag offset = slave bundle = gmem0
 #pragma HLS interface axis port = inStream
-#pragma HLS INTERFACE s_axilite port = out bundle = control
-#pragma HLS INTERFACE s_axilite port = encoded_size bundle = control
-#pragma HLS INTERFACE s_axilite port = status_flag bundle = control
-#pragma HLS INTERFACE s_axilite port = read_block_size bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
-
     hls::stream<bool> dcStatusStream("dcStatusStream");
 #pragma HLS STREAM variable = dcStatusStream depth = 3
 

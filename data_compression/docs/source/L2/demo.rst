@@ -20,7 +20,6 @@ Demo examples for **lz4**, **snappy**, **lz4_streaming**, **zlib**, **gzip** and
    lz4_streaming.rst
    snappy.rst
    snappy_streaming.rst
-   zstd_decompress.rst
 
 .. note::
    Execute the following commands before building any of the examples:

@@ -80,6 +80,16 @@ void zstdLz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
     IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> outSeqFreqVal;
     IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> metaVal;
     metaVal.strobe = 1;
+    // frequency buffers
+    FREQ_DT literal_freq[c_maxLitV + 1];
+    FREQ_DT litlen_freq[c_maxCodeLL + 1];
+    FREQ_DT matlen_freq[c_maxCodeML + 1];
+    FREQ_DT offset_freq[c_maxCodeOF + 1];
+#pragma HLS BIND_STORAGE variable = literal_freq type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = litlen_freq type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = matlen_freq type = ram_2p impl = lutram
+#pragma HLS BIND_STORAGE variable = offset_freq type = ram_2p impl = lutram
+
     bool last_block = false;
     bool just_started = true;
     int blk_n = 0;
@@ -88,13 +98,9 @@ void zstdLz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
         // iterate over multiple blocks in a file
         ++blk_n;
         enum LZ77EncoderStates next_state = WRITE_LITERAL;
-        FREQ_DT literal_freq[c_maxLitV + 1];
-        FREQ_DT litlen_freq[c_maxCodeLL + 1];
-        FREQ_DT matlen_freq[c_maxCodeML + 1];
-        FREQ_DT offset_freq[c_maxCodeOF + 1];
-
         FREQ_DT seqCnt = 0;
-        {
+
+        { // Initialize frequencies memory
 #pragma HLS LOOP_MERGE force
         lit_freq_init:
             for (uint16_t i = 0; i < c_maxLitV + 1; i++) {
@@ -155,7 +161,7 @@ void zstdLz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
                 offset_freq[ofc]++;
                 // write sequence
                 outSeqVal.data[0].litlen = litCount;
-                outSeqVal.data[0].matlen = tLen - MIN_MATCH;
+                outSeqVal.data[0].matlen = tLen; // - MIN_MATCH;
                 outSeqVal.data[0].offset = tOffset;
                 seqStream << outSeqVal;
                 litCount = 0;
@@ -208,7 +214,6 @@ void zstdLz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
             metaStream << metaVal;
             litCntStream << (isRLE ? (FREQ_DT)(litTotal + 1) : litTotal);
             // printf("litCount: %u, seqCnt: %u\n", (uint16_t)litTotal, (uint16_t)seqCnt);
-            // if (seqCnt == 0) seqCnt = 1;
             outLitFreqVal.strobe = 1;
             outSeqFreqVal.strobe = 1;
         write_lit_freq:
@@ -259,22 +264,25 @@ void zstdLz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
 // Block compression decision making
 template <int BLOCK_SIZE, int MAX_FREQ_DWIDTH, class DT = ap_uint<MAX_FREQ_DWIDTH> >
 void zstdCompressionMeta(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& metaStream,
-                         hls::stream<bool>& strdBlockFlagStream,
+                         hls::stream<ap_uint<2> >& strdBlockFlagStream,
                          hls::stream<DT>& outMetaStream) {
     uint8_t i = 0;
     DT litCnt = 0;
-    bool strdFlag = false;
+    ap_uint<2> stbFVal = 1; // <stb Flag 1-bit><strobe 1-bit>
 gen_meta_loop:
     for (auto inMetaVal = metaStream.read(); inMetaVal.strobe > 0; inMetaVal = metaStream.read()) {
 #pragma HLS PIPELINE off
         litCnt = inMetaVal.data[0];
         outMetaStream << litCnt;
         if (i == 0) {
-            strdFlag = (litCnt > BLOCK_SIZE - 2048);
-            strdBlockFlagStream << strdFlag;
+            stbFVal.range(1, 1) = (ap_int<1>)(litCnt > BLOCK_SIZE - 2048);
+            strdBlockFlagStream << stbFVal;
         }
         i = (i + 1) & 1;
     }
+    // end of all data
+    stbFVal = 0;
+    strdBlockFlagStream << stbFVal;
 }
 
 template <int BLOCK_SIZE = 128 * 1024,
@@ -289,7 +297,7 @@ void getLitSequences(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
                      hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& litFreqStream,
                      hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& seqFreqStream,
                      hls::stream<bool>& rleFlagStream,
-                     hls::stream<bool>& strdBlockFlagStream,
+                     hls::stream<ap_uint<2> >& strdBlockFlagStream,
                      hls::stream<ap_uint<MAX_FREQ_DWIDTH> >& outMetaStream,
                      hls::stream<ap_uint<MAX_FREQ_DWIDTH> >& litCntStream) {
 #pragma HLS dataflow
@@ -301,8 +309,8 @@ void getLitSequences(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
 #pragma HLS STREAM variable = metaStream depth = 8
 
     // LZ77 compress
-    xf::compression::lzCompress<BLOCK_SIZE, uint32_t, MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT, 1>(
-        inStream, compressedStream, 0);
+    xf::compression::lzCompress<BLOCK_SIZE, uint32_t, MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream,
+                                                                                                 compressedStream);
     // improve CR and generate clean sequences
     xf::compression::lzBooster<MAX_MATCH_LEN>(compressedStream, boosterStream);
     // separate literals from sequences and generate literal frequencies
@@ -321,7 +329,7 @@ void preProcessLitStream(hls::stream<IntVectorStream_dt<8, 1> >& inLitStream,
      *               of equal size. Last stream can be upto 3 bytes less than other 3 streams. This module
      *               streams literals in reverse order of input.
      */
-    constexpr uint16_t c_litBufSize = 8 + (BLOCK_SIZE / 4);
+    constexpr uint16_t c_litBufSize = (BLOCK_SIZE / 4);
     // literal buffer
     ap_uint<8> litBuffer[c_litBufSize];
 #pragma HLS BIND_STORAGE variable = litBuffer type = ram_t2p impl = bram
@@ -363,7 +371,6 @@ pre_proc_lit_main:
         uint16_t litIdx = 0;
         uint16_t wIdx = 1;
         uint16_t rIdx = 0;
-        int8_t lrInc = -1;
         litBuffer[0] = inVal.data[0];
     rev_lit_loop_1:
         for (litIdx = 1; litIdx < streamSize[0]; ++litIdx) {
@@ -371,63 +378,47 @@ pre_proc_lit_main:
             inVal = inLitStream.read();
             litBuffer[wIdx++] = inVal.data[0];
         }
-        // init read-write indexes
+        // init read-write indices
         rIdx = wIdx - 1;
         wIdx = c_litBufSize - 1;
-    rev_lit_loop_2:
-        for (litIdx = 0; litIdx < streamSize[0] && streamCnt > 1; ++litIdx) {
+
+        int8_t rwInc = -1;
+    rev_lit_loop_234:
+        for (uint8_t i = 0; i < 3 && streamCnt > 1; ++i) {
+        rev_lit_loop_overlap:
+            for (litIdx = 0; litIdx < streamSize[0]; ++litIdx) {
 #pragma HLS PIPELINE II = 1
-            // stream out previously read data
-            outLit.data[0] = litBuffer[rIdx--];
-            outReversedLitStream << outLit;
-            // buffer next sub-stream
-            inVal = inLitStream.read();
-            litBuffer[wIdx--] = inVal.data[0];
-        }
-        // init read-write indexes
-        if (streamCnt > 1) {
-            rIdx = wIdx + 1;
-            wIdx = 0;
-        }
-    rev_lit_loop_3:
-        for (litIdx = 0; litIdx < streamSize[0] && streamCnt > 1; ++litIdx) {
-#pragma HLS PIPELINE II = 1
-            // stream out previously read data
-            outLit.data[0] = litBuffer[rIdx++];
-            outReversedLitStream << outLit;
-            // buffer next sub-stream
-            inVal = inLitStream.read();
-            litBuffer[wIdx++] = inVal.data[0];
-        }
-        // init read-write indexes
-        if (streamCnt > 1) {
-            rIdx = wIdx - 1;
-            wIdx = c_litBufSize - 1;
-        }
-    rev_lit_loop_4:
-        for (litIdx = 0; litIdx < streamSize[0] && streamCnt > 1; ++litIdx) {
-#pragma HLS PIPELINE II = 1
-            // stream out previously read data
-            outLit.data[0] = litBuffer[rIdx--];
-            outReversedLitStream << outLit;
-            // buffer next sub-stream
-            if (litIdx < streamSize[3]) {
-                inVal = inLitStream.read();
-                litBuffer[wIdx--] = inVal.data[0];
+                // stream out previously read data
+                outLit.data[0] = litBuffer[rIdx];
+                outReversedLitStream << outLit;
+                rIdx += rwInc;
+                // buffer next sub-stream
+                if (litIdx < streamSize[i + 1]) {
+                    inVal = inLitStream.read();
+                    litBuffer[wIdx] = inVal.data[0];
+                    wIdx += rwInc;
+                }
+            }
+            // manage direction in memory access
+            // both indices move in same direction
+            rwInc = (~rwInc) + 1; // flip +1/-1
+            // manage memory access indices
+            if ((uint8_t)(i & 1) == 0) { // even, works only after type-casting to int types
+                rIdx = wIdx + 1;
+                wIdx = 0;
+            } else { // odd
+                rIdx = wIdx - 1;
+                wIdx = c_litBufSize - 1;
             }
         }
-        // init read index
-        if (streamCnt > 1) {
-            rIdx = wIdx + 1;
-            lrInc = 1;
-        }
+
     rev_lit_loop_5:
         for (litIdx = 0; litIdx < streamSize[3]; ++litIdx) {
 #pragma HLS PIPELINE II = 1
             // stream out previously read data
             outLit.data[0] = litBuffer[rIdx];
             outReversedLitStream << outLit;
-            rIdx += lrInc;
+            rIdx += rwInc;
         }
         // dump strobe 0 from input
         inVal = inLitStream.read();
@@ -438,41 +429,256 @@ pre_proc_lit_main:
     outReversedLitStream << outLit;
 }
 
-template <int BLOCK_SIZE = 32 * 1024, int MAX_FREQ_DWIDTH = 17, int MIN_MATCH = 3>
-void reverseSeq(hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& seqStream,
-                hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& outReversedSeqStream) {
-    constexpr int c_seqMemSize = 21 + ((BLOCK_SIZE - 1) / MIN_MATCH);
+template <int BLOCK_SIZE = 32 * 1024, int MAX_FREQ_DWIDTH = 17>
+void reverseLitQuadStreams(hls::stream<ap_uint<68> >& inLitStream,
+                           hls::stream<ap_uint<MAX_FREQ_DWIDTH> >& litCntStream,
+                           hls::stream<ap_uint<68> >& outReversedLitStream) {
+    /*
+     *  Description: This module reads literals from input stream and divides them into 1 or 4 streams
+     *               of equal size. Last stream can be upto 3 bytes less than other 3 streams. This module
+     *               streams literals in reverse order of input.
+     */
+    constexpr uint16_t c_litBufSize = (BLOCK_SIZE / 32);
+    // storing only 1/4th of the block size, 8-bytes a time
+    // literal buffer
+    ap_uint<64> litBuffer[c_litBufSize];
+#pragma HLS BIND_STORAGE variable = litBuffer type = ram_t2p impl = bram
+    ap_uint<64> outLit;
+    ap_uint<68> outVal;
+
+pre_proc_lit_main:
+    while (true) {
+        bool rdLitFlag = false;
+        auto inVal = inLitStream.read();
+        if (inVal.range(3, 0) == 0) break;
+        uint8_t streamCnt = 1;
+        uint16_t streamSize[5] = {0, 0, 0, 0, 0}; // 1 dummy entry
+#pragma HLS ARRAY_PARTITION variable = streamSize complete
+        ap_uint<MAX_FREQ_DWIDTH> litCnt = litCntStream.read();
+        // get out stream count and sizes
+        if (litCnt > 255) {
+            streamCnt = 4;
+            streamSize[0] = 1 + (litCnt - 1) / 4;
+            streamSize[1] = streamSize[0];
+            streamSize[2] = streamSize[0];
+            streamSize[3] = litCnt - (streamSize[0] * 3);
+        } else {
+            streamSize[0] = litCnt;
+            streamSize[3] = litCnt;
+        }
+        outVal.range(3, 0) = 1;
+        // first send the stream count
+        outVal.range(11, 4) = streamCnt;
+        outReversedLitStream << outVal;
+    write_stream_sizes:
+        for (uint8_t k = 0; k < streamCnt; ++k) {
+#pragma HLS UNROLL
+            outLit.range(15 + (k * 16), k * 16) = streamSize[k];
+        }
+        outVal.range(67, 4) = outLit;
+        outReversedLitStream << outVal;
+        // indexes
+        uint16_t litRcnt = 0, litWcnt = 0;
+        uint16_t wIdx = 1;
+        uint16_t rIdx = 0;
+        // write already read value into buffer
+        litBuffer[0] = inVal.range(67, 4);
+        ap_uint<64> prevWord = 0;
+        uint8_t extBytesRead = 0;
+        int8_t rwInc = 1;
+        litWcnt = inVal.range(3, 0);
+    rev_lit_loop_1to5:
+        for (uint8_t si = 0; si < streamCnt + 1; ++si) {
+            if (extBytesRead) {
+                // write first byte to buffer
+                litBuffer[wIdx] = prevWord;
+                wIdx += rwInc;
+                litWcnt = extBytesRead;
+                // write first output for previous sub-stream
+                outVal.range(3, 0) = 8 - extBytesRead;
+                outLit = litBuffer[rIdx];
+            // assign value in reverse byte order
+            assign_outVal_1:
+                for (uint8_t k = 0; k < 8; ++k) {
+#pragma HLS UNROLL
+                    uint8_t rK = 7 - k;
+                    outVal.range((k * 8) + 11, (k * 8) + 4) = outLit.range((rK * 8) + 7, (rK * 8));
+                }
+                outReversedLitStream << outVal;
+                rIdx += rwInc;
+                litRcnt = outVal.range(3, 0);
+            }
+        rev_lit_loop_overlap:
+            while ((si < streamCnt && litWcnt < streamSize[si]) || (si > 0 && litRcnt < streamSize[si - 1])) {
+#pragma HLS PIPELINE II = 1
+                // run till one of the conditions is true
+                // buffer sub-stream
+                if (si < streamCnt && litWcnt < streamSize[si]) {
+                    inVal = inLitStream.read();
+                    litBuffer[wIdx] = inVal.range(67, 4);
+                    prevWord = inVal.range(67, 4);
+                    litWcnt += 8; // to handle last stream size not aligned to 8 bytes case
+                    wIdx += rwInc;
+                }
+                // read-out buffer data in reverse after first sub-stream is buffered
+                if (si > 0 && litRcnt < streamSize[si - 1]) {
+                    outLit = litBuffer[rIdx];
+                    rIdx += rwInc;
+                // assign value in reverse byte order
+                assign_outVal_2:
+                    for (uint8_t k = 0; k < 8; ++k) {
+#pragma HLS UNROLL
+                        uint8_t rK = 7 - k;
+                        outVal.range((k * 8) + 11, (k * 8) + 4) = outLit.range((rK * 8) + 7, (rK * 8));
+                    }
+                    outVal.range(3, 0) = 8;
+                    outReversedLitStream << outVal;
+                    litRcnt += 8;
+                }
+            }
+            // printf("Written %u bytes\n", wb);
+            // get extra bytes for currently buffered stream
+            extBytesRead = litWcnt - streamSize[si];
+            // re-initialize literal index in sub-stream
+            litWcnt = 0;
+            litRcnt = 0;
+            // manage direction in memory access
+            // both indices move in same direction
+            rwInc = (~rwInc) + 1; // flip +1/-1
+            // manage memory access indices
+            if ((uint8_t)(si & 1) != 0) { // odd, works only after type-casting to int types
+                rIdx = wIdx + 1;
+                wIdx = 0;
+            } else { // even
+                rIdx = wIdx - 1;
+                wIdx = c_litBufSize - 1;
+            }
+        }
+        // dump strobe 0 from input
+        inVal = inLitStream.read();
+        // end of block indicator not needed, since size is also sent
+    }
+    // end of data
+    outVal.range(3, 0) = 0;
+    outReversedLitStream << outVal;
+}
+
+template <int MAX_FREQ_DWIDTH>
+void downSizeLitlen(hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& inSeqStream,
+                    hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> >& outSeqStream) {
+    // Downsize Literal length to 8-bits
+    DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> outSeqVal;
+    bool done = false;
+dsz_ll_outer:
+    while (!done) {
+        auto inSeqVal = inSeqStream.read();
+        bool dszDone = (inSeqVal.strobe == 0);
+        done = dszDone;
+        auto litLen = inSeqVal.data[0].litlen;
+        outSeqVal.strobe = 1;
+    dsz_litlen:
+        while (!dszDone) {
+#pragma HLS PIPELINE II = 1
+            if (litLen > 255) {
+                outSeqVal.data[0].setLitlen(255);
+                outSeqVal.data[0].setMatlen(0);
+                outSeqVal.data[0].setOffset(0);
+                litLen -= 255;
+            } else {
+                outSeqVal.data[0].setLitlen(litLen.range(7, 0));
+                outSeqVal.data[0].setMatlen(inSeqVal.data[0].matlen);
+                outSeqVal.data[0].setOffset(inSeqVal.data[0].offset);
+
+                // read next input sequence
+                inSeqVal = inSeqStream.read();
+                litLen = inSeqVal.data[0].litlen;
+                dszDone = (inSeqVal.strobe == 0);
+            }
+            // write output sequence
+            outSeqStream << outSeqVal;
+        }
+        // End of block/file
+        outSeqVal.strobe = 0;
+        outSeqStream << outSeqVal;
+    }
+}
+
+template <int MAX_FREQ_DWIDTH, int MIN_MATCH>
+void upSizeLitlen(hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> >& inSeqStream,
+                  hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& outSeqStream) {
+    // Upsize litlen to MAX_FREQ_DWIDTH-bits from 8-bits in reversed sequences stream
+    DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> outSeqVal;
+    bool done = false;
+upsz_ll_outer:
+    while (!done) {
+        auto inSeqVal = inSeqStream.read();
+        bool uszDone = (inSeqVal.strobe == 0);
+        done = uszDone;
+        // store current sequence
+        outSeqVal.data[0].litlen = inSeqVal.data[0].getLitlen();
+        outSeqVal.data[0].offset = inSeqVal.data[0].getOffset();
+        // check for noSeq condition
+        if (inSeqVal.data[0].getLitlen() == 0 && inSeqVal.data[0].getMatlen() == 0 &&
+            inSeqVal.data[0].getOffset() == 0) {
+            outSeqVal.data[0].matlen = 0;
+        } else {
+            outSeqVal.data[0].matlen = inSeqVal.data[0].getMatlen() - MIN_MATCH;
+        }
+        outSeqVal.strobe = 1;
+    upsz_litlen:
+        while (!uszDone) {
+#pragma HLS PIPELINE II = 1
+            inSeqVal = inSeqStream.read();
+            uszDone = (inSeqVal.strobe == 0);
+            if (inSeqVal.data[0].getMatlen() == 0 && inSeqVal.data[0].getOffset() == 0 && !uszDone) {
+                outSeqVal.data[0].litlen = outSeqVal.data[0].litlen + inSeqVal.data[0].getLitlen();
+            } else { // if regular or last sequence
+                outSeqStream << outSeqVal;
+                // update out sequence values with current values
+                outSeqVal.data[0].litlen = inSeqVal.data[0].getLitlen();
+                outSeqVal.data[0].matlen = inSeqVal.data[0].getMatlen() - MIN_MATCH;
+                outSeqVal.data[0].offset = inSeqVal.data[0].getOffset();
+            }
+        }
+        // end of block/file
+        outSeqVal.strobe = 0;
+        outSeqStream << outSeqVal;
+    }
+}
+
+template <int BLOCK_SIZE = 32 * 1024, int MAX_FREQ_DWIDTH = 17>
+void reverseSeqIntl(hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> >& seqStream,
+                    hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> >& outReversedSeqStream) {
+    constexpr uint32_t c_seqMemSize = BLOCK_SIZE / 4;
     // sequence buffer
-    Sequence_dt<MAX_FREQ_DWIDTH> seqBuffer[c_seqMemSize];
+    SequencePack<MAX_FREQ_DWIDTH, 8> seqBuffer[c_seqMemSize];
 #pragma HLS BIND_STORAGE variable = seqBuffer type = ram_t2p impl = bram
 
-    DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> outSeqV;
+    DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> outSeqV;
     bool done = false;
     bool blockDone = true;
     // operation modes
     bool streamMode = 0;
     bool bufferMode = 1;
 
-    uint16_t memReadBegin[2]; // starting index for BRAM read
-    constexpr int16_t memReadLimit[2] = {-1,
-                                         c_seqMemSize}; // index till which the BRAM can be read, 1 extra buffer entry
+    uint16_t memReadBegin[2];                               // starting index for BRAM read
+    constexpr int16_t memReadLimit[2] = {-1, c_seqMemSize}; // last index for buffer read
 #pragma HLS ARRAY_PARTITION variable = memReadBegin complete
 #pragma HLS ARRAY_PARTITION variable = memReadLimit complete
-    // uint16_t sqIdx = 0, sqcnt = 0;
     uint16_t wIdx = 0;
     int16_t rIdx = 0; // may become negative for writing strobe 0
     int8_t wInc = 1, rInc = 1;
     uint8_t rsi = 0, wsi = 0;
-    DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> inSeq;
+    DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> inSeq;
     outSeqV.strobe = 1;
 // sequence read and reverse
 reverse_seq_stream:
     while (bufferMode || streamMode) {
-#pragma HLS PIPELINE II = 1
+#pragma HLS PIPELINE II = 1 rewind
         if (bufferMode) {
             // Write to internal memory
             inSeq = seqStream.read();
-            seqBuffer[wIdx] = inSeq.data[0];
+            seqBuffer[wIdx].setData(inSeq.data[0].getData());
             // check mode
             if (inSeq.strobe == 0) {
                 done = blockDone;
@@ -485,8 +691,8 @@ reverse_seq_stream:
                 // set mem read begin index
                 memReadBegin[wsi] = wIdx - wInc; // since an extra increment has been done here
                 // change increment direction
-                wInc = (~wInc) + 1; // flip 1 and -1
-                wsi = (wsi + 1) & 1;
+                wInc = (~wInc) + 1;  // flip 1 and -1
+                wsi = (wsi + 1) & 1; // flip 1 and 0
                 // post increment check if bufferMode to be continued/paused/stopped
                 if (done || (wsi == rsi)) bufferMode = 0;
                 // set stream mode's last mem index for even and odd stream indices
@@ -512,7 +718,7 @@ reverse_seq_stream:
                 if (done || (wsi == rsi)) streamMode = 0;
             } else {
                 // Read from internal memory to output stream
-                outSeqV.data[0] = seqBuffer[rIdx];
+                outSeqV.data[0].setData(seqBuffer[rIdx].getData());
                 // directional decrement
                 rIdx -= rInc;
                 outSeqV.strobe = 1;
@@ -526,13 +732,81 @@ reverse_seq_stream:
     outReversedSeqStream << outSeqV;
 }
 
+template <int BLOCK_SIZE = 32 * 1024, int MAX_FREQ_DWIDTH = 17, int MIN_MATCH = 3>
+void reverseSeq(hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& inSeqStream,
+                hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& outReversedSeqStream) {
+    // reverse sequences
+    hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> > dszSeqStream("dszSeqStream");
+    hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> > dszReversedSeqStream("dszReversedSeqStream");
+#pragma HLS STREAM variable = dszSeqStream depth = 16
+#pragma HLS STREAM variable = dszReversedSeqStream depth = 16
+
+#pragma HLS DATAFLOW
+    // MAX_FREQ_DWIDTH-bit literal length to 8-bit
+    details::downSizeLitlen<MAX_FREQ_DWIDTH>(inSeqStream, dszSeqStream);
+    // reverse sequences
+    details::reverseSeqIntl<BLOCK_SIZE, MAX_FREQ_DWIDTH>(dszSeqStream, dszReversedSeqStream);
+    // upsize reversed sequences to MAX_FREQ_DWIDTH-bit literal length
+    details::upSizeLitlen<MAX_FREQ_DWIDTH, MIN_MATCH>(dszReversedSeqStream, outReversedSeqStream);
+}
+
+template <int BLOCK_SIZE = 32 * 1024, int MAX_FREQ_DWIDTH = 17, int MIN_MATCH = 3>
+void reverseSeq(hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> >& inSeqStream,
+                hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> >& outReversedSeqStream) {
+    // reverse sequences
+    hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> > dszReversedSeqStream("dszReversedSeqStream");
+#pragma HLS STREAM variable = dszReversedSeqStream depth = 16
+
+#pragma HLS DATAFLOW
+    // reverse sequences
+    details::reverseSeqIntl<BLOCK_SIZE, MAX_FREQ_DWIDTH>(inSeqStream, dszReversedSeqStream);
+    // upsize reversed sequences to MAX_FREQ_DWIDTH-bit literal length
+    details::upSizeLitlen<MAX_FREQ_DWIDTH, MIN_MATCH>(dszReversedSeqStream, outReversedSeqStream);
+}
+
+template <int CORE_IDX,
+          int BLOCK_SIZE = 128 * 1024,
+          int MAX_FREQ_DWIDTH = 17,
+          int MATCH_LEN = 6,
+          int MIN_MATCH = 3,
+          int LZ_MAX_OFFSET_LIMIT = 32 * 1024,
+          int MAX_MATCH_LEN = 255>
+void getLitSequences(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
+                     hls::stream<IntVectorStream_dt<8, 1> >& litStream,
+                     hls::stream<DSVectorStream_dt<SequencePack<MAX_FREQ_DWIDTH, 8>, 1> >& seqStream,
+                     hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& litFreqStream,
+                     hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& seqFreqStream,
+                     hls::stream<bool>& rleFlagStream,
+                     hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& outMetaStream,
+                     hls::stream<ap_uint<MAX_FREQ_DWIDTH> >& litCntStream) {
+#pragma HLS dataflow
+    hls::stream<IntVectorStream_dt<32, 1> > compressedStream("compressedStream");
+    hls::stream<IntVectorStream_dt<32, 1> > boosterStream("boosterStream");
+    hls::stream<DSVectorStream_dt<Sequence_dt<MAX_FREQ_DWIDTH>, 1> > seqFszStream("seqFszStream");
+#pragma HLS STREAM variable = compressedStream depth = 16
+#pragma HLS STREAM variable = boosterStream depth = 16
+#pragma HLS STREAM variable = seqFszStream depth = 16
+
+    // LZ77 compress
+    xf::compression::lzCompress<BLOCK_SIZE, uint32_t, MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT, CORE_IDX>(
+        inStream, compressedStream);
+    // improve CR and generate clean sequences
+    xf::compression::lzBooster<MAX_MATCH_LEN>(compressedStream, boosterStream);
+    // separate literals from sequences and generate literal frequencies
+    xf::compression::details::zstdLz77DivideStream<MAX_FREQ_DWIDTH, MIN_MATCH>(
+        boosterStream, litStream, seqFszStream, litFreqStream, seqFreqStream, rleFlagStream, outMetaStream,
+        litCntStream);
+    // Downsize literal lengths
+    xf::compression::details::downSizeLitlen<MAX_FREQ_DWIDTH>(seqFszStream, seqStream);
+}
+
 template <int MAX_FREQ_DWIDTH = 17>
 void frequencySequencer(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& wghtFreqStream,
                         hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& seqFreqStream,
                         hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& freqStream) {
     // sequence input frequencies into single output stream
-    constexpr uint16_t c_limits[4] = {c_maxCodeLL + 1, c_maxCodeOF + 1, c_maxZstdHfBits + 1, c_maxCodeML + 1};
-    const uint8_t c_hfIdx = 2;
+    constexpr uint16_t c_limits[4] = {c_maxCodeLL + 1, c_maxCodeOF + 1, c_maxCodeML + 1, c_maxZstdHfBits + 1};
+    const uint8_t c_hfIdx = 3;
     IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> outfreq;
     while (true) {
         outfreq = seqFreqStream.read();

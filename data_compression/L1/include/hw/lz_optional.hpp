@@ -96,11 +96,11 @@ lz77_divide:
         uint16_t tOffset = tmpEncodedValue.range(31, 16);
         uint32_t ltreeIdx, dtreeIdx;
         if (tLen > 0) {
-            ltreeIdx = length_code[tLen - 3] + 256 + 1;
+            ltreeIdx = length_code[tLen] + 256 + 1;
             dtreeIdx = d_code(tOffset, dist_code);
 
             i += (tLen - 1);
-            tmpEncodedValue.range(15, 8) = tLen - 3;
+            tmpEncodedValue.range(15, 8) = tLen;
             lcl_dyn_ltree[ltreeIdx]++;
             lcl_dyn_dtree[dtreeIdx]++;
         } else {
@@ -127,29 +127,35 @@ lz77_divide:
     }
 }
 
-template <int MAX_FREQ_DWIDTH = 32>
+template <int MAX_FREQ_DWIDTH = 32, int CORE_ID = 0>
 static void lz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
                              hls::stream<IntVectorStream_dt<9, 1> >& outStream,
                              hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& outTreeStream) {
+    constexpr uint16_t c_ltree_size = 286;
+    constexpr uint16_t c_dtree_size = 30;
     // lz77 encoder states
     enum LZ77EncoderStates { WRITE_LITERAL, WRITE_OFFSET0, WRITE_OFFSET1 };
     IntVectorStream_dt<9, 1> outValue;
     IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> outTreeVal;
     bool last_block = false;
     bool just_started = true;
+#ifndef AVOID_STATIC_MODE
+    static bool resetTree = true;
+#else
+    bool resetTree = true;
+#endif
+    ap_uint<MAX_FREQ_DWIDTH> lcl_dyn_ltree[c_ltree_size];
+    ap_uint<MAX_FREQ_DWIDTH> lcl_dyn_dtree[c_dtree_size];
+#pragma HLS bind_storage variable = lcl_dyn_ltree type = ram_2p impl = LUTRAM
+#pragma HLS bind_storage variable = lcl_dyn_dtree type = ram_2p impl = LUTRAM
+ltree_init:
+    for (uint16_t i = 0; i < c_ltree_size && resetTree; i++) lcl_dyn_ltree[i] = 0;
+dtree_init:
+    for (uint16_t i = 0; i < c_dtree_size && resetTree; i++) lcl_dyn_dtree[i] = 0;
+    resetTree = false;
 
     while (!last_block) { // iterate over multiple blocks in a file
         enum LZ77EncoderStates next_state = WRITE_LITERAL;
-        const uint16_t c_ltree_size = 286;
-        const uint16_t c_dtree_size = 30;
-
-        ap_uint<MAX_FREQ_DWIDTH> lcl_dyn_ltree[c_ltree_size];
-        ap_uint<MAX_FREQ_DWIDTH> lcl_dyn_dtree[c_dtree_size];
-
-    ltree_init:
-        for (uint16_t i = 0; i < c_ltree_size; i++) lcl_dyn_ltree[i] = 0;
-    dtree_init:
-        for (uint16_t i = 0; i < c_dtree_size; i++) lcl_dyn_dtree[i] = 0;
 
         uint8_t tCh = 0;
         uint8_t tLen = 0;
@@ -179,12 +185,12 @@ static void lz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
                 tOffset2 = encodedValue.data[0].range(31, 24);
 
                 if (tLen) {
-                    ltreeIdx = length_code[tLen - 3] + 256 + 1;
+                    ltreeIdx = length_code[tLen] + 256 + 1;
                     dtreeIdx = d_code(tOffset, dist_code);
                     lcl_dyn_ltree[ltreeIdx]++;
                     lcl_dyn_dtree[dtreeIdx]++;
                     outValue.data[0].range(8, 8) = 1;
-                    outValue.data[0].range(7, 0) = tLen - 3;
+                    outValue.data[0].range(7, 0) = tLen;
                     next_state = WRITE_OFFSET0;
                 } else {
                     ltreeIdx = tCh;
@@ -208,16 +214,18 @@ static void lz77DivideStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
         // write literal and distance trees
         if (!last_block) {
             outTreeVal.strobe = 1;
-        write_ltree:
+        read_write_ltree:
             for (ap_uint<9> i = 0; i < c_ltree_size; ++i) {
 #pragma HLS PIPELINE II = 1
                 outTreeVal.data[0] = lcl_dyn_ltree[i];
+                lcl_dyn_ltree[i] = 0;
                 outTreeStream << outTreeVal;
             }
-        write_dtree:
+        read_write_dtree:
             for (ap_uint<9> i = 0; i < c_dtree_size; ++i) {
 #pragma HLS PIPELINE II = 1
                 outTreeVal.data[0] = lcl_dyn_dtree[i];
+                lcl_dyn_dtree[i] = 0;
                 outTreeStream << outTreeVal;
             }
         }
@@ -265,10 +273,10 @@ static void lz77DivideStatic(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
                 tOffset2 = encodedValue.data[0].range(31, 24);
 
                 if (tLen) {
-                    ltreeIdx = length_code[tLen - 3] + 256 + 1;
+                    ltreeIdx = length_code[tLen] + 256 + 1;
                     dtreeIdx = d_code(tOffset, dist_code);
                     outValue.data[0].range(8, 8) = 1;
-                    outValue.data[0].range(7, 0) = tLen - 3;
+                    outValue.data[0].range(7, 0) = tLen;
                     next_state = WRITE_OFFSET0;
                 } else {
                     ltreeIdx = tCh;
@@ -347,6 +355,53 @@ lz_bestMatchFilter_left_over:
     }
 }
 
+template <int MATCH_LEN, int OFFSET_WINDOW>
+void lzBestMatchFilter(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
+                       hls::stream<IntVectorStream_dt<32, 1> >& outStream) {
+    const int c_max_match_length = MATCH_LEN;
+
+    IntVectorStream_dt<32, 1> compare_window;
+    IntVectorStream_dt<32, 1> outStreamValue;
+
+    while (true) {
+        auto nextVal = inStream.read();
+        if (nextVal.strobe == 0) {
+            outStreamValue.strobe = 0;
+            outStream << outStreamValue;
+            break;
+        }
+        // assuming that, at least bytes more than LEFT_BYTES will be present at the input
+        compare_window = nextVal;
+        nextVal = inStream.read();
+
+    lz_bestMatchFilter:
+        for (; nextVal.strobe != 0;) {
+#pragma HLS PIPELINE II = 1
+            // shift register logic
+            IntVectorStream_dt<32, 1> outValue = compare_window;
+            compare_window = nextVal;
+            nextVal = inStream.read();
+
+            uint8_t match_length = outValue.data[0].range(15, 8);
+            bool best_match = 1;
+            // Find Best match
+            compressd_dt compareValue = compare_window.data[0];
+            uint8_t compareLen = compareValue.range(15, 8);
+            if (match_length < compareLen) {
+                best_match = 0;
+            }
+            if (best_match == 0) {
+                outValue.data[0].range(15, 8) = 0;
+                outValue.data[0].range(31, 16) = 0;
+            }
+            outStream << outValue;
+        }
+        outStream << compare_window;
+        outStreamValue.strobe = 0;
+        outStream << outStreamValue;
+    }
+}
+
 /**
  * @brief This module helps in improving the compression ratio.
  * Finds a better match length by performing more character matches
@@ -363,17 +418,18 @@ lz_bestMatchFilter_left_over:
  * @param inStream input stream 32bit per read
  * @param outStream output stream 32bit per write
  *
-*/
-template <int MAX_MATCH_LEN, int BOOSTER_OFFSET_WINDOW = 16 * 1024, int LEFT_BYTES = 64>
+ */
+template <int MAX_MATCH_LEN, int BLOCKSIZE = 32768, int BOOSTER_OFFSET_WINDOW = 16 * 1024, int LEFT_BYTES = 64>
 void lzBooster(hls::stream<IntVectorStream_dt<32, 1> >& inStream, hls::stream<IntVectorStream_dt<32, 1> >& outStream) {
-    const uint16_t c_fifo_depth = LEFT_BYTES + 2;
+    constexpr uint16_t c_fifo_depth = LEFT_BYTES + 2;
+    constexpr int c_boosterOffsetWindow = (BLOCKSIZE < BOOSTER_OFFSET_WINDOW) ? BLOCKSIZE : BOOSTER_OFFSET_WINDOW;
     bool last_block = false;
     bool block_end = true;
     IntVectorStream_dt<32, 1> outStreamValue;
     ap_uint<32> outValue = 0;
 
     while (true) {
-        uint8_t local_mem[BOOSTER_OFFSET_WINDOW];
+        uint8_t local_mem[c_boosterOffsetWindow];
         hls::stream<ap_uint<32> > lclBufStream("lclBufStream");
 #pragma HLS STREAM variable = lclBufStream depth = c_fifo_depth
 #pragma HLS BIND_STORAGE variable = lclBufStream type = fifo impl = srl
@@ -388,7 +444,7 @@ void lzBooster(hls::stream<IntVectorStream_dt<32, 1> >& inStream, hls::stream<In
         bool outFlag = false;
         bool boostFlag = false;
         uint16_t skip_len = 0;
-        uint8_t nextMatchCh = local_mem[match_loc % BOOSTER_OFFSET_WINDOW];
+        uint8_t nextMatchCh = local_mem[match_loc % c_boosterOffsetWindow];
 
         // check and exit if end of data
         auto nextVal = inStream.read();
@@ -425,13 +481,13 @@ void lzBooster(hls::stream<IntVectorStream_dt<32, 1> >& inStream, hls::stream<In
             uint8_t tLen = inValue.range(15, 8);
             uint16_t tOffset = inValue.range(31, 16);
 
-            if (tOffset < BOOSTER_OFFSET_WINDOW) {
+            if (tOffset < c_boosterOffsetWindow) {
                 boostFlag = true;
             } else {
                 boostFlag = false;
             }
             uint8_t match_ch = nextMatchCh;
-            local_mem[iIdx % BOOSTER_OFFSET_WINDOW] = tCh;
+            local_mem[iIdx % c_boosterOffsetWindow] = tCh;
             outFlag = false;
 
             if (skip_len) {
@@ -458,7 +514,7 @@ void lzBooster(hls::stream<IntVectorStream_dt<32, 1> >& inStream, hls::stream<In
                     matchFlag = false;
                 }
             }
-            nextMatchCh = local_mem[match_loc % BOOSTER_OFFSET_WINDOW];
+            nextMatchCh = local_mem[match_loc % c_boosterOffsetWindow];
             if (outFlag) {
                 outStream << outStreamValue;
             }
@@ -494,7 +550,7 @@ void lzBooster(hls::stream<IntVectorStream_dt<32, 1> >& inStream, hls::stream<In
  * @param input_size input size
  * @param left_bytes last 64 left over bytes
  *
-*/
+ */
 template <int MAX_MATCH_LEN, int BOOSTER_OFFSET_WINDOW = 16 * 1024, int LEFT_BYTES = 64>
 void lzBooster(hls::stream<compressd_dt>& inStream, hls::stream<compressd_dt>& outStream, uint32_t input_size) {
     if (input_size == 0) return;

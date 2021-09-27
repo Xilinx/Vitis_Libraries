@@ -87,7 +87,7 @@ int compressApp::validate(std::string& inFile, std::string& outFile) {
     return ret;
 }
 
-void compressApp::parser(int argc, char** argv) {
+void compressApp::parser(int argc, char** argv, uint8_t swPline) {
     m_parser.parse(argc, argv);
     m_uncompressed_file = m_parser.value("compress");
     m_compressed_file = m_parser.value("decompress");
@@ -101,12 +101,14 @@ void compressApp::parser(int argc, char** argv) {
     m_xclbin = m_parser.value("xclbin");
     m_device_id = m_parser.value("device_id");
     m_mcr = m_parser.value("max_cr");
+    if (swPline) {
+        auto swPlineVal = (uint8_t)stoi(m_parser.value("sw_pipeline"));
+        m_isSeq = swPlineVal;
+    }
 }
 
 // compressApp Constructor: parse CLI opions and set the driver class memebr variables
-compressApp::compressApp(int argc, char** argv, bool is_seq, bool enable_profile) {
-    m_enableProfile = enable_profile;
-    m_isSeq = is_seq;
+compressApp::compressApp(int argc, char** argv, uint8_t swPline) {
     m_parser.addSwitch("--compress", "-c", "Compress", "");
     m_parser.addSwitch("--decompress", "-d", "Decompress", "");
     m_parser.addSwitch("--test", "-t", "Xilinx compress & Decompress", "");
@@ -116,6 +118,7 @@ compressApp::compressApp(int argc, char** argv, bool is_seq, bool enable_profile
     m_parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
     m_parser.addSwitch("--xclbin", "-xbin", "XCLBIN", "");
     m_parser.addSwitch("--device_id", "-id", "Device ID", "0");
+    if (swPline) m_parser.addSwitch("--sw_pipeline", "-sw_pipeline", "[1:Sequential, 2:Overlap]", "1");
 }
 
 void compressApp::printTestSummaryHeader() {
@@ -129,12 +132,12 @@ void compressApp::printTestSummaryHeader() {
         std::cout << "--------------------------------------------------------------" << std::endl;
     }
     if (m_list_flow) {
-        (m_isSeq) ? std::cout << "KT(MBps)\t" : std::cout << "E2E(MBps)\t";
+        (m_isSeq == compressBase::SEQ) ? std::cout << "KT(MBps)\t" : std::cout << "E2E(MBps)\t";
         (m_compress_flow) ? std::cout << "CR\t" : std::cout << "";
         std::cout << "File Size(MB)\tFile Name" << std::endl;
     } else {
-        (m_isSeq) ? std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:"
-                  : std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
+        (m_isSeq == compressBase::SEQ) ? std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:"
+                                       : std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
     }
 }
 
@@ -157,7 +160,12 @@ void compressApp::printTestSummaryFooter(const std::string& testFile) {
         std::cout << "File Name\t\t:";
         std::cout << testFile;
         std::cout << "\n";
+#ifndef PERF_DM
         std::cout << "Output Location: " << m_outFile_name.c_str() << std::endl;
+#else
+        std::cout << "[WARNING]: Multiple Output Files detected. Use FILE_WRITE macro to generate compressed files."
+                  << std::endl;
+#endif
         double enbytes = m_enbytes;
         fileUnit = getFileSizeUnit(enbytes);
         (m_compress_flow) ? std::cout << "Compressed file size(" << fileUnit << ")\t\t:" << enbytes : std::cout << "\t";
@@ -166,8 +174,10 @@ void compressApp::printTestSummaryFooter(const std::string& testFile) {
 }
 
 // compressApp run API: entry point of the program
-void compressApp::run(compressBase* b, uint16_t maxCR) {
-    b->m_maxCR = maxCR;
+void compressApp::run(compressBase* b, bool enable_profile) {
+    b->setProfile(enable_profile);
+    b->setMCR(this->getMCR());
+    b->setSeqOlapFlow(this->m_isSeq);
     if (!m_uncompressed_file.empty()) {
         runCompress(b, m_uncompressed_file);
     }
@@ -220,6 +230,7 @@ void compressApp::run(compressBase* b, uint16_t maxCR) {
                     std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << file_name << std::endl;
                 } else {
                     std::cout << "Validation Failed: " << file_name << std::endl;
+                    exit(1);
                 }
             }
         }
@@ -256,7 +267,9 @@ void compressApp::runCompress(compressBase* b, const std::string& m_uncompressed
         std::cerr << "\nOutfile file directory incorrect!" << std::endl;
         exit(1);
     }
+#ifndef PERF_DM
     outFile.write((char*)out.data(), m_enbytes);
+#endif
 
     printTestSummaryFooter(uncompressed_file);
     // Close file
@@ -302,6 +315,7 @@ void compressApp::runDecompress(compressBase* b, const std::string& m_compressed
             std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << m_golden_file << std::endl;
         } else {
             std::cout << "Validation Failed: " << m_golden_file << std::endl;
+            exit(1);
         }
     }
 }

@@ -121,13 +121,6 @@ void xilLz4Compress
 #pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem0
 #pragma HLS INTERFACE m_axi port = compressd_size offset = slave bundle = gmem1
 #pragma HLS INTERFACE m_axi port = in_block_size offset = slave bundle = gmem1
-#pragma HLS INTERFACE s_axilite port = in bundle = control
-#pragma HLS INTERFACE s_axilite port = out bundle = control
-#pragma HLS INTERFACE s_axilite port = compressd_size bundle = control
-#pragma HLS INTERFACE s_axilite port = in_block_size bundle = control
-#pragma HLS INTERFACE s_axilite port = block_size_in_kb bundle = control
-#pragma HLS INTERFACE s_axilite port = input_size bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     uint32_t block_idx = 0;
     uint32_t block_length = block_size_in_kb * 1024;

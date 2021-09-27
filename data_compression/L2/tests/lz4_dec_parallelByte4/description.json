@@ -51,7 +51,6 @@
                 "LIB_DIR/common/libs/compress/"
             ], 
             "symbols": [
-                "PARALLEL_BLOCK=1", 
                 "HOST_BUFFER_SIZE_IN_MB=128"
             ]
         }
@@ -59,7 +58,6 @@
     "v++": {
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=1", 
                 "PARALLEL_BYTE=4"
             ]
         }

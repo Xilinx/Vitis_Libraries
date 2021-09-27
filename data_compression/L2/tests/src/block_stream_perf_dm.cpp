@@ -32,8 +32,9 @@ void __xf_datamover(uintDataWidth* in,
                     uint32_t input_size,
                     uint32_t* compressed_size,
                     uint32_t numItr,
+                    uint32_t blckSize,
                     hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& instream_orig,
-                    hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outstream_dest) {
+                    hls::stream<ap_axiu<GMEM_DWIDTH, TUSER_DWIDTH, 0, 0> >& outstream_dest) {
     hls::stream<ap_uint<GMEM_DWIDTH> > mm2sStream;
 
     hls::stream<ap_uint<GMEM_DWIDTH> > outStream;
@@ -53,12 +54,17 @@ void __xf_datamover(uintDataWidth* in,
 #pragma HLS dataflow
     xf::compression::details::mm2sSimple<GMEM_DWIDTH, GMEM_BURST_SIZE>(in, mm2sStream, input_size, numItr);
 
-    xf::compression::details::streamDm2k<GMEM_DWIDTH, uint32_t, 32>(mm2sStream, input_size, numItr, instream_orig);
-    xf::compression::details::streamK2Dm<factor, uint32_t, 32>(outStream, outEos, outSizeStream, outstream_dest,
-                                                               numItr);
+    xf::compression::details::streamDm2k<GMEM_DWIDTH, uint32_t, 32>(mm2sStream, input_size, numItr, blckSize,
+                                                                    instream_orig);
+    xf::compression::details::streamK2Dm<factor, uint32_t, 32, TUSER_DWIDTH>(
+        outStream, outEos, outSizeStream, outstream_dest, numItr, input_size, blckSize);
 
-    xf::compression::details::s2mmEosSimple<GMEM_DWIDTH, GMEM_BURST_SIZE, uint32_t>(
-        out, outStream, outEos, outSizeStream, compressed_size, numItr);
+    // Segregate in two modules for GMEM Write
+    xf::compression::details::s2mmEosSimple<GMEM_DWIDTH, GMEM_BURST_SIZE, uint32_t>(out, outStream, outEos, numItr,
+                                                                                    input_size, blckSize);
+
+    xf::compression::details::s2mmSizeWrite<uint32_t, TUSER_DWIDTH>(outSizeStream, compressed_size, numItr, input_size,
+                                                                    blckSize);
 }
 
 // Top Function
@@ -67,18 +73,20 @@ void xilDataMover(uintDataWidth* in,
                   uintDataWidth* out,
                   uint32_t input_size,
                   uint32_t numItr,
+                  uint32_t blckSize,
                   uint32_t* compressed_size,
                   hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& instream_orig,
-                  hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outstream_dest) {
-#pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem max_read_burst_length = 64
-#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem max_write_burst_length = 64
-#pragma HLS INTERFACE m_axi port = compressed_size offset = slave bundle = gmem
+                  hls::stream<ap_axiu<GMEM_DWIDTH, TUSER_DWIDTH, 0, 0> >& outstream_dest) {
+    constexpr int c_gmem0_width = GMEM_DWIDTH;
+#pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem0 max_read_burst_length = 64 max_widen_bitwidth = \
+    c_gmem0_width
+#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem1 max_write_burst_length = 64 max_widen_bitwidth = \
+    c_gmem0_width
+#pragma HLS INTERFACE m_axi port = compressed_size offset = slave bundle = gmem2
 #pragma HLS interface axis port = instream_orig
 #pragma HLS interface axis port = outstream_dest
-#pragma HLS INTERFACE s_axilite port = input_size
-#pragma HLS INTERFACE s_axilite port = numItr
 
     // Transfer Data to and from compression kernels
-    __xf_datamover(in, out, input_size, compressed_size, numItr, instream_orig, outstream_dest);
+    __xf_datamover(in, out, input_size, compressed_size, numItr, blckSize, instream_orig, outstream_dest);
 }
 }

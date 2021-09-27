@@ -71,34 +71,34 @@ class lz4Base : public compressBase {
     lz4Base(bool content_size) : m_addContentSize(content_size) {}
 
     /**
-             * @brief Header Writer
-             *
-             * @param compress out stream
-             */
+     * @brief Header Writer
+     *
+     * @param compress out stream
+     */
 
     uint8_t writeHeader(uint8_t* out);
 
     /**
-         * @brief Footer Writer
-         *
-         * @param compress out stream
-         */
+     * @brief Footer Writer
+     *
+     * @param compress out stream
+     */
 
     void writeFooter(uint8_t* in, uint8_t* out);
 
     /**
-         * @brief Header Reader
-         *
-         * @param Compress stream input header read
-         */
+     * @brief Header Reader
+     *
+     * @param Compress stream input header read
+     */
 
     uint8_t readHeader(uint8_t* in);
 
     /**
-             * @brief Header Reader
-             *
-             * @param Compress stream input header read
-             */
+     * @brief Header Reader
+     *
+     * @param Compress stream input header read
+     */
     uint8_t get_bsize(uint32_t input_size);
 
     template <typename T>

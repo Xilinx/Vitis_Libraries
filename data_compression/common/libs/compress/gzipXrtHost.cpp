@@ -46,6 +46,111 @@ gzipXrtHost::gzipXrtHost(enum State flow,
     }
 }
 
+uint64_t gzipXrtHost::decompressEngineSeq(
+    uint8_t* in, uint8_t* out, uint64_t input_size, size_t max_outbuf_size, int cu) {
+#if (VERBOSE_LEVEL >= 1)
+    std::cout << "CU" << cu << " ";
+#endif
+    std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
+
+    // Streaming based solution
+    uint32_t inBufferSize = input_size;
+    uint32_t isLast = 1;
+    const uint32_t lim_4gb = (uint32_t)(((uint64_t)1024 * 1024 * 1024) - 2); // 4GB limit on output size
+    uint32_t outBufferSize = 0;
+
+    if (max_outbuf_size > lim_4gb) {
+        outBufferSize = lim_4gb;
+    } else {
+        outBufferSize = (uint32_t)max_outbuf_size;
+    }
+
+    auto data_writer_kernel = xrt::kernel(m_device, m_uuid, data_writer_kernel_name.c_str());
+    auto data_reader_kernel = xrt::kernel(m_device, m_uuid, data_reader_kernel_name.c_str());
+
+    auto buffer_dec_input = xrt::bo(m_device, inBufferSize, data_writer_kernel.group_id(0));
+    auto buffer_dec_zlib_output = xrt::bo(m_device, outBufferSize, data_reader_kernel.group_id(0));
+    auto buffer_size = xrt::bo(m_device, sizeof(uint32_t) * 10, data_reader_kernel.group_id(1));
+    auto buffer_status = xrt::bo(m_device, sizeof(uint32_t) * 10, data_reader_kernel.group_id(2));
+
+    auto dbuf_in = buffer_dec_input.map<uint8_t*>();
+    auto dbuf_out = buffer_dec_zlib_output.map<uint8_t*>();
+    auto dbuf_outSize = buffer_size.map<uint32_t*>();
+    auto h_dcompressStatus = buffer_status.map<uint32_t*>();
+    h_dcompressStatus[0] = 0;
+
+    // Copy input data
+    std::memcpy(dbuf_in, in, inBufferSize); // must be equal to input_size
+    buffer_dec_input.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+    buffer_status.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+
+    // start parallel reader kernel enqueue thread
+    uint32_t decmpSizeIdx = 0;
+    xrt::run reader_run;
+    xrt::run writer_run;
+    if (this->is_freeRunKernel()) {
+        reader_run = data_reader_kernel(buffer_dec_zlib_output, buffer_size, buffer_status, outBufferSize);
+        auto decompress_API_start = std::chrono::high_resolution_clock::now();
+        writer_run = data_writer_kernel(buffer_dec_input, inBufferSize, isLast);
+        writer_run.wait();
+        auto decompress_API_end = std::chrono::high_resolution_clock::now();
+        reader_run.wait();
+        auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+        decompress_API_time_ns_1 += duration;
+    } else {
+        auto decompress_kernel = xrt::kernel(m_device, m_uuid, stream_decompress_kernel_name[m_kidx].c_str());
+        auto decompress_API_start = std::chrono::high_resolution_clock::now();
+        auto decomp_run = xrt::run(decompress_kernel);
+        decomp_run.start();
+        decomp_run.wait();
+        auto decompress_API_end = std::chrono::high_resolution_clock::now();
+        writer_run.wait();
+        reader_run = data_reader_kernel(buffer_dec_zlib_output, buffer_size, buffer_status, outBufferSize);
+        writer_run = data_writer_kernel(buffer_dec_input, inBufferSize, isLast);
+        auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+        decompress_API_time_ns_1 += duration;
+    }
+
+    // copy decompressed output data
+    buffer_size.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+    buffer_status.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+
+    // decompressed size
+    decmpSizeIdx = dbuf_outSize[0];
+    if (decmpSizeIdx >= max_outbuf_size) {
+        auto brkloop = false;
+        do {
+            reader_run = data_reader_kernel(buffer_dec_zlib_output, buffer_size, buffer_status, outBufferSize);
+            reader_run.wait();
+
+            // copy decompressed output data
+            buffer_size.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+            buffer_status.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+
+            decmpSizeIdx += dbuf_outSize[0];
+            brkloop = h_dcompressStatus[0];
+        } while (!brkloop);
+        std::cout << "\n" << std::endl;
+        std::cout << "compressed size (.gz/.xz): " << input_size << std::endl;
+        std::cout << "decompressed size : " << decmpSizeIdx << std::endl;
+        std::cout << "maximum output buffer allocated: " << max_outbuf_size << std::endl;
+        std::cout << "Output Buffer Size Exceeds as the Compression Ratio is High " << std::endl;
+        std::cout << "Use -mcr option to increase the output buffer size (Default: 20) --> Aborting " << std::endl;
+        abort();
+    } else {
+        // Sync zlib output buffer
+        buffer_dec_zlib_output.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+
+        // copy output decompressed data
+        std::memcpy(out, dbuf_out, decmpSizeIdx);
+    }
+    float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    // printme("Done with decompress \n");
+    return decmpSizeIdx;
+}
+
 // This version of compression does sequential execution between kernel an dhost
 size_t gzipXrtHost::compressEngineSeq(
     uint8_t* in, uint8_t* out, size_t input_size, int level, int strategy, int window_bits, uint32_t* checksum) {

@@ -15,5 +15,6 @@ then
     else
         echo "ERROR: files are different"
         echo "$cmd1"
+        exit 1
    fi     
 fi

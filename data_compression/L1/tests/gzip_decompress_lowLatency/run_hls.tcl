@@ -26,8 +26,8 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "gzip_decompress_test.cpp $XF_PROJ_ROOT/common/libs/logger/logger.cpp $XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger"
-add_files -tb "gzip_decompress_test.cpp $XF_PROJ_ROOT/common/libs/logger/logger.cpp $XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger"
+add_files "gzip_decompress_test.cpp $XF_PROJ_ROOT/common/libs/logger/logger.cpp $XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include"
+add_files -tb "gzip_decompress_test.cpp $XF_PROJ_ROOT/common/libs/logger/logger.cpp $XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include"
 set_top gzipMultiByteDecompressEngineRun
 
 open_solution -reset $SOLN

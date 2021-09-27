@@ -41,12 +41,26 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifndef CORE_NUM
+// single core case
 #ifndef STREAM_IN_DWIDTH
 #define STREAM_IN_DWIDTH 8
 #endif
 
 #ifndef STREAM_OUT_DWIDTH
 #define STREAM_OUT_DWIDTH 32
+#endif
+
+#else
+// multicore case
+#ifndef STREAM_IN_DWIDTH
+#define STREAM_IN_DWIDTH 64
+#endif
+
+#ifndef STREAM_OUT_DWIDTH
+#define STREAM_OUT_DWIDTH 64
+#endif
+
 #endif
 
 extern "C" {

@@ -78,11 +78,6 @@ void xilDecompDatamover(xf::compression::uintMemWidth_t* in,
 #pragma HLS interface axis port = instream_orig
 #pragma HLS interface axis port = outstream_dest
 #pragma HLS interface axis port = outstream_size
-#pragma HLS INTERFACE s_axilite port = in bundle = control
-#pragma HLS INTERFACE s_axilite port = out bundle = control
-#pragma HLS INTERFACE s_axilite port = input_size bundle = control
-#pragma HLS INTERFACE s_axilite port = outputSize bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     // Transfer Data to and from compression kernels
     __xf_decomp_datamover(in, out, input_size, outputSize, instream_orig, outstream_size, outstream_dest);

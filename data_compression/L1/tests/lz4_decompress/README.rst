@@ -8,7 +8,7 @@ Xilinx Lz4 Decompress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-lz4_decompress_test  703   591   32   0 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ===== ===== 
+Module                   LUT       FF        BRAM  URAM 
+lz4_decompress_test      0.7K      0.6K      32    0 
+======================== ========= ========= ===== ===== 

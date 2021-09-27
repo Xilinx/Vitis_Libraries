@@ -96,8 +96,13 @@ lz_compress:
         present_window[MATCH_LEN - 1] = inStream.read();
 
         // Calculate Hash Value
-        uint32_t hash =
-            (present_window[0] << 4) ^ (present_window[1] << 3) ^ (present_window[2] << 3) ^ (present_window[3]);
+        uint32_t hash = 0;
+        if (MIN_MATCH == 3) {
+            hash = (present_window[0] << 4) ^ (present_window[1] << 3) ^ (present_window[2] << 2) ^
+                   (present_window[0] << 1) ^ (present_window[1]);
+        } else {
+            hash = (present_window[0] << 4) ^ (present_window[1] << 3) ^ (present_window[2] << 2) ^ (present_window[3]);
+        }
 
         // Dictionary Lookup
         uintDictV_t dictReadValue = dict[hash];
@@ -128,7 +133,9 @@ lz_compress:
             }
             if ((len >= MIN_MATCH) && (currIdx > compareIdx) && ((currIdx - compareIdx) < LZ_MAX_OFFSET_LIMIT) &&
                 ((currIdx - compareIdx - 1) >= MIN_OFFSET)) {
-                len = len;
+                if ((len == 3) && ((currIdx - compareIdx - 1) > 4096)) {
+                    len = 0;
+                }
             } else {
                 len = 0;
             }
@@ -177,26 +184,25 @@ template <int MAX_INPUT_SIZE = 64 * 1024,
           int MATCH_LEN,
           int MIN_MATCH,
           int LZ_MAX_OFFSET_LIMIT,
-          int NUM_BLOCKS = 8,
+          int CORE_ID = 0,
           int MATCH_LEVEL = 6,
           int MIN_OFFSET = 1,
           int LZ_DICT_SIZE = 1 << 12,
           int LEFT_BYTES = 64>
-void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
-                hls::stream<IntVectorStream_dt<32, 1> >& outStream,
-                uint8_t ii) {
+void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream, hls::stream<IntVectorStream_dt<32, 1> >& outStream) {
     const uint16_t c_indxBitCnts = 24;
     const uint16_t c_fifo_depth = LEFT_BYTES + 2;
     const int c_dictEleWidth = (MATCH_LEN * 8 + c_indxBitCnts);
     typedef ap_uint<MATCH_LEVEL * c_dictEleWidth> uintDictV_t;
     typedef ap_uint<c_dictEleWidth> uintDict_t;
     const uint32_t totalDictSize = (1 << (c_indxBitCnts - 1)); // 8MB based on index 3 bytes
-    static uint32_t relativeInSize[NUM_BLOCKS] = {0};
-    static bool resetDictFlag[8] = {true, true, true, true, true, true, true, true};
-    static uint32_t relativeNumBlocks[NUM_BLOCKS] = {0};
-#pragma HLS array_partition variable = relativeInSize
-#pragma HLS array_partition variable = resetDictFlag
-#pragma HLS array_partition variable = relativeNumBlocks
+#ifndef AVOID_STATIC_MODE
+    static bool resetDictFlag = true;
+    static uint32_t relativeNumBlocks = 0;
+#else
+    bool resetDictFlag = true;
+    uint32_t relativeNumBlocks = 0;
+#endif
 
     uintDictV_t dict[LZ_DICT_SIZE];
 #pragma HLS RESOURCE variable = dict core = XPM_MEMORY uram
@@ -213,12 +219,11 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
     // output register
     IntVectorStream_dt<32, 1> outValue;
     // loop over blocks
-
     while (true) {
         uint32_t iIdx = 0;
         // once 8MB data is processed reset dictionary
         // 8MB based on index 3 bytes
-        if (resetDictFlag[ii]) {
+        if (resetDictFlag) {
             ap_uint<MATCH_LEVEL* c_dictEleWidth> resetValue = 0;
             for (int i = 0; i < MATCH_LEVEL; i++) {
 #pragma HLS UNROLL
@@ -231,11 +236,10 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
 #pragma HLS UNROLL FACTOR = 2
                 dict[i] = resetValue;
             }
-            resetDictFlag[ii] = false;
-            relativeInSize[ii] = 0;
-            relativeNumBlocks[ii] = 0;
+            resetDictFlag = false;
+            relativeNumBlocks = 0;
         } else {
-            relativeNumBlocks[ii]++;
+            relativeNumBlocks++;
         }
         // check if end of data
         auto nextVal = inStream.read();
@@ -251,7 +255,6 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
             inVal = nextVal;
             nextVal = inStream.read();
             present_window[++iIdx] = inVal.data[0];
-            relativeInSize[ii]++;
         }
     // assuming that, at least bytes more than LEFT_BYTES will be present at the input
     lz_fill_circular_buf:
@@ -260,7 +263,6 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
             inVal = nextVal;
             nextVal = inStream.read();
             lclBufStream << inVal.data[0];
-            relativeInSize[ii]++;
         }
         // lz_compress main
         outValue.strobe = 1;
@@ -271,12 +273,11 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
 #ifndef DISABLE_DEPENDENCE
 #pragma HLS dependence variable = dict inter false
 #endif
-            uint32_t currIdx = (iIdx + (relativeNumBlocks[ii] * MAX_INPUT_SIZE)) - MATCH_LEN + 1;
+            uint32_t currIdx = (iIdx + (relativeNumBlocks * MAX_INPUT_SIZE)) - MATCH_LEN + 1;
             // read from input stream into circular buffer
             auto inValue = lclBufStream.read(); // pop latest value from FIFO
             lclBufStream << nextVal.data[0];    // push latest read value to FIFO
             nextVal = inStream.read();          // read next value from input stream
-            relativeInSize[ii]++;
 
             // shift present window and load next value
             for (uint8_t m = 0; m < MATCH_LEN - 1; m++) {
@@ -287,8 +288,14 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
             present_window[MATCH_LEN - 1] = inValue;
 
             // Calculate Hash Value
-            uint32_t hash =
-                (present_window[0] << 4) ^ (present_window[1] << 3) ^ (present_window[2] << 2) ^ (present_window[3]);
+            uint32_t hash = 0;
+            if (MIN_MATCH == 3) {
+                hash = (present_window[0] << 4) ^ (present_window[1] << 3) ^ (present_window[2] << 2) ^
+                       (present_window[0] << 1) ^ (present_window[1]);
+            } else {
+                hash = (present_window[0] << 4) ^ (present_window[1] << 3) ^ (present_window[2] << 2) ^
+                       (present_window[3]);
+            }
 
             // Dictionary Lookup
             uintDictV_t dictReadValue = dict[hash];
@@ -319,8 +326,10 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
                 }
                 if ((len >= MIN_MATCH) && (currIdx > compareIdx) && ((currIdx - compareIdx) < LZ_MAX_OFFSET_LIMIT) &&
                     ((currIdx - compareIdx - 1) >= MIN_OFFSET) &&
-                    (compareIdx >= (relativeNumBlocks[ii] * MAX_INPUT_SIZE))) {
-                    len = len;
+                    (compareIdx >= (relativeNumBlocks * MAX_INPUT_SIZE))) {
+                    if ((len == 3) && ((currIdx - compareIdx - 1) > 4096)) {
+                        len = 0;
+                    }
                 } else {
                     len = 0;
                 }
@@ -350,7 +359,7 @@ void lzCompress(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
         }
 
         // once relativeInSize becomes 8MB set the flag to true
-        resetDictFlag[ii] = (relativeInSize[ii] >= (totalDictSize)) ? true : false;
+        resetDictFlag = ((relativeNumBlocks * MAX_INPUT_SIZE) >= (totalDictSize)) ? true : false;
         // end of block
         outValue.strobe = 0;
         outStream << outValue;

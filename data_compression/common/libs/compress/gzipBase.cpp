@@ -101,8 +101,7 @@ uint64_t gzipBase::xilCompress(uint8_t* in, uint8_t* out, uint64_t input_size) {
     uint64_t enbytes = 0;
 
     uint32_t checksum = 0;
-
-    if (m_isSeq) {
+    if (m_isSeq == compressBase::SEQ) {
         // GZip single cu sequential version
         enbytes = compressEngineSeq(in, out + outIdx, m_InputSize, 1, 0, 15, &checksum);
     } else {
@@ -194,10 +193,14 @@ uint64_t gzipBase::xilDecompress(uint8_t* in, uint8_t* out, uint64_t input_size)
     uint64_t debytes;
 
     if (m_isSeq) {
-        // Decompression Engine multiple cus.
+// Decompression Engine multiple CUs.
+#ifdef DECOMPRESS_MM
+        debytes = decompressEngineMMSeq(in, out, input_size, input_size * m_maxCR);
+#else
         debytes = decompressEngineSeq(in, out, input_size, input_size * m_maxCR);
+#endif
     } else {
-        // Decompression Engine multiple cus.
+        // Decompression Engine multiple CUs.
         debytes = decompressEngine(in, out, input_size, input_size * m_maxCR);
     }
     return debytes;

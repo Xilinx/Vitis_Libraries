@@ -45,8 +45,6 @@ void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
 #pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem max_write_burst_length = 64
 #pragma HLS INTERFACE m_axi port = compressd_size offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = checksumData offset = slave bundle = gmem
-#pragma HLS INTERFACE s_axilite port = input_size
-#pragma HLS INTERFACE s_axilite port = checksumType
 #pragma HLS INTERFACE ap_ctrl_chain port = return
 #pragma HLS dataflow
 

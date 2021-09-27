@@ -19,27 +19,38 @@ Benchmark evaluation of compression performance is of reference `Silesia Corpus.
 Compression Performance
 ```````````````````````
 
-The following table presents compression ratio (CR), compression kernel throughput achieved with single and 8 engines, 
-kernel clock frequency met and resource utilization when executed on Alveo U200.
+The following table presents compression ratio (CR), compression kernel throughput, kernel clock frequency met and resource utilization when executed on Alveo U200 and is measured on Silesia Corpus compression benchmark.
 
-Reported compression ratio is measured on Silesia Corpus compression benchmark.
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| Architecture                                                          | Block Size|  Compression Ratio   |     Throughput    |  FMax    |  LUT    |  BRAM |  URAM |
++=======================================================================+===========+======================+===================+==========+=========+=======+=======+
+| `Zstd Compress Quad Core <source/L2/zstd_quadcore_compress.html>`__   |   32KB    |        2.68          |      1.17 GB/s    |  283MHz  |   40K   |  80   |  37   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip/Zlib 32KBMemory Mapped <source/L2/gzipc_block_mm.html>`__       |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  60K    |  135  |  64   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip 32KB Compress Stream <source/L2/gzipc.html>`__                  |   32KB    |        2.70          |      2 GB/s       |  293MHz  |  54K    |  131  |  64   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib 32KB Compress Stream <source/L2/zlibc.html>`__                  |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  54K    |  127  |  64   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip Fixed 32KB Compress Stream <source/L2/gzipc_static.html>`_      |   32KB    |        2.31          |      2 GB/s       |  300MHz  |  34.5K  |  43   |  64   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib Fixed 32KB Compress Stream <source/L2/zlibc_static.html>`__     |   32KB    |        2.31          |      2 GB/s       |  300MHz  |  34.7K  |  39   |  64   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip 16KB Compress Stream <source/L2/gzipc_16KB.html>`_              |   16KB    |        2.62          |      2 GB/s       |  298MHz  |  58K    |  165  |  48   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib 16KB Compress Stream <source/L2/zlibc_16KB.html>`__             |   16KB    |        2.62          |      2 GB/s       |  294MHz  |  58K    |  160  |  48   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip 8KB Compress Stream <source/L2/gzipc_8KB.html>`_                |   8KB     |        2.50          |      2 GB/s       |  300MHz  |  57.2K  |  101  |  48   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib 8KB Compress Stream <source/L2/zlibc_8KB.html>`__               |   8KB     |        2.50          |      2 GB/s       |  300MHz  |  57.4K  |  96   |  48   |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `LZ4 Streaming <source/L2/lz4_compress_streaming.html>`_              |   64KB    |        2.13          |      290 MB/s     |  300MHz  |  3K     |  5    |  6    |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
+| `Snappy Streaming <source/L2/snappy_streaming.html>`_                 |   64KB    |        2.13          |      290 MB/s     |  300MHz  |  3K     |  4    |  6    |
++-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
 
-+---------------------------------------------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| Architecture                                                                                                  |  Compression Ratio   |     Throughput    |  FMax    |  LUT    |  BRAM |  URAM |
-+===============================================================================================================+======================+===================+==========+=========+=======+=======+
-| `LZ4 Streaming <source/L2/lz4_compress_streaming.html>`__ (Single Engine and Datawidth: 8bit)                 |        2.13          |      290 MB/s     |  300MHz  |  3K     |  5    |  6    |
-+---------------------------------------------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Snappy Streaming <source/L2/snappy_streaming.html>`__ (Single Engine and Datawidth: 8bit)                    |        2.13          |      290 MB/s     |  300MHz  |  3K     |  4    |  6    |
-+---------------------------------------------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Memory Mapped <source/L2/gzipc_block_mm.html>`__ (Dynamic Huffman, 8 Engines with Data Movers)     |        2.67          |      2 GB/s       |  285MHz  |  52K    |  67   |  72   |
-+---------------------------------------------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Compress Stream <source/L2/gzipc.html>`__ (Dynamic Huffman, 8 Engines with Data Movers)            |        2.67          |      2 GB/s       |  290MHz  |  48.5K  |  61   |  72   |
-+---------------------------------------------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Fixed Huffman File Compress Stream <source/L2/gzipc_static.html>`__                                |        2.25          |      2 GB/s       |  300MHz  |  33.2K  |  45   |  64   |
-+---------------------------------------------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 
-
-.. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
+* The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
 
 
 De-Compression Performance
@@ -48,23 +59,22 @@ De-Compression Performance
 The following table presents decompression kernel throughput achieved with single and 8 engines, 
 kernel clock frequency met and resource utilization when executed on Alveo U200.
 
-+-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| Architecture                                                                                                            |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |           
-+=========================================================================================================================+===================+==========+=========+=======+======+
-| `LZ4 Streaming <source/L2/lz4_dec_streaming_parallelByte8.html>`__ (Single Engine and Datawidth: 64bit)                 |     1.8  GB/s     |  284MHz  |  5.5K   |  0    |  4   |
-+-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `Snappy Streaming <source/L2/snappy_dec_streaming_parallelByte8.html>`__ (Single Engine and Datawidth: 64bit)           |     1.97 GB/s     |  290MHz  |  6.4K   |  0    |  4   |
-+-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `GZip/Zlib Streaming <source/L2/gzip.html>`__ (High Throughput, Datawidth: 64bit)                                       |     518  MB/s     |  273MHz  |  6.9K   |  0    |  2   |
-+-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Streaming <source/L2/zstd_decompress.html>`__ (Single Engine and Datawidth: 32bit)                                |     463  MB/s     |  252MHz  |  21K    |  33   |  6   |
-+-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Full File Streaming <source/L2/zstd_decompress.html>`__ (Single Engine with Datawidth: 32bit)                     |     463  MB/s     |  252MHz  |  21K    |  33   |  6   |
-+-------------------------------------------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
++-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| Architecture                                                                        |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |         
++=====================================================================================+===================+==========+=========+=======+======+
+| `LZ4 Streaming <source/L2/lz4_dec_streaming_parallelByte8.html>`__                  |     1.8  GB/s     |  294MHz  |  5.4K   |  0    |  4   |
++-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `Snappy Streaming <source/L2/snappy_dec_streaming_parallelByte8.html>`__            |     1.97 GB/s     |  274MHz  |  6.4K   |  0    |  4   |
++-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `GZip/Zlib Streaming <source/L2/gzip.html>`__                                       |     518  MB/s     |  273MHz  |  6.9K   |  8    |  0   |
++-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `ZStd Streaming <source/L2/zstdd_32KB.html>`__                                      |     658.86 MB/s   |  271MHz  |  19.6K  |  32   |  3   |
++-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| `ZStd Full File Streaming <source/L2/zstdd_32KB.html>`__                            |     658.86 MB/s   |  271MHz  |  19.6K  |  32   |  3   |
++-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
-.. [*] 1. The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput. 
-      2. GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
-      3. ZStd Streaming: Full Standard support with limited Window Size upto 128KB.
+* GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
+* ZStd Streaming: Full Standard support with limited Window Size upto 128KB.
 
 
 Test Overview

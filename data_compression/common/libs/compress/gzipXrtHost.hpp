@@ -95,7 +95,10 @@ class gzipXrtHost : public gzipBase {
     uint64_t decompressEngine(uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t max_output_size, int cu = 0) {
         return 0;
     };
-    uint64_t decompressEngineSeq(uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t max_output_size, int cu = 0) {
+    uint64_t decompressEngineSeq(
+        uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t max_output_size, int cu = 0) override;
+    uint64_t decompressEngineMMSeq(
+        uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t max_output_size, int cu = 0) {
         return 0;
     };
 

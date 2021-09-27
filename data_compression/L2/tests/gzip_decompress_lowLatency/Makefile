@@ -133,6 +133,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
+VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 VPP_FLAGS += -DMULTIPLE_BYTES=8 -DGZIP_MODE=1 -DLL_MODEL=true 
 

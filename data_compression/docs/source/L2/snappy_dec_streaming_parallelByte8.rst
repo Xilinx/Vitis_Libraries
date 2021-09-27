@@ -33,7 +33,7 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx Snappy Streaming Decompression kernels. 
-The final Fmax achieved is 290MHz                                                                                                                   
+The final Fmax achieved is 274MHz                                                                                                                   
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 

@@ -41,8 +41,6 @@ void xilLz4DecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& inaxi
 #pragma HLS interface axis port = inaxistream
 #pragma HLS interface axis port = outaxistream
 #pragma HLS interface axis port = outaxistreamsize
-#pragma HLS interface s_axilite port = inputSize bundle = control
-#pragma HLS interface s_axilite port = return bundle = control
 
     hls::stream<ap_uint<c_parallelBit> > inStream("inStream");
     hls::stream<ap_uint<c_outstreamWidth> > decompressedStream("decompressedStream");

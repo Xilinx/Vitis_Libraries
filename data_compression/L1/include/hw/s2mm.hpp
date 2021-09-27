@@ -63,6 +63,43 @@ namespace xf {
 namespace compression {
 namespace details {
 
+template <int DATAWIDTH, int BURST_SIZE, int PARALLEL_BYTES>
+void s2mmAxi(ap_uint<DATAWIDTH>* out,
+             hls::stream<ap_uint<DATAWIDTH + PARALLEL_BYTES> >& inStream,
+             uint32_t* outputSize) {
+    /**
+     * @brief This module reads data from AXI stream and
+     * writes the data to DDR.
+     *
+     * @tparam DATAWIDTH width of data bus
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @param out output memory address
+     * @param inStream input stream
+     * @param outSize output data size
+     */
+    constexpr int c_parallelByte = DATAWIDTH / 8;
+    ap_uint<DATAWIDTH + PARALLEL_BYTES> inData = inStream.read();
+    uint32_t outSize = 0;
+    uint32_t outIdx = 0;
+    bool last = inData.range(PARALLEL_BYTES - 1, 0) == 0;
+
+axi2Hls:
+    while (!last) {
+        for (auto i = 0; i < BURST_SIZE; i++) {
+#pragma HLS PIPELINE II = 1
+            out[outIdx + i] = inData.range(DATAWIDTH + PARALLEL_BYTES - 1, PARALLEL_BYTES);
+            if (!last) {
+                outSize += (32 - __builtin_clz(inData.range(PARALLEL_BYTES - 1, 0)));
+                inData = inStream.read();
+                last = inData.range(PARALLEL_BYTES - 1, 0) == 0;
+            }
+        }
+        outIdx += BURST_SIZE;
+    }
+
+    outputSize[0] = outSize;
+}
+
 template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
 void stream2MM(ap_uint<DATAWIDTH>* out,
                uint32_t* checksumData,
@@ -481,13 +518,37 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
     bool eos = endOfStream[0].read();
 }
 
+template <class OUTSIZE_DT = uint32_t, int TUSR_DWIDTH = 0>
+void s2mmSizeWrite(hls::stream<OUTSIZE_DT>& inSizeStream,
+                   OUTSIZE_DT* compressedSize,
+                   OUTSIZE_DT numItr,
+                   OUTSIZE_DT inputSize,
+                   OUTSIZE_DT blckSize) {
+    OUTSIZE_DT blckNum = (inputSize - 1) / blckSize + 1;
+    OUTSIZE_DT idx = 0;
+sizewritedummy:
+    for (auto z = 0; z < (numItr - 1) * blckNum; z++) {
+#pragma HLS PIPELINE
+        inSizeStream.read();
+        if (TUSR_DWIDTH != 0) inSizeStream.read();
+    }
+sizewrite:
+    for (auto z = 0; z < blckNum; z++) {
+#pragma HLS PIPELINE
+        OUTSIZE_DT sizeVal = inSizeStream.read();
+        compressedSize[idx] = sizeVal;
+        if (TUSR_DWIDTH != 0) compressedSize[idx + 1] = inSizeStream.read();
+        idx += 2;
+    }
+}
+
 template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
 void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
                    hls::stream<ap_uint<DATAWIDTH> >& inStream,
                    hls::stream<bool>& endOfStream,
-                   hls::stream<OUTSIZE_DT>& outSize,
-                   OUTSIZE_DT* output_size,
-                   OUTSIZE_DT numItr) {
+                   OUTSIZE_DT numItr,
+                   OUTSIZE_DT inputSize,
+                   OUTSIZE_DT blckSize) {
     /**
      * @brief This module reads DATAWIDTH data from stream based on
      * size stream and writes the data to DDR.
@@ -498,22 +559,37 @@ void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
      * @param output_idx output index
      * @param inStream input stream
      * @param endOfStream stream to indicate end of data stream
-     * @param outSize output data size
+     * @param numItr No. of iterations
+     * @param inputSize Input File Size
+     * @param blckSize Block Size
      */
-    for (auto z = 0; z < numItr; z++) {
+    OUTSIZE_DT blckNum = (inputSize - 1) / blckSize + 1;
+    OUTSIZE_DT idx = 0, idxCntr = 0;
+    OUTSIZE_DT blckFactor = blckSize * 8 * 2 / DATAWIDTH;
+    ap_uint<DATAWIDTH> dummy = 0;
+    for (auto z = 0; z < (numItr - 1) * blckNum; z++) {
         bool eos = false;
-        ap_uint<DATAWIDTH> dummy = 0;
+    dummyLoop:
+        while (!eos) {
+#pragma HLS PIPELINE II = 1
+            inStream.read();
+            eos = endOfStream.read();
+        }
+    }
+    for (auto z = 0; z < blckNum; z++) {
+        bool eos = false;
     s2mm_eos_simple:
         for (int j = 0; eos == false; j += BURST_SIZE) {
+        s2mm_eos_inner:
             for (int i = 0; i < BURST_SIZE; i++) {
 #pragma HLS PIPELINE II = 1
                 ap_uint<DATAWIDTH> tmp = (eos == true) ? dummy : inStream.read();
                 bool eos_tmp = (eos == true) ? true : endOfStream.read();
-                out[j + i] = tmp;
+                out[idxCntr + j + i] = tmp;
                 eos = eos_tmp;
             }
         }
-        output_size[0] = outSize.read();
+        idxCntr += blckFactor;
     }
 }
 
@@ -580,7 +656,7 @@ s2mmWithSize:
     decSize[index] = decSizeStream.read();
 }
 
-template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
+template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t, int TUSR_DWIDTH = 0>
 void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
                    hls::stream<ap_uint<DATAWIDTH> >& inStream,
                    hls::stream<bool>& endOfStream,
@@ -611,8 +687,8 @@ s2mm_eos_outer:
             eos = eos_tmp;
         }
     }
-    OUTSIZE_DT tmp = outSize.read();
-    if (tmp) output_size[0] = tmp;
+    output_size[0] = outSize.read();
+    if (TUSR_DWIDTH != 0) output_size[1] = outSize.read();
 }
 
 template <int DATAWIDTH>

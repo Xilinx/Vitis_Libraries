@@ -24,17 +24,9 @@ constexpr uint32_t roundoff(uint32_t x, uint32_t y) {
 }
 
 // Constructor
-snappyOCLHost::snappyOCLHost(enum State flow,
-                             const std::string& binaryFileName,
-                             uint8_t device_id,
-                             uint32_t block_size_kb,
-                             bool enable_profile,
-                             bool enable_p2p)
-    : m_xclbin(binaryFileName),
-      m_enableProfile(enable_profile),
-      m_enableP2P(enable_p2p),
-      m_deviceId(device_id),
-      m_flow(flow) {
+snappyOCLHost::snappyOCLHost(
+    enum State flow, const std::string& binaryFileName, uint8_t device_id, uint32_t block_size_kb, bool enable_p2p)
+    : m_xclbin(binaryFileName), m_enableP2P(enable_p2p), m_deviceId(device_id), m_flow(flow) {
     m_BlockSizeInKb = block_size_kb;
 
     h_buf_in.resize(HOST_BUFFER_SIZE);

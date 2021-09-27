@@ -60,12 +60,8 @@ class lz4OCLHost : public lz4Base {
      * @brief Initialize host/device and OpenCL Setup
      *
      */
-    lz4OCLHost(enum State flow,
-               const std::string& binaryFileName,
-               uint8_t device_id,
-               uint32_t block_size_kb,
-               bool lz4_stream,
-               bool enable_profile = false);
+    lz4OCLHost(
+        enum State flow, const std::string& binaryFileName, uint8_t device_id, uint32_t block_size_kb, bool lz4_stream);
 
     /**
      * @brief Compress sequential

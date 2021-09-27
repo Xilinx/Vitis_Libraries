@@ -149,22 +149,41 @@ void inputDistributer(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
                                                              outStrdStream, blockMetaStream);
 }
 
-template <int MAX_FREQ_DWIDTH, class META_DT = ap_uint<MAX_FREQ_DWIDTH> >
-void bitstreamCollector(hls::stream<META_DT>& lzMetaStream,
-                        hls::stream<ap_uint<16> >& hfLitMetaStream,
-                        hls::stream<IntVectorStream_dt<8, 2> >& hfLitBitstream,
-                        hls::stream<IntVectorStream_dt<8, 2> >& fseHeaderStream,
-                        hls::stream<IntVectorStream_dt<8, 2> >& litEncodedStream,
-                        hls::stream<IntVectorStream_dt<8, 6> >& seqEncodedStream,
-                        hls::stream<META_DT>& seqEncSizeStream,
-                        hls::stream<META_DT>& bscMetaStream,
-                        hls::stream<IntVectorStream_dt<8, 2> >& out16Stream,
-                        hls::stream<IntVectorStream_dt<8, 6> >& out48Stream) {
+void readfseS2Bram(uint8_t* fseHdrBuf,
+                   uint8_t& fseHIdx,
+                   uint16_t& hdrBsLen,
+                   IntVectorStream_dt<8, 2>& fhVal,
+                   hls::stream<IntVectorStream_dt<8, 2> >& fseHeaderStream) {
+#pragma HLS inline off
+buffer_llofml_fsebs: // taking 1.3K LUTs
+    for (; fhVal.strobe > 0; fhVal = fseHeaderStream.read()) {
+#pragma HLS PIPELINE II = 1
+        fseHdrBuf[fseHIdx] = fhVal.data[0];
+        fseHdrBuf[fseHIdx + 1] = fhVal.data[1];
+        fseHIdx += fhVal.strobe;
+        hdrBsLen += fhVal.strobe;
+    }
+}
+
+template <int MAX_FREQ_DWIDTH, int DBYTES = 4, int HFBYTES = 2, class META_DT = ap_uint<MAX_FREQ_DWIDTH> >
+void bytestreamCollector(hls::stream<META_DT>& lzMetaStream,
+                         hls::stream<ap_uint<16> >& hfLitMetaStream,
+                         hls::stream<IntVectorStream_dt<8, HFBYTES> >& hfLitBitstream,
+                         hls::stream<IntVectorStream_dt<8, 2> >& fseHeaderStream,
+                         hls::stream<IntVectorStream_dt<8, 2> >& litEncodedStream,
+                         hls::stream<IntVectorStream_dt<8, DBYTES> >& seqEncodedStream,
+                         hls::stream<META_DT>& seqEncSizeStream,
+                         hls::stream<META_DT>& bscMetaStream,
+                         hls::stream<IntVectorStream_dt<8, DBYTES> >& outStream) {
     // Collect encoded literals and sequences data and send ordered data to output
     uint8_t fseHdrBuf[72];
-#pragma HLS ARRAY_PARTITION variable = fseHdrBuf complete
+#pragma HLS ARRAY_RESHAPE variable = fseHdrBuf type = cyclic factor = 2 dim = 1
+#pragma HLS BIND_STORAGE variable = fseHdrBuf type = ram_2p impl = lutram
+//#pragma HLS ARRAY_PARTITION variable = fseHdrBuf complete
+// int rc = 0;
 bsCol_main:
     while (true) {
+        IntVectorStream_dt<8, DBYTES> outVal;
         // First write the FSE headers in order litblen->litlen->offset->matlen
         bool readFseHdr = false;
         auto fhVal = fseHeaderStream.read();
@@ -182,50 +201,42 @@ bsCol_main:
         uint8_t fseHIdx = 0;
     // Buffer fse header bitstreams for litlen and offset
     buff_fse_header_bs:
-        for (uint8_t i = 0; i < 2 && seqCnt > 0; ++i) {
+        for (uint8_t i = 0; i < 3 && seqCnt > 0; ++i) {
             if (readFseHdr) fhVal = fseHeaderStream.read();
             readFseHdr = true;
-        buffer_llof_fsebs:
-            for (; fhVal.strobe > 0; fhVal = fseHeaderStream.read()) {
-#pragma HLS PIPELINE II = 1
-                fseHdrBuf[fseHIdx] = fhVal.data[0];
-                fseHdrBuf[fseHIdx + 1] = fhVal.data[1];
-                fseHIdx += fhVal.strobe;
-                hdrBsLen[i] += fhVal.strobe;
-            }
+            readfseS2Bram(fseHdrBuf, fseHIdx, hdrBsLen[i], fhVal, fseHeaderStream);
         }
         uint16_t hdrBsSize = 0;
         // Send FSE header for literal header
         if (readFseHdr) fhVal = fseHeaderStream.read();
-        readFseHdr = true;
+    // readFseHdr = true;
     send_lit_fse_header:
         for (; fhVal.strobe > 0; fhVal = fseHeaderStream.read()) {
 #pragma HLS PIPEINE II = 1
+            outVal.data[0] = fhVal.data[0];
+            outVal.data[1] = fhVal.data[1];
             hdrBsSize += fhVal.strobe;
-            out16Stream << fhVal;
+            outVal.strobe = fhVal.strobe;
+            outStream << outVal;
         }
         // send size of literal codes fse header
         bscMetaStream << hdrBsSize;
 
         // Buffer fse header bitstreams for matlen
-        fhVal.strobe = 0;
-        if (seqCnt > 0) fhVal = fseHeaderStream.read();
-    send_ml_fse_header_bs:
-        for (; fhVal.strobe > 0; fhVal = fseHeaderStream.read()) {
-#pragma HLS PIPELINE II = 1
-            fseHdrBuf[fseHIdx] = fhVal.data[0];
-            fseHdrBuf[fseHIdx + 1] = fhVal.data[1];
-            fseHIdx += fhVal.strobe;
-            hdrBsLen[2] += fhVal.strobe;
-        }
+        // fhVal.strobe = 0;
+        // if (seqCnt > 0) fhVal = fseHeaderStream.read();
+        // readfseS2Bram(fseHdrBuf, fseHIdx, hdrBsLen[2], fhVal, fseHeaderStream);
 
         // Send FSE encoded bitstream for literal header
         uint8_t litEncSize = 0;
     send_lit_fse_bitstream:
         for (fhVal = litEncodedStream.read(); fhVal.strobe > 0; fhVal = litEncodedStream.read()) {
 #pragma HLS PIPELINE II = 1
+            outVal.data[0] = fhVal.data[0];
+            outVal.data[1] = fhVal.data[1];
             litEncSize += fhVal.strobe;
-            out16Stream << fhVal;
+            outVal.strobe = fhVal.strobe;
+            outStream << outVal;
         }
         // send size of literal codes fse bitstream
         bscMetaStream << (uint16_t)litEncSize;
@@ -249,36 +260,39 @@ bsCol_main:
     // send huffman bitstreams
     send_all_hf_bitstreams:
         for (uint8_t i = 0; i < litStreamCnt; ++i) {
+            IntVectorStream_dt<8, HFBYTES> hfLitVal;
+        //++rc;
         send_huf_lit_bitstream:
-            for (fhVal = hfLitBitstream.read(); fhVal.strobe > 0; fhVal = hfLitBitstream.read()) {
+            for (hfLitVal = hfLitBitstream.read(); hfLitVal.strobe > 0; hfLitVal = hfLitBitstream.read()) {
 #pragma HLS PIPELINE II = 1
-                out16Stream << fhVal;
+                for (uint8_t k = 0; k < HFBYTES; ++k) {
+#pragma HLS UNROLL
+                    outVal.data[k] = hfLitVal.data[k];
+                }
+                outVal.strobe = hfLitVal.strobe;
+                outStream << outVal;
             }
         }
     // Send FSE header for litlen, offsets and matlen from buffer
     send_llof_fse_header_bs:
         for (uint8_t i = 0; i < fseHIdx; i += 2) {
 #pragma HLS PIPELINE II = 1
-            fhVal.data[0] = fseHdrBuf[i];
-            fhVal.data[1] = fseHdrBuf[i + 1];
-            fhVal.strobe = ((i < fseHIdx - 2) ? 2 : fseHIdx - i);
-            out16Stream << fhVal;
+            outVal.data[0] = fseHdrBuf[i];
+            outVal.data[1] = fseHdrBuf[i + 1];
+            outVal.strobe = ((i < fseHIdx - 2) ? 2 : fseHIdx - i);
+            outStream << outVal;
         }
-        // end of block 16-bit data
-        fhVal.strobe = 0;
-        out16Stream << fhVal;
         // send sequences bitstream
-        IntVectorStream_dt<8, 6> seqVal;
-        seqVal.strobe = 0;
-        if (seqCnt > 0) seqVal = seqEncodedStream.read();
+        outVal.strobe = 0;
+        if (seqCnt > 0) outVal = seqEncodedStream.read();
     send_seq_fse_bitstream:
-        for (; seqVal.strobe > 0; seqVal = seqEncodedStream.read()) {
+        for (; outVal.strobe > 0; outVal = seqEncodedStream.read()) {
 #pragma HLS PIPELINE II = 1
-            out48Stream << seqVal;
+            outStream << outVal;
         }
-        // end of block 48-bit data
-        seqVal.strobe = 0;
-        out48Stream << seqVal;
+        // end of block
+        outVal.strobe = 0;
+        outStream << outVal;
     }
     // dump end of data from remaining input streams
     hfLitBitstream.read();
@@ -286,16 +300,19 @@ bsCol_main:
     seqEncodedStream.read();
 }
 
-template <int BLOCK_SIZE, int MIN_BLK_SIZE, int MAX_FREQ_DWIDTH, class META_DT = ap_uint<MAX_FREQ_DWIDTH> >
+template <int BLOCK_SIZE,
+          int MIN_BLK_SIZE,
+          int MAX_FREQ_DWIDTH,
+          int DBYTES = 4,
+          class META_DT = ap_uint<MAX_FREQ_DWIDTH> >
 void packCompressedFrame(hls::stream<IntVectorStream_dt<16, 1> >& packerMetaStream,
                          hls::stream<META_DT>& bscMetaStream,
-                         hls::stream<IntVectorStream_dt<8, 2> >& bsc16Bitstream,
-                         hls::stream<IntVectorStream_dt<8, 6> >& bsc48Bitstream,
-                         hls::stream<IntVectorStream_dt<8, 4> >& outStream) {
+                         hls::stream<IntVectorStream_dt<8, DBYTES> >& bscBitstream,
+                         hls::stream<IntVectorStream_dt<8, DBYTES> >& outStream) {
     // Collect encoded literals and sequences data and send formatted data to output
     constexpr bool isSingleSegment = 0; // set if using 1 block/frame
     bool blockRead = false;
-    IntVectorStream_dt<8, 4> outVal;
+    IntVectorStream_dt<8, DBYTES> outVal;
     ap_uint<8> frameHeaderBuf[14];
 #pragma HLS ARRAY_PARTITION variable = frameHeaderBuf complete
     uint8_t fhIdx = 0;
@@ -368,13 +385,13 @@ zstd_frame_packer:
     // Write the size of frame header and block size, this is not part of the format, it is for use in next module
     // Write Frame header
     send_frame_header:
-        for (uint8_t i = 0; i < fhIdx; i += 4) {
+        for (uint8_t i = 0; i < fhIdx; i += DBYTES) {
 #pragma HLS PIPELINE II = 1
-            outVal.data[0] = frameHeaderBuf[i];
-            outVal.data[1] = (i + 1 < fhIdx) ? frameHeaderBuf[i + 1] : (ap_uint<8>)0;
-            outVal.data[2] = (i + 2 < fhIdx) ? frameHeaderBuf[i + 2] : (ap_uint<8>)0;
-            outVal.data[3] = (i + 3 < fhIdx) ? frameHeaderBuf[i + 3] : (ap_uint<8>)0;
-            outVal.strobe = ((i < fhIdx - 4) ? 4 : (fhIdx - i));
+            for (uint8_t k = 0; k < DBYTES; ++k) {
+#pragma HLS UNROLL
+                outVal.data[k] = (i + k < fhIdx) ? frameHeaderBuf[i + k] : (ap_uint<8>)0;
+            }
+            outVal.strobe = ((i < fhIdx - DBYTES) ? DBYTES : (fhIdx - i));
             outStream << outVal;
             outSize += outVal.strobe;
         }
@@ -382,8 +399,8 @@ zstd_frame_packer:
         outVal.strobe = 0;
         outStream << outVal;
         // skip stored block
-        if (fcs < MIN_BLK_SIZE) { // *** MIN_BLK_SIZE < 256 COMPULSORY ***
-            // send strobe 0, to indicate end of block
+        if (fcs < MIN_BLK_SIZE + 1) { // *** MIN_BLK_SIZE < 256 COMPULSORY ***
+            // send strobe 0, to indicate end of block for frame data
             outVal.strobe = 0;
             outStream << outVal;
             continue;
@@ -480,19 +497,29 @@ zstd_frame_packer:
         outVal.strobe = 3;
         outStream << outVal;
         outSize += outVal.strobe;
-    // Write Block Content
-    // Write Literal Section header
-    write_lit_sec_hdr:
-        for (uint8_t i = 0; i < litSecHdrBCnt; i += 4) {
+        // Write Block Content
+        // Write Literal Section header
+        if (DBYTES < 5) {
+        write_lit_sec_hdr:
+            for (uint8_t i = 0; i < litSecHdrBCnt; i += DBYTES) {
 #pragma HLS PIPELINE II = 1
-            outVal.data[0] = litSecHdr.range(7, 0);
-            outVal.data[1] = litSecHdr.range(15, 8);
-            outVal.data[2] = litSecHdr.range(23, 16);
-            outVal.data[3] = litSecHdr.range(31, 24);
-            outVal.strobe = ((i < litSecHdrBCnt - 4) ? 4 : (litSecHdrBCnt - i));
+                for (uint8_t k = 0; k < DBYTES; ++k) {
+#pragma HLS UNROLL
+                    outVal.data[k] = litSecHdr.range(7 + (k * 8), k * 8);
+                }
+                outVal.strobe = ((i < litSecHdrBCnt - DBYTES) ? DBYTES : (litSecHdrBCnt - i));
+                outStream << outVal;
+                litSecHdr >>= (DBYTES * 8);
+                outSize += outVal.strobe;
+            }
+        } else {
+            for (uint8_t k = 0; k < 5; ++k) { // litSecHdr is 40-bits => 5 bytes
+#pragma HLS UNROLL
+                outVal.data[k] = litSecHdr.range(7 + (k * 8), k * 8);
+            }
+            outVal.strobe = litSecHdrBCnt;
             outStream << outVal;
-            litSecHdr >>= 32;
-            outSize += outVal.strobe;
+            outSize += litSecHdrBCnt;
         }
         // Write fse header
         outVal.data[0] = (uint8_t)(streamSizes[0] + streamSizes[1]);
@@ -504,15 +531,11 @@ zstd_frame_packer:
         for (uint8_t k = 0; k < 3; ++k) {
             uint32_t itrSize = ((k < 2) ? (uint32_t)streamSizes[k] : (uint32_t)hfStrmSize);
         write_lithd_fse_data:
-            for (uint16_t i = 0; i < itrSize;) {
+            for (uint16_t i = 0; i < itrSize; i += outVal.strobe) {
 #pragma HLS PIPELINE II = 1
-                auto bs16Val = bsc16Bitstream.read();
-                outVal.data[0] = bs16Val.data[0];
-                outVal.data[1] = bs16Val.data[1];
-                outVal.strobe = (uint8_t)bs16Val.strobe;
+                outVal = bscBitstream.read();
                 outStream << outVal;
                 outSize += outVal.strobe;
-                i += outVal.strobe;
             }
             // Write jump table and huffman streams
             if (k == 1 && hfStreamCnt > 1) {
@@ -520,13 +543,20 @@ zstd_frame_packer:
                 outVal.data[1] = streamSizes[3].range(15, 8);
                 outVal.data[2] = streamSizes[4].range(7, 0);
                 outVal.data[3] = streamSizes[4].range(15, 8);
-                outVal.strobe = 4;
-                outStream << outVal;
-                outSize += outVal.strobe;
-                outVal.data[0] = streamSizes[5].range(7, 0);
-                outVal.data[1] = streamSizes[5].range(15, 8);
-                outVal.strobe = 2;
-                outStream << outVal;
+                if (DBYTES < 8) {
+                    outVal.strobe = 4;
+                    outStream << outVal;
+                    outSize += outVal.strobe;
+                    outVal.data[0] = streamSizes[5].range(7, 0);
+                    outVal.data[1] = streamSizes[5].range(15, 8);
+                    outVal.strobe = 2;
+                    outStream << outVal;
+                } else {
+                    outVal.data[4] = streamSizes[5].range(7, 0);
+                    outVal.data[5] = streamSizes[5].range(15, 8);
+                    outVal.strobe = 6;
+                    outStream << outVal;
+                }
                 outSize += outVal.strobe;
             }
         }
@@ -539,57 +569,12 @@ zstd_frame_packer:
         outVal.strobe = seqBytes;
         outStream << outVal;
         outSize += outVal.strobe;
-        // write sequence headers and bitstreams(entire remaining 16-bit and 48-bit input bitstreams)
-        if (seqCnt > 0) {
-        send_seq_fse_hdrs:
-            for (auto bs16Val = bsc16Bitstream.read(); bs16Val.strobe > 0; bs16Val = bsc16Bitstream.read()) {
+    // write sequence headers and bitstreams(entire remaining 16-bit and 32-bit input bitstreams)
+    send_seq_fse_hdrs:
+        for (outVal = bscBitstream.read(); outVal.strobe > 0; outVal = bscBitstream.read()) {
 #pragma HLS PIPELINE II = 1
-                outVal.data[0] = bs16Val.data[0];
-                outVal.data[1] = bs16Val.data[1];
-                outVal.strobe = (uint8_t)bs16Val.strobe;
-                outStream << outVal;
-                outSize += outVal.strobe;
-            }
-            IntVectorStream_dt<8, 6> bs48Val;
-            ap_uint<8> tmpb0, tmpb1;
-            uint8_t bitCount = 0;
-            bs48Val.strobe = 1; // to enter below loop, used only after input stream read
-            // Read-Write >> Read-Write >> Write
-            uint8_t rc = 0;
-        send_seq_fse_bitstreams:
-            while (bs48Val.strobe > 0 || bitCount > 0) {
-                if (rc < 2) {
-                    bs48Val = bsc48Bitstream.read();
-                    bitCount += bs48Val.strobe;
-                }
-                if (rc == 0 || rc == 2) {
-                    outVal.data[0] = bs48Val.data[0];
-                    outVal.data[1] = bs48Val.data[1];
-                    outVal.data[2] = bs48Val.data[2];
-                    outVal.data[3] = bs48Val.data[3];
-                    tmpb0 = bs48Val.data[4];
-                    tmpb1 = bs48Val.data[5];
-                } else if (rc == 1) {
-                    outVal.data[0] = tmpb0;
-                    outVal.data[1] = tmpb1;
-                    outVal.data[2] = bs48Val.data[0];
-                    outVal.data[3] = bs48Val.data[1];
-                    // shift data up
-                    bs48Val.data[0] = bs48Val.data[2];
-                    bs48Val.data[1] = bs48Val.data[3];
-                    bs48Val.data[2] = bs48Val.data[4];
-                    bs48Val.data[3] = bs48Val.data[5];
-                }
-                outVal.strobe = (uint8_t)((bitCount > 3) ? 4 : bitCount);
-                if (outVal.strobe > 0) outStream << outVal;
-                bitCount -= outVal.strobe;
-                ++rc;
-                if (rc > 2) rc = 0;
-            }
-        } else {
-            // dump strobe 0
-            bsc16Bitstream.read();
-            bsc48Bitstream.read();
+            outStream << outVal;
+            outSize += outVal.strobe;
         }
         // send strobe 0
         outVal.strobe = 0;
@@ -598,79 +583,115 @@ zstd_frame_packer:
     }
 }
 
-template <int MIN_BLK_SIZE = 128>
-void streamCmpStrdFrame(hls::stream<IntVectorStream_dt<8, 4> >& inStrBStream,
+template <int IN_DWIDTH, int STB_WIDTH>
+void skipPassRawBlock(hls::stream<ap_uint<IN_DWIDTH + STB_WIDTH> >& inRawStream,
+                      hls::stream<ap_uint<2> >& inStbFlagStream,
+                      hls::stream<ap_uint<IN_DWIDTH + STB_WIDTH> >& outRawStream,
+                      hls::stream<ap_uint<2> >& outStbFlagStream1,
+                      hls::stream<ap_uint<2> >& outStbFlagStream2) {
+    // read and dump the raw block data when not needed
+    ap_uint<IN_DWIDTH + STB_WIDTH> inVal;
+    bool stbFlagStrobe = 1;
+    ap_uint<2> outFlagVal = 1; // <stb Flag 1-bit><strobe 1-bit>
+outer_rbk_loop:
+    while (true) {
+        inVal = inRawStream.read();
+        if (inVal.range(STB_WIDTH - 1, 0) == 0) break;
+        auto inFlagVal = inStbFlagStream.read();
+        bool isRawBlk = inFlagVal.range(1, 1);
+        stbFlagStrobe = inFlagVal.range(0, 0);
+        // if last block is present (as control reached here) and strobe for stbFlagStream is 0
+        // therefore it is minimum block case, so set isRawBlk flag
+        if (stbFlagStrobe == 0) isRawBlk = 1;
+        outFlagVal.range(1, 1) = (ap_uint<1>)isRawBlk;
+        outStbFlagStream1 << outFlagVal;
+        outStbFlagStream2 << outFlagVal;
+    skip_pass_raw_block_loop:
+        for (; inVal.range(STB_WIDTH - 1, 0) > 0; inVal = inRawStream.read()) {
+#pragma HLS PIPELINE II = 1
+            if (isRawBlk) outRawStream << inVal;
+        }
+        // send strobe 0 for end of block
+        if (isRawBlk) outRawStream << inVal;
+    }
+    if (stbFlagStrobe > 0) inStbFlagStream.read();
+    // end of data
+    inVal = 0;
+    outRawStream << inVal;
+    outFlagVal = 0;
+    outStbFlagStream1 << outFlagVal;
+    outStbFlagStream2 << outFlagVal;
+}
+
+template <int DBYTES = 4>
+void skipPassCmpBlock(hls::stream<IntVectorStream_dt<8, DBYTES> >& inCmpStream,
+                      hls::stream<ap_uint<2> >& rawBlockFlagStream,
+                      hls::stream<IntVectorStream_dt<8, DBYTES> >& outCmpStream) {
+    IntVectorStream_dt<8, DBYTES> outVal;
+stream_skip_cmp_blk:
+    while (true) {
+        auto rawBlkFlag = rawBlockFlagStream.read();
+        bool isRawBlk = rawBlkFlag.range(1, 1);
+        bool rwbStrobe = rawBlkFlag.range(0, 0);
+        if (rwbStrobe == 0) break;
+    stream_cmp_frm_hdr_blk:
+        for (auto i = 0; i < 2; ++i) {
+        write_or_skip_cmp_blk_data:
+            for (outVal = inCmpStream.read(); outVal.strobe > 0; outVal = inCmpStream.read()) {
+#pragma HLS PIPELINE II = 1
+                if (isRawBlk == false || i == 0) outCmpStream << outVal;
+            }
+            outVal.strobe = 0;
+            if (isRawBlk == false || i == 0) outCmpStream << outVal;
+        }
+    }
+}
+
+void streamCmpStrdFrame(hls::stream<IntVectorStream_dt<8, 4> >& inRawBStream,
                         hls::stream<IntVectorStream_dt<8, 4> >& inCmpBStream,
-                        hls::stream<bool>& strdBlockFlagStream,
+                        hls::stream<ap_uint<2> >& rawBlockFlagStream,
                         hls::stream<IntVectorStream_dt<8, 4> >& outStream) {
     IntVectorStream_dt<8, 4> outVal;
     ap_uint<24> strdBlockHeader = 1; // bit-0 = 1, indicating last block, bits 1-2 = 0, indicating raw block
-
 stream_cmp_file:
     while (true) {
-        // Read Raw block into Buffer
-        uint16_t mIdx = 0;
-        auto inRawVal = inStrBStream.read();
-        if (inRawVal.strobe == 0) break;
-        // Read and forward each frame
-        bool readFlag = false;
-        auto cmpReg = inCmpBStream.read();
-        strdBlockHeader.range(10, 3) = (uint8_t)cmpReg.data[0];
-        strdBlockHeader.range(18, 11) = (uint8_t)cmpReg.data[1];
-        strdBlockHeader.range(23, 19) = (uint8_t)cmpReg.data[2];
-        bool strdBlkFlag = false;
-        // skip stored block
-        if (strdBlockHeader.range(23, 3) < MIN_BLK_SIZE) {
-            strdBlkFlag = true;
-        } else {
-            // written only if block is greater than minimum block size
-            strdBlkFlag = strdBlockFlagStream.read();
-        }
-    write_strd_frame_header:
-        for (cmpReg = inCmpBStream.read(); cmpReg.strobe > 0; cmpReg = inCmpBStream.read()) {
+        auto rawBlkFlag = rawBlockFlagStream.read();
+        bool isRawBlk = rawBlkFlag.range(1, 1);
+        bool rwbStrobe = rawBlkFlag.range(0, 0);
+        if (rwbStrobe == 0) break;
+        // read frame content size
+        outVal = inCmpBStream.read();
+        strdBlockHeader.range(10, 3) = (uint8_t)outVal.data[0];
+        strdBlockHeader.range(18, 11) = (uint8_t)outVal.data[1];
+        strdBlockHeader.range(23, 19) = (uint8_t)outVal.data[2];
+    // write the frame header, written for each block of input data as stated in its meta data
+    write_frame_header:
+        for (outVal = inCmpBStream.read(); outVal.strobe > 0; outVal = inCmpBStream.read()) {
 #pragma HLS PIPELINE II = 1
-            outVal.data[0] = cmpReg.data[0];
-            outVal.data[1] = cmpReg.data[1];
-            outVal.data[2] = cmpReg.data[2];
-            outVal.data[3] = cmpReg.data[3];
-            outVal.strobe = cmpReg.strobe;
             outStream << outVal;
         }
-        if (strdBlkFlag) {
+        if (isRawBlk) {
             // Write stored block header
             outVal.data[0] = strdBlockHeader.range(7, 0);
             outVal.data[1] = strdBlockHeader.range(15, 8);
             outVal.data[2] = strdBlockHeader.range(23, 16);
             outVal.strobe = 3;
             outStream << outVal;
-
-            // 1 data word already read
-            outVal.data[0] = inRawVal.data[0];
-            outVal.data[1] = inRawVal.data[1];
-            outVal.data[2] = inRawVal.data[2];
-            outVal.data[3] = inRawVal.data[3];
-            outVal.strobe = (uint8_t)((strdBlockHeader.range(23, 3) > 3) ? 4 : strdBlockHeader.range(5, 3));
-            outStream << outVal;
-        }
-        // set cmpReg strobe to initiate read in following loop
-        cmpReg.strobe = 4;
-        outVal.strobe = 4;
-        bool done = false;
-    write_output_block:
-        while (!done) {
+        write_raw_blk_data:
+            for (auto rbVal = inRawBStream.read(); rbVal.strobe > 0; rbVal = inRawBStream.read()) {
 #pragma HLS PIPELINE II = 1
-            // read input
-            if (outVal.strobe > 0) outVal = inStrBStream.read();
-            if (cmpReg.strobe > 0) cmpReg = inCmpBStream.read();
-            // write to output
-            if (strdBlkFlag) {
-                if (outVal.strobe > 0) outStream << outVal;
-            } else {
-                if (cmpReg.strobe > 0) outStream << cmpReg;
+                outStream << rbVal;
             }
-            done = (outVal.strobe == 0 && cmpReg.strobe == 0);
+        } else {
+        write_or_skip_cmp_blk_data:
+            for (outVal = inCmpBStream.read(); outVal.strobe > 0; outVal = inCmpBStream.read()) {
+#pragma HLS PIPELINE II = 1
+                outStream << outVal;
+            }
         }
     }
+    // dump last strobe 0
+    inRawBStream.read();
     // end of file
     outVal.strobe = 0;
     outStream << outVal;
@@ -678,20 +699,27 @@ stream_cmp_file:
 
 template <int IN_DWIDTH>
 void zstdAxiu2hlsStream(hls::stream<ap_axiu<IN_DWIDTH, 0, 0, 0> >& inStream,
-                        hls::stream<IntVectorStream_dt<IN_DWIDTH, 1> >& outHlsStream) {
+                        hls::stream<IntVectorStream_dt<8, IN_DWIDTH / 8> >& outHlsStream) {
     constexpr uint8_t c_keepDWidth = IN_DWIDTH / 8;
-    IntVectorStream_dt<IN_DWIDTH, 1> outVal;
-    outVal.strobe = 1;
+    IntVectorStream_dt<8, c_keepDWidth> outVal;
+    outVal.strobe = c_keepDWidth;
     auto inAxiVal = inStream.read();
 axi_to_hls:
     for (; inAxiVal.last == false; inAxiVal = inStream.read()) {
 #pragma HLS PIPELINE II = 1
-        outVal.data[0] = inAxiVal.data;
+        for (uint8_t i = 0; i < c_keepDWidth; ++i) {
+#pragma HLS UNROLL
+            outVal.data[i] = inAxiVal.data.range((i * 8) + 7, i * 8);
+        }
         outHlsStream << outVal;
     }
     uint8_t strb = countSetBits<c_keepDWidth>((int)(inAxiVal.keep));
     if (strb) { // write last byte if valid
-        outVal.data[0] = inAxiVal.data;
+        for (uint8_t i = 0; i < c_keepDWidth; ++i) {
+#pragma HLS UNROLL
+            outVal.data[i] = inAxiVal.data.range((i * 8) + 7, i * 8);
+        }
+        outVal.strobe = strb;
         outHlsStream << outVal;
     }
     outVal.strobe = 0;
@@ -707,17 +735,18 @@ void zstdHlsVectorStream2axiu(hls::stream<IntVectorStream_dt<8, OUT_DWIDTH / 8> 
     uint8_t bytesInReg = 0;
     outVal.keep = -1;
     outVal.last = false;
+    uint32_t outCnt = 0;
 hls_to_axi:
     for (auto inVal = hlsInStream.read(); inVal.strobe > 0; inVal = hlsInStream.read()) {
 #pragma HLS PIPELINE II = 1
         // Write data to output register
         for (uint8_t i = 0; i < c_bytesInWord; ++i) {
 #pragma HLS UNROLL
-            if (i < inVal.strobe) {
-                outReg.range(((bytesInReg + i + 1) * 8) - 1, (bytesInReg + i) * 8) = inVal.data[i];
-            }
+            uint16_t idx = (bytesInReg + i) * 8;
+            outReg.range(idx + 7, idx) = inVal.data[i];
         }
         bytesInReg += inVal.strobe;
+        outCnt += inVal.strobe;
         if (bytesInReg > c_bytesInWord - 1) {
             outVal.data = outReg.range(OUT_DWIDTH - 1, 0);
             outStream << outVal;
@@ -726,10 +755,11 @@ hls_to_axi:
         }
     }
     if (bytesInReg) {
-        outVal.keep = ((1 << bytesInReg) - 1);
+        outVal.keep = (((uint16_t)1 << bytesInReg) - 1);
         outVal.data = outReg.range(OUT_DWIDTH - 1, 0);
         outStream << outVal;
     }
+    // send eos
     outVal.last = true;
     outVal.keep = 0;
     outVal.data = 0;
@@ -761,41 +791,42 @@ template <int BLOCK_SIZE,
 void zstdCompressCore(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
                       hls::stream<IntVectorStream_dt<8, 4> >& outStream) {
     // zstd compression main module
-    constexpr uint32_t c_strdStreamDepth = BLOCK_SIZE * 2;
-    constexpr int c_freq_dwidth = maxBitsUsed(BLOCK_SIZE);
-    constexpr int c_blen_dwidth = maxBitsUsed(c_freq_dwidth);
-    constexpr int c_litUpSDepth = BLOCK_SIZE / 8;
-    constexpr int c_hfLitBSDepth = BLOCK_SIZE / 2;
-    constexpr int c_seqBlockDepth = 6144; // 1 + (BLOCK_SIZE - 1) / 6; //~6K deep for full BRAM use
-    constexpr int c_stbUpSDepth = 256 + c_strdStreamDepth / 8;
+    constexpr uint32_t c_freq_dwidth = maxBitsUsed(BLOCK_SIZE);
+    constexpr uint32_t c_dataUpSDepth = BLOCK_SIZE / 8;
+    constexpr uint32_t c_hfLitStreamDepth = BLOCK_SIZE / 2;
+    constexpr uint32_t c_seqBlockDepth = BLOCK_SIZE / 8;
 
     // Internal streams
     hls::stream<IntVectorStream_dt<8, 1> > inBlockStream("inBlockStream");
     hls::stream<IntVectorStream_dt<8, 1> > strdBlockStream("strdBlockStream");
     hls::stream<IntVectorStream_dt<8, 4> > strdDsBlockStream("strdDsBlockStream");
     hls::stream<IntVectorStream_dt<16, 1> > packerMetaStream("packerMetaStream");
-    hls::stream<ap_uint<68> > stbUpsizedStream("stbUpsizedStream"); // 2 URAM
+    hls::stream<ap_uint<68> > rawUpsizedFinalStream("rawUpsizedFinalStream");
+    hls::stream<ap_uint<68> > rwbUpsizedStream("rwbUpsizedStream"); // 1 URAM
 #pragma HLS STREAM variable = inBlockStream depth = 16
 #pragma HLS STREAM variable = strdBlockStream depth = 16
 #pragma HLS STREAM variable = strdDsBlockStream depth = 16
 #pragma HLS STREAM variable = packerMetaStream depth = 16
-#pragma HLS STREAM variable = stbUpsizedStream depth = c_stbUpSDepth
-#pragma HLS BIND_STORAGE variable = stbUpsizedStream type = FIFO impl = URAM
+#pragma HLS STREAM variable = rawUpsizedFinalStream depth = 16
+#pragma HLS STREAM variable = rwbUpsizedStream depth = c_dataUpSDepth
+#pragma HLS BIND_STORAGE variable = rwbUpsizedStream type = FIFO impl = URAM
+#pragma HLS BIND_STORAGE variable = rawUpsizedFinalStream type = FIFO impl = LUTRAM
 
     hls::stream<IntVectorStream_dt<8, 1> > litStream("litStream");
-    hls::stream<IntVectorStream_dt<8, 1> > reverseLitStream("reverseLitStream"); // 1 BRAM
+    hls::stream<IntVectorStream_dt<8, 1> > reverseLitStream("reverseLitStream");
     hls::stream<IntVectorStream_dt<8, 1> > dszLitStream("litStream");
     hls::stream<ap_uint<68> > litUpsizedStream("litUpsizedStream"); // 1 URAM
-#pragma HLS STREAM variable = litStream depth = 128
-#pragma HLS STREAM variable = reverseLitStream depth = 2048
-#pragma HLS STREAM variable = dszLitStream depth = 512
-#pragma HLS STREAM variable = litUpsizedStream depth = c_litUpSDepth
+#pragma HLS STREAM variable = litStream depth = 64
+#pragma HLS STREAM variable = reverseLitStream depth = 16
+#pragma HLS STREAM variable = dszLitStream depth = 8
+#pragma HLS STREAM variable = litUpsizedStream depth = c_dataUpSDepth
 #pragma HLS BIND_STORAGE variable = litUpsizedStream type = FIFO impl = URAM
 
     hls::stream<DSVectorStream_dt<details::Sequence_dt<c_freq_dwidth>, 1> > seqStream("seqStream");
     hls::stream<DSVectorStream_dt<details::Sequence_dt<c_freq_dwidth>, 1> > reverseSeqStream(
-        "reverseSeqStream"); // 4 BRAM
+        "reverseSeqStream"); // 1 URAM
 #pragma HLS STREAM variable = seqStream depth = 32
+// 4K depth needed to keep reading input sequences even if previous block decoding waits for fse table generation
 #pragma HLS STREAM variable = reverseSeqStream depth = 4096
 
     hls::stream<IntVectorStream_dt<c_freq_dwidth, 1> > litFreqStream("litFreqStream");
@@ -805,53 +836,59 @@ void zstdCompressCore(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
 
     hls::stream<IntVectorStream_dt<c_freq_dwidth, 1> > wghtFreqStream("wghtFreqStream");
     hls::stream<IntVectorStream_dt<c_freq_dwidth, 1> > freqStream("freqStream");
-#pragma HLS STREAM variable = wghtFreqStream depth = 256
+#pragma HLS STREAM variable = wghtFreqStream depth = 8
 #pragma HLS STREAM variable = freqStream depth = 128
 
     hls::stream<ap_uint<c_freq_dwidth> > lzMetaStream("lzMetaStream");
     hls::stream<bool> rleFlagStream("rleFlagStream");
-    hls::stream<bool> strdBlockFlagStream("strdBlockFlagStream");
+    hls::stream<ap_uint<2> > rwbFlagStream("rwbFlagStream");
+    hls::stream<ap_uint<2> > rwbFinalFlagStream1("rwbFinalFlagStream1");
+    hls::stream<ap_uint<2> > rwbFinalFlagStream2("rwbFinalFlagStream2");
     hls::stream<ap_uint<c_freq_dwidth> > litCntStream("litCntStream");
 #pragma HLS STREAM variable = lzMetaStream depth = 16
 #pragma HLS STREAM variable = rleFlagStream depth = 4
-#pragma HLS STREAM variable = strdBlockFlagStream depth = 4
+#pragma HLS STREAM variable = rwbFlagStream depth = 4
+#pragma HLS STREAM variable = rwbFinalFlagStream1 depth = 4
+#pragma HLS STREAM variable = rwbFinalFlagStream2 depth = 4
 #pragma HLS STREAM variable = litCntStream depth = 8
 
     hls::stream<IntVectorStream_dt<8, 2> > fseHeaderStream("fseHeaderStream");
-    hls::stream<IntVectorStream_dt<36, 1> > fseLitTableStream("fseLitTableStream"); // 2 BRAM
-    hls::stream<IntVectorStream_dt<36, 1> > fseSeqTableStream("fseSeqTableStream"); // 1 URAM
+    hls::stream<IntVectorStream_dt<36, 1> > fseLitTableStream("fseLitTableStream");
+    hls::stream<IntVectorStream_dt<36, 1> > fseSeqTableStream("fseSeqTableStream");
 #pragma HLS STREAM variable = fseHeaderStream depth = 128
-#pragma HLS STREAM variable = fseLitTableStream depth = 1024
-#pragma HLS STREAM variable = fseSeqTableStream depth = 4096
+#pragma HLS STREAM variable = fseLitTableStream depth = 8
+#pragma HLS STREAM variable = fseSeqTableStream depth = 8
 
     hls::stream<ap_uint<16> > hufLitMetaStream("hufLitMetaStream");
     hls::stream<DSVectorStream_dt<HuffmanCode_dt<details::c_maxZstdHfBits>, 1> > hufCodeStream;
     hls::stream<IntVectorStream_dt<4, 1> > hufWeightStream("hufWeightStream");
     hls::stream<DSVectorStream_dt<HuffmanCode_dt<details::c_maxZstdHfBits>, 1> > hfEncodedLitStream;
-    hls::stream<IntVectorStream_dt<8, 2> > hfLitBitstream("hfLitBitstream"); // 9 BRAM, need to restructure
+    hls::stream<IntVectorStream_dt<8, 2> > hfLitBitstream("hfLitBitstream");
 #pragma HLS STREAM variable = hufLitMetaStream depth = 128
-#pragma HLS STREAM variable = hufCodeStream depth = 256 // depth needed due to literal reversing module
-#pragma HLS STREAM variable = hufWeightStream depth = 512
-#pragma HLS STREAM variable = hfEncodedLitStream depth = 128
-#pragma HLS STREAM variable = hfLitBitstream depth = c_hfLitBSDepth
+#pragma HLS STREAM variable = hufCodeStream depth = 8
+#pragma HLS STREAM variable = hufWeightStream depth = 8
+#pragma HLS STREAM variable = hfEncodedLitStream depth = 256
+#pragma HLS STREAM variable = hfLitBitstream depth = c_hfLitStreamDepth
 
     hls::stream<IntVectorStream_dt<8, 2> > litEncodedStream("litEncodedStream");
     hls::stream<ap_uint<c_freq_dwidth> > seqEncSizeStream("seqEncSizeStream");
-    hls::stream<IntVectorStream_dt<8, 6> > seqEncodedStream("seqEncodedStream"); // 13 BRAM, need to restructure
+    hls::stream<ap_uint<68> > seqEncodedStream("seqEncodedStream");
+    hls::stream<IntVectorStream_dt<8, 4> > seqEncodedDszStream("seqEncodedDszStream");
 #pragma HLS STREAM variable = litEncodedStream depth = 128
 #pragma HLS STREAM variable = seqEncSizeStream depth = 4
+#pragma HLS STREAM variable = seqEncodedDszStream depth = 8
 #pragma HLS STREAM variable = seqEncodedStream depth = c_seqBlockDepth
 #pragma HLS BIND_STORAGE variable = seqEncodedStream type = FIFO impl = URAM
 
     hls::stream<ap_uint<16> > bscMetaStream("bscMetaStream");
-    hls::stream<IntVectorStream_dt<8, 2> > bsc16Bitstream("bsc16Bitstream");
-    hls::stream<IntVectorStream_dt<8, 6> > bsc48Bitstream("bsc48Bitstream");
+    hls::stream<IntVectorStream_dt<8, 4> > bsc32Bitstream("bsc32Bitstream");
 #pragma HLS STREAM variable = bscMetaStream depth = 128
-#pragma HLS STREAM variable = bsc16Bitstream depth = 1024
-#pragma HLS STREAM variable = bsc48Bitstream depth = 32
+#pragma HLS STREAM variable = bsc32Bitstream depth = 256
 
     hls::stream<IntVectorStream_dt<8, 4> > cmpFrameStream("cmpFrameStream");
-#pragma HLS STREAM variable = cmpFrameStream depth = 128
+    hls::stream<IntVectorStream_dt<8, 4> > cmpFrameFinalStream("cmpFrameFinalStream");
+#pragma HLS STREAM variable = cmpFrameStream depth = 64
+#pragma HLS STREAM variable = cmpFrameFinalStream depth = 16
 
 #pragma HLS dataflow
 
@@ -860,12 +897,14 @@ void zstdCompressCore(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
         details::inputDistributer<BLOCK_SIZE, MIN_BLCK_SIZE>(inStream, inBlockStream, strdBlockStream,
                                                              packerMetaStream);
         // Upsize raw data for raw block
-        details::simpleStreamUpsizer<8, 64, 4>(strdBlockStream, stbUpsizedStream);
+        details::simpleStreamUpsizer<8, 64, 4>(strdBlockStream, rwbUpsizedStream);
         // LZ77 compression of input blocks to get separate streams
         // for literals, sequences (litlen, metlen, offset), literal frequencies and sequences frequencies
         details::getLitSequences<BLOCK_SIZE, c_freq_dwidth>(inBlockStream, litStream, seqStream, litFreqStream,
-                                                            seqFreqStream, rleFlagStream, strdBlockFlagStream,
-                                                            lzMetaStream, litCntStream);
+                                                            seqFreqStream, rleFlagStream, rwbFlagStream, lzMetaStream,
+                                                            litCntStream);
+        details::skipPassRawBlock<64, 4>(rwbUpsizedStream, rwbFlagStream, rawUpsizedFinalStream, rwbFinalFlagStream1,
+                                         rwbFinalFlagStream2);
         // Upsize literals
         details::simpleStreamUpsizer<8, 64, 4>(litStream, litUpsizedStream);
         // Buffer in stream URAM and downsize literals
@@ -891,7 +930,7 @@ void zstdCompressCore(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
         // Huffman encoding of literal stream
         details::zstdHuffmanEncoder<details::c_maxZstdHfBits>(reverseLitStream, rleFlagStream, hufCodeStream,
                                                               hfEncodedLitStream, hufLitMetaStream);
-        // HUffman bitstream packer
+        // Huffman bitstream packer
         details::zstdHuffBitPacker<details::c_maxZstdHfBits>(hfEncodedLitStream, hfLitBitstream);
         // FSE encoding of literals
         details::fseEncodeLitHeader(hufWeightStream, fseLitTableStream, litEncodedStream);
@@ -900,17 +939,20 @@ void zstdCompressCore(hls::stream<IntVectorStream_dt<8, 1> >& inStream,
     }
     // Module-4: Output block and frame packing
     {
+        // Buffer in stream URAM and downsize fse encoded sequence bitstream
+        details::bufferDownsizerVec<64, 32, 4>(seqEncodedStream, seqEncodedDszStream);
+        // collect data from different input byte streams and output 2 continuous streams
+        details::bytestreamCollector<c_freq_dwidth>(lzMetaStream, hufLitMetaStream, hfLitBitstream, fseHeaderStream,
+                                                    litEncodedStream, seqEncodedDszStream, seqEncSizeStream,
+                                                    bscMetaStream, bsc32Bitstream);
         // pack compressed data into single sequential block stream
-        details::bitstreamCollector<c_freq_dwidth>(lzMetaStream, hufLitMetaStream, hfLitBitstream, fseHeaderStream,
-                                                   litEncodedStream, seqEncodedStream, seqEncSizeStream, bscMetaStream,
-                                                   bsc16Bitstream, bsc48Bitstream);
-        details::packCompressedFrame<BLOCK_SIZE, MIN_BLCK_SIZE, c_freq_dwidth>(
-            packerMetaStream, bscMetaStream, bsc16Bitstream, bsc48Bitstream, cmpFrameStream);
-
+        details::packCompressedFrame<BLOCK_SIZE, MIN_BLCK_SIZE, c_freq_dwidth>(packerMetaStream, bscMetaStream,
+                                                                               bsc32Bitstream, cmpFrameStream);
+        details::skipPassCmpBlock(cmpFrameStream, rwbFinalFlagStream1, cmpFrameFinalStream);
         // Buffer in stream URAM and downsize raw block data
-        details::bufferDownsizerVec<64, 32, 4>(stbUpsizedStream, strdDsBlockStream);
+        details::bufferDownsizerVec<64, 32, 4>(rawUpsizedFinalStream, strdDsBlockStream);
         // Output compressed or raw block based on input flag stream
-        details::streamCmpStrdFrame<MIN_BLCK_SIZE>(strdDsBlockStream, cmpFrameStream, strdBlockFlagStream, outStream);
+        details::streamCmpStrdFrame(strdDsBlockStream, cmpFrameFinalStream, rwbFinalFlagStream2, outStream);
     }
 }
 

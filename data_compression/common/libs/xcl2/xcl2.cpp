@@ -93,6 +93,15 @@ bool is_hw_emulation() {
     return ret;
 }
 
+bool is_sw_emulation() {
+    bool ret = false;
+    char* xcl_mode = getenv("XCL_EMULATION_MODE");
+    if ((xcl_mode != NULL) && !strcmp(xcl_mode, "sw_emu")) {
+        ret = true;
+    }
+    return ret;
+}
+
 bool is_xpr_device(const char* device_name) {
     const char* output = strstr(device_name, "xpr");
 

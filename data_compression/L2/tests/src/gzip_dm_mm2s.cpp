@@ -58,10 +58,6 @@ void xilGzipMM2S(uintMemWidth_t* in,
 #pragma HLS INTERFACE m_axi port = in max_widen_bitwidth = c_gmem0_width offset = slave bundle = \
     gmem0 max_read_burst_length = 64 max_write_burst_length = 2 num_read_outstanding = 8 num_write_outstanding = 1
 #pragma HLS interface axis port = outStream
-#pragma HLS INTERFACE s_axilite port = in bundle = control
-#pragma HLS INTERFACE s_axilite port = inputSize bundle = control
-#pragma HLS INTERFACE s_axilite port = last bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
 #pragma HLS_INTERFACE ap_ctrl_chain port = return bundle = control
 
     hls::stream<uintMemWidth_t> inHlsStream("inputStream");
@@ -71,10 +67,10 @@ void xilGzipMM2S(uintMemWidth_t* in,
 #pragma HLS BIND_STORAGE variable = outdownstream type = FIFO impl = SRL
 
 #pragma HLS dataflow
-    xf::compression::details::mm2sSimple<MULTIPLE_BYTES * 8>(in, inHlsStream, inputSize);
+    xf::compression::details::mm2sSimple<INPUT_BYTES * 8>(in, inHlsStream, inputSize);
 
-    xf::compression::details::streamDownsizer<uint32_t, MULTIPLE_BYTES * 8, c_inStreamDwidth>(inHlsStream,
-                                                                                              outdownstream, inputSize);
+    xf::compression::details::streamDownsizer<uint32_t, INPUT_BYTES * 8, c_inStreamDwidth>(inHlsStream, outdownstream,
+                                                                                           inputSize);
 
     streamDataDm2kSync<c_inStreamDwidth>(outdownstream, outStream, inputSize, last);
 }

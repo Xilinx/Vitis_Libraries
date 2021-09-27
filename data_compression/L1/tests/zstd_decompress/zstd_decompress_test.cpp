@@ -27,8 +27,9 @@
 #include "cmdlineparser.h"
 
 #define ZSTD
+#define INPUT_BYTES 4
+#define OUTPUT_BYTES 8
 
-#define PARALLEL_BYTES_READ 8
 #define ZSTD_BLOCK_SIZE_KB 32
 #define WINDOW_SIZE (32 * 1024)
 
@@ -37,10 +38,6 @@
 
 #include "zstd_decompress.hpp"
 
-constexpr int getDataPortWidth(int maxVal) {
-    return (31 - __builtin_clz(maxVal));
-}
-
 uint64_t getFileSize(std::ifstream& file) {
     file.seekg(0, file.end);
     uint64_t file_size = file.tellg();
@@ -48,11 +45,11 @@ uint64_t getFileSize(std::ifstream& file) {
     return file_size;
 }
 
-void decompressFrame(hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> >& inStream,
+void decompressFrame(hls::stream<ap_uint<INPUT_BYTES * 8> >& inStream,
                      hls::stream<ap_uint<4> >& inStrobe,
-                     hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ> >& outStream) {
+                     hls::stream<ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> >& outStream) {
     const int c_lmoDWidth = 1 + getDataPortWidth(WINDOW_SIZE);
-    xf::compression::zstdDecompressStream<PARALLEL_BYTES_READ, ZSTD_BLOCK_SIZE_KB, WINDOW_SIZE, c_lmoDWidth>(
+    xf::compression::zstdDecompressStream<INPUT_BYTES, OUTPUT_BYTES, ZSTD_BLOCK_SIZE_KB, WINDOW_SIZE, c_lmoDWidth>(
         inStream, inStrobe, outStream);
 }
 
@@ -78,17 +75,17 @@ void validateFile(std::string& fileName, std::string& cmpFileName, uint8_t max_c
     // decompress the file in a loop frame by frame
     std::string out_file_name = fileName + ".raw";
 
-    hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> > inputStream("inputStream");
+    hls::stream<ap_uint<INPUT_BYTES * 8> > inputStream("inputStream");
     hls::stream<ap_uint<4> > inStrobe("inStrobe");
-    hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ> > outputStream("outputStream");
+    hls::stream<ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> > outputStream("outputStream");
 
-    uint8_t lbWidth = inputSize % PARALLEL_BYTES_READ;
-    ap_uint<4> strb = PARALLEL_BYTES_READ;
+    uint8_t lbWidth = inputSize % INPUT_BYTES;
+    ap_uint<4> strb = INPUT_BYTES;
     // Fill Header to Stream
-    for (int i = 0; i < inputSize; i += PARALLEL_BYTES_READ) {
-        ap_uint<(8 * PARALLEL_BYTES_READ)> val;
-        inCmpFile.read((char*)&val, PARALLEL_BYTES_READ);
-        if (inputSize < (i + PARALLEL_BYTES_READ)) strb = lbWidth;
+    for (int i = 0; i < inputSize; i += INPUT_BYTES) {
+        ap_uint<INPUT_BYTES * 8> val;
+        inCmpFile.read((char*)&val, INPUT_BYTES);
+        if (inputSize < (i + INPUT_BYTES)) strb = lbWidth;
         inStrobe << strb;
         inputStream << val;
     }
@@ -101,20 +98,18 @@ void validateFile(std::string& fileName, std::string& cmpFileName, uint8_t max_c
     bool pass = true;
     uint64_t outCnt = 0;
 
-    for (ap_uint<(8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ> val = outputStream.read(); val != 0;
-         val = outputStream.read()) {
+    for (ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> val = outputStream.read(); val != 0; val = outputStream.read()) {
         // reading value from output stream
-        ap_uint<(8 * PARALLEL_BYTES_READ)> o =
-            val.range((8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ - 1, PARALLEL_BYTES_READ);
-        ap_uint<PARALLEL_BYTES_READ> strb = val.range(PARALLEL_BYTES_READ - 1, 0);
+        ap_uint<OUTPUT_BYTES* 8> o = val.range((OUTPUT_BYTES * 8) + OUTPUT_BYTES - 1, OUTPUT_BYTES);
+        ap_uint<OUTPUT_BYTES> strb = val.range(OUTPUT_BYTES - 1, 0);
         size_t size = __builtin_popcount(strb.to_uint());
         // writing output file
         // outFile.write((char*)&o, size);
         outCnt += size;
 
         // Comparing with input file
-        ap_uint<(8 * PARALLEL_BYTES_READ)> g = 0;
-        origFile.read((char*)&g, PARALLEL_BYTES_READ);
+        ap_uint<OUTPUT_BYTES* 8> g = 0;
+        origFile.read((char*)&g, 8);
         if (o != g) {
             for (uint8_t v = 0; v < size; v++) {
                 uint8_t e = g.range((v + 1) * 8 - 1, v * 8);

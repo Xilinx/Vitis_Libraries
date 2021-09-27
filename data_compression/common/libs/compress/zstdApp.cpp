@@ -25,8 +25,7 @@
 #include <iomanip>
 
 // compressApp Constructor: parse CLI opions and set the driver class memebr variables
-zstdApp::zstdApp(int argc, char** argv, bool is_seq, bool enable_profile)
-    : compressApp(argc, argv, is_seq, enable_profile) {
+zstdApp::zstdApp(int argc, char** argv, bool is_seq) : compressApp(argc, argv, is_seq) {
     m_extn = ".zst";
     m_parser.parse(argc, argv);
     compressApp::parser(argc, argv);

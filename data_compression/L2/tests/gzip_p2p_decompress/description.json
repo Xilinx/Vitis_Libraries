@@ -62,6 +62,9 @@
                 "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8", 
                 "GZIP_MODE=1"
+            ],
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
             ]
         }
     }, 

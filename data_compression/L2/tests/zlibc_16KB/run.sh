@@ -12,7 +12,7 @@ then
     done
 
     echo -e "\n\n-----------Running Compression for large file-----------\n"
-    cmd1="$EXE_FILE -c ./sample_run.txt -xbin $XCLBIN_FILE"
+    cmd1="$EXE_FILE -c ./sample_run.txt -xbin $XCLBIN_FILE -zlib 1"
     echo $cmd1
     $cmd1
 fi

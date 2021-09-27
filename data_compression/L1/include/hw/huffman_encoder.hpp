@@ -377,7 +377,7 @@ void huffmanEncoderStatic(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
                     next_state = WRITE_TOKEN;
 
             } else if (next_state == ML_EXTRA) {
-                tLen -= base_length[lcode];
+                tLen -= (base_length[lcode] + 3);
                 outValue.data[0].code = tLen;
                 outValue.data[0].bitlen = lextra;
                 outStream << outValue;
@@ -407,7 +407,6 @@ void huffmanEncoderStatic(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
  * @param inStream input packet of 32bit size which contains either literal or match length and distance
  * information.
  *          Example: [Literal (1 Byte) | ML (1 Byte) | DIST (2 Bytes)]
- * @param outStream output bit encoded LZ77 compressed data
  * @param hufCodeInStream Huffman Codes input
  * @param hufCodeOutStream HuffmanCodes output
  */
@@ -530,7 +529,7 @@ void huffmanEncoderStream(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
                     next_state = WRITE_TOKEN;
 
             } else if (next_state == ML_EXTRA) {
-                tLen -= base_length[lcode];
+                tLen -= (base_length[lcode] + 3);
                 outValue.data[0].code = tLen;
                 outValue.data[0].bitlen = lextra;
                 hufCodeOutStream << outValue;

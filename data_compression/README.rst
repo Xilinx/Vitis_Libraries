@@ -38,16 +38,19 @@ LTS, 18.04.1 LTS. With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be
 enabled via
 `devtoolset-6 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/>`__.
 
-PCIE Accelerator Card
+FPGA Accelerator Card
 ~~~~~~~~~~~~~~~~~~~~~
 
 Hardware modules and kernels are designed to work with 16nm Alveo cards.
-\* `Alveo
-U280 <https://www.xilinx.com/products/boards-and-kits/alveo/u280.html#gettingStarted>`__
-\* `Alveo
-U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted>`__
-\* `Alveo
-U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted>`__
+
+* `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html>`__
+
+* `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html>`__
+
+* `Alveo U50 <https://www.xilinx.com/products/boards-and-kits/alveo/u50.html>`__
+
+* `Versal AI VCK190 <https://www.xilinx.com/products/boards-and-kits/vck190.html>`__
+
 
 Shell Environment
 ~~~~~~~~~~~~~~~~~
@@ -91,16 +94,28 @@ Tables below showcases throughput details of compression for various Alveo accel
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | `Snappy Streaming <L2/demos/snappy_streaming>`_                        |        2.13          |      290 MB/s     |  300MHz  |  3K     |  4    |  6    |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Memory Mapped <L2/tests/gzipc_block_mm>`_                   |        2.67          |      2 GB/s       |  285MHz  |  52K    |  67   |  72   |
+| `GZip/Zlib 32KB Memory Mapped <L2/tests/gzipc_block_mm>`_              |        2.70          |      2 GB/s       |  300MHz  |  60K    |  135  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Compress Stream <L2/tests/gzipc>`_                          |        2.67          |      2 GB/s       |  290MHz  |  48.5K  |  61   |  72   |
+| `GZip 32KB Compress Stream <L2/tests/gzipc>`_                          |        2.70          |      2 GB/s       |  293MHz  |  54K    |  131  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib Fixed Compress Stream <L2/tests/gzipc_static>`_             |        2.25          |      2 GB/s       |  300MHz  |  33.2K  |  45   |  64   |
+| `GZip 16KB Compress Stream <L2/tests/gzipc_16KB>`_                     |        2.62          |      2 GB/s       |  298MHz  |  58K    |  165  |  48   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip 8KB Compress Stream <L2/tests/gzipc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.2K  |  101  |  48   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `GZip Fixed 32KB Compress Stream <L2/tests/gzipc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  34.5K  |  43   |  64   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib 32KB Compress Stream <L2/tests/zlibc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  54K    |  127  |  64   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib 16KB Compress Stream <L2/tests/zlibc_16KB>`_                     |        2.62          |      2 GB/s       |  294MHz  |  58K    |  160  |  48   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib 8KB Compress Stream <L2/tests/zlibc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.4K  |  96   |  48   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zlib Fixed 32KB Compress Stream <L2/tests/zlibc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  34.7K  |  39   |  64   |
++------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
+| `Zstd Compress Quad Core <L2/tests/zstd_quadcore_compress>`_           |        2.68          |     1.17 GB/s     |  283MHz  |  40K    |  80   |  37   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 
-.. [*] LZ4 Streaming and Snappy Streaming: Uses Single Engine and Datawidth 8-bit
-.. [*] LZ4 Memory Mapped and Snappy Memory Mapped: Uses 8-Engines with Data Movers
-.. [*] GZip/Zlib Memory Mapped and GZip/Zlib Compress Stream: Uses 8-Engines with Data Movers and supports Dynamic Huffman
+* GZip/Zlib Memory Mapped and GZip/Zlib Compress Stream: Supports Dynamic Huffman
 
 
 Decompression
@@ -111,22 +126,19 @@ Tables below showcases throughput details of decompression for various Alveo acc
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Architecture                                                         |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |           
 +======================================================================+===================+==========+=========+=======+======+
-| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  284MHz  |  5.5K   |  0    |  4   |
+| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  294MHz  |  5.4K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  290MHz  |  6.4K   |  0    |  4   |
+| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  274MHz  |  6.4K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `GZip/Zlib Streaming <L2/demos/gzip>`_                               |     518  MB/s     |  273MHz  |  6.9K   |  0    |  2   |
+| `GZip/Zlib Streaming <L2/demos/gzip>`_                               |     518  MB/s     |  273MHz  |  6.5K   |  8    |  0   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Streaming <L2/demos/zstd_decompress>`_                         |     463  MB/s     |  252MHz  |  21K    |  33   |  6   |
+| `ZStd Streaming <L2/tests/zstdd_32KB>`_                              |   658.86 MB/s     |  271MHz  |  19.6K  |  32   |  3   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Full File Streaming <L2/demos/zstd_decompress>`_               |     463  MB/s     |  252MHz  |  21K    |  33   |  6   |
+| `ZStd Full File Streaming <L2/tests/zstdd_32KB>`_                    |   658.86 MB/s     |  271MHz  |  19.6K  |  32   |  3   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
-.. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
-.. [*] LZ4 Streaming and Snappy Streaming: Uses Single Engine and Datawidth 64-bit
-.. [*] LZ4 Memory Mapped and Snappy Memory Mapped: Uses 8-Engines with Data Movers
-.. [*] GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported) and data width 64-bit.
-.. [*] ZStd Streaming: Uses single engine with datawidth 32-bit and full Standard support with limited Window Size upto 128KB.
+* GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
+* ZStd Streaming: Full Standard support with limited Window Size upto 128KB.
 
 
 LICENSE

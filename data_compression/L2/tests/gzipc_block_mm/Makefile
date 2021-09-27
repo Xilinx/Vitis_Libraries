@@ -58,12 +58,12 @@ DEVICE ?= xilinx_u250_gen3x16_xdma_3_1_202020_1
 # ###################### Setting up default value of HOST_ARCH ####################### 
 HOST_ARCH ?= x86
 
-# #################### Checking if DEVICE in blacklist #############################
+# #################### Checking if DEVICE in blocklist #############################
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
-# #################### Checking if DEVICE in whitelist ############################
+# #################### Checking if DEVICE in allowlist ############################
 ifneq ($(findstring xilinx_u250_gen3x16_xdma_3_1_202020_1, $(DEVICE)), xilinx_u250_gen3x16_xdma_3_1_202020_1)
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u50, $(DEVICE)), u50)
@@ -100,6 +100,7 @@ PERL ?= perl
 SDCARD := sd_card
 EMU_DIR := $(SDCARD)/data/emulation
 endif
+include ./config.mk
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files

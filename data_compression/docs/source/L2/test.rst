@@ -16,15 +16,21 @@ Tests examples for **lz4**, **snappy**, **lz4_streaming**, **snappy_streaming**,
    :caption: List of Tests
 
    lz4_compress_streaming.rst
-   lz4_compress.rst
    snappy_compress.rst
    gzipc_block_mm.rst
    gzipc.rst
+   gzipc_16KB.rst
+   gzipc_8KB.rst
    gzipc_static.rst
+   zlibc.rst
+   zlibc_16KB.rst
+   zlibc_8KB.rst
+   zlibc_static.rst
+   zstd_quadcore_compress.rst
    lz4_dec_streaming_parallelByte8.rst
    snappy_dec_streaming_parallelByte8.rst
-   gzip_decompress.rst
-
+   zstdd_32KB.rst
+   
 .. note::
    Execute the following commands before building any of the examples:
 

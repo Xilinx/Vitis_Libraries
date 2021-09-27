@@ -8,7 +8,7 @@ Xilinx Lz4 Multistream Compress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-lz4_compress_test    8933  14391 42   6 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ===== ===== 
+Module                   LUT       FF        BRAM  URAM 
+lz4_compress_test        8.9K      14.4K     42    6 
+======================== ========= ========= ===== ===== 

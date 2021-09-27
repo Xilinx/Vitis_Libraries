@@ -160,7 +160,7 @@ endif
 
 EXE_NAME := lz4
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -dx $(BUILD_DIR)/decompress_streaming.xclbin -d $(CUR_DIR)/sample.txt.lz4
+HOST_ARGS := -dx $(BUILD_DIR)/decompress_streaming.xclbin -d $(CUR_DIR)/data/sample.txt.lz4
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 

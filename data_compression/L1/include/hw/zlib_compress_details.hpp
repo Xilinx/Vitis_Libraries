@@ -75,7 +75,7 @@ void dataDuplicator(hls::stream<IntVectorStream_dt<8, PARALLEL_BYTES> >& inStrea
     if (STRATEGY == 0) {
         checksumInitStream << ~0;
     } else {
-        checksumInitStream << 0;
+        checksumInitStream << 1;
     }
 
 duplicator:
@@ -436,7 +436,15 @@ strdBlck:
     tmpVal.range(67, 0) = 0xffff0000015;
     packedStream << tmpVal;
 
-    tmpVal.range(67, 4) = checksumStream.read();
+    ap_uint<32> tmpChecksum = checksumStream.read();
+    if (STRATEGY == 0) {
+        tmpVal.range(36, 4) = tmpChecksum;
+    } else {
+        for (auto i = 0; i < 4; i++) {
+#pragma HLS UNROLL
+            tmpVal.range((((4 - i) * 8) - 1) + 4, ((3 - i) * 8) + 4) = tmpChecksum.range(((i + 1) * 8) - 1, i * 8);
+        }
+    }
     tmpVal.range(3, 0) = 4;
     packedStream << tmpVal;
     // Input Size Data
@@ -496,11 +504,10 @@ multicorePacker:
         }
         outVal.strobe = inputIdx;
         outStream << outVal;
-    } else {
-        // send end of stream data
-        outVal.strobe = 0;
-        outStream << outVal;
     }
+    // send end of stream data
+    outVal.strobe = 0;
+    outStream << outVal;
 }
 
 template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
@@ -541,15 +548,17 @@ void zlibTreegenScheduler(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > l
     outIdxNum << 0xFF;
 }
 
-template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
+template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24, int NUM_TREEGEN = 1>
 void zlibTreegenScheduler(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77InTree[NUM_BLOCK],
-                          hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& lz77OutTree,
+                          hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77OutTree[NUM_TREEGEN],
                           hls::stream<ap_uint<4> >& coreIdxStream,
                           hls::stream<uint8_t>& outIdxNum) {
     constexpr int c_litDistCodeCnt = 286 + 30;
     ap_uint<NUM_BLOCK> is_pending;
     bool eos_tmp[NUM_BLOCK];
+    static uint8_t treeIdx = 0;
     for (uint8_t i = 0; i < NUM_BLOCK; i++) {
+#pragma HLS UNROLL
         is_pending.range(i, i) = 1;
         eos_tmp[i] = false;
     }
@@ -570,15 +579,54 @@ void zlibTreegenScheduler(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > l
                 outIdxNum << j;
                 for (uint16_t k = 0; k < c_litDistCodeCnt; k++) {
                     if (read_flag) inVal = lz77InTree[j].read();
-                    lz77OutTree << inVal;
+                    lz77OutTree[treeIdx] << inVal;
                     read_flag = true;
                 }
+                treeIdx++;
+                if (treeIdx == NUM_TREEGEN) treeIdx = 0;
             }
         }
     }
     inVal.strobe = 0;
-    lz77OutTree << inVal;
+    for (auto i = 0; i < NUM_TREEGEN; i++) {
+        lz77OutTree[i] << inVal;
+    }
     outIdxNum << 0xFF;
+}
+
+template <int NUM_BLOCK = 8, int NUM_TREEGEN = 1>
+void zlibTreegenDistributor(
+    hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[NUM_BLOCK],
+    hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufSerialCodeStream[NUM_TREEGEN],
+    hls::stream<uint8_t>& inIdxNum) {
+    constexpr int c_litDistCodeCnt = 286 + 30;
+    DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> hufCodeOut;
+    static uint8_t treeIdx = 0;
+
+tgndst_units_main:
+    for (uint8_t i = inIdxNum.read(); i != 0xFF; i = inIdxNum.read()) {
+    tgndst_litDist:
+        for (uint16_t j = 0; j < c_litDistCodeCnt; j++) {
+#pragma HLS PIPELINE II = 1
+            hufCodeOut = hufSerialCodeStream[treeIdx].read();
+            hufCodeStream[i] << hufCodeOut;
+        }
+    tgndst_bitlen:
+        while (1) {
+#pragma HLS PIPELINE II = 1
+            hufCodeOut = hufSerialCodeStream[treeIdx].read();
+            hufCodeStream[i] << hufCodeOut;
+            if (hufCodeOut.data[0].bitlen == 0) break;
+        }
+        treeIdx++;
+        if (treeIdx == NUM_TREEGEN) treeIdx = 0;
+    }
+    // send eos to all unit
+    hufCodeOut.strobe = 0;
+tgndst_send_eos:
+    for (uint8_t i = 0; i < NUM_BLOCK; ++i) {
+        hufCodeStream[i] << hufCodeOut;
+    }
 }
 
 template <int NUM_BLOCK = 8>
@@ -628,21 +676,34 @@ void zlibTreegenStreamWrapper(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1>
     zlibTreegenDistributor<NUM_BLOCK>(hufCodeStream, hufSerialCodeStream, idxNum);
 }
 
-template <int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
-void zlibTreegenStreamWrapper(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77Tree[NUM_BLOCK],
-                              hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[NUM_BLOCK],
-                              hls::stream<ap_uint<4> >& coreIdxStream) {
+template <int BLOCK_SIZE_IN_KB = 32, int NUM_BLOCK = 8, int MAX_FREQ_DWIDTH = 24>
+void zlibMultiTreegenStream(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77Tree[NUM_BLOCK],
+                            hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[NUM_BLOCK],
+                            hls::stream<ap_uint<4> >& coreIdxStream) {
+    constexpr int c_litDistCodeDepth = 286 + 30 + 4;
 #pragma HLS dataflow
-    hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77SerialTree("lz77SerialTree");
-    hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufSerialCodeStream("hufSerialCodeStream");
+    constexpr int c_numTreegen = 1 + ((NUM_BLOCK - 1) / BLOCK_SIZE_IN_KB); // 32 / BLOCK_SIZE_IN_KB;
+    hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77SerialTree[c_numTreegen];
+    hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufSerialCodeStream[c_numTreegen];
     hls::stream<uint8_t> idxNum("idxNum");
-#pragma HLS STREAM variable = lz77SerialTree depth = 4
-#pragma HLS STREAM variable = hufSerialCodeStream depth = 4
-#pragma HLS STREAM variable = idxNum depth = 16
+#pragma HLS aggregate variable = lz77SerialTree compact = bit
+#pragma HLS aggregate variable = hufSerialCodeStream compact = bit
 
-    zlibTreegenScheduler<NUM_BLOCK, MAX_FREQ_DWIDTH>(lz77Tree, lz77SerialTree, coreIdxStream, idxNum);
-    zlibTreegenStream<MAX_FREQ_DWIDTH, 0>(lz77SerialTree, hufSerialCodeStream);
-    zlibTreegenDistributor<NUM_BLOCK>(hufCodeStream, hufSerialCodeStream, idxNum);
+#pragma HLS STREAM variable = lz77SerialTree depth = c_litDistCodeDepth
+#pragma HLS STREAM variable = hufSerialCodeStream depth = 512
+#pragma HLS STREAM variable = idxNum depth = 24
+
+    zlibTreegenScheduler<NUM_BLOCK, MAX_FREQ_DWIDTH, c_numTreegen>(lz77Tree, lz77SerialTree, coreIdxStream, idxNum);
+parallelTreegen:
+    for (auto i = 0; i < c_numTreegen; i++) {
+#pragma HLS UNROLL
+        if (BLOCK_SIZE_IN_KB > 16) {
+            zlibTreegenStream<MAX_FREQ_DWIDTH, 0>(lz77SerialTree[i], hufSerialCodeStream[i]);
+        } else {
+            zlibTreegenStreamLL<MAX_FREQ_DWIDTH, 0>(lz77SerialTree[i], hufSerialCodeStream[i]);
+        }
+    }
+    zlibTreegenDistributor<NUM_BLOCK, c_numTreegen>(hufCodeStream, hufSerialCodeStream, idxNum);
 }
 
 template <int DWIDTH, int SLAVES>

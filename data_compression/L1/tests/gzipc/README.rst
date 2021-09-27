@@ -8,7 +8,7 @@ Xilinx GZIP 32KB Compress Streaming Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-gzip_compress_test   48289 50623 123  72 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ========= ===== 
+Module                   LUT       FF        BRAM_18K  URAM 
+gzip_compress_test       52.7K     48.4K     284       64 
+======================== ========= ========= ========= ===== 

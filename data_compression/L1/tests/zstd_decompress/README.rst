@@ -8,7 +8,7 @@ Xilinx ZSTD Decompress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-zstd_decompress      28073 20766 36   5 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ===== ===== 
+Module                   LUT       FF        BRAM  URAM 
+zstd_decompress          28.1K     20.8K     36    5 
+======================== ========= ========= ===== ===== 

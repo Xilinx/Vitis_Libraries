@@ -39,6 +39,10 @@
 #define GMEM_DWIDTH 64
 #endif
 
+#ifndef TUSER_DWIDTH
+#define TUSER_DWIDTH 32
+#endif
+
 #ifndef URAM_BUFFER
 #define URAM_BUFFER 0 // 0: BRAM; 1: URAM
 #endif
@@ -65,6 +69,6 @@ extern "C" {
  * @param outaxistream output compressed data
  */
 void xilGzipComp(hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& inaxistream,
-                 hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outaxistream);
+                 hls::stream<ap_axiu<GMEM_DWIDTH, TUSER_DWIDTH, 0, 0> >& outaxistream);
 }
 #endif // _XFCOMPRESSION_GZIP_COMPRESS_MULTICORE_STREAM_HPP_

@@ -54,7 +54,9 @@
                 "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "symbols": [
-                "GZIP_STREAM"
+                "GZIP_STREAM",
+                "PERF_DM",
+                "BLOCK_SIZE_IN_KB=16"
             ]
         }
     }, 
@@ -70,8 +72,7 @@
             ], 
             "symbols": [
                 "GZIP_STREAM",
-                "BLOCKSIZE_IN_KB=16",
-                "NUM_CORES=4"
+                "BLOCKSIZE_IN_KB=16"
             ], 
             "clflags": [
                 "--config PROJECT/hls.cfg"
@@ -89,7 +90,7 @@
                 }, 
                 {
                     "name": "xilDataMover", 
-                    "location": "LIB_DIR/L2/tests/src/block_stream_dm.cpp"
+                    "location": "LIB_DIR/L2/tests/src/block_stream_perf_dm.cpp"
                 }
             ]
         }

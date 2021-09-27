@@ -24,13 +24,9 @@
 
 #include "zstd_decompress_stream.hpp"
 
-constexpr int getDataPortWidth(int maxVal) {
-    return (31 - __builtin_clz(maxVal));
-}
-
 extern "C" {
-void xilZstdDecompressStream(hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
-                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& outaxistreamd) {
+void xilZstdDecompressStream(hls::stream<ap_axiu<c_instreamDWidth, 0, 0, 0> >& inaxistreamd,
+                             hls::stream<ap_axiu<c_outstreamDWidth, 0, 0, 0> >& outaxistreamd) {
 #ifdef FREE_RUNNING_KERNEL
 #pragma HLS interface ap_ctrl_none port = return
 #endif
@@ -40,7 +36,7 @@ void xilZstdDecompressStream(hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& ina
     const int c_lmoDWidth = 1 + getDataPortWidth(c_windowSize);
 
     // Call for decompression
-    xf::compression::zstdDecompressCore<MULTIPLE_BYTES, ZSTD_BLOCK_SIZE_KB, c_windowSize, c_lmoDWidth>(inaxistreamd,
-                                                                                                       outaxistreamd);
+    xf::compression::zstdDecompressCore<INPUT_BYTES, OUTPUT_BYTES, ZSTD_BLOCK_SIZE_KB, c_windowSize, c_lmoDWidth,
+                                        SEQ_LL_MODEL, LL_MODEL>(inaxistreamd, outaxistreamd);
 }
 }

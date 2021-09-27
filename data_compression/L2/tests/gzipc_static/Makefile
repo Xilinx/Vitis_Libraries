@@ -115,7 +115,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
-CXXFLAGS += -DGZIP_STREAM
+CXXFLAGS += -DGZIP_STREAM -DPERF_DM
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
@@ -228,7 +228,7 @@ $(TEMP_DIR)/xilGzipComp.xo: $(XFLIB_DIR)/L2/src/gzip_compress_multicore_stream.c
 	$(ECHO) "Compiling Kernel: xilGzipComp"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(xilGzipComp_VPP_FLAGS) $(VPP_FLAGS) -k xilGzipComp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
-$(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_dm.cpp
+$(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_perf_dm.cpp
 	$(ECHO) "Compiling Kernel: xilDataMover"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(xilDataMover_VPP_FLAGS) $(VPP_FLAGS) -k xilDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^

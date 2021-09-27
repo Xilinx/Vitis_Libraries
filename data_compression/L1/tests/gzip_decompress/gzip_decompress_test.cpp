@@ -49,8 +49,8 @@ void gzipMultiByteDecompressEngineRun(hls::stream<in_t>& inStream,
 {
     const int c_decoderType = (int)HUFFMAN_TYPE;
 
-    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, LL_MODEL, HISTORY_SIZE>(
-        inStream, inEos, outStream);
+    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, xf::compression::FileFormat::BOTH,
+                                                   LL_MODEL, HISTORY_SIZE>(inStream, inEos, outStream);
 }
 
 void validateFile(std::string& fileName, std::string& originalFileName) {

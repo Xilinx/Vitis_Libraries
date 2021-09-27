@@ -20,17 +20,9 @@
 using namespace xf::compression;
 
 // Constructor: Kernel creation
-lz4OCLHost::lz4OCLHost(enum State flow,
-                       const std::string& binaryFileName,
-                       uint8_t device_id,
-                       uint32_t block_size_kb,
-                       bool lz4_stream,
-                       bool enable_profile)
-    : m_xclbin(binaryFileName),
-      m_enableProfile(enable_profile),
-      m_deviceId(device_id),
-      m_lz4Stream(lz4_stream),
-      m_flow(flow) {
+lz4OCLHost::lz4OCLHost(
+    enum State flow, const std::string& binaryFileName, uint8_t device_id, uint32_t block_size_kb, bool lz4_stream)
+    : m_xclbin(binaryFileName), m_deviceId(device_id), m_lz4Stream(lz4_stream), m_flow(flow) {
     (m_lz4Stream) ? m_addContentSize = false : m_addContentSize = false;
 
     m_BlockSizeInKb = block_size_kb;

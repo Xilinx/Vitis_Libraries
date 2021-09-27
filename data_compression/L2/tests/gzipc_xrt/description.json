@@ -10,7 +10,6 @@
             "name": "generic launch for all flows"
         }
     ],
-    "config_make": "./config.mk",
     "platform_blacklist": [
         "zc", 
         "vck"
@@ -59,7 +58,8 @@
                 "LIB_DIR/L2/tests/src"
             ],
             "symbols": [
-                "GZIP_STREAM"
+                "GZIP_STREAM",
+                "PERF_DM"
             ]
         }
     }, 
@@ -74,7 +74,7 @@
                 },
                 {
                     "name": "xilDataMover", 
-                    "location": "LIB_DIR/L2/tests/src/block_stream_dm.cpp"
+                    "location": "LIB_DIR/L2/tests/src/block_stream_perf_dm.cpp"
                 }
             ]
         }

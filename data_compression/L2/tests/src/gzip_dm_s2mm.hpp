@@ -35,7 +35,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
+#ifndef OUTPUT_BYTES
+#define OUTPUT_BYTES MULTIPLE_BYTES
+#endif
+
+typedef ap_uint<OUTPUT_BYTES * 8> uintMemWidth_t;
 
 extern "C" {
 /**
@@ -53,6 +57,6 @@ void xilGzipS2MM(uintMemWidth_t* out,
                  uint32_t* encoded_size,
                  uint32_t* status_flag,
                  uint32_t read_block_size,
-                 hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& inStream);
+                 hls::stream<ap_axiu<OUTPUT_BYTES * 8, 0, 0, 0> >& inStream);
 }
 #endif // _XFCOMPRESSION_GZIP_DM_S2MM_HPP_

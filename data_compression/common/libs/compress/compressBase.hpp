@@ -35,7 +35,7 @@ constexpr auto MAX_CR_DEFAULT = 20;
 class compressBase {
    public:
     enum State { COMPRESS, DECOMPRESS, BOTH };
-    enum Level { OLAP = 0, SEQ };
+    enum Level { SEQ = 1, OLAP };
 
     // Xilinx compression
     virtual uint64_t xilCompress(uint8_t* in, uint8_t* out, size_t input_size) = 0;
@@ -43,9 +43,17 @@ class compressBase {
     // Xilinx decompression
     virtual uint64_t xilDecompress(uint8_t* in, uint8_t* out, size_t input_size) = 0;
 
-    virtual ~compressBase(){};
+    ~compressBase(){};
 
+    void setMCR(uint16_t max_cr) { m_maxCR = max_cr; }
+
+    void setProfile(bool enable_profile) { m_enableProfile = enable_profile; }
+    void setSeqOlapFlow(uint8_t val) { m_isSeq = val; }
+
+   protected:
     uint16_t m_maxCR;
+    bool m_enableProfile;
+    uint8_t m_isSeq;
 };
 
 #endif // _XFCOMPRESSION_COMPRESS_BASE_HPP_

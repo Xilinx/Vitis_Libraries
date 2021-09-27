@@ -70,7 +70,7 @@ class CmdLineParser {
    public:
     CmdLineParser();
     // CmdLineParser(int argc, char* argv[]);
-    virtual ~CmdLineParser();
+    ~CmdLineParser();
 
     bool addSwitch(const CmdSwitch& s);
     bool addSwitch(const string& name,
@@ -106,7 +106,7 @@ class CmdLineParser {
     /*!
      * prints the help menu in case the options are not correct.
      */
-    virtual void printHelp();
+    void printHelp();
 
    protected:
     /*!

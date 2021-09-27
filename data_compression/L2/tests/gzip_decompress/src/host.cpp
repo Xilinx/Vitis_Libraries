@@ -25,13 +25,13 @@ int main(int argc, char* argv[]) {
     gzipBase::d_type decKernelType = gzipBase::FULL;
 
     // Driver class object
-    gzipApp d(argc, argv, lflow, enable_profile);
+    gzipApp d(argc, argv, lflow);
 
     // Design class object creating and constructor invocation
-    std::unique_ptr<gzipOCLHost> gzip(new gzipOCLHost(flow, d.getXclbin(), d.getInFileName(), lflow, d.getDeviceId(),
-                                                      enable_profile, decKernelType, d.getDesignFlow()));
+    std::unique_ptr<gzipOCLHost> gzip(
+        new gzipOCLHost(flow, d.getXclbin(), d.getDeviceId(), decKernelType, d.getDesignFlow()));
 
     // Run API to launch the compress or decompress engine
-    d.run(gzip.get(), d.getMCR());
+    d.run(gzip.get(), enable_profile);
     return 0;
 }

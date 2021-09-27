@@ -8,7 +8,7 @@ Xilinx ZLIB 32KB Static Compress Streaming AXI Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-zlib_compress_test   33174 36772 82   64 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ========= ===== 
+Module                   LUT       FF        BRAM_18K  URAM 
+zlib_compress_test       34.3K     36.6K     79        64 
+======================== ========= ========= ========= ===== 

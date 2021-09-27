@@ -10,7 +10,6 @@
             "name": "generic launch for all flows"
         }
     ],
-    "config_make": "./config.mk",
     "platform_blacklist": [
         "zc", 
         "vck"

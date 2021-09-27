@@ -8,7 +8,7 @@ Xilinx GZIP 32KB Compress Memory Mapped HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-gzip_compress_test   49345 49974 124  72 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ========= ===== 
+Module                   LUT       FF        BRAM_18K  URAM 
+gzip_compress_test       53.0K     47.4K     260       64 
+======================== ========= ========= ========= ===== 

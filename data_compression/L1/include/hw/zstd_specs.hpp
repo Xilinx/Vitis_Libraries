@@ -27,22 +27,41 @@ namespace xf {
 namespace compression {
 namespace details {
 
-typedef struct {
+struct __attribute__((packed)) FseBSState {
     uint8_t symbol;     // code to get length/offset basevalue
     uint8_t bitCount;   // bits to be read to generate next state
     uint16_t nextState; // basevalue for next state
-} FseBSState;
+};
 
-typedef struct {
+struct __attribute__((packed)) HuffmanTable {
     ap_uint<8> symbol; // decoded symbol
     ap_uint<4> bitlen; // code bit-length
-} HuffmanTable;
+};
 
-template <int OF_DWIDTH = 16, int ML_DWIDTH = 8, int LL_DWIDTH = OF_DWIDTH>
+template <int OF_DWIDTH = 16, int LL_DWIDTH = OF_DWIDTH, int ML_DWIDTH = 8>
 struct __attribute__((packed)) Sequence_dt {
+    ap_uint<OF_DWIDTH> offset;
     ap_uint<LL_DWIDTH> litlen;
     ap_uint<ML_DWIDTH> matlen;
-    ap_uint<OF_DWIDTH> offset;
+};
+
+template <int OF_DWIDTH = 16, int LL_DWIDTH = OF_DWIDTH, int ML_DWIDTH = 8>
+struct SequencePack {
+    // get values
+    ap_uint<ML_DWIDTH> getMatlen() { return _data.range(ML_DWIDTH - 1, 0); }
+    ap_uint<LL_DWIDTH> getLitlen() { return _data.range(ML_DWIDTH + LL_DWIDTH - 1, ML_DWIDTH); }
+    ap_uint<OF_DWIDTH> getOffset() { return _data.range(ML_DWIDTH + LL_DWIDTH + OF_DWIDTH - 1, ML_DWIDTH + LL_DWIDTH); }
+    ap_uint<OF_DWIDTH + LL_DWIDTH + ML_DWIDTH> getData() { return _data; }
+    // set value
+    void setMatlen(ap_uint<ML_DWIDTH> matlen) { _data.range(ML_DWIDTH - 1, 0) = matlen; }
+    void setLitlen(ap_uint<LL_DWIDTH> litlen) { _data.range(ML_DWIDTH + LL_DWIDTH - 1, ML_DWIDTH) = litlen; }
+    void setOffset(ap_uint<OF_DWIDTH> offset) {
+        _data.range(ML_DWIDTH + LL_DWIDTH + OF_DWIDTH - 1, ML_DWIDTH + LL_DWIDTH) = offset;
+    }
+    void setData(ap_uint<OF_DWIDTH + LL_DWIDTH + ML_DWIDTH> val) { _data = val; }
+
+   private:
+    ap_uint<OF_DWIDTH + LL_DWIDTH + ML_DWIDTH> _data;
 };
 
 enum xfBlockType_t { RAW_BLOCK = 0, RLE_BLOCK, CMP_BLOCK, INVALID_BLOCK };

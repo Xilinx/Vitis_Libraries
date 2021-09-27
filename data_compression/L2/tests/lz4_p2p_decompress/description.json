@@ -6,7 +6,7 @@
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.lz4", 
+            "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/data/sample.txt.lz4", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -127,7 +127,7 @@
                 "cmd": "", 
                 "max_memory_MB": {
                     "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
+                    "vitis_hw_emu": 32768, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240
                 }, 

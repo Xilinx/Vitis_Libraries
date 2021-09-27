@@ -44,7 +44,7 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx GZip Compress/Decompress
-kernels. The final Fmax achieved is 273MHz 
+kernels. The final Fmax achieved is 277MHz 
 
 Compression
 ~~~~~~~~~~~
@@ -52,7 +52,7 @@ Compression
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   33.7K  3.1K  33.2K  38    36    
+Compress   35.4K  4.6K  31.8K  75    32    
 ========== ===== ====== ===== ===== ===== 
 
 Decompression
@@ -61,11 +61,11 @@ Decompression
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-DeCompress 6.9K  748    5.3K   0     2    
+DeCompress 6.5K  866    5K    8     0    
 ---------- ----- ------ ----- ----- -----
-DM Reader  1.5K  281    1.8K   2      0
+DM Reader  1.5K  281    1.9K  2     0
 ---------- ----- ------ ----- ----- -----
-DM Writer  2.7K  630    4K     2      0
+DM Writer  4K    1681   6K    9     0
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data
@@ -82,7 +82,7 @@ Decompression Throughput      518 MB/s
 Average Compression Ratio     2.67x (Silesia Benchmark)
 ============================= =========================
 
-Note: Overall throughput can still be increased with multiple compute
+Note: Overall throughput can still be increased with multiple compute.
 
 
 Standard GZip Support

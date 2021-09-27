@@ -26,8 +26,7 @@
 #include <iostream>
 
 // compressApp Constructor: parse CLI opions and set the driver class memebr variables
-lz4App::lz4App(int argc, char** argv, bool is_seq, bool enable_profile)
-    : compressApp(argc, argv, is_seq, enable_profile) {
+lz4App::lz4App(int argc, char** argv, bool is_seq) : compressApp(argc, argv, is_seq) {
     m_extn = ".lz4";
     m_parser.addSwitch("--block_size", "-B", "Compress Block Size [0-64: 1-256: 2-1024: 3-4096]", "0");
     m_parser.parse(argc, argv);

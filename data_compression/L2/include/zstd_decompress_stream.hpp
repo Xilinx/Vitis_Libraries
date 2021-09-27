@@ -38,11 +38,26 @@
 #define ZSTD_BLOCK_SIZE_KB 32
 #endif
 
-#ifndef MULTIPLE_BYTES
-#define MULTIPLE_BYTES 4
+#ifndef INPUT_BYTES
+#define INPUT_BYTES MULTIPLE_BYTES
 #endif
 
-const int c_streamDWidth = 8 * MULTIPLE_BYTES;
+#ifndef OUTPUT_BYTES
+#define OUTPUT_BYTES MULTIPLE_BYTES
+#endif
+
+// by default disable sequence low latency model
+#ifndef SEQ_LL_MODEL
+#define SEQ_LL_MODEL false
+#endif
+
+// by default disable literal and sequence low latency model
+#ifndef LL_MODEL
+#define LL_MODEL false
+#endif
+
+const int c_instreamDWidth = INPUT_BYTES * 8;
+const int c_outstreamDWidth = OUTPUT_BYTES * 8;
 // window size is kept equal to block size in this design
 const int c_windowSize = ZSTD_BLOCK_SIZE_KB * 1024;
 
@@ -54,13 +69,11 @@ extern "C" {
  * it uses streams instead. Intermediate data is stored in internal BRAMs and stream FIFOs, which helps
  * to attain better decompression throughput.
  *
- * @param input_size input size
  * @param inaxistreamd input kernel axi stream
  * @param outaxistreamd output kernel axi stream
- * @param sizestreamd output size kernel axi stream
  *
  */
-void xilZstdDecompressStream(hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
-                             hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& outaxistreamd);
+void xilZstdDecompressStream(hls::stream<ap_axiu<c_instreamDWidth, 0, 0, 0> >& inaxistreamd,
+                             hls::stream<ap_axiu<c_outstreamDWidth, 0, 0, 0> >& outaxistreamd);
 }
 #endif // _XFCOMPRESSION_ZSTD_DECOMPRESS_STREAM_HPP_

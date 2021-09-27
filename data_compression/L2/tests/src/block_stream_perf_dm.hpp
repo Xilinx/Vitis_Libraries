@@ -37,6 +37,10 @@
 
 #define GMEM_DWIDTH 64
 
+#ifndef TUSER_DWIDTH
+#define TUSER_DWIDTH 32
+#endif
+
 #define GMEM_BURST_SIZE (512 / GMEM_DWIDTH) * 16
 
 typedef ap_uint<GMEM_DWIDTH> uintDataWidth;
@@ -60,8 +64,9 @@ void xilDataMover(uintDataWidth* in,
                   uintDataWidth* out,
                   uint32_t input_size,
                   uint32_t numItr,
+                  uint32_t blckSize,
                   uint32_t* compressed_size,
                   hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& instream_orig,
-                  hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outstream_dest);
+                  hls::stream<ap_axiu<GMEM_DWIDTH, TUSER_DWIDTH, 0, 0> >& outstream_dest);
 }
 #endif // _XFCOMPRESSION_BLOCK_STREAM_PERF_DM_HPP_

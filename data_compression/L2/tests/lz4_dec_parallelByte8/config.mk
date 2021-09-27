@@ -14,9 +14,5 @@
 # limitations under the License.
 #
 
-PARALLEL_BLOCK  := 1 
-
 PARALLEL_BYTE  := 8
 HOST_BUFFER_SIZE_IN_MB := 128
-
-CXXFLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)

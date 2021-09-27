@@ -53,7 +53,8 @@
                 "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "symbols": [
-                "GZIP_STREAM"
+                "GZIP_STREAM",
+                "PERF_DM"
             ]
         }
     }, 
@@ -86,7 +87,7 @@
                 }, 
                 {
                     "name": "xilDataMover", 
-                    "location": "LIB_DIR/L2/tests/src/block_stream_dm.cpp"
+                    "location": "LIB_DIR/L2/tests/src/block_stream_perf_dm.cpp"
                 }
             ]
         }

@@ -36,10 +36,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
+#ifndef INPUT_BYTES
+#define INPUT_BYTES MULTIPLE_BYTES
+#endif
+
+typedef ap_uint<INPUT_BYTES * 8> uintMemWidth_t;
 
 #ifdef INZSTD
-const int c_inStreamDwidth = (MULTIPLE_BYTES * 8);
+const int c_inStreamDwidth = (INPUT_BYTES * 8);
 #else
 const int c_inStreamDwidth = 16;
 #endif

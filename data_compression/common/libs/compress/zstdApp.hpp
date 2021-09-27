@@ -28,7 +28,7 @@
 class zstdApp : public compressApp {
    private:
    public:
-    zstdApp(int argc, char** argv, bool is_seq, bool enable_profile = false);
+    zstdApp(int argc, char** argv, bool is_seq);
 };
 
 #endif // _XFCOMPRESSION_ZSTD_APP_HPP_

@@ -18,13 +18,8 @@
 #include <unistd.h>
 
 // Constructor
-zstdOCLHost::zstdOCLHost(enum State flow,
-                         const std::string& binaryFileName,
-                         uint8_t device_id,
-                         uint8_t max_cr,
-                         bool enable_profile,
-                         uint32_t itrCnt)
-    : m_flow(flow), m_xclbin(binaryFileName), m_deviceId(device_id), m_maxCr(max_cr), m_testItrCount(itrCnt) {
+zstdOCLHost::zstdOCLHost(enum State flow, const std::string& binaryFileName, uint8_t device_id, uint32_t itrCnt)
+    : m_flow(flow), m_xclbin(binaryFileName), m_deviceId(device_id), m_testItrCount(itrCnt) {
     // unsigned fileBufSize;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -224,7 +219,7 @@ uint64_t zstdOCLHost::decompressEngine(uint8_t* in, uint8_t* out, size_t input_s
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
     uint32_t inBufferSize = input_size;
     uint32_t isLast = 1;
-    const uint64_t max_outbuf_size = input_size * m_maxCr;
+    const uint64_t max_outbuf_size = input_size * m_maxCR;
     const uint32_t lim_4gb = (uint32_t)(((uint64_t)4 * 1024 * 1024 * 1024) - 2); // 4GB limit on output size
     uint32_t outBufferSize = 0;
     // allocate < 4GB size for output buffer

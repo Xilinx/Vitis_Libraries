@@ -16,7 +16,8 @@
                   "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
              ]
         }
-    ], 
+    ],
+    "config_make": "./config.mk", 
     "platform_blacklist": [
         "zc"
     ], 

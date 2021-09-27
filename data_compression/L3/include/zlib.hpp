@@ -319,7 +319,7 @@ class xfZlib {
     size_t deflate_buffer(
         uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, const std::string& cu);
 
-    // Extra copy API
+    // Libz based deflate API
     size_t deflate_buffer(xlibData* strm, int flush, size_t& input_size, bool& last_data, const std::string& cu);
 
     /**
@@ -329,6 +329,7 @@ class xfZlib {
          * @param in input byte sequence
          * @param out output byte sequence
          * @param input_size input size
+         * @param output_size input size
          * @param last_data last compressed output buffer
          * @param last_buffer last input buffer
          * @param cu comput unit name
@@ -340,6 +341,8 @@ class xfZlib {
                           bool& last_data,
                           bool last_buffer,
                           const std::string& cu_id);
+
+    // Libz based inflate API
     size_t inflate_buffer(xlibData* strm,
                           int last_block,
                           size_t& input_size,
@@ -355,6 +358,7 @@ class xfZlib {
      * @param in input byte sequence
      * @param out output byte sequence
      * @param actual_size input size
+     * @param max_outbuf_size Maximum output buffer size
      * @param cu_run compute unit number
      */
 
@@ -369,6 +373,10 @@ class xfZlib {
      * @param in input byte sequence
      * @param out output byte sequence
      * @param input_size input size
+     * @param cu compute unit number
+     * @param level GZip/Zlib level
+     * @param strategy GZip/Zlib strategy
+     * @param window_bits GZip/Zlib window size
      */
     // Default values
     // Level    = Fast method
@@ -383,7 +391,8 @@ class xfZlib {
      *
      * @param inFile_name input file name
      * @param outFile_name output file name
-     * @param actual_size input size
+     * @param input_size input size
+     * @param cu_run compute unit number
      */
 
     uint64_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run = 0);
@@ -403,10 +412,16 @@ class xfZlib {
     uint64_t get_event_duration_ns(const cl::Event& event);
 
     /**
-     * @brief Constructor responsible for creating various host/device buffers.
+     * @brief Libz supported constructor responsible for creating various host/device buffers.
      * This gets context created already with it so skips ocl platform, device
      * and context creation as part of it.
-     *
+     * @param binaryFile XCLBIN name
+     * @param sb_opt Slave Bridge option
+     * @param context OpenCL context
+     * @param program OpenCL program
+     * @param device OpenCL device
+     * @param dflow GZip/Zlib flow
+     * @param bank_id Bank Id of a device
      */
     xfZlib(const std::string& binaryFile,
            bool sb_opt,
@@ -419,6 +434,16 @@ class xfZlib {
 
     /**
      * @brief Constructor responsible for creating various host/device buffers.
+     * @param binaryFile binaryFile
+     * @param sb_opt Slave Bridge option
+     * @param c_max_cr Maximum compression ratio
+     * @param cd_flow compress/decompress flow
+     * @param device_id device id
+     * @param profile OpenCL profiling enble/disable
+     * @param d_type decompression kernel type (Dynamic/Full/Static)
+     * @param dflow GZip/Zlib selection
+     * @param ccu Compression CU number
+     * @param dcu Decompression CU number
      *
      */
     xfZlib(const std::string& binaryFile,
@@ -433,46 +458,43 @@ class xfZlib {
            uint8_t dcu = 0);
 
     /**
-     * @brief OpenCL setup initialization
-     * @param binaryFile
+     * OpenCL setup initialization
      *
      */
     int init(const std::string& binaryFile, uint8_t dtype);
 
     /**
-     * @brief OpenCL setup release
+     * OpenCL setup release
      *
      */
     void release();
 
     /**
-     * @brief Release host/device memory
+     * Release host/device memory
      */
     ~xfZlib();
 
     /**
-     * @brief error_code of a OpenCL call
+     * Error_code of a OpenCL call
      */
     int error_code(void);
 
     /**
-     * @brief returns check sum value (CRC32/Adler32)
+     * Returns check sum value (CRC32/Adler32)
      */
     uint32_t get_checksum(void);
 
     /**
-     * @brief set check sum value (CRC32/Adler32)
+     * Set check sum value (CRC32/Adler32)
      */
     void set_checksum(uint32_t cval);
 
     /**
-     * @brief get compress kernel name
+     * Get compress kernel name
      */
     std::string getCompressKernel(int index);
 
-    /**
-     * @brief get decompress kernel name
-     */
+    // Get decompress kernel name
     std::string getDeCompressKernel(int index);
 
    private:

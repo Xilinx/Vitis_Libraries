@@ -46,6 +46,7 @@ extern "C" {
  * @param inaxistream input kernel axi stream for compressed data
  * @param outaxistream output kernel axi stream for decompressed data
  * @param inputSize input data size
+ * @param outputSize output data size
  */
 void xilSnappyDecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
                                hls::stream<ap_axiu<8, 0, 0, 0> >& outaxistream,

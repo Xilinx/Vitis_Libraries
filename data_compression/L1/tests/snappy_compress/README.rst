@@ -8,7 +8,7 @@ Xilinx Snappy Compress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-snappy_compress_test 2811  3181  8    6 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ===== ===== 
+Module                   LUT       FF        BRAM  URAM 
+snappy_compress_test     2.8K      3.2K      8     6 
+======================== ========= ========= ===== ===== 

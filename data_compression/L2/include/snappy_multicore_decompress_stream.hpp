@@ -52,8 +52,9 @@ extern "C" {
  * and process in block based fashion and writes the raw data to global memory.
  *
  * @param inaxistream input kernel axi stream for compressed data
+ * @param inaxistreamsize input stream data size
  * @param outaxistream output kernel axi stream for decompressed data
- * @param inputSize input data size
+ * @param outaxistreamsize output stream data size
  */
 void xilSnappyDecompressStream(hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& inaxistream,
                                hls::stream<ap_axiu<32, 0, 0, 0> >& inaxistreamsize,

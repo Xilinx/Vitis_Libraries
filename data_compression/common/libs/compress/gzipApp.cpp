@@ -25,14 +25,13 @@
 #include <iomanip>
 
 // compressApp Constructor: parse CLI opions and set the driver class memebr variables
-gzipApp::gzipApp(int argc, char** argv, bool is_seq, bool enable_profile)
-    : compressApp(argc, argv, is_seq, enable_profile) {
+gzipApp::gzipApp(int argc, char** argv, uint8_t swPline) : compressApp(argc, argv, swPline) {
     m_extn = ".gz";
     m_parser.addSwitch("--zlib", "-zlib", "[0:GZip, 1:Zlib]", "0");
     m_parser.parse(argc, argv);
     m_zlibFlow = (uint8_t)stoi(m_parser.value("zlib"));
     if (m_zlibFlow) m_extn = ".xz";
-    compressApp::parser(argc, argv);
+    compressApp::parser(argc, argv, swPline);
 }
 
 uint8_t gzipApp::getDesignFlow(void) {

@@ -113,7 +113,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
-CXXFLAGS += -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8
+CXXFLAGS += -DMULTIPLE_BYTES=8
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
@@ -158,7 +158,7 @@ endif
 
 EXE_NAME := xil_lz4_decompress_streaming
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -xbin $(BUILD_DIR)/decompress_streaming.xclbin -d $(CUR_DIR)/sample.txt.lz4
+HOST_ARGS := -xbin $(BUILD_DIR)/decompress_streaming.xclbin -d $(CUR_DIR)/data/sample.txt.lz4
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
@@ -172,7 +172,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
 
-VPP_FLAGS += -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8 
+VPP_FLAGS += -DMULTIPLE_BYTES=8 
 
 # Kernel linker flags
 VPP_LDFLAGS_decompress_streaming_temp := --config $(CUR_DIR)/connectivity.cfg

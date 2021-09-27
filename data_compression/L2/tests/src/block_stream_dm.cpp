@@ -34,14 +34,15 @@ void dataWrapper(hls::stream<ap_uint<GMEM_DWIDTH> >& mm2sStream,
                  hls::stream<bool>& outEos,
                  hls::stream<uint32_t>& outSizeStream,
                  hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& instream_orig,
-                 hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outstream_dest) {
+                 hls::stream<ap_axiu<GMEM_DWIDTH, TUSER_DWIDTH, 0, 0> >& outstream_dest) {
 #pragma HLS INTERFACE ap_ctrl_none port = return
 #pragma HLS dataflow
     // HLS 2 AXI
     xf::compression::details::streamDm2k<GMEM_DWIDTH, uint32_t, 32>(mm2sStream, sizeStream, instream_orig);
 
     // AXI 2 HLS
-    xf::compression::details::streamK2Dm<factor, uint32_t, 32>(outStream, outEos, outSizeStream, outstream_dest);
+    xf::compression::details::streamK2Dm<factor, uint32_t, 32, TUSER_DWIDTH>(outStream, outEos, outSizeStream,
+                                                                             outstream_dest);
 }
 
 // Top Function
@@ -51,7 +52,7 @@ void xilDataMover(uintDataWidth* in,
                   uint32_t input_size,
                   uint32_t* compressed_size,
                   hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& instream_orig,
-                  hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& outstream_dest) {
+                  hls::stream<ap_axiu<GMEM_DWIDTH, TUSER_DWIDTH, 0, 0> >& outstream_dest) {
 #pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem max_read_burst_length = 64
 #pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem max_write_burst_length = 64
 #pragma HLS INTERFACE m_axi port = compressed_size offset = slave bundle = gmem
@@ -94,7 +95,7 @@ void xilDataMover(uintDataWidth* in,
     dataWrapper(mm2sStream, sizeStream, outStream, outEos, outSizeStream, instream_orig, outstream_dest);
 
     // HLS Streams to Memory Write
-    xf::compression::details::s2mmEosSimple<GMEM_DWIDTH, GMEM_BURST_SIZE, uint32_t>(out, outStream, outEos,
-                                                                                    outSizeStream, compressed_size);
+    xf::compression::details::s2mmEosSimple<GMEM_DWIDTH, GMEM_BURST_SIZE, uint32_t, TUSER_DWIDTH>(
+        out, outStream, outEos, outSizeStream, compressed_size);
 }
 }

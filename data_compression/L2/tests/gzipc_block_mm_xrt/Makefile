@@ -81,7 +81,6 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
-include ./config.mk
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files

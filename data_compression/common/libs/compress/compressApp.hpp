@@ -51,7 +51,7 @@ class compressApp {
     sda::utils::CmdLineParser m_parser;
     std::string m_extn{".compressed"};
     bool m_enableProfile;
-    bool m_isSeq;
+    uint8_t m_isSeq = compressBase::SEQ; // Default Sequential
 
     /** Switch flow
      * true means compress,
@@ -63,9 +63,11 @@ class compressApp {
      * @brief Initialize compressApp content
      *
      */
-    compressApp(const int argc, char** argv, bool is_seq, bool enable_profile);
-    void parser(const int argc, char** argv);
+    compressApp(const int argc, char** argv, uint8_t swPline = false);
+    void parser(const int argc, char** argv, uint8_t swPline = false);
     int validate(std::string& inFile, std::string& outFile);
+    void setSwPipeline(uint8_t val) { m_isSeq = val; };
+
     // Get Input Filename
     std::string getXclbin(void) const;
     uint8_t getDeviceId(void) const;
@@ -76,7 +78,7 @@ class compressApp {
     void printTestSummaryHeader();
     void printTestSummaryFooter(const std::string& testFile);
     // -c -d -l -t
-    void run(compressBase* b, uint16_t maxCR = MAX_CR_DEFAULT);
+    void run(compressBase* b, bool enable_profile = false);
 
     void runCompress(compressBase* b, const std::string&);
 

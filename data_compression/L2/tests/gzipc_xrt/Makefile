@@ -81,7 +81,6 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
-include ./config.mk
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
@@ -138,7 +137,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src
 
-VPP_FLAGS += -DGZIP_STREAM 
+VPP_FLAGS += -DGZIP_STREAM -DPERF_DM 
 
 # Kernel linker flags
 VPP_LDFLAGS_compress_temp := --config $(CUR_DIR)/connectivity.cfg
@@ -183,7 +182,7 @@ $(TEMP_DIR)/xilGzipComp.xo: $(XFLIB_DIR)/L2/src/gzip_compress_multicore_stream.c
 	$(ECHO) "Compiling Kernel: xilGzipComp"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(xilGzipComp_VPP_FLAGS) $(VPP_FLAGS) -k xilGzipComp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
-$(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_dm.cpp
+$(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_perf_dm.cpp
 	$(ECHO) "Compiling Kernel: xilDataMover"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(xilDataMover_VPP_FLAGS) $(VPP_FLAGS) -k xilDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^

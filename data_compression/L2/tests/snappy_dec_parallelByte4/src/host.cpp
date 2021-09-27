@@ -24,12 +24,11 @@ int main(int argc, char* argv[]) {
     compressBase::Level lflow = compressBase::SEQ;
 
     // Driver class object
-    snappyApp d(argc, argv, lflow, enable_profile);
+    snappyApp d(argc, argv, lflow);
 
     // Design class object creating and constructor invocation
-    std::unique_ptr<snappyOCLHost> snappy(
-        new snappyOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), enable_profile));
+    std::unique_ptr<snappyOCLHost> snappy(new snappyOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize()));
 
     // Run API to launch the compress or decompress engine
-    d.run(snappy.get(), d.getMCR());
+    d.run(snappy.get(), enable_profile);
 }

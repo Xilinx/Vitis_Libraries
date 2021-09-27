@@ -112,8 +112,6 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
-
-CXXFLAGS += -DPARALLEL_BLOCK=1
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
@@ -170,7 +168,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
 
-VPP_FLAGS += -DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=4 
+VPP_FLAGS += -DPARALLEL_BYTE=4 
 
 # Kernel args
 

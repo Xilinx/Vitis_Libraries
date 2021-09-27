@@ -113,7 +113,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
-CXXFLAGS += -DSNAPPY_STREAM -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8
+CXXFLAGS += -DSNAPPY_STREAM -DMULTIPLE_BYTES=8
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
@@ -171,7 +171,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src
 
 
-VPP_FLAGS += -DSNAPPY_STREAM -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8 
+VPP_FLAGS += -DSNAPPY_STREAM -DMULTIPLE_BYTES=8 
 
 # Kernel linker flags
 VPP_LDFLAGS_decompress_streaming_temp := --config $(CUR_DIR)/connectivity.cfg

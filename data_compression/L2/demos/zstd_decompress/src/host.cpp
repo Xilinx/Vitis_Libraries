@@ -23,12 +23,11 @@ int main(int argc, char* argv[]) {
     compressBase::State flow = compressBase::DECOMPRESS;
     compressBase::Level lflow = compressBase::SEQ;
     // Driver class object
-    zstdApp d(argc, argv, lflow, enable_profile);
+    zstdApp d(argc, argv, lflow);
 
     // Design class object creating and constructor invocation
-    std::unique_ptr<zstdOCLHost> zstd(
-        new zstdOCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getMCR(), enable_profile));
+    std::unique_ptr<zstdOCLHost> zstd(new zstdOCLHost(flow, d.getXclbin(), d.getDeviceId()));
 
     // Run API to launch the compress or decompress engine
-    d.run(zstd.get());
+    d.run(zstd.get(), enable_profile);
 }

@@ -49,7 +49,6 @@
                 "LIB_DIR/L2/tests/src"
             ], 
             "symbols": [
-                "MULTIPLE_BYTES=4", 
                 "ZSTD_BLOCK_SIZE_KB=32"
             ]
         }
@@ -58,11 +57,13 @@
         "compiler": {
             "symbols": [
                 "INZSTD=1", 
-                "MULTIPLE_BYTES=4", 
+                "INPUT_BYTES=4",
+                "OUTPUT_BYTES=8",
                 "ZSTD_BLOCK_SIZE_KB=32" 
             ],
             "includepaths": [
-                "LIB_DIR/L2/tests/src"
+                "LIB_DIR/L2/tests/src", 
+                "LIB_DIR/../security/L1/include" 
             ]
         }
     }, 

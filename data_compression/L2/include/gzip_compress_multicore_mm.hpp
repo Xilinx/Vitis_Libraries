@@ -59,7 +59,9 @@ extern "C" {
  * @param in input raw data
  * @param out output compressed data
  * @param compressd_size compressed output size of each block
+ * @param checksumData checksum data
  * @param input_size input data size
+ * @param checksumTye checksum type
  */
 void xilGzipCompBlock(const ap_uint<GMEM_DWIDTH>* in,
                       ap_uint<GMEM_DWIDTH>* out,

@@ -8,7 +8,7 @@ Xilinx LZ4 32 Bit Memory Mapped Single Engine Compress HLS Test
 Results
 -------
 
-==================== ===== ===== ==== ==== 
-Module               LUT   FF    BRAM URAM 
-lz4_compress_test    6110  8247  13   6 
-==================== ===== ===== ==== ==== 
+======================== ========= ========= ===== ===== 
+Module                   LUT       FF        BRAM  URAM 
+lz4_compress_test        6.1K      8.2K      13    6 
+======================== ========= ========= ===== ===== 

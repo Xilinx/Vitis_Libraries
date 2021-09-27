@@ -42,7 +42,9 @@ const auto HOST_BUFFER_SIZE = (32 * 1024 * 1024);
  * Default block size
  *
  */
-const auto BLOCK_SIZE_IN_KB = 64;
+#ifndef BLOCK_SIZE_IN_KB
+#define BLOCK_SIZE_IN_KB 64
+#endif
 
 /**
  * Maximum number of blocks based on host buffer size
@@ -76,7 +78,6 @@ class gzipBase : public compressBase {
    protected:
     bool m_isZlib = false;
     std::string m_inFileName;
-    bool m_isSeq = false;
     bool m_freeRunKernel = false;
     int m_level = 1;
     int m_strategy = 0;
@@ -89,16 +90,6 @@ class gzipBase : public compressBase {
     enum design_flow { XILINX_GZIP, XILINX_ZLIB };
 
     bool is_freeRunKernel(void) { return m_freeRunKernel; };
-
-    /**
-      * @brief Enable Profile
-      * True: Prints the end to end throughput.
-      * False: Prints Kernel throughput.
-      */
-    bool m_enableProfile;
-
-    gzipBase(bool enable_profile) : m_enableProfile(enable_profile) {}
-
     /**
          * @brief Xilinx Compress
          *
@@ -172,6 +163,8 @@ class gzipBase : public compressBase {
     virtual uint64_t decompressEngine(
         uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t max_outbuf_size, int cu = 0) = 0;
     virtual uint64_t decompressEngineSeq(
+        uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t max_outbuf_size, int cu = 0) = 0;
+    virtual uint64_t decompressEngineMMSeq(
         uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t max_outbuf_size, int cu = 0) = 0;
     gzipBase(){};
 };

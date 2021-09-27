@@ -40,8 +40,6 @@ class zstdOCLHost : public zstdBase {
     enum State m_flow;
     std::string m_xclbin;
     uint8_t m_deviceId;
-    bool m_enableProfile;
-    uint8_t m_maxCr;
     uint32_t m_testItrCount;
     cl::Program* m_program;
     cl::Context* m_context;
@@ -98,12 +96,7 @@ class zstdOCLHost : public zstdBase {
      * @brief Initialize host/device and OpenCL Setup
      *
      */
-    zstdOCLHost(enum State flow,
-                const std::string& binaryFileName,
-                uint8_t device_id,
-                uint8_t max_cr,
-                bool enable_profile = false,
-                uint32_t itrCnt = 1);
+    zstdOCLHost(enum State flow, const std::string& binaryFileName, uint8_t device_id, uint32_t itrCnt = 1);
 
     /**
      * @brief Xilinx Compress

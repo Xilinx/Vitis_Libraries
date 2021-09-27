@@ -48,7 +48,7 @@ DEVICE ?= xilinx_u250_gen3x16_xdma_3_1_202020_1
 # ###################### Setting up default value of HOST_ARCH ####################### 
 HOST_ARCH ?= x86
 
-# #################### Checking if DEVICE in blacklist #############################
+# #################### Checking if DEVICE in blocklist #############################
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
@@ -56,7 +56,7 @@ ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
-# #################### Checking if DEVICE in whitelist ############################
+# #################### Checking if DEVICE in allowlist ############################
 ifneq ($(findstring xilinx_u250_gen3x16_xdma_3_1_202020_1, $(DEVICE)), xilinx_u250_gen3x16_xdma_3_1_202020_1)
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u50, $(DEVICE)), u50)
@@ -96,7 +96,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
-CXXFLAGS += -DGZIP_STREAM
+CXXFLAGS += -DGZIP_STREAM -DPERF_DM
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
@@ -181,7 +181,7 @@ $(TEMP_DIR)/xilGzipComp.xo: $(XFLIB_DIR)/L2/src/gzip_compress_multicore_stream.c
 	$(ECHO) "Compiling Kernel: xilGzipComp"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(xilGzipComp_VPP_FLAGS) $(VPP_FLAGS) -k xilGzipComp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
-$(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_dm.cpp
+$(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_perf_dm.cpp
 	$(ECHO) "Compiling Kernel: xilDataMover"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(xilDataMover_VPP_FLAGS) $(VPP_FLAGS) -k xilDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^

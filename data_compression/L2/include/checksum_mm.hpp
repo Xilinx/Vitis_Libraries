@@ -44,7 +44,6 @@ extern "C" {
  *
  * @param in input raw data
  * @param initData input Initial data
- * @param outData output checksum
  * @param inSize input size
  * @param checksumType CRC/ADLER
  */

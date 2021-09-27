@@ -36,6 +36,8 @@
 #define IN_BITWIDTH 16
 #define OUT_BITWIDTH (MULTIPLE_BYTES * 8)
 #define LL_MODEL true
+#define ZLIB_FORMAT xf::compression::FileFormat::ZLIB
+#define GZIP_FORMAT xf::compression::FileFormat::BOTH
 const uint32_t sizeof_in = (IN_BITWIDTH / 8);
 const uint32_t strbSize = (OUT_BITWIDTH / 8);
 
@@ -53,7 +55,8 @@ void gzipMultiByteDecompressEngineRun(hls::stream<in_t>& inStream, hls::stream<o
     const int c_decoderType = (int)HUFFMAN_TYPE;
 #pragma HLS DATAFLOW
 
-    xf::compression::inflateMultiByte<c_decoderType, MULTIPLE_BYTES, LL_MODEL, HISTORY_SIZE>(inStream, outStream);
+    xf::compression::inflateMultiByte<c_decoderType, MULTIPLE_BYTES, xf::compression::FileFormat::BOTH, LL_MODEL,
+                                      HISTORY_SIZE>(inStream, outStream);
 }
 
 void validateFile(std::string& fileName, std::string& originalFileName) {

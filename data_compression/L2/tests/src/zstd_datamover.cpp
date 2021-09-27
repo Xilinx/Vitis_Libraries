@@ -115,11 +115,6 @@ void xilZstdDataMover(xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE m_axi port = outputSize offset = slave bundle = gmem
 #pragma HLS interface axis port = origStream
 #pragma HLS interface axis port = destStream
-#pragma HLS INTERFACE s_axilite port = in bundle = control
-#pragma HLS INTERFACE s_axilite port = out bundle = control
-#pragma HLS INTERFACE s_axilite port = inputSize bundle = control
-#pragma HLS INTERFACE s_axilite port = outputSize bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     // Transfer Data to and from compression kernels
     __xf_zstd_datamover(in, out, inputSize, outputSize, origStream, destStream);

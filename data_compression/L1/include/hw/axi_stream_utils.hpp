@@ -83,42 +83,59 @@ write_all_files:
     } while (!allDone);
 }
 
-template <int OUT_DWIDTH>
+template <int OUT_DWIDTH, int TUSR_DWIDTH = 0>
 void hlsStream2axiu(hls::stream<IntVectorStream_dt<8, OUT_DWIDTH / 8> >& inputStream,
-                    hls::stream<ap_axiu<OUT_DWIDTH, 0, 0, 0> >& outAxiStream) {
+                    hls::stream<ap_axiu<OUT_DWIDTH, TUSR_DWIDTH, 0, 0> >& outAxiStream) {
     constexpr int c_maxByteCnt = OUT_DWIDTH / 8;
     IntVectorStream_dt<8, OUT_DWIDTH / 8> inVal = inputStream.read();
-    ap_axiu<OUT_DWIDTH, 0, 0, 0> tOut;
+    ap_axiu<OUT_DWIDTH, TUSR_DWIDTH, 0, 0> t1;
+    auto strb = inVal.strobe;
     ap_uint<OUT_DWIDTH> tmpVal;
-    bool last = (inVal.strobe < c_maxByteCnt);
-write_out_file_data:
-    while (!last) {
-#pragma HLS PIPELINE II = 1
-        for (auto i = 0, j = 0; i < OUT_DWIDTH; i += c_maxByteCnt) {
-#pragma HLS UNROLL
-            tmpVal.range(i + 7, i) = inVal.data[j++];
-        }
-        tOut.data = tmpVal;
-        tOut.last = false;
-        tOut.keep = -1;
-        outAxiStream << tOut;
-        inVal = inputStream.read();
-        last = (inVal.strobe < c_maxByteCnt);
-    }
+    ap_uint<32> outSize = 0;
 
     for (auto i = 0, j = 0; i < OUT_DWIDTH; i += c_maxByteCnt) {
 #pragma HLS UNROLL
         tmpVal.range(i + 7, i) = inVal.data[j++];
     }
-    tOut.data = tmpVal;
-    tOut.last = last;
+    t1.data = tmpVal;
     ap_uint<OUT_DWIDTH / 8> cntr = 0;
-    auto strb = inVal.strobe;
-    for (auto i = 0; i < strb; i++) {
-        cntr.range(i, i) = 1;
+    for (auto i = 0; i < c_maxByteCnt; i++) {
+#pragma HLS UNROLL
+        cntr.range(i, i) = (i < strb) ? 1 : 0;
     }
-    tOut.keep = cntr;
-    outAxiStream << tOut;
+    t1.strb = cntr;
+    t1.keep = cntr;
+    t1.last = 0;
+    if (TUSR_DWIDTH != 0) t1.user = 0;
+    if (strb == 0) {
+        t1.last = 1;
+        outAxiStream << t1;
+    }
+
+AXI2HLS:
+    while (strb != 0) {
+#pragma HLS PIPELINE II = 1
+        outSize += strb;
+        inVal = inputStream.read();
+        strb = inVal.strobe;
+        if (strb == 0) {
+            t1.last = 1;
+            if (TUSR_DWIDTH != 0) t1.user = outSize;
+        }
+        outAxiStream << t1;
+        for (auto i = 0, j = 0; i < OUT_DWIDTH; i += c_maxByteCnt) {
+#pragma HLS UNROLL
+            tmpVal.range(i + 7, i) = inVal.data[j++];
+        }
+        for (auto i = 0; i < c_maxByteCnt; i++) {
+#pragma HLS UNROLL
+            cntr.range(i, i) = (i < strb) ? 1 : 0;
+        }
+        t1.data = tmpVal;
+        t1.strb = cntr;
+        t1.keep = cntr;
+        t1.last = 0;
+    }
 }
 
 template <int IN_DWIDTH>
@@ -347,6 +364,7 @@ template <uint16_t STREAMDWIDTH, class SIZE_DT = uint32_t, uint16_t AXIWIDTH = 3
 void streamDm2k(hls::stream<ap_uint<STREAMDWIDTH> >& in,
                 SIZE_DT inputSize,
                 SIZE_DT numItr,
+                SIZE_DT blckSize,
                 hls::stream<ap_axiu<STREAMDWIDTH, 0, 0, 0> >& inStream_dm) {
     /**
      * @brief Write N-bit wide data of given size from hls stream to kernel axi stream.
@@ -358,39 +376,49 @@ void streamDm2k(hls::stream<ap_uint<STREAMDWIDTH> >& in,
      * @param inStream_dm   output kernel stream
      * @param inputSize     size of data in to be transferred
      * @param numItr        number of iterations for single file
-     *
+     * @param blckSize      Block Size
      */
     // read data from input hls to input stream for decompression kernel
 
     constexpr int c_size = STREAMDWIDTH / 8;
     ap_axiu<STREAMDWIDTH, 0, 0, 0> inData;
+    // Loop over multiple iterations of the same file
     for (auto z = 0; z < numItr; z++) {
-        SIZE_DT inputAlignedSize = inputSize / c_size;
-        uint8_t inputModSize = inputSize % c_size;
-    alignedTransfer:
-        for (auto i = 0; i < inputAlignedSize; i++) {
-#pragma HLS PIPELINE II = 1
-            ap_uint<STREAMDWIDTH> v = in.read();
-            inData.data = v;
-            inData.keep = -1;
-            inData.last = false;
-            if (inputModSize == 0 && i == inputAlignedSize - 1) {
+        // Break file into smaller chunks of multiple TLAST
+        for (auto j = 0; j < inputSize; j += blckSize) {
+            SIZE_DT bSize = blckSize;
+            SIZE_DT inputAlignedSize = bSize / c_size;
+            uint8_t inputModSize = 0;
+            if (j + blckSize > inputSize) {
+                bSize = inputSize - j;
+                inputAlignedSize = bSize / c_size;
+                inputModSize = bSize % c_size;
+            }
+        alignedTransfer:
+            // Block Size Aligned Data Transfer
+            for (auto i = 0; i < inputAlignedSize; i++) {
+#pragma HLS PIPELINE
+                ap_uint<STREAMDWIDTH> v = in.read();
+                inData.data = v;
+                inData.keep = -1;
+                inData.last = false;
+                if (inputModSize == 0 && i == inputAlignedSize - 1) {
+                    inData.last = true;
+                }
+                inStream_dm << inData;
+            }
+            // Unaligned Data Transfer
+            if (inputModSize) {
+                ap_uint<STREAMDWIDTH> v = in.read();
+                inData.data = v;
                 inData.last = true;
+                uint32_t num = 0;
+                for (auto b = 0; b < inputModSize; b++) {
+                    num |= 1UL << b;
+                }
+                inData.keep = num;
+                inStream_dm << inData;
             }
-            inStream_dm << inData;
-        }
-
-        if (inputModSize) {
-            ap_uint<STREAMDWIDTH> v = in.read();
-            ap_axiu<STREAMDWIDTH, 0, 0, 0> inData;
-            inData.data = v;
-            inData.last = true;
-            uint32_t num = 0;
-            for (auto b = 0; b < inputModSize; b++) {
-                num |= 1UL << b;
-            }
-            inData.keep = num;
-            inStream_dm << inData;
         }
     }
 }
@@ -439,7 +467,7 @@ void streamDm2k(hls::stream<ap_uint<STREAMDWIDTH> >& in,
      *
      * @param in            input hls stream
      * @param outStream     output kernel stream
-     * @param inputSize     size of data in to be transferred
+     * @param inSize        size of data in to be transferred
      *
      */
     // read data from input hls to input stream for decompression kernel
@@ -561,24 +589,18 @@ void streamDataK2dmMultiByteSize(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
     decompressSize << uncompressSize.data;
 }
 
-template <int PARALLEL_BYTES = 8, class SIZE_DT = uint32_t, int AXIWIDTH = 32>
+template <int PARALLEL_BYTES = 8, class SIZE_DT = uint32_t, int AXIWIDTH = 32, int TUSR_DWIDTH = 0>
 void streamK2Dm(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
                 hls::stream<bool>& outEoS,
-                hls::stream<SIZE_DT>& decompressSize,
-                hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >& dmInStream,
-                SIZE_DT numItr) {
-    /**
-     * @brief Read data from kernel axi stream byte by byte and write to hls stream for given output size.
-     *
-     * @param out           output hls stream
-     * @param dmOutStream   input kernel axi stream to be read
-     * @param dataSize      size of data in streams
-     *
-     */
-    // read data from decompression kernel output to global memory output
-    for (auto z = 0; z < numItr; z++) {
+                hls::stream<SIZE_DT>& dataSize,
+                hls::stream<ap_axiu<PARALLEL_BYTES * 8, TUSR_DWIDTH, 0, 0> >& dmInStream,
+                SIZE_DT numItr,
+                SIZE_DT inputSize,
+                SIZE_DT blckSize) {
+    SIZE_DT blckNum = (inputSize - 1) / blckSize + 1;
+    for (auto z = 0; z < numItr * blckNum; z++) {
         SIZE_DT cntr = 0;
-        ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> inValue;
+        ap_axiu<PARALLEL_BYTES * 8, TUSR_DWIDTH, 0, 0> inValue;
         auto keep = 0;
         bool last = false;
 
@@ -600,7 +622,8 @@ void streamK2Dm(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
         }
 
         cntr += incr;
-        decompressSize << cntr;
+        dataSize << cntr;
+        if (TUSR_DWIDTH != 0) dataSize << inValue.user;
         outEoS << 1;
         out << 0;
     }
@@ -643,11 +666,11 @@ void streamK2Dm(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
     decompressSize << uncompressSize.data;
 }
 
-template <int PARALLEL_BYTES = 8, class SIZE_DT = uint32_t, int AXIWIDTH = 32>
+template <int PARALLEL_BYTES = 8, class SIZE_DT = uint32_t, int AXIWIDTH = 32, int TUSR_DWIDTH = 0>
 void streamK2Dm(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
                 hls::stream<bool>& outEoS,
-                hls::stream<SIZE_DT>& decompressSize,
-                hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >& dmInStream) {
+                hls::stream<SIZE_DT>& dataSize,
+                hls::stream<ap_axiu<PARALLEL_BYTES * 8, TUSR_DWIDTH, 0, 0> >& dmInStream) {
     /**
      * @brief Read data from kernel axi stream byte by byte and write to hls stream for given output size.
      *
@@ -658,7 +681,7 @@ void streamK2Dm(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
      */
     // read data from decompression kernel output to global memory output
     SIZE_DT cntr = 0;
-    ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> inValue;
+    ap_axiu<PARALLEL_BYTES * 8, TUSR_DWIDTH, 0, 0> inValue;
     auto keep = 0;
     bool last = false;
 
@@ -682,7 +705,8 @@ dmLeftSize:
     }
 
     cntr += incr;
-    decompressSize << cntr;
+    dataSize << cntr;
+    if (TUSR_DWIDTH != 0) dataSize << inValue.user;
     outEoS << 1;
     out << 0;
 }
@@ -756,8 +780,8 @@ void streamDataK2dmMultiByteStrobe(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& ou
     decompressSize << outSize;
 }
 
-} // end details
-} // end compression
-} // end xf
+} // namespace details
+} // namespace compression
+} // namespace xf
 
 #endif // _XFCOMPRESSION_AXI_STREAM_UTILS_HPP_

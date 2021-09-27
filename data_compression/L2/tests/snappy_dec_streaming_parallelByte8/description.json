@@ -52,7 +52,6 @@
             ], 
             "symbols": [
                 "SNAPPY_STREAM",
-                "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"
             ]
         }
@@ -61,7 +60,6 @@
         "compiler": {
             "symbols": [
                 "SNAPPY_STREAM",
-                "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"
             ],
             "includepaths": [

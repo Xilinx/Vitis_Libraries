@@ -48,7 +48,6 @@ class snappyOCLHost : public snappyBase {
                   const std::string& binaryFileName,
                   uint8_t device_id,
                   uint32_t block_size_kb,
-                  bool enable_profile = false,
                   bool enable_p2p = 0);
 
     /**
