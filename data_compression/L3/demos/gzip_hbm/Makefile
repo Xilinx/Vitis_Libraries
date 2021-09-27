@@ -136,14 +136,11 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
-VPP_FLAGS += --config $(CUR_DIR)/advanced.cfg
 VPP_FLAGS += -DMULTIPLE_BYTES=8 
 
 # Kernel linker flags
-VPP_LDFLAGS_compress_decompress_temp := --kernel_frequency 250 --config $(CUR_DIR)/connectivity.cfg
+VPP_LDFLAGS_compress_decompress_temp := --kernel_frequency 250 --config $(CUR_DIR)/connectivity.cfg --config $(CUR_DIR)/advanced.cfg
 VPP_LDFLAGS_compress_decompress += $(VPP_LDFLAGS_compress_decompress_temp)
-# Adding config files to linker
-VPP_LDFLAGS_compress_decompress+= --config auto_compress_decompress.cfg 
 
 # Kernel args
 

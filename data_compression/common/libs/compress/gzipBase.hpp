@@ -42,7 +42,9 @@ const auto HOST_BUFFER_SIZE = (32 * 1024 * 1024);
  * Default block size
  *
  */
-const auto BLOCK_SIZE_IN_KB = 64;
+#ifndef BLOCK_SIZE_IN_KB
+#define BLOCK_SIZE_IN_KB 64
+#endif
 
 /**
  * Maximum number of blocks based on host buffer size

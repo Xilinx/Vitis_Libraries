@@ -117,7 +117,6 @@
             }
         ], 
         "targets": [
-            "vitis_sw_emu", 
             "vitis_hw_run"
         ], 
         "category": "canary"

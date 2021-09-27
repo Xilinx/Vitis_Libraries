@@ -169,13 +169,6 @@ void gzipMulticoreCompression(hls::stream<ap_uint<64> >& inStream,
     hls::stream<IntVectorStream_dt<c_freq_dwidth, 1> > lz77Tree[c_numBlocks];
     hls::stream<ap_uint<c_dwidth + c_size_dwidth> > mergeStream[c_numBlocks];
 
-#pragma HLS aggregate variable = downStream compact = bit
-#pragma HLS aggregate variable = lz77Stream compact = bit
-#pragma HLS aggregate variable = huffStream compact = bit
-#pragma HLS aggregate variable = lz77DownsizedStream compact = bit
-#pragma HLS aggregate variable = lz77Tree compact = bit
-#pragma HLS aggregate variable = hufCodeStream compact = bit
-
 #pragma HLS STREAM variable = checksumStream depth = c_defaultDepth
 #pragma HLS STREAM variable = checksumSizeStream depth = c_defaultDepth
 #pragma HLS STREAM variable = coreStream depth = c_defaultDepth
@@ -301,12 +294,6 @@ void gzipMulticoreStaticCompressStream(hls::stream<IntVectorStream_dt<8, 8> >& i
     hls::stream<IntVectorStream_dt<8, 2> > huffStream[c_numBlocks];
     hls::stream<IntVectorStream_dt<c_freq_dwidth, 1> > lz77Tree[c_numBlocks];
     hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[c_numBlocks];
-
-#pragma HLS aggregate variable = downStream compact = bit
-#pragma HLS aggregate variable = lz77Stream compact = bit
-#pragma HLS aggregate variable = huffStream compact = bit
-#pragma HLS aggregate variable = lz77Tree compact = bit
-#pragma HLS aggregate variable = hufCodeStream compact = bit
 
     hls::stream<ap_uint<5> > checksumSizeStream("checksumSizeStream");
     hls::stream<ap_uint<16> > strdSizeStream("strdSizeStream");
@@ -445,13 +432,6 @@ void gzipMulticoreCompressStream(hls::stream<IntVectorStream_dt<8, 8> >& inStrea
     hls::stream<IntVectorStream_dt<9, 1> > lz77DownsizedStream[c_numBlocks];
     hls::stream<IntVectorStream_dt<c_freq_dwidth, 1> > lz77Tree[c_numBlocks];
     hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufCodeStream[c_numBlocks];
-
-#pragma HLS aggregate variable = downStream compact = bit
-#pragma HLS aggregate variable = lz77Stream compact = bit
-#pragma HLS aggregate variable = huffStream compact = bit
-#pragma HLS aggregate variable = lz77DownsizedStream compact = bit
-#pragma HLS aggregate variable = lz77Tree compact = bit
-#pragma HLS aggregate variable = hufCodeStream compact = bit
 
     hls::stream<ap_uint<5> > checksumSizeStream("checksumSizeStream");
     hls::stream<ap_uint<16> > strdSizeStream("strdSizeStream");

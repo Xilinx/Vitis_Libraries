@@ -54,7 +54,8 @@
             ], 
             "symbols": [
                 "GZIP_STREAM",
-                "PERF_DM"
+                "PERF_DM",
+                "BLOCK_SIZE_IN_KB=8"
             ]
         }
     }, 

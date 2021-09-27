@@ -62,7 +62,9 @@ zstdOCLHost::zstdOCLHost(enum State flow, const std::string& binaryFileName, uin
     }
     // Create Decompress kernels
     if (m_flow == BOTH || m_flow == DECOMPRESS) {
+#ifndef FREE_RUNNING_KERNEL
         decompress_kernel = new cl::Kernel(*m_program, decompress_kernel_name.c_str());
+#endif
         data_writer_kernel = new cl::Kernel(*m_program, data_writer_kernel_name.c_str());
         data_reader_kernel = new cl::Kernel(*m_program, data_reader_kernel_name.c_str());
     }

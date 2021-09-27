@@ -132,10 +132,8 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 
 # Kernel linker flags
-VPP_LDFLAGS_compress_temp := --kernel_frequency 250
+VPP_LDFLAGS_compress_temp := --kernel_frequency 250 --config $(CUR_DIR)/compress-link.cfg
 VPP_LDFLAGS_compress += $(VPP_LDFLAGS_compress_temp)
-# Adding config files to linker
-VPP_LDFLAGS_compress+= --config auto_compress.cfg 
 
 # Kernel args
 

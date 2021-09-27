@@ -128,8 +128,6 @@ VPP_FLAGS += -DMULTIPLE_BYTES=8
 # Kernel linker flags
 VPP_LDFLAGS_decompress_temp := --kernel_frequency 250 --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_decompress += $(VPP_LDFLAGS_decompress_temp)
-# Adding config files to linker
-VPP_LDFLAGS_decompress+= --config auto_decompress.cfg 
 
 # Kernel args
 

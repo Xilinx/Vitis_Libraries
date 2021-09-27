@@ -70,8 +70,10 @@ xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow
         // Create Compress datamover kernels
         compress_data_mover_kernel = new cl::Kernel(*m_program, compress_dm_kernel_name.c_str());
     } else {
+#ifndef FREE_RUNNING_KERNEL
         // Create Decompress kernels
         decompress_kernel_snappy = new cl::Kernel(*m_program, decompress_kernel_name.c_str());
+#endif
         // Create Decompress datamover kernels
         decompress_data_mover_kernel = new cl::Kernel(*m_program, decompress_dm_kernel_name.c_str());
     }

@@ -36,12 +36,12 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx GZip Compress/Decompress
-kernels. The final Fmax achieved is 298MHz 
+kernels. The final Fmax achieved is 300MHz.
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   57.4K 8.1K   51.5K 133   64    
+Compress   60K   8.1K   51K    135   64    
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

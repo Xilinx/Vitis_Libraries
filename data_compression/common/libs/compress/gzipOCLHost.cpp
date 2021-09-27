@@ -638,10 +638,11 @@ uint64_t gzipOCLHost::decompressEngineSeq(
 
     uint8_t kidx = m_kidx;
     std::string cu_id = std::to_string((cu + 1));
+#ifndef FREE_RUNNING_KERNEL
     std::string decompress_kname =
         stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + cu_id + "}";
     OCL_CHECK(err, cl::Kernel decompress_kernel(*m_program, decompress_kname.c_str(), &err));
-
+#endif
     std::string data_writer_kname = data_writer_kernel_name + ":{" + data_writer_kernel_name + "_" + cu_id + "}";
     OCL_CHECK(err, cl::Kernel data_writer_kernel(*m_program, data_writer_kname.c_str(), &err));
 
@@ -823,9 +824,11 @@ size_t gzipOCLHost::decompressEngine(uint8_t* in, uint8_t* out, size_t input_siz
 
         uint8_t kidx = m_kidx;
         std::string cu_id = std::to_string((cu + 1));
+#ifndef FREE_RUNNING_KERNEL
         std::string decompress_kname =
             stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + cu_id + "}";
         OCL_CHECK(err, cl::Kernel decompress_kernel(*m_program, decompress_kname.c_str(), &err));
+#endif
 
         // start parallel reader kernel enqueue thread
         uint32_t decmpSizeIdx = 0;
@@ -1933,7 +1936,7 @@ size_t gzipOCLHost::compressEngineSeq(
 #else
     std::string compress_kname = compress_kernel_names[2];
 #endif
-    if (!this->is_freeRunKernel() || xcl::is_emulation()) {
+    if (!this->is_freeRunKernel()) {
         OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
     }
 
@@ -1956,7 +1959,7 @@ size_t gzipOCLHost::compressEngineSeq(
         checksum_type = true;
     }
 
-    auto blockSize = 4096;
+    auto blockSize = BLOCK_SIZE_IN_KB * 1024; // can be changed for custom testing of block sizes upto 4KB.
     auto blckNum = (input_size - 1) / blockSize + 1;
     auto output_size = 10 * blckNum * BLOCK_SIZE_IN_KB * 1024;
 
@@ -2053,18 +2056,20 @@ size_t gzipOCLHost::compressEngineSeq(
     m_def_q->finish();
 
     uint32_t compSize = 0;
+    uint32_t compSizeCntr = 0;
 
     auto index = 0;
     if (this->is_freeRunKernel()) {
 #ifdef PERF_DM
         for (long unsigned i = 0; i < 2 * blckNum; i += 2) {
             compSize = h_compressSize[i];
+            compSizeCntr += compSize;
             if (!xcl::is_sw_emulation()) {
                 uint32_t compAPISize = h_compressSize[i + 1];
                 // AXI size and calculated size using strobe should be equal
                 assert(compAPISize == compSize);
             }
-#ifdef FILE_WRITE__
+#ifdef FILE_WRITE
             std::stringstream ss;
             ss << (int)(i / 2);
             std::ofstream fOut("compBlockFile_" + ss.str());
@@ -2081,10 +2086,13 @@ size_t gzipOCLHost::compressEngineSeq(
     m_def_q->finish();
     float throughput_in_mbps_1 = (float)input_size * 1000 * num_itr / kernel_time_ns_1.count();
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
-    compSize = h_compressSize[0];
-    std::memcpy(out + outIdx, &h_output_buffer[0], compSize);
-    enbytes += compSize;
-    outIdx += compSize;
+
+#ifndef PERF_DM
+    compSizeCntr = h_compressSize[0];
+    std::memcpy(out + outIdx, &h_output_buffer[0], compSizeCntr);
+#endif
+    enbytes += compSizeCntr;
+    outIdx += compSizeCntr;
     if (!is_freeRunKernel()) {
         // Add last block header
         long int last_block = 0xffff000001;

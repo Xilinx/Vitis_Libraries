@@ -59,7 +59,7 @@ const int gz_max_literal_count = 4096;
 
 // Default block size
 #ifndef BLOCK_SIZE_IN_KB
-#define BLOCK_SIZE_IN_KB 8
+#define BLOCK_SIZE_IN_KB 32
 #endif
 
 // Input and output buffer size

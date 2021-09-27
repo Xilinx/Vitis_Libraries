@@ -11,11 +11,11 @@
     "part_whitelist": [], 
     "part_blacklist": [],
     "QoR_golden": {
-        "VV_LUT": "50270", 
-        "VV_FF": "49132",
-        "VV_BRAM": "269",
+        "VV_LUT": "53035", 
+        "VV_FF": "48503",
+        "VV_BRAM_18K": "274",
         "VV_URAM": "64",
-        "VV_AchievedClockPeriod": "3.479"
+        "VV_AchievedClockPeriod": "3.605"
     },
     "project": "zlib_compress_test", 
     "solution": "sol1", 

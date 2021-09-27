@@ -160,7 +160,12 @@ void compressApp::printTestSummaryFooter(const std::string& testFile) {
         std::cout << "File Name\t\t:";
         std::cout << testFile;
         std::cout << "\n";
+#ifndef PERF_DM
         std::cout << "Output Location: " << m_outFile_name.c_str() << std::endl;
+#else
+        std::cout << "[WARNING]: Multiple Output Files detected. Use FILE_WRITE macro to generate compressed files."
+                  << std::endl;
+#endif
         double enbytes = m_enbytes;
         fileUnit = getFileSizeUnit(enbytes);
         (m_compress_flow) ? std::cout << "Compressed file size(" << fileUnit << ")\t\t:" << enbytes : std::cout << "\t";
@@ -262,7 +267,9 @@ void compressApp::runCompress(compressBase* b, const std::string& m_uncompressed
         std::cerr << "\nOutfile file directory incorrect!" << std::endl;
         exit(1);
     }
+#ifndef PERF_DM
     outFile.write((char*)out.data(), m_enbytes);
+#endif
 
     printTestSummaryFooter(uncompressed_file);
     // Close file

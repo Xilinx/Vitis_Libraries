@@ -96,7 +96,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
-CXXFLAGS += -DGZIP_STREAM -DPERF_DM
+CXXFLAGS += -DGZIP_STREAM -DPERF_DM -DBLOCK_SIZE_IN_KB=8
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/

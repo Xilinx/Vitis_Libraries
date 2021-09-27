@@ -707,13 +707,13 @@ reset_remaining_parent:
 }
 
 template <int SYMBOL_SIZE, int SYMBOL_BITS, int MAX_FREQ_DWIDTH = 32>
-inline void computeBitLengthLL(ap_uint<SYMBOL_BITS>* parent,
-                               ap_uint<SYMBOL_SIZE>& left,
-                               ap_uint<SYMBOL_SIZE>& right,
-                               int num_symbols,
-                               Histogram* length_histogram,
-                               Frequency<MAX_FREQ_DWIDTH>* child_depth) {
-#pragma HLS INLINE
+void computeBitLengthLL(ap_uint<SYMBOL_BITS>* parent,
+                        ap_uint<SYMBOL_SIZE>& left,
+                        ap_uint<SYMBOL_SIZE>& right,
+                        int num_symbols,
+                        Histogram* length_histogram,
+                        Frequency<MAX_FREQ_DWIDTH>* child_depth) {
+    //#pragma HLS INLINE
     ap_uint<SYMBOL_SIZE> tmp;
     // for case with less number of symbols
     if (num_symbols < 2) num_symbols++;
@@ -741,7 +741,7 @@ traverse_tree:
             bool is_right_internal = ((right & tmp) == 0);
 
             if ((is_left_internal || is_right_internal)) {
-                length_histogram[length] += (1 + (uint8_t)(is_left_internal && is_right_internal)); // children;
+                length_histogram[length] += (1 + (uint8_t)(is_left_internal & is_right_internal));
             }
             --i;
         }
@@ -1277,7 +1277,7 @@ void getHuffBitLengths(hls::stream<IntVectorStream_dt<SYMBOL_BITS, 1> >& parentS
     ap_uint<SYMBOL_BITS> parent[SYMBOL_SIZE];
 #pragma HLS BIND_STORAGE variable = parent type = ram_2p impl = lutram
     Frequency<MAX_FREQ_DWIDTH> temp_array[SYMBOL_SIZE];
-#pragma HLS BIND_STORAGE variable = temp_array type = ram_t2p impl = bram
+    //#pragma HLS BIND_STORAGE variable = temp_array type = ram_t2p impl = bram
     Histogram length_histogram[c_lengthHistogram];
 #pragma HLS ARRAY_PARTITION variable = length_histogram complete
 
@@ -1295,17 +1295,22 @@ create_tree_comp_bitlengths:
             break;
         }
         auto rhpLen = heapLength + (uint16_t)(heapLength < 3);
+
     init_lenHist_parent_stream:
         for (uint16_t i = 0; i < i_symbolSize; ++i) {
 #pragma HLS PIPELINE II = 1
             temp_array[i] = 0;
-            length_histogram[i % c_lengthHistogram] = 0;
             if (i < rhpLen) {
                 inPrtVal = parentStream.read();
                 parent[i] = inPrtVal.data[0];
             } else {
                 parent[i] = 0;
             }
+        }
+        // init histogram
+        for (uint8_t i = 0; i < c_lengthHistogram; ++i) {
+#pragma HLS UNROLL
+            length_histogram[i] = 0;
         }
         // read the left & right to output stream
         constexpr uint8_t lrItr = 1 + ((SYMBOL_SIZE - 1) / SYMBOL_BITS);
