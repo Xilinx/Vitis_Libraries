@@ -1,0 +1,2465 @@
+.. index:: pair: namespace; blas
+.. _doxid-namespacexf_1_1blas:
+.. _cid-xf::blas:
+
+namespace blas
+==============
+
+.. toctree::
+	:hidden:
+
+	enum_xf_blas_OpType.rst
+	class_xf_blas_BLASArgs.rst
+	class_xf_blas_BLASHost.rst
+	class_xf_blas_BLASHostHandle.rst
+	class_xf_blas_ConfigDict.rst
+	class_xf_blas_GEMMHost.rst
+	class_xf_blas_GEMVHost.rst
+	class_xf_blas_Gemm.rst
+	class_xf_blas_Gemm-2.rst
+	class_xf_blas_GemmArgs.rst
+	class_xf_blas_GemvArgs.rst
+	class_xf_blas_XFpga.rst
+	class_xf_blas_XFpgaHold.rst
+	class_xf_blas_XHost.rst
+
+
+
+.. _doxid-namespacexf_1_1blas_1acdf951ea9c1921f71980c9c074b107b7:
+.. _cid-xf::blas::gbmv:
+.. _doxid-namespacexf_1_1blas_1ad19ab9f9934817d5883ddc4a466f9d35:
+.. _cid-xf::blas::gemm:
+.. _doxid-namespacexf_1_1blas_1a47261b43b0350a2eb5e26f095a7a1ed9:
+.. _cid-xf::blas::gemm-2:
+.. _doxid-namespacexf_1_1blas_1af1a123d1f3f744bd2dacce12e4159229:
+.. _cid-xf::blas::gemv:
+.. _doxid-namespacexf_1_1blas_1a47921e027eea35baf2aa92cef1e65e04:
+.. _cid-xf::blas::symv:
+.. _doxid-namespacexf_1_1blas_1a14f3d206577a7701291bf592477f383b:
+.. _cid-xf::blas::trmv:
+.. _doxid-namespacexf_1_1blas_1ad6b3b9dedec764afebe1f771dcd2970a:
+.. _cid-xf::blas::buildconfigdict:
+.. _doxid-namespacexf_1_1blas_1aeb6a3b73c452d656709f690153b76f38:
+.. _cid-xf::blas::getpaddedsize:
+.. _doxid-namespacexf_1_1blas_1a8698571ed048de23340e0c3abdfbeca8:
+.. _cid-xf::blas::gettypesize:
+.. _doxid-namespacexf_1_1blas_1ae4f42ee8a0390300797ac0f9fbf52946:
+.. _cid-xf::blas::xfblasmalloc:
+.. _doxid-namespacexf_1_1blas_1a93992a033073024ab0f99e582c14101d:
+.. _cid-xf::blas::xfblasmallocmanaged:
+.. _doxid-namespacexf_1_1blas_1aadaca31b748b53ce739dd534c3266562:
+.. _cid-xf::blas::xfblassetmatrix:
+.. _doxid-namespacexf_1_1blas_1af82e120c9206fb5021a31cf099a9af80:
+.. _cid-xf::blas::xfblasgetmatrix:
+.. _doxid-namespacexf_1_1blas_1a02508bb94cc6c1d2615ba0b15d1f0fb5:
+.. _cid-xf::blas::xfblasgemm:
+.. _doxid-namespacexf_1_1blas_1a3372bd3080b8991ac25776d97746f029:
+.. _cid-xf::blas::xfblasgemmbyaddress:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enums
+
+	enum :ref:`OpType<doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850b>`
+
+	// classes
+
+	class :ref:`BLASArgs<doxid-classxf_1_1blas_1_1_b_l_a_s_args>` 
+	class :ref:`BLASHost<doxid-classxf_1_1blas_1_1_b_l_a_s_host>` 
+	class :ref:`BLASHostHandle<doxid-classxf_1_1blas_1_1_b_l_a_s_host_handle>` 
+	class :ref:`ConfigDict<doxid-classxf_1_1blas_1_1_config_dict>` 
+	class :ref:`GEMMHost<doxid-classxf_1_1blas_1_1_g_e_m_m_host>` 
+	class :ref:`GEMVHost<doxid-classxf_1_1blas_1_1_g_e_m_v_host>` 
+
+	template <
+	    unsigned int t_KBufferDim,
+	    unsigned int t_ParEntriesM,
+	    unsigned int t_ParEntriesN
+	    >
+	class :ref:`Gemm <float, t_KBufferDim, t_ParEntriesM, t_ParEntriesN, float><doxid-classxf_1_1blas_1_1_gemm_3_01float_00_01t___k_buffer_dim_00_01t___par_entries_m_00_01t___par_entries_n_00_01float_01_4>` 
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_KBufferDim,
+	    unsigned int t_ParEntriesM,
+	    unsigned int t_ParEntriesN = t_ParEntriesM,
+	    typename t_MacDataType = t_DataType
+	    >
+	class :ref:`Gemm<doxid-classxf_1_1blas_1_1_gemm>` 
+
+	class :ref:`GemmArgs<doxid-classxf_1_1blas_1_1_gemm_args>` 
+	class :ref:`GemvArgs<doxid-classxf_1_1blas_1_1_gemv_args>` 
+	class :ref:`XFpga<doxid-classxf_1_1blas_1_1_x_fpga>` 
+	class :ref:`XFpgaHold<doxid-classxf_1_1blas_1_1_x_fpga_hold>` 
+	class :ref:`XHost<doxid-classxf_1_1blas_1_1_x_host>` 
+
+
+
+
+
+.. FunctionSection
+
+.. _doxid-namespacexf_1_1blas_1ae8c39ca6acb5feee02411518f4081ddf:
+.. _cid-xf::blas::amax:
+
+amax
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/amax.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType
+	    >
+	void amax (unsigned int p_n)
+
+amax function that returns the position of the vector element that has the maximum magnitude.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_result
+
+        - the resulting index, which is 0 if p_n <= 0
+
+.. _doxid-namespacexf_1_1blas_1aa54b37f7edd39d3afd4f5f4c43b47a6e:
+.. _cid-xf::blas::amin:
+
+amin
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/amin.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType
+	    >
+	void amin (unsigned int p_n)
+
+amin function that returns the position of the vector element that has the minimum magnitude.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_result
+
+        - the resulting index, which is 0 if p_n <= 0
+
+.. _doxid-namespacexf_1_1blas_1a98937e81ec47b917aa67f9706ff90765:
+.. _cid-xf::blas::asum:
+
+asum
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/asum.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void asum (unsigned int p_n)
+
+asum function that returns the sum of the magnitude of vector elements.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_sum
+
+        - the sum, which is 0 if p_n <= 0
+
+.. _doxid-namespacexf_1_1blas_1ad311d6b8ec3d424bc05d0da2332fa563:
+.. _cid-xf::blas::axpy:
+
+axpy
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/axpy.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_ParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void axpy (
+	    unsigned int p_n,
+	    const t_DataType p_alpha,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_x,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_y,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_r
+	    )
+
+axpy function that compute Y = alpha*X + Y.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in the input vector p_x, p_n % t_ParEntries == 0
+
+    *
+        - p_x
+
+        - the input stream of packed entries of vector X
+
+    *
+        - p_y
+
+        - the input stream of packed entries of vector Y
+
+    *
+        - p_r
+
+        - the output stream of packed entries of result vector Y
+
+.. _doxid-namespacexf_1_1blas_1ab7178c62c609142d71b8422952972c21:
+.. _cid-xf::blas::copy:
+
+copy
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/copy.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_ParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void copy (
+	    unsigned int p_n,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_x,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_y
+	    )
+
+copy function that compute Y = X
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_ParEntries
+
+        - number of parallelly processed entries in the packed input vector stream
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in vector X and Y
+
+    *
+        - p_x
+
+        - the packed input vector stream
+
+    *
+        - p_y
+
+        - the packed output vector stream
+
+.. _doxid-namespacexf_1_1blas_1ad528c7fe8703a79e1a7eba755307b8d5:
+.. _cid-xf::blas::dot:
+
+dot
+---
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/dot.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void dot (unsigned int p_n)
+
+dot function that returns the dot product of vector x and y.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_res
+
+        - the dot product of x and y
+
+.. _doxid-namespacexf_1_1blas_1aee03ea5231dc70a7c81570e7473dfdcb:
+.. _cid-xf::blas::gbmv-2:
+
+gbmv
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/gbmv.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_ParEntries,
+	    unsigned int t_MaxRows,
+	    typename t_IndexType = unsigned int,
+	    typename t_MacType = t_DataType
+	    >
+	void gbmv (
+	    const unsigned int p_m,
+	    const unsigned int p_n,
+	    const unsigned int p_kl,
+	    const unsigned int p_ku,
+	    const t_DataType p_alpha,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_M,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_x,
+	    const t_DataType p_beta,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_y,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_yr
+	    )
+
+gbmv function performs general banded matrix-vector multiplication matrix and a vector y = alpha * M * x + beta * y
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_ParEntries
+
+        - the number of parallelly processed entries in the input vector
+
+    *
+        - t_MaxRows
+
+        - the maximum size of buffers for output vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - t_MacType
+
+        - the datatype of the output stream
+
+    *
+        - p_m
+
+        - the number of rows of input matrix p_M
+
+    *
+        - p_alpha
+
+        - scalar alpha
+
+    *
+        - p_M
+
+        - the input stream of packed Matrix entries
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_beta
+
+        - scalar beta
+
+    *
+        - p_y
+
+        - the output vector
+
+.. _doxid-namespacexf_1_1blas_1a12015d4aad2ebe31523d9fe0e021d073:
+.. _cid-xf::blas::gemv-2:
+
+gemv
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/gemv.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void gemv (
+	    const unsigned int p_m,
+	    const unsigned int p_n,
+	    const t_DataType p_alpha
+	    )
+
+gemv function that returns the result vector of the multiplication of a matrix and a vector y = alpha * M * x
+
+* beta * y
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_m
+
+        - the number of rows of input matrix p_M
+
+    *
+        - p_n
+
+        - the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_alpha
+
+        - scalar alpha
+
+    *
+        - p_M
+
+        - the input stream of packed Matrix entries
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_beta
+
+        - scalar beta
+
+    *
+        - p_y
+
+        - the output vector
+
+.. _doxid-namespacexf_1_1blas_1afc5302e85d7cf138eebf970d314007ab:
+.. _cid-xf::blas::nrm2:
+
+nrm2
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/nrm2.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void nrm2 (unsigned int p_n)
+
+nrm2 function that returns the Euclidean norm of the vector x.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in the input vector p_x, p_n % (1<<l_LogParEntries) == 0
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_res
+
+        - the nrm2 of x
+
+.. _doxid-namespacexf_1_1blas_1a47ea330104e7fc8c8e69f9b4a79bf36f:
+.. _cid-xf::blas::scal:
+
+scal
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/scal.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_ParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void scal (
+	    unsigned int p_n,
+	    t_DataType p_alpha,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_x,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_res
+	    )
+
+scal function that compute X = alpha * X
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_ParEntries
+
+        - number of parallelly processed entries in the packed input vector stream
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in vector X, p_n % t_ParEntries == 0
+
+    *
+        - p_x
+
+        - the packed input vector stream
+
+    *
+        - p_res
+
+        - the packed output vector stream
+
+.. _doxid-namespacexf_1_1blas_1a7bce75e6324e2b1d04a4e6b75b0ce479:
+.. _cid-xf::blas::swap:
+
+swap
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/swap.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_ParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void swap (
+	    unsigned int p_n,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_x,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_y,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_xRes,
+	    hls::stream <typename WideType <t_DataType, t_ParEntries>::t_TypeInt>& p_yRes
+	    )
+
+swap function that swap vector x and y
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_ParEntries
+
+        - number of parallelly processed entries in the packed input vector stream
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of entries in vector X and Y, p_n % t_ParEntries == 0
+
+    *
+        - p_x
+
+        - the packed input vector stream
+
+    *
+        - p_y
+
+        - the packed input vector stream
+
+    *
+        - p_xRes
+
+        - the packed output stream
+
+    *
+        - p_yRes
+
+        - the packed output stream
+
+.. _doxid-namespacexf_1_1blas_1a6643005917b4616140a32ea8c30583ac:
+.. _cid-xf::blas::symv-2:
+
+symv
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/symv.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void symv (
+	    const unsigned int p_n,
+	    const t_DataType p_alpha
+	    )
+
+symv function that returns the result vector of the multiplication of a symmetric matrix and a vector y = alpha * M * x + beta * y
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the dimention of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_alpha
+
+        - 
+
+    *
+        - scalar
+
+        - alpha
+
+    *
+        - p_M
+
+        - the input stream of packed Matrix entries
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_beta
+
+        - 
+
+    *
+        - scalar
+
+        - beta
+
+    *
+        - p_y
+
+        - the output vector
+
+.. _doxid-namespacexf_1_1blas_1a1bc12175970a07d1e485579c1d1eead2:
+.. _cid-xf::blas::trmv-2:
+
+trmv
+----
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/trmv.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	template <
+	    typename t_DataType,
+	    unsigned int t_LogParEntries,
+	    typename t_IndexType = unsigned int
+	    >
+	void trmv (
+	    const bool uplo,
+	    const unsigned int p_n,
+	    const t_DataType p_alpha
+	    )
+
+trmv function that returns the result vector of the multiplication of a triangular matrix and a vector y = alpha * M * x + beta * y
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - t_DataType
+
+        - the data type of the vector entries
+
+    *
+        - t_LogParEntries
+
+        - log2 of the number of parallelly processed entries in the input vector
+
+    *
+        - t_IndexType
+
+        - the datatype of the index
+
+    *
+        - p_n
+
+        - the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+
+    *
+        - p_alpha
+
+        - 
+
+    *
+        - scalar
+
+        - alpha
+
+    *
+        - p_M
+
+        - the input stream of packed Matrix entries
+
+    *
+        - p_x
+
+        - the input stream of packed vector entries
+
+    *
+        - p_beta
+
+        - 
+
+    *
+        - scalar
+
+        - beta
+
+    *
+        - p_y
+
+        - the output vector
+
+.. _doxid-namespacexf_1_1blas_1a52daebb8305c7126097063cc93348ebb:
+.. _cid-xf::blas::xfblascreate:
+
+xfblasCreate
+------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasCreate (
+	    const char* xclbin,
+	    string configFile,
+	    xfblasEngine_t engineName,
+	    unsigned int kernelNumber = 1,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - xclbin
+
+        - file path to FPGA bitstream
+
+    *
+        - configFile
+
+        - file path to config_info.dat file
+
+    *
+        - engineName
+
+        - XFBLAS engine to run
+
+    *
+        - kernelNumber
+
+        - number of kernels that is being used, default is 1
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the initialization succeeded
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the opencl runtime initialization failed
+
+    *
+        - xfblasStatus_t
+
+        - 2 if the xclbin doesn't contain the engine
+
+    *
+        - xfblasStatus_t
+
+        - 4 if the engine is not supported for now
+
+.. _doxid-namespacexf_1_1blas_1a6a9862976c80ea2ef3806cd801b564ee:
+.. _cid-xf::blas::xfblasmalloc-2:
+
+xfblasMalloc
+------------
+
+
+xfblasMalloc overload (1)
++++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasMalloc (
+	    short** devPtr,
+	    int rows,
+	    int lda,
+	    int elemSize,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function allocates memory on the FPGA device.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - devPtr
+
+        - pointer to mapped memory
+
+    *
+        - rows
+
+        - number of rows in the matrix
+
+    *
+        - lda
+
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+
+    *
+        - elemSize
+
+        - number of bytes required to store each element in the matrix
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the allocation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is memory already allocated to the same matrix
+
+    *
+        - xfblasStatus_t
+
+        - 4 if the engine is not supported for now
+
+.. _doxid-namespacexf_1_1blas_1aec7cfadc850f57e71dade1d4158e34df:
+.. _cid-xf::blas::xfblasmallocrestricted:
+
+xfblasMallocRestricted
+----------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasMallocRestricted (
+	    int rows,
+	    int cols,
+	    int elemSize,
+	    void* A,
+	    int lda,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function allocates memory for host row-major format matrix on the FPGA device.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+
+        - number of rows in the matrix
+
+    *
+        - cols
+
+        - number of cols in the matrix that is being used
+
+    *
+        - elemSize
+
+        - number of bytes required to store each element in the matrix
+
+    *
+        - A
+
+        - pointer to the matrix array in the host memory
+
+    *
+        - lda
+
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the allocation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is memory already allocated to the same matrix
+
+    *
+        - xfblasStatus_t
+
+        - 4 if the engine is not supported for now
+
+    *
+        - xfblasStatus_t
+
+        - 5 if rows, cols or lda is not padded correctly
+
+.. _doxid-namespacexf_1_1blas_1af10a96bec6f2fa487df846d5745e1247:
+.. _cid-xf::blas::xfblasmallocmanaged-2:
+
+xfblasMallocManaged
+-------------------
+
+
+xfblasMallocManaged overload (1)
+++++++++++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasMallocManaged (
+	    short** devPtr,
+	    int* paddedLda,
+	    int rows,
+	    int lda,
+	    int elemSize,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function allocates memory on the FPGA device, rewrites the leading dimension size after padding.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - devPtr
+
+        - pointer to mapped memory
+
+    *
+        - paddedLda
+
+        - leading dimension of the matrix after padding
+
+    *
+        - rows
+
+        - number of rows in the matrix
+
+    *
+        - lda
+
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+
+    *
+        - elemSize
+
+        - number of bytes required to store each element in the matrix
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the allocation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is memory already allocated to the same matrix
+
+    *
+        - xfblasStatus_t
+
+        - 4 if the engine is not supported for now
+
+.. _doxid-namespacexf_1_1blas_1acd5be1d18aafeaa486531c2ef245692e:
+.. _cid-xf::blas::xfblassetmatrix-2:
+
+xfblasSetMatrix
+---------------
+
+
+xfblasSetMatrix overload (1)
+++++++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasSetMatrix (
+	    int rows,
+	    int cols,
+	    int elemSize,
+	    short* A,
+	    int lda,
+	    short* d_A,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in host memory to FPGA device memory. :ref:`xfblasMalloc() <doxid-namespacexf_1_1blas_1a6a9862976c80ea2ef3806cd801b564ee>` need to be called prior to this function.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+
+        - number of rows in the matrix
+
+    *
+        - cols
+
+        - number of cols in the matrix that is being used
+
+    *
+        - elemSize
+
+        - number of bytes required to store each element in the matrix
+
+    *
+        - A
+
+        - pointer to the matrix array in the host memory
+
+    *
+        - lda
+
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+
+    *
+        - d_A
+
+        - pointer to mapped memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+    *
+        - xfblasStatus_t
+
+        - 4 if the engine is not supported for now
+
+.. _doxid-namespacexf_1_1blas_1a52e5407eeeadb669b39916cb65ef5dee:
+.. _cid-xf::blas::xfblassetmatrixrestricted:
+
+xfblasSetMatrixRestricted
+-------------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasSetMatrixRestricted (
+	    void* A,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in host memory to FPGA device memory. :ref:`xfblasMallocRestricted() <doxid-namespacexf_1_1blas_1aec7cfadc850f57e71dade1d4158e34df>` need to be called prior to this function.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+
+        - pointer to the matrix array in the host memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1a9f330caeb49a36130dacd9395c4fffe6:
+.. _cid-xf::blas::xfblassetvectorrestricted:
+
+xfblasSetVectorRestricted
+-------------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasSetVectorRestricted (
+	    void* x,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a vector in host memory to FPGA device memory. :ref:`xfblasMallocRestricted() <doxid-namespacexf_1_1blas_1aec7cfadc850f57e71dade1d4158e34df>` need to be called prior to this function.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+
+        - pointer to the vector in the host memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the vector
+
+.. _doxid-namespacexf_1_1blas_1aa08fa7748d61a0ab7db86d1e0ce1d7ef:
+.. _cid-xf::blas::xfblasdevicesynchronize:
+
+xfblasDeviceSynchronize
+-----------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasDeviceSynchronize (
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function will synchronize all the device memory to host memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for some of the matrices in the host memory
+
+.. _doxid-namespacexf_1_1blas_1aa14253fa61ac0626a2418e936790240b:
+.. _cid-xf::blas::xfblasgetmatrix-2:
+
+xfblasGetMatrix
+---------------
+
+
+xfblasGetMatrix overload (1)
+++++++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasGetMatrix (
+	    int rows,
+	    int cols,
+	    int elemSize,
+	    short* d_A,
+	    short* A,
+	    int lda,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in FPGA device memory to host memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+
+        - number of rows in the matrix
+
+    *
+        - cols
+
+        - number of cols in the matrix that is being used
+
+    *
+        - elemSize
+
+        - number of bytes required to store each element in the matrix
+
+    *
+        - d_A
+
+        - pointer to mapped memory
+
+    *
+        - A
+
+        - pointer to the matrix array in the host memory
+
+    *
+        - lda
+
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1a9cfdeff6f13ccfc230c22ffc58ad935d:
+.. _cid-xf::blas::xfblasgetmatrixrestricted:
+
+xfblasGetMatrixRestricted
+-------------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasGetMatrixRestricted (
+	    void* A,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in FPGA device memory to host memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+
+        - pointer to matrix A in the host memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1ab6461ee4759af12ff3c38c31af177d8a:
+.. _cid-xf::blas::xfblasgetvectorrestricted:
+
+xfblasGetVectorRestricted
+-------------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasGetVectorRestricted (
+	    void* x,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in FPGA device memory to host memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+
+        - pointer to vetcor x in the host memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1a3481768e00c5ae020cfcf0a8e014ee9c:
+.. _cid-xf::blas::xfblasfree:
+
+xfblasFree
+----------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasFree (
+	    void* A,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function frees memory in FPGA device.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+
+        - pointer to matrix A in the host memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1a0260a59e6b77591aef6fcae63919125e:
+.. _cid-xf::blas::xfblasfreeinstr:
+
+xfblasFreeInstr
+---------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasFreeInstr (
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function frees instrution.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+.. _doxid-namespacexf_1_1blas_1a7afa69b44f921a043d40138408f49201:
+.. _cid-xf::blas::xfblasdestroy:
+
+xfblasDestroy
+-------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasDestroy (
+	    unsigned int kernelNumber = 1,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function releases handle used by the XFBLAS library.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - kernelNumber
+
+        - number of kernels that is being used, default is 1
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the shut down succeeded
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+.. _doxid-namespacexf_1_1blas_1a9e74b37edddf2e5112abf9fd018ed239:
+.. _cid-xf::blas::xfblasgemm-2:
+
+xfblasGemm
+----------
+
+
+xfblasGemm overload (1)
++++++++++++++++++++++++
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasGemm (
+	    xfblasOperation_t transa,
+	    xfblasOperation_t transb,
+	    int m,
+	    int n,
+	    int k,
+	    int alpha,
+	    void* A,
+	    int lda,
+	    void* B,
+	    int ldb,
+	    int beta,
+	    void* C,
+	    int ldc,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + beta*C.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - transa
+
+        - operation op(A) that is non- or (conj.) transpose
+
+    *
+        - transb
+
+        - operation op(B) that is non- or (conj.) transpose
+
+    *
+        - m
+
+        - number of rows in matrix A, matrix C
+
+    *
+        - n
+
+        - number of cols in matrix B, matrix C
+
+    *
+        - k
+
+        - number of cols in matrix A, number of rows in matrix B
+
+    *
+        - alpha
+
+        - scalar used for multiplication
+
+    *
+        - A
+
+        - pointer to matrix A in the host memory
+
+    *
+        - lda
+
+        - leading dimension of matrix A
+
+    *
+        - B
+
+        - pointer to matrix B in the host memory
+
+    *
+        - ldb
+
+        - leading dimension of matrix B
+
+    *
+        - beta
+
+        - scalar used for multiplication
+
+    *
+        - C
+
+        - pointer to matrix C in the host memory
+
+    *
+        - ldc
+
+        - leading dimension of matrix C
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if not all the matrices have FPGA devie memory allocated
+
+    *
+        - xfblasStatus_t
+
+        - 4 if the engine is not supported for now
+
+.. _doxid-namespacexf_1_1blas_1a27e81292e4e4674626c5daa7c2be7718:
+.. _cid-xf::blas::xfblasgetbypointer:
+
+xfblasGetByPointer
+------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasGetByPointer (
+	    void* A,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in FPGA device memory to host memory by pointer.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+
+        - pointer to matrix A in the host memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1a8e7f1ccb3be77301019e8790d22cec50:
+.. _cid-xf::blas::xfblasgetbyaddress:
+
+xfblasGetByAddress
+------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasGetByAddress (
+	    void* A,
+	    unsigned long long p_bufSize,
+	    unsigned int offset,
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function copies a matrix in FPGA device memory to host memory by its address in device memory.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+
+        - pointer to matrix A in the host memory
+
+    *
+        - p_bufSize
+
+        - size of matrix A
+
+    *
+        - offset
+
+        - A's address in device memory
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+.. _doxid-namespacexf_1_1blas_1a391ce5a5da4d1bfb1b29de85c7b7397a:
+.. _cid-xf::blas::xfblasexecute:
+
+xfblasExecute
+-------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	xfblasStatus_t xfblasExecute (
+	    unsigned int kernelIndex = 0,
+	    unsigned int deviceIndex = 0
+	    )
+
+This function starts the kernel and wait until it finishes.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - kernelIndex
+
+        - index of kernel that is being used, default is 0
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+
+    *
+        - xfblasStatus_t
+
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+
+        - 3 if there is no FPGA device memory allocated for instrution
+
+.. _doxid-namespacexf_1_1blas_1a79009753a3d93e39b3085b9dc9da4ce7:
+.. _cid-xf::blas::xfblasexecuteasync:
+
+xfblasExecuteAsync
+------------------
+
+
+.. code-block:: cpp
+	
+	#include "xf_blas/wrapper.hpp"
+
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	void xfblasExecuteAsync (
+	    unsigned int numKernels = 1,
+	    unsigned int deviceIndex = 0
+	    )
+
+This asynchronous function starts all kernels and wait until them finish.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - numKernels
+
+        - number of kernels that is being used, default is 1
+
+    *
+        - deviceIndex
+
+        - index of device that is being used, default is 0
+

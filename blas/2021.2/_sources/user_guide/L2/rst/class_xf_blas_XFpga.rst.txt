@@ -1,0 +1,44 @@
+.. index:: pair: class; xf::blas::XFpga
+.. _doxid-classxf_1_1blas_1_1_x_fpga:
+.. _cid-xf::blas::xfpga:
+
+class xf::blas::XFpga
+=====================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a7d557952587920d4dd7ec61040d3fa2e:
+.. _cid-xf::blas::xfpga::m_device:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a11cb7067d66bf8b4c9ab2e665270300d:
+.. _cid-xf::blas::xfpga::m_uuid:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a328f2016ed0902361be4233e82f1da49:
+.. _cid-xf::blas::xfpga::xfpga:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a7ccedc49ffa3ce4b21b0703495eeca77:
+.. _cid-xf::blas::xfpga::xfpga-2:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a5f17f5de4be44393996cb125e0ead4d3:
+.. _cid-xf::blas::xfpga::~xfpga:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1ab1cd4b4534dfe413f754f7605e7a9d06:
+.. _cid-xf::blas::xfpga::createbuf:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a76c88718d25838576daefb065aae9ab2:
+.. _cid-xf::blas::xfpga::copytofpga:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1aae3a515cd3fc9eb6e48cf4bfbecec086:
+.. _cid-xf::blas::xfpga::copyfromfpga:
+.. _doxid-classxf_1_1blas_1_1_x_fpga_1a758bbf37cec929e1eec2c4592a13aca1:
+.. _cid-xf::blas::xfpga::execkernel:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// fields
+
+	xrt::device m_device
+	xrt::uuid m_uuid
+
