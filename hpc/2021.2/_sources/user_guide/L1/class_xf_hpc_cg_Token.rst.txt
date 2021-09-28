@@ -1,0 +1,64 @@
+.. index:: pair: class; xf::hpc::cg::Token
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token:
+.. _cid-xf::hpc::cg::token:
+
+template class xf::hpc::cg::Token
+=================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "token.hpp"
+
+
+
+
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a708ee081a89d3c5860f6a4f5355935b0:
+.. _cid-xf::hpc::cg::token::token:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a35c3cbd92372955cb9aec1719a0e84e8:
+.. _cid-xf::hpc::cg::token::token-2:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a0e0a8e5ba530528c0fcb833b429ebac7:
+.. _cid-xf::hpc::cg::token::getid:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a251585498a67ded2afb85c8b7715d618:
+.. _cid-xf::hpc::cg::token::setid:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1ae38347ca6c1b8302517c3894e97d17c1:
+.. _cid-xf::hpc::cg::token::getvecsize:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a828bcac978e1ad37b5f3a6604ba1cacd:
+.. _cid-xf::hpc::cg::token::setvecsize:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a7e757caaac4a11fb69bfaaf81ffb49c7:
+.. _cid-xf::hpc::cg::token::getalpha:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1ae3cd364ef8ab0839359d456c9eb587f4:
+.. _cid-xf::hpc::cg::token::setalpha:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a651be66ad7ae8052fefcb40db7356beb:
+.. _cid-xf::hpc::cg::token::getbeta:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a293a3203ec2d15749a9281473b1d230d:
+.. _cid-xf::hpc::cg::token::setbeta:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1ab1fb74fab0692007d21dbffb440fdc31:
+.. _cid-xf::hpc::cg::token::getres:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1ab7088ce2b3c2fef9ee9456a4e33d6d97:
+.. _cid-xf::hpc::cg::token::setres:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a021b2c738f128ebcf21482b55878e8d8:
+.. _cid-xf::hpc::cg::token::getrz:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1ac257b24587253dd31661c76729f55bfa:
+.. _cid-xf::hpc::cg::token::setrz:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1aa93b62490f3e61609fab216a8dde3ab9:
+.. _cid-xf::hpc::cg::token::setexit:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a2ee86bb1981c27fd7aa0bd8684862599:
+.. _cid-xf::hpc::cg::token::getexit:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a143ca2e831169e8349d1400cde7e7f05:
+.. _cid-xf::hpc::cg::token::increase:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1acffad4283ed88028e996079286df97a0:
+.. _cid-xf::hpc::cg::token::getiter:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1a5d746936a429dedf604a2bb4177f3ddc:
+.. _cid-xf::hpc::cg::token::encode_write:
+.. _doxid-classxf_1_1hpc_1_1cg_1_1_token_1abde8b662858d331ea8925cd4d5725e87:
+.. _cid-xf::hpc::cg::token::read_decode:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <typename t_DataType>
+	class Token
+
