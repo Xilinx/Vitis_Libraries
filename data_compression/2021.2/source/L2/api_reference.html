@@ -771,14 +771,14 @@
 </table>
 </div>
 <div class="section" id="xillz4decompress">
-<span id="cid-xillz4decompress"></span><span id="doxid-lz4-multibyte-decompress-mm-8hpp-1a125e46ad8f1530bf082e0a0956597a97"></span><h3>xilLz4Decompress<a class="headerlink" href="#xillz4decompress" title="Permalink to this headline">¶</a></h3>
+<span id="cid-xillz4decompress"></span><span id="doxid-lz4-multibyte-decompress-mm-8hpp-1ad496a3f229c31844afef153d183b80fd"></span><h3>xilLz4Decompress<a class="headerlink" href="#xillz4decompress" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;lz4_multibyte_decompress_mm.hpp&quot;</span>
 </pre>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">xilLz4Decompress</span> <span class="p">(</span>
-    <span class="k">const</span> <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">PARALLEL_BYTE</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">in</span><span class="p">,</span>
-    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">PARALLEL_BYTE</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">out</span><span class="p">,</span>
+    <span class="k">const</span> <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">MULTIPLE_BYTES</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">in</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">MULTIPLE_BYTES</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">out</span><span class="p">,</span>
     <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">in_block_size</span><span class="p">,</span>
     <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">in_compress_size</span><span class="p">,</span>
     <span class="kt">uint32_t</span> <span class="n">block_size_in_kb</span><span class="p">,</span>
@@ -1185,14 +1185,14 @@
 </table>
 </div>
 <div class="section" id="cid-xilsnappydecompress-2">
-<span id="doxid-snappy-multibyte-decompress-mm-8hpp-1a3b346359aa2053bc5f8cd2975955963c"></span><span id="id1"></span><h3>xilSnappyDecompress<a class="headerlink" href="#cid-xilsnappydecompress-2" title="Permalink to this headline">¶</a></h3>
+<span id="doxid-snappy-multibyte-decompress-mm-8hpp-1a8b8bcd49b3a44ef3abff8eb2ab731084"></span><span id="id1"></span><h3>xilSnappyDecompress<a class="headerlink" href="#cid-xilsnappydecompress-2" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;snappy_multibyte_decompress_mm.hpp&quot;</span>
 </pre>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">xilSnappyDecompress</span> <span class="p">(</span>
-    <span class="k">const</span> <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">PARALLEL_BYTE</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">in</span><span class="p">,</span>
-    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">PARALLEL_BYTE</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">out</span><span class="p">,</span>
+    <span class="k">const</span> <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">MULTIPLE_BYTES</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">in</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">MULTIPLE_BYTES</span><span class="o">*</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">out</span><span class="p">,</span>
     <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">in_block_size</span><span class="p">,</span>
     <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">in_compress_size</span><span class="p">,</span>
     <span class="kt">uint32_t</span> <span class="n">block_size_in_kb</span><span class="p">,</span>
@@ -1616,7 +1616,7 @@
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on September 27, 2021.
+        Last updated on September 28, 2021.
       </span>
 
     </p>

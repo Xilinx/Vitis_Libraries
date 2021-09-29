@@ -438,8 +438,8 @@ and achieve 20% higher throughput compare to previous release.</dd>
 </li>
 <li><dl class="first docutils">
 <dt><strong>GZIP Decompress Improvement</strong></dt>
-<dd>Re-architected GZIP Decompress cores to reduce resource significantly 6.9K
-and slightly better throughput compare to previous release.
+<dd>Re-architected GZIP Decompress cores to reduce resource to 6.9K
+and better throughput compare to previous release.
 With this new latency overall IP latency is also reduced to ~1.5K cycle.
 Provided ZLIB decompression containing ADLR32 Checksum to catch any error in input file.
 Added functionality to provide uncompressed size in output stream port TUSER (incase end application needs to know uncompressed size).</dd>
@@ -450,7 +450,7 @@ Added functionality to provide uncompressed size in output stream port TUSER (in
 <dd><ul class="first last">
 <li>Created various ZLIB/GZIP Octa-Core Compression Kernels for different block sizes (8KB, 16KB, 32KB)
 and achieved &gt; 2GB/s throughput for all variants. Updated IP core to provided compressed size in output axis
-stream TUSER port (incase any application wants to use compressed size directly).</li>
+stream TUSER port (incase any application needs compressed size).</li>
 <li>Huffman TreeGen latency is reduced significantly &lt; 1K, as a result, for multi-core architectures (Octa-core),
 a single Treegen is required. This reduce the resource requirement signficantly down for 8KB and 16KB blocksize
 compression core compare to previous release solution.</li>
@@ -586,7 +586,7 @@ for small block size 4KB/8KB/16KB)</dd>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on September 27, 2021.
+        Last updated on September 28, 2021.
       </span>
 
     </p>
