@@ -142,6 +142,7 @@ class Stencil3D { // column major
      */
 
     void laplacian(hls::stream<t_InType>& p_in, hls::stream<t_InType>& p_pin, hls::stream<t_InType>& p_out) {
+#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         static t_InType l_sliceBuffer[t_Order / t_PEX][t_MaxDimY][t_MaxDimZ / t_PEZ];
 #else

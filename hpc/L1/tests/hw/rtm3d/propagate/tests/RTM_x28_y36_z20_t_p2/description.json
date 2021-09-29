@@ -34,7 +34,7 @@
                 "dependency": [], 
                 "env": "", 
                 "index": 0, 
-                "max_memory_MB": 16384, 
+                "max_memory_MB": 18432, 
                 "max_time_min": 300
             }
         ], 

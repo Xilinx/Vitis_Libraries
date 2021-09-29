@@ -2,7 +2,7 @@
     "clock": "3.3333", 
     "description": "", 
     "flow": "hls", 
-    "name": "Xilinx HPC RTM forward.RTM_x60_y70_z60_t6_p4", 
+    "name": "Xilinx HPC RTM forward", 
     "part_blacklist": [], 
     "part_whitelist": [], 
     "platform_blacklist": [], 
@@ -15,13 +15,13 @@
     "solution": "sol", 
     "testbench": {
         "argv": {
-            "hls_cosim": "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x60_y70_z60_t6_p4/data/", 
-            "hls_csim": "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x60_y70_z60_t6_p4/data/"
+            "hls_cosim": "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/data/", 
+            "hls_csim": "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/data/"
         }, 
-        "cflags": "-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x60_y70_z60_t6_p4 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include", 
+        "cflags": "-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include", 
         "ldflags": "", 
         "source": [
-            "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x60_y70_z60_t6_p4/../../main.cpp"
+            "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/main.cpp"
         ], 
         "stdmath": false
     }, 
@@ -53,9 +53,9 @@
         ]
     }, 
     "top": {
-        "cflags": "-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x60_y70_z60_t6_p4 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include/hw/rtm3d -I${XF_PROJ_ROOT}/../blas/L1/include/hw", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include/hw/rtm3d -I${XF_PROJ_ROOT}/../blas/L1/include/hw", 
         "source": [
-            "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x60_y70_z60_t6_p4/../../forward.cpp"
+            "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/forward.cpp"
         ]
     }, 
     "topfunction": "top"

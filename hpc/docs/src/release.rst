@@ -41,7 +41,7 @@ Vitis HPC Libraray release 2020.1 introduces HLS primitives, pre-built kernles a
 2021.1
 ----
 
-Vitis HPC Libraray 2021.1 release introduces HLS primitives, prebuild kernles and software APIs for HPC applications on FPGAs. These applications are: 
+Vitis HPC Libraray 2021.2 release introduces HLS primitives, prebuild kernles and software APIs for HPC applications on FPGAs. These applications are: 
 
 * 2D Acoustic RTM (Reverse Time Migration) based on FDTD (Finite Difference Time Domain) algorithm, including forward kernel and backward kernel
 

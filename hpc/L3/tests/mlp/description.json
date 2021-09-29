@@ -45,7 +45,6 @@
                 "LIB_DIR/../blas/L3/include/sw/xf_blas"
             ], 
             "symbols": [
-                "_GLIBCXX_USE_CXX11_ABI=0"
             ]
         },
         "linker": {
@@ -88,7 +87,7 @@
             "env": "",
             "cmd": "",
             "max_memory_MB": 81920,
-            "max_time_min": 1080
+            "max_time_min": 3600
         }
         ],
         "targets": [

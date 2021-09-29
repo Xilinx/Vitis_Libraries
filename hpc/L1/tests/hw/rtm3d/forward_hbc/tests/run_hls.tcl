@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "forward_RTM_x36_y50_z40_t6_p4_test.prj"
+set PROJ "forward_test.prj"
 set SOLN "sol"
 
 if {![info exists CLKP]} {
@@ -25,8 +25,8 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x36_y50_z40_t6_p4/../../forward.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x36_y50_z40_t6_p4 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include/hw/rtm3d -I${XF_PROJ_ROOT}/../blas/L1/include/hw"
-add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x36_y50_z40_t6_p4/../../main.cpp" -cflags "-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x36_y50_z40_t6_p4 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include"
+add_files "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/forward.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include/hw/rtm3d -I${XF_PROJ_ROOT}/../blas/L1/include/hw"
+add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/main.cpp" -cflags "-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include"
 set_top top
 
 open_solution -reset $SOLN
@@ -43,7 +43,7 @@ if { [ file exists directives.tcl ] == 1 } {
 
 
 if {$CSIM == 1} {
-  csim_design -argv "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x36_y50_z40_t6_p4/data/"
+  csim_design -argv "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/data/"
 }
 
 if {$CSYNTH == 1} {
@@ -51,7 +51,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/RTM_x36_y50_z40_t6_p4/data/"
+  cosim_design -argv "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_hbc/tests/data/"
 }
 
 if {$VIVADO_SYN == 1} {

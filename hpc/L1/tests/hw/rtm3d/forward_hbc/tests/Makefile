@@ -239,7 +239,7 @@ runhls: data setup | check_vivado check_vpp
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log forward_RTM_x36_y50_z40_t6_p4_test.prj
+	rm -rf settings.tcl *_hls.log forward_test.prj
 
 # Used by Jenkins test
 cleanall: clean

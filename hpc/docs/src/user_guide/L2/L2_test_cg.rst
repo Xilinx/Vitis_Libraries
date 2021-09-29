@@ -34,12 +34,12 @@ Please deactivate xf_hpc environment after testing.
 Set up Vitis environment
 =================================
 Please navigate to directory L2/tests, and change the setting of environment variable 
-**TA_PATH** to point to the installation path of your Vitis 2021.1, and run following command to set up Vivado_hls environment.
+**TA_PATH** to point to the installation path of your Vitis 2021.2, and run following command to set up Vivado_hls environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2021.1
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
+   export XILINX_VITIS=${TA_PATH}/Vitis/2021.2
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2021.2
    source ${XILINX_VITIS}/settings64.sh
 
 Test CG kernels
