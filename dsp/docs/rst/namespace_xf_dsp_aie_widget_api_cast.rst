@@ -25,7 +25,8 @@ namespace api_cast
 	    unsigned int TP_OUT_API,
 	    unsigned int TP_NUM_INPUTS,
 	    unsigned int TP_WINDOW_VSIZE,
-	    unsigned int TP_NUM_OUTPUT_CLONES = 1
+	    unsigned int TP_NUM_OUTPUT_CLONES = 1,
+	    unsigned int TP_PATTERN = 0
 	    >
 	class :ref:`widget_api_cast_graph<doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph>` 
 

@@ -50,11 +50,6 @@ inline constexpr unsigned int fnFirDecSymmertySupported() {
     return SUPPORTED;
 };
 
-// Unsupported types trigger static_assert. Only affected when AIE API in use
-// template<>inline constexpr unsigned int fnFirDecSymMultiColumn<cint16,  int16>() {return NOT_SUPPORTED;}; //
-// template<>inline constexpr unsigned int fnFirDecSymMultiColumn<cint16, cint16>() {return NOT_SUPPORTED;}; //
-// template<>inline constexpr unsigned int fnFirDecSymMultiColumn< int32,  int32>() {return NOT_SUPPORTED;}; //
-
 // FIR element support type combination with AIE API
 template <typename TT_DATA, typename TT_COEFF>
 inline constexpr unsigned int fnFirDecSymTypeSupport() {

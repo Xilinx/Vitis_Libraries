@@ -32,16 +32,14 @@ namespace aie {
 namespace widget {
 namespace api_cast {
 
-// static constexpr unsigned int kWindowAPI = 0;
-// static constexpr unsigned int kStreamAPI = 1;
-
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_IN_API,
           unsigned int TP_OUT_API,
           unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUT_CLONES>
+          unsigned int TP_NUM_OUTPUT_CLONES = 1,
+          unsigned int TP_PATTERN = 0>
 class widget_api_cast_ref {
    private:
    public:
@@ -56,8 +54,9 @@ class widget_api_cast_ref {
 
 // window to window, 1 to 2
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -73,8 +72,9 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2
 
 // window to window, 1 to 3
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -91,8 +91,9 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3
 
 // stream to window, 1 to 1
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -106,8 +107,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1
 
 // stream to window, 1 to 2
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -123,8 +125,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2
 
 // stream to window, 1 to 3
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -141,8 +144,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3
 
 // stream to window, 1 to 4
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -161,8 +165,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4
 // Dual stream in
 // stream to window, 2 to 1
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -178,8 +183,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1
 
 // stream to window, 1 to 2
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -196,8 +202,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2
 
 // stream to window, 2 to 3
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -215,8 +222,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3
 
 // stream to window, 2 to 4
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -236,8 +244,9 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4
 // Window to stream
 // window to stream, 1 to 1
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN> {
    private:
    public:
     // Constructor
@@ -251,8 +260,9 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1
 
 // window to stream, 1 to 2
 template <typename TT_DATA, // type of data input and output
-          unsigned int TP_WINDOW_VSIZE>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2> {
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PATTERN>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
    private:
    public:
     // Constructor

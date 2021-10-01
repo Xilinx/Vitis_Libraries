@@ -322,7 +322,7 @@ class create_casc_kernel<1,
  *         decimation factor of the filter, the ratio of input to output samples.
  *         TP_DECIMATE_FACTOR must be in the range 2 to 3. For larger factors, use
  *         the fir_decimate_asym library element.
- * @tparam TP_SHIFT is describes power of 2 shift down applied to the accumulation of
+ * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. TP_RND must be in the range 0 to 7
@@ -402,6 +402,15 @@ class fir_decimate_sym_graph : public graph {
      **/
 
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP,
+                                TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS>::get_m_kArch();
+    };
 
     static_assert(TP_CASC_LEN < 9, "ERROR: Unsupported Cascade length");
 
@@ -485,6 +494,15 @@ class fir_decimate_sym_graph<TT_DATA,
     kernel m_firKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_SINGLE,
+                                USE_COEFF_RELOAD_FALSE, 2>::get_m_kArch();
+    };
 
     fir_decimate_sym_graph(const std::vector<TT_COEFF>& taps) {
         // Create FIR class
@@ -550,6 +568,15 @@ class fir_decimate_sym_graph<TT_DATA,
     kernel m_firKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+                                USE_COEFF_RELOAD_FALSE, 1>::get_m_kArch();
+    };
 
     // constructor
     fir_decimate_sym_graph(const std::vector<TT_COEFF>& taps) {
@@ -617,6 +644,15 @@ class fir_decimate_sym_graph<TT_DATA,
     kernel m_firKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+                                USE_COEFF_RELOAD_FALSE, 2>::get_m_kArch();
+    };
 
     // constructor
     fir_decimate_sym_graph(const std::vector<TT_COEFF>& taps) {
@@ -702,6 +738,15 @@ class fir_decimate_sym_graph<TT_DATA,
 
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_SINGLE,
+                                USE_COEFF_RELOAD_TRUE, 1>::get_m_kArch();
+    };
 
     // constructor
     fir_decimate_sym_graph() {
@@ -771,6 +816,15 @@ class fir_decimate_sym_graph<TT_DATA,
 
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_SINGLE,
+                                USE_COEFF_RELOAD_TRUE, 2>::get_m_kArch();
+    };
 
     // constructor
     fir_decimate_sym_graph() {
@@ -842,6 +896,15 @@ class fir_decimate_sym_graph<TT_DATA,
 
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+                                USE_COEFF_RELOAD_TRUE, 1>::get_m_kArch();
+    };
 
     // constructor
     fir_decimate_sym_graph() {
@@ -914,6 +977,15 @@ class fir_decimate_sym_graph<TT_DATA,
 
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_decimate_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+                                USE_COEFF_RELOAD_TRUE, 2>::get_m_kArch();
+    };
 
     // constructor
     fir_decimate_sym_graph() {

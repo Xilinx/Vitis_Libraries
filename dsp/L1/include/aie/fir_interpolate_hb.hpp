@@ -209,7 +209,7 @@ class kernelFilterClass {
 
    public:
     // Access function for AIE Synthesizer
-    unsigned int get_m_kArch() { return m_kArch; };
+    static unsigned int get_m_kArch() { return m_kArchZigZag == kArch2BuffZigZag ? kArch2BuffZigZag : m_kArch; };
 
     // Constructors
     kernelFilterClass() : m_oldInTaps{}, m_internalTapsFSA{} {}

@@ -94,6 +94,10 @@ These are the templates to configure the Symmetric Single Rate FIR class.
 
         - sets the number of ports to broadcast the output to. This is the class for the Symmetric Single Rate FIR graph
 
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1ae626a88833ee955ae6d34ad938cd8de4:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::fir_sr_sym_graph:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a4d6402e325cf9ff10f844f23750307b7:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::create_connections:
 .. ref-code-block:: cpp
 	:class: overview-code-block
 
@@ -106,35 +110,27 @@ These are the templates to configure the Symmetric Single Rate FIR class.
 	    unsigned int TP_INPUT_WINDOW_VSIZE,
 	    unsigned int TP_CASC_LEN = 1,
 	    unsigned int TP_USE_COEFF_RELOAD = 0,
-	    unsigned int TP_NUM_OUTPUTS = 1
+	    unsigned int TP_NUM_OUTPUTS = 1,
+	    unsigned int TP_API = 0,
+	    unsigned int TP_DUAL_IP = 0
 	    >
-	class fir_sr_sym_graph: public graph
+	class fir_sr_sym_graph:
+	    public :ref:`xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph>`
+	    public :ref:`xf::dsp::aie::fir::sr_sym::conditional_in_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1conditional__in__graph>`
+	    public :ref:`xf::dsp::aie::fir::sr_sym::conditional_out_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1conditional__out__graph>`
+	    public :ref:`xf::dsp::aie::fir::sr_sym::conditioanl_rtp_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1conditioanl__rtp__graph>`
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
 
 	// fields
 
-	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a5886ffc21fb2da1fed350bc970616496>`
-	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a45b9705dc25a80595d5dd3bd3a56a47e>`
-
-Fields
-------
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a5886ffc21fb2da1fed350bc970616496:
-.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::in:
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	port <input> in
-
-The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_INPUT_WINDOW_VSIZE. Note: Margin is added internally to the graph, when connecting input port with kernel port. Therefore, margin should not be added when connecting graph to a higher level design unit. Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest multiple of 32 bytes.
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a45b9705dc25a80595d5dd3bd3a56a47e:
-.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::out:
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	port <output> out
-
-A window API of TP_INPUT_WINDOW_VSIZE samples of TT_DATA type.
+	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1acd9dde9811406a9603f91985650a12ce>`
+	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1aab25a93be05eccd59d59b643dbc0ab3d>`
+	kernel :ref:`m_firKernels<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1a897cc97c3d0368711b7ecccb5036c52d>`[TP_CASC_LEN]
 
 
 Methods
@@ -142,33 +138,25 @@ Methods
 
 .. FunctionSection
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a350921f780186f09e0416ab49c83c26c:
-.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::getkernels:
-
-getKernels
-----------
-
-
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	kernel* getKernels ()
-
-Access function to get pointer to kernel (or first kernel in a chained configuration).
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1ab20f36ad739a508863b581bc4888bd7a:
-.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::fir_sr_sym_graph:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a81ac4264ea5f83c5379bf1aeb7504b24:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::fir_sr_sym_graph-2:
 
 fir_sr_sym_graph
 ----------------
 
 
+fir_sr_sym_graph overload (1)
++++++++++++++++++++++++++++++
+
+
 .. ref-code-block:: cpp
 	:class: title-code-block
 
-	fir_sr_sym_graph (const std::vector <TT_COEFF>& taps)
+	fir_sr_sym_graph ()
 
 This is the constructor function for the Symmetric Singlr Rate FIR graph.
+
+The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_INPUT_WINDOW_VSIZE. Note: Margin is added internally to the graph, when connecting input port with kernel port. Therefore, margin should not be added when connecting graph to a higher level design unit. Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest multiple of 32 bytes. A window API of TP_INPUT_WINDOW_VSIZE samples of TT_DATA type. Access function to get pointer to kernel (or first kernel in a chained configuration).
 
 
 
@@ -180,5 +168,24 @@ This is the constructor function for the Symmetric Singlr Rate FIR graph.
     *
         - taps
 
-        - - a pointer to the array of taps values of type TT_COEFF. The taps array need only be supplied for the first half of the filter length plus the center tap for odd lengths i.e. taps[] = {c0, c1, c2, ..., cN [, cCT]} where N = TP_FIR_LEN/2 and cCT is the center tap where TP_FIR_LEN is odd. For example, a 7-tap filter might use coeffs (1, 3, 2, 5, 2, 3, 1). This could be input as taps[]= {1,3,2,5} since the context of symmetry allows the remaining coefficients to be inferred.
+        - 
+          a pointer to the array of taps values of type TT_COEFF.
+          
+          The taps array need only be supplied for the first half
+          
+          of the filter length plus the center tap for odd lengths i.e.
+          
+          taps[] = {c0, c1, c2, ..., cN [, cCT]} where
+          
+          N = TP_FIR_LEN/2 and cCT is the center tap where TP_FIR_LEN
+          
+          is odd.
+          
+          For example, a 7-tap filter might use coeffs
+          
+          (1, 3, 2, 5, 2, 3, 1). This could be input as
+          
+          taps[]= {1,3,2,5} since the context of symmetry allows
+          
+          the remaining coefficients to be inferred.
 

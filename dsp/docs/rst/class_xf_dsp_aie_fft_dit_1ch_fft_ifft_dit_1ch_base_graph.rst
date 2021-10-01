@@ -73,7 +73,17 @@ These are the templates to configure the single-channel decimation-in-time class
     *
         - TP_WINDOW_VSIZE
 
-        - is an unsigned intered which describes the number of samples in the input window. By default, TP_WINDOW_SIZE is set ot match TP_POINT_SIZE. TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case multiple FFT iterations will be performed on a given input window, resulting in multiple iterations of output samples, reducing the numer of times the kernel needs to be triggered to process a given number of input data samples. As a result, the overheads inferred during kernel triggering are reduced and overall performance is increased. This is the base class for the Single channel DIT FFT graph - one or many cascaded kernels for higher throughput
+        - is an unsigned integer which describes the number of samples in the input window. By default, TP_WINDOW_SIZE is set ot match TP_POINT_SIZE. TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case multiple FFT iterations will be performed on a given input window, resulting in multiple iterations of output samples, reducing the numer of times the kernel needs to be triggered to process a given number of input data samples. As a result, the overheads inferred during kernel triggering are reduced and overall performance is increased.
+
+    *
+        - TP_API
+
+        - is an unsigned integer to select window (0) or stream (1) interfaces.
+
+    *
+        - TP_PARALLEL_POWER
+
+        - is an unsigned integer to describe how many subframe processors to use. The default is 1. This may be set to 4 or 16 to increase throughput. This is the base class for the Single channel DIT FFT graph - one or many cascaded kernels for higher throughput
 
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__base__graph_1a68748f70c4d83099b860eb27cdb56c82:
 .. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_base_graph::m_fftkernels:
@@ -132,10 +142,35 @@ These are the templates to configure the single-channel decimation-in-time class
 	    >
 	class fft_ifft_dit_1ch_base_graph: public graph
 
+	    // direct descendants
+
+	    template <
+	        typename TT_DATA,
+	        typename TT_TWIDDLE,
+	        unsigned int TP_POINT_SIZE,
+	        unsigned int TP_FFT_NIFFT,
+	        unsigned int TP_SHIFT,
+	        unsigned int TP_CASC_LEN = 1,
+	        unsigned int TP_DYN_PT_SIZE = 0,
+	        unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+	        unsigned int TP_API = kWindowAPI
+	        >
+	    class :ref:`xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_baseports_graph<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__baseports__graph>` 
+
+	    template <
+	        typename TT_DATA,
+	        typename TT_TWIDDLE,
+	        unsigned int TP_POINT_SIZE,
+	        unsigned int TP_FFT_NIFFT,
+	        unsigned int TP_SHIFT,
+	        unsigned int TP_CASC_LEN,
+	        unsigned int TP_DYN_PT_SIZE,
+	        unsigned int TP_WINDOW_VSIZE
+	        >
+	    class :ref:`xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_baseports_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kStreamAPI><doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__baseports__graph_3_01_t_t___d_a046f489d9c68786fd2376ae7bee3eba7>` 
+
 	// fields
 
-	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__base__graph_1adda3ba8550dd9a01f1d10fbf31c01f00>`
-	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__base__graph_1af711ddd4d3a5e2a7bca96ce54dd94c8d>`
 	kernel m_fftKernels[TP_CASC_LEN]
 	parameter fft_buf1
 	parameter fft_lut1
@@ -156,27 +191,6 @@ These are the templates to configure the single-channel decimation-in-time class
 	parameter fft_buf512
 	parameter fft_buf256
 	parameter fft_buf128
-
-Fields
-------
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__base__graph_1adda3ba8550dd9a01f1d10fbf31c01f00:
-.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_base_graph::in:
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	port <input> in
-
-The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_POINT_SIZE.
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__base__graph_1af711ddd4d3a5e2a7bca96ce54dd94c8d:
-.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_base_graph::out:
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	port <output> out
-
-A window API of TP_POINT_SIZE samples of TT_DATA type.
 
 
 Methods

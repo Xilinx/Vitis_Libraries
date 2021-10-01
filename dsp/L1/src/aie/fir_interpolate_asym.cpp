@@ -592,33 +592,30 @@ inline void kernelFilterClass<TT_DATA,
         fnInitOffsets<TP_INTERPOLATE_FACTOR, TT_DATA, TT_COEFF>();
     window_incr(inInterface.inWindow, m_kDataWindowOffset); // move input data pointer past the margin padding
 
-    // preamble, load data from window into register
-    numDataLoads = 0;
+// preamble, load data from window into register
 // load the data registers with enough data for the initial MAC(MUL)
 #pragma unroll(m_kInitialLoadsIncr - 1)
     for (int initLoads = 0; initLoads < m_kInitialLoadsIncr - 1; ++initLoads) {
         readData = window_readincr_256b<TT_DATA>(inInterface.inWindow);
-        sbuff.val = upd_w(sbuff.val, numDataLoads, readData.val);
-        numDataLoads++;
+        sbuff.val = upd_w(sbuff.val, initLoads, readData.val);
     }
 
     // loop through window, computing a vector of output for each iteration.
     for (unsigned i = 0; i < m_kLsize / m_kRepeatFactor; i++)
         chess_prepare_for_pipelining chess_loop_range(m_kLsize / m_kRepeatFactor, ) {
-            dataNeeded = (m_kDataBuffXOffset + TP_FIR_LEN + (m_kLanes - 1)) *
-                         TP_INTERPOLATE_FACTOR; // m_klanes will be loaded at start of loop.
-            dataLoaded = m_kDataLoadVsize * TP_INTERPOLATE_FACTOR *
-                         (m_kInitialLoadsIncr - 1); // in effect, since data is duplicated
+            dataLoaded = 0;
+            dataNeeded = m_kVOutSize;
+
             numDataLoads = m_kInitialLoadsIncr - 1;
 #pragma unroll(m_kRepeatFactor)
             for (int strobe = 0; strobe < m_kRepeatFactor; strobe++) {
                 if (dataNeeded > dataLoaded) {
                     readData = window_readincr_256b<TT_DATA>(inInterface.inWindow);
                     sbuff.val = upd_w(sbuff.val, numDataLoads % m_kDataLoadsInReg, readData.val);
-                    dataLoaded += m_kDataLoadVsize * TP_INTERPOLATE_FACTOR; // in effect, since data is duplicated
+                    dataLoaded += m_kDataLoadVsize;
                     numDataLoads++;
                 }
-                dataNeeded += m_kLanes * TP_INTERPOLATE_FACTOR;
+                dataNeeded += m_kLanes;
 #pragma unroll(m_kPhases)
                 // The phase loop effectively multiplies the number of lanes in use to ensures that
                 // an integer number of interpolation polyphases are calculated

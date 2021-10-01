@@ -106,10 +106,13 @@ class kernelFilterClass {
     static constexpr unsigned int m_kLanes = fnNumLanesIntAsym<TT_DATA, TT_COEFF>(); // number of operations in parallel
                                                                                      // of this type combinations that
                                                                                      // the vector processor can do.
+    static constexpr unsigned int m_kVOutSize =
+        fnVOutSizeIntAsym<TT_DATA, TT_COEFF>();          // This differs from kLanes for cint32/cint32
     static constexpr unsigned int m_kDataLoadsInReg = 4; // ratio of 1024-bit data buffer to 256-bit load size.
     static constexpr unsigned int m_kDataLoadVsize =
         (32 / sizeof(TT_DATA)); // number of samples in a single 256-bit load
     static constexpr unsigned int m_kSamplesInBuff = m_kDataLoadsInReg * m_kDataLoadVsize;
+    // static constexpr unsigned int m_kSamplesInBuff          = 0;
 
     static constexpr unsigned int m_kFirRangeOffset =
         fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_INTERPOLATE_FACTOR>() /
@@ -125,11 +128,12 @@ class kernelFilterClass {
     // In some cases, the number of accumulators needed exceeds the number available in the processor leading to
     // inefficency as the
     // accumulators are loaded and stored on the stack. An alternative implementation is used to avoid this.
-    static constexpr unsigned int m_kArch = (((m_kDataBuffXOffset + TP_FIR_RANGE_LEN + m_kLanes) < m_kSamplesInBuff) &&
-                                             (TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg) == 0))
-                                                ? kArchIncr
-                                                :                 // execute incremental load architecture
-                                                kArchPhaseSeries; // execute each phase in series (reloads data)
+    static constexpr unsigned int m_kArch =
+        (((m_kDataBuffXOffset + TP_FIR_RANGE_LEN + m_kLanes * m_kDataLoadVsize / m_kVOutSize) <= m_kSamplesInBuff) &&
+         (TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg) == 0))
+            ? kArchIncr
+            :                 // execute incremental load architecture
+            kArchPhaseSeries; // execute each phase in series (reloads data)
     static constexpr unsigned int m_kZbuffSize = 32;
     static constexpr unsigned int m_kCoeffRegVsize = m_kZbuffSize / sizeof(TT_COEFF);
     static constexpr unsigned int m_kTotalLanes =
@@ -138,9 +142,7 @@ class kernelFilterClass {
     static constexpr unsigned int m_kLCMPhases = m_kTotalLanes / m_kLanes;
     static constexpr unsigned int m_kPhases = TP_INTERPOLATE_FACTOR;
     static constexpr unsigned int m_kNumOps = CEIL(TP_FIR_RANGE_LEN / TP_INTERPOLATE_FACTOR, m_kColumns) / m_kColumns;
-    static constexpr unsigned int m_kVOutSize =
-        fnVOutSizeIntAsym<TT_DATA, TT_COEFF>();       // This differs from kLanes for cint32/cint32
-    static constexpr unsigned int m_kXbuffSize = 128; // data buffer size in Bytes
+    static constexpr unsigned int m_kXbuffSize = 128;                               // data buffer size in Bytes
     static constexpr unsigned int m_kDataRegVsize = m_kXbuffSize / sizeof(TT_DATA); // samples in data buffer
     static constexpr unsigned int m_kLsize = TP_INPUT_WINDOW_VSIZE / m_kLanes;      // loops required to consume input
     static constexpr unsigned int m_kInitialLoads =
@@ -183,7 +185,7 @@ class kernelFilterClass {
 
    public:
     // Access function for AIE Synthesizer
-    unsigned int get_m_kArch() { return m_kArch; };
+    static unsigned int get_m_kArch() { return m_kArch; };
 
     // Constructors
     kernelFilterClass() : m_oldInTaps{} {}

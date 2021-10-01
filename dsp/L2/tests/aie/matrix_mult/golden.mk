@@ -24,4 +24,3 @@ $(GOLDEN):
 	make cleanall
 	perl $(GOLDEN_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --inFile $(LOC_INPUT_FILE_A) --inRow $(P_DIM_A)  --inCol $(P_DIM_AB) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --colMajor $(P_DIM_A_LEADING) --isTiled $(P_ADD_TILING_A) --tileInPlace ;
 	perl $(GOLDEN_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --inFile $(LOC_INPUT_FILE_B) --inRow $(P_DIM_AB) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --colMajor $(P_DIM_B_LEADING) --isTiled $(P_ADD_TILING_B)  --tileInPlace  --splitRows;
-	touch $(GOLDEN)

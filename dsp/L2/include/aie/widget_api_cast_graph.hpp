@@ -61,13 +61,21 @@ using namespace adf;
  * @tparam TP_NUM_OUTPUT_CLONES sets the number of output ports to write the input
  *         data to. Note that while input data from multiple ports is independent,
  *         data out is not.
+ * @tparam TP_PATTERN sets the interleave or deinterleave pattern for configurations using dual
+ *         streams, since streams are not considered clones for input nor for output.
+ *         The patterns supported are:
+ *         0 (default) : 128bits are taken from each input, concatenated to 256b and output to window.
+ *                       or one 256b window read is split into upper and lower 128b cunks for output.
+ *         1           : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa.
+ *         2           : kSplit. The window is split into 2 halves with each half going to a stream.
  **/
 template <typename TT_DATA,
           unsigned int TP_IN_API, // 0 = Window, 1 = Stream
           unsigned int TP_OUT_API,
           unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUT_CLONES = 1>
+          unsigned int TP_NUM_OUTPUT_CLONES = 1,
+          unsigned int TP_PATTERN = 0>
 /**
  * This is the class for the Widget API Cast graph
  **/
@@ -87,6 +95,10 @@ class widget_api_cast_graph : public graph {
     static_assert(TP_IN_API != 1 || TP_OUT_API != 1, "Error: stream to stream connection is not supported");
     static_assert(TP_IN_API != 0 || TP_OUT_API != 1 || TP_NUM_INPUTS == 1,
                   "Error: Window to stream supports only a single connection in.");
+    static_assert(TP_PATTERN >= 0 && TP_PATTERN < 3, "Error: TP_PATTERN is out of range.");
+    static_assert(TP_PATTERN == 0 || (TP_IN_API == kStreamAPI && TP_NUM_INPUTS == 2) ||
+                      (TP_OUT_API == kStreamAPI && TP_NUM_OUTPUT_CLONES == 2),
+                  "Error: non-zero TP_PATTERN features require dual streams on input or output");
     /**
      * The input data to the function. This input may be stream or window.
      * Data is read from here and written directly to output. When there are
@@ -121,8 +133,8 @@ class widget_api_cast_graph : public graph {
      * @brief This is the constructor function for the Widget API Cast graph.
      **/
     widget_api_cast_graph() {
-        m_kernel = kernel::create_object<
-            widget_api_cast<TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES> >();
+        m_kernel = kernel::create_object<widget_api_cast<TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE,
+                                                         TP_NUM_OUTPUT_CLONES, TP_PATTERN> >();
 
         // Specify mapping constraints
         runtime<ratio>(m_kernel) = 0.1; // Nominal figure. The real figure requires knowledge of the sample rate.

@@ -113,11 +113,11 @@ class test_graph : public graph {
 // FIR sub-graph
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
         dsplib::fir::sr_sym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, CASC_LEN,
-                                       USE_COEFF_RELOAD, NUM_OUTPUTS>
+                                       USE_COEFF_RELOAD, NUM_OUTPUTS, PORT_API>
             firGraph;
 #else // Static coefficients
         dsplib::fir::sr_sym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, CASC_LEN,
-                                       USE_COEFF_RELOAD, NUM_OUTPUTS>
+                                       USE_COEFF_RELOAD, NUM_OUTPUTS, PORT_API>
             firGraph(m_taps_v);
 #endif
 
@@ -141,23 +141,11 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        kernel* myKernel;
-        dsplib::fir::sr_sym::fir_sr_sym<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, false, false,
-                                        FIR_LEN, 0, CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS>* mySr;
         if (&firGraph.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            for (int i = 0; i < CASC_LEN; i++) {
-                myKernel = &firGraph.getKernels()[i];
-                mySr = (dsplib::fir::sr_sym::fir_sr_sym<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE,
-                                                        INPUT_SAMPLES, false, false, FIR_LEN, 0, CASC_LEN,
-                                                        USE_COEFF_RELOAD, NUM_OUTPUTS>*)myKernel;
-                printf("%d", mySr->get_m_kArch());
-                if (i == CASC_LEN - 1) {
-                    printf("]\n");
-                } else {
-                    printf(",");
-                }
-            }
+            int arch = firGraph.getKernelArchs();
+            printf("%d", arch);
+            printf("]\n");
         }
 #endif
         printf("========================\n");

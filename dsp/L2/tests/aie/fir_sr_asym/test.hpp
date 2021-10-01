@@ -49,10 +49,13 @@ class test_graph : public graph {
    public:
     port<input> in;
     port<output> out;
+#if (DUAL_IP == 1)
+    port<input> in2;
+#endif
 #if (NUM_OUTPUTS == 2)
     port<output> out2;
 #endif
-#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+#if (USE_COEFF_RELOAD == 1)
     port<input> coeff;
 #endif
 
@@ -111,16 +114,20 @@ class test_graph : public graph {
 // FIR sub-graph
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
         dsplib::fir::sr_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, CASC_LEN,
-                                        USE_COEFF_RELOAD_TRUE, NUM_OUTPUTS>
+                                        USE_COEFF_RELOAD_TRUE, NUM_OUTPUTS, DUAL_IP, PORT_API>
             firGraph;
 #else // Multi-kernel, static coefficients
         dsplib::fir::sr_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, CASC_LEN,
-                                        USE_COEFF_RELOAD_FALSE, NUM_OUTPUTS>
+                                        USE_COEFF_RELOAD_FALSE, NUM_OUTPUTS, DUAL_IP, PORT_API>
             firGraph(m_taps_v);
 #endif
 
         // Make connections
         connect<>(in, firGraph.in);
+#if (DUAL_IP == 1)
+        connect<>(in2, firGraph.in2);
+#endif
+
 #if (USE_CHAIN == 1 && NUM_OUTPUTS == 1)
         // Chained connections mutually explusive with multiple outputs.
         dsplib::fir::sr_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, CASC_LEN>
@@ -139,23 +146,11 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        kernel* myKernel;
-        dsplib::fir::sr_asym::fir_sr_asym<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE, INPUT_SAMPLES, false,
-                                          false, FIR_LEN, 0, CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS>* mySr;
         if (&firGraph.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            for (int i = 0; i < CASC_LEN; i++) {
-                myKernel = &firGraph.getKernels()[i];
-                mySr = (dsplib::fir::sr_asym::fir_sr_asym<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, ROUND_MODE,
-                                                          INPUT_SAMPLES, false, false, FIR_LEN, 0, CASC_LEN,
-                                                          USE_COEFF_RELOAD, NUM_OUTPUTS>*)myKernel;
-                printf("%d", mySr->get_m_kArch());
-                if (i == CASC_LEN - 1) {
-                    printf("]\n");
-                } else {
-                    printf(",");
-                }
-            }
+            int arch = firGraph.getKernelArchs();
+            printf("%d", arch);
+            printf("]\n");
         }
 #endif
         printf("========================\n");

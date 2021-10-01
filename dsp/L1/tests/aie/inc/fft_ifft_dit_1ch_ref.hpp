@@ -19,105 +19,22 @@
 FFT/iFFT DIT single channel reference model
 */
 
+#ifndef _DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
 //#define _DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
+#endif //_DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
 
 #include <adf.h>
 #include <limits>
+
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace fft {
 namespace dit_1ch {
 
+#include "fft_ref_utils.hpp"
+
 constexpr int kFftDynHeadBytes = 32;
-
-//---------------------------------
-// Templatized types
-template <typename T_D>
-struct T_int_data {};
-template <>
-struct T_int_data<int16> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_int_data<cint16> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_int_data<int32> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_int_data<cint32> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_int_data<float> {
-    float real;
-    float imag;
-};
-template <>
-struct T_int_data<cfloat> {
-    float real;
-    float imag;
-};
-
-template <typename T_D>
-struct T_accfftRef {};
-template <>
-struct T_accfftRef<int16> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_accfftRef<cint16> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_accfftRef<int32> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_accfftRef<cint32> {
-    int32 real;
-    int32 imag;
-};
-template <>
-struct T_accfftRef<float> {
-    float real;
-    float imag;
-};
-template <>
-struct T_accfftRef<cfloat> {
-    float real;
-    float imag;
-};
-
-// Fn to perform log2 on TP_POINT_SIZE to get #ranks
-template <unsigned int TP_POINT_SIZE>
-inline constexpr unsigned int fnGetPointSizePower() {
-    return TP_POINT_SIZE == 16
-               ? 4
-               : TP_POINT_SIZE == 32
-                     ? 5
-                     : TP_POINT_SIZE == 64
-                           ? 6
-                           : TP_POINT_SIZE == 128
-                                 ? 7
-                                 : TP_POINT_SIZE == 256
-                                       ? 8
-                                       : TP_POINT_SIZE == 512
-                                             ? 9
-                                             : TP_POINT_SIZE == 1024
-                                                   ? 10
-                                                   : TP_POINT_SIZE == 2048 ? 11 : TP_POINT_SIZE == 4096 ? 12 : 0;
-}
 
 //-----------------------------------------------------------------------------------------------------
 // FFT/iFFT DIT single channel reference model class

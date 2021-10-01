@@ -63,6 +63,14 @@
 #define NUM_ITER 1
 #endif
 
+#ifndef DUAL_IP
+#define DUAL_IP 0
+#endif
+
+#ifndef PORT_API
+#define PORT_API 0
+#endif
+
 #define INPUT_SAMPLES INPUT_WINDOW_VSIZE* NUM_ITER
 #define INPUT_MARGIN(x, y) CEIL(x, (32 / sizeof(y)))
 #define OUTPUT_SAMPLES INPUT_WINDOW_VSIZE* NUM_ITER

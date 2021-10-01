@@ -1,0 +1,76 @@
+#!/tools/xgs/perl/5.8.8/bin/perl -w
+#
+# Copyright 2021 Xilinx, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+use strict;
+
+use Cwd;
+use Cwd 'chdir';
+use Getopt::Long;
+my $usage = "This script will split a single input file into multiple.\n";
+my $debug = 0;
+my $help = 0;
+my $numFiles = 0;
+my $i = 0;
+my $k = 0;
+my $parallel_factor = 0;
+my $point_size = 0;
+my $splice_len;
+my $fileprefix;
+my $filepostfix = "fft_ifft_dit_1ch_graph_cint16_cint16_32_1_0_1_0_32_1_1_SRC_x86sim_5";
+my $line = "";
+my @indata;
+
+if ($debug == 1) {print "Entering parse_args...";}
+GetOptions('h'   => \$help,
+           't=i' => \$numFiles,
+           'p=i' => \$parallel_factor,
+           's=i' => \$point_size,
+           'q=s' => \$fileprefix,
+           'w=s' => \$filepostfix
+  )    or die "$usage";
+die "$usage\n" if $help;
+
+my @infiles;
+my $dir = "./data";
+$splice_len = $point_size/(2**($parallel_factor+1));
+print "starting concat with ${numFiles} input files\n";
+opendir(D,$dir) or die "could not open pthread dir\n";
+my $linenum = 0;
+for ($i = 0; $i < $numFiles; $i++) {
+#  print "trying to open ${dir}/${fileprefix}${i}_${filepostfix}.txt\n";
+  open(MYFH, "<${dir}/${fileprefix}${i}_${filepostfix}.txt") or print "Error: concat.out.pl cannot access file ${dir}/${fileprefix}${i}_${filepostfix}.txt\n";
+  $linenum = 0;
+  while(<MYFH>) {
+    $indata[$i][$linenum] = $_;
+    $linenum++;
+  }
+  close(MYFH);
+}
+my $idx = 0;
+open(OUTFILE, ">${dir}/${fileprefix}_${filepostfix}.txt");
+for (my $splices = 0; $splices < $linenum/$splice_len; $splices++) {
+  for ($i = 0; $i < $numFiles; $i++) {
+    for($k = 0; $k < $splice_len; $k++) {
+      $line = $indata[$i][$k+$splices*$splice_len];
+      print OUTFILE $line;
+    }
+  }
+}
+close(OUTFILE);
+closedir(D);
+print "finished merging output files\n";
+exit 0;
+#successful end to program
+###################################################################

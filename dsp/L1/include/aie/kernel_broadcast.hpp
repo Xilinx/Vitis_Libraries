@@ -36,7 +36,7 @@ namespace aie {
 namespace fir {
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, bool TP_CASC_IN>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 inline void windowBroadcast(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade) {
     using buff_type = typename T_buff_256b<int32>::v_type;
     buff_type buff256;
@@ -53,13 +53,12 @@ inline void windowBroadcast(input_window<TT_DATA>* inWindow, output_stream_cacc4
 }
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, bool TP_CASC_IN>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 inline void windowBroadcast(input_stream_cacc48* inCascade,
                             output_stream_cacc48* outCascade,
                             input_window<TT_DATA>* outWindow) {
     using buff_type = typename T_buff_256b<int32>::v_type;
     buff_type buff256;
-    // buff_type* restrict inWindowPtr   = (buff_type*) inWindow->head;
     buff_type* restrict outWindowPtr = (buff_type*)outWindow->head;
     // const int samplesPer256Buff = sizeof(buff_type)/sizeof(TT_DATA);
     const int samplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
@@ -74,7 +73,7 @@ inline void windowBroadcast(input_stream_cacc48* inCascade,
 }
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, bool TP_CASC_IN>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 inline void windowBroadcast(input_stream_cacc48* inCascade, input_window<TT_DATA>* outWindow) {
     using buff_type = typename T_buff_256b<int32>::v_type;
     buff_type buff256;
@@ -90,19 +89,23 @@ inline void windowBroadcast(input_stream_cacc48* inCascade, input_window<TT_DATA
     }
 }
 
-// Window Lock Acquire. Overloaded with IO interface.
-template <typename TT_DATA, unsigned int TP_DUAL_IP = 0>
+template <typename TT_DATA, unsigned int TP_DUAL_IP = 0, unsigned int TP_API = 0>
 inline void windowAcquire(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface) {
     // Do nothing.
-    // When Cascade is not present, Window is a sync connection
-    // No need for internal syncronization mechanisms.
 }
-// Window Lock Acquire. Overloaded with IO interface.
+
 template <typename TT_DATA, unsigned int TP_DUAL_IP = 0>
 inline void windowAcquire(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface) {
-    // acquire a lock on async input window
-    // window_acquire(inInterface.inWindow);
+    // Reset async input window pointer
     inInterface.inWindow->ptr = inInterface.inWindow->head;
+}
+
+template <typename TT_DATA, bool TP_CASC_IN, unsigned int TP_DUAL_IP, unsigned int TP_API>
+inline void windowReset(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface) {
+    // Reset async window pointers when windows are used.
+    // Pointer reset is needed to revert the window after the previous iteration.
+    if
+        constexpr(TP_API == 0 && TP_CASC_IN == CASC_IN_TRUE) { inInterface.inWindow->ptr = inInterface.inWindow->head; }
 }
 
 // Window Lock Release. Overloaded with IO interface.
@@ -117,37 +120,44 @@ inline void windowRelease(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterf
 template <typename TT_DATA, unsigned int TP_DUAL_IP = 0>
 inline void windowRelease(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface) {
     // acquire a lock on async broadcast window
-    // window_release(inInterface.inWindow);
 }
 
 // Wrapper. Overloaded with IO interface.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_DUAL_IP = 0>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API = 0, unsigned int TP_DUAL_IP = 0>
 inline void windowBroadcast(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
                             T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
     // Do nothing.
 }
 
 // Wrapper. Overloaded with IO interface.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_DUAL_IP = 0>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API = 0, unsigned int TP_DUAL_IP = 0>
 inline void windowBroadcast(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
                             T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE, CASC_IN_FALSE>(inInterface.inWindow, outInterface.outCascade);
-    // chess_memory_fence();
+    if
+        constexpr(TP_API == 0) {
+            windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inWindow, outInterface.outCascade);
+        }
 }
 
 // Wrapper. Overloaded with IO interface.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_DUAL_IP = 0>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API = 0, unsigned int TP_DUAL_IP = 0>
 inline void windowBroadcast(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                             T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE, CASC_IN_TRUE>(inInterface.inCascade, outInterface.outCascade,
-                                                                  inInterface.inWindow);
+    if
+        constexpr(TP_API == 0) {
+            windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, outInterface.outCascade,
+                                                            inInterface.inWindow);
+        }
 }
 
 // Wrapper. Overloaded with IO interface.
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_DUAL_IP = 0>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API = 0, unsigned int TP_DUAL_IP = 0>
 inline void windowBroadcast(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                             T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE, CASC_IN_FALSE>(inInterface.inCascade, inInterface.inWindow);
+    if
+        constexpr(TP_API == 0) {
+            windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, inInterface.inWindow);
+        }
 }
 }
 }

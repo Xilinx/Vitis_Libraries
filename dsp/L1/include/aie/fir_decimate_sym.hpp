@@ -188,7 +188,7 @@ class kernelFilterClass {
 
    public:
     // Access function for AIE Synthesizer
-    unsigned int get_m_kArch() { return m_kArch; };
+    static unsigned int get_m_kArch() { return m_kArch; };
 
     // FIR
     void filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,

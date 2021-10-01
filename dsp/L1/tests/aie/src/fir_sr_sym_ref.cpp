@@ -36,7 +36,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_API>
 void fir_sr_sym_ref<TT_DATA,
                     TT_COEFF,
                     TP_FIR_LEN,
@@ -44,7 +45,8 @@ void fir_sr_sym_ref<TT_DATA,
                     TP_RND,
                     TP_INPUT_WINDOW_VSIZE,
                     TP_USE_COEFF_RELOAD,
-                    TP_NUM_OUTPUTS>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
+                    TP_NUM_OUTPUTS,
+                    TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[TP_FIR_LEN];
@@ -65,18 +67,14 @@ void fir_sr_sym_ref<TT_DATA,
     // Each iteration of this loop calculates a single output sample from this FIR.
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // printf("Reset accumulator: %d\n", i);
         // Accumulation
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
             d_in[j] = window_readincr(inWindow); // read input data
-            // printf("Read data input %d\n", j);
             // Note the coefficient index reversal. See note in constructor.
             multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], m_internalTaps[TP_FIR_LEN - 1 - j]);
-            // printf("Performed MAC\n");
         }
         // Revert data pointer for next sample
         window_decr(inWindow, TP_FIR_LEN - 1);
-        // printf("Decremented input window\n");
 
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
@@ -92,13 +90,24 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
-void fir_sr_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, 2>::
-    filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow, output_window<TT_DATA>* outWindow2) {
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_API>
+void fir_sr_sym_ref<TT_DATA,
+                    TT_COEFF,
+                    TP_FIR_LEN,
+                    TP_SHIFT,
+                    TP_RND,
+                    TP_INPUT_WINDOW_VSIZE,
+                    USE_COEFF_RELOAD_FALSE,
+                    2,
+                    TP_API>::filter(input_window<TT_DATA>* inWindow,
+                                    output_window<TT_DATA>* outWindow,
+                                    output_window<TT_DATA>* outWindow2) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[TP_FIR_LEN];
     TT_DATA accumSrs;
+    int phase = 0;
 
     printf("Ref model params:\n");
     printf("TP_FIR_LEN = %lu\n", TP_FIR_LEN);
@@ -115,14 +124,11 @@ void fir_sr_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WI
     // Each iteration of this loop calculates a single output sample from this FIR.
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // printf("Reset accumulator: %d\n", i);
         // Accumulation
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
             d_in[j] = window_readincr(inWindow); // read input data
-            // printf("Read data input %d\n", j);
             // Note the coefficient index reversal. See note in constructor.
             multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], m_internalTaps[TP_FIR_LEN - 1 - j]);
-            // printf("Performed MAC\n");
         }
         // Revert data pointer for next sample
         window_decr(inWindow, TP_FIR_LEN - 1);
@@ -131,8 +137,21 @@ void fir_sr_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WI
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-        window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
+
+        if (TP_API == 0) {
+            window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+            window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
+        } else {
+            // To max HW performance, data is interleaved with 128-bit data blocks.
+            static constexpr unsigned streamBitWidth = 128;
+            static constexpr unsigned streamByteWidth = streamBitWidth / 8;
+            int outPhase = (phase++ * sizeof(TT_DATA)) % (2 * streamByteWidth);
+            if (outPhase < streamByteWidth) {
+                window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+            } else {
+                window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
+            }
+        }
         // printf("Wrote to and incremented output window\n");
     }
 };
@@ -144,11 +163,19 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
-void fir_sr_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, 1>::
-    filter(input_window<TT_DATA>* inWindow,
-           output_window<TT_DATA>* outWindow,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_API>
+void fir_sr_sym_ref<TT_DATA,
+                    TT_COEFF,
+                    TP_FIR_LEN,
+                    TP_SHIFT,
+                    TP_RND,
+                    TP_INPUT_WINDOW_VSIZE,
+                    USE_COEFF_RELOAD_TRUE,
+                    1,
+                    TP_API>::filter(input_window<TT_DATA>* inWindow,
+                                    output_window<TT_DATA>* outWindow,
+                                    const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[TP_FIR_LEN];
@@ -192,17 +219,26 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
-void fir_sr_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, 2>::
-    filter(input_window<TT_DATA>* inWindow,
-           output_window<TT_DATA>* outWindow,
-           output_window<TT_DATA>* outWindow2,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_API>
+void fir_sr_sym_ref<TT_DATA,
+                    TT_COEFF,
+                    TP_FIR_LEN,
+                    TP_SHIFT,
+                    TP_RND,
+                    TP_INPUT_WINDOW_VSIZE,
+                    USE_COEFF_RELOAD_TRUE,
+                    2,
+                    TP_API>::filter(input_window<TT_DATA>* inWindow,
+                                    output_window<TT_DATA>* outWindow,
+                                    output_window<TT_DATA>* outWindow2,
+                                    const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[TP_FIR_LEN];
     TT_DATA accumSrs;
     firReload(inTaps); // loads inTaps into m_internalTaps
+    int phase = 0;
 
     printf("Ref model params:\n");
     printf("TP_FIR_LEN = %lu\n", TP_FIR_LEN);
@@ -231,8 +267,21 @@ void fir_sr_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WI
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-        window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
+
+        if (TP_API == 0) {
+            window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+            window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
+        } else {
+            // To max HW performance, data is interleaved with 128-bit data blocks.
+            static constexpr unsigned streamBitWidth = 128;
+            static constexpr unsigned streamByteWidth = streamBitWidth / 8;
+            int outPhase = (phase++ * sizeof(TT_DATA)) % (2 * streamByteWidth);
+            if (outPhase < streamByteWidth) {
+                window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+            } else {
+                window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
+            }
+        }
     }
 };
 }

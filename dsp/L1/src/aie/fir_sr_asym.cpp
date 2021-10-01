@@ -55,7 +55,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 inline void kernelFilterClass<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -68,9 +70,12 @@ inline void kernelFilterClass<TT_DATA,
                               TP_KERNEL_POSITION,
                               TP_CASC_LEN,
                               TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>()>(inInterface, outInterface);
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API>(inInterface,
+                                                                                                 outInterface);
     filterSelectArch(inInterface, outInterface);
 };
 
@@ -88,7 +93,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 inline void kernelFilterClass<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -101,10 +108,13 @@ inline void kernelFilterClass<TT_DATA,
                               TP_KERNEL_POSITION,
                               TP_CASC_LEN,
                               TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
-                                                            const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>()>(inInterface, outInterface);
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
+                                                    const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API>(inInterface,
+                                                                                                 outInterface);
     m_coeffnEq = rtpCompare(inTaps, m_oldInTaps);
 
     sendRtpTrigger(m_coeffnEq, outInterface);
@@ -129,7 +139,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 inline void kernelFilterClass<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -142,9 +154,12 @@ inline void kernelFilterClass<TT_DATA,
                               TP_KERNEL_POSITION,
                               TP_CASC_LEN,
                               TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                               T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>()>(inInterface, outInterface);
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API>(inInterface,
+                                                                                                 outInterface);
     m_coeffnEq = getRtpTrigger(); // 0 - equal, 1 - not equal
 
     sendRtpTrigger(m_coeffnEq, outInterface);
@@ -169,7 +184,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 inline void kernelFilterClass<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -182,14 +199,19 @@ inline void kernelFilterClass<TT_DATA,
                               TP_KERNEL_POSITION,
                               TP_CASC_LEN,
                               TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                                T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    windowAcquire(inInterface);
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                        T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    windowReset<TT_DATA, TP_CASC_IN, TP_DUAL_IP, TP_API>(inInterface);
+    // windowAcquire(inInterface);
 
     if
         constexpr(m_kArch == kArchIncLoads) { filterIncLoads(inInterface, outInterface); }
     else if
         constexpr(m_kArch == kArchZigZag) { filterZigZag(inInterface, outInterface); }
+    else if
+        constexpr(m_kArch == kArchStream) { filterStream(inInterface, outInterface); }
     else {
         filterBasic(inInterface, outInterface);
     }
@@ -209,7 +231,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 inline void kernelFilterClass<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -222,8 +246,10 @@ inline void kernelFilterClass<TT_DATA,
                               TP_KERNEL_POSITION,
                               TP_CASC_LEN,
                               TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filterBasic(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterBasic(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                   T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
     T_buff_256b<TT_COEFF>* restrict coeff;
@@ -232,9 +258,9 @@ inline void kernelFilterClass<TT_DATA,
     T_buff_1024b<TT_DATA> sbuff; // input data value cache.
     T_acc<TT_DATA, TT_COEFF> acc;
     T_outVal<TT_DATA, TT_COEFF> outVal;
-    T_buff_256b<TT_DATA> readData; // input data read from window, bound for sbuff
     unsigned int dataLoaded, numDataLoads;
     unsigned int dataNeeded;
+    unsigned int dataLoadPhase = 0;
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit. Cascade phase remainder goes to m_kDataBuffXOffset
@@ -262,7 +288,7 @@ inline void kernelFilterClass<TT_DATA,
                 numDataLoads++;
             }
             // Read cascade input. Do nothing if cascade input not present.
-            acc = readCascade<TT_DATA, TT_COEFF>(inInterface, acc);
+            acc = readCascade(inInterface, acc);
             // Init Vector operation. VMUL if cascade not present, otherwise VMAC
             acc = initMacSrAsym<TT_DATA, TT_COEFF>(inInterface, acc, sbuff, m_kDataBuffXOffset, coe0, 0);
 #pragma unroll(GUARD_ZERO((m_kFirLenCeilCols / (m_kColumns) - 1)))
@@ -287,8 +313,169 @@ inline void kernelFilterClass<TT_DATA,
 
             outVal = shiftAndSaturate(acc, TP_SHIFT);
             // Write to output window
-            writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++);
         }
+};
+
+// ----------------------------------------------------- Stream ----------------------------------------------------- //
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_USE_COEFF_RELOAD,
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
+inline void kernelFilterClass<TT_DATA,
+                              TT_COEFF,
+                              TP_FIR_LEN,
+                              TP_SHIFT,
+                              TP_RND,
+                              TP_INPUT_WINDOW_VSIZE,
+                              TP_CASC_IN,
+                              TP_CASC_OUT,
+                              TP_FIR_RANGE_LEN,
+                              TP_KERNEL_POSITION,
+                              TP_CASC_LEN,
+                              TP_USE_COEFF_RELOAD,
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd(TP_RND);
+    set_sat();
+    T_buff_256b<TT_COEFF>* restrict coeff;
+    coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
+    T_buff_256b<TT_COEFF> coe0, coe1, coe2;                          // register for coeff values.
+    T_buff_1024b<TT_DATA> sbuff;                                     // input data value cache.
+    static T_buff_1024b<TT_DATA> delay = null_buff_1024b<TT_DATA>(); // retains margin data between calls
+    T_acc<TT_DATA, TT_COEFF> acc;
+    T_outVal<TT_DATA, TT_COEFF> outVal;
+    unsigned int dataLoaded;
+    unsigned int dataNeeded;
+    unsigned int dataLoadPhase = 0;
+    int dataOffset = 0;
+    int numDataLoads = 0;
+
+    constexpr int streamRptFactor = m_kSamplesInBuff / m_kVOutSize;
+
+    constexpr int marginLoadsMappedToBuff = (m_kFirMargin % m_kSamplesInBuff) / m_kDataLoadVsize;
+    constexpr int streamDataOffsetWithinBuff = (m_kFirInitOffset) % m_kSamplesInBuff;
+    constexpr int streamInitNullAccs = ((TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset) / m_kVOutSize);
+    constexpr int streamInitAccs = (CEIL(streamInitNullAccs, streamRptFactor) - streamInitNullAccs);
+    int loopSize = (m_kLsize / streamRptFactor);
+    int startDataLoads = marginLoadsMappedToBuff + streamInitAccs / (m_kDataLoadVsize / m_kVOutSize);
+    int startDataOffset = (streamDataOffsetWithinBuff) % m_kSamplesInBuff;
+
+    sbuff = delay;
+
+    coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps);
+    coe0 = *coeff++;
+    // Load more pre-loop and hold each coe
+    if (m_kFirLenCeilCols >= m_kCoeffRegVsize) {
+        coe1 = *coeff++;
+    }
+    if (m_kFirLenCeilCols >= 2 * m_kCoeffRegVsize) {
+        coe2 = *coeff;
+    }
+
+    // when firInitOffset requires special handlin
+    static int doInit = (TP_CASC_LEN == 1 || streamInitNullAccs == 0) ? 0 : 1;
+    // Init pre-loop to deal with m_kFirInitOffset. Only generate for cascaded designs
+    if
+        constexpr(TP_CASC_LEN > 1) {
+            if (doInit == 1) {
+                dataLoaded = 0;
+                dataNeeded = m_kVOutSize;
+
+                for (unsigned i = 0; i < streamInitNullAccs; i++)
+                    chess_prepare_for_pipelining chess_loop_range(streamInitNullAccs, ) {
+                        acc = readCascade(inInterface, acc);
+                        writeCascade<TT_DATA, TT_COEFF>(outInterface, null_acc<TT_DATA, TT_COEFF>());
+                    }
+
+#pragma unroll(GUARD_ZERO(streamInitAccs))
+                for (unsigned strobe = 0; strobe < (streamInitAccs); strobe++) {
+                    int xoffset = (streamInitNullAccs + strobe) * m_kVOutSize + streamDataOffsetWithinBuff;
+
+                    if (dataNeeded > dataLoaded) {
+                        // read only 128-bits for cint32/cint32 or 256-bits every odd loop
+                        readStream256(sbuff, (marginLoadsMappedToBuff + strobe / (m_kDataLoadVsize / m_kVOutSize)) %
+                                                 m_kDataLoadsInReg,
+                                      inInterface);
+                        dataLoaded += m_kDataLoadVsize;
+                    }
+                    dataNeeded += m_kVOutSize;
+
+                    // Read cascade input. Do nothing if cascade input not present.
+                    acc = readCascade(inInterface, acc);
+                    // Init Vector operation. VMUL if cascade not present, otherwise VMAC
+                    acc = initMacSrAsym<TT_DATA, TT_COEFF>(inInterface, acc, sbuff, xoffset, coe0, 0);
+
+#pragma unroll(GUARD_ZERO((m_kFirLenCeilCols / (m_kColumns) - 1)))
+                    for (int op = m_kColumns; op < m_kFirLenCeilCols; op += m_kColumns) {
+                        acc = macSrAsym(acc, sbuff, xoffset + op,
+                                        op >= 2 * m_kCoeffRegVsize ? coe2 : op >= m_kCoeffRegVsize ? coe1 : coe0,
+                                        (op % m_kCoeffRegVsize));
+                    }
+                    // Write cascade. Do nothing if cascade not present.
+                    writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
+                }
+                loopSize -= CEIL(streamInitNullAccs, streamRptFactor) / streamRptFactor;
+            }
+        }
+
+    // This loop creates the output window data. In each iteration a vector of samples is output
+    for (unsigned i = 0; i < loopSize; i++)
+        chess_prepare_for_pipelining chess_loop_range((m_kLsize / streamRptFactor) - 1, (m_kLsize / streamRptFactor)) {
+            numDataLoads = startDataLoads;
+            dataOffset = startDataOffset;
+            dataLoaded = 0;
+            dataNeeded = m_kVOutSize;
+// unroll streamRptFactor times
+#pragma unroll(streamRptFactor)
+            for (unsigned strobe = 0; strobe < streamRptFactor; strobe++) {
+                // if (dataNeeded > dataLoaded && numDataLoads < m_kLsize) {
+                if (dataNeeded > dataLoaded) {
+                    // read only 128-bits for cint32/cint32 or 256-bits every odd loop
+                    readStream256(sbuff, numDataLoads % m_kDataLoadsInReg, inInterface);
+                    dataLoaded += m_kDataLoadVsize;
+                    numDataLoads++;
+                }
+
+                dataNeeded += m_kVOutSize;
+
+                // Read cascade input. Do nothing if cascade input not present.
+                acc = readCascade(inInterface, acc);
+                // Init Vector operation. VMUL if cascade not present, otherwise VMAC
+                acc = initMacSrAsym<TT_DATA, TT_COEFF>(inInterface, acc, sbuff, strobe * m_kVOutSize + dataOffset, coe0,
+                                                       0);
+
+#pragma unroll(GUARD_ZERO((m_kFirLenCeilCols / (m_kColumns) - 1)))
+                for (int op = m_kColumns; op < m_kFirLenCeilCols; op += m_kColumns) {
+                    acc = macSrAsym(acc, sbuff, strobe * m_kVOutSize + (op + dataOffset),
+                                    op >= 2 * m_kCoeffRegVsize ? coe2 : op >= m_kCoeffRegVsize ? coe1 : coe0,
+                                    (op % m_kCoeffRegVsize));
+                }
+                // Write cascade. Do nothing if cascade not present.
+                writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
+                outVal = shiftAndSaturate(acc, TP_SHIFT);
+                // Write to output
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++);
+            }
+        }
+
+    doInit = 0;
+
+    // store sbuff for next iteration
+    delay = sbuff;
 };
 
 // ---------------------------------------------------- IncLoads ---------------------------------------------------- //
@@ -304,7 +491,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 void kernelFilterClass<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -317,8 +506,10 @@ void kernelFilterClass<TT_DATA,
                        TP_KERNEL_POSITION,
                        TP_CASC_LEN,
                        TP_USE_COEFF_RELOAD,
-                       TP_NUM_OUTPUTS>::filterIncLoads(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+                       TP_NUM_OUTPUTS,
+                       TP_DUAL_IP,
+                       TP_API>::filterIncLoads(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                               T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
     T_buff_256b<TT_COEFF>* restrict coeff;
@@ -327,8 +518,8 @@ void kernelFilterClass<TT_DATA,
     T_buff_1024b<TT_DATA> sbuff;            // input data value cache.
     T_acc<TT_DATA, TT_COEFF> acc;
     T_outVal<TT_DATA, TT_COEFF> outVal;
-    T_buff_256b<TT_DATA> readData; // input data read from window, bound for sbuff
     unsigned int dataLoaded, dataNeeded, numDataLoads;
+    unsigned int dataLoadPhase = 0;
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit. Cascade phase remainder goes to m_kDataBuffXOffset
@@ -367,7 +558,7 @@ void kernelFilterClass<TT_DATA,
                 dataNeeded += m_kVOutSize;
 
                 // Read cascade input. Do nothing if cascade input not present.
-                acc = readCascade<TT_DATA, TT_COEFF>(inInterface, acc);
+                acc = readCascade(inInterface, acc);
                 // Init Vector operation. VMUL if cascade not present, otherwise VMAC
                 acc = initMacSrAsym<TT_DATA, TT_COEFF>(inInterface, acc, sbuff,
                                                        strobe * m_kVOutSize + m_kDataBuffXOffset, coe0, 0);
@@ -383,7 +574,10 @@ void kernelFilterClass<TT_DATA,
                 writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
                 outVal = shiftAndSaturate(acc, TP_SHIFT);
                 // Write to output window
-                writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++);
+                // writeOutput<TT_DATA,TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal);  // is this causing a
+                // qor hit, compared to writeWindow?
+                // writeWindow<TT_DATA,TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
             }
         }
 };
@@ -401,7 +595,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 inline void kernelFilterClass<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -414,8 +610,10 @@ inline void kernelFilterClass<TT_DATA,
                               TP_KERNEL_POSITION,
                               TP_CASC_LEN,
                               TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS>::filterZigZag(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+                              TP_NUM_OUTPUTS,
+                              TP_DUAL_IP,
+                              TP_API>::filterZigZag(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
 
@@ -425,11 +623,11 @@ inline void kernelFilterClass<TT_DATA,
     T_buff_1024b<TT_DATA> sbuff; // input data value cache.
     T_acc<TT_DATA, TT_COEFF> acc;
     T_outVal<TT_DATA, TT_COEFF> outVal;
-    T_buff_256b<TT_DATA> readData; // input data read from window, bound for sbuff
     unsigned int dataLoaded, dataNeeded, dataNeededTemp;
     unsigned int xRegSplicePtr, xRegSplicePtrOp1, xRegSplicePtrOp2;
     unsigned int xstart, xstart2;
     unsigned int zstart, zstart2;
+    unsigned int dataLoadPhase = 0;
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit. Cascade phase remainder goes to m_kDataBuffXOffset
@@ -458,7 +656,7 @@ inline void kernelFilterClass<TT_DATA,
                 // ---------------------------------------------- FORWARD ----------------------------------------------
                 // //
                 // Read cascade input. Do nothing if cascade input not present.
-                acc = readCascade<TT_DATA, TT_COEFF>(inInterface, acc);
+                acc = readCascade(inInterface, acc);
                 // Init Vector operation. VMUL if cascade not present, otherwise VMAC
                 zstart = 0;
                 xstart = m_kDataBuffXOffset + strobe * m_kVOutSize * m_kZigZagFactor;
@@ -486,7 +684,7 @@ inline void kernelFilterClass<TT_DATA,
 
                 outVal = shiftAndSaturate(acc, TP_SHIFT); // prep acc for output
                 // Write to output window
-                writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++);
 
                 // ---------------------------------------------- PREP FOR REVERSE
                 // ---------------------------------------------- //
@@ -512,7 +710,7 @@ inline void kernelFilterClass<TT_DATA,
                 // ---------------------------------------------- REVERSE ----------------------------------------------
                 // //
                 // Read cascade input. Do nothing if cascade input not present.
-                acc = readCascade<TT_DATA, TT_COEFF>(inInterface, acc);
+                acc = readCascade(inInterface, acc);
                 // Init Vector operation. VMUL if cascade not present, otherwise VMAC
                 acc = initMacSrAsym<TT_DATA, TT_COEFF>(inInterface, acc, sbuff, xstart2, coe0, zstart2);
                 xRegSplicePtrOp2 = xRegSplicePtr % m_kDataLoadsInReg;
@@ -544,7 +742,7 @@ inline void kernelFilterClass<TT_DATA,
 
                 outVal = shiftAndSaturate(acc, TP_SHIFT);
                 // Write to output window
-                writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++);
 
                 // adjust pointers and counters for forward operation in next iteration (may be claused out for last
                 // iteration)
@@ -575,7 +773,9 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 void fir_sr_asym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -588,8 +788,10 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  TP_USE_COEFF_RELOAD,
-                 TP_NUM_OUTPUTS>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
-    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+                 TP_NUM_OUTPUTS,
+                 TP_DUAL_IP,
+                 TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
     outInterface.outWindow = outWindow;
@@ -617,10 +819,11 @@ void fir_sr_asym<TT_DATA,
                  0,
                  1,
                  USE_COEFF_RELOAD_FALSE,
-                 2>::filter(input_window<TT_DATA>* inWindow,
-                            output_window<TT_DATA>* outWindow,
-                            output_window<TT_DATA>* outWindow2) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 2;
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         output_window<TT_DATA>* outWindow,
+                                         output_window<TT_DATA>* outWindow2) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -654,10 +857,11 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_TRUE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            output_window<TT_DATA>* outWindow,
-                            const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 1;
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         output_window<TT_DATA>* outWindow,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -689,11 +893,12 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_TRUE,
-                 2>::filter(input_window<TT_DATA>* inWindow,
-                            output_window<TT_DATA>* outWindow,
-                            output_window<TT_DATA>* outWindow2,
-                            const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 2;
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         output_window<TT_DATA>* outWindow,
+                                         output_window<TT_DATA>* outWindow2,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -727,10 +932,11 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_FALSE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_window<TT_DATA>* outWindow) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 1;
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         input_stream_cacc48* inCascade,
+                                         output_window<TT_DATA>* outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -763,11 +969,12 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_FALSE,
-                 2>::filter(input_window<TT_DATA>* inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_window<TT_DATA>* outWindow,
-                            output_window<TT_DATA>* outWindow2) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 2;
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         input_stream_cacc48* inCascade,
+                                         output_window<TT_DATA>* outWindow,
+                                         output_window<TT_DATA>* outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -802,9 +1009,11 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_FALSE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            output_stream_cacc48* outCascade,
-                            output_window<TT_DATA>* broadcastWindow) {
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         output_stream_cacc48* outCascade,
+                                         output_window<TT_DATA>* broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -838,10 +1047,12 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_FALSE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_stream_cacc48* outCascade,
-                            output_window<TT_DATA>* broadcastWindow) {
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream_cacc48* outCascade,
+                                         output_window<TT_DATA>* broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -876,10 +1087,11 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_TRUE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_window<TT_DATA>* outWindow) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 1;
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         input_stream_cacc48* inCascade,
+                                         output_window<TT_DATA>* outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -912,11 +1124,12 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_TRUE,
-                 2>::filter(input_window<TT_DATA>* inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_window<TT_DATA>* outWindow,
-                            output_window<TT_DATA>* outWindow2) {
-    constexpr unsigned int TP_NUM_OUTPUTS = 2;
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         input_stream_cacc48* inCascade,
+                                         output_window<TT_DATA>* outWindow,
+                                         output_window<TT_DATA>* outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -951,10 +1164,12 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_TRUE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            output_stream_cacc48* outCascade,
-                            output_window<TT_DATA>* broadcastWindow,
-                            const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         output_stream_cacc48* outCascade,
+                                         output_window<TT_DATA>* broadcastWindow,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
@@ -988,16 +1203,785 @@ void fir_sr_asym<TT_DATA,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN,
                  USE_COEFF_RELOAD_TRUE,
-                 1>::filter(input_window<TT_DATA>* inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_stream_cacc48* outCascade,
-                            output_window<TT_DATA>* broadcastWindow) {
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API>::filter(input_window<TT_DATA>* inWindow,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream_cacc48* outCascade,
+                                         output_window<TT_DATA>* broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindow = inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = broadcastWindow;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+// ----------------------------------------------------------------------------
+// ---------------------------------- STREAM ----------------------------------
+// ----------------------------------------------------------------------------
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for when there is only one kernel for the whole filter.
+// Static coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 0,
+                 1,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream, output_stream<TT_DATA>* outStream) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    outInterface.outStream = outStream;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// Single kernel, Static coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 0,
+                 1,
+                 USE_COEFF_RELOAD_FALSE,
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for when there is only one kernel for the whole filter.
+// Reloadable coefficients, single output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         output_stream<TT_DATA>* outStream,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    outInterface.outStream = outStream;
+    this->filterKernel(inInterface, outInterface, inTaps);
+};
+
+// This is a specialization of the main class for when there is only one kernel for the whole filter.
+// Reloadable coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernel(inInterface, outInterface, inTaps);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for the final kernel in a cascade chain.
+// Static coefficients, single output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream<TT_DATA>* outStream) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inCascade = inCascade;
+    outInterface.outStream = outStream;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// This is a specialization of the main class for the final kernel in a cascade chain.
+// Static coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inCascade = inCascade;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for the first kernel in a cascade chain.
+// Static coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream, output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for any kernel within a cascade chain, but neither first nor last.
+// Static coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for the final kernel in a cascade chain.
+// Reloadable coefficients, single output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream<TT_DATA>* outStream) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inCascade = inCascade;
+    outInterface.outStream = outStream;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+// This is a specialization of the main class for the final kernel in a cascade chain.
+// Reloadable coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 2,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inCascade = inCascade;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for the first kernel in a cascade chain.
+// Reloadable coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         output_stream_cacc48* outCascade,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface, inTaps);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for any kernel within a cascade chain, but neither first nor last.
+// Reloadable coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 DUAL_IP_SINGLE,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+// ----------------------------------------------------------------------------
+// ----------------------------- DUAL STREAM ----------------------------------
+// ----------------------------------------------------------------------------
+
+// Single kernel, Static coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 0,
+                 1,
+                 USE_COEFF_RELOAD_FALSE,
+                 2,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// This is a specialization of the main class for when there is only one kernel for the whole filter.
+// Reloadable coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 2,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernel(inInterface, outInterface, inTaps);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for the first kernel in a cascade chain.
+// Static coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for any kernel within a cascade chain, but neither first nor last.
+// Static coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// This is a specialization of the main class for the final kernel in a cascade chain.
+// Static coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 2,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    inInterface.inCascade = inCascade;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernel(inInterface, outInterface);
+};
+
+// This is a specialization of the main class for the final kernel in a cascade chain.
+// Reloadable coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 2,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream<TT_DATA>* outStream,
+                                         output_stream<TT_DATA>* outStream2) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    inInterface.inCascade = inCascade;
+    outInterface.outStream = outStream;
+    outInterface.outStream2 = outStream2;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for the first kernel in a cascade chain.
+// Reloadable coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         output_stream_cacc48* outCascade,
+                                         const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface, inTaps);
+};
+
+// FIR filter function overloaded with cascade interface variations
+// This is a specialization of the main class for any kernel within a cascade chain, but neither first nor last.
+// Reloadable coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_TRUE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 DUAL_IP_DUAL,
+                 USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
+                                         input_stream<TT_DATA>* inStream2,
+                                         input_stream_cacc48* inCascade,
+                                         output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inStream = inStream;
+    inInterface.inStream2 = inStream2;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
     this->filterKernelRtp(inInterface, outInterface);
 };
 }

@@ -43,10 +43,14 @@ inline T_acc<TT_DATA, TT_COEFF> mulSrAsym(T_buff_1024b<TT_DATA> xbuff,
                                           unsigned int xstart,
                                           T_buff_256b<TT_COEFF> zbuff,
                                           unsigned int zstart) {
+    // using acc_type = typename T_acc<TT_DATA, TT_COEFF>::v_type;
+    // acc_type tmp;
+
     T_acc<TT_DATA, TT_COEFF> retVal;
     retVal.val = ::aie::sliding_mul<fnNumLanesSrAsym<TT_DATA, TT_COEFF>(), fnNumColumnsSrAsym<TT_DATA, TT_COEFF>(), 1,
                                     1, 1, accClassTag_t<fnAccClass<TT_DATA>(), fnAccSizeSrAsym<TT_DATA, TT_COEFF>()> >(
         zbuff.val, zstart, xbuff.val, xstart);
+    // retVal.val = tmp;
     return retVal;
 }
 
@@ -57,15 +61,19 @@ inline T_acc<TT_DATA, TT_COEFF> macSrAsym(T_acc<TT_DATA, TT_COEFF> acc,
                                           unsigned int xstart,
                                           T_buff_256b<TT_COEFF> zbuff,
                                           unsigned int zstart) {
+    // using acc_type = typename T_acc<TT_DATA, TT_COEFF>::v_type;
+    // acc_type tmp;
+
     T_acc<TT_DATA, TT_COEFF> retVal;
     retVal.val = ::aie::sliding_mac<fnNumLanesSrAsym<TT_DATA, TT_COEFF>(), fnNumColumnsSrAsym<TT_DATA, TT_COEFF>()>(
         acc.val, zbuff.val, zstart, xbuff.val, xstart);
+    // retVal.val = tmp;
     return retVal;
 }
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA, typename TT_COEFF>
-inline T_acc<TT_DATA, TT_COEFF> initMacSrAsym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>
+inline T_acc<TT_DATA, TT_COEFF> initMacSrAsym(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
                                               T_acc<TT_DATA, TT_COEFF> acc,
                                               T_buff_1024b<TT_DATA> xbuff,
                                               unsigned int xstart,
@@ -73,8 +81,8 @@ inline T_acc<TT_DATA, TT_COEFF> initMacSrAsym(T_inputIF<CASC_IN_FALSE, TT_DATA> 
                                               unsigned int zstart) {
     return mulSrAsym<TT_DATA, TT_COEFF>(xbuff, xstart, zbuff, zstart);
 };
-template <typename TT_DATA, typename TT_COEFF>
-inline T_acc<TT_DATA, TT_COEFF> initMacSrAsym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>
+inline T_acc<TT_DATA, TT_COEFF> initMacSrAsym(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                                               T_acc<TT_DATA, TT_COEFF> acc,
                                               T_buff_1024b<TT_DATA> xbuff,
                                               unsigned int xstart,

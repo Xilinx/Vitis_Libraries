@@ -79,6 +79,22 @@
             "FFT_NIFFT":"0",
             "SHIFT":"12",
             "STIM_TYPE":"0"
+        },
+        "test_10_fft_ifft_dit_1ch": {
+            "DATA_TYPE":"cint32",
+            "TWIDDLE_TYPE":"cint16",
+            "POINT_SIZE":"2048",
+            "FFT_NIFFT":"0",
+            "SHIFT":"13",
+            "STIM_TYPE":"0"
+        },
+        "test_11_fft_ifft_dit_1ch": {
+            "DATA_TYPE":"cfloat",
+            "TWIDDLE_TYPE":"cfloat",
+            "POINT_SIZE":"1024",
+            "FFT_NIFFT":"0",
+            "SHIFT":"0",
+            "STIM_TYPE":"0"
         }
     }
 }

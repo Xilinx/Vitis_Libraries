@@ -7,6 +7,23 @@
             "SHIFT":"16",
             "STIM_TYPE":"0",
             "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_1_fir_sr_asym": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"24",
+            "SHIFT":"16",
+            "STIM_TYPE":"0",
+            "INPUT_WINDOW_VSIZE":"512"
+        },
+        "test_2_fir_sr_asym": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"24",
+            "SHIFT":"16",
+            "STIM_TYPE":"0",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"256"
         }
     }
 }

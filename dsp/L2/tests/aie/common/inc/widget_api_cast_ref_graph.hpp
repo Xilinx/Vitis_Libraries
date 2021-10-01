@@ -36,7 +36,8 @@ template <typename TT_DATA,
           unsigned int TP_OUT_API,
           unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUT_CLONES>
+          unsigned int TP_NUM_OUTPUT_CLONES = 1,
+          unsigned int TP_PATTERN = 0>
 class widget_api_cast_ref_graph : public graph {
    public:
     port<input> in[TP_NUM_INPUTS];
@@ -54,9 +55,10 @@ class widget_api_cast_ref_graph : public graph {
         printf("NUM_INPUTS        = %d\n", TP_NUM_INPUTS);
         printf("WINDOW_VSIZE      = %d\n", TP_WINDOW_VSIZE);
         printf("NUM_OUTPUT_CLONES = %d\n", TP_NUM_OUTPUT_CLONES);
+        printf("PATTERN           = %d\n", TP_PATTERN);
 
         m_kernel = kernel::create_object<widget_api_cast_ref<TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS,
-                                                             TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES> >();
+                                                             TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN> >();
         // Specify mapping constraints
         runtime<ratio>(m_kernel) = 0.1; // Nominal figure. The real figure requires knowledge of the sample rate.
         // Source files

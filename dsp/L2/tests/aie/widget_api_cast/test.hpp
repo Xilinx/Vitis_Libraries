@@ -61,10 +61,12 @@ class test_graph : public graph {
         printf("NUM_INPUTS        = %d \n", NUM_INPUTS);
         printf("WINDOW_VSIZE      = %d \n", WINDOW_VSIZE);
         printf("NUM_OUTPUT_CLONES = %d \n", NUM_OUTPUT_CLONES);
+        printf("PATTERN           = %d \n", PATTERN);
         namespace dsplib = xf::dsp::aie;
 
         // Widget sub-graph
-        dsplib::widget::api_cast::UUT_GRAPH<DATA_TYPE, IN_API, OUT_API, NUM_INPUTS, WINDOW_VSIZE, NUM_OUTPUT_CLONES>
+        dsplib::widget::api_cast::UUT_GRAPH<DATA_TYPE, IN_API, OUT_API, NUM_INPUTS, WINDOW_VSIZE, NUM_OUTPUT_CLONES,
+                                            PATTERN>
             widgetGraph;
 
         // Make connections

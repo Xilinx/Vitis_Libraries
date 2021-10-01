@@ -23,18 +23,50 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
+#define NOT_SUPPORTED 0
+#define SUPPORTED 1
+
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace fir {
 namespace sr_asym {
-enum eArchType { kArchBasic = 0, kArchIncLoads, kArchZigZag };
+enum eArchType { kArchBasic = 0, kArchIncLoads, kArchZigZag, kArchStream };
 
 static constexpr unsigned int kMaxColumns = 2;
 static constexpr unsigned int kUpdWSize = 32;         // Upd_w size in Bytes (256bit) - const for all data/coeff types
 static constexpr unsigned int kBuffSize128Byte = 128; // 1024-bit buffer size in Bytes
 static constexpr unsigned int kBuffSize64Byte = 64;   // 512-bit buffer size in Bytes
 static constexpr unsigned int kBuffSize32Byte = 32;   // 256-bit buffer size in Bytes
+
+// align to 256b for FIR cascade splitting - also should be a multiple of lanes/columns
+template <typename TT_DATA>
+inline constexpr unsigned int fnFirRangeRound() {
+    return ((258 / 8) / sizeof(TT_DATA));
+}
+
+// Calculate ASYM FIR range for cascaded kernel
+template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, unsigned int TP_API>
+inline constexpr unsigned int fnFirRangeAsym() {
+    // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
+    // make sure there's no runt filters ( lengths < 4)
+    // make each cascade rounded to fnFirRangeRound and only last in the chain possibly odd
+    // Limited to stream architectures for now
+    return fnFirRange<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnFirRangeRound<TT_DATA>()) : 1)>();
+}
+template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, unsigned int TP_API>
+inline constexpr unsigned int fnFirRangeRemAsym() {
+    // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
+    // this is for last in the cascade
+    return fnFirRangeRem<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnFirRangeRound<TT_DATA>()) : 1)>();
+}
+
+// Calculate ASYM FIR range offset for cascaded kernel
+template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, unsigned int TP_API>
+inline constexpr unsigned int fnFirRangeOffsetAsym() {
+    // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
+    return fnFirRangeOffset<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnFirRangeRound<TT_DATA>()) : 1)>();
+}
 
 // function to return the number of lanes for a type combo
 template <typename TT_DATA, typename TT_COEFF>
@@ -112,10 +144,27 @@ inline constexpr unsigned int fnDataLoadVsizeSrAsym() {
     return (kUpdWSize / sizeof(TT_DATA));
 }
 
+// Helper function to define max ZigZag Coefficient array
+template <typename TT_COEFF>
+inline constexpr unsigned int fnZigZagMaxCoeffByteSize() {
+    return 256;
+}
+
 // function to return the number of samples in an output vector for a type combo
 template <typename TT_DATA, typename TT_COEFF>
 inline constexpr unsigned int fnVOutSizeSrAsym() {
     return fnNumLanesSrAsym<TT_DATA, TT_COEFF>();
+};
+
+// Support for stream interface for a give data/coeff type combination
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+inline constexpr unsigned int fnTypeStreamSupport() {
+    return SUPPORTED;
+};
+// Exclude cint32/cint32 combo.
+template <>
+inline constexpr unsigned int fnTypeStreamSupport<cint32, cint32, 1>() {
+    return NOT_SUPPORTED;
 };
 }
 }

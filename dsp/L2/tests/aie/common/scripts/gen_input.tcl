@@ -32,6 +32,8 @@ set seed 1
 set stim_type 0
 set dyn_pt_size 0
 set max_pt_size_pwr 10
+set tt_data "cint16" ;# sensible default of complex data
+set tp_api 0 ;#  for high throughput fft (planned)
 if { $::argc > 2} {
     set filename [lindex $argv 0]
     set fileDirpath [file dirname $filename]
@@ -52,6 +54,9 @@ if { $::argc > 2} {
     if {[llength $argv] > 7 } {
         set tt_data [lindex $argv 7]
     }
+    if {[llength $argv] > 8 } {
+        set tp_api [lindex $argv 8]
+    }
 
 } else {
     # defaults
@@ -63,6 +68,8 @@ if { $::argc > 2} {
     set stim_type 0 ;# random
     set dyn_pt_size 0
     set max_pt_size_pwr 0
+    set tt_data "cint16"
+    set tp_api 0
 }
 
 set nextRand $seed
@@ -117,54 +124,80 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
         }
         set iters [expr (($window_vsize-$header_size)/($samples+$padding))]
     }
+    #real has 1, complex has 2. int16 is an exception since 32 bits are read
+    set parts 1
+    if {$tt_data eq "cint16" || $tt_data eq "cint32" || $tt_data eq "cfloat" || $tt_data eq "int16"} {
+        set parts 2
+    }
     for {set winSplice 0} {$winSplice < $iters} {incr winSplice} {
         for {set sample_idx 0} {$sample_idx < [expr ($samples)]} {incr sample_idx} {
-            set sample_nr [expr (($samples * $iter_nr)+$sample_idx)]
-            if { $stim_type == 4 || ($stim_type == 3 && $sample_nr == 0) || ($stim_type == 9 && $sample_nr%2 == 1) } {
-                set nextRand 1
-            } elseif { ($stim_type == 3 && $sample_nr != 0) || $stim_type == 9 } {
+            for {set comp 0} {$comp < $parts} {incr comp} {
+                set sample_nr [expr (($samples * $iter_nr)+$sample_idx)]
+                if { $stim_type == 4 || ($stim_type == 3 && $sample_nr == 0) || ($stim_type == 9 && $sample_nr%2 == 1) } {
+                    set nextRand 1
+                } elseif { ($stim_type == 3 && $sample_nr != 0) || $stim_type == 9 } {
+                    set nextRand 0
+                } elseif { ($stim_type == 5) } {
+                    set nextRand [expr $nextRand+1]
+                } elseif { ($stim_type == 8) } {
+                    if {$comp eq 0} {
+                        if {$sample_idx % 8 == 0 } {
+                            set nextRand 8192
+                        }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 7 } {
+                            set nextRand 5793
+                        }  elseif {$sample_idx % 8 == 2 || $sample_idx % 8 == 6 } {
+                            set nextRand 0
+                        }  elseif {$sample_idx % 8 == 3 || $sample_idx % 8 == 5 } {
+                            set nextRand -5793
+                        }  else {
+                            set nextRand -8192
+                        }
+                    } else {
+                        if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
+                            set nextRand 0
+                        }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
+                            set nextRand 5793
+                        }  elseif {$sample_idx % 8 == 2 } {
+                            set nextRand 8192
+                        }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
+                            set nextRand -5793
+                        }  else {
+                            set nextRand -8192
+                        }
+                    }
+                } else {
+                    set nextRand [randInt16 $nextRand]
+                }
+                if {$comp eq 0 && $parts eq 2} {
+                    puts -nonewline $output_file "$nextRand "
+                } else {
+                    puts $output_file "$nextRand "
+                }
+            }
 
-                set nextRand 0
-            } elseif { ($stim_type == 5) } {
-                set nextRand [expr $nextRand+1]
-            } elseif { ($stim_type == 8) } {
-                if {$sample_idx % 8 == 0 } {
-                    set nextRand 8192
-                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 7 } {
-                    set nextRand 5793
-                }  elseif {$sample_idx % 8 == 2 || $sample_idx % 8 == 6 } {
-                    set nextRand 0
-                }  elseif {$sample_idx % 8 == 3 || $sample_idx % 8 == 5 } {
-                    set nextRand -5793
-                }  else {
-                    set nextRand -8192
-                }
-            } else {
-                set nextRand [randInt16 $nextRand]
-            }
-            puts -nonewline $output_file "$nextRand "
-            if { $stim_type == 4 || ($stim_type == 9 && $sample_nr%2 == 1)} {
-                set nextRand 1
-            } elseif { ($stim_type == 3) || ($stim_type == 9)} {
-                set nextRand 0
-            } elseif { ($stim_type == 5) } {
-                set nextRand $nextRand
-            } elseif { ($stim_type == 8) } {
-                if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
-                    set nextRand 0
-                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
-                    set nextRand 5793
-                }  elseif {$sample_idx % 8 == 2 } {
-                    set nextRand 8192
-                }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
-                    set nextRand -5793
-                }  else {
-                    set nextRand -8192
-                }
-            } else {
-                set nextRand [randInt16 $nextRand]
-            }
-            puts $output_file $nextRand
+
+#            if { $stim_type == 4 || ($stim_type == 9 && $sample_nr%2 == 1)} {
+#                set nextRand 1
+#            } elseif { ($stim_type == 3) || ($stim_type == 9)} {
+#                set nextRand 0
+#            } elseif { ($stim_type == 5) } {
+#                set nextRand $nextRand
+#            } elseif { ($stim_type == 8) } {
+#                if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
+#                    set nextRand 0
+#                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
+#                    set nextRand 5793
+#                }  elseif {$sample_idx % 8 == 2 } {
+#                    set nextRand 8192
+#                }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
+#                    set nextRand -5793
+#                }  else {
+#                    set nextRand -8192
+#                }
+#            } else {
+#                set nextRand [randInt16 $nextRand]
+#            }
+#            puts $output_file $nextRand
         }
         #padding is only non-zero for dynamic point size, so no need to clause with dyn_pt_size
         for {set sample_idx 0} {$sample_idx < [expr ($padding)]} {incr sample_idx} {
@@ -174,4 +207,3 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
         }
     }
 }
-

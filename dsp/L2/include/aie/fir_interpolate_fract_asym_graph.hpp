@@ -318,7 +318,7 @@ class create_casc_kernel<1,
  *         decimation factor of the filter. TP_DECIMATE_FACTOR must be in the
  *         range 2 to 16. The decimation factor should be less that the interpolation
  *         factor and should not be divisible factor of the interpolation factor.
- * @tparam TP_SHIFT is describes power of 2 shift down applied to the accumulation of
+ * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. TP_RND must be in the range 0 to 7
@@ -393,6 +393,18 @@ class fir_interpolate_fract_asym_graph : public graph {
      **/
 
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange =
+            (TP_CASC_LEN == 1)
+                ? TP_FIR_LEN
+                : fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
+                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
+                                          TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS>::get_m_kArch();
+    };
 
     // constructor
     /**
@@ -477,6 +489,18 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
     kernel m_firKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange =
+            (TP_CASC_LEN == 1)
+                ? TP_FIR_LEN
+                : fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
+                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
+                                          TP_CASC_LEN, USE_COEFF_RELOAD_FALSE, 2>::get_m_kArch();
+    };
 
     fir_interpolate_fract_asym_graph(const std::vector<TT_COEFF>& taps) {
         // create kernels
@@ -545,6 +569,18 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
     kernel m_firReloadKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange =
+            (TP_CASC_LEN == 1)
+                ? TP_FIR_LEN
+                : fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
+                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
+                                          TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 1>::get_m_kArch();
+    };
 
     // constructor
     fir_interpolate_fract_asym_graph() {
@@ -618,6 +654,18 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
     kernel m_firReloadKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
+    unsigned int getKernelArchs() {
+        constexpr unsigned int firRange =
+            (TP_CASC_LEN == 1)
+                ? TP_FIR_LEN
+                : fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>();
+        // return the architecture for first kernel in the design (only one for single kernel designs).
+        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
+        // best.
+        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
+                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
+                                          TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 2>::get_m_kArch();
+    };
 
     // constructor
     fir_interpolate_fract_asym_graph() {

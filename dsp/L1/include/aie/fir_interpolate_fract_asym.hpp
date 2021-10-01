@@ -215,7 +215,7 @@ class kernelFilterClass {
 
    public:
     // Access function for AIE Synthesizer
-    unsigned int get_m_kArch() { return 0; }; // no distinct architectures yet
+    static unsigned int get_m_kArch() { return 0; }; // no distinct architectures yet
 
     // Constructors
     kernelFilterClass() : m_oldInTaps{} {}

@@ -36,18 +36,22 @@
             "target": "aiesim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "grep -ve '[XT]' ./data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./data/ref_output.txt > ./logs/ref_output.txt",
+                "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
+                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(DATA_TYPE) $(COEFF_TYPE) $(FIR_LEN) $(INPUT_WINDOW_VSIZE) $(CASC_LEN) $(INTERPOLATE_FACTOR) $(DECIMATE_FACTOR) $(SYMMETRY_FACTOR) $(DUAL_IP) $(USE_COEFF_RELOAD) $(NUM_OUTPUTS) $(STATUS_FILE) ./ \"filter\" $(NITER_UUT);"
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) FIR_LEN $(FIR_LEN) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) INPUT_WINDOW_VSIZE $(INPUT_WINDOW_VSIZE) CASC_LEN $(CASC_LEN) INTERPOLATE_FACTOR $(INTERPOLATE_FACTOR) DECIMATE_FACTOR $(DECIMATE_FACTOR) SYMMETRY_FACTOR $(SYMMETRY_FACTOR) DUAL_IP $(DUAL_IP) USE_COEFF_RELOAD $(USE_COEFF_RELOAD) NUM_OUTPUTS $(NUM_OUTPUTS)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(INPUT_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output filter $(NITER_UUT)",
+		        "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fir_theoretical_min.tcl $(DATA_TYPE) $(COEFF_TYPE) $(FIR_LEN) $(INPUT_WINDOW_VSIZE) $(CASC_LEN) $(INTERPOLATE_FACTOR) $(DECIMATE_FACTOR) $(SYMMETRY_FACTOR) $(STATUS_FILE) $(UUT_KERNEL)",
+                "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
                 ]
         },
         {
             "target": "x86sim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "grep -ve '[XT]' ./data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./data/ref_output.txt > ./logs/ref_output.txt",
+                "grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt",
+                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)"
                 ]
         }
@@ -57,15 +61,13 @@
             "name": "aiesim-launch",
             "target": "aiesim",
             "pkg-dir": "./Work",
-            "input-dir": "./",
-            "output-dir": "./"
+            "input-dir": "./"
         },
         {
             "name": "x86sim-launch",
             "target": "x86sim",
             "pkg-dir": "./Work",
-            "input-dir": "./",
-            "output-dir": "./"
+            "input-dir": "./"
         }
     ],
     "aiecompiler": {
@@ -126,11 +128,12 @@
                     "COEFF_FILE": "data/coeff.txt",
                     "LOC_COEFF_FILE":"./data/coeff.txt",
                     "LOC_INPUT_FILE":"./data/input.txt",
+                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(COEFF_TYPE)_$(FIR_LEN)_$(SHIFT)_$(ROUND_MODE)_$(CASC_LEN)_$(DUAL_IP)_$(USE_COEFF_RELOAD)_$(SYMMETRY_FACTOR)_$(INTERPOLATE_FACTOR)_$(DECIMATE_FACTOR)_$(NUM_OUTPUTS)",
                     "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_FILE": "$(STATUS_LOG_FILE)",
                     "DIFF_OUT_FILE": "diff_output.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "--xlopt=1 -stacksize=$$(( $(FIR_LEN) * $(INTERPOLATE_FACTOR) * $(COEFF_SIZE) + 1536))  -Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:noodle.optim.olbb=20 -Xchess=main:backend.mist2.pnll=\"off\" ",
+                    "UUT_TARGET_COMPILE_ARGS": "--xlopt=1 -stacksize=$$(( $(FIR_LEN) * $(INTERPOLATE_FACTOR) * $(COEFF_SIZE) + 1536))  -Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  ",
                     "REF_TARGET_COMPILE_ARGS":"",
                     "WORK_DIR":"./Work",
                     "UUT_WORK_DIR":"./Work",
@@ -139,7 +142,6 @@
                     "USING_REF": "",
                     "USING_UUT": "-DUSING_UUT=1",
                     "TAG_PREPROC_ARGS": "-DUUT_GRAPH=$($(TAG)_GRAPH) -DOUTPUT_FILE=$($(TAG)_SIM_FILE) -DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS)  -DINPUT_WINDOW_VSIZE=$($(TAG)_INPUT_WINDOW_VSIZE) -DNITER=$(NITER_$(TAG)) $(USING_$(TAG))"
-
 
                 }
             }

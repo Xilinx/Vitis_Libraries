@@ -34,13 +34,6 @@ void widget_real2complex_ref<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::convertData
     TT_OUT_DATA d_out;
     d_out.imag = 0;
 
-#ifdef _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-    const unsigned int kSamplesInWindow = window_size(inWindow0); // number of samples in window
-    if (kSamplesInWindow != TP_WINDOW_VSIZE) {
-        printf("Error: mismatch of samples in window versus template parameter");
-    }
-#endif //_DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data
         d_out.real = d_in;
@@ -54,13 +47,6 @@ void widget_real2complex_ref<int32, cint32, TP_WINDOW_VSIZE>::convertData(input_
                                                                           output_window<cint32>* outWindow0) {
     int32 d_in;
     cint32 d_out;
-
-#ifdef _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-    const unsigned int kSamplesInWindow = window_size(inWindow0); // number of samples in window
-    if (kSamplesInWindow != TP_WINDOW_VSIZE) {
-        printf("Error: mismatch of samples in window versus template parameter");
-    }
-#endif //_DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data
@@ -76,13 +62,6 @@ void widget_real2complex_ref<float, cfloat, TP_WINDOW_VSIZE>::convertData(input_
     float d_in;
     cfloat d_out;
 
-#ifdef _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-    const unsigned int kSamplesInWindow = window_size(inWindow0); // number of samples in window
-    if (kSamplesInWindow != TP_WINDOW_VSIZE) {
-        printf("Error: mismatch of samples in window versus template parameter");
-    }
-#endif //_DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data
         d_out.real = d_in;
@@ -96,13 +75,6 @@ void widget_real2complex_ref<cint16, int16, TP_WINDOW_VSIZE>::convertData(input_
                                                                           output_window<int16>* outWindow0) {
     cint16 d_in;
     int16 d_out;
-
-#ifdef _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-    const unsigned int kSamplesInWindow = window_size(inWindow0); // number of samples in window
-    if (kSamplesInWindow != TP_WINDOW_VSIZE) {
-        printf("Error: mismatch of samples in window versus template parameter");
-    }
-#endif //_DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data
@@ -118,13 +90,6 @@ void widget_real2complex_ref<cint32, int32, TP_WINDOW_VSIZE>::convertData(input_
     cint32 d_in;
     int32 d_out;
 
-#ifdef _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-    const unsigned int kSamplesInWindow = window_size(inWindow0); // number of samples in window
-    if (kSamplesInWindow != TP_WINDOW_VSIZE) {
-        printf("Error: mismatch of samples in window versus template parameter");
-    }
-#endif //_DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data
         d_out = d_in.real;
@@ -138,13 +103,6 @@ void widget_real2complex_ref<cfloat, float, TP_WINDOW_VSIZE>::convertData(input_
                                                                           output_window<float>* outWindow0) {
     cfloat d_in;
     float d_out;
-
-#ifdef _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
-    const unsigned int kSamplesInWindow = window_size(inWindow0); // number of samples in window
-    if (kSamplesInWindow != TP_WINDOW_VSIZE) {
-        printf("Error: mismatch of samples in window versus template parameter");
-    }
-#endif //_DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data

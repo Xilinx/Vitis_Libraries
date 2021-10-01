@@ -1,0 +1,308 @@
+/* General CSS */
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    overflow-y: scroll;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    line-height: 1.2;
+    text-align: center;
+    color: hsl(226, 32%, 13%);
+}
+
+h3 {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+h5 {
+    font-size: 1.4em;
+}
+
+h6 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+
+#bootstrap-override h1 {
+    font-size: 1.8em;
+    font-weight: 400;
+}
+
+#bootstrap-override #heading #logo {
+    display: inline-block;
+    height: 2.3em;
+    width: 2.3em;
+}
+
+#bootstrap-override #heading h1 {
+    display: inline-block;
+    font-size: 2.5em;
+    line-height: 1;
+    vertical-align: bottom;
+    margin: 0;
+    color: white;
+}
+
+#bootstrap-override #heading {
+    text-align: center;
+    height: 50px;
+    margin: auto;
+}
+
+#top-bg-div {
+    width: 100%;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    background-color: #171c2d;
+    margin-bottom: 50px;
+}
+
+.qorScore {
+    font-size: 3em !important;
+}
+
+.avgQorScore {
+    font-size: 5.5em !important;
+}
+
+
+/* Table CSS */
+.large-table {
+    min-width: 100% !important;
+}
+
+table {
+    margin: 0 auto;
+    text-align: center;
+    font-size: 80%;
+    white-space: nowrap;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+
+.table-wrapper {
+    overflow: auto;
+    max-width: 80%;
+    max-height: 85vh;
+    margin: auto;
+    margin-bottom: 60px;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+tr.final-row {
+    border-bottom: 5px solid #171c2d;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 4px;
+    width: 100%;
+}
+
+a:link {
+    color: #171c2d;
+}
+  
+a:visited {
+    color: #171c2d;
+}
+
+#genSummaryInput,
+#qorSummaryInput,
+#qorRegressionInput,
+#grepSummaryInput {
+    background-image: url('searchicon.png'); /* Add a search icon to input */
+    background-size: 15px 15px;
+    background-position: 10px 12px; /* Position the search icon */
+    background-repeat: no-repeat; /* Do not repeat the icon image */
+    border-radius: 5px;
+    border: 1px solid #171c2d;
+    width: 20%; 
+    font-size: 16px; /* Increase font-size */
+    padding: 7px 13px 7px 40px; /* Add some padding */
+    margin-bottom: 20px;
+    background-color: white;
+    color: black;
+}
+
+#qorSummaryTable,
+#genSummaryTable,
+#qorRegressionTable,
+#grepSummaryTable {
+    min-width: 100%;
+}
+
+#scoreboard {
+    width: 80%;
+    margin:auto;
+    padding-bottom: 200px;
+    padding-top: 60px;
+}
+
+#avg-scoreboard {
+    width: 80%;
+    margin:auto;
+    padding-bottom: 200px;
+    padding-top: 60px;
+    text-align: center;
+}
+
+
+/* Cycle Plot Images CSS */
+.column {
+    flex: 50%;
+    width: 100%;
+    padding-left: 5%;
+    padding-right: 3%;
+}
+
+.column img {
+    margin-top: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.imgPlots {
+    width: 85%;
+    padding: 0px 20px 80px 20px;
+}
+
+.showTableButton {
+    background-image: url('down-icon.svg'); /* Add a search icon to input */
+    background-size: 15px 15px;
+    background-position: 10px 12px; /* Position the search icon */
+    background-repeat: no-repeat; /* Do not repeat the icon image */
+    padding: 5px 13px 5px 40px;
+    width: 150px;
+}
+
+
+
+/* Navigation Button CSS */
+#bootstrap-override .btn {
+    font-size: 1em;
+    transition: all 0.5s;
+}
+
+#bootstrap-override .btn-secondary {
+    background-color: #171c2d;
+}
+
+#bootstrap-override .btn-secondary:hover,
+#bootstrap-override .btn-secondary:active,
+#bootstrap-override .btn-secondary:focus {
+    background-color: #fff;
+    color: #171c2d;
+    border: solid 1px #171c2d;
+    box-shadow: none;
+}
+
+#bootstrap-override .btn-secondary:focus,
+#bootstrap-override .btn-secondary:active,
+#bootstrap-override .active {
+    box-shadow: inset #ec1c24 0px -4px;
+}
+
+#sel2,
+#sel3,
+#sel4,
+#sel5,
+#sel6,
+#sel7, 
+#sel8 {
+    display: none;
+}
+
+#toolbar {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+
+
+/* Scrollbar CSS */
+.table-wrapper::-webkit-scrollbar {
+    width: 12px;               
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f7f7f7;        
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #171c2d;    
+    border-radius: 20px;       
+    border: 3px solid #171c2d;  
+}
+
+
+/* Changelist CSS */
+.card-body {
+    padding: 3rem;
+}
+
+.changelist-box {
+    width: 80%;
+    margin: auto;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+.card-header {
+    background-color: #171c2d;  
+}
+
+.changelist-box h6 {
+    text-align: left;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.changelist-box .btn,
+.changelist-box .btn:hover,
+.changelist-box .btn:active{
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: all 0.5s;
+    text-decoration: none;
+}
+
+.changelist-box p { 
+    text-align: left;
+}
+
+.changelist-box .btn:hover {
+    color: #ec1c24 !important;
+}
+
+.togl-color {
+    color: #ec1c24 !important;
+}
+
+.togl-color.collapsed {
+    color: white !important;
+}

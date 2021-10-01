@@ -38,6 +38,12 @@
 #ifndef WINDOW_VSIZE
 #define WINDOW_VSIZE 1024
 #endif
+#ifndef API_IO
+#define API_IO 0
+#endif
+#ifndef PARALLEL_POWER
+#define PARALLEL_POWER 0
+#endif
 #ifndef INPUT_FILE
 #define INPUT_FILE "data/input.txt"
 #endif

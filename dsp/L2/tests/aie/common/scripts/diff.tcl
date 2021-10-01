@@ -12,7 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Compare files containing numbers, line by line, value by value.
+#
+set usage "
+Compare files containing numbers, line by line, value by value.
+Print found differences into a <status> file.
+Specify acceptable error with optional \[<tolerance>\] - default: 0.001.
+Select between percent (relative) and abs (absolute) \[<toleranceMode>\] -  default: percent
+
+Usage:
+tclsh diff.tcl <filename1> <filename2> <status> \[<tolerance>\] \[<toleranceMode>\]
+
+";
+if { [lsearch $argv "-h"] != -1 } {
+    puts $usage
+    exit 0
+}
 
 
 # Get args
@@ -46,8 +60,11 @@ if { $::argc >= 5} {
 }
 
 
-
+# global variable to track max difference
+set maxDiffVal 0
 proc isSame {a b tolerance toleranceMode} {
+    variable maxDiffVal
+    
     if {(($a == 0.0) && ($toleranceMode != "abs"))} {
     # Avoid division by 0
         if {$b == 0.0} {
@@ -56,13 +73,15 @@ proc isSame {a b tolerance toleranceMode} {
             set res 0
         }
     } else {
-
         if {($toleranceMode == "abs")} {
             # Absolute tolerance
             set diffVal [expr {abs(($a-$b))}]
         } else {
             # Percentage tolerance
         set diffVal [expr {abs(((double(($a-$b))) / double($a)))}]
+        }
+        if {($maxDiffVal < $diffVal)} { 
+            set maxDiffVal $diffVal
         }
         if {$diffVal <= $tolerance} {
             set res 1
@@ -140,35 +159,35 @@ while {$fexist1 && $fexist2 && [gets $inFile1 line1] != -1} {
 
 if {!$fexist1} {
     # File not found
-    puts "Error: File not found: $fileName1 "
+    puts "error: File not found: $fileName1 "
     set outFile [open $fileNameOut a]
     # Write to file
-    puts $outFile "Error: File not found: $fileName1 "
+    puts $outFile "error: File not found: $fileName1 "
     close $outFile
 } elseif {!$fexist2} {
     # File not found
-    puts "Error: File not found: $fileName2 "
+    puts "error: File not found: $fileName2 "
     set outFile [open $fileNameOut a]
     # Write to file
-    puts $outFile "Error: File not found: $fileName2 "
+    puts $outFile "error: File not found: $fileName2 "
     close $outFile
 } elseif {$lineNo == 0} {
     # Empty file
-    puts "Error: File empty: $fileName1"
+    puts "error: File empty: $fileName1"
     set outFile [open $fileNameOut a]
     # Write to file
-    puts $outFile "Error: File empty: $fileName1"
+    puts $outFile "error: File empty: $fileName1"
     close $outFile
 } elseif {$fileLengthMismatch != 0} {
     # Empty file
-    puts "Error: File length mismatch. Insufficient data in: $fileName2"
+    puts "error: File length mismatch. Insufficient data in: $fileName2"
     set outFile [open $fileNameOut a]
     # Write to file
-    puts $outFile "Error: File length mismatch. Insufficient data in: $fileName2"
+    puts $outFile "error: File length mismatch. Insufficient data in: $fileName2"
     close $outFile
 } elseif {$fileMismatch != 0} {
     # Diffs are showing mismatches
-    puts "WARNING: Compared files differ. Differences found: $fileDiffsFound"
+    puts "error: Compared files differ. Differences found: $fileDiffsFound. Max Difference: $maxDiffVal"
 } else {
     # Good. Put a phrase to a file, which mimics the diff command behaviour.
     set outFile [open $fileNameOut a]

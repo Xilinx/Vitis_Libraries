@@ -36,6 +36,8 @@ fft_ifft_dit_1ch graph class.
 
 #include QUOTE(UUT_GRAPH.hpp)
 
+#include "widget_api_cast_graph.hpp"
+
 using namespace adf;
 
 namespace xf {
@@ -46,8 +48,8 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    port<input> in;
-    port<output> out;
+    port<input> in[(1 + API_IO) << PARALLEL_POWER];
+    port<output> out[(1 + API_IO) << PARALLEL_POWER];
 
     // Constructor
     test_graph() {
@@ -65,6 +67,8 @@ class test_graph : public graph {
         printf("Number of kernels    = %d \n", CASC_LEN);
         printf("Dynamic point size   = %d \n", DYN_PT_SIZE);
         printf("Window Size          = %d \n", WINDOW_VSIZE);
+        printf("API_IO               = %d \n", API_IO);
+        printf("PARALLEL_POWER       = %d \n", PARALLEL_POWER);
         printf("Data type            = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
@@ -76,13 +80,19 @@ class test_graph : public graph {
 
         // FIR sub-graph
         xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
-                                              DYN_PT_SIZE, WINDOW_VSIZE>
+                                              DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER>
             fftGraph;
-
-        // Make connections
-        // Size of window in Bytes.
-        connect<>(in, fftGraph.in);
-        connect<>(fftGraph.out, out);
+        if (API_IO == 1) {                                    // dual streams for input
+            for (int i = 0; i < (2 << PARALLEL_POWER); i++) { // 2? 2 streams per subframe FFT
+                connect<stream>(in[i], fftGraph.in[i]);   // window<(WINDOW_VSIZE*sizeof(DATA_TYPE)>>PARALLEL_POWER)>
+                connect<stream>(fftGraph.out[i], out[i]); // avoiding multiple drivers by being outside the loop
+            }
+        } else { // native single window input to FFT
+            // Make connections
+            // Size of window in Bytes.
+            connect<>(in[0], fftGraph.in[0]);
+            connect<>(fftGraph.out[0], out[0]);
+        }
     };
 };
 }

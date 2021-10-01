@@ -150,25 +150,11 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        kernel* myKernel;
-        dsplib::fir::interpolate_fract_asym::fir_interpolate_fract_asym<
-            DATA_TYPE, COEFF_TYPE, FIR_LEN, INTERPOLATE_FACTOR, DECIMATE_FACTOR, SHIFT, ROUND_MODE, INPUT_SAMPLES,
-            false, false, FIR_LEN, 0, CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS>* myIntFrac;
         if (&firGraph.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            for (int i = 0; i < CASC_LEN; i++) {
-                myKernel = &firGraph.getKernels()[i];
-                myIntFrac =
-                    (dsplib::fir::interpolate_fract_asym::fir_interpolate_fract_asym<
-                        DATA_TYPE, COEFF_TYPE, FIR_LEN, INTERPOLATE_FACTOR, DECIMATE_FACTOR, SHIFT, ROUND_MODE,
-                        INPUT_SAMPLES, false, false, FIR_LEN, 0, CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS>*)myKernel;
-                printf("%d", myIntFrac->get_m_kArch());
-                if (i == CASC_LEN - 1) {
-                    printf("]\n");
-                } else {
-                    printf(",");
-                }
-            }
+            int arch = firGraph.getKernelArchs();
+            printf("%d", arch);
+            printf("]\n");
         }
 #endif
     };

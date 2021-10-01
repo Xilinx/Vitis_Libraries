@@ -227,8 +227,7 @@ class kernelFilterClass {
 
    public:
     // Access function for AIE Synthesizer
-    unsigned int get_m_kArch() { return m_kArch; };
-    unsigned int get_m_kArchZigZag() { return m_kArchZigZag; };
+    static unsigned int get_m_kArch() { return m_kArchZigZag == kArchZigZag ? kArchZigZag : m_kArch; };
 
     // Constructor used for reloadable coefficients
     kernelFilterClass() : m_oldInTaps{}, m_phaseOneTaps{} {}

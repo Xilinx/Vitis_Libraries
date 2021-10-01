@@ -194,6 +194,9 @@ inline constexpr bool fnCheckCascLen() {
 
 template <typename TT_DATA, unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN>
 inline constexpr bool fnCheckCascLen2() {
+    return true;
+    // The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
+    // all cascade configurations possible will not run into the issue of buffer overwrite involved.
     return (TP_CASC_LEN == 1) || (!std::is_same<TT_DATA, cfloat>::value) || (TP_POINT_SIZE != 16);
 }
 
@@ -201,6 +204,89 @@ inline constexpr bool fnCheckCascLen2() {
 
 //---------------------------------------------------
 // Functions
+
+template <typename TT_DATA, typename TT_TWIDDLE, unsigned int TP_POINT_SIZE>
+inline constexpr int fnHeapSize() {
+    int retVal = 0;
+    int buffsize = 0;
+    // cfloat twiddles are cfloat size and cam not use half table trick.
+    if (std::is_same<TT_DATA, cfloat>::value) {
+        switch (TP_POINT_SIZE) {
+            case 16:
+                retVal += 5 * 32;
+                break; // tw1, tw2, tw4, tw8 all 32 byte aligned. tw 8 is 64 long.
+            case 32:
+                retVal += 5 * 32 + 128;
+                break; // as above, plus tw16 (128)
+            case 64:
+                retVal += 32 + 4 * 32 + 128 + 256;
+                break; // Note the pattern. This is 512 +32.
+            case 128:
+                retVal += 32 + 1024;
+                break; // and so on.
+            case 256:
+                retVal += 32 + 2048;
+                break;
+            case 512:
+                retVal += 32 + 4096;
+                break;
+            case 1024:
+                retVal += 32 + 8192;
+                break;
+            case 2048:
+                retVal += 32 + 16384;
+                break;
+            case 4096:
+                retVal += 32 + 32768;
+                break; // clearly not possible as this is > 32k.
+            default:
+                retVal = 0;
+                break;
+        }
+    } else {
+        switch (TP_POINT_SIZE) {
+            case 16:
+                retVal += 4 * 32;
+                break; // tw1, tw2, tw4, tw8 all 32 byte aligned.
+            case 32:
+                retVal += 4 * 32 + 64 / 2;
+                break; // as above, +tw16(half)
+            case 64:
+                retVal += 4 * 32 + 64 + 128 / 2;
+                break; // as above, but with tw16(full) and tw32(half)
+            case 128:
+                retVal += 4 * 32 + 192 + 256 / 2;
+                break; // and so on.
+            case 256:
+                retVal += 4 * 32 + 512 - 64 + 256;
+                break;
+            case 512:
+                retVal += 4 * 32 + 768 - 64 + 512;
+                break;
+            case 1024:
+                retVal += 4 * 32 + 1536 - 64 + 1024;
+                break;
+            case 2048:
+                retVal += 4 * 32 + 3072 - 64 + 2048;
+                break;
+            case 4096:
+                retVal += 4 * 32 + 6144 - 64 + 4096;
+                break;
+            default:
+                retVal = 0;
+                break;
+        }
+    }
+    retVal += 1024; // sundry items
+
+    buffsize = TP_POINT_SIZE > 128 ? TP_POINT_SIZE : 128; // 128 is minimum point size
+    retVal += sizeof(cint32) * buffsize;                  // internal buffer - always 8 bytes per samples
+    if (std::is_same<TT_DATA, cint16>::value) {
+        retVal += sizeof(cint32) * buffsize; // internal buffer - cint16 requires 2 copies
+    }
+
+    return retVal;
+};
 
 // To reduce Data Memory required, the input window can be re-used as a temporary buffer of samples,
 // but only when the internal type size is the same as the input type size
@@ -274,6 +360,11 @@ template <>
 inline constexpr int fnOddPower<2048>() {
     return 1;
 }
+
+template <int T_X, int T_Y>
+inline constexpr int fnCeil() {
+    return ((T_X + T_Y - 1) / T_Y) * T_Y;
+};
 
 //----------------------------------------------------------------------
 // nullElem

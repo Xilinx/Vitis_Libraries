@@ -1,0 +1,22 @@
+{
+    "daily": {
+        "test_0_dds_mixer": {
+            "DATA_TYPE":"cint16",
+            "MIXER_MODE":"0",
+            "WINDOW_VSIZE":"256",
+            "P_API":"0"
+        },
+        "test_1_dds_mixer": {
+            "DATA_TYPE":"cint16",
+            "MIXER_MODE":"1",
+            "WINDOW_VSIZE":"256",
+            "P_API":"1"
+        },
+        "test_2_dds_mixer": {
+            "DATA_TYPE":"cint16",
+            "MIXER_MODE":"2",
+            "WINDOW_VSIZE":"320",
+            "P_API":"0"
+        }
+    }
+}

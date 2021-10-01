@@ -37,13 +37,6 @@ included in aie graph level compilation.
 #include <vector>
 
 #include "fft_ifft_dit_1ch_traits.hpp"
-//#ifdef __X86SIM__
-// The graph scoping mechanism confuses x86sim. This works around it.
-#include "fft_bufs.h"
-//#else
-//#include "fft_twiddle_lut_dit.h"
-//#include "fft_twiddle_lut_dit_cfloat.h"
-//#endif //__X86SIM__
 
 #ifndef _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
 //#define _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
@@ -73,6 +66,10 @@ class stockhamStages {
     stockhamStages() {} // Constructor
 
     static constexpr unsigned int kPointSizePower = fnPointSizePower<TP_POINT_SIZE>();
+    static constexpr unsigned int kPointSizePowerCeiled =
+        fnCeil<kPointSizePower, 2>(); // round up to 2 to allow loop of r4 stages
+    static constexpr unsigned int kPointSizeCeiled = 1 << kPointSizePowerCeiled; // loop is for R4 or R2
+
     static constexpr unsigned int kOddPower = fnOddPower<TP_POINT_SIZE>();
     static constexpr unsigned int kIntR4Stages =
         (kPointSizePower - 3) / 2; // number of internal radix 4 stags, i.e. not including input or output stages.
@@ -80,21 +77,21 @@ class stockhamStages {
         (kPointSizePower -
          2); // The 2 comes from the last 2 ranks being handled differently, being Stockham stage 1 and 2.
 
-    void calc(TT_DATA* __xbuff,
+    void calc(TT_DATA* __restrict xbuff,
               TT_TWIDDLE** tw_table,
               TT_INTERNAL_DATA* tmp1_buf,
               TT_INTERNAL_DATA* tmp2_buf,
               TT_OUT_DATA* __restrict obuff);
-    void calc(TT_DATA* __xbuff,
+    void calc(TT_DATA* __restrict xbuff,
               TT_TWIDDLE** tw_table,
               TT_INTERNAL_DATA* tmp1_buf,
               TT_INTERNAL_DATA* tmp2_buf,
               TT_OUT_DATA* __restrict obuff,
               int ptSizePwr,
               bool inv);
-    void stagePreamble(void* tw_table,
-                       void* tmp1_buf,
-                       void* tmp2_buf,
+    void stagePreamble(TT_TWIDDLE** tw_table,
+                       TT_INTERNAL_DATA* tmp1_buf,
+                       TT_INTERNAL_DATA* tmp2_buf,
                        input_window<TT_DATA>* __restrict inputx,
                        output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -154,36 +151,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
-    TT_TWIDDLE* __restrict tw512 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512);
-    TT_TWIDDLE* __restrict tw1024 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1024_cfloat : (TT_TWIDDLE*)fft_lut_tw1024);
-    TT_TWIDDLE* __restrict tw2048 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2048_cfloat : (TT_TWIDDLE*)fft_lut_tw2048_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, tw1024, tw2048};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_4096_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -219,34 +186,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
-    TT_TWIDDLE* __restrict tw512 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512);
-    TT_TWIDDLE* __restrict tw1024 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1024_cfloat : (TT_TWIDDLE*)fft_lut_tw1024_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, tw1024, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_2048_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -282,32 +221,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
-    TT_TWIDDLE* __restrict tw512 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_1024_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -343,30 +256,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_512_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -402,28 +291,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_256_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -459,26 +326,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, NULL, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -515,26 +362,6 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE>
         stages;
 
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    // the I/O buffers cannot easily be used as temp stores here because the I/O type may be smaller than the internal
-    // type.
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_DATA,
@@ -570,23 +397,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1; // works because cint32 is the same size as
-                                                                       // cfloat
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 
@@ -623,21 +433,6 @@ class kernelFFTClass<TT_DATA,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-    TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8_half);
-
-    TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1; // works because cint32 is the same size as
-                                                                       // cfloat
-    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
-
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 
@@ -675,24 +470,6 @@ class kernelFFTClass<cint16,
                    TP_WINDOW_VSIZE>
         stages;
 
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
-    cint16* __restrict tw512 = (cint16*)fft_lut_tw512;
-    cint16* __restrict tw1024 = (cint16*)fft_lut_tw1024;
-    cint16* __restrict tw2048 = (cint16*)fft_lut_tw2048_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, tw1024, tw2048};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_4096_tmp1;
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_4096_tmp2;
-
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_OUT_DATA,
@@ -726,23 +503,6 @@ class kernelFFTClass<cint16,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
-    cint16* __restrict tw512 = (cint16*)fft_lut_tw512;
-    cint16* __restrict tw1024 = (cint16*)fft_lut_tw1024_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, tw1024, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_2048_tmp1;
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_2048_tmp2;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -778,22 +538,6 @@ class kernelFFTClass<cint16,
                    TP_WINDOW_VSIZE>
         stages;
 
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
-    cint16* __restrict tw512 = (cint16*)fft_lut_tw512_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_1024_tmp1;
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_1024_tmp2;
-
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_OUT_DATA,
@@ -827,21 +571,6 @@ class kernelFFTClass<cint16,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    cint16* __restrict tw256 = (cint16*)fft_lut_tw256_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_512_tmp1;
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_512_tmp2;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -877,20 +606,6 @@ class kernelFFTClass<cint16,
                    TP_WINDOW_VSIZE>
         stages;
 
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    cint16* __restrict tw128 = (cint16*)fft_lut_tw128_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_256_tmp1;
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_256_tmp2;
-
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_OUT_DATA,
@@ -924,19 +639,6 @@ class kernelFFTClass<cint16,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    cint16* __restrict tw64 = (cint16*)fft_lut_tw64_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, NULL, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_128_tmp2;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -972,21 +674,6 @@ class kernelFFTClass<cint16,
                    TP_WINDOW_VSIZE>
         stages;
 
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    cint16* __restrict tw32 = (cint16*)fft_lut_tw32_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    // the I/O buffers cannot easily be used as temp stores here because the I/O type may be smaller than the internal
-    // type.
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)
-        fft_128_tmp1; // all pt sizes 128 or smaller use 128 sample buffer to keep codebase smaller.
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_128_tmp2;
-
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 template <typename TT_OUT_DATA,
@@ -1020,18 +707,6 @@ class kernelFFTClass<cint16,
                    TP_DYN_PT_SIZE,
                    TP_WINDOW_VSIZE>
         stages;
-
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    cint16* __restrict tw16 = (cint16*)fft_lut_tw16_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)
-        fft_128_tmp1; // all pt sizes 128 or smaller use 128 sample buffer to keep codebase smaller.
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_128_tmp2;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -1068,17 +743,6 @@ class kernelFFTClass<cint16,
                    TP_WINDOW_VSIZE>
         stages;
 
-    cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    cint16* __restrict tw8 = (cint16*)fft_lut_tw8_half;
-
-    cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    T_internalDataType* ktmp1_buf = (T_internalDataType*)
-        fft_128_tmp1; // all pt sizes 128 or smaller use 128 sample buffer to keep codebase smaller.
-    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_128_tmp2;
-
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
 
@@ -1110,6 +774,8 @@ class fft_ifft_dit_1ch {
                   "ERROR: TP_SHIFT is ignored for data type cfloat so must be set to 0");
     static_assert(TP_WINDOW_VSIZE % TP_POINT_SIZE == 0, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
     static_assert(TP_WINDOW_VSIZE / TP_POINT_SIZE >= 1, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
+    static_assert((TP_DYN_PT_SIZE == 0) || (TP_POINT_SIZE != 16),
+                  "ERROR: Dynamic point size is not supported for only one legal size (16)");
 
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,

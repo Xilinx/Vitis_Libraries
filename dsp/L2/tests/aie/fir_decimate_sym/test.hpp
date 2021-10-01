@@ -142,25 +142,11 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        kernel* myKernel;
-        dsplib::fir::decimate_sym::fir_decimate_sym<DATA_TYPE, COEFF_TYPE, FIR_LEN, DECIMATE_FACTOR, SHIFT, ROUND_MODE,
-                                                    INPUT_SAMPLES, false, false, FIR_LEN, 0, CASC_LEN, USE_COEFF_RELOAD,
-                                                    NUM_OUTPUTS>* myDecSym;
         if (&firGraph.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            for (int i = 0; i < CASC_LEN; i++) {
-                myKernel = &firGraph.getKernels()[i];
-                myDecSym =
-                    (dsplib::fir::decimate_sym::fir_decimate_sym<DATA_TYPE, COEFF_TYPE, FIR_LEN, DECIMATE_FACTOR, SHIFT,
-                                                                 ROUND_MODE, INPUT_SAMPLES, false, false, FIR_LEN, 0,
-                                                                 CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS>*)myKernel;
-                printf("%d", myDecSym->get_m_kArch());
-                if (i == CASC_LEN - 1) {
-                    printf("]\n");
-                } else {
-                    printf(",");
-                }
-            }
+            int arch = firGraph.getKernelArchs();
+            printf("%d", arch);
+            printf("]\n");
         }
 #endif
         printf("========================\n");

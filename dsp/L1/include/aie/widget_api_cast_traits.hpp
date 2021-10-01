@@ -29,8 +29,14 @@ namespace aie {
 namespace widget {
 namespace api_cast {
 
+// TP_API values
 static constexpr unsigned int kWindowAPI = 0;
 static constexpr unsigned int kStreamAPI = 1;
+
+// TP_PATTERN values
+static constexpr unsigned int kDefaultIntlv = 0;
+static constexpr unsigned int kSampleIntlv = 1;
+static constexpr unsigned int kSplit = 2;
 
 // This interface is maximally sized (3) since it doesn't matter if some inputs are unused.
 template <typename T_D, unsigned int T_IN_API>

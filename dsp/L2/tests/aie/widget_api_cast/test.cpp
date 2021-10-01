@@ -78,10 +78,10 @@ int main(void) {
     printf("Number of samples   = %d \n", WINDOW_VSIZE);
     switch (IN_API) {
         case 0:
-            printf("Input API   = window\n");
+            printf("Input API           = window\n");
             break;
         case 1:
-            printf("Input API   = stream\n");
+            printf("Input API           = stream\n");
             break;
         default:
             printf("Input API unrecognised = %d\n", IN_API);
@@ -89,19 +89,20 @@ int main(void) {
     };
     switch (OUT_API) {
         case 0:
-            printf("Output API   = window\n");
+            printf("Output API          = window\n");
             break;
         case 1:
-            printf("Output API   = stream\n");
+            printf("Output API          = stream\n");
             break;
         default:
             printf("Output API unrecognised = %d\n", OUT_API);
             break;
     };
-    printf("Data type       = ");
+    printf("Data type           = ");
     printf(QUOTE(DATA_TYPE));
     printf("\n");
-    printf("NUM_OUTPUT_CLONES     = %d \n", NUM_OUTPUT_CLONES);
+    printf("NUM_OUTPUT_CLONES   = %d \n", NUM_OUTPUT_CLONES);
+    printf("PATTERN             = %d \n", PATTERN);
     printf("\n");
 
     widgetTestHarness.init();

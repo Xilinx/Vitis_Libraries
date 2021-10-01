@@ -40,7 +40,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1>
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = 0>
 class fir_sr_sym_ref {
    private:
     // This array holds the coefficient values for the reference model.
@@ -69,7 +70,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_API>
 class fir_sr_sym_ref<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -77,7 +79,8 @@ class fir_sr_sym_ref<TT_DATA,
                      TP_RND,
                      TP_INPUT_WINDOW_VSIZE,
                      0 /*USE_COEFF_RELOAD_FALSE*/,
-                     2> {
+                     2,
+                     TP_API> {
    private:
     // This array holds the coefficient values for the reference model.
     // Strictly speaking the alignment is not required when targetting
@@ -106,7 +109,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_API>
 class fir_sr_sym_ref<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -114,7 +118,8 @@ class fir_sr_sym_ref<TT_DATA,
                      TP_RND,
                      TP_INPUT_WINDOW_VSIZE,
                      1 /*USE_COEFF_RELOAD_TRUE*/,
-                     1> {
+                     1,
+                     TP_API> {
    private:
     // This array holds the coefficient values for the reference model.
     // Strictly speaking the alignment is not required when targetting
@@ -147,7 +152,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_API>
 class fir_sr_sym_ref<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -155,7 +161,8 @@ class fir_sr_sym_ref<TT_DATA,
                      TP_RND,
                      TP_INPUT_WINDOW_VSIZE,
                      1 /*USE_COEFF_RELOAD_TRUE*/,
-                     2> {
+                     2,
+                     TP_API> {
    private:
     // This array holds the coefficient values for the reference model.
     // Strictly speaking the alignment is not required when targetting

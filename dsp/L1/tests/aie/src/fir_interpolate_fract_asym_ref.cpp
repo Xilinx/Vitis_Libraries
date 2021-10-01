@@ -19,11 +19,6 @@
 Fractional interpolator asymetric FIR filter reference model
 */
 
-//#define _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-//#include "debug_utils.h"
-#endif
-
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -89,14 +84,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
                 // guard for fir_len padding
                 if (coefIndex < TP_FIR_LEN) {
                     multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[dataIndex], m_internalTapsRef[coefIndex]);
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-                    printf("dataIndex = %d, coefIndex = %d \n", dataIndex, coefIndex);
-                    // this doesn't really work for complex types
-                    printf("data = (%d,%d) coeff = %d \n", d_in[dataIndex].real, d_in[dataIndex].imag,
-                           m_internalTapsRef[coefIndex]);
-                    printf("acc[%d,%d] = (%d,%d) \n", i * TP_INTERPOLATE_FACTOR + k, p, (int32_t)accum.real,
-                           (int32_t)accum.imag);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
                 }
             }
 
@@ -104,9 +91,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
             saturateAcc(accum);
             accumSrs = castAcc(accum);
 
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-            printf("output[%d] = %d \n", i * TP_INTERPOLATE_FACTOR + k, accumSrs.real);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
             window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
         }
         // Revert data pointer for next set of samples
@@ -172,14 +156,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
                 // guard for fir_len padding
                 if (coefIndex < TP_FIR_LEN) {
                     multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[dataIndex], m_internalTapsRef[coefIndex]);
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-                    printf("dataIndex = %d, coefIndex = %d \n", dataIndex, coefIndex);
-                    // this doesn't really work for complex types
-                    printf("data = (%d,%d) coeff = %d \n", d_in[dataIndex].real, d_in[dataIndex].imag,
-                           m_internalTapsRef[coefIndex]);
-                    printf("acc[%d,%d] = (%d,%d) \n", i * TP_INTERPOLATE_FACTOR + k, p, (int32_t)accum.real,
-                           (int32_t)accum.imag);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
                 }
             }
 
@@ -187,9 +163,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
             saturateAcc(accum);
             accumSrs = castAcc(accum);
 
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-            printf("output[%d] = %d \n", i * TP_INTERPOLATE_FACTOR + k, accumSrs.real);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
             window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
             window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
         }
@@ -261,14 +234,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
                 // guard for fir_len padding
                 if (coefIndex < TP_FIR_LEN) {
                     multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[dataIndex], m_internalTapsRef[coefIndex]);
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-                    printf("dataIndex = %d, coefIndex = %d \n", dataIndex, coefIndex);
-                    // this doesn't really work for complex types
-                    printf("data = (%d,%d) coeff = %d \n", d_in[dataIndex].real, d_in[dataIndex].imag,
-                           m_internalTapsRef[coefIndex]);
-                    printf("acc[%d,%d] = (%d,%d) \n", i * TP_INTERPOLATE_FACTOR + k, p, (int32_t)accum.real,
-                           (int32_t)accum.imag);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
                 }
             }
 
@@ -276,9 +241,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
             saturateAcc(accum);
             accumSrs = castAcc(accum);
 
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-            printf("output[%d] = %d \n", i * TP_INTERPOLATE_FACTOR + k, accumSrs.real);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
             window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
         }
         // Revert data pointer for next set of samples
@@ -350,14 +312,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
                 // guard for fir_len padding
                 if (coefIndex < TP_FIR_LEN) {
                     multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[dataIndex], m_internalTapsRef[coefIndex]);
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-                    printf("dataIndex = %d, coefIndex = %d \n", dataIndex, coefIndex);
-                    // this doesn't really work for complex types
-                    printf("data = (%d,%d) coeff = %d \n", d_in[dataIndex].real, d_in[dataIndex].imag,
-                           m_internalTapsRef[coefIndex]);
-                    printf("acc[%d,%d] = (%d,%d) \n", i * TP_INTERPOLATE_FACTOR + k, p, (int32_t)accum.real,
-                           (int32_t)accum.imag);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
                 }
             }
 
@@ -365,9 +319,6 @@ void fir_interpolate_fract_asym_ref<TT_DATA,
             saturateAcc(accum);
             accumSrs = castAcc(accum);
 
-#ifdef _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
-            printf("output[%d] = %d \n", i * TP_INTERPOLATE_FACTOR + k, accumSrs.real);
-#endif // _DSPLIB_FIR_INTERPOLATE_FRACT_ASYM_HPP_DEBUG_
             window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
             window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
         }

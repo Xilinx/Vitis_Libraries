@@ -104,6 +104,8 @@ These are the templates to configure the Asymmetric Single Rate FIR class.
 
         - sets the number of ports to broadcast the output to. This is the class for the Asymmetric Single Rate FIR graph
 
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1a87879f7d88af759f028391f7bba3ba5e:
+.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::create_connections:
 .. ref-code-block:: cpp
 	:class: overview-code-block
 
@@ -116,35 +118,31 @@ These are the templates to configure the Asymmetric Single Rate FIR class.
 	    unsigned int TP_INPUT_WINDOW_VSIZE,
 	    unsigned int TP_CASC_LEN = 1,
 	    unsigned int TP_USE_COEFF_RELOAD = 0,
-	    unsigned int TP_NUM_OUTPUTS = 1
+	    unsigned int TP_NUM_OUTPUTS = 1,
+	    unsigned int TP_DUAL_IP = 0,
+	    unsigned int TP_API = 0
 	    >
-	class fir_sr_asym_graph: public graph
+	class fir_sr_asym_graph:
+	    public :ref:`xf::dsp::aie::fir::sr_asym::fir_sr_asym_base_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__base__graph>`
+	    public :ref:`xf::dsp::aie::fir::sr_asym::conditional_in_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__in__graph>`
+	    public :ref:`xf::dsp::aie::fir::sr_asym::conditional_out_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__out__graph>`
+	    public :ref:`xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditioanl__rtp__graph>`
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
 
 	// fields
 
-	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1abe7a1982ec078d804e980f69cd3de044>`
-	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1a6709fbf19d4445e508c29003c1305c64>`
-
-Fields
-------
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1abe7a1982ec078d804e980f69cd3de044:
-.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::in:
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	port <input> in
-
-The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_INPUT_WINDOW_VSIZE. Note: Margin is added internally to the graph, when connecting input port with kernel port. Therefore, margin should not be added when connecting graph to a higher level design unit. Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest multiple of 32 bytes.
-
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1a6709fbf19d4445e508c29003c1305c64:
-.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::out:
-.. ref-code-block:: cpp
-	:class: title-code-block
-
-	port <output> out
-
-A window API of TP_INPUT_WINDOW_VSIZE samples of TT_DATA type.
+	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__base__graph_1acb1f3b93f71e4ec08292c24e00dc9129>`
+	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__base__graph_1ae88952cd9f30608b6a0aa01e7b7bd448>`
+	kernel :ref:`m_firKernels<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__base__graph_1a1335e230d55187a1c4a906b68853179d>`[TP_CASC_LEN]
+	port <input> :ref:`in2<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__in__graph_1a6759dd0e2be37c4aa3a9c904a17e68bd>`
+	std::array <connect <stream, stream>*, TP_CASC_LEN> :ref:`net<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__in__graph_1a46093e3c0f07f6ce193d62deb1ca5f21>`
+	port <output> :ref:`out2<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__out__graph_1af3b3dca71fb11487164f88a21988c05a>`
+	port <input> :ref:`coeff<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditioanl__rtp__graph_1a95c65db2e2974bf41bb982d7dc1158a1>`
 
 
 Methods
@@ -152,25 +150,29 @@ Methods
 
 .. FunctionSection
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1adf9e20567347081db2d9855378abd23e:
-.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::getkernels:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1ab4402f1698e230952d5d87fb9aeb30e2:
+.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::fir_sr_asym_graph:
 
-getKernels
-----------
+fir_sr_asym_graph
+-----------------
+
+
+fir_sr_asym_graph overload (1)
+++++++++++++++++++++++++++++++
 
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
-	kernel* getKernels ()
+	fir_sr_asym_graph ()
 
-Access function to get pointer to kernel (or first kernel in a chained configuration).
+This is the constructor function for the Symmetric Singlr Rate FIR graph. Constructor with no args. To be used with TP_USE_COEFF_RELOAD=1, taps needs to be passed through RTP.
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1a370244962e875e5720a62fd3d4ca6bf8:
-.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::fir_sr_asym_graph:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1a5d072c1b740351bf3e79c3683051d1ed:
+.. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::fir_sr_asym_graph-2:
 
-fir_sr_asym_graph
------------------
+fir_sr_asym_graph overload (2)
+++++++++++++++++++++++++++++++
 
 
 .. ref-code-block:: cpp
@@ -178,17 +180,7 @@ fir_sr_asym_graph
 
 	fir_sr_asym_graph (const std::vector <TT_COEFF>& taps)
 
-This is the constructor function for the Asymmetric Single Rate FIR graph.
+This is the constructor function for the Symmetric Singlr Rate FIR graph. Constructor with taps.
 
-
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - taps
-
-        - - a pointer to the array of taps values of type TT_COEFF.
+* taps a pointer to the array of taps values of type TT_COEFF.
 

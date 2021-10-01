@@ -56,7 +56,12 @@ These are the templates to configure the Widget API Cast class.
     *
         - TP_NUM_OUTPUT_CLONES
 
-        - sets the number of output ports to write the input data to. Note that while input data from multiple ports is independent, data out is not. This is the class for the Widget API Cast graph
+        - sets the number of output ports to write the input data to. Note that while input data from multiple ports is independent, data out is not.
+
+    *
+        - TP_PATTERN
+
+        - sets the interleave or deinterleave pattern for configurations using dual streams, since streams are not considered clones for input nor for output. The patterns supported are: 0 (default) : 128bits are taken from each input, concatenated to 256b and output to window. or one 256b window read is split into upper and lower 128b cunks for output. 1 : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa. 2 : kSplit. The window is split into 2 halves with each half going to a stream. This is the class for the Widget API Cast graph
 
 .. ref-code-block:: cpp
 	:class: overview-code-block
@@ -67,19 +72,20 @@ These are the templates to configure the Widget API Cast class.
 	    unsigned int TP_OUT_API,
 	    unsigned int TP_NUM_INPUTS,
 	    unsigned int TP_WINDOW_VSIZE,
-	    unsigned int TP_NUM_OUTPUT_CLONES = 1
+	    unsigned int TP_NUM_OUTPUT_CLONES = 1,
+	    unsigned int TP_PATTERN = 0
 	    >
 	class widget_api_cast_graph: public graph
 
 	// fields
 
-	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a9317e12e575b6a20ffd942c92cbc086e>`[TP_NUM_INPUTS]
-	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a1e868a00b412933606f080c022d6f22b>`[TP_NUM_OUTPUT_CLONES]
+	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a47e8bc0208d022993ecd46375fb00b1c>`[TP_NUM_INPUTS]
+	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a509eee5291a504cc92a9341df3743363>`[TP_NUM_OUTPUT_CLONES]
 
 Fields
 ------
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a9317e12e575b6a20ffd942c92cbc086e:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a47e8bc0208d022993ecd46375fb00b1c:
 .. _cid-xf::dsp::aie::widget::api_cast::widget_api_cast_graph::in:
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -88,7 +94,7 @@ Fields
 
 The input data to the function. This input may be stream or window. Data is read from here and written directly to output. When there are multiple input streams, a read from each will occur of the maximum size supported (32 bits) with these 2 being concatenated, before being written to the output(s). Multiple input windows is not supported
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a1e868a00b412933606f080c022d6f22b:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a509eee5291a504cc92a9341df3743363:
 .. _cid-xf::dsp::aie::widget::api_cast::widget_api_cast_graph::out:
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -103,7 +109,7 @@ Methods
 
 .. FunctionSection
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1ac9c791f1e1e95ff60b41ae97c98fe94e:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1af17957f0ea2370ac9e8ede234490f33d:
 .. _cid-xf::dsp::aie::widget::api_cast::widget_api_cast_graph::getkernels:
 
 getKernels
@@ -117,7 +123,7 @@ getKernels
 
 Access function to get pointer to kernel (or first kernel in a chained configuration).
 
-.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1a7c9b45a6e3a1bd33bfa7ae2bc57e0107:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1widget_1_1api__cast_1_1widget__api__cast__graph_1ad993ab1d3c4f22f1ffab28adb73d8ae1:
 .. _cid-xf::dsp::aie::widget::api_cast::widget_api_cast_graph::widget_api_cast_graph:
 
 widget_api_cast_graph

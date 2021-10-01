@@ -62,6 +62,13 @@
 #define USE_COEFF_RELOAD_FALSE 0
 #define USE_COEFF_RELOAD_TRUE 1
 
+#define USE_WINDOW_API 0
+#define USE_STREAM_API 1
+
+#define MIXER_MODE_0 0
+#define MIXER_MODE_1 1
+#define MIXER_MODE_2 2
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -455,190 +462,128 @@ inline constexpr unsigned int fnUnsupportedTypeCombo<int16, int16>() {
 // IF input type
 template <bool T_CASC_IN, typename T_D, unsigned int T_DUAL_IP = 0>
 struct T_inputIF {};
-template <>
-struct T_inputIF<CASC_IN_FALSE, int16, 0> {
-    input_window<int16>* inWindow;
+template <typename T_D>
+struct T_inputIF<CASC_IN_FALSE, T_D, 0> {
+    input_window<T_D>* inWindow;
+    input_stream<T_D>* restrict inStream;
+    input_stream<T_D>* restrict inStream2;
 };
-template <>
-struct T_inputIF<CASC_IN_FALSE, int32, 0> {
-    input_window<int32>* inWindow;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, cint16, 0> {
-    input_window<cint16>* inWindow;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, cint32, 0> {
-    input_window<cint32>* inWindow;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, float, 0> {
-    input_window<float>* inWindow;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, cfloat, 0> {
-    input_window<cfloat>* inWindow;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, int16, 0> {
-    input_window<int16>* inWindow;
+template <typename T_D>
+struct T_inputIF<CASC_IN_TRUE, T_D, 0> {
+    input_window<T_D>* inWindow;
+    input_stream<T_D>* restrict inStream;
+    input_stream<T_D>* restrict inStream2;
     input_stream_cacc48* inCascade;
 };
-template <>
-struct T_inputIF<CASC_IN_TRUE, int32, 0> {
-    input_window<int32>* inWindow;
-    input_stream_cacc48* inCascade;
+template <typename T_D>
+struct T_inputIF<CASC_IN_FALSE, T_D, 1> {
+    input_window<T_D>* inWindow;
+    input_window<T_D>* inWindowReverse;
+    input_stream<T_D>* restrict inStream;
+    input_stream<T_D>* restrict inStream2;
 };
-template <>
-struct T_inputIF<CASC_IN_TRUE, cint16, 0> {
-    input_window<cint16>* inWindow;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, cint32, 0> {
-    input_window<cint32>* inWindow;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, float, 0> {
-    input_window<float>* inWindow;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, cfloat, 0> {
-    input_window<cfloat>* inWindow;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, int16, 1> {
-    input_window<int16>* inWindow;
-    input_window<int16>* inWindowReverse;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, int32, 1> {
-    input_window<int32>* inWindow;
-    input_window<int32>* inWindowReverse;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, cint16, 1> {
-    input_window<cint16>* inWindow;
-    input_window<cint16>* inWindowReverse;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, cint32, 1> {
-    input_window<cint32>* inWindow;
-    input_window<cint32>* inWindowReverse;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, float, 1> {
-    input_window<float>* inWindow;
-    input_window<float>* inWindowReverse;
-};
-template <>
-struct T_inputIF<CASC_IN_FALSE, cfloat, 1> {
-    input_window<cfloat>* inWindow;
-    input_window<cfloat>* inWindowReverse;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, int16, 1> {
-    input_window<int16>* inWindow;
-    input_window<int16>* inWindowReverse;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, int32, 1> {
-    input_window<int32>* inWindow;
-    input_window<int32>* inWindowReverse;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, cint16, 1> {
-    input_window<cint16>* inWindow;
-    input_window<cint16>* inWindowReverse;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, cint32, 1> {
-    input_window<cint32>* inWindow;
-    input_window<cint32>* inWindowReverse;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, float, 1> {
-    input_window<float>* inWindow;
-    input_window<float>* inWindowReverse;
-    input_stream_cacc48* inCascade;
-};
-template <>
-struct T_inputIF<CASC_IN_TRUE, cfloat, 1> {
-    input_window<cfloat>* inWindow;
-    input_window<cfloat>* inWindowReverse;
+template <typename T_D>
+struct T_inputIF<CASC_IN_TRUE, T_D, 1> {
+    input_window<T_D>* inWindow;
+    input_window<T_D>* inWindowReverse;
+    input_stream<T_D>* restrict inStream;
+    input_stream<T_D>* restrict inStream2;
     input_stream_cacc48* inCascade;
 };
 
 // IF output type
 template <bool T_CASC_IN, typename T_D>
 struct T_outputIF {};
-template <>
-struct T_outputIF<CASC_OUT_FALSE, int16> {
-    output_window<int16>* restrict outWindow;
-    output_window<int16>* restrict outWindow2;
+template <typename T_D>
+struct T_outputIF<CASC_OUT_FALSE, T_D> {
+    output_window<T_D>* restrict outWindow;
+    output_window<T_D>* restrict outWindow2;
+    output_stream<T_D>* restrict outStream;
+    output_stream<T_D>* restrict outStream2;
 };
-template <>
-struct T_outputIF<CASC_OUT_FALSE, int32> {
-    output_window<int32>* restrict outWindow;
-    output_window<int32>* restrict outWindow2;
-};
-template <>
-struct T_outputIF<CASC_OUT_FALSE, cint16> {
-    output_window<cint16>* restrict outWindow;
-    output_window<cint16>* restrict outWindow2;
-};
-template <>
-struct T_outputIF<CASC_OUT_FALSE, cint32> {
-    output_window<cint32>* restrict outWindow;
-    output_window<cint32>* restrict outWindow2;
-};
-template <>
-struct T_outputIF<CASC_OUT_FALSE, float> {
-    output_window<float>* restrict outWindow;
-    output_window<float>* restrict outWindow2;
-};
-template <>
-struct T_outputIF<CASC_OUT_FALSE, cfloat> {
-    output_window<cfloat>* restrict outWindow;
-    output_window<cfloat>* restrict outWindow2;
-};
-template <>
-struct T_outputIF<CASC_OUT_TRUE, int16> {
+template <typename T_D>
+struct T_outputIF<CASC_OUT_TRUE, T_D> {
     output_stream_cacc48* outCascade;
-    output_window<int16>* broadcastWindow;
+    output_window<T_D>* broadcastWindow;
 };
-template <>
-struct T_outputIF<CASC_OUT_TRUE, int32> {
-    output_stream_cacc48* outCascade;
-    output_window<int32>* broadcastWindow;
-};
-template <>
-struct T_outputIF<CASC_OUT_TRUE, cint16> {
-    output_stream_cacc48* outCascade;
-    output_window<cint16>* broadcastWindow;
-};
-template <>
-struct T_outputIF<CASC_OUT_TRUE, cint32> {
-    output_stream_cacc48* outCascade;
-    output_window<cint32>* broadcastWindow;
-};
-template <>
-struct T_outputIF<CASC_OUT_TRUE, float> {
-    output_stream_cacc48* outCascade;
-    output_window<float>* broadcastWindow;
-};
-template <>
-struct T_outputIF<CASC_OUT_TRUE, cfloat> {
-    output_stream_cacc48* outCascade;
-    output_window<cfloat>* broadcastWindow;
-};
+
+// // IF input type
+// template<bool T_CASC_IN, typename T_D, unsigned int T_DUAL_IP = 0> struct T_inputIF   {};
+// template<> struct T_inputIF<CASC_IN_FALSE, int16,  0>  {input_window<int16 >  * inWindow;};
+// template<> struct T_inputIF<CASC_IN_FALSE, int32,  0>  {input_window<int32 >  * inWindow;};
+// template<> struct T_inputIF<CASC_IN_FALSE, cint16, 0>  {input_window<cint16>  * inWindow;};
+// template<> struct T_inputIF<CASC_IN_FALSE, cint32, 0>  {input_window<cint32>  * inWindow;};
+// template<> struct T_inputIF<CASC_IN_FALSE, float,  0>  {input_window<float >  * inWindow;};
+// template<> struct T_inputIF<CASC_IN_FALSE, cfloat, 0>  {input_window<cfloat>  * inWindow;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  int16,  0>  {input_window<int16 >  * inWindow;
+// input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  int32,  0>  {input_window<int32 >  * inWindow;
+// input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  cint16, 0>  {input_window<cint16>  * inWindow;
+// input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  cint32, 0>  {input_window<cint32>  * inWindow;
+// input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  float,  0>  {input_window<float >  * inWindow;
+// input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  cfloat, 0>  {input_window<cfloat>  * inWindow;
+// input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_FALSE, int16,  1>  {input_window<int16 >  * inWindow; input_window<int16 >  *
+// inWindowReverse;};
+// template<> struct T_inputIF<CASC_IN_FALSE, int32,  1>  {input_window<int32 >  * inWindow; input_window<int32 >  *
+// inWindowReverse;};
+// template<> struct T_inputIF<CASC_IN_FALSE, cint16, 1>  {input_window<cint16>  * inWindow; input_window<cint16>  *
+// inWindowReverse;};
+// template<> struct T_inputIF<CASC_IN_FALSE, cint32, 1>  {input_window<cint32>  * inWindow; input_window<cint32>  *
+// inWindowReverse;};
+// template<> struct T_inputIF<CASC_IN_FALSE, float,  1>  {input_window<float >  * inWindow; input_window<float >  *
+// inWindowReverse;};
+// template<> struct T_inputIF<CASC_IN_FALSE, cfloat, 1>  {input_window<cfloat>  * inWindow; input_window<cfloat>  *
+// inWindowReverse;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  int16,  1>  {input_window<int16 >  * inWindow; input_window<int16 >  *
+// inWindowReverse; input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  int32,  1>  {input_window<int32 >  * inWindow; input_window<int32 >  *
+// inWindowReverse; input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  cint16, 1>  {input_window<cint16>  * inWindow; input_window<cint16>  *
+// inWindowReverse; input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  cint32, 1>  {input_window<cint32>  * inWindow; input_window<cint32>  *
+// inWindowReverse; input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  float,  1>  {input_window<float >  * inWindow; input_window<float >  *
+// inWindowReverse; input_stream_cacc48 * inCascade;};
+// template<> struct T_inputIF<CASC_IN_TRUE,  cfloat, 1>  {input_window<cfloat>  * inWindow; input_window<cfloat>  *
+// inWindowReverse; input_stream_cacc48 * inCascade;};
+
+// // IF output type
+// template<bool T_CASC_IN, typename T_D> struct T_outputIF   {};
+// template<> struct T_outputIF<CASC_OUT_FALSE, int16 >  {output_window<int16 > * restrict outWindow;
+// output_window<int16 > * restrict outWindow2; output_stream<int16 > * restrict outStream; output_stream<int16 > *
+// restrict outStream2;};
+// template<> struct T_outputIF<CASC_OUT_FALSE, int32 >  {output_window<int32 > * restrict outWindow;
+// output_window<int32 > * restrict outWindow2; output_stream<int32 > * restrict outStream; output_stream<int32 > *
+// restrict outStream2;};
+// template<> struct T_outputIF<CASC_OUT_FALSE, cint16>  {output_window<cint16> * restrict outWindow;
+// output_window<cint16> * restrict outWindow2; output_stream<cint16> * restrict outStream; output_stream<cint16> *
+// restrict outStream2;};
+// template<> struct T_outputIF<CASC_OUT_FALSE, cint32>  {output_window<cint32> * restrict outWindow;
+// output_window<cint32> * restrict outWindow2; output_stream<cint32> * restrict outStream; output_stream<cint32> *
+// restrict outStream2;};
+// template<> struct T_outputIF<CASC_OUT_FALSE, float >  {output_window<float > * restrict outWindow;
+// output_window<float > * restrict outWindow2; output_stream<float > * restrict outStream; output_stream<float > *
+// restrict outStream2;};
+// template<> struct T_outputIF<CASC_OUT_FALSE, cfloat>  {output_window<cfloat> * restrict outWindow;
+// output_window<cfloat> * restrict outWindow2; output_stream<cfloat> * restrict outStream; output_stream<cfloat> *
+// restrict outStream2;};
+// template<> struct T_outputIF<CASC_OUT_TRUE, int16 >   {output_stream_cacc48   * outCascade; output_window<int16 >  *
+// broadcastWindow;};
+// template<> struct T_outputIF<CASC_OUT_TRUE, int32 >   {output_stream_cacc48   * outCascade; output_window<int32 >  *
+// broadcastWindow;};
+// template<> struct T_outputIF<CASC_OUT_TRUE, cint16>   {output_stream_cacc48   * outCascade; output_window<cint16>  *
+// broadcastWindow;};
+// template<> struct T_outputIF<CASC_OUT_TRUE, cint32>   {output_stream_cacc48   * outCascade; output_window<cint32>  *
+// broadcastWindow;};
+// template<> struct T_outputIF<CASC_OUT_TRUE, float >   {output_stream_cacc48   * outCascade; output_window<float >  *
+// broadcastWindow;};
+// template<> struct T_outputIF<CASC_OUT_TRUE, cfloat>   {output_stream_cacc48   * outCascade; output_window<cfloat>  *
+// broadcastWindow;};
 
 //----------------------------------------------------------------------
 // nullElem

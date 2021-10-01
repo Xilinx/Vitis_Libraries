@@ -38,6 +38,9 @@
 #ifndef NUM_OUTPUT_CLONES
 #define NUM_OUTPUT_CLONES 2
 #endif
+#ifndef PATTERN
+#define PATTERN 0
+#endif
 
 #ifndef USE_CHAIN
 #define USE_CHAIN 0

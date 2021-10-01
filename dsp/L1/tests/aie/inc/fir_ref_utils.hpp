@@ -58,6 +58,10 @@ functions for use by the reference model classes.
 #define USE_COEFF_RELOAD_FALSE 0
 #define USE_COEFF_RELOAD_TRUE 1
 
+#define MIXER_MODE_0 0
+#define MIXER_MODE_1 1
+#define MIXER_MODE_2 2
+
 // Round up to y
 #define CEIL(x, y) (((x + y - 1) / y) * y)
 

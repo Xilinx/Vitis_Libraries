@@ -187,7 +187,7 @@ class kernelFilterClass {
 
    public:
     // Access function for AIE Synthesizer
-    unsigned int get_m_kArch() { return m_kArch; };
+    static unsigned int get_m_kArch() { return m_kArch; };
 
     // Constructor for reloadable coefficient designs
     // Calculates offsets required for coefficient reloads and m_kDecimateOffsets

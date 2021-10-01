@@ -317,10 +317,12 @@
 #endif
 
 // Force LLVM frontend to inline the functions (CRVO-1430)
+#ifndef INLINE_DECL
 #ifdef __clang__
 #define INLINE_DECL inline __attribute__((always_inline))
 #else
 #define INLINE_DECL inline
 #endif
+#endif // ifndef INLINE_DECL
 
 #endif /* __FFT_COM_INC_H__ */

@@ -21,7 +21,7 @@ Coding conventions
   TP_      template parameter suffix
 */
 
-#include <adf.h>
+//#include <adf.h>
 #include <stdio.h>
 
 using namespace std;
@@ -37,6 +37,7 @@ using namespace std;
 #include "fft_ifft_dit_1ch.hpp"
 #include "kernel_api_utils.hpp"
 #include "fft_ifft_dit_1ch_utils.hpp"
+#include "fft_kernel_bufs.h"
 #include "fft_twiddle_lut_dit.h"
 #include "fft_twiddle_lut_dit_cfloat.h"
 
@@ -70,14 +71,13 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                 TP_START_RANK,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE>::stagePreamble(void* tw_table,
-                                                                void* tmp1_buf,
-                                                                void* tmp2_buf,
+                                TP_WINDOW_VSIZE>::stagePreamble(TT_TWIDDLE** tw_table,
+                                                                TT_INTERNAL_DATA* tmp1_buf,
+                                                                TT_INTERNAL_DATA* tmp2_buf,
                                                                 input_window<TT_DATA>* __restrict inputx,
                                                                 output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     constexpr int minPtSizePwr = 4;
-    constexpr int maxPtSizePwr = fnPointSizePower<TP_POINT_SIZE>();
     constexpr int kOpsInWindow = TP_WINDOW_VSIZE / TP_POINT_SIZE;
 
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
@@ -113,6 +113,8 @@ INLINE_DECL void stockhamStages<TT_DATA,
             in256VectorType in256;
             outVectorType outVector;
             int ptSizePwr;
+            int firstRank; // first for this particular point size
+
             ::aie::accum<cacc48, 256 / 8 / sizeof(TT_DATA)> cacc384;
 
             blankOp.val = ::aie::zeros<TT_OUT_DATA, 32 / sizeof(TT_OUT_DATA)>();
@@ -133,12 +135,15 @@ INLINE_DECL void stockhamStages<TT_DATA,
             headerOpVal.imag = headerVal.imag;
             headerOp.val.set(headerOpVal, 1);
             ptSizePwr = (int)headerVal.real;
-            if ((ptSizePwr >= minPtSizePwr) && (ptSizePwr <= maxPtSizePwr)) {
+            firstRank = kPointSizePower - ptSizePwr;
+            if ((ptSizePwr >= minPtSizePwr) && (ptSizePwr <= kPointSizePower)) {
                 window_write(outputy, headerOp.val);
                 window_incr(outputy, 32 / sizeof(TT_OUT_DATA));
                 obuff = (TT_OUT_DATA*)outputy->ptr;
-                if (TP_START_RANK >=
-                    ptSizePwr) { // i.e. kernels earlier in the chain have already performed the FFT for this size
+                //      if (TP_START_RANK >= ptSizePwr ) { //i.e. kernels earlier in the chain have already performed
+                //      the FFT for this size
+                if (TP_END_RANK <=
+                    firstRank) { // i.e. no need to do any processing in this kernel as later kernels will do it all.
                     // copy input window to output window in 256bit chunks
                     inPtr = (in256VectorType*)inputx->ptr;
                     outPtr = (outVectorType*)outputy->ptr;
@@ -149,6 +154,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
                             }
                         }
                     else {
+                        // this clause handles the case with different TT_IN_DATA and TT_OUT_DATA
                         for (int i = 0; i < TP_WINDOW_VSIZE / (32 / sizeof(TT_DATA)); i++) {
                             in256 = *inPtr++;
                             cacc384.from_vector(in256, 0);
@@ -221,10 +227,6 @@ INLINE_DECL void stockhamStages<TT_DATA,
     set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
     set_sat();            // do saturate.
 
-    TT_DATA* inptr;
-    TT_INTERNAL_DATA* outptr; // outptr is only used for multi-kernel operation where the kernel output (TT_OUT_DATA) is
-                              // used. However, T_INTERNAL DATA has to be used since the output of a stage isn't
-                              // necessarily TT_OUT_DATA.
     TT_INTERNAL_DATA* my_tmp2_buf = fnUsePingPongIntBuffer<TT_DATA>() ? tmp2_buf : (TT_INTERNAL_DATA*)xbuff;
     TT_INTERNAL_DATA* tmp_bufs[2] = {tmp1_buf, my_tmp2_buf}; // tmp2 is actually xbuff reused.
     unsigned int pingPong = 1;                               // use tmp_buf1 as initial output
@@ -236,105 +238,111 @@ INLINE_DECL void stockhamStages<TT_DATA,
         constexpr(std::is_same<TT_DATA, cfloat>::value) {
             //-----------------------------------------------------------------------------
             // cfloat handling
+            TT_DATA* inptr;
+            TT_INTERNAL_DATA* outptr;
 
-            r = TP_POINT_SIZE >> 1;
-
-// internal stages including input stage
-#pragma unroll(kIntR2Stages)
-            for (int stage = 0; stage < kIntR2Stages; ++stage) {
-                if (stage >= TP_START_RANK && stage + 1 <= TP_END_RANK) { // i.e is this rank in the scope of the
-                                                                          // kernel?
-                    outptr = (stage == TP_END_RANK - 1) ? (TT_INTERNAL_DATA*)obuff
-                                                        : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                    inptr = (stage == TP_START_RANK) ? (TT_INTERNAL_DATA*)xbuff : (TT_INTERNAL_DATA*)tmp_bufs[pingPong];
-                    stage0_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)inptr, (cfloat*)tw_table[tw_index],
-                                                              TP_POINT_SIZE, r, 0, (cfloat*)outptr, inv);
-                    pingPong = 1 - pingPong;
-                }
-                r = r >> 1; // divide by 2
-                tw_index++;
-            }
-
-            // final 2 stages - these require a different granularity of sample interleaving (each) so are called stage
-            // 1 and stage2.
-            if
-                constexpr(kIntR2Stages >= TP_START_RANK &&
-                          kIntR2Stages < TP_END_RANK) { // i.e is this rank in the scope of the kernel?
-                    outptr = (kIntR2Stages + 1 == TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff
-                                                               : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                    stage1_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp_bufs[pingPong], (cfloat*)tw_table[tw_index],
-                                                              TP_POINT_SIZE, r, 0, (cfloat*)outptr, inv);
-                    pingPong = 1 - pingPong;
-                }
-            r = r >> 1; // divide by 2
-            tw_index++;
-
-            if
-                constexpr(kIntR2Stages + 2 == TP_END_RANK) { // i.e is this rank in the scope of the kernel?
-                    stage2_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp_bufs[pingPong], (cfloat*)tw_table[tw_index],
-                                                              TP_POINT_SIZE, r, TP_SHIFT, (cfloat*)obuff,
-                                                              inv); // r is not used.
-                }
+            unroll_for<unsigned, TP_START_RANK, TP_END_RANK, 1>([&](auto stage) {
+                outptr = (stage == TP_END_RANK - 1) ? obuff : tmp_bufs[1 - pingPong];
+                inptr = (stage == TP_START_RANK) ? xbuff : tmp_bufs[pingPong];
+                stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage))>(
+                    (cfloat*)inptr, (cfloat*)tw_table[stage], TP_POINT_SIZE, 0, (cfloat*)outptr, inv);
+                pingPong = 1 - pingPong;
+            });
         }
     else { // integer types can use radix 4 stages
-        //-----------------------------------------------------------------------------
-        // cint handling
 
-        // input stage
-        if
-            constexpr(kOddPower == 1) {
-                r = TP_POINT_SIZE >> 1; // divide by 2
-                if
-                    constexpr(TP_START_RANK == 0) {
-                        outptr = (rank == TP_END_RANK - 1) ? (TT_INTERNAL_DATA*)obuff
-                                                           : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                        stage0_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(xbuff, tw_table[0], TP_POINT_SIZE, r,
-                                                                                 FFT_SHIFT15, outptr, inv);
-                        pingPong = 1 - pingPong;
-                    }
-                tw_index = 1;
-                rank++;
-            }
-        else {
-            r = TP_POINT_SIZE >> 2; // divide by 4
+        constexpr int firstRank = kPointSizePowerCeiled - kPointSizePower;
+        // The following code is a loop which is unrolled so that the loop variable is constant at compile time in each
+        // iteration
+        // The loop unrolls to describe the stages required for a maximum point size, rounded up to a multiple of 2 so
+        // that each pass through the loop is a radix 4 stage.
+        // In each iteration the code considers whether or not to execute a stage, since for small point sizes, early
+        // stages with large 'r' factors are skipped.
+        // Also, the code has to handle the case that for odd power point sizes the first stage will be radix2, so it
+        // has to detect the first stage being one more than the current loop stage.
+        // Twiddles are relative to the first stage of the point size, not the first stage of the loop, hence the
+        // equation for tw index.
+        // Accordingly when the first stage is r2, it will be the second r2 of the radix4 in this iteration, so stage+1
+        // is necessary to describe the position.
+        // A further complication is that data arrives as TT_DATA, is processed to internal stages as TT_INTERNAL_DATA
+        // and output as TT_OUT_DATA.
+        // Finally, the whole operation may be split over multiple kernels, which means the input or output of this
+        // kernel may be TT_INTERNAL_DATA.
+        // beyond finally(!), only stages in the remit of the kernel are executed.
+        unroll_for<unsigned, TP_START_RANK, TP_END_RANK, 2>([&](auto stage) {
             if
-                constexpr(TP_START_RANK == 0) {
-                    outptr = (rank == TP_END_RANK - 2) ? (TT_INTERNAL_DATA*)obuff
-                                                       : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                    stage0_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(
-                        xbuff, tw_table[0], tw_table[1], TP_POINT_SIZE, r, FFT_SHIFT15, outptr, inv);
-                    pingPong = 1 - pingPong;
+                constexpr(stage == firstRank) { // first stage and radix4
+                    TT_DATA* inptr = xbuff;
+                    if
+                        constexpr(stage == TP_END_RANK - 2) {
+                            if
+                                constexpr(stage + 2 == kPointSizePowerCeiled) { // Not possible?
+                                    TT_OUT_DATA* outptr = obuff;
+                                    stage_radix4_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        TP_POINT_SIZE, FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                                }
+                            else {
+                                TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)obuff;
+                                stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                                    FFT_SHIFT15, outptr, inv);
+                            }
+                        }
+                    else {
+                        TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
+                        stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                            inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                            FFT_SHIFT15, outptr, inv);
+                    }
                 }
-            tw_index = 2;
-            rank += 2;
-        }
-
-// internal stages
-// Note that the loop ensures only intermediate ranks are handled.
-// the Internal if appears to support the final rank being done here, but this is prevented by the loop.
-#pragma unroll(GUARD_ZERO((kPointSizePower - 2 - 2 + kOddPower) / 2))
-        for (int stage = rank; stage < kPointSizePower - 2; stage = stage + 2) {
-            r = r >> 2;
-            if ((rank >= TP_START_RANK) && (rank + 2 <= TP_END_RANK)) {
-                outptr =
-                    (rank + 2 == TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                stage0_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(
-                    tmp_bufs[pingPong], tw_table[tw_index], tw_table[tw_index + 1], TP_POINT_SIZE, r, FFT_SHIFT15,
-                    outptr, inv);
-                pingPong = 1 - pingPong;
+            else if
+                constexpr(stage + 1 == firstRank) { // radix2 stage - can't possible be the final stage overall, so no
+                                                    // need for TP_SHIFT clause
+                    TT_DATA* inptr = xbuff;
+                    if
+                        constexpr(stage + 1 == TP_END_RANK - 1) {
+                            TT_OUT_DATA* outptr = obuff;
+                            stage_radix2_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                        }
+                    else {
+                        TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
+                        stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                            inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                    }
+                }
+            else { // not the first stage in the kernel
+                TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                if
+                    constexpr(stage == TP_END_RANK - 2) {
+                        TT_OUT_DATA* outptr = obuff;
+                        if
+                            constexpr(stage + 2 == kPointSizePowerCeiled) {
+                                stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                                    FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                            }
+                        else {
+                            stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                             (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                                FFT_SHIFT15, outptr, inv);
+                        }
+                    }
+                else {
+                    TT_INTERNAL_DATA* outptr = tmp_bufs[1 - pingPong];
+                    stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE, FFT_SHIFT15,
+                        outptr, inv);
+                }
             }
-            rank += 2;
-            tw_index += 2;
-        }
-
-        // output stage
-        if
-            constexpr(kPointSizePower == TP_END_RANK) {
-                stage1_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE>(tmp_bufs[pingPong], tw_table[tw_index],
-                                                                             tw_table[tw_index + 1], TP_POINT_SIZE,
-                                                                             FFT_SHIFT15 + TP_SHIFT, obuff, inv);
-            }
-    }
+            pingPong = 1 - pingPong;
+        }); // end of unroll_for
+    }       // end of if float or int handling
 };
 
 // stockhamStages calc body. Dynamic variant.
@@ -366,14 +374,10 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                                        TT_OUT_DATA* __restrict obuff,
                                                        int ptSizePwr,
                                                        bool inv) {
-    // This code should be moved to the constructor preferably
+    // This code cannot be moved to the constructor because its scope is the processor so would affect co-hosted kernels
     set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
     set_sat();            // do saturate.
 
-    TT_DATA* inptr;
-    TT_INTERNAL_DATA* outptr; // outptr is only used for multi-kernel operation where the kernel output (TT_OUT_DATA) is
-                              // used. However, T_INTERNAL DATA has to be used since the output of a stage isn't
-                              // necessarily TT_OUT_DATA.
     TT_INTERNAL_DATA* my_tmp2_buf = fnUsePingPongIntBuffer<TT_DATA>() ? tmp2_buf : (TT_INTERNAL_DATA*)xbuff;
     TT_INTERNAL_DATA* tmp_bufs[2] = {tmp1_buf, my_tmp2_buf}; // tmp2 is actually xbuff reused.
     unsigned int pingPong = 1; // use tmp_buf1 as input or tmp_buf2? Initially tmp2 is input since this is xbuff
@@ -384,108 +388,159 @@ INLINE_DECL void stockhamStages<TT_DATA,
     unsigned int ptSize = 1 << ptSizePwr;
     unsigned int myStart = TP_START_RANK;
     unsigned int myEnd = TP_END_RANK;
+    unsigned int firstRank;
 
     if
         constexpr(std::is_same<TT_DATA, cfloat>::value) {
             //-----------------------------------------------------------------------------
             // cfloat handling
-
-            r = 1 << (ptSizePwr - 1);
-            intR2Stages = ptSizePwr - 2;
-
-            // internal stages including input stage
-            for (int stage = 0; stage < intR2Stages; ++stage) {
-                if (rank >= TP_START_RANK && rank + 1 <= TP_END_RANK) { // i.e is this rank in the scope of the kernel?
-                    outptr = (rank + 1 == TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff
-                                                       : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                    inptr = (rank == TP_START_RANK) ? (cfloat*)xbuff : (cfloat*)tmp_bufs[pingPong];
-                    stage0_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)inptr, (cfloat*)tw_table[tw_index], ptSize, r, 0,
-                                                              (cfloat*)outptr, inv);
+            firstRank = kPointSizePower - ptSizePwr;
+            unroll_for<unsigned, TP_START_RANK, TP_END_RANK, 1>([&](auto stage) {
+                if (stage >= firstRank) {
+                    TT_INTERNAL_DATA* outptr = (stage == TP_END_RANK - 1) ? (TT_INTERNAL_DATA*)obuff
+                                                                          : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
+                    TT_INTERNAL_DATA* inptr = (stage == TP_START_RANK) || (stage == firstRank)
+                                                  ? (TT_INTERNAL_DATA*)xbuff
+                                                  : (TT_INTERNAL_DATA*)tmp_bufs[pingPong];
+                    stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage))>(
+                        (cfloat*)inptr, (cfloat*)tw_table[stage - firstRank], (1 << ptSizePwr), 0, (cfloat*)outptr,
+                        inv);
                     pingPong = 1 - pingPong;
                 }
-                rank++;
-                r = r >> 1; // divide by 2
-                tw_index++;
-            }
-            // final 2 stages - these require a different granularity of sample interleaving (each) so are called stage
-            // 1 and stage2.
-            if (rank >= TP_START_RANK && rank < TP_END_RANK) { // i.e is this rank in the scope of the kernel?
-                outptr =
-                    (rank + 1 == TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                stage1_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp_bufs[pingPong], (cfloat*)tw_table[tw_index],
-                                                          ptSize, r, 0, (cfloat*)outptr, inv);
-                pingPong = 1 - pingPong;
-            }
-            rank++;
-            r = r >> 1; // divide by 2
-            tw_index++;
-
-            if (rank >= TP_START_RANK && rank + 1 <= TP_END_RANK) { // i.e is this rank in the scope of the kernel?
-                ptSize = 1 << ptSizePwr;
-                stage2_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp_bufs[pingPong], (cfloat*)tw_table[tw_index],
-                                                          ptSize, r, TP_SHIFT, (cfloat*)obuff, inv); // r is not used.
-            }
+            });
         }
     else { // integer types can use radix 4 stages
         //------------------------------------------------------------------------------------------------
         // cint handling, dynamic variant
         ptSize = ((unsigned int)1 << ptSizePwr); // without this, x86 zeros ptSize.
 
-        // input stage. This cannot be rolled into the stage loop because the first stage has TT_DATA not
-        // TT_INTERNAL_DATA as input
-        if ((ptSizePwr & 1) == 1) { // odd point size power
-            r = 1 << (ptSizePwr - 1);
-            if
-                constexpr(TP_START_RANK == 0) {
-                    outptr =
-                        (rank + 3 > TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                    ptSize = ((unsigned int)1 << ptSizePwr); // without this, x86 zeros ptSize.
-                    stage0_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(xbuff, tw_table[0], ptSize, r, FFT_SHIFT15,
-                                                                             outptr, inv);
-                    pingPong = 1 - pingPong;
-                }
-            tw_index = 1;
-            rank++;
-        } else {
-            r = 1 << (ptSizePwr - 2);
-            if
-                constexpr(TP_START_RANK == 0) {
-                    outptr =
-                        (rank + 4 > TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                    ptSize = ((unsigned int)1 << ptSizePwr); // without this, x86 zeros ptSize.
-                    stage0_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(xbuff, tw_table[0], tw_table[1], ptSize, r,
-                                                                             FFT_SHIFT15, outptr, inv);
-                    pingPong = 1 - pingPong;
-                }
-            tw_index = 2;
-            rank += 2;
-        }
-
-        // internal stages
-        // Note that the loop ensures only intermediate ranks are handled.
-        // the Internal if appears to support the final rank being done here, but this is prevented by the loop.
-        for (int stage = rank; stage < ptSizePwr - 2; stage = stage + 2) {
-            r = r >> 2;
-            if ((rank + 2 > TP_START_RANK) && (rank + 1 < TP_END_RANK)) {
-                outptr =
-                    (rank + 4 > TP_END_RANK) ? (TT_INTERNAL_DATA*)obuff : (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                stage0_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(
-                    tmp_bufs[pingPong], tw_table[tw_index], tw_table[tw_index + 1], ptSize, r, FFT_SHIFT15, outptr,
-                    inv);
+        firstRank = kPointSizePowerCeiled - ptSizePwr;
+        // The following code is a loop which is unrolled so that the loop variable is constant at compile time in each
+        // iteration
+        // The loop unrolls to describe the stages required for a maximum point size, rounded up to a multiple of 2 so
+        // that each pass through the loop is a radix 4 stage.
+        // In each iteration the code considers whether or not to execute a stage, since for small point sizes, early
+        // stages with large 'r' factors are skipped.
+        // Also, the code has to handle the case that for odd power point sizes the first stage will be radix2, so it
+        // has to detect the first stage being one more than the current loop stage.
+        // Twiddles are relative to the first stage of the point size, not the first stage of the loop, hence the
+        // equation for tw index.
+        // Accordingly when the first stage is r2, it will be the second r2 of the radix4 in this iteration, so stage+1
+        // is necessary to describe the position.
+        // A further complication is that data arrives as TT_DATA, is processed to internal stages as TT_INTERNAL_DATA
+        // and output as TT_OUT_DATA.
+        // Finally, the whole operation may be split over multiple kernels, which means the input or output of this
+        // kernel may be TT_INTERNAL_DATA.
+        // beyond finally(!), only stages in the remit of the kernel are executed.
+        // Compilation note. It is necessary to trap the end of FFT cases first, else the runtime clauses can create
+        // unsupported variants os the stage functions.
+        unroll_for<unsigned, TP_START_RANK, TP_END_RANK, 2>([&](auto stage) {
+            if (stage + 1 >= firstRank) {
+                if
+                    constexpr(stage == TP_END_RANK - 2) {
+                        if
+                            constexpr(stage + 2 == kPointSizePowerCeiled) { // end of FFT, so apply shift
+                                TT_OUT_DATA* outptr = obuff;
+                                if
+                                    constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
+                                        TT_DATA* inptr = xbuff;
+                                        stage_radix4_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                            inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                            (1 << ptSizePwr), FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                                    }
+                                else { // last in FFT, not start of kernel
+                                    TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                                    stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        (1 << ptSizePwr), FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                                }
+                            }
+                        else { // end of kernel, not end of FFT
+                            TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)obuff;
+                            if
+                                constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
+                                    TT_DATA* inptr = xbuff;
+                                    if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
+                                                                  // overall, so no need for TT_OUT_DATA
+                                        stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                            inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15,
+                                            outptr, inv);
+                                    } else {
+                                        stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                            inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                            (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                    }
+                                }
+                            else {                        // end of kernel, not start kernel.
+                                if (stage == firstRank) { // first stage of point size and radix4
+                                    TT_DATA* inptr = xbuff;
+                                    stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                } else if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
+                                                                     // overall, so no need for TT_OUT_DATA
+                                    TT_DATA* inptr = xbuff;
+                                    stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr,
+                                        inv);
+                                } else { // last in kernel, not first in kernel, not first in FFT
+                                    TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                                    stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                }
+                            } // if start of kernel
+                        }     // if end of FFT
+                    }
+                else { // not end of kernel
+                    TT_INTERNAL_DATA* outptr = tmp_bufs[1 - pingPong];
+                    if
+                        constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
+                            TT_DATA* inptr = xbuff;
+                            if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage overall,
+                                                          // so no need for TT_OUT_DATA
+                                stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                            } else {
+                                stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                    (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                            }
+                        }
+                    else {                        // not last in kernel, not first in kernel.
+                        if (stage == firstRank) { // first stage of point size and radix4
+                            TT_DATA* inptr = xbuff;
+                            stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], (1 << ptSizePwr),
+                                FFT_SHIFT15, outptr, inv);
+                        } else if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
+                                                             // overall, so no need for TT_OUT_DATA
+                            TT_DATA* inptr = xbuff;
+                            stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                        } else { // not last in kernel, not first in kernel, not first in FFT
+                            TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                            stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                             (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], (1 << ptSizePwr),
+                                FFT_SHIFT15, outptr, inv);
+                        }
+                    } // if start of kernel
+                }     // if end of FFT
                 pingPong = 1 - pingPong;
-            }
-            rank += 2;
-            tw_index += 2;
-        }
+            } // if  stage involves processing
+        });   // end of unroll_for
 
-        // output stage. Regardless of kernel splits, the output of this stage goes to the output buffer, so no need for
-        // the outptr switch
-        if ((rank + 2 == ptSizePwr) && (rank + 2 > TP_START_RANK) && (rank + 1 < TP_END_RANK)) {
-            stage1_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE>(tmp_bufs[pingPong], tw_table[tw_index],
-                                                                         tw_table[tw_index + 1], ptSize,
-                                                                         FFT_SHIFT15 + TP_SHIFT, obuff, inv);
-        }
-    }
+    } // end of float/integer handling
 
     if ((1 << ptSizePwr) < TP_POINT_SIZE) {
         using outVectType = ::aie::vector<TT_OUT_DATA, 32 / sizeof(TT_OUT_DATA)>;
@@ -544,10 +599,38 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
+    static constexpr TT_TWIDDLE* __restrict tw128 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
+    static constexpr TT_TWIDDLE* __restrict tw256 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
+    static constexpr TT_TWIDDLE* __restrict tw512 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512);
+    static constexpr TT_TWIDDLE* __restrict tw1024 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1024_cfloat : (TT_TWIDDLE*)fft_lut_tw1024);
+    static constexpr TT_TWIDDLE* __restrict tw2048 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2048_cfloat : (TT_TWIDDLE*)fft_lut_tw2048_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1,  tw2,   tw4,   tw8,   tw16,   tw32,
+                                                 tw64, tw128, tw256, tw512, tw1024, tw2048};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_4096_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -572,10 +655,25 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
+    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
+    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
+    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
+    static constexpr cint16* __restrict tw512 = (cint16*)fft_lut_tw512;
+    static constexpr cint16* __restrict tw1024 = (cint16*)fft_lut_tw1024;
+    static constexpr cint16* __restrict tw2048 = (cint16*)fft_lut_tw2048_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, tw1024, tw2048};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_4096_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_4096_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -601,10 +699,35 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
+    static constexpr TT_TWIDDLE* __restrict tw128 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
+    static constexpr TT_TWIDDLE* __restrict tw256 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
+    static constexpr TT_TWIDDLE* __restrict tw512 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512);
+    static constexpr TT_TWIDDLE* __restrict tw1024 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1024_cfloat : (TT_TWIDDLE*)fft_lut_tw1024_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1,  tw2,   tw4,   tw8,   tw16,   tw32,
+                                                 tw64, tw128, tw256, tw512, tw1024, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_2048_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -629,10 +752,24 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
+    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
+    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
+    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
+    static constexpr cint16* __restrict tw512 = (cint16*)fft_lut_tw512;
+    static constexpr cint16* __restrict tw1024 = (cint16*)fft_lut_tw1024_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, tw1024, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_2048_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_2048_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -658,10 +795,32 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
+    static constexpr TT_TWIDDLE* __restrict tw128 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
+    static constexpr TT_TWIDDLE* __restrict tw256 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
+    static constexpr TT_TWIDDLE* __restrict tw512 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, NULL, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_1024_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -686,10 +845,23 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
+    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
+    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
+    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
+    static constexpr cint16* __restrict tw512 = (cint16*)fft_lut_tw512_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, tw512, NULL, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_1024_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_1024_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -715,10 +887,30 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
+    static constexpr TT_TWIDDLE* __restrict tw128 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
+    static constexpr TT_TWIDDLE* __restrict tw256 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, NULL, NULL, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_512_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -743,10 +935,22 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
+    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
+    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
+    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, tw256, NULL, NULL, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_512_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_512_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -772,10 +976,28 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
+    static constexpr TT_TWIDDLE* __restrict tw128 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, NULL, NULL, NULL, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_256_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -799,12 +1021,22 @@ INLINE_DECL void kernelFFTClass<cint16,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<cint16>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
-
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
+    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
+    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, tw128, NULL, NULL, NULL, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_256_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_256_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -830,10 +1062,26 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, NULL, NULL, NULL, NULL, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -858,10 +1106,20 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
+    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, tw64, NULL, NULL, NULL, NULL, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_128_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -887,10 +1145,24 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, NULL, NULL, NULL, NULL, NULL, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -915,10 +1187,19 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
+    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, tw32, NULL, NULL, NULL, NULL, NULL, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_128_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -944,10 +1225,22 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_WINDOW_VSIZE>::kernelFFT(input_window<TT_DATA>* __restrict inputx,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf =
-        fnUsePingPongIntBuffer<TT_DATA>() ? (T_internalDataType*)ktmp2_buf : (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -972,10 +1265,18 @@ INLINE_DECL void kernelFFTClass<cint16,
                                                             output_window<TT_OUT_DATA>* __restrict outputy) {
     typedef cint16 TT_DATA;
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
+    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, tw16, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)ktmp2_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_128_tmp2;
 
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inputx, outputy);
 };
@@ -1003,12 +1304,27 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     const unsigned int TP_POINT_SIZE = FFT16_SIZE;
 
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8_half);
+
+    static TT_TWIDDLE* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+    T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1; // works because cint32 is the same size as
+                                                                       // cfloat
+    T_internalDataType* ktmp2_buf; // not initialized because input window is re-used for this storage
+
     TT_DATA* xbuff = (TT_DATA*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;
+    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
     // The following break with the pattern for other point sizes is a workaround for a compiler issue.
-    T_internalDataType chess_storage(% chess_alignof(v4cfloat)) tmp2_buf[FFT16_SIZE]; // must be 256 bit aligned
-    T_internalDataType chess_storage(% chess_alignof(v4cfloat)) tmp3_buf[FFT16_SIZE]; // must be 256 bit aligned
+    alignas(32) T_internalDataType tmp2_buf[FFT16_SIZE]; // must be 256 bit aligned
+    alignas(32) T_internalDataType tmp3_buf[FFT16_SIZE]; // must be 256 bit aligned
 
     bool inv = TP_FFT_NIFFT == 1 ? false : true;
 
@@ -1018,15 +1334,16 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     for (int iter = 0; iter < TP_WINDOW_VSIZE / TP_POINT_SIZE; iter++)
         chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
             if
-                constexpr(std::is_same<TT_DATA, cfloat>::value) {
-                    stage0_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)xbuff, (cfloat*)tw1, FFT16_SIZE, FFT_8, 0,
-                                                              (cfloat*)tmp1_buf, inv);
-                    stage0_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp1_buf, (cfloat*)tw2, FFT16_SIZE, FFT_4, 0,
-                                                              (cfloat*)tmp2_buf, inv);
-                    stage1_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp2_buf, (cfloat*)tw4, FFT16_SIZE, FFT_2, 0,
-                                                              (cfloat*)tmp3_buf, inv);
-                    stage2_radix2_dit<cfloat, cfloat, cfloat>((cfloat*)tmp3_buf, (cfloat*)tw8, FFT16_SIZE, FFT_1,
-                                                              TP_SHIFT, (cfloat*)obuff, inv); // r is not used.
+                constexpr(std::is_same<TT_DATA, cfloat>::value &&
+                          (TP_END_RANK - TP_START_RANK == 4)) { // special case for uncascaded 16pt cfloat
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 8>((cfloat*)xbuff, (cfloat*)tw1, FFT16_SIZE, 0,
+                                                                (cfloat*)tmp1_buf, inv);
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 4>((cfloat*)tmp1_buf, (cfloat*)tw2, FFT16_SIZE, 0,
+                                                                (cfloat*)tmp2_buf, inv);
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 2>((cfloat*)tmp2_buf, (cfloat*)tw4, FFT16_SIZE, 0,
+                                                                (cfloat*)tmp3_buf, inv);
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 1>((cfloat*)tmp3_buf, (cfloat*)tw8, FFT16_SIZE, TP_SHIFT,
+                                                                (cfloat*)obuff, inv); // r is not used.
                 }
             else {
                 stages.calc(xbuff, tw_table, tmp1_buf, tmp2_buf, obuff);
@@ -1058,6 +1375,17 @@ INLINE_DECL void kernelFFTClass<cint16,
     typedef cint16 TT_DATA;
 
     typedef cint32_t T_internalDataType;
+    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
+    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
+    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
+    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8_half;
+
+    static cint16* tw_table[kMaxPointLog] = {tw1, tw2, tw4, tw8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+    T_internalDataType* ktmp1_buf = (T_internalDataType*)
+        fft_128_tmp1; // all pt sizes 128 or smaller use 128 sample buffer to keep codebase smaller.
+    T_internalDataType* ktmp2_buf = (T_internalDataType*)fft_128_tmp2;
+
     cint16* xbuff = (cint16*)inputx->ptr;
     TT_OUT_DATA* obuff = (TT_OUT_DATA*)outputy->ptr;
     T_internalDataType* tmp1_buf = (T_internalDataType*)ktmp1_buf;

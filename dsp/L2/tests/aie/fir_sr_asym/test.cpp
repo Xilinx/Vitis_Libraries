@@ -23,13 +23,21 @@ reference model graph
 #if (NUM_OUTPUTS == 1)
 simulation::platform<1, 1> platform(QUOTE(INPUT_FILE), QUOTE(OUTPUT_FILE));
 #else
+#if (DUAL_IP == 1)
+// temporarily connect same file to both inputs
+simulation::platform<2, 2> platform(QUOTE(INPUT_FILE), QUOTE(INPUT_FILE), QUOTE(OUTPUT_FILE), QUOTE(OUTPUT_FILE2));
+#else
 simulation::platform<1, 2> platform(QUOTE(INPUT_FILE), QUOTE(OUTPUT_FILE), QUOTE(OUTPUT_FILE2));
+#endif
 #endif
 
 xf::dsp::aie::testcase::test_graph filter;
 
 // Connect filter instance to platform
-connect<> net0(platform.src[0], filter.in);
+connect<> net0a(platform.src[0], filter.in);
+#if (DUAL_IP == 1)
+connect<> net0b(platform.src[1], filter.in2);
+#endif
 connect<> net1(filter.out, platform.sink[0]);
 #if (NUM_OUTPUTS == 2)
 connect<> net2(filter.out2, platform.sink[1]);

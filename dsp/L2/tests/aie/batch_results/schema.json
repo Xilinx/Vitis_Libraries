@@ -1,0 +1,10 @@
+{
+    "COMPILE": ["int"],
+    "SIM": ["int"],
+    "FUNC": ["int"],
+    "DATA_MEMORY": ["int"],
+    "PROGRAM_MEMORY": ["int"],
+    "cycleCountMin": ["int"],
+    "cycleCountAvg": ["int"],
+    "cycleCountMax": ["int"]
+}

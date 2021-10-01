@@ -1,0 +1,166 @@
+{
+    "name": "Xilinx DSPLIB matrix mult with datamover",
+    "description": "",
+    "gui": "true",
+    "flow": "versal",
+    "platform_whitelist": [
+        "vck190"
+    ],
+    "data": ["PROJECT/data/"],
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "cflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "launch": [
+        {
+            "name": "hwemu-launch",
+            "target": "hw_emu",
+            "pkg-dir": "$(WORK_DIR)",
+            "input-dir": "./"
+        },
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "pkg-dir": "$(WORK_DIR)",
+            "input-dir": "./"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "pkg-dir": "$(WORK_DIR)",
+            "input-dir": "./"
+        }
+    ],
+    "host": {
+        "host_exe": "host.elf",
+        "compiler": {
+            "sources": [
+                "PROJECT/host.cpp",
+                "PROJECT/gui_hack/aie_control_xrt.cpp"
+            ],
+            "includepaths": [
+                "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "PROJECT"
+            ],
+            "options": "--sysroot=$(SYSROOT)",
+            "symbols": ["__PS_ENABLE_AIE__", "USING_PL_MOVER=1", "USING_UUT=1"]
+        },
+        "linker": {
+            "librarypaths": [
+                "$(SYSROOT)/usr/lib/"
+            ],
+            "options": "--sysroot=$(SYSROOT)"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/../utils/L1/include/hw",
+                "LIB_DIR/../utils/L2/src/sw/datamvoer",
+                "PROJECT/kernel",
+                "PROJECT"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "./"
+            ],
+            "clflags":["--dataflow --device=4x4 -Xchess=llvm.xargs=-std=c++2a -Xchess=main:backend.mist2.xargs=+NOdra -Xchess=main:noodle.optim.olbb=20 -Xchess=main:backend.mist2.pnll=off --test-iterations=16 -Xpreproc=\"-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1\""]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "PROJECT/test.cpp",
+                    "pl-freq": 1000,
+                    "workdir": "./Work",
+                    "options": "--use-phy-shim=false",
+                    "name": "libadf.a",
+                     "aie_kernel_files": [   
+                         "LIB_DIR/L1/src/aie/matrix_mult.cpp",   
+                         "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp",     
+                         "LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"    
+                     ]  
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/mm2s.cpp",
+                    "clflags": " ",
+                    "name": "mm2s"
+                },
+                {
+                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/bmm2s.cpp",
+                    "clflags": " ",
+                    "name": "bmm2s"
+                },
+                {
+                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/s2mm.cpp",
+                    "clflags": " ",
+                    "name": "s2mm"
+                }
+            ],
+            "name": "kernel"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": {
+                    "vitis_aie_sim": 200,
+                    "vitis_aie_x86sim": 60,
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 200,
+                    "vitis_hw_run": 30
+                }
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim",
+            "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run"
+        ],
+        "category": "canary"
+    }
+}
