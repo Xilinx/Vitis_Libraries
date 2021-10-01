@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Consumer Price Index Cap Or Floor Engine Test", 
-    "description": "", 
+    "description": "A consumer price index (CPI) Cap/Floor is a call/put on the CPI.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

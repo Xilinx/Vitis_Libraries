@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Jacobi Singular Value Decomposition Benchmark", 
-    "description": "", 
+    "description": "The singular value decomposition (SVD) is a very useful technique for dealing with general dense matrix problems.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

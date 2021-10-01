@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Tree Cap Floor Engine HW Model Benchmark", 
-    "description": "", 
+    "description": "Tree Cap/Floor pricing engine with Hull-White model uses trinomial tree based on 1D lattice method to calculate the pricing result.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

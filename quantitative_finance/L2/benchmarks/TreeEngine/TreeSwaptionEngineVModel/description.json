@@ -1,7 +1,7 @@
 {
     "gui": false, 
     "name": "Xilinx Tree Swaption Engine Vasicek Model Benchmark", 
-    "description": "", 
+    "description": "Tree Swaption pricing engine with Vasicek Model uses trinomial tree based on 1D lattice method to calculate the pricing result.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

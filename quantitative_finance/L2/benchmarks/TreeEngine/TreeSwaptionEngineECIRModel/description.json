@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Tree Swaption Engine ECIR Model Benchmark", 
-    "description": "", 
+    "description": "Tree Swaption pricing engine with Extended-CoxIngersollRoss Model uses trinomial tree based on 1D lattice method to calculate the pricing result.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

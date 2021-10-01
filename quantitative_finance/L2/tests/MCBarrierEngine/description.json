@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx MC Barrier Option Pricing Engine Test", 
-    "description": "", 
+    "description": "The Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

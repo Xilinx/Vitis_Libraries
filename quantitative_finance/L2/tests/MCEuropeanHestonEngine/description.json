@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx MC European Heston Engine Test", 
-    "description": "", 
+    "description": "The European option is an option that can only be exercised at the expiration date. Heston Model is the most classic model for stock price.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

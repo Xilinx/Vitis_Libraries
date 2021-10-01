@@ -42,13 +42,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Quantitative Finance Library'
-copyright = '2020, Xilinx'
+copyright = '2021, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2021.1'
+version = '2021.2'
 # The full version, including alpha/beta/rc tags
-release = '2021.1_release'
+release = '2021.2_release'
 
 
 # -- General configuration ---------------------------------------------------

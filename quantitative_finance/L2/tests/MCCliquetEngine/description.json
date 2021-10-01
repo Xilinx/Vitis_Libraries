@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx MC Cliquet Option Pricing Engine Test", 
-    "description": "", 
+    "description": "The Cliquet option pricing engine uses Monte Carlo Simulation to estimate the value of Cliquet Option.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

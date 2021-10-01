@@ -56,7 +56,7 @@ CPPFLAGS = -DVITIS_PLATFORM=$(VITIS_PLATFORM) \
 			-I$(XILINX_XRT)/include \
 			$(PYTHON_INC_FLAGS)
 
-LDFLAGS = -shared  -lxilinxopencl -lxilinxfintech -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib -L$(XILINX_FINTECH_LIB_DIR)
+LDFLAGS = -shared  -lxilinxopencl -lxilinxfintech -pthread -lrt -lstdc++ -L$(XILINX_XRT)/lib -L$(XILINX_FINTECH_LIB_DIR)
 
 
 .PHONY: output all clean cleanall run

@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Inflation Black Cap or Floor Engine Test", 
-    "description": "", 
+    "description": "Inflation option can be cap and floor. An inflation cap (floor) is a financial asset that offers protection against inflation being higher (lower) than a given rate of inflation.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

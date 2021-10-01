@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx MC European Heston Greeks Engine Test", 
-    "description": "", 
+    "description": "Monte Carlo European Option Greeks Calculating Engine uses Monte Carlo Method based on Heston valuation model to calculate greeks.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

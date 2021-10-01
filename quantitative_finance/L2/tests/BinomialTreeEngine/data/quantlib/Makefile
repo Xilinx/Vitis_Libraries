@@ -30,7 +30,7 @@ OBJ_FILES := $(addsuffix .o, $(basename $(SRCS)))
 EXTRA_OBJS :=
 
 CPPFLAGS = -std=c++11 -O3 -Wall -Wno-unknown-pragmas -c -I$(INCLUDE_DIR) -I$(XF_FINTECH_L2_DIR)
-LDFLAGS = -lpthread -lstdc++ -lQuantLib -L/usr/local/lib
+LDFLAGS = -pthread -lstdc++ -lQuantLib -L/usr/local/lib
 
 # not used
 KERNELS=

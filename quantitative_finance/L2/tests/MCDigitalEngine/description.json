@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx MC Digital Option Pricing Engine Test", 
-    "description": "", 
+    "description": "Digital Option pricing engine uses Monte Carlo Simulation to estimate the value of digital option.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

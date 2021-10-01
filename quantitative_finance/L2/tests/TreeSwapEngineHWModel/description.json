@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx Tree Swap Engine HW Model Test", 
-    "description": "", 
+    "description": "Tree Swap pricing engine with Hull-White model uses trinomial tree based on 1D lattice method to calculate the pricing result.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

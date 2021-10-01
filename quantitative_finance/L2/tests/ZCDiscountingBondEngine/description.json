@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx ZC Discounting Bond Engine Test", 
-    "description": "", 
+    "description": "A zero-coupon bond is a bond which is purchased at a price below the face value of the bond. It does not pay coupon during the contract period, and repays the face value at the time of maturity.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

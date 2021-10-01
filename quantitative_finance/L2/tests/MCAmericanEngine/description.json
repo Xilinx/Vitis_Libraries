@@ -1,7 +1,7 @@
 {
     "gui": true, 
     "name": "Xilinx MC American Option Pricing Engine Test", 
-    "description": "", 
+    "description": "The American option can be exercised at any time up until its maturity date. This early exercise feature of American Option gives the investors more freedom to exercise, compared to the European options.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

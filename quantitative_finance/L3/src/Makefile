@@ -59,7 +59,7 @@ CXXFLAGS += -Iutils/linear_interpolation/include
 CXXFLAGS += -I$(XILINX_XCL2_DIR)
 CXXFLAGS += -I$(XILINX_XRT)/include
 
-LDFLAGS = -shared -lxilinxopencl -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib
+LDFLAGS = -shared -lxilinxopencl -pthread -lrt -lstdc++ -L$(XILINX_XRT)/lib
 
 EXE_NAME := libxilinxfintech.so
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
