@@ -354,8 +354,8 @@
 <p class="caption"><span class="caption-text">Benchmark</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmark</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#pictures">Pictures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#performance">Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pictures-performance">Pictures &amp; Performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resource-utilization">Resource Utilization</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="benchmark/jpegHuffmanDecoderIP.html">JPEG Huffman Decoder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="benchmark/jpegDecoder.html">JPEG Decoder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="benchmark/pikEnc.html">PIK Encoder</a></li>
@@ -433,72 +433,214 @@
             
   <div class="section" id="benchmark">
 <h1>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="pictures">
-<span id="id1"></span><h2>Pictures<a class="headerlink" href="#pictures" title="Permalink to this headline">¶</a></h2>
-<p>The data is used by benchmarks, our commonly used pictures are listed in table 1.</p>
-<table border="1" class="docutils align-center" id="id2">
-<caption><span class="caption-text">Table 1 Pictures for benchmark</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<div class="section" id="pictures-performance">
+<span id="pictures"></span><h2>Pictures &amp; Performance<a class="headerlink" href="#pictures-performance" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>JPEG Decoder: This API supports the ‘Sequential DCT-based mode’ of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy.
+It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle.
+It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.</li>
+<li>Pik Encoder: This API is based on Google’s PIK, which was ‘chosen as the base framework for JPEG XL’.
+The pikEnc is based on the ‘fast mode’ of PIK which can provide better encoding efficnty than most of other still image encoding methods.
+The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture.
+It can proved higher throughput and lower latency compared to software-based solutions.</li>
+</ol>
+<p>our commonly used pictures are listed in table below.</p>
+<table border="1" class="docutils align-center" id="id1">
+<caption><span class="caption-text">Table 1 Cosim benchmark for Huffman Decoder(L1)</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="47%" />
-<col width="23%" />
-<col width="30%" />
+<col width="18%" />
+<col width="9%" />
+<col width="12%" />
+<col width="15%" />
+<col width="16%" />
+<col width="17%" />
+<col width="5%" />
+<col width="9%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Pictures</th>
 <th class="head">Format</th>
 <th class="head">Size</th>
+<th class="head">Compress ratio</th>
+<th class="head">cosim Freq(MHz)</th>
+<th class="head">input speed(MB/s)</th>
+<th class="head">QPS</th>
+<th class="head">time(ms)</th>
 </tr>
 </thead>
 <tbody valign="top">
+<tr class="row-even"><td>lena_c_512.jpg</td>
+<td>420</td>
+<td>512*512</td>
+<td>5.2</td>
+<td>300</td>
+<td>174</td>
+<td>2288</td>
+<td>0.437</td>
+</tr>
+<tr class="row-odd"><td>t0.jpg</td>
+<td>420</td>
+<td>616*516</td>
+<td>9.3</td>
+<td>300</td>
+<td>147</td>
+<td>2890</td>
+<td>0.346</td>
+</tr>
 <tr class="row-even"><td>android.jpg</td>
 <td>420</td>
 <td>960*1280</td>
+<td>14.2</td>
+<td>300</td>
+<td>145</td>
+<td>1125</td>
+<td>0.889</td>
 </tr>
 <tr class="row-odd"><td>offset.jpg</td>
 <td>422</td>
 <td>5184*3456</td>
+<td>4.6</td>
+<td>300</td>
+<td>209</td>
+<td>27</td>
+<td>37.25</td>
 </tr>
 <tr class="row-even"><td>hq.jpg</td>
 <td>444</td>
 <td>5760*3840</td>
+<td>2.8</td>
+<td>300</td>
+<td>233</td>
+<td>10</td>
+<td>101.1</td>
 </tr>
 <tr class="row-odd"><td>iphone.jpg</td>
 <td>420</td>
 <td>3264*2448</td>
+<td>5.4</td>
+<td>300</td>
+<td>213</td>
+<td>96</td>
+<td>10.47</td>
 </tr>
-<tr class="row-even"><td>lena_c_512.png</td>
-<td>444</td>
+</tbody>
+</table>
+<table border="1" class="docutils align-center" id="id2">
+<caption><span class="caption-text">Table 2 On board benchmark for JPEG Decoder(L2)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="19%" />
+<col width="10%" />
+<col width="13%" />
+<col width="16%" />
+<col width="11%" />
+<col width="17%" />
+<col width="5%" />
+<col width="10%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Pictures</th>
+<th class="head">Format</th>
+<th class="head">Size</th>
+<th class="head">Compress ratio</th>
+<th class="head">Freq(MHz)</th>
+<th class="head">input speed(MB/s)</th>
+<th class="head">QPS</th>
+<th class="head">time(ms)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>lena_c_512.jpg</td>
+<td>420</td>
 <td>512*512</td>
+<td>5.2</td>
+<td>243</td>
+<td>87</td>
+<td>1148</td>
+<td>0.871</td>
 </tr>
-<tr class="row-odd"><td>1920x1080.png</td>
-<td>444</td>
-<td>1920*1080</td>
+<tr class="row-odd"><td>t0.jpg</td>
+<td>420</td>
+<td>616*516</td>
+<td>9.3</td>
+<td>243</td>
+<td>66</td>
+<td>1292</td>
+<td>0.774</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils align-center" id="id3">
+<caption><span class="caption-text">Table 3 On board benchmark for Pik Eecoder(L2)</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="17%" />
+<col width="16%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="10%" />
+<col width="18%" />
+<col width="5%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Pictures</th>
+<th class="head">Size</th>
+<th class="head">Kernel1(ms)</th>
+<th class="head">Kernel2(ms)</th>
+<th class="head">Kernel3(ms)</th>
+<th class="head">Freq(MHz)</th>
+<th class="head">input speed(MPIX/s)</th>
+<th class="head">QPS</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>lena_c_512.png</td>
+<td>512*512</td>
+<td>16</td>
+<td>14</td>
+<td>7</td>
+<td>200</td>
+<td>16.4</td>
+<td>62.5</td>
+</tr>
+<tr class="row-odd"><td>lena_c_1024.png</td>
+<td>1024*1024</td>
+<td>52</td>
+<td>48</td>
+<td>24</td>
+<td>200</td>
+<td>20.2</td>
+<td>19.2</td>
+</tr>
+<tr class="row-even"><td>lena_c_2048.png</td>
+<td>2048*2048</td>
+<td>191</td>
+<td>180</td>
+<td>86</td>
+<td>200</td>
+<td>22.0</td>
+<td>5.2</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="performance">
-<h2>Performance<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="resource-utilization">
+<h2>Resource Utilization<a class="headerlink" href="#resource-utilization" title="Permalink to this headline">¶</a></h2>
 <p>For representing the resource utilization in each benchmark, we separate the overall utilization into 2 parts, where P stands for the resource usage in
 platform, that is those instantiated in static region of the FPGA card, as well as K represents those used in kernels (dynamic region). The input is
 png, jpg, pik, e.g. format, and the target device is set to Alveo U200.</p>
-<table border="1" class="docutils align-center" id="id3">
-<caption><span class="caption-text">Table 2 Performance for processing pictures on FPGA</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<table border="1" class="docutils align-center" id="id4">
+<caption><span class="caption-text">Table 4 Resource Utilization</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="18%" />
-<col width="16%" />
-<col width="12%" />
-<col width="9%" />
-<col width="14%" />
+<col width="28%" />
 <col width="11%" />
-<col width="10%" />
-<col width="10%" />
+<col width="18%" />
+<col width="15%" />
+<col width="14%" />
+<col width="14%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Architecture</th>
-<th class="head">Picture</th>
-<th class="head">Latency(ms)</th>
-<th class="head">Timing</th>
+<th class="head">Freq</th>
 <th class="head">LUT(P/K)</th>
 <th class="head">BRAM(P/K)</th>
 <th class="head">URAM(P/K)</th>
@@ -507,8 +649,6 @@ png, jpg, pik, e.g. format, and the target device is set to Alveo U200.</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>JPEG Huffman Decoder</td>
-<td>android.jpg</td>
-<td>0.889</td>
 <td>270MHz</td>
 <td>108.1K/7.9K</td>
 <td>178/5</td>
@@ -516,8 +656,6 @@ png, jpg, pik, e.g. format, and the target device is set to Alveo U200.</p>
 <td>4/12</td>
 </tr>
 <tr class="row-odd"><td>JPEG Decoder</td>
-<td>android.jpg</td>
-<td>1.515</td>
 <td>243MHz</td>
 <td>108.1K/23.1K</td>
 <td>178/28</td>
@@ -525,8 +663,6 @@ png, jpg, pik, e.g. format, and the target device is set to Alveo U200.</p>
 <td>4/39</td>
 </tr>
 <tr class="row-even"><td>PIK Encoder</td>
-<td>lena_c_512.png</td>
-<td>16.0</td>
 <td>300MHz</td>
 <td>150.9K/439.4K</td>
 <td>338/62</td>
