@@ -256,6 +256,14 @@ int main(int argc, const char* argv[]) {
     q.enqueueMigrateMemObjects(buffread, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[0], &read_events[0][0]);
     q.finish();
 
+    GetTreeFromBits<DataType, 64>(nodes, tree, nodes_num);
+    // check nodes_num
+    // if (nodes_num != 103) return 1;
+    printTree(nodes, nodes_num);
+
+    // check tree by computing precision and recall
+    int check = precisonAndRecall(testsets, test_num, features_num, nodes);
+
     gettimeofday(&end_time, 0);
     std::cout << "INFO: kernel end------" << std::endl;
     std::cout << "INFO: Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
@@ -277,14 +285,6 @@ int main(int argc, const char* argv[]) {
 #else
     DecisionTree(data, configs, tree);
 #endif
-
-    GetTreeFromBits<DataType, 64>(nodes, tree, nodes_num);
-    // check nodes_num
-    if (nodes_num != 103) return 1;
-    printTree(nodes, nodes_num);
-
-    // check tree by computing precision and recall
-    int check = precisonAndRecall(testsets, test_num, features_num, nodes);
 
     check ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
           : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);

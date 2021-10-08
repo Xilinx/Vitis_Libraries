@@ -783,17 +783,17 @@ extern "C" void DecisionTree(ap_uint<512> data[DATASIZE], ap_uint<512> configs[3
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	num_write_outstanding = 16 num_read_outstanding = 16 \
 	max_write_burst_length = 64 max_read_burst_length = 64 \
-	bundle = gmem0_0 port = data
+	bundle = gmem0_0 port = data depth = 102400
 
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	num_write_outstanding = 16 num_read_outstanding = 16 \
 	max_write_burst_length = 64 max_read_burst_length = 64 \
-	bundle = gmem0_1 port = configs
+	bundle = gmem0_1 port = configs depth = 1024
 
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
 	num_write_outstanding = 16 num_read_outstanding = 16 \
 	max_write_burst_length = 64 max_read_burst_length = 64 \
-	bundle = gmem0_2 port = tree
+	bundle = gmem0_2 port = tree = depth = 102400
 
 #pragma HLS INTERFACE s_axilite port = data bundle = control
 #pragma HLS INTERFACE s_axilite port = configs bundle = control

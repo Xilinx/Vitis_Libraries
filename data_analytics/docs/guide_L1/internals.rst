@@ -22,6 +22,7 @@ The profiling in this documentation is based on U250, and the tool version is Vi
 .. toctree::
    :maxdepth: 1
 
+   internals/csvParser.rst
    internals/dt.rst
    internals/kMeansPredict.rst
    internals/linearRegression.rst
@@ -31,4 +32,3 @@ The profiling in this documentation is based on U250, and the tool version is Vi
    internals/regex_vm.rst
    internals/writeToDataFrame.rst
    internals/readFromDataFrame.rst
-

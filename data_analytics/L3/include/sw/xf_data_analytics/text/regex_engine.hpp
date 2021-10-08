@@ -24,7 +24,8 @@
 #include <queue>
 #include <cstring>
 #include "xf_data_analytics/text/reEngine_config.hpp"
-#include "xf_data_analytics/text/helper.hpp"
+#include "xf_data_analytics/text/ocl_helper.hpp"
+#include "xf_data_analytics/text/common.hpp"
 #include "xf_utils_sw/logger.hpp"
 
 namespace xf {

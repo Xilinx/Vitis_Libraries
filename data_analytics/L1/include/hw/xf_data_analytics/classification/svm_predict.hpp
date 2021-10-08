@@ -113,6 +113,7 @@ void getPredictions(const int cols,
 
     sl2<double, StreamN, SampleDepth, 1, 1, &funcA, &funcB, &funcC, 6, URAM, URAM> processor;
     processor.setWeight(weight, cols, 1);
+    processor.intercept[0][0] = 0;
     processor.process(sample_strm, e_sample_strm, retStrm, eRetStrm, cols, 1);
     transPredictions<MType, WD>(retStrm, eRetStrm, predictionsStrm, predictionsTag);
 }

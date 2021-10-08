@@ -101,7 +101,7 @@ endif
 
 # ######################### Host compiler global settings ############################
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
@@ -128,6 +128,7 @@ HOST_ARGS := -xclbin $(BUILD_DIR)/decision_tree.xclbin -in $(CUR_DIR)/data -trn 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
 VPP_FLAGS += --hls.jobs 8
+VPP_FLAGS += -g
 VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u250.cfg

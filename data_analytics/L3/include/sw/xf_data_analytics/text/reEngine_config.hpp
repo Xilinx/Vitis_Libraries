@@ -23,7 +23,7 @@
 #include <queue>
 #include <cstring>
 
-#include "xf_data_analytics/text/helper.hpp"
+#include "xf_data_analytics/text/common.hpp"
 
 extern "C" {
 #include "xf_data_analytics/text/xf_re_compile.h"

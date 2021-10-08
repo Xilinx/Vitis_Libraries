@@ -22,6 +22,13 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2021.2
+------
+
+The 2021.2 release provide CSV Parser:
+
+* **CSV Parser** could parse comma-seperated value files and generate object stream which could easily be connected with DataFrame APIs.
+  CSV is a common used storage format in Date Lake. CSV parser could be used to accelerate data extract process. 
 
 2021.1
 ------
