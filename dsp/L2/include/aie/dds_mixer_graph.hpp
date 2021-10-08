@@ -36,36 +36,37 @@ using namespace adf;
 // dds_mixer_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @brief dds_mixer operates in 3 modes
- *        Mixer Mode 0:  This is dds mode only. The library element has a single output window,
+ * @brief dds_mixer operates in 3 modes: \n
+ *      **Mixer Mode 0:** \n
+ *                       This is dds mode only. The library element has a single output window,
  *                       which is written to with the sin/cos components corresponding to the
- *                       programmed phase increment.
- *        Mixer Mode 1:  This is dds plus mixer for a single data input port. Each data input
+ *                       programmed phase increment. \n
+ *      **Mixer Mode 1:** \n
+ *                       This is dds plus mixer for a single data input port. \n Each data input
  *                       sample is complex multiplied with the corresponding dds sample, to
- *                       create a modulated signal that is written to the output window
- *        Mixer Mode 2:  This is a special configuration for symmetrical carriers and two data
- *                       input ports. Each data sample of the first input is complex multiplied
- *                       with the corresponding dds sample to create a modulated signal.
- * These are the templates to configure the dds_mixer class.
+ *                       create a modulated signal that is written to the output window. \n
+ *      **Mixer Mode 2:** \n
+ *                       This is a special configuration for symmetrical carriers and two data
+ *                       input ports. \n Each data sample of the first input is complex multiplied
+ *                       with the corresponding dds sample to create a modulated signal. \n
+ * These are the templates to configure the dds_mixer class. \n
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the dds_mixer function. This is a typename and must be one
- *         of the following:
+ *         of the following: \n
  *         cint16
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the input/output window API
  *          or number of samples to process per iteration.
- * @tparam TP_MIXER_MODE describes the mode of operation of the dds_mixer.
- *         The values supported are 0 (dds only mode), 1 (dds plus single data channel mixer)
+ * @tparam TP_MIXER_MODE describes the mode of operation of the dds_mixer.  \n
+ *         The values supported are: \n
+ *         0 (dds only mode), \n 1 (dds plus single data channel mixer),  \n
  *         2 (dds plus two data channel mixer for symmetrical carriers)
- * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.
+ * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
  **/
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE = MIXER_MODE_2, // default is dds plus two inputs to mixers
           unsigned int TP_API = IO_API::WINDOW>
-/**
- * This is the class for the dds_mixer graph MIXER_MODE_2
- **/
 class dds_mixer_graph : public graph {
    private:
    public:
@@ -100,7 +101,7 @@ class dds_mixer_graph : public graph {
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.
-     * @param[in] perSamplePhaseInce - specifies the phase increment between samples.
+     * @param[in] phaseInc specifies the phase increment between samples.
      *                                 Input value 2^31 corresponds to Pi (i.e. 180').
      **/
     dds_mixer_graph(const uint32_t phaseInc) {

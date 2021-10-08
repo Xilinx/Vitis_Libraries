@@ -311,43 +311,43 @@ class create_combOutWidget_kernels<TT_DATA, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, 
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the transform function. This is a typename and must be one
- *         of the following:
+ *         of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform.
+ * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be one of the following: cint16, cint32, cfloat
  *         and must also satisfy the following rules:
  *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
  *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
  *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of point
- *         size of the transform. This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive. When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
+ *         size of the transform. \n This must be 2^N where N is an integer in the range
+ *         4 to 16 inclusive. \n When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
  *         point size possible.
  * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
  * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
  * @tparam TP_CASC_LEN selects the number of kernels the FFT will be divided over in series
  *         to improve throughput
- * @tparam TP_DYN_PT_SIZE selects whether (1) or not (0) to use run-time point size determination.
- *         When set, each frame of data must be preceeded, in the window, by a 256 bit header.
+ * @tparam TP_DYN_PT_SIZE selects whether (1) or not (0) to use run-time point size determination. \n
+ *         When set, each frame of data must be preceeded, in the window, by a 256 bit header. \n
  *         The output frame will also be preceeded by a 256 bit vector which is a copy of the input
  *         vector, but for the top byte, which is 0 to indicate a legal frame or 1 to indicate an illegal
- *         frame.
+ *         frame. \n
  *         The lowest significance byte of the input header field describes forward (non-zero) or
- *         inverse(0) direction.
+ *         inverse(0) direction. \n
  *         The second least significant byte  8 bits of this field describe the Radix 2 power of the following
- *         frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512. Any value below 4 or
- *         greater than log2(TP_POINT_SIZE) is considered illegal. When this occurs the top byte of the
+ *         frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512. \n Any value below 4 or
+ *         greater than log2(TP_POINT_SIZE) is considered illegal. \n When this occurs the top byte of the
  *         output header will be set to 1 and the output samples will be set to 0 for a frame of TP_POINT_SIZE
- * @tparam TP_WINDOW_VSIZE is an unsigned integer which describes the number of samples in the input window.
- *         By default, TP_WINDOW_SIZE is set ot match TP_POINT_SIZE.
+ * @tparam TP_WINDOW_VSIZE is an unsigned integer which describes the number of samples in the input window. \n
+ *         By default, TP_WINDOW_SIZE is set ot match TP_POINT_SIZE. \n
  *         TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case
  *         multiple FFT iterations will be performed on a given input window, resulting in multiple
  *         iterations of output samples, reducing the numer of times the kernel needs to be triggered to
- *         process a given number of input data samples.
+ *         process a given number of input data samples. \n
  *         As a result, the overheads inferred during kernel triggering are reduced and overall performance
  *         is increased.
  * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
- * @tparam TP_PARALLEL_POWER is an unsigned integer to describe how many subframe processors to use.
+ * @tparam TP_PARALLEL_POWER is an unsigned integer to describe how many subframe processors to use. \n
  *         The default is 1. This may be set to 4 or 16 to increase throughput.
   **/
 template <typename TT_DATA,
@@ -359,7 +359,6 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE = 0, // backwards compatible default
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE>
 /**
- * This is the base class for the Single channel DIT FFT graph - one or many cascaded kernels for higher throughput
  **/
 class fft_ifft_dit_1ch_base_graph : public graph {
    public:
@@ -889,6 +888,8 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_WINDOW_VSIZE,
                                 kWindowAPI>
         FFTwinproc;
+    kernel* getKernels() { return FFTwinproc.m_fftKernels; };
+
     fft_ifft_dit_1ch_graph() {
         connect<>(in[0], FFTwinproc.in[0]);
         connect<>(FFTwinproc.out[0], out[0]);

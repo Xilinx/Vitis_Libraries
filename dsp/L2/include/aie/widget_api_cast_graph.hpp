@@ -47,7 +47,7 @@ using namespace adf;
  * These are the templates to configure the Widget API Cast class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the function. This is a typename and must be one
- *         of the following:
+ *         of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TP_IN_API defines the input interface type.
  *         0 = Window, 1 = Stream

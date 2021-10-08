@@ -59,10 +59,11 @@ for reference.
    :caption: L2 DSP Library User Guide
    :maxdepth: 4
 
-   user_guide/L2/1-introduction.rst
-   user_guide/L2/2-dsp-lib-func.rst
-   user_guide/L2/3-using-examples.rst
-   user_guide/L2/5-benchmark.rst
+   user_guide/L2/introduction.rst
+   user_guide/L2/dsp-lib-func.rst
+   user_guide/L2/compiling-and-simulating.rst
+   user_guide/L2/using-examples.rst
+   user_guide/L2/benchmark.rst
 
 
 .. toctree::
@@ -70,7 +71,7 @@ for reference.
    :caption: API Reference
    :hidden:
 
-   API Reference Overview <user_guide/L2/4-api-reference>
+   API Reference Overview <user_guide/L2/api-reference>
    fir_sr_asym_graph <rst/class_xf_dsp_aie_fir_sr_asym_fir_sr_asym_graph>
    fir_sr_sym_graph <rst/class_xf_dsp_aie_fir_sr_sym_fir_sr_sym_graph>
    fir_interpolate_asym_graph <rst/class_xf_dsp_aie_fir_interpolate_asym_fir_interpolate_asym_graph>
@@ -83,6 +84,7 @@ for reference.
    fft_ifft_dit_1ch_graph <rst/class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_base_graph>
    widget_api_cast_graph <rst/class_xf_dsp_aie_widget_api_cast_widget_api_cast_graph>
    widget_real2complex_graph <rst/class_xf_dsp_aie_widget_real2complex_widget_real2complex_graph>
+   dds_mixer_graph <rst/class_xf_dsp_aie_mixer_dds_mixer_dds_mixer_graph>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

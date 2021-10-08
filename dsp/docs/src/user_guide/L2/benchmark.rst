@@ -12,7 +12,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   
+
 .. _5_BENCHMARK:
 
 =============
@@ -30,9 +30,13 @@ The QoR are reflected using the below metrics:
 - NUM_BANKS             - number of memory banks used by the design
 - NUM_AIE               - number of AIE tiles used by the design
 - DATA_MEMORY           - total data memory in Bytes used by the design
-- PROGRAM_MEMORY        - total program memory in Bytes used by the design
+- PROGRAM_MEMORY        - program memory in Bytes used by each kernel
 
-In addition, QoR metrics are harvested for each kernel the design consists of. For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space deliminated).
+In addition, for multi-kernel designs, each kernel may take different amount of time to execute, as a result figures reported for each kernels `cycleCountAvg`, `throughputAvg` may vary slightly. \n
+To give a good comparison figure, the highest value of `cycleCountAvg` reported by each kernel in a multi-kernel configuration  will be presented as `cycleCountAvg` in the benchmark tables. \n
+Similarly, the lowest value of `throughputAvg`reported by each kernel will be presented as `throughputAvg`. \n
+Furthermore, PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. \n
+For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space deliminated).
 
 Filters
 ~~~~~~~
@@ -65,14 +69,14 @@ Following table gives results for the FFT/IFFT function with a wide variety of s
 Matrix Multiply
 ~~~~~~~~~~~~~~~
 
-Following table gives results for the matrix multiply function with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_GEMM`.
+Following table gives results for the Matrix Multiply function with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_GEMM`.
 
-.. note:: cycleCountAvg does not include the cycle count information for the additional shuffling/tiling widget kernels, but initiationInterval and PROGRAM_MEMORY do include shuffling/tiling widget kernels. 
+.. note:: cycleCountAvg does not include the cycle count information for the additional shuffling/tiling widget kernels, but initiationInterval and PROGRAM_MEMORY do include shuffling/tiling widget kernels.
 
-:download:`mat_mult_benchmark.csv <../../csv_data_files/L2/mat_mult_benchmark.csv>`
+:download:`matrix_mult_benchmark.csv <../../csv_data_files/L2/matrix_mult_benchmark.csv>`
 
 .. csv-table:: Matrix Multiply benchmark
-   :file: ../../csv_data_files/L2/mat_mult_benchmark.csv
+   :file: ../../csv_data_files/L2/matrix_mult_benchmark.csv
    :align: center
    :header-rows: 1
 
@@ -81,12 +85,26 @@ Following table gives results for the matrix multiply function with a wide varie
 Widgets
 ~~~~~~~
 
-Following table gives results for the widgets with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_WIDGETS`.
+Following table gives results for the Widgets with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_WIDGETS`.
 
 :download:`widget_benchmark.csv <../../csv_data_files/L2/widget_benchmark.csv>`
 
 .. csv-table:: Widgets benchmark
    :file: ../../csv_data_files/L2/widget_benchmark.csv
+   :align: center
+   :header-rows: 1
+
+
+
+DDS/Mixer
+~~~~~~~~~
+
+Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_WIDGETS`.
+
+:download:`dds_mixer_benchmark.csv <../../csv_data_files/L2/dds_mixer_benchmark.csv>`
+
+.. csv-table:: DDS/Mixer benchmark
+   :file: ../../csv_data_files/L2/dds_mixer_benchmark.csv
    :align: center
    :header-rows: 1
 

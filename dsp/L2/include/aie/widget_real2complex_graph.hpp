@@ -44,10 +44,10 @@ using namespace adf;
  *
  * These are the templates to configure the function.
  * @tparam TT_DATA describes the type of individual data samples input to the function.
- *         This is a typename and must be one of the following:
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_OUT_DATA describes the type of individual data samples output from the function.
- *         This is a typename and must be one of the following:
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  *         TT_OUT_DATA must also be the real or complex counterpart of TT_DATA, e.g.
  *         TT_DATA = int16 and TT_OUT_DATA = cint16 is valid,

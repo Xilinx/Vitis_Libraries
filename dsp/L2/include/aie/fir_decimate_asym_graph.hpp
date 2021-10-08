@@ -276,10 +276,10 @@ class create_casc_kernel<1,
  * These are the templates to configure the asymmetric decimator FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the filter function. This is a typename and must be one
- *         of the following:
+ *         of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
- *         taps. It must be one of the same set of types listed for TT_DATA
+ *         taps. \n It must be one of the same set of types listed for TT_DATA
  *         and must also satisfy the following rules:
  *         - Complex types are only supported when TT_DATA is also complex.
  *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
@@ -289,36 +289,38 @@ class create_casc_kernel<1,
  *         in the filter. TP_FIR_LEN must be in the range 4 to 240 and
  *         must be an integer multiple of the TP_DECIMATE_FACTOR value.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         FIR terms before output. TP_SHIFT must be in the range 0 to 61.
+ *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. TP_RND must be in the range 0 to 7
  *         where
- *         0 = floor (truncate) eg. 3.8 Would become 3.
- *         1 = ceiling e.g. 3.2 would become 4.
- *         2 = round to positive infinity.
- *         3 = round to negative infinity.
- *         4 = round symmetrical to infinity.
- *         5 = round symmetrical to zero.
- *         6 = round convergent to even.
- *         7 = round convergent to odd.
+ *         - 0 = floor (truncate) eg. 3.8 Would become 3.
+ *         - 1 = ceiling e.g. 3.2 would become 4.
+ *         - 2 = round to positive infinity.
+ *         - 3 = round to negative infinity.
+ *         - 4 = round symmetrical to infinity.
+ *         - 5 = round symmetrical to zero.
+ *         - 6 = round convergent to even.
+ *         - 7 = round convergent to odd. \n
  *         Modes 2 to 7 round to the nearest integer. They differ only in how
  *         they round for values of 0.5.
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the window API
- *         used for input to the filter function.
+ *         used for input to the filter function. \n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         divided by TP_DECIMATE_FACTOR by virtue the decimation factor.
- *         TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR
- *         The resulting output window size must be a multiple of 256bits.
- *
+ *         TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR.
+ *         The resulting output window size must be a multiple of 256bits. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
- *         over. This allows resource to be traded for higher performance.
+ *         over. \n This allows resource to be traded for higher performance.
  *         TP_CASC_LEN must be in the range 1 (default) to 9.
- * @tparam TP_USE_COEFF_RELOAD selects if runtime coefficient reloading is used.
- *         0 = Runtime coefficient reloading is not used. Coefficients are passes into
- *         the graph constructor and cannot be changed during runtime.
- *         1 = Runtime coefficient reloading is used. Coefficients are not passed into
- *         the graph constructor and are set using the graph API update function.
+ * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
+ *         reloading should be used.   \n When defining the parameter:
+ *         - 0 = static coefficients, defined in filter constructor,
+ *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
+ *
+ *         Note: when used, optional port: ``` port<input> coeff; ``` will be added to the FIR. \n
+ * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
+ *         Note: when used, optional port: ``` port<output> out2; ``` will be added to the FIR. \n
  **/
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -331,7 +333,6 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1>
 /**
- * This is the class for the Asymmetric Decimation FIR graph
  **/
 class fir_decimate_asym_graph : public graph {
    private:
@@ -380,7 +381,7 @@ class fir_decimate_asym_graph : public graph {
     // constructor
     /**
      * @brief This is the constructor function for the asymmetrical decimator FIR graph with static coefficients.
-     * @param[in] taps - a pointer to the array of taps values of type TT_COEFF.
+     * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
      **/
     fir_decimate_asym_graph(const std::vector<TT_COEFF>& taps) {
         // create kernels

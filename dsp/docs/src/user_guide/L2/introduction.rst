@@ -41,7 +41,7 @@ Xilinx |reg| documentation is organized around a set of standard design processe
 
    -  :ref:`3_USING_EXAMPLES`
 
-   -  :ref:`4_API_REFRENCE`
+   -  :ref:`4_API_REFERENCE`
 
    -  :ref:`5_BENCHMARK`
 
@@ -60,7 +60,7 @@ Xilinx |reg| documentation is organized around a set of standard design processe
 
    -  :ref:`3_USING_EXAMPLES`
 
-   -  :ref:`4_API_REFRENCE`
+   -  :ref:`4_API_REFERENCE`
 
 .. _1_ORGANIZATION:
 

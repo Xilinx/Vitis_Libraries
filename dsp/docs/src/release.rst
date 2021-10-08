@@ -23,6 +23,40 @@ Release Note
    :maxdepth: 1
 
 ***********************
+2021.2
+***********************
+
+The below features have been added to the library in this release.
+
+
+
+*  **DDS / Mixer**
+
+New library element is now available:
+
+- DDS/Mixer
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace**                                                               |
++=======================================+=============================================================================+
+| DDS / Mixer                           |  dsplib::mixer::dds_mixer                                                   |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+.. note:: Namespace aliasing can be utilized to shorten instantiations: ``namespace dsplib = xf::dsp::aie;``
+
+Component may be configured to provide a DDS output or to mix 1/2 input channels onto generated DDS frequency.
+DDS/Mixer supports window input/output interface, as well as streaming interface.
+
+*  **FIR Filters**
+
+Single rate FIRs now support streaming interfaces in addition to window interfaces.
+
+*  **FFT/iFFT**
+
+FFT now supports streaming interfaces in addition to window interfaces.
+In addition, FFT now offers improved performance and greater poit size support with parallelization.
+
+***********************
 2021.1
 ***********************
 

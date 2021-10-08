@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _4_API_REFRENCE:
+.. _4_API_REFERENCE:
 
 **********************
 API Reference Overview
@@ -36,6 +36,7 @@ This section describes the interface to each library element, i.e., configuratio
 - `fft_ifft_dit_1ch_graph <../../rst/class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_base_graph.html>`_
 - `widget_api_cast_graph <../../rst/class_xf_dsp_aie_widget_api_cast_widget_api_cast_graph.html>`_
 - `widget_real2complex_graph <../../rst/class_xf_dsp_aie_widget_real2complex_widget_real2complex_graph.html>`_
+- `dds_mixer_graph <../../rst/class_xf_dsp_aie_mixer_dds_mixer_dds_mixer_graph.html>`_
 
 
 .. |image1| image:: ./media/image1.png

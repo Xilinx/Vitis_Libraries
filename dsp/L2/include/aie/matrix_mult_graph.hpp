@@ -56,11 +56,11 @@ using namespace adf;
  * These are the templates to configure the Matrix Multiply graph class.
  * @tparam TT_DATA_A describes the type of individual data samples input of
  *         Matrix A to the gemm function. This is a typename and must be one
- *         of the following:
+ *         of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_DATA_B describes the type of individual data samples input of
  *         Matrix B to the gemm function. This is a typename and must be one
- *         of the following:
+ *         of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  *         The following rules apply:
  *         - must be an integer type if TT_DATA_A is an integer type
@@ -71,19 +71,19 @@ using namespace adf;
  *          along the common dimension of Matrix A (columns) and Matrix B (rows).
  * @tparam TP_DIM_B is an unsigned integer which describes the number of elements
  *          along the unique dimension (columns) of Matrix B.
- * @tparam TP_SHIFT is describes power of 2 shift down applied to the accumulation of
+ * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. TP_RND must be in the range 0 to 7
  *         where
- *         0 = floor (truncate) eg. 3.8 Would become 3.
- *         1 = ceiling e.g. 3.2 would become 4.
- *         2 = round to positive infinity.
- *         3 = round to negative infinity.
- *         4 = round symmetrical to infinity.
- *         5 = round symmetrical to zero.
- *         6 = round convergent to even.
- *         7 = round convergent to odd.
+ *         - 0 = floor (truncate) eg. 3.8 Would become 3.
+ *         - 1 = ceiling e.g. 3.2 would become 4.
+ *         - 2 = round to positive infinity.
+ *         - 3 = round to negative infinity.
+ *         - 4 = round symmetrical to infinity.
+ *         - 5 = round symmetrical to zero.
+ *         - 6 = round convergent to even.
+ *         - 7 = round convergent to odd. \n
  *         Modes 2 to 7 round to the nearest integer. They differ only in how
  *         they round for values of 0.5.
  * @tparam TP_DIM_A_LEADING describes the scheme in which the data should be stored
@@ -94,34 +94,34 @@ using namespace adf;
  * @tparam TP_DIM_OUT_LEADING describes the scheme in which the data should be stored
  *         in memory. ROW_MAJOR = 0, COL_MAJOR = 1.
  * @tparam TP_ADD_TILING_A describes wether or not to add an additional kernel to
- *          rearrange the matrix samples into their required position. Setting this
+ *          rearrange the matrix samples into their required position. \n Setting this
  *          option to 0 indicates that the re-arrangement will be done externally to
  *          the AIE matrix multiply graph.
  * @tparam TP_ADD_TILING_B describes wether or not to add an additional kernel to
- *          rearrange the matrix samples into their required position. Setting this
+ *          rearrange the matrix samples into their required position. \n Setting this
  *          option to 0 indicates that the re-arrangement will be done externally to
  *          the AIE matrix multiply graph.
  * @tparam TP_ADD_DETILING_OUT describes wether or not to add an additional kernel to
- *          rearrange the matrix samples into their required position. Setting this
+ *          rearrange the matrix samples into their required position. \n Setting this
  *          option to 0 indicates that the re-arrangement will be done externally to
  *          the AIE matrix multiply graph.
  * @tparam TP_INPUT_WINDOW_VSIZE_A describes the number of samples in the window API
- *         used for input to Matrix A. It must be of size TP_DIM_A*TP_DIM_AB*N.
+ *         used for input to Matrix A. \n It must be of size TP_DIM_A*TP_DIM_AB*N.
  *         Typical use has N=1, however N>1 can be utilised to minimise overhead of
- *         window API. This parameter is optional and has a default value of
+ *         window API. \n This parameter is optional and has a default value of
  *         TP_DIM_A*TP_DIM_AB (N=1).
  * @tparam TP_INPUT_WINDOW_VSIZE_B describes the number of samples in the window API
- *         used for input to Matrix B. It must be of size TP_DIM_B*TP_DIM_AB*M.
+ *         used for input to Matrix B. \n It must be of size TP_DIM_B*TP_DIM_AB*M.
  *         Typical use has M=1, however M>1 can be utilised to minimise overhead of
- *         window API.  This parameter is optional and has a default value of
- *         TP_DIM_B*TP_DIM_AB (M=1).
+ *         window API. \n This parameter is optional and has a default value of
+ *         TP_DIM_B*TP_DIM_AB (M=1). \n
  *         Note, the output window will be of size:
  *           (TP_INPUT_WINDOW_VSIZE_A/TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B/TP_DIM_AB).
  *          When N and M is 1, output window size will be TP_DIM_A * TP_DIM_B.
- * @tparam TP_CASC_LEN describes the number of AIE Tiles to split the GEMM operation into.
+ * @tparam TP_CASC_LEN describes the number of AIE Tiles to split the GEMM operation into. \n
  *         TP_CASC_LEN splits the operation over TP_DIM_AB, where each kernel
  *         utilises the cascade stream to pass partial accumulation results to
- *         the next kernel. In effect, dot(A,B) + C.
+ *         the next kernel. In effect, dot(A,B) + C. \n
  *         Note, it is also possible to tile the operation over multiple AIE tiles
  *         by instantiating multiple GEMM graphs with smaller dimensions.
  *

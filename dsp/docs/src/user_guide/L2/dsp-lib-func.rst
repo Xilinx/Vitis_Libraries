@@ -20,7 +20,7 @@
 DSP Library Functions
 *********************
 
-The Xilinx |reg| digital signal processing library (DSPLib) is a configurable library of kernels that can be used to develop applications on Versal |trade| ACAP AI Engines. This is an Open Source library for DSP applications. Kernels are coded in C++ and contain special functions called *intrinsics* that give access to AI Engine vector processing capabilities. Kernels can be combined to construct graphs for developing complex designs. An example design is provided with this library for your reference. Each kernel has a corresponding graph. It is highly recommended to use the library element's graph as the entry-point. See the :ref:`3_USING_EXAMPLES`  for more details.
+The Xilinx |reg| digital signal processing library (DSPLib) is a configurable library of elements that can be used to develop applications on Versal |trade| ACAP AI Engines. This is an Open Source library for DSP applications. The functions are captured in C++ as graph containing one or more kernels. An object of this graph class in your code can be used to access the application in question. An example design showing the use of DSP library elements is provided with this library for your reference. Although open source allows use of the kernels which capture the operational code within the library element, the use of the graph class in your graph is highly recommended. See the :ref:`3_USING_EXAMPLES`  for more details.
 
 .. _2_FILTERS:
 
@@ -28,9 +28,9 @@ The Xilinx |reg| digital signal processing library (DSPLib) is a configurable li
 Filters
 =======
 
-The DSPLib contains several variants of Finite Impulse Response (FIR) filters. On the AI Engine processor, data is packetized into windows. In the case of FIRs, each window is extended by a margin so that the state of the filter at the end of the previous window may be restored before new computations begin. Therefore, to maximize performance, the window size should be set to the maximum that the system will allow, though this will lead to a corresponding increase in latency. However, this is a complex decision as multiple factors such as data movement and latency need to be taken into consideration.
+The DSPLib contains several variants of Finite Impulse Response (FIR) filters. On the AI Engine processor, data is packetized into windows. In the case of FIRs, each window is extended by a margin so that the state of the filter at the end of the previous window may be restored before new computations begin. Therefore, to maximize performance, the window size should be set to the maximum that the system will allow, though this will lead to a corresponding increase in latency.
 
-.. note:: With a small window size (for example, 32), you pay a high penalty on the function call overhead. This means that the pre/post amble will be major cycle consumer in your function call.
+.. note:: For example, with a small window, say 32 samples, the overheads of window acquisition and release will be incurred for every 32 samples. Using a larger window will mean that a greater portion of time will be spent in active computation.
 
 FIR filters have been categorized into classes and placed in a distinct namespace scope: xf::dsp::aie::fir, to prevent name collision in the global scope. Namespace aliasing can be utilized to shorten instantiations:
 
@@ -66,7 +66,7 @@ Additionally, each FIR filter has been placed in a unique FIR type namespace. Th
 Conventions for Filters
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-All FIR filters can be configured for various types of data and coefficients. These types can be int16, int32, or float, and also real or complex. However, configurations with real data versus complex coefficients are not supported nor are configurations where the coefficients are int32 and data is int16. Data and coefficients must both be integer types or both be float types, as mixes are not supported.
+All FIR filters can be configured for various types of data and coefficients. These types can be int16, int32, or float, and also real or complex. However, configurations with real data versus complex coefficients are not supported nor are configurations where the coefficents are a higher precision type than the data type. Data and coefficients must both be integer types or both be float types, as mixes are not supported.
 
 The following table lists the supported combinations of data type and coefficient type.
 
@@ -105,7 +105,7 @@ The following table lists parameters supported by all the FIR filters:
 | Parameter Name         |    Type        |  Description   |    Range       |
 +========================+================+================+================+
 |    TP_FIR_LEN          |    unsigned    | The number of  |    4 to 240    |
-|                        |                | taps           |                |
+|                        |    int         | taps           |                |
 +------------------------+----------------+----------------+----------------+
 |    TP_RND              |    unsigned    | Round mode     |    0 =         |
 |                        |    int         |                |    truncate or |
@@ -126,6 +126,7 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                |                |    4 =         |
 |                        |                |                |    symmetrical |
 |                        |                |                |    to infinity |
+|                        |                |                |                |
 |                        |                |                |    5 =         |
 |                        |                |                |    symmetrical |
 |                        |                |                |    to zero     |
@@ -164,7 +165,9 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                | input          |    of lanes    |
 |                        |                | window.        |    used        |
 |                        |                |                |    (typically  |
-|                        |                |                |    4 or 8). No |
+|                        |                |                |    4 or 8).    |
+|                        |                |                |                |
+|                        |                |                |    No          |
 |                        |                |                |    enforced    |
 |                        |                |                |    range, but  |
 |                        |                |                |    large       |
@@ -177,40 +180,41 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                |                |    RAM use.    |
 +------------------------+----------------+----------------+----------------+
 |    TP_CASC_LEN         |    unsigned    | The number     |    1 to 9.     |
-|                        |    int         | of cascaded    |    Defaults to |
-|                        |                | kernels to     |    1 if not    |
-|                        |                | use for        |    set.        |
-|                        |                | this FIR.      |                |
+|                        |    int         | of cascaded    |                |
+|                        |                | kernels to     |    Defaults to |
+|                        |                | use for        |    1 if not    |
+|                        |                | this FIR.      |    set.        |
+|                        |                |                |                |
 +------------------------+----------------+----------------+----------------+
 |    TP_DUAL_IP          |    unsigned    | Use dual       |    Range 0     |
-|                        |    int         | inputs (may    |    (single     |
-|                        |                | increase       |    input), 1   |
-|                        |                | throughput     |    (dual       |
-|                        |                | for symmetrical|    input).     |
-|                        |                | and halfband   |    Defaults to |
-|                        |                | filters by     |    0 if not    |
-|                        |                | avoiding load  |    set.        |
-|                        |                | contention by  |                |
-|                        |                | using a second |                |
-|                        |                | RAM bank for   |                |
-|                        |                | input).        |                |
+|                        |    int         | inputs ports.  |    (single     |
+|                        |                |                |    input), 1   |
+|                        |                |                |    (dual       |
+|                        |                |                |    input).     |
+|                        |                |                |                |
+|                        |                |                |    Defaults to |
+|                        |                |                |    0 if not    |
+|                        |                |                |    set.        |
+|                        |                |                |                |
+|                        |                |                |                |
 +------------------------+----------------+----------------+----------------+
 | TP_USE_COEFF_RELOAD    |    unsigned    | Enable         |    0 (no       |
 |                        |    int         | reloadable     |    reload), 1  |
 |                        |                | coefficient    |    (use        |
-|                        |                | feature. An    |    reloads).   |
-|                        |                | additional     |    Defaults to |
+|                        |                | feature.       |    reloads).   |
+|                        |                |                |                |
+|                        |                | An additional  |    Defaults to |
 |                        |                | 'coeff' RTP    |    0 if not    |
 |                        |                | port will      |    set.        |
 |                        |                | appear on      |                |
 |                        |                | the graph.     |                |
 +------------------------+----------------+----------------+----------------+
 | TP_NUM_OUTPUTS         |    unsigned    | Number of      |                |
-|                        |    int         | fir output     |    >1          |
+|                        |    int         | fir output     |    1 to 2      |
 |                        |                | ports          |                |
 +------------------------+----------------+----------------+----------------+
 
-.. note:: The number of lanes is the number of data elements that is being processed in parallel, e.g., presented at the input window. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
+.. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
 
 .. _2_FFT_IFFT:
 
@@ -274,15 +278,17 @@ Point size may be any power of 2 from 16 to 4096, but this upper limit will be r
 +----------------------+----------------+----------------+----------------------------+
 | TP_WINDOW_VSIZE      |    Unsigned    | The number     |  Must be a multiple of the |
 |                      |    int         | of samples     |  number of lanes used      |
-|                      |                | in the         |  (typically 4 or 8). No    |
-|                      |                | input          |  enforced range, but large |
-|                      |                | window.        |  windows will result in    |
+|                      |                | in the         |  (typically 4 or 8).       |
+|                      |                | input          |                            |
+|                      |                | window.        |  No                        |
+|                      |                |                |  enforced range, but large |
+|                      |                |                |  windows will result in    |
 |                      |                |                |  mapper errors due to      |
 |                      |                |                |  excessive memory usage.   |
 |                      |                |                |                            |
 +----------------------+----------------+----------------+----------------------------+
 
-.. note:: The number of lanes is the number of data elements that is being processed in parallel, e.g., presented at the input window. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
+.. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
 
 This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32. In the final stage, the result is scaled by 17 bits for point size from 16 to 1024, by 18 for 2048, and by 19 for 4096.
 
@@ -310,16 +316,16 @@ An output port connects to a window, where the data for the output matrix will b
 +============================+================+================+================+
 |                TT_DATA_A   |    Typename    |    The input   |    int16,      |
 |                            |                |    data type   |    cint16,     |
-|                            |                |                |    int32       |
-|                            |                |                |    cint32      |
-|                            |                |                |    float       |
+|                            |                |                |    int32,      |
+|                            |                |                |    cint32,     |
+|                            |                |                |    float,      |
 |                            |                |                |    cfloat      |
 +----------------------------+----------------+----------------+----------------+
 |                TT_DATA_B   |    Typename    |    The input   |    int16,      |
 |                            |                |    data type   |    cint16,     |
-|                            |                |                |    int32       |
-|                            |                |                |    cint32      |
-|                            |                |                |    float       |
+|                            |                |                |    int32,      |
+|                            |                |                |    cint32,     |
+|                            |                |                |    float,      |
 |                            |                |                |    cfloat      |
 +----------------------------+----------------+----------------+----------------+
 |                TP_DIM_A    | unsigned int   | The number of  |                |
@@ -372,6 +378,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |    4 =         |
 |                            |                |                |    symmetrical |
 |                            |                |                |    to infinity |
+|                            |                |                |                |
 |                            |                |                |    5 =         |
 |                            |                |                |    symmetrical |
 |                            |                |                |    to zero     |
@@ -385,19 +392,23 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |    to odd      |
 +----------------------------+----------------+----------------+----------------+
 | TP_DIM_A_LEADING           | unsigned int   | The scheme in  | ROW_MAJOR = 0  |
-|                            |                | which the data | COL_MAJOR = 1  |
+|                            |                | which the data |                |
+|                            |                | for matrix A   | COL_MAJOR = 1  |
 |                            |                | should be      |                |
 |                            |                | stored in      |                |
 |                            |                | memory         |                |
 +----------------------------+----------------+----------------+----------------+
 | TP_DIM_B_LEADING           | unsigned int   | The scheme in  | ROW_MAJOR = 0  |
-|                            |                | which the data | COL_MAJOR = 1  |
+|                            |                | which the data |                |
+|                            |                | for matrix B   | COL_MAJOR = 1  |
 |                            |                | should be      |                |
 |                            |                | stored in      |                |
 |                            |                | memory         |                |
 +----------------------------+----------------+----------------+----------------+
 | TP_DIM_OUT_LEADING         | unsigned int   | The scheme in  | ROW_MAJOR = 0  |
-|                            |                | which the data | COL_MAJOR = 1  |
+|                            |                | which the data |                |
+|                            |                | for output     | COL_MAJOR = 1  |
+|                            |                | matrix         |                |
 |                            |                | should be      |                |
 |                            |                | stored in      |                |
 |                            |                | memory         |                |
@@ -406,19 +417,34 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                | an additional  | externally to  |
 |                            |                | kernel to      | the graph      |
 |                            |                | rearrange      |                |
-|                            |                | matrix samples |                |
+|                            |                | matrix samples | 1 = rearrange  |
+|                            |                |                | internally     |
+|                            |                |                | within the     |
+|                            |                |                | graph. Adds a  |
+|                            |                |                | tiling kernel  |
+|                            |                |                | to design.     |
 +----------------------------+----------------+----------------+----------------+
 | TP_ADD_TILING_B            | unsigned int   | Option to add  | 0 = rearrange  |
 |                            |                | an additional  | externally to  |
 |                            |                | kernel to      | the graph      |
 |                            |                | rearrange      |                |
-|                            |                | matrix samples |                |
+|                            |                | matrix samples | 1 = rearrange  |
+|                            |                |                | internally     |
+|                            |                |                | within the     |
+|                            |                |                | graph. Adds a  |
+|                            |                |                | tiling kernel  |
+|                            |                |                | to design.     |
 +----------------------------+----------------+----------------+----------------+
 |                            | unsigned int   | Option to add  | 0 = rearrange  |
 | TP_ADD_DETILING_OUT        |                | an additional  | externally to  |
 |                            |                | kernel to      | the graph      |
 |                            |                | rearrange      |                |
-|                            |                | matrix samples |                |
+|                            |                | matrix samples | 1 = rearrange  |
+|                            |                |                | internally     |
+|                            |                |                | within the     |
+|                            |                |                | graph. Adds a  |
+|                            |                |                | tiling kernel  |
+|                            |                |                | to design.     |
 +----------------------------+----------------+----------------+----------------+
 |                            |    unsigned    | The number     |  Must be of    |
 | TP_WINDOW_VSIZE_A          |    int         | of samples     |  size          |
@@ -452,11 +478,11 @@ An output port connects to a window, where the data for the output matrix will b
 +----------------------------+----------------+----------------+----------------+
 
 
-Input matrices are processed in distinct blocks and matrix elements must be rearranged into a specific pattern.
+Input matrices are processed in distinct blocks. Matrix elements must be rearranged into a specific pattern.
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x4 tiling pattern.
 
-.. note:: Indices are quoted assuming a row major matrix. A column major matrix needs to be transposed.
+.. note:: Indices are quoted assuming a row major matrix. A column major matrix would be the transpose of the table below.
 
 *Table 6*: Matrix Multiply 4x4 tiling pattern
 
@@ -496,7 +522,7 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
 |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
 +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
-This is stored contigulously in memory like:
+This is stored contiguously in memory like:
 
 0, 1, 2, 3, 16, 17, 18, 19, 32, 33, 34, 35, 48, 49, 50, 51, 4, 5, 6, 7, 20, 21, 22, 23, 36, 37, 38, 39, 52, 53, 54, 55, 8, 9, 10, 11, 24, 25, 26, 27, 40, 41, 42, 43, 56, 57, 58, 59, 12, 13, 14, 15, 28, 29, 30, 31, 44, 45, 46, 47, 60, 61, 62, 63, 64, 65, 66, 67, 80, 81, 82, 83, 96, 97, 98, 99, 112, 113, 114, 115, ... , 204, 205, 206, 207, 220, 221, 222, 223, 236, 237, 238, 239, 252, 253, 254, 255
 
@@ -541,7 +567,7 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
 +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
 
-This is stored contigulously in memory like:
+This is stored contiguously in memory like:
 
 0, 1, 16, 17, 32, 33, 48, 49, 2, 3, 18, 19, 34, 35, 50, 51, ..., 206, 207, 222, 223, 238, 239, 254, 255
 
@@ -597,9 +623,9 @@ The following table specifies the tiling scheme used for a given data type combi
 |cfloat   |       cfloat |   4x2  |  2x2  |  cfloat      |
 +---------+--------------+--------+-------+--------------+
 
-The parameters TP_ADD_TILING_A, TP_ADD_TILING_B, and TP_ADD_DETILING_OUT control the inclusion of an additional pre-processing / post-processing kernel to perform the required data shuffling. When used with TP_DIM_A_LEADING, TP_DIM_B_LEADING, or TP_DIM_OUT_LEADING, the matrix is also transposed in the tiling kernel.
+The parameters TP_ADD_TILING_A, TP_ADD_TILING_B, and TP_ADD_DETILING_OUT control the inclusion of an additional pre-processing / post-processing kernel to perform the required data data storage re-ordering. When used with TP_DIM_A_LEADING, TP_DIM_B_LEADING, or TP_DIM_OUT_LEADING, the matrix is also transposed in the tiling kernel.
 
-If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above. When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel is passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph.
+If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above. When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph.
 
 Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B.
 
@@ -691,7 +717,7 @@ The graph entry point is the following:
 
     xf::dsp::aie::blas::matrix_mult::matrix_mult_graph
 
-Find a full list of descriptions and parameters in the :ref:`4_API_REFRENCE`.
+Find a full list of descriptions and parameters in the :ref:`4_API_REFERENCE`.
 
 Connections to the cascade ports can be made as follows:
 
@@ -716,61 +742,72 @@ The DSPLib contains a Widget API Cast solution, which provides flexibilty when c
 
 *Table 11*: Widget API Cast Parameters
 
-+-----------------------+----------------+----------------+----------------+
-|           **Name**    |    **Type**    |   Description  |    **Range**   |
-+=======================+================+================+================+
-|           TT_DATA     |    typename    | Data Type      |    int16,      |
-|                       |                |                |    cint16,     |
-|                       |                |                |    int32,      |
-|                       |                |                |    cint32,     |
-|                       |                |                |    float,      |
-|                       |                |                |    cfloat      |
-+-----------------------+----------------+----------------+----------------+
-|           TP_IN_API   |    Unsigned    | The input      |  0 = window,   |
-|                       |    int         | interface type |  1 = stream    |
-|                       |                |                |                |
-+-----------------------+----------------+----------------+----------------+
-|          TP_OUT_API   |    Typename    | The output     |  0 = window,   |
-|                       |    int         | interface type |  1 = stream    |
-|                       |                |                |                |
-+-----------------------+----------------+----------------+----------------+
-|         TP_NUM_INPUTS |    Unsigned    | The number of  |  1 - 2         |
-|                       |    int         | input stream   |                |
-|                       |                | interfaces     |                |
-|                       |                | to be          |                |
-|                       |                | processed      |                |
-|                       |                |                |                |
-+-----------------------+----------------+----------------+----------------+
-|       TP_WINDOW_VSIZE |    Unsigned    | The number     |  Must be a     |
-|                       |    int         | of samples     |  multiple of   |
-|                       |                | in the input   |  the number    |
-|                       |                | window         |  of lanes      |
-|                       |                |                |  used          |
-|                       |                |                |  (typically    |
-|                       |                |                |  4 or 8). No   |
-|                       |                |                |  enforced      |
-|                       |                |                |  range, but    |
-|                       |                |                |  large         |
-|                       |                |                |  windows       |
-|                       |                |                |  will result   |
-|                       |                |                |  in mapper     |
-|                       |                |                |  errors due    |
-|                       |                |                |  to            |
-|                       |                |                |  excessive     |
-|                       |                |                |  RAM use.      |
-|                       |                |                |                |
-|                       |                |                |                |
-+-----------------------+----------------+----------------+----------------+
-| TP_NUM_OUTPUT_CLONES  |    Unsigned    | The number     |  1 - 4         |
-|                       |    int         | of output      |                |
-|                       |                | window         |                |
-|                       |                | ports to write |                |
-|                       |                | the input data |                |
-|                       |                | to.            |                |
-|                       |                |                |                |
-+-----------------------+----------------+----------------+----------------+
++-----------------------+----------------+--------------------------------+----------------+
+|           **Name**    |    **Type**    |   Description                  |    **Range**   |
++=======================+================+================================+================+
+|           TT_DATA     |    typename    | Data Type                      |    int16,      |
+|                       |                |                                |    cint16,     |
+|                       |                |                                |    int32,      |
+|                       |                |                                |    cint32,     |
+|                       |                |                                |    float,      |
+|                       |                |                                |    cfloat      |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
+|           TP_IN_API   |    Unsigned    | The input                      |  0 = window,   |
+|                       |    int         | interface type                 |                |
+|                       |                |                                |  1 = stream    |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
+|          TP_OUT_API   |    Typename    | The output                     |  0 = window,   |
+|                       |    int         | interface type                 |                |
+|                       |                |                                |  1 = stream    |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
+|         TP_NUM_INPUTS |    Unsigned    | The number of                  |  1 - 2         |
+|                       |    int         | input stream                   |                |
+|                       |                | interfaces                     |                |
+|                       |                | to be                          |                |
+|                       |                | processed                      |                |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
+|       TP_WINDOW_VSIZE |    Unsigned    | The number                     |  Must be a     |
+|                       |    int         | of samples                     |  multiple of   |
+|                       |                | in the input                   |  the number    |
+|                       |                | window                         |  of lanes      |
+|                       |                |                                |  used          |
+|                       |                |                                |  (typically    |
+|                       |                |                                |  4 or 8).      |
+|                       |                |                                |                |
+|                       |                |                                |  No enforced   |
+|                       |                |                                |  range, but    |
+|                       |                |                                |  large         |
+|                       |                |                                |  windows       |
+|                       |                |                                |  will result   |
+|                       |                |                                |  in mapper     |
+|                       |                |                                |  errors due    |
+|                       |                |                                |  to            |
+|                       |                |                                |  excessive     |
+|                       |                |                                |  RAM use.      |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
+| TP_NUM_OUTPUT_CLONES  |    Unsigned    | The number                     |  1 - 4         |
+|                       |    int         | of output                      |                |
+|                       |                | window                         |                |
+|                       |                | ports to write                 |                |
+|                       |                | the input data                 |                |
+|                       |                | to.                            |                |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
+| TP_PATTERN            |    Unsigned    | The pattern of interleave      | 0 - 2          |
+|                       |    int         | by which samples from each     |                |
+|                       |                | of 2 streams are arranged      |                |
+|                       |                | into the destination window,   |                |
+|                       |                | or from the input window       |                |
+|                       |                | to dual output streams.        |                |
+|                       |                |                                |                |
++-----------------------+----------------+--------------------------------+----------------+
 
-.. note:: The number of lanes is the number of data elements that is being processed in parallel, e.g., presented at the input window. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
+.. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
 
 The graph entry point is the following:
 
@@ -809,8 +846,9 @@ The DSPLib contains a Widget Real to Complex solution, which provides a utility 
 |                 |                | window         |  of lanes      |
 |                 |                |                |  used          |
 |                 |                |                |  (typically    |
-|                 |                |                |  4 or 8). No   |
-|                 |                |                |  enforced      |
+|                 |                |                |  4 or 8).      |
+|                 |                |                |                |
+|                 |                |                |  No enforced   |
 |                 |                |                |  range, but    |
 |                 |                |                |  large         |
 |                 |                |                |  windows       |
@@ -821,10 +859,9 @@ The DSPLib contains a Widget Real to Complex solution, which provides a utility 
 |                 |                |                |  excessive     |
 |                 |                |                |  RAM use.      |
 |                 |                |                |                |
-|                 |                |                |                |
 +-----------------+----------------+----------------+----------------+
 
-.. note:: The number of lanes is the number of data elements that is being processed in parallel, e.g., presented at the input window. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
+.. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
 
 The graph entry point is the following:
 
@@ -832,381 +869,47 @@ The graph entry point is the following:
 
     xf::dsp::aie::widget::api_cast::widget_api_cast_graph
 
-.. _2_COMPILING_AND_SIMULATING:
-
-===========================================
-Compiling and Simulating Using the Makefile
-===========================================
-
-A Makefile is included with each library element. It is located in the `L2/tests/aie/<library_element>` directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs.
-
-Prerequisites:
-
-.. code-block::
-
-        source <your-Vitis-install-path>/lin64/Vitis/HEAD/settings64.csh
-        setenv PLATFORM_REPO_PATHS <your-platform-repo-install-path>
-        source <your-XRT-install-path>/xbb/xrt/packages/xrt-2.1.0-centos/opt/xilinx/xrt/setup.csh
-        setenv DSPLIB_ROOT <your-Vitis-libraries-install-path/dsp>
-
-
-Use the following steps to compile, simulate the reference model with the x86sim target and the AIE graphs using AIE emulation plaftorm. The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs ( `logs/uut_output.txt` ).
-
-.. code-block::
-
-        make run
-
-To overwrite the default parameters, add desired parameters as arguments to the make command, for example:
-
-.. code-block::
-
-        make run DATA_TYPE=cint16 SHIFT=16
-
-For list of all the configurable parameters, see the :ref:`2_CONFIGURATION_PARAMETERS`.
-
-List of all Makefile targets:
-
-.. code-block::
-
-        make all TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to generate the design for specified Target and Shell.
-
-        make clean
-            Command to remove the generated non-hardware files.
-
-        make cleanall
-            Command to remove all the generated files.
-
-        make sd_card TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to prepare sd_card files.
-            This target is only used in embedded device.
-
-        make run TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to run application in emulation or on board.
-
-        make build TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to build xclbin application.
-
-        make host HOST_ARCH=<aarch64>
-            Command to build host application.
-
-.. note:: For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,
-
-            .. code-block::
-
-                export SYSROOT=< path-to-platform-sysroot >
-                export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-                export PERL=<path-to-perl-installation-location >
-
-Simulation results and diff results are located in the in `L2/tests/aie/<library_element>/logs/status.txt` file. To perform a x86 compilation/simulation, run
-
-.. code-block::
-
-    make run TARGET=x86sim.
-
-It is also possible to randomly generate coefficient and input data, or to generate specific stimulus patterns like ALL_ONES, IMPULSE, etc. by running
-
-.. code-block::
-
-      make run STIM_TYPE=4.
-
-L2 Library Element Unit Test
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Each library element category comes supplied with a test harness which is an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
-
-Each library element filter category also has a reference model which is used by the test harness. The reference models graphs are to be found in the `L2/tests/aie/inc/<library_element>_ref_graph.hpp` file.
-
-Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
-
-An example of how a library element may be configured by a parent graph is provided in the `L2/examples/fir_129t_sym` folder. The example graph, test.h, in the `L2/examples/fir_129t_sym` folder instantiates the fir_sr_sym graph configured to be a 129-tap filter. This example exposes the ports such that the parent graph can be used to replace an existing 129-tap symmetric filter point solution design.
-
-.. _2_CONFIGURATION_PARAMETERS:
-
-L2 Library Element Configuration Parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. _2_CONFIGURATION_PARAMETERS_FILTERS:
-
-L2 FIR configuration parameters
--------------------------------
-
-The list below consists of configurable parameters for FIR library elements with their default values.
-
-*Table 13*: L2 FIR configuration parameters
-
-+------------------------+----------------+----------------+--------------------------------------+
-|     **Name**           |    **Type**    |  **Default**   |   Description                        |
-+========================+================+================+======================================+
-| DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| COEFF_TYPE             |    typename    |    int16       | Coefficient Type.                    |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| FIR_LEN                |    unsigned    |    81          | FIR length.                          |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| SHIFT                  |    unsigned    |    16          | Acc results shift down value.        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| INPUT_WINDOW_VSIZE     |    unsigned    |    512         | Input window size.                   |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| INTERPOLATE_FACTOR     |    unsigned    |    1           | Interpolation factor,                |
-|                        |                |                | see note below                       |
-+------------------------+----------------+----------------+--------------------------------------+
-| DECIMATE_FACTOR        |    unsigned    |    1           | Decimation factor,                   |
-|                        |                |                | see note below                       |
-+------------------------+----------------+----------------+--------------------------------------+
-| DUAL_IP                |    unsigned    |    0           | Dual inputs used in symmetric FIRs,  |
-|                        |                |                | see note below                       |
-+------------------------+----------------+----------------+--------------------------------------+
-| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| GEN_INPUT_DATA         |    bool        |    true        | Generate input data samples.         |
-|                        |                |                | When true, generate stimulus data    |
-|                        |                |                | as defined in: DATA_STIM_TYPE.       |
-|                        |                |                | When false, use the input file       |
-|                        |                |                | defined in: INPUT_FILE               |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| GEN_COEFF_DATA         |    bool        |    true        | Generate random coefficients.        |
-|                        |                |                | When true, generate stimulus data    |
-|                        |                |                | as defined in: COEFF_STIM_TYPE.      |
-|                        |                |                | When false, use the coefficient file |
-|                        |                |                | defined in: COEFF_FILE               |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-|                        |                |                | 0 - random                           |
-|                        |                |                | 3 - impulse                          |
-|                        |                |                | 4 - all ones                         |
-|                        |                |                | 5 - incrementing pattern             |
-|                        |                |                | 6 - sym incrementing pattern         |
-|                        |                |                | 8 - sine wave                        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| COEFF_STIM_TYPE        |    unsigned    |    0           | Supported types:                     |
-|                        |                |                | 0 - random                           |
-|                        |                |                | 3 - impulse                          |
-|                        |                |                | 4 - all ones                         |
-|                        |                |                | 5 - incrementing pattern             |
-|                        |                |                | 6 - sym incrementing pattern         |
-|                        |                |                | 8 - sine wave                        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| INPUT_FILE             |    string      | data/input.txt | Input data samples file.             |
-|                        |                |                | Only used when GEN_INPUT_DATA=false. |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| COEFF_FILE             |    string      | data/coeff.txt | Coefficient data file.               |
-|                        |                |                | Only used when GEN_COEFF_DATA=false. |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-.. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., parameter `INTERPOLATE_FACTOR` is only supported by interpolation filters and will be ignored by other library elements.
-
-
-.. _2_CONFIGURATION_PARAMETERS_FFT:
-
-L2 FFT configuration parameters
--------------------------------
-
-For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
-
-*Table 14*: L2 FFT configuration parameters
-
-+------------------------+----------------+----------------+--------------------------------------+
-|     **Name**           |    **Type**    |  **Default**   |   Description                        |
-+========================+================+================+======================================+
-| DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
-|                        |                |                | By default, set to: $(POINT_SIZE).   |
-+------------------------+----------------+----------------+--------------------------------------+
-| CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
-|                        |                |                | feature.                             |
-+------------------------+----------------+----------------+--------------------------------------+
-| NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| GEN_INPUT_DATA         |    bool        |    true        | Generate random input data samples.  |
-|                        |                |                | When false, use the input file       |
-|                        |                |                | defined in: INPUT_FILE               |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
-|                        |                |                | 0 - random                           |
-|                        |                |                | 3 - impulse                          |
-|                        |                |                | 4 - all ones                         |
-|                        |                |                | 5 - incrementing pattern             |
-|                        |                |                | 6 - sym incrementing pattern         |
-|                        |                |                | 8 - sine wave                        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| INPUT_FILE             |    string      | data/input.txt | Input data samples file.             |
-|                        |                |                | Only used when GEN_INPUT_DATA=false. |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-
-.. _2_CONFIGURATION_PARAMETERS_GEMM:
-
-L2 Matrix Multiply Configuration Parameters
--------------------------------------------
-
-For the Matrix Multiply (GeMM) library element the list of configurable parameters and default values is presented below.
-
-*Table 15*: L2 Matrix Multiply configuration parameters
-
-+------------------------+----------------+----------------+--------------------------------------+
-|     **Name**           |    **Type**    |  **Default**   |   Description                        |
-+========================+================+================+======================================+
-| T_DATA_A               |    typename    |    cint16      | Input A Data Type.                   |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| T_DATA_B               |    typename    |    cint16      | Input B Data Type.                   |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_DIM_A                |    unsigned    |    16          | Input A Dimension                    |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_DIM_AB               |    unsigned    |    16          | Input AB Common Dimension.           |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_DIM_B                |    unsigned    |    16          | Input B Dimension.                   |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| SHIFT                  |    unsigned    |    20          | Acc results shift down value.        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_CASC_LEN             |    unsigned    |    1           | Cascade length.                      |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_DIM_A_LEADING        |    unsigned    |    0           | ROW_MAJOR = 0                        |
-|                        |                |                | COL_MAJOR = 1                        |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_DIM_B_LEADING        |    unsigned    |    1           | ROW_MAJOR = 0                        |
-|                        |                |                | COL_MAJOR = 1                        |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_DIM_OUT_LEADING      |    unsigned    |    0           | ROW_MAJOR = 0                        |
-|                        |                |                | COL_MAJOR = 1                        |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_ADD_TILING_A         |    unsigned    |    1           | no additional tiling kernel = 0      |
-|                        |                |                | add additional tiling kernel = 1     |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_ADD_TILING_B         |    unsigned    |    1           | no additional tiling kernel = 0      |
-|                        |                |                | add additional tiling kernel = 1     |
-+------------------------+----------------+----------------+--------------------------------------+
-| P_ADD_DETILING_OUT     |    unsigned    |    1           | no additional detiling kernel = 0    |
-|                        |                |                | add additional detiling kernel = 1   |
-+------------------------+----------------+----------------+--------------------------------------+
-| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| STIM_TYPE_A            |    unsigned    |    0           | Supported types:                     |
-|                        |                |                | 0 - random                           |
-|                        |                |                | 3 - impulse                          |
-|                        |                |                | 4 - all ones                         |
-|                        |                |                | 5 - incrementing pattern             |
-|                        |                |                | 6 - sym incrementing pattern         |
-|                        |                |                | 8 - sine wave                        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| STIM_TYPE_B            |    unsigned    |    0           | Supported types:                     |
-|                        |                |                | 0 - random                           |
-|                        |                |                | 3 - impulse                          |
-|                        |                |                | 4 - all ones                         |
-|                        |                |                | 5 - incrementing pattern             |
-|                        |                |                | 6 - sym incrementing pattern         |
-|                        |                |                | 8 - sine wave                        |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-
-.. _2_CONFIGURATION_PARAMETERS_WIDGETS:
-
-L2 Widgets Configuration Parameters
------------------------------------
-
-For the Widgets library elements the list of configurable parameters and default values is presented below.
-
-*Table 16*: L2 Widget API Casts Configuration Parameters
-
-+------------------------+----------------+----------------+--------------------------------------+
-|     **Name**           |    **Type**    |  **Default**   |   Description                        |
-+========================+================+================+======================================+
-| DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| IN_API                 |    unsigned    |    0           | 0 = window,                          |
-|                        |                |                | 1 = stream                           |
-+------------------------+----------------+----------------+--------------------------------------+
-| OUT_API                |    unsigned    |    0           | 0 = window,                          |
-|                        |                |                | 1 = stream                           |
-+------------------------+----------------+----------------+--------------------------------------+
-| NUM_INPUTS             |    unsigned    |    1           | The number of input stream           |
-|                        |                |                | interfaces                           |
-+------------------------+----------------+----------------+--------------------------------------+
-| WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| NUM_OUTPUT_CLONES      |    unsigned    |    1           | The number of output window          |
-|                        |                |                | port copies                          |
-+------------------------+----------------+----------------+--------------------------------------+
-
-
-*Table 17*: L2 Widget Real to Complex Configuration Parameters
-
-+------------------------+----------------+----------------+--------------------------------------+
-|     **Name**           |    **Type**    |  **Default**   |   Description                        |
-+========================+================+================+======================================+
-| DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| DATA_OUT_TYPE          |    typename    |    cint16      | Data Type.                           |
-|                        |                |                |                                      |
-+------------------------+----------------+----------------+--------------------------------------+
-| WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-+------------------------+----------------+----------------+--------------------------------------+
-
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-
+.. _2_DDS_MIXER:
+
+===========
+DDS / Mixer
+===========
+
+The DSPLib contains a DDS and Mixer solution.
+
+In DDS Only mode, there is a single output port that contains the sin/cosine components corresponding to the programmed phase increment. The phase increment is a fixed uint32 value provided as a constructor argument, where 2^31 corresponds to Pi (180 degrees phase increment). The number of samples sent through the output port is determined by the TP_INPUT_WINDOW_SIZE parameter. The output port can be a window interface or a stream interface depending on the use of TP_API.
+
+Mixer inputs are enabled with the TP_MIXER_MODE template parameter. There are two modes that have the mixer functionality enabled. In MIXER_MODE_1, a single input port is exposed and the input samples are complex multiplied by the DDS output for the given phase increment. In MIXER_MODE_2, two input ports are exposed for multi-carrier operation, with the first behaving as in MIXER_MODE_1, and the second input port getting complex multiplied with the complex conjugate of the DDS signal then accumulated to the result of the first complex multiply operation.
+
+
+*Table 13*: DDS / Mixer Parameters
+
++-----------------------+----------------+----------------+--------------------------+
+|     **Name**          |    **Type**    |   Description  |    **Range**             |
++=======================+================+================+==========================+
+|     TT_DATA           |    typename    | Data Type      |    cint16                |
++-----------------------+----------------+----------------+--------------------------+
+| TP_INPUT_WINDOW_VSIZE |    Unsigned    | The number     |  Must be a multiple of   |
+|                       |    int         | of samples     |  the number of lanes     |
+|                       |                | to process     |  used (typically 4       |
+|                       |                | each iteration |  or 8).                  |
+|                       |                |                |                          |
+|                       |                |                |  No enforced             |
+|                       |                |                |  range, but large        |
+|                       |                |                |  windows will result in  |
+|                       |                |                |  mapper errors due to    |
+|                       |                |                |  excessive RAM use.      |
++-----------------------+----------------+----------------+--------------------------+
+|  TP_MIXER_MODE        |    Unsigned    | Mode of        |  0 = DDS Only            |
+|                       |    int         | operation      |                          |
+|                       |                |                |  1 = Single input mixer  |
+|                       |                |                |                          |
+|                       |                |                |  2 = Two input mixer     |
++-----------------------+----------------+----------------+--------------------------+
+|  TP_API               |    Unsigned    | I/O interface  |  0 = Window              |
+|                       |    int         | port type      |                          |
+|                       |                |                |  1 = Stream              |
++-----------------------+----------------+----------------+--------------------------+
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png
