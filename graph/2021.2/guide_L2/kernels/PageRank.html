@@ -376,6 +376,8 @@
 <li class="toctree-l2"><a class="reference internal" href="LouvainFast.html">Internal Design of Louvain Modularity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="denseSimilarityCoeffs.html">Internal Design of Dense Similarity with Coefficient</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Renumbering.html">Internal Design of Renumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MST.html">Internal Design of Minimum Spanning Tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimated_diameter.html">Internal Design of Estimated Diameter</a></li>
 </ul>
 </li>
 </ul>
@@ -556,18 +558,18 @@ Different tool versions may result slightly different resource.</p>
 <td>Frequency(MHz)</td>
 </tr>
 <tr class="row-even"><td>kernel_pagerank_0</td>
-<td>546</td>
+<td>216</td>
 <td>0</td>
-<td>52</td>
-<td>401749</td>
-<td>258942</td>
+<td>42</td>
+<td>123998</td>
+<td>88372</td>
 <td>300</td>
 </tr>
 </tbody>
 </table>
 <p>Table 2 : Hardware resources for PageRank with cache</p>
 <table border="1" class="docutils align-center" id="id2">
-<caption><span class="caption-text">Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U250)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-text">Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U50)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="22%" />
 <col width="12%" />
@@ -587,16 +589,16 @@ Different tool versions may result slightly different resource.</p>
 <td>Frequency(MHz)</td>
 </tr>
 <tr class="row-even"><td>kernel_pagerank_0</td>
-<td>546</td>
+<td>216</td>
 <td>224</td>
-<td>52</td>
-<td>391591</td>
-<td>262918</td>
+<td>42</td>
+<td>124054</td>
+<td>95950</td>
 <td>225</td>
 </tr>
 </tbody>
 </table>
-<p>With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U250.</p>
+<p>With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U50.</p>
 <p>Table 3 : Comparison between CPU SPARK and FPGA VITIS_GRAPH</p>
 <table border="1" class="docutils" id="id3">
 <caption><span class="caption-text">Table 3 Comparison between CPU SPARK and FPGA VITIS_GRAPH</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>

@@ -57,8 +57,8 @@
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="namespace graph" href="../rst_L2/namespace_xf_graph.html" />
-    <link rel="prev" title="Top K Sort" href="../guide_L1/primitives/sortTopK.html" /> 
+    <link rel="next" title="struct xf::graph::internal::diameter::IdWeight" href="struct_xf_graph_internal_diameter_IdWeight.html" />
+    <link rel="prev" title="namespace convert_csr_csc" href="namespace_xf_graph_internal_convert_csr_csc.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -346,14 +346,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../guide_L1/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L2 User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Document</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html">namespace graph</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/api.html">API Document</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="internals.html">Design Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L3 User Guide</span></p>
 <ul>
@@ -416,7 +413,13 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>API Document</li>
+          <li><a href="../guide_L2/api.html">API Document</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_graph.html">namespace graph</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_graph_internal.html">namespace internal</a> &raquo;</li>
+        
+      <li>namespace diameter</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -433,31 +436,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-document">
-<h1>API Document<a class="headerlink" href="#api-document" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="namespace-diameter">
+<span id="cid-xf-graph-internal-diameter"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter"></span><span id="index-0"></span><h1>namespace diameter<a class="headerlink" href="#namespace-diameter" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html">namespace graph</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#bfs">bfs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#calcudegree">calcuDegree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#calcuweighteddegree">calcuWeightedDegree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#connectedcomponents">connectedComponents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#convertcsrcsc">convertCsrCsc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#densesimilaritycoeffs">denseSimilarityCoeffs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#estimated-diameter">estimated_diameter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#labelpropagation">labelPropagation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#kernellouvaintop">kernelLouvainTop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#mst">mst</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#pageranktop">pageRankTop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#renumbercore">renumberCore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#singlesourceshortestpath">singleSourceShortestPath</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#stronglyconnectedcomponents">stronglyConnectedComponents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#trianglecount">triangleCount</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#twohop">twoHop</a></li>
-</ul>
-</li>
-</ul>
 </div>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-graph-internal-diameter-diameter">
+<span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter-1aa4103de55fa8f8222db42c4c5ccd0be9"></span><span id="cid-xf-graph-internal-diameter-my-sssp"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter-1a97e608e2d2b76cae6f8e1e9d01a9bd58"></span><span id="cid-xf-graph-internal-diameter-random-offset"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter-1a4129424b16c78f516e18f5ae1018f570"></span><span id="cid-xf-graph-internal-diameter-loop-num"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter-1a46ca9a0ea45526ccec0455d8d16e17a9"></span><span id="cid-xf-graph-internal-diameter-para-num"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter-1a416bd123a2cb691157b27390db3c8d85"></span><span id="cid-xf-graph-internal-diameter-fadd-ltncy"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1diameter-1abedfe2d3c1fd06bc1c13c9451011b66c"></span><span></span><span class="c1">// structs</span>
+
+<span class="k">struct</span> <a class="reference internal" href="struct_xf_graph_internal_diameter_IdWeight.html#doxid-structxf-1-1graph-1-1internal-1-1diameter-1-1-id-weight"><span class="std std-ref">IdWeight</span></a><span></span>
+
+<span class="c1">// unions</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">MType</span><span class="o">&gt;</span>
+<span class="k">union</span> <a class="reference internal" href="union_xf_graph_internal_diameter_f_cast.html#doxid-unionxf-1-1graph-1-1internal-1-1diameter-1-1f-cast"><span class="std std-ref">f_cast</span></a><span></span>
+
+<span class="k">template</span> <span class="o">&lt;&gt;</span>
+<span class="k">union</span> <a class="reference internal" href="union_xf_graph_internal_diameter_f_cast-2.html#doxid-unionxf-1-1graph-1-1internal-1-1diameter-1-1f-cast-3-01float-01-4"><span class="std std-ref">f_cast &lt;float&gt;</span></a><span></span>
+
+<span class="c1">// global variables</span>
+
+<span class="k">const</span> <span class="kt">int</span> <span class="n">FADD_LTNCY</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">PARA_NUM</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">LOOP_NUM</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">RANDOM_OFFSET</span>
+</pre>
 </div>
 
 
@@ -476,10 +478,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../rst_L2/namespace_xf_graph.html" class="btn btn-neutral float-right" title="namespace graph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="struct_xf_graph_internal_diameter_IdWeight.html" class="btn btn-neutral float-right" title="struct xf::graph::internal::diameter::IdWeight" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../guide_L1/primitives/sortTopK.html" class="btn btn-neutral float-left" title="Top K Sort" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="namespace_xf_graph_internal_convert_csr_csc.html" class="btn btn-neutral float-left" title="namespace convert_csr_csc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

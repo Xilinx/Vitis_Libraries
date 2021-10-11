@@ -470,14 +470,14 @@
 </ul>
 <p>Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.</p>
 <pre class="highlight literal-block">
-<span></span>make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u250_xdma_201830_2
+<span></span>make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u50_gen3x16_xdma_201920_3
 </pre>
 <ul class="simple">
 <li><strong>Run kernel(Step 3)</strong></li>
 </ul>
 <p>To get the benchmark results, please run the following command.</p>
 <pre class="highlight literal-block">
-<span></span>./build_dir.hw.xilinx_u250_xdma_201830_2/host.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/kernel_pagerank_0.xclbin -dataSetDir data/ -refDir data/
+<span></span>./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/host.exe -xclbin build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_pagerank_0.xclbin -dataSetDir data/ -refDir data/
 </pre>
 <p>Pagerank Input Arguments:</p>
 <pre class="highlight literal-block">
@@ -493,9 +493,9 @@
 <pre class="highlight literal-block">
 <span></span>Found Platform
 Platform Name: Xilinx
-INFO: Found <span class="nv">Device</span><span class="o">=</span>xilinx_u250_xdma_201830_2
-INFO: Importing build_dir.hw.xilinx_u250_xdma_201830_2/kernel_pagerank_0.xclbin
-Loading: <span class="s1">&#39;build_dir.hw.xilinx_u250_xdma_201830_2/kernel_pagerank_0.xclbin&#39;</span>
+INFO: Found <span class="nv">Device</span><span class="o">=</span>xilinx_u50_gen3x16_xdma_201920_3
+INFO: Importing build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_pagerank_0.xclbin
+Loading: <span class="s1">&#39;build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_pagerank_0.xclbin&#39;</span>
 INFO: Kernel has been created
 INFO: Finish kernel setup
 ...
@@ -540,17 +540,17 @@ Different tool versions may result slightly different resource.</p>
 <td>Frequency(MHz)</td>
 </tr>
 <tr class="row-even"><td>kernel_pagerank_0</td>
-<td>546</td>
+<td>216</td>
 <td>0</td>
-<td>52</td>
-<td>401749</td>
-<td>258942</td>
+<td>42</td>
+<td>123998</td>
+<td>88372</td>
 <td>300</td>
 </tr>
 </tbody>
 </table>
 <table border="1" class="docutils align-center" id="id2">
-<caption><span class="caption-text">Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U250)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-text">Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U50)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="22%" />
 <col width="12%" />
@@ -570,16 +570,16 @@ Different tool versions may result slightly different resource.</p>
 <td>Frequency(MHz)</td>
 </tr>
 <tr class="row-even"><td>kernel_pagerank_0</td>
-<td>189</td>
+<td>216</td>
 <td>224</td>
-<td>52</td>
-<td>391591</td>
-<td>102782</td>
+<td>42</td>
+<td>124054</td>
+<td>95950</td>
 <td>225</td>
 </tr>
 </tbody>
 </table>
-<p>With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U250.</p>
+<p>With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U50.</p>
 <table border="1" class="docutils" id="id3">
 <caption><span class="caption-text">Table 3 Comparison between CPU SPARK and FPGA VITIS_GRAPH</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>

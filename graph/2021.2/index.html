@@ -437,7 +437,7 @@
 <div><ul class="simple">
 <li>Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the ‘weight’ feature is supported for Cosin Similarity.</li>
 <li>Centrality analysis: PageRank.</li>
-<li>Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).</li>
+<li>Pathfinding: Minimum Spanning Tree (MST, 2021.2), Estimated Diameter (2021.2), Single Source Shortest Path (SSSP) and Multi-Sources Shortest Path (MSSP).</li>
 <li>Connectivity analysis: Weekly Connected Components and Strongly Connected Components.</li>
 <li>Community Detection: Louvain Modularity, Label Propagation and Triangle Count.</li>
 <li>Search: Breadth First Search, 2-Hop Search</li>
@@ -499,8 +499,11 @@ Otherwise, full path to .xpfm file needs to be provided via <code class="docutil
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#calcuweighteddegree">calcuWeightedDegree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#connectedcomponents">connectedComponents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#convertcsrcsc">convertCsrCsc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#densesimilaritycoeffs">denseSimilarityCoeffs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#estimated-diameter">estimated_diameter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#labelpropagation">labelPropagation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#kernellouvaintop">kernelLouvainTop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#mst">mst</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#pageranktop">pageRankTop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#renumbercore">renumberCore</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rst_L2/namespace_xf_graph.html#singlesourceshortestpath">singleSourceShortestPath</a></li>
@@ -533,6 +536,8 @@ Otherwise, full path to .xpfm file needs to be provided via <code class="docutil
 <li class="toctree-l2"><a class="reference internal" href="guide_L2/kernels/LouvainFast.html">Internal Design of Louvain Modularity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide_L2/kernels/denseSimilarityCoeffs.html">Internal Design of Dense Similarity with Coefficient</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide_L2/kernels/Renumbering.html">Internal Design of Renumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide_L2/kernels/MST.html">Internal Design of Minimum Spanning Tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide_L2/kernels/estimated_diameter.html">Internal Design of Estimated Diameter</a></li>
 </ul>
 </li>
 </ul>

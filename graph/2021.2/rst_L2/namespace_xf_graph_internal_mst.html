@@ -57,8 +57,8 @@
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="namespace graph" href="../rst_L2/namespace_xf_graph.html" />
-    <link rel="prev" title="Top K Sort" href="../guide_L1/primitives/sortTopK.html" /> 
+    <link rel="next" title="namespace pagerank" href="namespace_xf_graph_internal_pagerank.html" />
+    <link rel="prev" title="namespace mssp" href="namespace_xf_graph_internal_mssp.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -346,14 +346,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../guide_L1/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L2 User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Document</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html">namespace graph</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/api.html">API Document</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="internals.html">Design Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L3 User Guide</span></p>
 <ul>
@@ -416,7 +413,13 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>API Document</li>
+          <li><a href="../guide_L2/api.html">API Document</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_graph.html">namespace graph</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_graph_internal.html">namespace internal</a> &raquo;</li>
+        
+      <li>namespace mst</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -433,31 +436,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-document">
-<h1>API Document<a class="headerlink" href="#api-document" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="namespace-mst">
+<span id="cid-xf-graph-internal-mst"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst"></span><span id="index-0"></span><h1>namespace mst<a class="headerlink" href="#namespace-mst" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html">namespace graph</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#bfs">bfs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#calcudegree">calcuDegree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#calcuweighteddegree">calcuWeightedDegree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#connectedcomponents">connectedComponents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#convertcsrcsc">convertCsrCsc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#densesimilaritycoeffs">denseSimilarityCoeffs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#estimated-diameter">estimated_diameter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#labelpropagation">labelPropagation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#kernellouvaintop">kernelLouvainTop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#mst">mst</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#pageranktop">pageRankTop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#renumbercore">renumberCore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#singlesourceshortestpath">singleSourceShortestPath</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#stronglyconnectedcomponents">stronglyConnectedComponents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#trianglecount">triangleCount</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L2/namespace_xf_graph.html#twohop">twoHop</a></li>
-</ul>
-</li>
-</ul>
 </div>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-graph-internal-mst-prim">
+<span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1affc31e6e97774f8881ed2ee66d95b29d"></span><span id="cid-xf-graph-internal-mst-decrease-key"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1aa31a35a99e51fe1f1ef9ae1df531f375"></span><span id="cid-xf-graph-internal-mst-push"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1aa3b76529067e3636892c9d9683c249b1"></span><span id="cid-xf-graph-internal-mst-pop"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a91fbaa6d9575818b7eea978efa0596d1"></span><span id="cid-xf-graph-internal-mst-heapify"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a1e5210119b3e062c7435e358334c0ae2"></span><span id="cid-xf-graph-internal-mst-getrightweight"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a2fd8c88ecc798469c604410e6bcdd779"></span><span id="cid-xf-graph-internal-mst-getleftweight"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a4d2deff6a5a5ea5d6f350cbae0ece65c"></span><span id="cid-xf-graph-internal-mst-empty"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a7c2c364ee22e68d91758fba0165f4bb6"></span><span id="cid-xf-graph-internal-mst-exchange-idx"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a8353ee0be8773a5fafd30d9a22266565"></span><span id="cid-xf-graph-internal-mst-exchange"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1ad9e94629c0cc55d47c2e187c8fce2eb5"></span><span id="cid-xf-graph-internal-mst-right"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a80f226857b29002f7457da8b5fe25d53"></span><span id="cid-xf-graph-internal-mst-left"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1af770816f88a1e2596ae8a1dccfbc926f"></span><span id="cid-xf-graph-internal-mst-parent"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a3a937f444c318503b1d325357d783196"></span><span id="cid-xf-graph-internal-mst-e-key"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1ac904847fc8276f27b3e1db7ce772fa9a"></span><span id="cid-xf-graph-internal-mst-keys"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1afeb1b8c5df514b7505dcfc9dbca2948e"></span><span id="cid-xf-graph-internal-mst-idxs"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a0597f6df116625319d1814611a907dc3"></span><span id="cid-xf-graph-internal-mst-elems"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a8d6ef7c56f1a67c9e93cb4d2cb1451c1"></span><span id="cid-xf-graph-internal-mst-heap-size"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a4dac100bce79c28f91ede323b50b11ca"></span><span id="cid-xf-graph-internal-mst-mstvert"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1a501d61480f6b35fee6be32b97b00fc24"></span><span id="cid-xf-graph-internal-mst-interface-memsize"></span><span id="doxid-namespacexf-1-1graph-1-1internal-1-1mst-1ae3d0584a8ac3e14a9a757bb174f5cd0f"></span><span></span><span class="c1">// global variables</span>
+
+<span class="k">constexpr</span> <span class="kt">long</span> <span class="n">INTERFACE_MEMSIZE</span>
+<span class="k">static</span> <span class="kt">bool</span> <span class="n">mstVert</span><span class="p">[</span><span class="n">INTERFACE_MEMSIZE</span><span class="p">]</span>
+<span class="k">static</span> <span class="kt">unsigned</span> <span class="n">heap_size_</span>
+<span class="k">static</span> <span class="kt">unsigned</span> <span class="n">elems_</span><span class="p">[</span><span class="n">INTERFACE_MEMSIZE</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">static</span> <span class="kt">unsigned</span> <span class="n">idxs_</span><span class="p">[</span><span class="n">INTERFACE_MEMSIZE</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">static</span> <span class="kt">float</span> <span class="n">keys</span><span class="p">[</span><span class="n">INTERFACE_MEMSIZE</span><span class="p">]</span>
+</pre>
 </div>
 
 
@@ -476,10 +468,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../rst_L2/namespace_xf_graph.html" class="btn btn-neutral float-right" title="namespace graph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="namespace_xf_graph_internal_pagerank.html" class="btn btn-neutral float-right" title="namespace pagerank" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../guide_L1/primitives/sortTopK.html" class="btn btn-neutral float-left" title="Top K Sort" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="namespace_xf_graph_internal_mssp.html" class="btn btn-neutral float-left" title="namespace mssp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
