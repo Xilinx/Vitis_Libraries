@@ -38,3 +38,5 @@ Design Internals
    kernels/LouvainFast.rst
    kernels/denseSimilarityCoeffs.rst
    kernels/Renumbering.rst
+   kernels/MST.rst
+   kernels/estimated_diameter.rst

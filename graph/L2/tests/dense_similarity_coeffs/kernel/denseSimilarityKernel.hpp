@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 #ifndef _XF_GRAPH_DENSE_SIMILARITY_KERNEL_HPP_
 #define _XF_GRAPH_DENSE_SIMILARITY_KERNEL_HPP_
 
-#include "similarity/dense_similarity_int.hpp"
-#include "similarity/sort_top_k.hpp"
-#include "similarity/enums.hpp"
+#include "dense_similarity_coeffs.hpp"
 
 #include <ap_int.h>
 #include <hls_math.h>

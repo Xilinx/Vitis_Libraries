@@ -126,22 +126,22 @@ Table 1 : Hardware resources for PageRank with small cache
     +-------------------+----------+----------+----------+----------+---------+-----------------+
     |    Kernel         |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
-    | kernel_pagerank_0 |   546    |     0    |    52    |  401749  |  258942 |       300       |
+    | kernel_pagerank_0 |   216    |     0    |    42    |  123998  |  88372  |       300       |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
 
 Table 2 : Hardware resources for PageRank with cache
   
-.. table:: Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U250)
+.. table:: Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U50)
     :align: center
 
     +-------------------+----------+----------+----------+----------+---------+-----------------+
     |    Kernel         |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
-    | kernel_pagerank_0 |   546    |    224   |    52    |  391591  |  262918 |       225       |
+    | kernel_pagerank_0 |   216    |    224   |    42    |  124054  |  95950  |       225       |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
-With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U250.
+With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U50.
 
 
 Table 3 : Comparison between CPU SPARK and FPGA VITIS_GRAPH

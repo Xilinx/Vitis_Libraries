@@ -38,7 +38,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash
 
-   make run TARGET=hw DEVICE=xilinx_u250_xdma_201830_2
+   make run TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3
 
 * **Run kernel(Step 3)**
 
@@ -46,7 +46,7 @@ To get the benchmark results, please run the following command.
 
 .. code-block:: bash
 
-   ./build_dir.hw.xilinx_u250_xdma_201830_2/host.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/kernel_pagerank_0.xclbin -dataSetDir data/ -refDir data/
+   ./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/host.exe -xclbin build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_pagerank_0.xclbin -dataSetDir data/ -refDir data/
 
 Pagerank Input Arguments:
 
@@ -65,9 +65,9 @@ Note: Default arguments are set in Makefile, you can use other :ref:`datasets` l
 
    Found Platform
    Platform Name: Xilinx
-   INFO: Found Device=xilinx_u250_xdma_201830_2
-   INFO: Importing build_dir.hw.xilinx_u250_xdma_201830_2/kernel_pagerank_0.xclbin
-   Loading: 'build_dir.hw.xilinx_u250_xdma_201830_2/kernel_pagerank_0.xclbin'
+   INFO: Found Device=xilinx_u50_gen3x16_xdma_201920_3
+   INFO: Importing build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_pagerank_0.xclbin
+   Loading: 'build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_pagerank_0.xclbin'
    INFO: Kernel has been created
    INFO: Finish kernel setup
    ...
@@ -99,20 +99,20 @@ Different tool versions may result slightly different resource.
     +-------------------+----------+----------+----------+----------+---------+-----------------+
     |    Kernel         |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
-    | kernel_pagerank_0 |   546    |     0    |    52    |  401749  |  258942 |       300       |
+    | kernel_pagerank_0 |   216    |     0    |    42    |  123998  |  88372  |       300       |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
 
-.. table:: Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U250)
+.. table:: Table 2 Hardware resources for PageRank with cache (maximum supported cache size 32K in one SLR of Alveo U50)
     :align: center
 
     +-------------------+----------+----------+----------+----------+---------+-----------------+
     |    Kernel         |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
-    | kernel_pagerank_0 |   189    |    224   |    52    |  391591  |  102782 |       225       |
+    | kernel_pagerank_0 |   216    |    224   |    42    |  124054  |  95950  |       225       |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
-With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U250.
+With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U50.
 
 
 .. table:: Table 3 Comparison between CPU SPARK and FPGA VITIS_GRAPH

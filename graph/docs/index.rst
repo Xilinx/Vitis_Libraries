@@ -28,7 +28,7 @@ Currently, this includes the following algorithm implementation:
 
  - Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the 'weight' feature is supported for Cosin Similarity. 
  - Centrality analysis: PageRank.
- - Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).
+ - Pathfinding: Minimum Spanning Tree (MST, 2021.2), Estimated Diameter (2021.2), Single Source Shortest Path (SSSP) and Multi-Sources Shortest Path (MSSP).
  - Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
  - Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
  - Search: Breadth First Search, 2-Hop Search 

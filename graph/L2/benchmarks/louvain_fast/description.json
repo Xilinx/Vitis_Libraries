@@ -32,7 +32,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": " -x BUILD/kernel_louvain.xclbin -f 3 -c -o -m 10 -prun PROJECT/data/example-wt.txt", 
+            "cmd_args": " -x BUILD/kernel_louvain.xclbin -f 3 -c -m 10 -prun PROJECT/data/example-wt.txt", 
             "name": "generic launch for all flows",
             "ld_library_path": [
                     "$(LD_LIBRARY_PATH)",

@@ -35,7 +35,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 XILINX_XRM=/opt/xilinx/xrm
 
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label -w
-LDFLAGS += -L$(XILINX_XRT)/lib -lstdc++ -lxrt_core -ldl -luuid -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
+LDFLAGS += -L$(XILINX_XRT)/lib -lstdc++ -lxrt_core -ldl -luuid -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
 CXXFLAGS += -fmessage-length=0 -O3
 
 ifneq ($(HOST_ARCH), x86)

@@ -27,7 +27,8 @@ using namespace std;
 int renumberClustersContiguously(int* C, int size) {
     printf("Within renumberClustersContiguously()\n");
 
-    double time1 = omp_get_wtime();
+    struct timeval start_time, end_time;
+    gettimeofday(&start_time, 0);
     // Count the number of unique communities and internal edges
     map<int, int> clusterLocalMap; // Map each neighbor's cluster to a local number
     map<int, int>::iterator storedAlready;
@@ -46,8 +47,8 @@ int renumberClustersContiguously(int* C, int size) {
             }
         } // End of if()
     }     // End of for (i)
-    time1 = omp_get_wtime() - time1;
-    double ts = time1 * 1000.0;
+    gettimeofday(&end_time, 0);
+    double ts = tvdiff(&start_time, &end_time) / 1000.0;
     printf("INFO: renumberClustersContiguously time %.4f ms.\n", ts);
     return numUniqueClusters; // Return the number of unique cluster ids
 }

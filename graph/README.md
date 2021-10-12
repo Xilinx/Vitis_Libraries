@@ -6,13 +6,13 @@ Vitis Graph Library is an open-sourced Vitis library written in C++ for accelera
 
 The algorithms implemented by Vitis Graph Library include:
 
-- Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the 'weight' feature is supported by Cosin Similarity.
+- Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the ‘weight’ feature is supported by Cosin Similarity.
 - Centrality analysis: PageRank.
-- Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).
-- Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
+- Pathfinding: Minimum Spanning Tree (MST, 2021.2), Estimated Diameter (2021.2), Single Source Shortest Path (SSSP) and Multi-Sources Shortest Path (MSSP).
+- Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
 - Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
-- Search: Breadth First Search, 2-Hop Search
-- Graph Format: Renumber(2021.2), Calculate Degree and Format Convert between CSR and CSC.
+- Search: Breadth First Search and 2-Hop Search.
+- Graph Format: Renumber (2021.2), Calculate Degree and Format Convert between CSR and CSC.
 
 
 ## Benchmark Result

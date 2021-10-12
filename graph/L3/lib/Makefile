@@ -52,7 +52,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 XILINX_XRM=/opt/xilinx/xrm
 
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
 CXXFLAGS += -fmessage-length=0 -O3
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
