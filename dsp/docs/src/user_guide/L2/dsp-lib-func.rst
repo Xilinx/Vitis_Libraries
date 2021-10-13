@@ -273,89 +273,170 @@ Native stream input, where port is diretly connected to the kernel is not possib
 Instead, stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.
 
 
-FIRs can be configured to produce multiple output ports, with help of TP_NUM_OUTPUTS.
-
 .. _2_FFT_IFFT:
 
 ========
 FFT/iFFT
 ========
 
-The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation with configurable point size, data type, and FFT/iFFT function.
-
-Point size may be any power of 2 from 16 to 4096, but this upper limit will be reduced to 2048 for cint16 data type and 1024 for cfloat or cint32 data type where the FFT kernel uses ping-pong window input. The 4096 limit may only be achieved where the FFT receives and outputs data to/from kernels on the same processor.
+The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation. It has configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface api (stream/window) and parallelism factor.
+Table 4 lists the template parameters used to configure the top level graph of the fft_ifft_dit_1ch_graph class.
 
 *Table 4*: FFT Parameters
 
-+----------------------+----------------+----------------+----------------------------+
-|    **Name**          |    **Type**    |   Description  |    **Range**               |
-+======================+================+================+============================+
-|    TT_DATA           |    Typename    |    The input   |  cint16,                   |
-|                      |                |    data type   |  cint32,                   |
-|                      |                |                |  cfloat                    |
-+----------------------+----------------+----------------+----------------------------+
-|    TT_TWIDDLE        |    Typename    |    The twiddle |  Set to cint16 for data    |
-|                      |                |    factor type.|  type of cint16 or cint32  |
-|                      |                |    Determined  |  and cfloat for data type  |
-|                      |                |    by TT_DATA  |  of  cfloat.               |
-|                      |                |                |                            |
-+----------------------+----------------+----------------+----------------------------+
-|  TP_POINT_SIZE       |    Unsigned    |    The number  |  2^N, where N is in the    |
-|                      |    int         |    of samples  |  range 4 to 12, though     |
-|                      |                |    in a frame  |  the upper limit may be    |
-|                      |                |    to be       |  constrained by device     |
-|                      |                |    processed   |  resources.                |
-|                      |                |                |                            |
-+----------------------+----------------+----------------+----------------------------+
-|   TP_FFT_NIFFT       |    Unsigned    |    Forward or  |  0 (IFFT) or               |
-|                      |    int         |    reverse     |  1 (FFT).                  |
-|                      |                |    transform   |                            |
-+----------------------+----------------+----------------+----------------------------+
-|    TP_SHIFT          |    Unsigned    | The number of  |  0 to 61                   |
-|                      |    int         | bits to shift  |                            |
-|                      |                | accumulation   |                            |
-|                      |                | down by before |                            |
-|                      |                | output.        |                            |
-+----------------------+----------------+----------------+----------------------------+
-|    TP_CASC_LEN       |    Unsigned    | The number     |  1 to 12.                  |
-|                      |    int         | of kernels     |  Defaults to 1             |
-|                      |                | the FFT will   |  if not set.               |
-|                      |                | be divided     |                            |
-|                      |                | over.          |  Maximum is derived by the |
-|                      |                |                |  number of radix 2 stages  |
-|                      |                |                |  required for the given    |
-|                      |                |                |  point size (N where       |
-|                      |                |                |  pointSize = 2^N)          |
-|                      |                |                |                            |
-|                      |                |                |  For float data types the  |
-|                      |                |                |  max is N.                 |
-|                      |                |                |  For integer data types    |
-|                      |                |                |  the max is CEIL(N/2).     |
-+----------------------+----------------+----------------+----------------------------+
-| TP_DYN_PT_SIZE       |    Unsigned    |    FFT point   |  2^N, where                |
-|                      |    int         |    size        |  N is 2 to 12              |
-+----------------------+----------------+----------------+----------------------------+
-| TP_WINDOW_VSIZE      |    Unsigned    | The number     |  Must be a multiple of the |
-|                      |    int         | of samples     |  number of lanes used      |
-|                      |                | in the         |  (typically 4 or 8).       |
-|                      |                | input          |                            |
-|                      |                | window.        |  No                        |
-|                      |                |                |  enforced range, but large |
-|                      |                |                |  windows will result in    |
-|                      |                |                |  mapper errors due to      |
-|                      |                |                |  excessive memory usage.   |
-|                      |                |                |                            |
-+----------------------+----------------+----------------+----------------------------+
++----------------------+----------------+-----------------------+----------------------------+
+|    **Name**          |    **Type**    |       Description     |    **Range**               |
++======================+================+=======================+============================+
+|    TT_DATA           |    Typename    |       The input       |  cint16,                   |
+|                      |                |       data type       |  cint32,                   |
+|                      |                |                       |  cfloat                    |
++----------------------+----------------+-----------------------+----------------------------+
+|    TT_TWIDDLE        |    Typename    |  The twiddle factor   |  Set to cint16 for data    |
+|                      |                |  type.                |  type of cint16 or cint32  |
+|                      |                |  Determined by        |  and cfloat for data type  |
+|                      |                |  by TT_DATA           |  of  cfloat.               |
+|                      |                |                       |                            |
++----------------------+----------------+-----------------------+----------------------------+
+|  TP_POINT_SIZE       |    Unsigned    |  The number of        |  2^N, where N is in the    |
+|                      |    int         |  samples in a frame   |  range 4 to 16, though     |
+|                      |                |  to be processed      |  the upper limit may be    |
+|                      |                |                       |  constrained by device     |
+|                      |                |                       |  resources.                |
+|                      |                |                       |                            |
++----------------------+----------------+-----------------------+----------------------------+
+|   TP_FFT_NIFFT       |    Unsigned    |  Forward or reverse   |  0 (IFFT) or               |
+|                      |    int         |  transform            |  1 (FFT).                  |
+|                      |                |                       |                            |
++----------------------+----------------+-----------------------+----------------------------+
+|    TP_SHIFT          |    Unsigned    | The number of bits    |  0 to 61                   |
+|                      |    int         | to shift accumulation |                            |
+|                      |                | down by before output |                            |
+|                      |                |                       |                            |
+|                      |                |                       |                            |
++----------------------+----------------+-----------------------+----------------------------+
+|    TP_CASC_LEN       |    Unsigned    | The number of kernels |  1 to 12.                  |
+|                      |    int         | the FFT will          |  Defaults to 1             |
+|                      |                | be divided over.      |  if not set.               |
+|                      |                |                       |                            |
+|                      |                |                       |  Maximum is derived by the |
+|                      |                |                       |  number of radix 2 stages  |
+|                      |                |                       |  required for the given    |
+|                      |                |                       |  point size (N where       |
+|                      |                |                       |  pointSize = 2^N)          |
+|                      |                |                       |                            |
+|                      |                |                       |  For float data types the  |
+|                      |                |                       |  max is N.                 |
+|                      |                |                       |  For integer data types    |
+|                      |                |                       |  the max is CEIL(N/2).     |
++----------------------+----------------+-----------------------+----------------------------+
+| TP_DYN_PT_SIZE       |    Unsigned    | Selects static point  |  0 (Static point size)     |
+|                      |    int         | size or runtime       |  1 (dynamic point size)    |
+|                      |                | dynamic point size    |                            |
++----------------------+----------------+-----------------------+----------------------------+
+| TP_WINDOW_VSIZE      |    Unsigned    | The number of samples |  Must be a multiple of the |
+|                      |    int         | in the input window.  |  number of lanes used      |
+|                      |                |                       |  (typically 4 or 8). No    |
+|                      |                |                       |  enforced range, but large |
+|                      |                |                       |  windows will result in    |
+|                      |                |                       |  mapper errors due to      |
+|                      |                |                       |  excessive memory usage.   |
+|                      |                |                       |                            |
++----------------------+----------------+-----------------------+----------------------------+
+|  TP_API              |    Unsigned    | Selects between       |  0 (windows for input      |
+|                      |    int         | streams and windows   |  and output),              |
+|                      |                | for I/O               |  1 (streams for input      |
+|                      |                |                       |  and output)               |
++----------------------+----------------+-----------------------+----------------------------+
+| TP_PARALLEL_POWER    |    Unsigned    | Selects the           |  0 to 4 (1 to 16 kernel    |
+|                      |    int         | parallelism factor    |  -lanes of processing)     |
+|                      |                | as a power of 2       |                            |
++----------------------+----------------+-----------------------+----------------------------+
 
-.. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
+TT_DATA: Supports only the 3 types listed. For real-only FFT/IFFT operation, consider using the library element widget_real2complex to convert real-only data to complex and vice versa.
 
+TT_TWIDDLE: Is entirely determined by the choice of TT_DATA.
+
+TP_POINT_SIZE: Must be a power of 2 with a minimum value of 16. The maximum value supported by the library element is 65536, but the achievable maximum will be determined by mapping limitations. For instance, a single tile implementation can achieve a maximum of 4096, but this may require single rather than pingpong window interfaces depending on data type.
+
+TP_SHIFT: Can be used to implement the 1/N scaling of an IFFT.
+
+TP_CASC_LEN: Splits the FFT/IFFT operation over multiple kernels in series, with each subsequent kernel being placed on an adjacent tile. This is to achieve higher throughput.
+
+TP_PARALLEL_POWER: If greater than 0, TP_CASC_LEN applies to the subframe FFT rather than the FFT as a whole. For instance, with TP_POINT_SIZE=16384 and TP_PARALLEL_POWER = 3 there will be 8 subframe FFTs each of point size 2048. The TP_CASC_LEN in this case would be limited to 6 for integer TT_DATA types and 11 for TT_DATA = cfloat.
+
+TP_DYN_PT_SIZE: When set to static point size all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to dynamic point size each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1 TP_POINT_SIZE describes the maximum point size which may be input.
+
+*Table 5*: Header Format
+
++-------------------------------+----------------------+---------------------------------------------------------------------------------+
+|                               | Location (TT_DATA    |                                                                                 |
+| Field name                    | sample)              | Description                                                                     |
++===============================+======================+=================================================================================+
+|                               |                      |                                                                                 |
+| Direction                     | 0 (real part)        | 0 (inverse FFT) 1 (forward FFT)                                                 |
++-------------------------------+----------------------+---------------------------------------------------------------------------------+
+|                               |                      |                                                                                 |
+| Point size (radix2 stages)    | 1 (real part)        | Point size described as a power of 2. E.g. 5 described a   point size of 32.    |
++-------------------------------+----------------------+---------------------------------------------------------------------------------+
+|                               |                      |                                                                                 |
+| Reserved                      | 2                    | reserved                                                                        |
++-------------------------------+----------------------+---------------------------------------------------------------------------------+
+|                               |                      |                                                                                 |
+| Status (output only)          | 3 (real part)        | 0 = legal point size, 1 = illegal point size                                    |
++-------------------------------+----------------------+---------------------------------------------------------------------------------+
+
+The locations are set to suit TT_DATA type. That is, for TT_DATA=cint16, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
+Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the second cint32 value’s real part holds the Point size (radix2) field.
+
+Note that for TT_DATA=cfloat, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
+
+TP_WINDOW_VSIZE: Describes the number of data samples in the supplied window. If stream input is selected, an FFT operation will not begin until this number of samples has been input. TP_WINDOW_VSIZE does not include the 256 bit header when dynamic point size is used. TP_WINDOW_VSIZE is intended to improve performance for small point sizes by incurring the kernel acquisition and release overheads only once per window rather than once per frame of data.
+
+TP_API: Selects between window (0) and stream (1) input/output. When set to 1, the FFT will have 2 stream port per subframe processor so as to maximize performance. Samples must be input to each stream in turn. E.g. with TP_PARALLEL_POWER=2 there will be 8 stream inputs. Samples 0 to 7 must be input one to each port, followed by samples 8 to 15, so port(0) will receive samples 0, 8, 16, etc.
+On output, each stream will output a splice of the overall frame. So in the above example, output port(0) will output samples 0 to TP_POINT_SIZE/8-1.
+
+TP_PARALLEL_POWER: Intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram <refer to the ppt supplied yesterday) shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.
+
+Scaling
+~~~~~~~
 This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32. In the final stage, the result is scaled by 17 bits for point size from 16 to 1024, by 18 for 2048, and by 19 for 4096.
 
-No scaling is applied at any point when the data type is cfloat. The graph entry point is the following:
+In the case of TP_PARALLEL_POWER > 0 for cint16, scaling is applied at the end of the subframe processor and in each radix2 combiner stage so that cint16 is the data type used for internal streams for maximal performance. In this case, TP_SHIFT-TP_PARALLEL_POWER is applied as the TP_SHIFT value to each subframe processor and a TP_SHIFT of 1 is applied in each radix2 combiner stage. Better noise performance may be achieved at the expense of throughput by using TT_DATA=cint32.
+
+No scaling is applied at any point when the data type is cfloat.
+
+The graph entry point is the following:
 
 .. code-block::
 
     xf::dsp::aie::fft::fft_ifft_dit_1ch_graph
+
+Constraints
+~~~~~~~~~~~
+The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See Figure 1 below.
+
+.. figure:: ./media/figure8.png
+
+*Figure 1:* **Applying Design Constraints**
+
+The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.
+
+The stream to window conversion kernels on input and output to the fft subframes are at the same level as m_fftKernels and are called m_inWidgetKernel and m_outWidgetKernel respectively.
+Each level of recursion will also contain an array of radix2 combiner kernels and associated stream to window conversion kernels. These are seen as a column of kernels in the above figure.
+Their instance names are m_r2Comb[] for the radix2 combiners and m_combInKernel[] and m_combOutKernel[] for the input and output widget kernels respectively.
+
+Examples of constraints: For TP_PARALLEL_POWER=2, to set the runtime ratio of the 3rd of 4 subframe FFTs, the constraint could look like this:
+
+.. code-block::
+
+	Runtime<ratio>(myFFT.FFTsubframe[1].FFTsubframe[0].FFTstrproc.m_kernels[0]) = 0.9; //where myFFT is the instance name of the FFT in your design.
+
+For the same example, to ensure that the second radix2 combiner kernel in the first column of combiners and its input widget do not share a tile, the constraint could look like this:
+
+.. code-block::
+
+	not_equal(location<kernel>(myFFT.FFTsubframe[0].m_combInKernel[1]),location<kernel>( myFFT.FFTsubframe[0].m_r2Comb[1]));
+
 
 .. _2_MATRIX_MULTIPLY:
 
@@ -368,7 +449,7 @@ The DSPLib contains one Matrix Multiply/GEMM (GEneral Matrix Multiply) solution.
 An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have rows = inA rows (TP_DIM_A) and columns = inB (TP_DIM_B) columns. The data type of both input matrices can be configured and the data type of the output is derived from the inputs.
 
 
-*Table 5*: Matrix Multiply Parameters
+*Table 6*: Matrix Multiply Parameters
 
 +----------------------------+----------------+----------------+----------------+
 |                **Name**    |    **Type**    |   Description  |    **Range**   |
@@ -543,7 +624,7 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
 
 .. note:: Indices are quoted assuming a row major matrix. A column major matrix would be the transpose of the table below.
 
-*Table 6*: Matrix Multiply 4x4 tiling pattern
+*Table 7*: Matrix Multiply 4x4 tiling pattern
 
 +------------+-------------------------------+-------------------------------+-------------------------------+-------------------------------+
 |            | Tile Col 0                    | Tile Col 1                    | Tile Col 2                    | Tile Col 3                    |
@@ -587,7 +668,7 @@ This is stored contiguously in memory like:
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x2 tiling pattern.
 
-*Table 7*: Matrix Multiply 4x2 tiling pattern
+*Table 8*: Matrix Multiply 4x2 tiling pattern
 
 +------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
 |            | Tile Col 0    | Tile Col 1    | Tile Col 2    | Tile Col 3    | Tile Col 4    | Tile Col 5    | Tile Col 6    | Tile Col 7    |
@@ -634,7 +715,7 @@ Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tilin
 
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type:
 
-*Table 8*: Matrix Multiply tiling pattern combination
+*Table 9*: Matrix Multiply tiling pattern combination
 
 +------------------------+----------------+--------------+
 |Input Type Combination  |  Tiling Scheme |  Output Type |
@@ -690,7 +771,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
 
 **Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)**:
 
-*Table 9*: Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)
+*Table 10*: Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)
 
 +------------+---------------------------------------------------------------+---------------------------------------------------------------+
 |            | AIE 0                                                         | AIE 1                                                         |
@@ -732,7 +813,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
 
 **Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)**:
 
-*Table 10*: Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)
+*Table 11*: Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)
 
 +------------+------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
 |            |            | Tile Col 0    | Tile Col 1    | Tile Col 2    | Tile Col 3    | Tile Col 4    | Tile Col 5    | Tile Col 6    | Tile Col 7    |
@@ -799,7 +880,7 @@ Widget API Cast
 
 The DSPLib contains a Widget API Cast solution, which provides flexibilty when connecting other kernels. This component is able to change the stream interface to window interface and vice-versa. It may be configured to read two input stream interfaces and interleave data onto an output window interface. In addition, multiple copies of output window may be configured to allow extra flexibility when connecting to further kernels.
 
-*Table 11*: Widget API Cast Parameters
+*Table 12*: Widget API Cast Parameters
 
 +-----------------------+----------------+--------------------------------+----------------+
 |           **Name**    |    **Type**    |   Description                  |    **Range**   |
@@ -880,7 +961,7 @@ Widget Real to Complex
 
 The DSPLib contains a Widget Real to Complex solution, which provides a utility to convert real data to complex or vice versa.
 
-*Table 12*: Widget Real to Complex Parameters
+*Table 13*: Widget Real to Complex Parameters
 
 +-----------------+----------------+----------------+----------------+
 |     **Name**    |    **Type**    |   Description  |    **Range**   |
@@ -941,7 +1022,7 @@ In DDS Only mode, there is a single output port that contains the sin/cosine com
 Mixer inputs are enabled with the TP_MIXER_MODE template parameter. There are two modes that have the mixer functionality enabled. In MIXER_MODE_1, a single input port is exposed and the input samples are complex multiplied by the DDS output for the given phase increment. In MIXER_MODE_2, two input ports are exposed for multi-carrier operation, with the first behaving as in MIXER_MODE_1, and the second input port getting complex multiplied with the complex conjugate of the DDS signal then accumulated to the result of the first complex multiply operation.
 
 
-*Table 13*: DDS / Mixer Parameters
+*Table 14*: DDS / Mixer Parameters
 
 +-----------------------+----------------+----------------+--------------------------+
 |     **Name**          |    **Type**    |   Description  |    **Range**             |

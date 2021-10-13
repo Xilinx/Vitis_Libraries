@@ -115,7 +115,7 @@ L2 FIR configuration parameters
 
 The list below consists of configurable parameters for FIR library elements with their default values.
 
-*Table 14*: L2 FIR configuration parameters
+*Table 15*: L2 FIR configuration parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -224,7 +224,7 @@ L2 FFT configuration parameters
 
 For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
 
-*Table 15*: L2 FFT configuration parameters
+*Table 16*: L2 FFT configuration parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -294,7 +294,7 @@ L2 Matrix Multiply Configuration Parameters
 
 For the Matrix Multiply (GeMM) library element the list of configurable parameters and default values is presented below.
 
-*Table 16*: L2 Matrix Multiply configuration parameters
+*Table 17*: L2 Matrix Multiply configuration parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -391,7 +391,7 @@ L2 Widgets Configuration Parameters
 
 For the Widgets library elements the list of configurable parameters and default values is presented below.
 
-*Table 17*: L2 Widget API Casts Configuration Parameters
+*Table 18*: L2 Widget API Casts Configuration Parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -427,7 +427,7 @@ For the Widgets library elements the list of configurable parameters and default
 +------------------------+----------------+----------------+--------------------------------------+
 
 
-*Table 18*: L2 Widget Real to Complex Configuration Parameters
+*Table 19*: L2 Widget Real to Complex Configuration Parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -452,7 +452,7 @@ L2 DDS/Mixer Configuration Parameters
 
 For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.
 
-*Table 19*: L2 DDS/Mixer Configuration Parameters
+*Table 20*: L2 DDS/Mixer Configuration Parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |

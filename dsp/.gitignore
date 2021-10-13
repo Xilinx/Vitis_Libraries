@@ -10,6 +10,7 @@ settings.tcl
 docs/_build
 docs/html
 docs/xml
+docs/rst
 docs/.stamp
 L2/tests/aie/batch_results/*/batch*
 L2/tests/aie/*/test_*
