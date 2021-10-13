@@ -52,4 +52,5 @@ endif
 CONFIG_INFO = $(shell echo ${MACROS} | sed 's/-D //g; s/ -Wno.*//')
 
 dump_config: 
+	mkdir -p ${BUILD_DIR} 
 	@echo ${CONFIG_INFO}  | tr " " "\n" > ${BUILD_DIR}/config_info.dat

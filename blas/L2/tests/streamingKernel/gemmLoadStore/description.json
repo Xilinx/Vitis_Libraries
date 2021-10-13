@@ -31,10 +31,11 @@
         "name": "generic launch for all flows",
         "cmd_args": "BUILD/blas.xclbin BUILD/data"
     }],
-    "pre_launch": [
-    {
-        "launch_cmd": "make data_gen"
-    }],
+    "pre_build": [
+        {
+            "build_cmd": "make data_gen"
+        }
+    ], 
     "post_launch": [
     {
         "launch_cmd": "make check"

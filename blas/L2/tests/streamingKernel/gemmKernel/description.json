@@ -25,10 +25,11 @@
         "name": "generic launch for all flows",
         "cmd_args": "BUILD/gemmKernel.xclbin BUILD/data"
     }],
-    "pre_launch": [
-    {
-        "launch_cmd": "make data_gen"
-    }],
+    "pre_build": [
+        {
+            "build_cmd": "LD_LIBRARY_PATH=$$XILINX_HLS/lnx64/tools/fpo_v7_0:$$LD_LIBRARY_PATH make data_gen"
+        }
+    ], 
     "post_launch": [
     {
         "launch_cmd": "make check"

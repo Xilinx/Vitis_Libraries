@@ -24,9 +24,9 @@
             "name": "generic launch for all flows"
         }
     ], 
-    "pre_launch": [
+    "pre_build": [
         {
-            "launch_cmd": "make dump_config"
+            "build_cmd": "make dump_config"
         }
     ], 
     "host": {

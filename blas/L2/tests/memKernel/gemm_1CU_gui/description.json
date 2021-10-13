@@ -14,9 +14,7 @@
     "platform_properties": {
         "u250": {
             "host": {
-                "compiler": {
-                    "symbols": []
-                }
+                "compiler": {}
             }, 
             "v++": {
                 "compiler": {}

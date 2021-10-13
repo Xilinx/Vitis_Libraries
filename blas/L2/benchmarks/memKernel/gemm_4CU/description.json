@@ -36,7 +36,7 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/benchmarks/memKernel/gemm_4CU/host", 
+                "LIB_DIR/L2/benchmarks/memKernel/gemm_4CU/host/gemm_benchmark.cpp", 
                 "LIB_DIR/L2/src/xcl2/xcl2.cpp"
             ], 
             "includepaths": [

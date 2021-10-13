@@ -32,9 +32,9 @@
             "cmd_args": "BUILD/blas.xclbin BUILD/data"
         }
     ], 
-    "pre_launch": [
+    "pre_build": [
         {
-            "launch_cmd": "make data_gen"
+            "build_cmd": "make data_gen"
         }
     ], 
     "post_launch": [
