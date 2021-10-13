@@ -104,10 +104,10 @@ The following table lists parameters supported by all the FIR filters:
 +------------------------+----------------+----------------+----------------+
 | Parameter Name         |    Type        |  Description   |    Range       |
 +========================+================+================+================+
-|    TP_FIR_LEN          |    unsigned    | The number of  |    4 to 240    |
+|    TP_FIR_LEN          |    Unsigned    | The number of  |    4 to 240    |
 |                        |    int         | taps           |                |
 +------------------------+----------------+----------------+----------------+
-|    TP_RND              |    unsigned    | Round mode     |    0 =         |
+|    TP_RND              |    Unsigned    | Round mode     |    0 =         |
 |                        |    int         |                |    truncate or |
 |                        |                |                |    floor       |
 |                        |                |                |                |
@@ -139,27 +139,27 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                |                |    convergent  |
 |                        |                |                |    to odd      |
 +------------------------+----------------+----------------+----------------+
-|    TP_SHIFT            |    unsigned    | The number of  |    0 to 61     |
+|    TP_SHIFT            |    Unsigned    | The number of  |    0 to 61     |
 |                        |    int         | bits to shift  |                |
 |                        |                | accumulation   |                |
 |                        |                | down by before |                |
 |                        |                | output.        |                |
 +------------------------+----------------+----------------+----------------+
-|    TT_DATA             |    typename    | Data Type      |    int16,      |
+|    TT_DATA             |    Typename    | Data Type      |    int16,      |
 |                        |                |                |    cint16,     |
 |                        |                |                |    int32,      |
 |                        |                |                |    cint32,     |
 |                        |                |                |    float,      |
 |                        |                |                |    cfloat      |
 +------------------------+----------------+----------------+----------------+
-|    TT_COEFF            |    typename    | Coefficient    |    int16,      |
+|    TT_COEFF            |    Typename    | Coefficient    |    int16,      |
 |                        |                | type           |    cint16,     |
 |                        |                |                |    int32,      |
 |                        |                |                |    cint32,     |
 |                        |                |                |    float,      |
 |                        |                |                |    cfloat      |
 +------------------------+----------------+----------------+----------------+
-| TP_INPUT_WINDOW_VSIZE  |    unsigned    | The number     |    Must be a   |
+| TP_INPUT_WINDOW_VSIZE  |    Unsigned    | The number     |    Must be a   |
 |                        |    int         | of samples     |    multiple of |
 |                        |                | in the         |    the number  |
 |                        |                | input          |    of lanes    |
@@ -179,14 +179,14 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                |                |    excessive   |
 |                        |                |                |    RAM use.    |
 +------------------------+----------------+----------------+----------------+
-|    TP_CASC_LEN         |    unsigned    | The number     |    1 to 9.     |
+|    TP_CASC_LEN         |    Unsigned    | The number     |    1 to 9.     |
 |                        |    int         | of cascaded    |                |
 |                        |                | kernels to     |    Defaults to |
 |                        |                | use for        |    1 if not    |
 |                        |                | this FIR.      |    set.        |
 |                        |                |                |                |
 +------------------------+----------------+----------------+----------------+
-|    TP_DUAL_IP          |    unsigned    | Use dual       |    Range 0     |
+|    TP_DUAL_IP          |    Unsigned    | Use dual       |    Range 0     |
 |                        |    int         | inputs ports.  |    (single     |
 |                        |                |                |    input), 1   |
 |                        |                |                |    (dual       |
@@ -198,7 +198,7 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                |                |                |
 |                        |                |                |                |
 +------------------------+----------------+----------------+----------------+
-| TP_USE_COEFF_RELOAD    |    unsigned    | Enable         |    0 (no       |
+| TP_USE_COEFF_RELOAD    |    Unsigned    | Enable         |    0 (no       |
 |                        |    int         | reloadable     |    reload), 1  |
 |                        |                | coefficient    |    (use        |
 |                        |                | feature.       |    reloads).   |
@@ -209,12 +209,71 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                | appear on      |                |
 |                        |                | the graph.     |                |
 +------------------------+----------------+----------------+----------------+
-| TP_NUM_OUTPUTS         |    unsigned    | Number of      |                |
+| TP_NUM_OUTPUTS         |    Unsigned    | Number of      |                |
 |                        |    int         | fir output     |    1 to 2      |
 |                        |                | ports          |                |
 +------------------------+----------------+----------------+----------------+
+|  TP_API                |    Unsigned    | I/O interface  |  0 = Window    |
+|                        |    int         | port type      |                |
+|                        |                |                |  1 = Stream    |
++------------------------+----------------+----------------+----------------+
 
 .. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
+
+.. note:: TP_API template parameter is currently only supported wiht single rate FIRs.
+
+Streaming interface for Filters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Streaming interfaces are now supported by single rate FIRs.
+When TP_API is set to 1 - kernel will be created with a native stream output interface and native stream input interface when possible (asymmetric FIRs).
+
+.. note:: Streaming interface is currently only supported wiht single rate FIRs.
+
+Stream Output
+-------------
+
+Stream output allows computed data samples to be directly sent over the stream without the requirement for a ping-pong window buffer.
+As a result, memory requirements and design's latency are reduced.
+Furthermore, the streaming output allows data samples to be broadcasted to multiple destinations.
+
+To maximize the throughput, FIRs can be configured with 2 output stream ports.
+Set TP_NUM_OUTPUTS template parameter to 2, to create a FIR kernel with 2 output stream ports.
+In such scenario, kernel interleaves the output data with a 128-bit pattern, e.g.:
+
+* samples 0-3 to be sent over output stream 0 for cint16 data type,
+
+* samples 4-7 to be sent over output stream 1 for cint16 data type.
+
+
+Stream Input for Asymmetric FIRs
+--------------------------------
+
+Stream input allows data samples to be directly written from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
+As a result, memory requirements and design's latency are reduced.
+
+To maximize the throughput, Asymmetric FIRs can be configured with 2 input stream ports.
+Enable TP_DUAL_IP template parameter, by setting its value to 1, to create a FIR kernel with 2 input stream ports.
+In such case data should be organized in a 128-bit interleaved pattern, e.g.:
+
+* samples 0-3 to be received on input stream 0 for cint16 data type,
+
+* samples 4-7 to be received on input stream 1 for cint16 data type.
+
+.. note::  Dual input streams offer no throughput gain if only single output stream would be used. Therefore, dual input streams are only supported with 2 output streams.
+
+.. note::  Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows. This is the class for the Asymmetric Single Rate FIR graph
+
+
+Stream Input for Symmetric FIRs
+--------------------------------
+
+Symmetric FIRs require access to data from 2 distinctive areas of the data sample pool and therefore require memory storage.
+Native stream input, where port is diretly connected to the kernel is not possible.
+Instead, stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.
+
+
+FIRs can be configured to produce multiple output ports, with help of TP_NUM_OUTPUTS.
 
 .. _2_FFT_IFFT:
 
@@ -328,14 +387,14 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |    float,      |
 |                            |                |                |    cfloat      |
 +----------------------------+----------------+----------------+----------------+
-|                TP_DIM_A    | unsigned int   | The number of  |                |
+|                TP_DIM_A    | Unsigned int   | The number of  |                |
 |                            |                | elements along |                |
 |                            |                | the unique     |                |
 |                            |                | dimension      |                |
 |                            |                | (rows) of      |                |
 |                            |                | Matrix A       |                |
 +----------------------------+----------------+----------------+----------------+
-|                TP_DIM_AB   | unsigned int   | The number of  |                |
+|                TP_DIM_AB   | Unsigned int   | The number of  |                |
 |                            |                | elements along |                |
 |                            |                | the common     |                |
 |                            |                | dimension      |                |
@@ -344,14 +403,14 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                | Matrix B       |                |
 |                            |                | (rows)         |                |
 +----------------------------+----------------+----------------+----------------+
-|                TP_DIM_B    | unsigned int   | The number of  |                |
+|                TP_DIM_B    | Unsigned int   | The number of  |                |
 |                            |                | elements along |                |
 |                            |                | the unique     |                |
 |                            |                | dimension      |                |
 |                            |                | (rows) of      |                |
 |                            |                | Matrix B       |                |
 +----------------------------+----------------+----------------+----------------+
-|                TP_SHIFT    | unsigned int   | power of 2     |   In range     |
+|                TP_SHIFT    | Unsigned int   | power of 2     |   In range     |
 |                            |                | shift down     |   0 to 61      |
 |                            |                | applied to the |                |
 |                            |                | accumulation   |                |
@@ -359,7 +418,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                | terms before   |                |
 |                            |                | each output    |                |
 +----------------------------+----------------+----------------+----------------+
-|                TP_RND      | unsigned int   | Round mode     |    0 =         |
+|                TP_RND      | Unsigned int   | Round mode     |    0 =         |
 |                            |                |                |    truncate or |
 |                            |                |                |    floor       |
 |                            |                |                |                |
@@ -391,21 +450,21 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |    convergent  |
 |                            |                |                |    to odd      |
 +----------------------------+----------------+----------------+----------------+
-| TP_DIM_A_LEADING           | unsigned int   | The scheme in  | ROW_MAJOR = 0  |
+| TP_DIM_A_LEADING           | Unsigned int   | The scheme in  | ROW_MAJOR = 0  |
 |                            |                | which the data |                |
 |                            |                | for matrix A   | COL_MAJOR = 1  |
 |                            |                | should be      |                |
 |                            |                | stored in      |                |
 |                            |                | memory         |                |
 +----------------------------+----------------+----------------+----------------+
-| TP_DIM_B_LEADING           | unsigned int   | The scheme in  | ROW_MAJOR = 0  |
+| TP_DIM_B_LEADING           | Unsigned int   | The scheme in  | ROW_MAJOR = 0  |
 |                            |                | which the data |                |
 |                            |                | for matrix B   | COL_MAJOR = 1  |
 |                            |                | should be      |                |
 |                            |                | stored in      |                |
 |                            |                | memory         |                |
 +----------------------------+----------------+----------------+----------------+
-| TP_DIM_OUT_LEADING         | unsigned int   | The scheme in  | ROW_MAJOR = 0  |
+| TP_DIM_OUT_LEADING         | Unsigned int   | The scheme in  | ROW_MAJOR = 0  |
 |                            |                | which the data |                |
 |                            |                | for output     | COL_MAJOR = 1  |
 |                            |                | matrix         |                |
@@ -413,7 +472,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                | stored in      |                |
 |                            |                | memory         |                |
 +----------------------------+----------------+----------------+----------------+
-| TP_ADD_TILING_A            | unsigned int   | Option to add  | 0 = rearrange  |
+| TP_ADD_TILING_A            | Unsigned int   | Option to add  | 0 = rearrange  |
 |                            |                | an additional  | externally to  |
 |                            |                | kernel to      | the graph      |
 |                            |                | rearrange      |                |
@@ -424,7 +483,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                | tiling kernel  |
 |                            |                |                | to design.     |
 +----------------------------+----------------+----------------+----------------+
-| TP_ADD_TILING_B            | unsigned int   | Option to add  | 0 = rearrange  |
+| TP_ADD_TILING_B            | Unsigned int   | Option to add  | 0 = rearrange  |
 |                            |                | an additional  | externally to  |
 |                            |                | kernel to      | the graph      |
 |                            |                | rearrange      |                |
@@ -435,7 +494,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                | tiling kernel  |
 |                            |                |                | to design.     |
 +----------------------------+----------------+----------------+----------------+
-|                            | unsigned int   | Option to add  | 0 = rearrange  |
+|                            | Unsigned int   | Option to add  | 0 = rearrange  |
 | TP_ADD_DETILING_OUT        |                | an additional  | externally to  |
 |                            |                | kernel to      | the graph      |
 |                            |                | rearrange      |                |
@@ -446,7 +505,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                | tiling kernel  |
 |                            |                |                | to design.     |
 +----------------------------+----------------+----------------+----------------+
-|                            |    unsigned    | The number     |  Must be of    |
+|                            |    Unsigned    | The number     |  Must be of    |
 | TP_WINDOW_VSIZE_A          |    int         | of samples     |  size          |
 |                            |                | in the         |  TP_DIM_A*     |
 |                            |                | input          |  TP_DIM_AB*N   |
@@ -456,7 +515,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |  TP_DIM_AB     |
 |                            |                |                |  (N=1)         |
 +----------------------------+----------------+----------------+----------------+
-|                            |    unsigned    | The number     |  Must be of    |
+|                            |    Unsigned    | The number     |  Must be of    |
 | TP_WINDOW_VSIZE_B          |    int         | of samples     |  size          |
 |                            |                | in the         |  TP_DIM_B*     |
 |                            |                | input          |  TP_DIM_AB*M   |
@@ -466,7 +525,7 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |  TP_DIM_AB     |
 |                            |                |                |  (M=1)         |
 +----------------------------+----------------+----------------+----------------+
-| TP_CASC_LEN                |    unsigned    | The number of  |  Defaults to   |
+| TP_CASC_LEN                |    Unsigned    | The number of  |  Defaults to   |
 |                            |    int         | AIE tiles to   |  1 if not      |
 |                            |                | split the      |  set.          |
 |                            |                | operation into |                |
@@ -745,7 +804,7 @@ The DSPLib contains a Widget API Cast solution, which provides flexibilty when c
 +-----------------------+----------------+--------------------------------+----------------+
 |           **Name**    |    **Type**    |   Description                  |    **Range**   |
 +=======================+================+================================+================+
-|           TT_DATA     |    typename    | Data Type                      |    int16,      |
+|           TT_DATA     |    Typename    | Data Type                      |    int16,      |
 |                       |                |                                |    cint16,     |
 |                       |                |                                |    int32,      |
 |                       |                |                                |    cint32,     |
@@ -826,14 +885,14 @@ The DSPLib contains a Widget Real to Complex solution, which provides a utility 
 +-----------------+----------------+----------------+----------------+
 |     **Name**    |    **Type**    |   Description  |    **Range**   |
 +=================+================+================+================+
-|     TT_DATA     |    typename    | Data Type      |    int16,      |
+|     TT_DATA     |    Typename    | Data Type      |    int16,      |
 |                 |                |                |    cint16,     |
 |                 |                |                |    int32,      |
 |                 |                |                |    cint32,     |
 |                 |                |                |    float,      |
 |                 |                |                |    cfloat      |
 +-----------------+----------------+----------------+----------------+
-|  TT_OUT_DATA    |    typename    | Data Type      |    int16,      |
+|  TT_OUT_DATA    |    Typename    | Data Type      |    int16,      |
 |                 |                |                |    cint16,     |
 |                 |                |                |    int32,      |
 |                 |                |                |    cint32,     |
@@ -887,7 +946,7 @@ Mixer inputs are enabled with the TP_MIXER_MODE template parameter. There are tw
 +-----------------------+----------------+----------------+--------------------------+
 |     **Name**          |    **Type**    |   Description  |    **Range**             |
 +=======================+================+================+==========================+
-|     TT_DATA           |    typename    | Data Type      |    cint16                |
+|     TT_DATA           |    Typename    | Data Type      |    cint16                |
 +-----------------------+----------------+----------------+--------------------------+
 | TP_INPUT_WINDOW_VSIZE |    Unsigned    | The number     |  Must be a multiple of   |
 |                       |    int         | of samples     |  the number of lanes     |

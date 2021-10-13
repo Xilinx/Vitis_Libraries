@@ -1,63 +1,69 @@
 Library Element,DATA_TYPE,TWIDDLE_TYPE,POINT_SIZE,FFT_NIFFT,CASC_LEN,DYN_PT_SIZE,WINDOW_VSIZE,API_IO,PARALLEL_POWER,cycleCountAvg,throughputAvg,initiationInterval,throughputInitIntAvg,NUM_BANKS,NUM_ME,DATA_MEMORY,PROGRAM_MEMORY
-fft_ifft_dit_1ch,cfloat,cfloat,1024,1,1,1,1024,0,0,2922,350 MSa/s,3246,315 MSa/s,13,1,55864,12498
-fft_ifft_dit_1ch,cint16,cint16,64,1,1,1,64,0,0,648,98 MSa/s,692,92 MSa/s,8,1,11832,8802
-fft_ifft_dit_1ch,cint32,cint16,1024,1,1,0,1024,0,0,1992,514 MSa/s,2075,493 MSa/s,9,1,51640,6460
-fft_ifft_dit_1ch,cint32,cint16,1024,1,1,1,1024,0,0,1317,777 MSa/s,2111,485 MSa/s,13,1,51768,14892
-fft_ifft_dit_1ch,cint32,cint16,1024,1,2,1,1024,0,0,876,1168 MSa/s,2075,493 MSa/s,22,2,76848,24 1 24 1 5238 25 0 25 0 10866
-fft_ifft_dit_1ch,cint32,cint16,1024,1,3,1,1024,0,0,876,1168 MSa/s,2079,492 MSa/s,31,3,101928,24 2 24 2 10866 25 0 25 0 3268 25 2 25 2 4020
-fft_ifft_dit_1ch,cint32,cint16,1024,1,4,1,1024,0,0,589,1738 MSa/s,2084,491 MSa/s,38,4,127008,24 1 24 1 3268 24 3 24 3 4020 25 1 25 1 7686 25 3 25 3 4322
-fft_ifft_dit_1ch,cint32,cint16,1024,1,5,1,1024,0,0,529,1935 MSa/s,2088,490 MSa/s,49,5,152088,24 2 24 2 3252 24 4 24 4 4020 25 0 25 0 4378 25 2 25 2 4290 25 4 25 4 4322
-fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,1024,0,0,3659,279 MSa/s,3720,275 MSa/s,7,1,42424,5038
-fft_ifft_dit_1ch,cint32,cint16,128,1,2,0,1024,0,0,2011,509 MSa/s,2096,488 MSa/s,12,2,67440,24 0 24 0 3130 25 0 25 0 3498
-fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,128,0,0,463,276 MSa/s,501,255 MSa/s,7,1,13752,4908
-fft_ifft_dit_1ch,cint32,cint16,128,1,1,1,128,0,0,699,183 MSa/s,742,172 MSa/s,7,1,13880,11616
-fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,1024,0,0,10207,100 MSa/s,10268,99 MSa/s,7,1,42424,2546
-fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,16,0,0,172,93 MSa/s,210,76 MSa/s,7,1,10168,2352
-fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,1024,0,0,2540,403 MSa/s,2601,393 MSa/s,7,1,43448,5490
-fft_ifft_dit_1ch,cint32,cint16,256,1,2,0,1024,0,0,1331,769 MSa/s,2080,492 MSa/s,12,2,68464,24 0 24 0 3646 25 0 25 0 3514
-fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,256,0,0,637,401 MSa/s,677,378 MSa/s,7,1,18872,5360
-fft_ifft_dit_1ch,cint32,cint16,256,1,1,1,256,0,0,767,333 MSa/s,813,314 MSa/s,7,1,19000,11600
-fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,1024,0,0,8592,119 MSa/s,8653,118 MSa/s,7,1,42424,3246
-fft_ifft_dit_1ch,cint32,cint16,32,1,2,0,1024,0,0,6140,166 MSa/s,6234,164 MSa/s,12,2,67440,24 0 24 0 2720 25 0 25 0 2146
-fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,32,0,0,276,115 MSa/s,313,102 MSa/s,7,1,10680,3116
-fft_ifft_dit_1ch,cint32,cint16,32,1,1,1,32,0,0,545,58 MSa/s,587,54 MSa/s,7,1,10808,8436
-fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,512,0,0,1153,444 MSa/s,1199,427 MSa/s,8,1,29624,5928
-fft_ifft_dit_1ch,cint32,cint16,512,1,1,1,512,0,0,986,519 MSa/s,1126,454 MSa/s,8,1,29752,14908
-fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,1024,0,0,2316,442 MSa/s,2377,430 MSa/s,8,1,46008,6058
-fft_ifft_dit_1ch,cint32,cint16,512,1,2,0,1024,0,0,1391,736 MSa/s,2077,493 MSa/s,14,2,71024,24 0 24 0 3530 25 0 25 0 4166
-fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,1024,0,0,5107,200 MSa/s,5168,198 MSa/s,7,1,42424,3908
-fft_ifft_dit_1ch,cint32,cint16,64,1,2,0,1024,0,0,3579,286 MSa/s,3661,279 MSa/s,12,2,67440,24 0 24 0 3154 25 0 25 0 2342
-fft_ifft_dit_1ch,cint16,cint16,64,1,1,0,64,0,0,324,197 MSa/s,362,176 MSa/s,8,1,11704,3834
-fft_ifft_dit_1ch,cint16,cint16,512,1,1,0,512,0,0,1186,431 MSa/s,1227,417 MSa/s,9,1,25528,5938
-fft_ifft_dit_1ch,cint16,cint16,512,0,1,0,512,0,0,1186,431 MSa/s,1227,417 MSa/s,9,1,25528,5938
-fft_ifft_dit_1ch,cint16,cint16,32,0,1,1,32,0,0,523,61 MSa/s,567,56 MSa/s,8,1,11320,8596
-fft_ifft_dit_1ch,cfloat,cfloat,128,1,1,1,128,0,0,1139,112 MSa/s,1184,108 MSa/s,7,1,13880,9454
+fft_ifft_dit_1ch,cfloat,cfloat,1024,1,1,1,1024,0,0,2390,428 MSa/s,2983,343 MSa/s,13,1,55864,9190
+fft_ifft_dit_1ch,cint16,cint16,256,1,3,1,256,0,0,344,744 MSa/s,641,399 MSa/s,15,3,42536,24 0 24 0 6732 24 1 24 1 3006 25 0 25 0 2910
+fft_ifft_dit_1ch,cint16,cint16,256,1,1,0,256,0,0,469,545 MSa/s,512,500 MSa/s,8,1,16824,4322
+fft_ifft_dit_1ch,cint16,cint16,32,0,1,0,32,0,0,130,246 MSa/s,167,191 MSa/s,8,1,11192,2310
+fft_ifft_dit_1ch,cint16,cint16,512,0,1,0,512,0,0,933,548 MSa/s,978,523 MSa/s,9,1,25528,4722
+fft_ifft_dit_1ch,cint16,cint16,512,1,1,0,512,0,0,933,548 MSa/s,978,523 MSa/s,9,1,25528,4722
+fft_ifft_dit_1ch,cint16,cint16,64,1,1,0,64,0,0,203,315 MSa/s,245,261 MSa/s,8,1,11704,3100
+fft_ifft_dit_1ch,cint16,cint16,64,1,1,1,64,0,0,488,131 MSa/s,532,120 MSa/s,8,1,11832,7660
+fft_ifft_dit_1ch,cint32,cint16,1024,1,1,0,1024,0,0,1782,574 MSa/s,2071,494 MSa/s,9,1,51640,5010
+fft_ifft_dit_1ch,cint32,cint16,1024,1,1,1,1024,0,0,1054,971 MSa/s,2070,494 MSa/s,13,1,51768,12928
+fft_ifft_dit_1ch,cint32,cint16,1024,1,2,1,1024,0,0,700,1462 MSa/s,2071,494 MSa/s,22,2,76848,24 1 24 1 3974 25 0 25 0 9500
+fft_ifft_dit_1ch,cint32,cint16,1024,1,3,1,1024,0,0,700,1462 MSa/s,2076,493 MSa/s,31,3,101928,24 2 24 2 9500 25 0 25 0 2894 25 2 25 2 2990
+fft_ifft_dit_1ch,cint32,cint16,1024,1,4,1,1024,0,0,492,2081 MSa/s,2080,492 MSa/s,38,4,127008,24 1 24 1 2894 24 3 24 3 2990 25 1 25 1 6556 25 3 25 3 3550
+fft_ifft_dit_1ch,cint32,cint16,1024,1,5,1,1024,0,0,427,2398 MSa/s,2085,491 MSa/s,49,5,152088,24 2 24 2 2862 24 4 24 4 2990 25 0 25 0 3622 25 2 25 2 3598 25 4 25 4 3550
+fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,1024,0,0,2207,463 MSa/s,2268,451 MSa/s,7,1,42424,4098
+fft_ifft_dit_1ch,cint16,cint16,256,1,3,0,256,0,0,299,856 MSa/s,526,486 MSa/s,15,3,42280,24 0 24 0 2898 24 1 24 1 2082 25 0 25 0 1954
+fft_ifft_dit_1ch,cint32,cint16,128,1,2,0,1024,0,0,1219,840 MSa/s,2076,493 MSa/s,12,2,67440,24 0 24 0 2624 25 0 25 0 2958
+fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,1024,0,0,3993,256 MSa/s,4054,252 MSa/s,7,1,42424,2230
+fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,16,0,0,79,202 MSa/s,114,140 MSa/s,7,1,10168,1778
+fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,1024,0,0,1871,547 MSa/s,2073,493 MSa/s,7,1,43448,4512
+fft_ifft_dit_1ch,cint32,cint16,256,1,2,0,1024,0,0,963,1063 MSa/s,2072,494 MSa/s,12,2,68464,24 0 24 0 3058 25 0 25 0 2974
+fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,256,0,0,465,550 MSa/s,524,488 MSa/s,7,1,18872,4306
+fft_ifft_dit_1ch,cint32,cint16,256,1,1,1,256,0,0,548,467 MSa/s,600,426 MSa/s,7,1,19000,10160
+fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,1024,0,0,4069,251 MSa/s,4129,248 MSa/s,7,1,42424,2524
+fft_ifft_dit_1ch,cint32,cint16,32,1,2,0,1024,0,0,3008,340 MSa/s,3078,332 MSa/s,12,2,67440,24 0 24 0 2172 25 0 25 0 1680
+fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,32,0,0,139,230 MSa/s,176,181 MSa/s,7,1,10680,2358
+fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,512,0,0,936,547 MSa/s,1040,492 MSa/s,8,1,29624,4626
+fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,1024,0,0,1895,540 MSa/s,2073,493 MSa/s,8,1,46008,4802
+fft_ifft_dit_1ch,cint32,cint16,512,1,2,0,1024,0,0,1115,918 MSa/s,2072,494 MSa/s,14,2,71024,24 0 24 0 2990 25 0 25 0 3350
+fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,1024,0,0,3000,341 MSa/s,3060,334 MSa/s,7,1,42424,3118
+fft_ifft_dit_1ch,cint32,cint16,64,1,2,0,1024,0,0,2114,484 MSa/s,2185,468 MSa/s,12,2,67440,24 0 24 0 2602 25 0 25 0 1890
+fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,128,0,0,282,453 MSa/s,320,400 MSa/s,7,1,13752,3858
+fft_ifft_dit_1ch,cint16,cint16,256,1,2,1,256,0,0,347,737 MSa/s,596,429 MSa/s,11,2,29744,24 0 24 0 4006 25 0 25 0 6732
+fft_ifft_dit_1ch,cint16,cint16,256,1,2,0,256,0,0,250,1024 MSa/s,440,581 MSa/s,14,2,29552,24 0 24 0 2754 25 0 25 0 2898
+fft_ifft_dit_1ch,cint16,cint16,256,1,1,1,256,0,0,577,443 MSa/s,679,377 MSa/s,8,1,16952,10862
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,1,1,128,0,0,721,177 MSa/s,766,167 MSa/s,7,1,13880,7158
 fft_ifft_dit_1ch,cfloat,cfloat,16,1,1,0,16,0,0,126,126 MSa/s,168,95 MSa/s,7,1,10168,2344
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,1024,0,0,8148,125 MSa/s,8209,124 MSa/s,7,1,43448,7908
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,256,0,0,2018,126 MSa/s,2064,124 MSa/s,7,1,18872,7646
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,1,256,0,0,1431,178 MSa/s,1479,173 MSa/s,7,1,19000,10474
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,1024,0,0,4283,239 MSa/s,4384,233 MSa/s,12,2,68464,24 0 24 0 4846 25 0 25 0 4662
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,1024,0,0,20502,49 MSa/s,20563,49 MSa/s,7,1,42424,5380
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,32,0,0,632,50 MSa/s,674,47 MSa/s,7,1,10680,5098
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,1,32,0,0,884,36 MSa/s,928,34 MSa/s,7,1,10808,7414
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,2,0,1024,0,0,12384,82 MSa/s,12472,82 MSa/s,12,2,67440,24 0 24 0 3948 25 0 25 0 2250
-fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,1024,0,0,7183,142 MSa/s,7244,141 MSa/s,8,1,47544,8926
-fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,512,0,0,3593,142 MSa/s,3644,140 MSa/s,8,1,31160,8812
-fft_ifft_dit_1ch,cfloat,cfloat,512,1,2,0,1024,0,0,3699,276 MSa/s,3796,269 MSa/s,14,2,72560,24 0 24 0 4694 25 0 25 0 5696
-fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,64,0,0,326,196 MSa/s,363,176 MSa/s,7,1,11704,3778
-fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,0,1024,0,0,13957,73 MSa/s,14018,73 MSa/s,7,1,42424,6288
-fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,1,64,0,0,962,66 MSa/s,1006,63 MSa/s,7,1,11832,8450
-fft_ifft_dit_1ch,cfloat,cfloat,64,1,2,0,1024,0,0,6970,146 MSa/s,7102,144 MSa/s,12,2,67440,24 0 24 0 4028 25 0 25 0 3832
-fft_ifft_dit_1ch,cint16,cint16,1024,0,1,0,1024,0,0,2057,497 MSa/s,2103,486 MSa/s,10,1,43448,6462
-fft_ifft_dit_1ch,cint16,cint16,1024,1,1,0,1024,0,0,2057,497 MSa/s,2103,486 MSa/s,10,1,43448,6462
-fft_ifft_dit_1ch,cint16,cint16,128,0,1,0,128,0,0,472,271 MSa/s,509,251 MSa/s,8,1,12728,4934
-fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,1,1,326,392 MSa/s,711,197 MSa/s,14,4,38624,23 0 23 0 4324 24 0 24 0 2134 25 0 25 0 4308 26 0 26 0 2134
-fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,0,0,472,271 MSa/s,509,251 MSa/s,8,1,12728,4934
-fft_ifft_dit_1ch,cint16,cint16,16,1,1,0,16,0,0,173,92 MSa/s,215,74 MSa/s,8,1,10936,2408
-fft_ifft_dit_1ch,cint16,cint16,2048,0,1,0,2048,0,0,4305,475 MSa/s,4362,469 MSa/s,13,1,79288,7054
-fft_ifft_dit_1ch,cint16,cint16,2048,1,1,0,2048,0,0,4305,475 MSa/s,4362,469 MSa/s,13,1,79288,7054
-fft_ifft_dit_1ch,cint16,cint16,256,0,1,0,256,0,0,654,391 MSa/s,693,369 MSa/s,8,1,16824,5410
-fft_ifft_dit_1ch,cint16,cint16,256,1,1,0,256,0,0,654,391 MSa/s,693,369 MSa/s,8,1,16824,5410
-fft_ifft_dit_1ch,cint16,cint16,32,0,1,0,32,0,0,270,118 MSa/s,307,104 MSa/s,8,1,11192,3066
-fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,0,64,0,0,863,74 MSa/s,905,70 MSa/s,7,1,11704,6014
-fft_ifft_dit_1ch,cint32,cint16,64,1,1,1,64,0,0,645,99 MSa/s,687,93 MSa/s,7,1,11832,8420
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,1024,0,0,5225,195 MSa/s,5286,193 MSa/s,7,1,43448,4956
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,256,0,0,1306,196 MSa/s,1469,174 MSa/s,7,1,18872,4684
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,1,256,0,0,976,262 MSa/s,1024,250 MSa/s,7,1,19000,7862
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,1024,0,0,2935,348 MSa/s,3021,338 MSa/s,12,2,68464,24 0 24 0 3278 25 0 25 0 3248
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,256,0,0,802,319 MSa/s,1155,221 MSa/s,10,2,31600,24 0 24 0 3160 25 0 25 0 3020
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,1,256,0,0,652,392 MSa/s,1065,240 MSa/s,10,2,31792,24 0 24 0 4916 25 0 25 0 5738
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,3,0,256,0,0,633,404 MSa/s,1070,239 MSa/s,14,3,44328,24 0 24 0 3160 24 1 24 1 2296 25 0 25 0 2028
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,3,1,256,0,0,564,453 MSa/s,1076,237 MSa/s,15,3,44584,24 0 24 0 5738 24 1 24 1 3796 25 0 25 0 3562
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,1024,0,0,6297,162 MSa/s,6358,161 MSa/s,7,1,42424,3538
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,32,0,0,213,150 MSa/s,255,125 MSa/s,7,1,10680,3268
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,1,32,0,0,529,60 MSa/s,573,55 MSa/s,7,1,10808,5600
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,2,0,1024,0,0,3774,271 MSa/s,3863,265 MSa/s,12,2,67440,24 0 24 0 2650 25 0 25 0 2250
+fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,1024,0,0,5495,186 MSa/s,5556,184 MSa/s,8,1,47544,5464
+fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,512,0,0,2735,187 MSa/s,2786,183 MSa/s,8,1,31160,5068
+fft_ifft_dit_1ch,cfloat,cfloat,512,1,2,0,1024,0,0,2804,365 MSa/s,2894,353 MSa/s,14,2,72560,24 0 24 0 3264 25 0 25 0 3724
+fft_ifft_dit_1ch,cint16,cint16,256,1,1,0,256,0,0,469,545 MSa/s,567,451 MSa/s,8,1,16824,4322
+fft_ifft_dit_1ch,cint16,cint16,256,0,1,0,256,0,0,469,545 MSa/s,512,500 MSa/s,8,1,16824,4322
+fft_ifft_dit_1ch,cint16,cint16,2048,1,1,0,2048,0,0,3913,523 MSa/s,3974,515 MSa/s,13,1,79288,5490
+fft_ifft_dit_1ch,cint16,cint16,2048,0,1,0,2048,0,0,3913,523 MSa/s,3974,515 MSa/s,13,1,79288,5490
+fft_ifft_dit_1ch,cint16,cint16,16,1,1,0,16,0,0,81,197 MSa/s,117,136 MSa/s,8,1,10936,1796
+fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,0,0,291,439 MSa/s,329,389 MSa/s,8,1,12728,3938
+fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,64,0,0,193,331 MSa/s,231,277 MSa/s,7,1,11704,2972
+fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,1,1,205,624 MSa/s,590,242 MSa/s,14,4,38624,23 0 23 0 3558 24 0 24 0 2134 25 0 25 0 3542 26 0 26 0 2134
+fft_ifft_dit_1ch,cint16,cint16,1024,1,1,0,1024,0,0,1790,572 MSa/s,1842,555 MSa/s,10,1,43448,5122
+fft_ifft_dit_1ch,cint16,cint16,1024,0,1,0,1024,0,0,1790,572 MSa/s,1842,555 MSa/s,10,1,43448,5122
+fft_ifft_dit_1ch,cfloat,cfloat,64,1,2,0,1024,0,0,3011,340 MSa/s,3099,330 MSa/s,12,2,67440,24 0 24 0 2814 25 0 25 0 2762
+fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,1,64,0,0,581,110 MSa/s,625,102 MSa/s,7,1,11832,6416
+fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,0,64,0,0,347,184 MSa/s,389,164 MSa/s,7,1,11704,3836
+fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,0,1024,0,0,5453,187 MSa/s,5514,185 MSa/s,7,1,42424,4132
+fft_ifft_dit_1ch,cint16,cint16,128,0,1,0,128,0,0,291,439 MSa/s,329,389 MSa/s,8,1,12728,3938
+fft_ifft_dit_1ch,cint32,cint16,64,1,1,1,64,0,0,442,144 MSa/s,486,131 MSa/s,7,1,11832,7216

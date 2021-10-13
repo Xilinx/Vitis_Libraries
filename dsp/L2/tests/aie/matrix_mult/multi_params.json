@@ -44,6 +44,19 @@
             "p_add_detiling_out": "1",
             "p_dim_out_leading": "1",
             "p_dim_a_leading": "1"
+        },
+        "test_5_matmul_nxl_lxn_8x64_64x4": {
+            "t_data_a":"cint32",
+            "t_data_b":"int32",
+            "p_dim_a":"8",
+            "p_dim_ab":"64",
+            "p_dim_b":"4",
+            "shift":"32",
+            "p_casc_len": "4",
+            "p_add_tiling_a": "1",
+            "p_add_detiling_out": "1",
+            "p_dim_out_leading": "1",
+            "p_dim_a_leading": "1"
         }
     }
 }

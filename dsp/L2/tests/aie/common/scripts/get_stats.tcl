@@ -12,6 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Get min
+proc min {list} {
+    set min [lindex $list 0]
+    foreach i $list {
+        if { $i < $min } {
+            set min $i
+        }
+    }
+    return $min
+}
+
+# Get max
+proc max {list} {
+    set max 0
+    foreach i $list {
+        if { $i > $max } {
+            set max $i
+        }
+    }
+    return $max
+}
+
 # Get args
 set windowSize          [lindex $argv 0]
 set cascLen             [lindex $argv 1]
@@ -115,35 +138,50 @@ if {[llength $cycleCountAvg] == 0} {
     }
 }
 
-# --------------------------
-# --- Compute Throughput ---
-# --------------------------
+# ------------------------------------------
+# --- Compute Throughput for each Kernel ---
+# ------------------------------------------
 for {set x 0} {$x < $cascLen} {incr x} {
     # Actual average throughput in MSa per second
     lappend throughputAvg  [expr {1000 * $windowSize / [lindex $cycleCountAvg $x]}]
     lappend throughputIIAvg  [expr {1000 * $windowSize / [lindex $initiationIntervalAprx $x]}]
 }
 
+# -----------------------------------------
+# --- Compute Throughput for the design ---
+# -----------------------------------------
+# Get the design extrema cycle count.
+set maxDescycleCountTotal [max $cycleCountTotal]
+set minDesCycleCountMin [min $cycleCountMin]
+set maxDescycleCountMax [max $cycleCountMax]
+set maxDesCycleCountAvg [max $cycleCountAvg]
+set maxDesInitiationInterval [max $initiationIntervalAprx]
+
+# Similarly, get the lowest throughput figure.
+set minDesThroughputAvg  [min $throughputAvg]
+set minDesThroughputIIAvg  [min $throughputIIAvg]
+
 # ----------------------
 # --- Display Result ---
 # ----------------------
-puts "cycleCountTotal:      $cycleCountTotal"
-puts "cycleCountMin:        $cycleCountMin"
-puts "cycleCountMax:        $cycleCountMax"
-puts "cycleCountAvg:        $cycleCountAvg"
-puts "throughputAvg:        $throughputAvg MSa/s"
-puts "initiationInterval:   $initiationIntervalAprx"
-puts "throughpuInitIntAvg:  $throughputIIAvg MSa/s"
+puts "cycleCountTotal:      $maxDescycleCountTotal"
+puts "cycleCountMin:        $minDesCycleCountMin"
+puts "cycleCountMax:        $maxDescycleCountMax"
+puts "cycleCountAvg:        $maxDesCycleCountAvg"
+puts "throughputAvg:        $minDesThroughputAvg MSa/s"
+puts "initiationInterval:   $maxDesInitiationInterval"
+puts "throughputInitIntAvg: $minDesThroughputIIAvg MSa/s"
 
 # ----------------------------
 # --- Store in status file ---
 # ----------------------------
 set outFile [open $outStatus a]
-puts $outFile "    cycleCountTotal:      $cycleCountTotal"
-puts $outFile "    cycleCountMin:        $cycleCountMin"
-puts $outFile "    cycleCountMax:        $cycleCountMax"
-puts $outFile "    cycleCountAvg:        $cycleCountAvg"
-puts $outFile "    throughputAvg:        $throughputAvg MSa/s"
-puts $outFile "    initiationInterval:   $initiationIntervalAprx"
-puts $outFile "    throughpuInitIntAvg:  $throughputIIAvg MSa/s"
+puts $outFile "    cycleCountTotal:      $maxDescycleCountTotal"
+puts $outFile "    cycleCountMin:        $minDesCycleCountMin"
+puts $outFile "    cycleCountMax:        $maxDescycleCountMax"
+puts $outFile "    cycleCountAvg:        $maxDesCycleCountAvg"
+puts $outFile "    throughputAvg:        $minDesThroughputAvg MSa/s"
+puts $outFile "    initiationInterval:   $maxDesInitiationInterval"
+puts $outFile "    throughputInitIntAvg: $minDesThroughputIIAvg MSa/s"
 close $outFile
+

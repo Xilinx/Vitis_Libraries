@@ -255,6 +255,270 @@ void INLINE_DECL r2comb_dit<cfloat, cfloat>(const cfloat* x,
                                             bool inv) {
     stage_radix2_dit<cfloat, cfloat, cfloat, 1>(x, tw, n, shift, y, inv);
 };
+
+//-------------------------------------------------------------------------------------------------
+// Unroll_for replacement functions.
+// Function to optionally call a rank if it lies within the remit of this kernel
+// static float stage handling
+template <int stage, int TP_POINT_SIZE, int TP_START_RANK, int TP_END_RANK>
+void INLINE_DECL opt_cfloat_stage(
+    cfloat* xbuff, cfloat* obuff, cfloat** tmp_bufs, cfloat** tw_table, unsigned int& pingPong, bool& inv) {
+    if
+        constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
+            cfloat* outptr = (stage == TP_END_RANK - 1) ? obuff : tmp_bufs[1 - pingPong];
+            cfloat* inptr = (stage == TP_START_RANK) ? xbuff : tmp_bufs[pingPong];
+            stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage))>(
+                (cfloat*)inptr, (cfloat*)tw_table[stage], TP_POINT_SIZE, 0, (cfloat*)outptr, inv);
+            pingPong = 1 - pingPong;
+        }
+};
+
+// dynamic float stage handling
+template <int stage, int TP_POINT_SIZE, int TP_START_RANK, int TP_END_RANK, int kPointSizePower>
+void INLINE_DECL opt_cfloat_dyn_stage(cfloat* xbuff,
+                                      cfloat* obuff,
+                                      cfloat** tmp_bufs,
+                                      cfloat** tw_table,
+                                      unsigned int& pingPong,
+                                      bool& inv,
+                                      int ptSizePwr) {
+    if
+        constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
+            int firstRank = kPointSizePower - ptSizePwr;
+            if (stage >= firstRank) {
+                cfloat* outptr = (stage == TP_END_RANK - 1) ? (cfloat*)obuff : (cfloat*)tmp_bufs[1 - pingPong];
+                cfloat* inptr =
+                    (stage == TP_START_RANK) || (stage == firstRank) ? (cfloat*)xbuff : (cfloat*)tmp_bufs[pingPong];
+                stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage))>(
+                    (cfloat*)inptr, (cfloat*)tw_table[stage - firstRank], (1 << ptSizePwr), 0, (cfloat*)outptr, inv);
+                pingPong = 1 - pingPong;
+            }
+        }
+};
+
+// Static int stage handling
+template <typename TT_DATA,
+          typename TT_INTERNAL_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          int stage,
+          int TP_POINT_SIZE,
+          int TP_SHIFT,
+          int TP_START_RANK,
+          int TP_END_RANK,
+          int firstRank,
+          int kPointSizePowerCeiled,
+          int kPointSizeCeiled>
+void INLINE_DECL opt_int_stage(TT_DATA* xbuff,
+                               TT_OUT_DATA* obuff,
+                               TT_INTERNAL_DATA** tmp_bufs,
+                               TT_TWIDDLE** tw_table,
+                               unsigned int& pingPong,
+                               bool& inv) {
+    if
+        constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
+            if
+                constexpr(stage == firstRank) { // first stage and radix4
+                    TT_DATA* inptr = xbuff;
+                    if
+                        constexpr(stage == TP_END_RANK - 2) {
+                            if
+                                constexpr(stage + 2 == kPointSizePowerCeiled) { // Not possible?
+                                    TT_OUT_DATA* outptr = obuff;
+                                    stage_radix4_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        TP_POINT_SIZE, FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                                }
+                            else {
+                                TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)obuff;
+                                stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                                    FFT_SHIFT15, outptr, inv);
+                            }
+                        }
+                    else {
+                        TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
+                        stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                            inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                            FFT_SHIFT15, outptr, inv);
+                    }
+                }
+            else if
+                constexpr(stage + 1 == firstRank) { // radix2 stage - can't possible be the final stage overall, so no
+                                                    // need for TP_SHIFT clause
+                    TT_DATA* inptr = xbuff;
+                    if
+                        constexpr(stage + 1 == TP_END_RANK - 1) {
+                            TT_OUT_DATA* outptr = obuff;
+                            stage_radix2_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                        }
+                    else {
+                        TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
+                        stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                            inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                    }
+                }
+            else { // not the first stage in the kernel
+                TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                if
+                    constexpr(stage == TP_END_RANK - 2) {
+                        TT_OUT_DATA* outptr = obuff;
+                        if
+                            constexpr(stage + 2 == kPointSizePowerCeiled) {
+                                stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                                    FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                            }
+                        else {
+                            stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                             (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE,
+                                FFT_SHIFT15, outptr, inv);
+                        }
+                    }
+                else {
+                    TT_INTERNAL_DATA* outptr = tmp_bufs[1 - pingPong];
+                    stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], TP_POINT_SIZE, FFT_SHIFT15,
+                        outptr, inv);
+                }
+            }
+            pingPong = 1 - pingPong;
+        }
+};
+
+// dynamic int stage handling
+template <typename TT_DATA,
+          typename TT_INTERNAL_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          int stage,
+          int TP_POINT_SIZE,
+          int TP_SHIFT,
+          int TP_START_RANK,
+          int TP_END_RANK,
+          int kPointSizePower,
+          int kPointSizePowerCeiled,
+          int kPointSizeCeiled>
+void INLINE_DECL opt_int_dyn_stage(TT_DATA* xbuff,
+                                   TT_OUT_DATA* obuff,
+                                   TT_INTERNAL_DATA** tmp_bufs,
+                                   TT_TWIDDLE** tw_table,
+                                   unsigned int& pingPong,
+                                   bool& inv,
+                                   int ptSizePwr) {
+    if
+        constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
+            int firstRank = kPointSizePowerCeiled - ptSizePwr;
+            if (stage + 1 >= firstRank) {
+                if
+                    constexpr(stage == TP_END_RANK - 2) {
+                        if
+                            constexpr(stage + 2 == kPointSizePowerCeiled) { // end of FFT, so apply shift
+                                TT_OUT_DATA* outptr = obuff;
+                                if
+                                    constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
+                                        TT_DATA* inptr = xbuff;
+                                        stage_radix4_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                            inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                            (1 << ptSizePwr), FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                                    }
+                                else { // last in FFT, not start of kernel
+                                    TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                                    stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        (1 << ptSizePwr), FFT_SHIFT15 + TP_SHIFT, outptr, inv);
+                                }
+                            }
+                        else { // end of kernel, not end of FFT
+                            TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)obuff;
+                            if
+                                constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
+                                    TT_DATA* inptr = xbuff;
+                                    if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
+                                                                  // overall, so no need for TT_OUT_DATA
+                                        stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                            inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15,
+                                            outptr, inv);
+                                    } else {
+                                        stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                            inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                            (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                    }
+                                }
+                            else {                        // end of kernel, not start kernel.
+                                if (stage == firstRank) { // first stage of point size and radix4
+                                    TT_DATA* inptr = xbuff;
+                                    stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                } else if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
+                                                                     // overall, so no need for TT_OUT_DATA
+                                    TT_DATA* inptr = xbuff;
+                                    stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr,
+                                        inv);
+                                } else { // last in kernel, not first in kernel, not first in FFT
+                                    TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                                    stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                        (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                }
+                            } // if start of kernel
+                        }     // if end of FFT
+                    }
+                else { // not end of kernel
+                    TT_INTERNAL_DATA* outptr = tmp_bufs[1 - pingPong];
+                    if
+                        constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
+                            TT_DATA* inptr = xbuff;
+                            if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage overall,
+                                                          // so no need for TT_OUT_DATA
+                                stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                            } else {
+                                stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                    inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
+                                    (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                            }
+                        }
+                    else {                        // not last in kernel, not first in kernel.
+                        if (stage == firstRank) { // first stage of point size and radix4
+                            TT_DATA* inptr = xbuff;
+                            stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], (1 << ptSizePwr),
+                                FFT_SHIFT15, outptr, inv);
+                        } else if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
+                                                             // overall, so no need for TT_OUT_DATA
+                            TT_DATA* inptr = xbuff;
+                            stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                        } else { // not last in kernel, not first in kernel, not first in FFT
+                            TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
+                            stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
+                                             (kPointSizeCeiled >> (2 + stage))>(
+                                inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1], (1 << ptSizePwr),
+                                FFT_SHIFT15, outptr, inv);
+                        }
+                    } // if start of kernel
+                }     // if end of FFT
+                pingPong = 1 - pingPong;
+            } // if  stage involves processing
+        }
+};
 }
 }
 }

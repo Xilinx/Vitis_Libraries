@@ -14,9 +14,7 @@
                     "clflags": []
                 },
                 "linker": {
-                    "ldclflags": [
-                        "--config PROJECT/system.cfg"
-                    ]
+                    "ldclflags": []
                 },
                 "package": {
                     "cflags": [
@@ -29,9 +27,6 @@
     "pre_build": [
         {
             "build_cmd": "make -f PROJECT/golden.mk GOLDEN_CUR_DIR=PROJECT GOLDEN_ROOT_DIR=LIB_DIR LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) LOC_INPUT_FILE_B=$(LOC_INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_A=$(P_INPUT_WINDOW_VSIZE_A) STIM_TYPE_A=$(STIM_TYPE_A) INPUT_FILE_B=$(INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_B=$(P_INPUT_WINDOW_VSIZE_B) STIM_TYPE_B=$(STIM_TYPE_B) NITER_UUT=$(NITER_UUT) P_DIM_A=$(P_DIM_A) P_DIM_AB=$(P_DIM_AB) T_DATA_A=$(T_DATA_A) T_DATA_B=$(T_DATA_B) P_CASC_LEN=$(P_CASC_LEN) P_DIM_A_LEADING=$(P_DIM_A_LEADING) P_ADD_TILING_A=$(P_ADD_TILING_A) P_DIM_B=$(P_DIM_B) P_DIM_B_LEADING=$(P_DIM_B_LEADING) P_ADD_TILING_B=$(P_ADD_TILING_B) "
-        },
-        {
-            "build_cmd": "make -f PROJECT/ksrc.mk GENKERNEL=LIB_DIR/../utils/L2/scripts/generate_kernels SPEC=PROJECT/kernel/spec.json TOOLDIR=PROJECT/_krnlgen"
         }
     ],
     "post_launch": [
@@ -63,12 +58,6 @@
     ],
     "launch": [
         {
-            "name": "hwemu-launch",
-            "target": "hw_emu",
-            "pkg-dir": "$(WORK_DIR)",
-            "input-dir": "./"
-        },
-        {
             "name": "aiesim-launch",
             "target": "aiesim",
             "pkg-dir": "$(WORK_DIR)",
@@ -81,41 +70,6 @@
             "input-dir": "./"
         }
     ],
-    "host": {
-        "host_exe": "host.elf",
-        "compiler": {
-            "sources": [
-                "PROJECT/host.cpp",
-                "PROJECT/Work/ps/c_rts/aie_control_xrt.cpp"
-            ],
-            "includepaths": [
-                "$(SYSROOT)/usr/include/xrt/",
-                "LIB_DIR/L2/include/aie",
-                "LIB_DIR/L2/tests/aie/common/inc",
-                "LIB_DIR/L1/include/aie",
-                "LIB_DIR/L1/tests/aie/inc",
-                "LIB_DIR/L1/tests/aie/src",
-                "PROJECT"
-            ],
-            "options": "--sysroot=$(SYSROOT)",
-            "symbols": ["__PS_ENABLE_AIE__", "USING_PL_MOVER=1", "USING_UUT=1"]
-        },
-        "linker": {
-            "librarypaths": [
-                "$(SYSROOT)/usr/lib/"
-            ],
-            "options": "--sysroot=$(SYSROOT)"
-        }
-    },
-    "v++": {
-        "compiler": {
-            "includepaths": [
-                "LIB_DIR/../utils/L1/include/hw",
-                "PROJECT/kernel",
-                "PROJECT"
-            ]
-        }
-    },
     "aiecompiler": {
         "compiler": {
             "includepaths": [
@@ -127,7 +81,6 @@
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
             ],
-            "clflags":["-Xpreproc='-DUSING_PL_MOVER=1'"],
             "customized_params": {
                 "params" : "--dataflow -v --device=$(DEVICE_FILE) $($(TAG)_TARGET_COMPILE_ARGS) --test-iterations=$(NITER_$(TAG)) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
                 "default": {
@@ -225,28 +178,6 @@
                     "name": "libadf.a"
                 }
             ]
-        }
-    ],
-    "containers": [
-        {
-            "accelerators": [
-                {
-                    "location": "kernel/mm2s.cpp",
-                    "clflags": " ",
-                    "name": "mm2s"
-                },
-                {
-                    "location": "kernel/bmm2s.cpp",
-                    "clflags": " ",
-                    "name": "bmm2s"
-                },
-                {
-                    "location": "kernel/s2mm.cpp",
-                    "clflags": " ",
-                    "name": "s2mm"
-                }
-            ],
-            "name": "kernel"
         }
     ],
     "testinfo": {

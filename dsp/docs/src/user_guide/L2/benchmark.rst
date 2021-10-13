@@ -32,11 +32,11 @@ The QoR are reflected using the below metrics:
 - DATA_MEMORY           - total data memory in Bytes used by the design
 - PROGRAM_MEMORY        - program memory in Bytes used by each kernel
 
-In addition, for multi-kernel designs, each kernel may take different amount of time to execute, as a result figures reported for each kernels `cycleCountAvg`, `throughputAvg` may vary slightly. \n
-To give a good comparison figure, the highest value of `cycleCountAvg` reported by each kernel in a multi-kernel configuration  will be presented as `cycleCountAvg` in the benchmark tables. \n
-Similarly, the lowest value of `throughputAvg`reported by each kernel will be presented as `throughputAvg`. \n
-Furthermore, PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. \n
-For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space deliminated).
+In addition, for multi-kernel designs, each kernel may take different amount of time to execute and as a result, figures reported for each kernels `cycleCountAvg`, `throughputAvg` may vary slightly.
+
+To give a good comparison figure, the highest value of `cycleCountAvg` reported by each kernel in a multi-kernel configuration  will be presented as `cycleCountAvg` in the benchmark tables. Similarly, the lowest value of `throughputAvg`reported by each kernel will be presented as `throughputAvg`.
+
+Furthermore, PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space deliminated).
 
 Filters
 ~~~~~~~

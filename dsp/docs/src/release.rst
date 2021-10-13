@@ -22,43 +22,33 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-***********************
 2021.2
-***********************
+------
 
 The below features have been added to the library in this release.
 
-
-
-*  **DDS / Mixer**
-
-New library element is now available:
-
-- DDS/Mixer
+*  **DDS / Mixer** - new library element
 
 +---------------------------------------+-----------------------------------------------------------------------------+
 | **Function**                          | **Namespace**                                                               |
 +=======================================+=============================================================================+
-| DDS / Mixer                           |  dsplib::mixer::dds_mixer                                                   |
+| DDS / Mixer                           |  xf::dsp::aie::mixer::dds_mixer                                             |
 +---------------------------------------+-----------------------------------------------------------------------------+
-
-.. note:: Namespace aliasing can be utilized to shorten instantiations: ``namespace dsplib = xf::dsp::aie;``
 
 Component may be configured to provide a DDS output or to mix 1/2 input channels onto generated DDS frequency.
 DDS/Mixer supports window input/output interface, as well as streaming interface.
 
 *  **FIR Filters**
 
-Single rate FIRs now support streaming interfaces in addition to window interfaces.
+Single rate FIRs now support streaming interfaces as well as to window interfaces.
 
 *  **FFT/iFFT**
 
-FFT now supports streaming interfaces in addition to window interfaces.
-In addition, FFT now offers improved performance and greater poit size support with parallelization.
+FFT now supports streaming interfaces as well as to window interfaces.
+In addition, FFT now offers improved performance and greater point size support with parallelization.
 
-***********************
 2021.1
-***********************
+------
 
 The AI Engine DSP Library contains common parameterizable DSP functions used in many advanced signal processing applications. All functions currently support window interfaces with streaming interface support planned for future releases.
 
@@ -133,16 +123,14 @@ DSP Library functions are supported in Vitis Model Composer, enabling users to e
 
 
 
-***********************
 2020.2
-***********************
+------
 
 Revised the APIs to fully support Vitis HLS.
 
 
 
-***********************
 2020.1
-***********************
+------
 
 The 1.0 release introduces L1 HLS primitives for Discrete Fourier Transform for 1-D and 2-D input data.
