@@ -1,0 +1,54 @@
+.. index:: pair: class; xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditioanl__rtp__graph:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph:
+
+template class xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph
+================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_sr_asym_graph.hpp"
+
+
+
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditioanl__rtp__graph_1a95c65db2e2974bf41bb982d7dc1158a1:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph::coeff:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditioanl__rtp__graph_1a3680bccd1f37e91f056f9be2c55baa02:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph::conditioanl_rtp_graph:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditioanl__rtp__graph_1a05eac05abbdace0aac9ce6aa3adfff1c:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditioanl_rtp_graph::conditioanl_rtp_connections:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    unsigned int TP_USE_RTP = 1,
+	    unsigned int TP_PORT_POS = 1
+	    >
+	class conditioanl_rtp_graph: public graph
+
+	    // direct descendants
+
+	    template <
+	        typename TT_DATA,
+	        typename TT_COEFF,
+	        unsigned int TP_FIR_LEN,
+	        unsigned int TP_SHIFT,
+	        unsigned int TP_RND,
+	        unsigned int TP_INPUT_WINDOW_VSIZE,
+	        unsigned int TP_CASC_LEN = 1,
+	        unsigned int TP_USE_COEFF_RELOAD = 0,
+	        unsigned int TP_NUM_OUTPUTS = 1,
+	        unsigned int TP_DUAL_IP = 0,
+	        unsigned int TP_API = 0
+	        >
+	    class :ref:`xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph>` 
+
+	// fields
+
+	port <input> coeff
+

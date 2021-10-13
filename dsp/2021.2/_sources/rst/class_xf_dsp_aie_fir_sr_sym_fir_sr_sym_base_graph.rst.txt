@@ -1,0 +1,123 @@
+.. index:: pair: class; xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph:
+
+template class xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph
+===============================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_sr_sym_graph.hpp"
+
+
+Overview
+~~~~~~~~
+
+
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1a897cc97c3d0368711b7ecccb5036c52d:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::m_firkernels:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1a067e6383e2662aac99ce798ee6d72b2a:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::fir_sr_sym_base_graph:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1a75f86cef2d71967a4bb6684a5e3dd3f5:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::fir_sr_sym_base_graph-2:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1a014aac20f420cf3eb6a49b0a0e96f43b:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::fir_sr_sym_base_connections:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename TT_DATA,
+	    typename TT_COEFF,
+	    unsigned int TP_FIR_LEN,
+	    unsigned int TP_SHIFT,
+	    unsigned int TP_RND,
+	    unsigned int TP_INPUT_WINDOW_VSIZE,
+	    unsigned int TP_CASC_LEN = 1,
+	    unsigned int TP_USE_COEFF_RELOAD = 0,
+	    unsigned int TP_NUM_OUTPUTS = 1,
+	    unsigned int TP_API = 0
+	    >
+	class fir_sr_sym_base_graph: public graph
+
+	    // direct descendants
+
+	    template <
+	        typename TT_DATA,
+	        typename TT_COEFF,
+	        unsigned int TP_FIR_LEN,
+	        unsigned int TP_SHIFT,
+	        unsigned int TP_RND,
+	        unsigned int TP_INPUT_WINDOW_VSIZE,
+	        unsigned int TP_CASC_LEN = 1,
+	        unsigned int TP_USE_COEFF_RELOAD = 0,
+	        unsigned int TP_NUM_OUTPUTS = 1,
+	        unsigned int TP_API = 0
+	        >
+	    class :ref:`xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph>` 
+
+	// fields
+
+	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1acd9dde9811406a9603f91985650a12ce>`
+	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1aab25a93be05eccd59d59b643dbc0ab3d>`
+	kernel m_firKernels[TP_CASC_LEN]
+
+Fields
+------
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1acd9dde9811406a9603f91985650a12ce:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::in:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	port <input> in
+
+The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_INPUT_WINDOW_VSIZE. Note: Margin is added internally to the graph, when connecting input port with kernel port. Therefore, margin should not be added when connecting graph to a higher level design unit. Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest multiple of 32 bytes.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1aab25a93be05eccd59d59b643dbc0ab3d:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::out:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	port <output> out
+
+A window API of TP_INPUT_WINDOW_VSIZE samples of TT_DATA type.
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1a920a87fc6bafe5eb700728af0dea7968:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__base__graph_1ad72365303b366e1fb9ee0614c97a9b16:
+.. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_base_graph::getkernelarchs:
+
+getKernelArchs
+--------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	unsigned int getKernelArchs ()
+
+Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
+

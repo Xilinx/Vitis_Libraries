@@ -1,0 +1,34 @@
+.. index:: pair: class; xf::dsp::aie::fir::sr_asym::conditional_in_graph <TP_INPUT_WINDOW_BYTESIZE, TP_MARGIN, TP_CASC_LEN, DUAL_IP_SINGLE, TP_API, TP_PORT_POS>
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__in__graph_3_01_t_p___i_n_p_u_t___w_i_n_6ea3d8b2cd686da3e92552dffb6302c1:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_in_graph:
+
+template class xf::dsp::aie::fir::sr_asym::conditional_in_graph <TP_INPUT_WINDOW_BYTESIZE, TP_MARGIN, TP_CASC_LEN, DUAL_IP_SINGLE, TP_API, TP_PORT_POS>
+=======================================================================================================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_sr_asym_graph.hpp"
+
+
+
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__in__graph_3_01_t_p___i_n_p_u_t___w_i_n_6ea3d8b2cd686da3e92552dffb6302c1_1a64da9e115abf2b4b20b3fb548924851f:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_in_graph::conditional_in_graph:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__in__graph_3_01_t_p___i_n_p_u_t___w_i_n_6ea3d8b2cd686da3e92552dffb6302c1_1ac269ab43c8e8655964c5648f4732efab:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_in_graph::conditioanl_in_connections:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    unsigned int TP_INPUT_WINDOW_BYTESIZE,
+	    unsigned int TP_MARGIN,
+	    unsigned int TP_CASC_LEN,
+	    unsigned int TP_API,
+	    unsigned int TP_PORT_POS
+	    >
+	class conditional_in_graph <TP_INPUT_WINDOW_BYTESIZE, TP_MARGIN, TP_CASC_LEN, DUAL_IP_SINGLE, TP_API, TP_PORT_POS>: public graph
+

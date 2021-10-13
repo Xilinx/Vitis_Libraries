@@ -1,0 +1,186 @@
+.. index:: pair: class; xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph:
+
+template class xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph
+==============================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "dds_mixer_graph.hpp"
+
+
+Overview
+~~~~~~~~
+
+:ref:`dds_mixer <doxid-namespacexf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer>` operates in 3 modes:
+
+**Mixer Mode 0:**
+
+This is dds mode only. The library element has a single output window, which is written to with the sin/cos components corresponding to the programmed phase increment.
+
+**Mixer Mode 1:**
+
+This is dds plus mixer for a single data input port.
+
+Each data input sample is complex multiplied with the corresponding dds sample, to create a modulated signal that is written to the output window.
+
+**Mixer Mode 2:**
+
+This is a special configuration for symmetrical carriers and two data input ports.
+
+Each data sample of the first input is complex multiplied with the corresponding dds sample to create a modulated signal.
+
+These are the templates to configure the :ref:`dds_mixer <doxid-namespacexf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer>` class.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - TT_DATA
+
+        - 
+          describes the type of individual data samples input to and output from the :ref:`dds_mixer <doxid-namespacexf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer>` function. This is a typename and must be one of the following:
+          
+          cint16
+
+    *
+        - TP_INPUT_WINDOW_VSIZE
+
+        - describes the number of samples in the input/output window API or number of samples to process per iteration.
+
+    *
+        - TP_MIXER_MODE
+
+        - 
+          describes the mode of operation of the :ref:`dds_mixer <doxid-namespacexf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer>` .
+          
+          The values supported are:
+          
+          0 (dds only mode),
+          
+          1 (dds plus single data channel mixer),
+          
+          2 (dds plus two data channel mixer for symmetrical carriers)
+
+    *
+        - TP_API
+
+        - 
+          specifies if the input/output interface should be window-based or stream-based.
+          
+          The values supported are 0 (window API) or 1 (stream API).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1ab4379702aa7d1dd670f479875aff4fbf:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::inporttype:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a59fd8a7476b0a95250255057f60e8ad8:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::outporttype:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1ab4d60e740b585e76d95871c930af8643:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::in2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename TT_DATA,
+	    unsigned int TP_INPUT_WINDOW_VSIZE,
+	    unsigned int TP_MIXER_MODE = MIXER_MODE_2,
+	    unsigned int TP_API = IO_API::WINDOW
+	    >
+	class dds_mixer_graph: public graph
+
+	// typedefs
+
+	typedef typename std::conditional < (TP_API==IO_API::WINDOW), window <TP_INPUT_WINDOW_VSIZE*sizeof (TT_DATA)>, stream>::type inPortType
+	typedef :ref:`inPortType<doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1ab4379702aa7d1dd670f479875aff4fbf>` outPortType
+
+	// fields
+
+	port <input> :ref:`in1<doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a4e3ec8081b49dc6e13a955dc100daf34>`
+	port <input> in2
+	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a7734a512e680ffc887d2c33b966e1fd8>`
+	kernel :ref:`m_ddsKernel<doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a9a5f4881e2bc299cd71297c34654f92d>`
+
+Fields
+------
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a4e3ec8081b49dc6e13a955dc100daf34:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::in1:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	port <input> in1
+
+The input data to the function. When in TP_API=WINDOW, the port is a window of samples of TT_DATA type. The number of samples in the window is described by TP_INPUT_WINDOW_VSIZE.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a7734a512e680ffc887d2c33b966e1fd8:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::out:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	port <output> out
+
+An output port of TT_DATA type. When in TP_API=WINDOW, the port is a window of TP_INPUT_WINDOW_VSIZE samples.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1a9a5f4881e2bc299cd71297c34654f92d:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::m_ddskernel:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel m_ddsKernel
+
+kernel instance used to set constraints - getKernels function returns a pointer to this.
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1abde90213d90eb1140dbcbf766f219325:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function for getting kernel - useful for setting runtime ratio, location constraints, fifo_depth (for stream), etc.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer_1_1dds__mixer__graph_1af7a257f8f2e09cc73b35933edb3f3fc1:
+.. _cid-xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph::dds_mixer_graph:
+
+dds_mixer_graph
+---------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	dds_mixer_graph (const uint32_t phaseInc)
+
+This is the constructor function for the :ref:`dds_mixer <doxid-namespacexf_1_1dsp_1_1aie_1_1mixer_1_1dds__mixer>` graph.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - phaseInc
+
+        - specifies the phase increment between samples. Input value 2^31 corresponds to Pi (i.e. 180').
+

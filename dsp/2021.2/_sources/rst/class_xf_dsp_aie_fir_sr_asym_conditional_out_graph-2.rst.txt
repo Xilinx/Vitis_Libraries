@@ -1,0 +1,57 @@
+.. index:: pair: class; xf::dsp::aie::fir::sr_asym::conditional_out_graph
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__out__graph:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_out_graph-2:
+
+template class xf::dsp::aie::fir::sr_asym::conditional_out_graph
+================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_sr_asym_graph.hpp"
+
+
+
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__out__graph_1af3b3dca71fb11487164f88a21988c05a:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_out_graph::out2:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__out__graph_1a5aed938d56406bd4c721825d39b2bd9c:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_out_graph::conditional_out_graph-2:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1conditional__out__graph_1ae857a4d25eeac0c6a0daae1c6502918e:
+.. _cid-xf::dsp::aie::fir::sr_asym::conditional_out_graph::conditioanl_out_connections-2:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    unsigned int TP_OUTPUT_WINDOW_BYTESIZE,
+	    unsigned int TP_CASC_LEN = 1,
+	    unsigned int TP_NUM_OUTPUTS = 2,
+	    unsigned int TP_API = USE_WINDOW_API,
+	    unsigned int TP_PORT_POS = 1
+	    >
+	class conditional_out_graph: public graph
+
+	    // direct descendants
+
+	    template <
+	        typename TT_DATA,
+	        typename TT_COEFF,
+	        unsigned int TP_FIR_LEN,
+	        unsigned int TP_SHIFT,
+	        unsigned int TP_RND,
+	        unsigned int TP_INPUT_WINDOW_VSIZE,
+	        unsigned int TP_CASC_LEN = 1,
+	        unsigned int TP_USE_COEFF_RELOAD = 0,
+	        unsigned int TP_NUM_OUTPUTS = 1,
+	        unsigned int TP_DUAL_IP = 0,
+	        unsigned int TP_API = 0
+	        >
+	    class :ref:`xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph>` 
+
+	// fields
+
+	port <output> out2
+
