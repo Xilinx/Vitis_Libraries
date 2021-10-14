@@ -16,8 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MK_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/scripts/*}')
-XFLIB_DIR = $(XF_PROJ_ROOT)
+override XFLIB_DIR := $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/scripts/*}')
 
 DEST_DIR ?= $(CURDIR)
 
@@ -58,7 +57,7 @@ $(DEST_DIR)/py3env/.ok: $(DEST_DIR)/py3env/bin/activate
 $(DEST_DIR)/py3env/bin/activate:
 	@echo "[INFO] Creating python3 virtual environment..."
 	@mkdir -p $(DEST_DIR)
-	@(cd $(DEST_DIR);export LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib:$(LD_LIBRARY_PATH); $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3 -m venv py3env)
+	@(cd $(DEST_DIR); python3 -m venv py3env)
 
 clean:
 	@rm -rf dataConverter py3env

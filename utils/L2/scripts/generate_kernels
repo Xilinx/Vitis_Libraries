@@ -11,7 +11,8 @@ else
   tool_dir=${script_path}
 fi
 
-PATH=${XILINX_VITIS}/tps/lnx64/python-3.8.3/bin:$PATH
+# Use python3 shipped with Vitis
+export PATH=${XILINX_VITIS}/tps/lnx64/python-3.8.3/bin:$PATH
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}${LD_LIBRARY_PATH:+:}${XILINX_VITIS}/tps/lnx64/python-3.8.3/lib:${XILINX_VIVADO}/tps/lnx64/gcc-6.2.0/lib64
 
 if ! hash python3 &> /dev/null; then
@@ -24,17 +25,4 @@ if [ ! -f ${tool_dir}/py3env/.ok -o ! -f ${tool_dir}/dataConverter ]; then
 fi
 
 source ${tool_dir}/py3env/bin/activate
-
-echo "... ..."
-echo "1. DEBUG: python path: "
-which python
-echo "... ..."
-
 ${script_path}/internal/generate_kernels.py --tool-dir ${tool_dir} "$@"
-
-echo "... ..."
-echo "2. DEBUG: python path: "
-which python
-echo "... ..."
-
-unset PYTHONPATH
