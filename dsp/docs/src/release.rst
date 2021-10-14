@@ -35,7 +35,10 @@ The below features have been added to the library in this release.
 | DDS / Mixer                           |  xf::dsp::aie::mixer::dds_mixer                                             |
 +---------------------------------------+-----------------------------------------------------------------------------+
 
-Component may be configured to provide a DDS output or to mix 1/2 input channels onto generated DDS frequency.
+This component may be configured to one of three modes.
+The first mode is a DDS only.
+The second mode is a single channel mixer.
+The third mode is a symmetrical mixer, taking two input channels and mixing each with the DDS output and the conjugate of DDS output respectively, combining the result to one output channel.
 DDS/Mixer supports window input/output interface, as well as streaming interface.
 
 *  **FIR Filters**

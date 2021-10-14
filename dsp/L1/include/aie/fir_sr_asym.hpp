@@ -127,7 +127,7 @@ class kernelFilterClass {
     static constexpr eArchType m_kArchBufSize = m_kInitDataNeeded > m_kSamplesInBuff ? kArchZigZag : kArchIncLoads;
     static constexpr eArchType m_kArchWindow =
         (m_kFirCoeffByteSize < fnZigZagMaxCoeffByteSize<TT_COEFF>() && // Revert to Basic for "big" FIRs.
-         TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg) == 0)
+         TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg * m_kDataLoadVsize / m_kVOutSize) == 0)
             ? m_kArchBufSize
             : kArchBasic;
     static constexpr eArchType m_kArch = TP_API == 1 ? kArchStream : m_kArchWindow;

@@ -262,7 +262,7 @@ In such case data should be organized in a 128-bit interleaved pattern, e.g.:
 
 .. note::  Dual input streams offer no throughput gain if only single output stream would be used. Therefore, dual input streams are only supported with 2 output streams.
 
-.. note::  Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows. This is the class for the Asymmetric Single Rate FIR graph
+.. note::  Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows.
 
 
 Stream Input for Symmetric FIRs
@@ -352,19 +352,17 @@ Table 4 lists the template parameters used to configure the top level graph of t
 |                      |                | as a power of 2       |                            |
 +----------------------+----------------+-----------------------+----------------------------+
 
-TT_DATA: Supports only the 3 types listed. For real-only FFT/IFFT operation, consider using the library element widget_real2complex to convert real-only data to complex and vice versa.
+**TT_DATA**: Supports only the 3 types listed. For real-only FFT/IFFT operation, consider using the library element widget_real2complex to convert real-only data to complex and vice versa.
 
-TT_TWIDDLE: Is entirely determined by the choice of TT_DATA.
+**TT_TWIDDLE**: Is entirely determined by the choice of TT_DATA.
 
-TP_POINT_SIZE: Must be a power of 2 with a minimum value of 16. The maximum value supported by the library element is 65536, but the achievable maximum will be determined by mapping limitations. For instance, a single tile implementation can achieve a maximum of 4096, but this may require single rather than pingpong window interfaces depending on data type.
+**TP_POINT_SIZE**: Must be a power of 2 with a minimum value of 16. The maximum value supported by the library element is 65536, but the achievable maximum will be determined by mapping limitations. For instance, a single tile implementation can achieve a maximum of 4096, but this may require single rather than pingpong window interfaces depending on data type.
 
-TP_SHIFT: Can be used to implement the 1/N scaling of an IFFT.
+**TP_SHIFT**: Can be used to implement the 1/N scaling of an IFFT.
 
-TP_CASC_LEN: Splits the FFT/IFFT operation over multiple kernels in series, with each subsequent kernel being placed on an adjacent tile. This is to achieve higher throughput.
+**TP_CASC_LEN**: Splits the FFT/IFFT operation over multiple kernels in series, with each subsequent kernel being placed on an adjacent tile. This is to achieve higher throughput.
 
-TP_PARALLEL_POWER: If greater than 0, TP_CASC_LEN applies to the subframe FFT rather than the FFT as a whole. For instance, with TP_POINT_SIZE=16384 and TP_PARALLEL_POWER = 3 there will be 8 subframe FFTs each of point size 2048. The TP_CASC_LEN in this case would be limited to 6 for integer TT_DATA types and 11 for TT_DATA = cfloat.
-
-TP_DYN_PT_SIZE: When set to static point size all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to dynamic point size each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1 TP_POINT_SIZE describes the maximum point size which may be input.
+**TP_DYN_PT_SIZE**: When set to static point size all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to dynamic point size each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1 TP_POINT_SIZE describes the maximum point size which may be input.
 
 *Table 5*: Header Format
 
@@ -390,20 +388,22 @@ Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the he
 
 Note that for TT_DATA=cfloat, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
 
-TP_WINDOW_VSIZE: Describes the number of data samples in the supplied window. If stream input is selected, an FFT operation will not begin until this number of samples has been input. TP_WINDOW_VSIZE does not include the 256 bit header when dynamic point size is used. TP_WINDOW_VSIZE is intended to improve performance for small point sizes by incurring the kernel acquisition and release overheads only once per window rather than once per frame of data.
+**TP_WINDOW_VSIZE**: Describes the number of data samples in the supplied window. If stream input is selected, an FFT operation will not begin until this number of samples has been input. TP_WINDOW_VSIZE does not include the 256 bit header when dynamic point size is used. TP_WINDOW_VSIZE is intended to improve performance for small point sizes by incurring the kernel acquisition and release overheads only once per window rather than once per frame of data.
 
-TP_API: Selects between window (0) and stream (1) input/output. When set to 1, the FFT will have 2 stream port per subframe processor so as to maximize performance. Samples must be input to each stream in turn. E.g. with TP_PARALLEL_POWER=2 there will be 8 stream inputs. Samples 0 to 7 must be input one to each port, followed by samples 8 to 15, so port(0) will receive samples 0, 8, 16, etc.
+**TP_API**: Selects between window (0) and stream (1) input/output. When set to 1, the FFT will have 2 stream port per subframe processor so as to maximize performance. Samples must be input to each stream in turn. E.g. with TP_PARALLEL_POWER=2 there will be 8 stream inputs. Samples 0 to 7 must be input one to each port, followed by samples 8 to 15, so port(0) will receive samples 0, 8, 16, etc.
 On output, each stream will output a splice of the overall frame. So in the above example, output port(0) will output samples 0 to TP_POINT_SIZE/8-1.
 
-TP_PARALLEL_POWER: Intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram <refer to the ppt supplied yesterday) shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.
+**TP_PARALLEL_POWER**: If greater than 0, TP_CASC_LEN applies to the subframe FFT rather than the FFT as a whole. For instance, with TP_POINT_SIZE=16384 and TP_PARALLEL_POWER = 3 there will be 8 subframe FFTs each of point size 2048. The TP_CASC_LEN in this case would be limited to 6 for integer TT_DATA types and 11 for TT_DATA = cfloat.
+
+TP_PARALLEL_POWER is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_1` shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.
 
 Scaling
 ~~~~~~~
-This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32. In the final stage, the result is scaled by 17 bits for point size from 16 to 1024, by 18 for 2048, and by 19 for 4096.
+This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32.
 
 In the case of TP_PARALLEL_POWER > 0 for cint16, scaling is applied at the end of the subframe processor and in each radix2 combiner stage so that cint16 is the data type used for internal streams for maximal performance. In this case, TP_SHIFT-TP_PARALLEL_POWER is applied as the TP_SHIFT value to each subframe processor and a TP_SHIFT of 1 is applied in each radix2 combiner stage. Better noise performance may be achieved at the expense of throughput by using TT_DATA=cint32.
 
-No scaling is applied at any point when the data type is cfloat.
+No scaling is applied at any point when the data type is cfloat. Setting TP_SHIFT to any value other than 0 when TT_DATA is cfloat will result in an error.”
 
 The graph entry point is the following:
 
@@ -413,11 +413,12 @@ The graph entry point is the following:
 
 Constraints
 ~~~~~~~~~~~
-The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See Figure 1 below.
+The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See :ref:`FIGURE_1` below.
 
+.. _FIGURE_1:
 .. figure:: ./media/figure8.png
 
-*Figure 1:* **Applying Design Constraints**
+    *Figure 1:* **Applying Design Constraints**
 
 The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.
 

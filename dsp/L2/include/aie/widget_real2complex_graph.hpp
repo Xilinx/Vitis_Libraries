@@ -59,7 +59,6 @@ using namespace adf;
  **/
 template <typename TT_DATA, typename TT_OUT_DATA, unsigned int TP_WINDOW_VSIZE>
 /**
- * This is the class for the Widget API Cast graph
  **/
 class widget_real2complex_graph : public graph {
    public:

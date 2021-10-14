@@ -606,7 +606,6 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0>
 /**
- * This is the class for the Asymmetric Single Rate FIR graph
  **/
 class fir_sr_asym_graph
     : public fir_sr_asym_base_graph<TT_DATA,

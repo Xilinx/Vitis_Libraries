@@ -372,7 +372,6 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_UPSHIFT_CT = 0>
 /**
- * This is the class for the halfband interpolator FIR graph
  **/
 class fir_interpolate_hb_graph : public graph {
    private:

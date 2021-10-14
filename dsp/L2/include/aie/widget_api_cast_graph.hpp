@@ -77,7 +77,6 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUT_CLONES = 1,
           unsigned int TP_PATTERN = 0>
 /**
- * This is the class for the Widget API Cast graph
  **/
 class widget_api_cast_graph : public graph {
    public:

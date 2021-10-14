@@ -500,7 +500,6 @@ template <typename TT_DATA,
           unsigned int TP_API = 0 // 0 = Window, 1 = Stream
           >
 /**
- * @brief This is the class for the Symmetric Single Rate FIR graph
  **/
 class fir_sr_sym_graph
     : public fir_sr_sym_base_graph<TT_DATA,
