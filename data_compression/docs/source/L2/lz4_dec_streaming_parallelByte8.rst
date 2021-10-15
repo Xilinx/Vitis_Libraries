@@ -33,12 +33,12 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx LZ4 Streaming Compression kernels. 
-The final Fmax achieved is 294MHz                                                                                                                   
+The final Fmax achieved is 300MHz                                                                                                                   
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Decompress 5.4K  370    4.8K   0     4
+Decompress 5.5K  370    4.8K   0     4
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

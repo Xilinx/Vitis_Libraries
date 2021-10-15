@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include "snappy_decompress.hpp"
 #include "lz_decompress.hpp"
+#include "inflate.hpp"
 
 namespace xf {
 namespace compression {
@@ -296,10 +297,7 @@ static void snappyMultiBlockHeaderProcessing(hls::stream<ap_uint<PARALLEL_BYTES 
 // to produce the data in order
 template <int NUM_BLOCKS, int PARALLEL_BYTES, int BLOCK_SIZE = 64, class SIZE_DT = ap_uint<17> >
 void lzMultiBlockPacker(hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> > lzDataStream[NUM_BLOCKS],
-                        hls::stream<uint32_t> lzSizeStream[NUM_BLOCKS],
-                        hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
-                        hls::stream<uint32_t>& outSizeStream) {
-    uint32_t outSize = 0;
+                        hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream) {
     const uint8_t c_parallelBit = PARALLEL_BYTES * 8;
     const uint8_t c_streamWidth = (PARALLEL_BYTES * 8) + 8;
     uint32_t blockSizeInBytes = BLOCK_SIZE * 1024;
@@ -317,25 +315,18 @@ void lzMultiBlockPacker(hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> > lzDataSt
                  read += PARALLEL_BYTES) {
 #pragma HLS PIPELINE II = 1
                 ap_uint<c_streamWidth> outData = lzDataStream[i].read();
-                bool eosFlag = outData.range(c_streamWidth - 1, c_parallelBit);
-                if (eosFlag == false) {
-                    outStream << outData;
-                } else {
+                ap_uint<PARALLEL_BYTES> strb = outData.range(PARALLEL_BYTES - 1, 0);
+                if (strb == 0) {
                     is_pending.range(i, i) = 0;
+                } else {
+                    outStream << outData;
                 }
             }
         }
     }
 
     ap_uint<c_streamWidth> outData = 0;
-    outData.range(c_streamWidth - 1, c_parallelBit) = 1;
     outStream << outData;
-
-    for (int i = 0; i < NUM_BLOCKS; i++) {
-#pragma HLS PIPELINE II = 1
-        outSize += lzSizeStream[i].read();
-    }
-    outSizeStream << outSize;
 }
 
 } // namespace details
@@ -344,37 +335,38 @@ void lzMultiBlockPacker(hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> > lzDataSt
 template <int NUM_BLOCKS, int PARALLEL_BYTES, int HISTORY_SIZE, int BLOCK_SIZE = 64, class SIZE_DT = ap_uint<17> >
 void snappyBlockDecoder(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& blockDataStream,
                         hls::stream<dt_blockInfo>& blockInfoStream,
-                        hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& lzDataStream,
-                        hls::stream<uint32_t>& lzSizeStream) {
+                        hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& lzDataStream) {
     typedef ap_uint<16> offset_dt;
     hls::stream<SIZE_DT> litlenStream("litlenStream");
     hls::stream<ap_uint<PARALLEL_BYTES * 8> > litStream("litStream");
     hls::stream<offset_dt> offsetStream("offsetStream");
     hls::stream<SIZE_DT> matchLenStream("matchLenStream");
+    hls::stream<ap_uint<27> > lzInfoStream("lzInfoStream");
 
 #pragma HLS STREAM variable = litlenStream depth = 32
 #pragma HLS STREAM variable = litStream depth = 32
 #pragma HLS STREAM variable = offsetStream depth = 32
 #pragma HLS STREAM variable = matchLenStream depth = 32
+#pragma HLS STREAM variable = lzInfoStream depth = 32
 
 #pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzInfoStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     // last template arg as true to run block decom
     snappyMultiByteDecompress<PARALLEL_BYTES, SIZE_DT>(blockDataStream, litlenStream, litStream, offsetStream,
                                                        matchLenStream, blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, SIZE_DT>(litlenStream, litStream, offsetStream, matchLenStream,
-                                                              lzDataStream, lzSizeStream);
+    details::lzPreProcessingUnitLL<SIZE_DT, PARALLEL_BYTES>(litlenStream, matchLenStream, offsetStream, lzInfoStream);
+    lzMultiByteDecompressLL<PARALLEL_BYTES, HISTORY_SIZE, 16, SIZE_DT>(litStream, lzInfoStream, lzDataStream);
 }
 
 template <int NUM_BLOCKS, int PARALLEL_BYTES, int HISTORY_SIZE, int BLOCK_SIZE = 64, class SIZE_DT = ap_uint<17> >
 void snappyMultiCoreDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
                                hls::stream<uint32_t>& inSizeStream,
-                               hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
-                               hls::stream<uint32_t>& outSizeStream) {
+                               hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream) {
     const uint8_t c_streamWidth = (PARALLEL_BYTES * 8) + 8;
     typedef ap_uint<c_streamWidth> uintV_t;
     typedef ap_uint<PARALLEL_BYTES * 8> uintS_t;
@@ -383,16 +375,13 @@ void snappyMultiCoreDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStre
     hls::stream<uintS_t> blockDataStream[NUM_BLOCKS];
     hls::stream<dt_blockInfo> blockInfoStream[NUM_BLOCKS];
     hls::stream<uintV_t> lzDataStream[NUM_BLOCKS];
-    hls::stream<uint32_t> lzSizeStream[NUM_BLOCKS];
 #pragma HLS STREAM variable = blockDataStream depth = depthBlockSizeInBytes
 #pragma HLS STREAM variable = blockInfoStream depth = 32
 #pragma HLS STREAM variable = lzDataStream depth = depthBlockSizeInBytes
-#pragma HLS STREAM variable = lzSizeStream depth = 32
 
 #pragma HLS BIND_STORAGE variable = blockDataStream type = FIFO impl = URAM
 #pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = lzDataStream type = FIFO impl = URAM
-#pragma HLS BIND_STORAGE variable = lzSizeStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     details::snappyMultiBlockHeaderProcessing<NUM_BLOCKS, PARALLEL_BYTES, SIZE_DT>(inStream, blockDataStream,
@@ -400,16 +389,14 @@ void snappyMultiCoreDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStre
     for (int i = 0; i < NUM_BLOCKS; i++) {
 #pragma HLS UNROLL
         snappyBlockDecoder<NUM_BLOCKS, PARALLEL_BYTES, HISTORY_SIZE, BLOCK_SIZE, SIZE_DT>(
-            blockDataStream[i], blockInfoStream[i], lzDataStream[i], lzSizeStream[i]);
+            blockDataStream[i], blockInfoStream[i], lzDataStream[i]);
     }
-    details::lzMultiBlockPacker<NUM_BLOCKS, PARALLEL_BYTES, BLOCK_SIZE, SIZE_DT>(lzDataStream, lzSizeStream, outStream,
-                                                                                 outSizeStream);
+    details::lzMultiBlockPacker<NUM_BLOCKS, PARALLEL_BYTES, BLOCK_SIZE, SIZE_DT>(lzDataStream, outStream);
 }
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = ap_uint<17> >
 void snappyDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
                             hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
-                            hls::stream<uint32_t>& outSizeStream,
                             const uint32_t _input_size) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
     typedef ap_uint<16> offset_dt;
@@ -420,12 +407,14 @@ void snappyDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
     hls::stream<offset_dt> offsetStream("offsetStream");
     hls::stream<SIZE_DT> matchLenStream("matchLenStream");
     hls::stream<dt_blockInfo> blockInfoStream("blockInfoStream");
-#pragma HLS STREAM variable = headerStream depth = 32
-#pragma HLS STREAM variable = blockInfoStream depth = 32
-#pragma HLS STREAM variable = litlenStream depth = 32
-#pragma HLS STREAM variable = litStream depth = 32
-#pragma HLS STREAM variable = offsetStream depth = 32
-#pragma HLS STREAM variable = matchLenStream depth = 32
+    hls::stream<ap_uint<27> > lzInfoStream("lzInfoStream");
+#pragma HLS STREAM variable = headerStream depth = 16
+#pragma HLS STREAM variable = blockInfoStream depth = 16
+#pragma HLS STREAM variable = litlenStream depth = 16
+#pragma HLS STREAM variable = litStream depth = 256
+#pragma HLS STREAM variable = offsetStream depth = 16
+#pragma HLS STREAM variable = matchLenStream depth = 16
+#pragma HLS STREAM variable = lzInfoStream depth = 4
 
 #pragma HLS BIND_STORAGE variable = headerStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
@@ -433,19 +422,19 @@ void snappyDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
 #pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzInfoStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     details::snappyHeaderProcessing<PARALLEL_BYTES, SIZE_DT>(inStream, headerStream, blockInfoStream, input_size1);
     snappyMultiByteDecompress<PARALLEL_BYTES, SIZE_DT>(headerStream, litlenStream, litStream, offsetStream,
                                                        matchLenStream, blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, SIZE_DT>(litlenStream, litStream, offsetStream, matchLenStream,
-                                                              outStream, outSizeStream);
+    details::lzPreProcessingUnitLL<SIZE_DT, PARALLEL_BYTES>(litlenStream, matchLenStream, offsetStream, lzInfoStream);
+    lzMultiByteDecompressLL<PARALLEL_BYTES, HISTORY_SIZE, 16, SIZE_DT>(litStream, lzInfoStream, outStream);
 }
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = ap_uint<17> >
 void snappyDecompressCoreEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                                hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
-                                hls::stream<uint32_t>& outSizeStream,
+                                hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >& outStream,
                                 hls::stream<uint32_t>& blockSizeStream) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
     typedef ap_uint<16> offset_dt;
@@ -454,17 +443,20 @@ void snappyDecompressCoreEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStr
     hls::stream<offset_dt> offsetStream("offsetStream");
     hls::stream<uintV_t> litStream("litStream");
     hls::stream<dt_blockInfo> blockInfoStream("blockInfoStream");
-#pragma HLS STREAM variable = litlenStream depth = 32
-#pragma HLS STREAM variable = offsetStream depth = 32
-#pragma HLS STREAM variable = matchLenStream depth = 32
-#pragma HLS STREAM variable = litStream depth = 32
-#pragma HLS STREAM variable = blockInfoStream depth = 32
+    hls::stream<ap_uint<27> > lzInfoStream("lzInfoStream");
+#pragma HLS STREAM variable = litlenStream depth = 16
+#pragma HLS STREAM variable = offsetStream depth = 16
+#pragma HLS STREAM variable = matchLenStream depth = 16
+#pragma HLS STREAM variable = litStream depth = 256
+#pragma HLS STREAM variable = blockInfoStream depth = 4
+#pragma HLS STREAM variable = lzInfoStream depth = 4
 
 #pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzInfoStream type = FIFO impl = SRL
 
     dt_blockInfo blockInfo;
     for (int i = 0; i < 2; i++) {
@@ -477,8 +469,8 @@ void snappyDecompressCoreEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStr
     // last template arg true to run block decom
     snappyMultiByteDecompress<PARALLEL_BYTES, SIZE_DT, true>(inStream, litlenStream, litStream, offsetStream,
                                                              matchLenStream, blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, SIZE_DT>(litlenStream, litStream, offsetStream, matchLenStream,
-                                                              outStream, outSizeStream);
+    details::lzPreProcessingUnitLL<SIZE_DT, PARALLEL_BYTES>(litlenStream, matchLenStream, offsetStream, lzInfoStream);
+    lzMultiByteDecompressLL<PARALLEL_BYTES, HISTORY_SIZE, 16, SIZE_DT>(litStream, lzInfoStream, outStream);
 }
 
 } // namespace compression

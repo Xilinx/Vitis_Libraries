@@ -23,8 +23,8 @@ set CLKP 3.3
 open_project -reset $PROJ
 
 # Add design and testbench files
-add_files snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
-add_files -tb snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
+add_files snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -DMULTIPLE_BYTES=8"
+add_files -tb snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -DMULTIPLE_BYTES=8"
 
 # Set the top-level function
 set_top snappyDecompressEngineRun

@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx LZ4 Decompress 8 Parallel Bytes", 
+    "name": "Xilinx LZ4 Decompress 4 Parallel Bytes", 
     "description": [
-        "Xilinx LZ4 Decompress Parallel Byte 8."
+        "Xilinx LZ4 Decompress Parallel Byte 4"
     ], 
     "flow": "vitis", 
     "launch": [
@@ -57,8 +57,11 @@
     }, 
     "v++": {
         "compiler": {
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
+            ],
             "symbols": [
-                "PARALLEL_BYTE=8"
+                "MULTIPLE_BYTES=8"
             ]
         }
     }, 

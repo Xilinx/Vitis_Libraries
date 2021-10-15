@@ -61,8 +61,7 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                 "LIB_DIR/../security/L1/include",
-                 "LIB_DIR/L2/tests/src"
+                 "LIB_DIR/../security/L1/include"
             ],
             "symbols": [
                 "NUM_CORES=4", 

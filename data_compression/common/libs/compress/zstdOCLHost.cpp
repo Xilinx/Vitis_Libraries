@@ -29,7 +29,6 @@ zstdOCLHost::zstdOCLHost(enum State flow, const std::string& binaryFileName, uin
     m_context = new cl::Context(device);
 
 #ifndef FREE_RUNNING_KERNEL
-    printf("Free Running mode\n");
     if (m_flow == BOTH || m_flow == COMPRESS) {
         m_q_cmp = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
     }
@@ -57,7 +56,9 @@ zstdOCLHost::zstdOCLHost(enum State flow, const std::string& binaryFileName, uin
     m_program = new cl::Program(*m_context, {device}, bins);
     // Create Compress kernels
     if (m_flow == BOTH || m_flow == COMPRESS) {
+#ifndef FREE_RUNNING_KERNEL
         compress_kernel = new cl::Kernel(*m_program, compress_kernel_name.c_str());
+#endif
         cmp_dm_kernel = new cl::Kernel(*m_program, cmp_dm_kernel_name.c_str());
     }
     // Create Decompress kernels
@@ -88,6 +89,10 @@ zstdOCLHost::~zstdOCLHost() {
 #ifndef FREE_RUNNING_KERNEL
     if (m_flow == COMPRESS) delete (m_q_cmp);
     if (m_flow == DECOMPRESS) delete (m_q_dec);
+    if (compress_kernel != nullptr) {
+        delete compress_kernel;
+        compress_kernel = nullptr;
+    }
 #endif
     if (m_flow == COMPRESS) delete (m_q_cdm);
     if (m_flow == DECOMPRESS) {
@@ -185,7 +190,7 @@ uint64_t zstdOCLHost::compressEngine(uint8_t* in, uint8_t* out, size_t input_siz
 
         m_q_cdm->finish();
 #else
-        printf("Free running kernel\n");
+        // printf("Free running kernel\n");
         m_q_cdm->enqueueTask(*cmp_dm_kernel);
         m_q_cdm->finish();
         auto kernel_stop = std::chrono::high_resolution_clock::now();

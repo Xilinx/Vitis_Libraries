@@ -30,7 +30,7 @@ Requirements
 Software Platform
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis 2021.1 and later, and
+This library is designed to work with Vitis 2021.2 and later, and
 therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4
@@ -59,7 +59,7 @@ Setup the build environment using the Vitis and XRT scripts:
 
 ::
 
-       $ source <install path>/Vitis/2021.1/settings64.sh
+       $ source <install path>/Vitis/2021.2/settings64.sh
        $ source /opt/xilinx/xrt/setup.sh
        $ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
@@ -94,25 +94,25 @@ Tables below showcases throughput details of compression for various Alveo accel
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | `Snappy Streaming <L2/demos/snappy_streaming>`_                        |        2.13          |      290 MB/s     |  300MHz  |  3K     |  4    |  6    |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib 32KB Memory Mapped <L2/tests/gzipc_block_mm>`_              |        2.70          |      2 GB/s       |  300MHz  |  60K    |  135  |  64   |
+| `GZip/Zlib 32KB Memory Mapped <L2/tests/gzipc_block_mm>`_              |        2.70          |      2 GB/s       |  300MHz  |  57K    |  135  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 32KB Compress Stream <L2/tests/gzipc>`_                          |        2.70          |      2 GB/s       |  293MHz  |  54K    |  131  |  64   |
+| `GZip 32KB Compress Stream <L2/tests/gzipc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  54K    |  141  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 16KB Compress Stream <L2/tests/gzipc_16KB>`_                     |        2.62          |      2 GB/s       |  298MHz  |  58K    |  165  |  48   |
+| `GZip 16KB Compress Stream <L2/tests/gzipc_16KB>`_                     |        2.62          |      2 GB/s       |  282MHz  |  58K    |  164  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 8KB Compress Stream <L2/tests/gzipc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.2K  |  101  |  48   |
+| `GZip 8KB Compress Stream <L2/tests/gzipc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.5K  |  100  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip Fixed 32KB Compress Stream <L2/tests/gzipc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  34.5K  |  43   |  64   |
+| `GZip Fixed 32KB Compress Stream <L2/tests/gzipc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  35K    |  45   |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 32KB Compress Stream <L2/tests/zlibc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  54K    |  127  |  64   |
+| `Zlib 32KB Compress Stream <L2/tests/zlibc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  54K    |  128  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 16KB Compress Stream <L2/tests/zlibc_16KB>`_                     |        2.62          |      2 GB/s       |  294MHz  |  58K    |  160  |  48   |
+| `Zlib 16KB Compress Stream <L2/tests/zlibc_16KB>`_                     |        2.62          |      2 GB/s       |  300MHz  |  58K    |  160  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | `Zlib 8KB Compress Stream <L2/tests/zlibc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.4K  |  96   |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib Fixed 32KB Compress Stream <L2/tests/zlibc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  34.7K  |  39   |  64   |
+| `Zlib Fixed 32KB Compress Stream <L2/tests/zlibc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  35.7K  |  39   |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zstd Compress Quad Core <L2/tests/zstd_quadcore_compress>`_           |        2.68          |     1.17 GB/s     |  283MHz  |  40K    |  80   |  37   |
+| `Zstd Compress Quad Core <L2/tests/zstd_quadcore_compress>`_           |        2.68          |     1.17 GB/s     |  284MHz  |  40K    |  79   |  37   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 
 * GZip/Zlib Memory Mapped and GZip/Zlib Compress Stream: Supports Dynamic Huffman
@@ -126,15 +126,15 @@ Tables below showcases throughput details of decompression for various Alveo acc
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Architecture                                                         |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |           
 +======================================================================+===================+==========+=========+=======+======+
-| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  294MHz  |  5.4K   |  0    |  4   |
+| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  300MHz  |  5.5K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  274MHz  |  6.4K   |  0    |  4   |
+| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  300MHz  |  6.5K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `GZip/Zlib Streaming <L2/demos/gzip>`_                               |     518  MB/s     |  273MHz  |  6.5K   |  8    |  0   |
+| `GZip/Zlib Streaming <L2/demos/gzip>`_                               |     518  MB/s     |  283MHz  |  6.7K   |  8    |  0   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Streaming <L2/tests/zstdd_32KB>`_                              |   658.86 MB/s     |  271MHz  |  19.6K  |  32   |  3   |
+| `ZStd Streaming <L2/tests/zstdd_32KB>`_                              |   658.86 MB/s     |  234MHz  |  22K    |  32   |  3   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Full File Streaming <L2/tests/zstdd_32KB>`_                    |   658.86 MB/s     |  271MHz  |  19.6K  |  32   |  3   |
+| `ZStd Full File Streaming <L2/tests/zstdd_32KB>`_                    |   658.86 MB/s     |  234MHz  |  22K    |  32   |  3   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
 * GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).

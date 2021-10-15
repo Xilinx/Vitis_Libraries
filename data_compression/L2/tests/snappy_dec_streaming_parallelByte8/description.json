@@ -63,7 +63,8 @@
                 "MULTIPLE_BYTES=8"
             ],
             "includepaths": [
-             "LIB_DIR/L2/tests/src"
+                "LIB_DIR/L2/tests/src",
+                "LIB_DIR/../security/L1/include"
             ]
         }
     }, 

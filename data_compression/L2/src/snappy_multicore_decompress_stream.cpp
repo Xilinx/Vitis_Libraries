@@ -47,7 +47,6 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& in
     hls::stream<ap_uint<c_parallelBit> > inStream("inStream");
     hls::stream<uint32_t> inSizeStream;
     hls::stream<ap_uint<c_parallelBit + 8> > decompressedStream("decompressedStream");
-    hls::stream<uint32_t> decStreamSize;
 #pragma HLS STREAM variable = inStream depth = 32
 #pragma HLS STREAM variable = decompressedStream depth = 32
 
@@ -57,10 +56,10 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& in
 #pragma HLS dataflow
     xf::compression::details::kStreamDataRead<c_parallelBit>(inaxistream, inaxistreamsize, inStream, inSizeStream);
 
-    xf::compression::snappyMultiCoreDecompress<NUM_CORES, MULTIPLE_BYTES, historySize>(
-        inStream, inSizeStream, decompressedStream, decStreamSize);
+    xf::compression::snappyMultiCoreDecompress<NUM_CORES, MULTIPLE_BYTES, historySize>(inStream, inSizeStream,
+                                                                                       decompressedStream);
 
     xf::compression::details::kStreamWriteMultiByteSize<c_parallelBit>(outaxistream, outaxistreamsize,
-                                                                       decompressedStream, decStreamSize);
+                                                                       decompressedStream);
 }
 }

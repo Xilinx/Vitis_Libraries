@@ -36,7 +36,7 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx Zlib Compress/Decompress
-kernels. The final Fmax achieved is 294MHz.
+kernels. The final Fmax achieved is 300MHz.
 
 
 ========== ===== ====== ===== ===== ===== 

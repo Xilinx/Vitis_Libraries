@@ -216,6 +216,7 @@ void lzPreProcessingUnitLL(hls::stream<SIZE_DT>& inLitLen,
         fdone = false;
     }
     while (!done) {
+#pragma HLS PIPELINE II = 1
         if (litlen) {
             SIZE_DT val = (litlen > PARALLEL_BYTES) ? (SIZE_DT)PARALLEL_BYTES : litlen;
             litlen -= val;
@@ -523,7 +524,7 @@ void dataStrbSplitter(hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> >& inpu
     ap_uint<DATA_WIDTH> strb = 0;
 splitter:
     while (1) {
-#pragma HLS_PIPELINE II = 1
+#pragma HLS PIPELINE II = 1
         auto inVal = input.read();
         auto data = inVal.range((DATA_WIDTH * 8) + DATA_WIDTH - 1, DATA_WIDTH);
         strb = inVal.range(DATA_WIDTH - 1, 0);
@@ -555,7 +556,7 @@ void streamDistributor(hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> >& inp
                        hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> >& output2) {
     ap_uint<DATA_WIDTH> strb = 0;
     do {
-#pragma HLS_PIPELINE II = 1
+#pragma HLS PIPELINE II = 1
         auto inVal = input.read();
         strb = inVal.range(DATA_WIDTH - 1, 0);
         output1 << inVal;

@@ -43,7 +43,7 @@ const auto HOST_BUFFER_SIZE = (32 * 1024 * 1024);
  *
  */
 #ifndef BLOCK_SIZE_IN_KB
-#define BLOCK_SIZE_IN_KB 64
+#define BLOCK_SIZE_IN_KB 32
 #endif
 
 /**

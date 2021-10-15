@@ -28,18 +28,17 @@
 
 #include "snappy_multibyte_decompress_mm.hpp"
 
-const int c_parallelBit = PARALLEL_BYTE * 8;
+const int c_parallelBit = MULTIPLE_BYTES * 8;
 const int historySize = MAX_OFFSET;
 const int c_gmemBurstSize = (2 * GMEM_BURST_SIZE);
 
 typedef ap_uint<c_parallelBit> uintpV_t;
 // namespace  hw_decompress {
 
-void snappyCoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
-                   hls::stream<ap_uint<(PARALLEL_BYTE * 8) + 8> >& outStream,
+void snappyCoreDec(hls::stream<ap_uint<MULTIPLE_BYTES * 8> >& inStream,
+                   hls::stream<ap_uint<(MULTIPLE_BYTES * 8) + MULTIPLE_BYTES> >& outStream,
                    const uint32_t _input_size) {
     uint32_t input_size = _input_size;
-    hls::stream<uint32_t> decStreamSize;
     hls::stream<uint32_t> blockCompSize;
 
     // send each block compressed size and 0 to indicate end of data
@@ -47,25 +46,22 @@ void snappyCoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
     blockCompSize << 0;
 
 #pragma HLS dataflow
-    xf::compression::snappyDecompressCoreEngine<PARALLEL_BYTE, historySize>(inStream, outStream, decStreamSize,
-                                                                            blockCompSize);
-    {
-        uint32_t outsize = decStreamSize.read(); // Dummy module to empty SizeStream
-    }
+    xf::compression::snappyDecompressCoreEngine<MULTIPLE_BYTES, historySize>(inStream, outStream, blockCompSize);
 }
 
-void snappyDec(const ap_uint<PARALLEL_BYTE * 8>* in,
-               ap_uint<PARALLEL_BYTE * 8>* out,
+void snappyDec(const ap_uint<MULTIPLE_BYTES * 8>* in,
+               ap_uint<MULTIPLE_BYTES * 8>* out,
                const uint32_t input_idx,
                const uint32_t input_size,
                const uint32_t input_size1) {
     const int c_byteSize = 8;
-    const int c_wordSize = (PARALLEL_BYTE * 8) / c_byteSize;
+    const int c_wordSize = (MULTIPLE_BYTES * 8) / c_byteSize;
+    const uint8_t c_streamWidth = MULTIPLE_BYTES * 8;
 
     uint32_t rIdx = input_idx / c_wordSize;
 
-    hls::stream<ap_uint<PARALLEL_BYTE * 8> > inStream;
-    hls::stream<ap_uint<(PARALLEL_BYTE * 8) + 8> > outStream;
+    hls::stream<ap_uint<MULTIPLE_BYTES * 8> > inStream;
+    hls::stream<ap_uint<(MULTIPLE_BYTES * 8) + MULTIPLE_BYTES> > outStream;
 #pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
 #pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
@@ -73,21 +69,21 @@ void snappyDec(const ap_uint<PARALLEL_BYTE * 8>* in,
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
-    xf::compression::details::mm2sSimple<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(in[rIdx]), inStream, input_size);
+    xf::compression::details::mm2sSimple<c_streamWidth, GMEM_BURST_SIZE>(&(in[rIdx]), inStream, input_size);
 
     // Snappy Single Instance
     snappyCoreDec(inStream, outStream, input_size1);
 
     // Transfer data from kernel to global memory
-    xf::compression::details::s2mmEosStreamSimple<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(out[rIdx]), outStream);
+    xf::compression::details::s2mmEosStreamSimple<c_streamWidth, GMEM_BURST_SIZE>(&(out[rIdx]), outStream);
 }
 
 //}//end of namepsace
 
 extern "C" {
 
-void xilSnappyDecompress(const ap_uint<PARALLEL_BYTE * 8>* in,
-                         ap_uint<PARALLEL_BYTE * 8>* out,
+void xilSnappyDecompress(const ap_uint<MULTIPLE_BYTES * 8>* in,
+                         ap_uint<MULTIPLE_BYTES * 8>* out,
                          uint32_t* in_block_size,
                          uint32_t* in_compress_size,
                          uint32_t block_size_in_kb,

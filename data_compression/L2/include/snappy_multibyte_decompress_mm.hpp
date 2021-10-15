@@ -40,8 +40,8 @@
 #define GMEM_DWIDTH 64
 #define GMEM_BURST_SIZE 512
 
-#ifndef PARALLEL_BYTE
-#define PARALLEL_BYTE 8
+#ifndef MULTIPLE_BYTES
+#define MULTIPLE_BYTES 8
 #endif
 
 #define MAX_OFFSET 65536
@@ -59,8 +59,8 @@ extern "C" {
  * @param block_size_in_kb block size in bytes
  * @param no_blocks number of blocks
  */
-void xilSnappyDecompress(const ap_uint<PARALLEL_BYTE * 8>* in,
-                         ap_uint<PARALLEL_BYTE * 8>* out,
+void xilSnappyDecompress(const ap_uint<MULTIPLE_BYTES * 8>* in,
+                         ap_uint<MULTIPLE_BYTES * 8>* out,
                          uint32_t* in_block_size,
                          uint32_t* in_compress_size,
                          uint32_t block_size_in_kb,

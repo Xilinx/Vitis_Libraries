@@ -7,6 +7,39 @@ Release Note
    :hidden
    :maxdepth: 1
 
+2021.2
+------
+
+Following is the 2021.2 release notes.
+
+* **ZSTD Quad-Core Compression**
+   Created ZSTD Multi-Core architecture to provide high throughput for single file compression. 
+   Using Zstd Quad core solution, user can get throughput > 1 GB/s. 
+
+* **Zstd Decompress Improvement**
+   ZSTD Decompress optimized in this release. Overall resource is reduced to 19.6K 
+   and achieve 20% higher throughput compare to previous release.
+
+* **GZIP Decompress Improvement**
+   Re-architected GZIP Decompress cores to reduce resource to 6.9K 
+   and better throughput compare to previous release. 
+   With this new latency overall IP latency is also reduced to ~1.5K cycle. 
+   Provided ZLIB decompression containing ADLR32 Checksum to catch any error in input file. 
+   Added functionality to provide uncompressed size in output stream port TUSER (incase end application needs to know uncompressed size).
+
+* **GZIP Compression Improvement**
+   - Created various ZLIB/GZIP Octa-Core Compression Kernels for different block sizes (8KB, 16KB, 32KB) 
+     and achieved > 2GB/s throughput for all variants. Updated IP core to provided compressed size in output axis
+     stream TUSER port (incase any application needs compressed size). 
+   - Huffman TreeGen latency is reduced significantly < 1K, as a result, for multi-core architectures (Octa-core), 
+     a single Treegen is required. This reduce the resource requirement signficantly down for 8KB and 16KB blocksize 
+     compression core compare to previous release solution. 
+   - Compression ratio is improved from 2.67 to 2.7 for Silesia Fileset for 32KB bloksize. 
+
+* **Snappy/LZ4 Decompress Improvement**
+   Optimized Snappy and LZ4 Decompress throughput. 
+   
+
 2021.1
 ------
 

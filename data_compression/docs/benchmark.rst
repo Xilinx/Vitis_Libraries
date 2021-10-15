@@ -24,23 +24,23 @@ The following table presents compression ratio (CR), compression kernel throughp
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
 | Architecture                                                          | Block Size|  Compression Ratio   |     Throughput    |  FMax    |  LUT    |  BRAM |  URAM |
 +=======================================================================+===========+======================+===================+==========+=========+=======+=======+
-| `Zstd Compress Quad Core <source/L2/zstd_quadcore_compress.html>`__   |   32KB    |        2.68          |      1.17 GB/s    |  283MHz  |   40K   |  80   |  37   |
+| `Zstd Compress Quad Core <source/L2/zstd_quadcore_compress.html>`__   |   32KB    |        2.68          |      1.17 GB/s    |  284MHz  |   40K   |  79   |  37   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib 32KBMemory Mapped <source/L2/gzipc_block_mm.html>`__       |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  60K    |  135  |  64   |
+| `GZip/Zlib 32KBMemory Mapped <source/L2/gzipc_block_mm.html>`__       |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  57K    |  135  |  64   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 32KB Compress Stream <source/L2/gzipc.html>`__                  |   32KB    |        2.70          |      2 GB/s       |  293MHz  |  54K    |  131  |  64   |
+| `GZip 32KB Compress Stream <source/L2/gzipc.html>`__                  |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  54K    |  141  |  64   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 32KB Compress Stream <source/L2/zlibc.html>`__                  |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  54K    |  127  |  64   |
+| `Zlib 32KB Compress Stream <source/L2/zlibc.html>`__                  |   32KB    |        2.70          |      2 GB/s       |  300MHz  |  54K    |  128  |  64   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip Fixed 32KB Compress Stream <source/L2/gzipc_static.html>`_      |   32KB    |        2.31          |      2 GB/s       |  300MHz  |  34.5K  |  43   |  64   |
+| `GZip Fixed 32KB Compress Stream <source/L2/gzipc_static.html>`_      |   32KB    |        2.31          |      2 GB/s       |  300MHz  |  35K    |  45   |  64   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib Fixed 32KB Compress Stream <source/L2/zlibc_static.html>`__     |   32KB    |        2.31          |      2 GB/s       |  300MHz  |  34.7K  |  39   |  64   |
+| `Zlib Fixed 32KB Compress Stream <source/L2/zlibc_static.html>`__     |   32KB    |        2.31          |      2 GB/s       |  300MHz  |  35.7K  |  39   |  64   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 16KB Compress Stream <source/L2/gzipc_16KB.html>`_              |   16KB    |        2.62          |      2 GB/s       |  298MHz  |  58K    |  165  |  48   |
+| `GZip 16KB Compress Stream <source/L2/gzipc_16KB.html>`_              |   16KB    |        2.62          |      2 GB/s       |  282MHz  |  58K    |  164  |  48   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 16KB Compress Stream <source/L2/zlibc_16KB.html>`__             |   16KB    |        2.62          |      2 GB/s       |  294MHz  |  58K    |  160  |  48   |
+| `Zlib 16KB Compress Stream <source/L2/zlibc_16KB.html>`__             |   16KB    |        2.62          |      2 GB/s       |  300MHz  |  58K    |  160  |  48   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 8KB Compress Stream <source/L2/gzipc_8KB.html>`_                |   8KB     |        2.50          |      2 GB/s       |  300MHz  |  57.2K  |  101  |  48   |
+| `GZip 8KB Compress Stream <source/L2/gzipc_8KB.html>`_                |   8KB     |        2.50          |      2 GB/s       |  300MHz  |  57.5K  |  100  |  48   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
 | `Zlib 8KB Compress Stream <source/L2/zlibc_8KB.html>`__               |   8KB     |        2.50          |      2 GB/s       |  300MHz  |  57.4K  |  96   |  48   |
 +-----------------------------------------------------------------------+-----------+----------------------+-------------------+----------+---------+-------+-------+
@@ -62,15 +62,15 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 +-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Architecture                                                                        |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |         
 +=====================================================================================+===================+==========+=========+=======+======+
-| `LZ4 Streaming <source/L2/lz4_dec_streaming_parallelByte8.html>`__                  |     1.8  GB/s     |  294MHz  |  5.4K   |  0    |  4   |
+| `LZ4 Streaming <source/L2/lz4_dec_streaming_parallelByte8.html>`__                  |     1.8  GB/s     |  300MHz  |  5.5K   |  0    |  4   |
 +-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `Snappy Streaming <source/L2/snappy_dec_streaming_parallelByte8.html>`__            |     1.97 GB/s     |  274MHz  |  6.4K   |  0    |  4   |
+| `Snappy Streaming <source/L2/snappy_dec_streaming_parallelByte8.html>`__            |     1.97 GB/s     |  300MHz  |  6.5K   |  0    |  4   |
 +-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `GZip/Zlib Streaming <source/L2/gzip.html>`__                                       |     518  MB/s     |  273MHz  |  6.9K   |  8    |  0   |
+| `GZip/Zlib Streaming <source/L2/gzip.html>`__                                       |     518  MB/s     |  283MHz  |  6.7K   |  8    |  0   |
 +-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Streaming <source/L2/zstdd_32KB.html>`__                                      |     658.86 MB/s   |  271MHz  |  19.6K  |  32   |  3   |
+| `ZStd Streaming <source/L2/zstdd_32KB.html>`__                                      |     658.86 MB/s   |  234MHz  |  22K    |  32   |  3   |
 +-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Full File Streaming <source/L2/zstdd_32KB.html>`__                            |     658.86 MB/s   |  271MHz  |  19.6K  |  32   |  3   |
+| `ZStd Full File Streaming <source/L2/zstdd_32KB.html>`__                            |     658.86 MB/s   |  234MHz  |  22K    |  32   |  3   |
 +-------------------------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
 * GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
@@ -101,7 +101,7 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <Vitis_Intstalled_Path>/installs/lin64/Vitis/2021.1/settings64.sh
+   source <Vitis_Intstalled_Path>/installs/lin64/Vitis/2021.2/settings64.sh
    source <Vitis_Installed_Path>/xbb/xrt/packages/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
    export LD_LIBRARY_PATH=$XILINX_VITIS/lib/lnx64.o/Default/:$LD_LIBRARY_PATH

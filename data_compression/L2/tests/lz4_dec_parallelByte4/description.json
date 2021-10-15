@@ -57,8 +57,11 @@
     }, 
     "v++": {
         "compiler": {
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
+            ],
             "symbols": [
-                "PARALLEL_BYTE=4"
+                "MULTIPLE_BYTES=4"
             ]
         }
     }, 

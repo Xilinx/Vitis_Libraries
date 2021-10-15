@@ -1,6 +1,6 @@
-====================================
-Xlinx Snappy Streaming Decompression 
-====================================
+=====================================
+Xilinx Snappy Streaming Decompression 
+=====================================
 
 Snappy Compress Streaming example resides in ``L2/tests/snappy_dec_streaming_parallelByte8`` directory. 
 
@@ -33,12 +33,12 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx Snappy Streaming Decompression kernels. 
-The final Fmax achieved is 274MHz                                                                                                                   
+The final Fmax achieved is 300MHz                                                                                                                   
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Decompress 6.4K  316    5.7K   0     4
+Decompress 6.5K  316    5.7K   0     4
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

@@ -53,7 +53,18 @@
                 "OVERLAP_HOST_DEVICE"
             ]
         }
-    },
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/../security/L1/include"
+            ], 
+            "symbols": [
+                "MULTIPLE_BYTES=8" 
+            ] 
+        }
+    }, 
     "containers": [
         {
             "name": "compress_decompress",

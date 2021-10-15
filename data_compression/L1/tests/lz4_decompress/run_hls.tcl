@@ -25,8 +25,8 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "lz4_decompress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb "lz4_decompress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "lz4_decompress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include"
+add_files -tb "lz4_decompress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include"
 set_top lz4DecompressEngineRun
 
 open_solution -reset $SOLN

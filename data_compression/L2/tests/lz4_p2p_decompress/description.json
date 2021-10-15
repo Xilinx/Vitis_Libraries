@@ -90,6 +90,9 @@
     }, 
     "v++": {
         "compiler": {
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
+            ],
             "symbols": [
                 "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"

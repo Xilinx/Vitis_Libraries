@@ -28,9 +28,8 @@ const int historySize = MAX_OFFSET;
 
 // namespace hw_decompress {
 
-void lz4CoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
-                hls::stream<ap_uint<(PARALLEL_BYTE * 8) + 8> >& outStream,
-                hls::stream<uint32_t>& decStreamSize,
+void lz4CoreDec(hls::stream<ap_uint<MULTIPLE_BYTES * 8> >& inStream,
+                hls::stream<ap_uint<(MULTIPLE_BYTES * 8) + MULTIPLE_BYTES> >& outStream,
                 const uint32_t _input_size) {
     uint32_t input_size = _input_size;
     hls::stream<uint32_t> blockCompSize;
@@ -39,25 +38,23 @@ void lz4CoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
     blockCompSize << input_size;
     blockCompSize << 0;
 #pragma HLS DATAFLOW
-    xf::compression::lz4CoreDecompressEngine<PARALLEL_BYTE, historySize>(inStream, outStream, decStreamSize,
-                                                                         blockCompSize);
+    xf::compression::lz4CoreDecompressEngine<MULTIPLE_BYTES, historySize>(inStream, outStream, blockCompSize);
 }
 
-void lz4Dec(const ap_uint<PARALLEL_BYTE * 8>* in,
-            ap_uint<PARALLEL_BYTE * 8>* out,
+void lz4Dec(const ap_uint<MULTIPLE_BYTES * 8>* in,
+            ap_uint<MULTIPLE_BYTES * 8>* out,
             uint32_t* dec_size,
             const uint32_t input_idx,
             const uint32_t input_size,
             const uint32_t input_size1,
             uint32_t block_size_in_kb) {
     const int c_byteSize = 8;
-    const int c_wordSize = (PARALLEL_BYTE * 8) / c_byteSize;
+    const int c_wordSize = (MULTIPLE_BYTES * 8) / c_byteSize;
 
     uint32_t rIdx = (input_idx * block_size_in_kb) / c_wordSize;
 
-    hls::stream<ap_uint<PARALLEL_BYTE * 8> > inStream;
-    hls::stream<ap_uint<(PARALLEL_BYTE * 8) + 8> > outStream;
-    hls::stream<uint32_t> decStreamSize;
+    hls::stream<ap_uint<MULTIPLE_BYTES * 8> > inStream;
+    hls::stream<ap_uint<(MULTIPLE_BYTES * 8) + MULTIPLE_BYTES> > outStream;
 #pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
 #pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
@@ -65,21 +62,21 @@ void lz4Dec(const ap_uint<PARALLEL_BYTE * 8>* in,
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
-    xf::compression::details::mm2sSimple<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(in[rIdx]), inStream, input_size);
+    xf::compression::details::mm2sSimple<MULTIPLE_BYTES * 8, GMEM_BURST_SIZE>(&(in[rIdx]), inStream, input_size);
 
     // LZ4 Single Instance
-    lz4CoreDec(inStream, outStream, decStreamSize, input_size1);
+    lz4CoreDec(inStream, outStream, input_size1);
 
     // Transfer data from kernel to global memory
-    xf::compression::details::s2mmWithSize<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(out[rIdx]), outStream, input_idx,
-                                                                               dec_size, decStreamSize);
+    xf::compression::details::s2mmWithSize<MULTIPLE_BYTES * 8, GMEM_BURST_SIZE>(&(out[rIdx]), outStream, input_idx,
+                                                                                dec_size);
 }
 //} // namespace end
 
 extern "C" {
 
-void xilLz4Decompress(const ap_uint<PARALLEL_BYTE * 8>* in,
-                      ap_uint<PARALLEL_BYTE * 8>* out,
+void xilLz4Decompress(const ap_uint<MULTIPLE_BYTES * 8>* in,
+                      ap_uint<MULTIPLE_BYTES * 8>* out,
                       uint32_t* dec_size,
                       uint32_t* in_compress_size,
                       uint32_t block_size_in_kb,

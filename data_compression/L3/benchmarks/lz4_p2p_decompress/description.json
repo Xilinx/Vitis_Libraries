@@ -63,25 +63,24 @@
                 "PARALLEL_BLOCK=1",
                 "MULTIPLE_BYTES=8"
             ],
-            "includepaths": [
-                "LIB_DIR/L2/tests/src"
+         "includepaths": [
+               "LIB_DIR/L2/tests/src",
+                "LIB_DIR/../security/L1/include"
             ]
         }
     },
     "containers": [
         {
             "name": "decompress",
-            "ldclflags": "--config PROJECT/connectivity.cfg",
+            "ldclflags": "--config PROJECT/connectivity.cfg --config PROJECT/decompress-link.cfg",
             "accelerators": [
                 {
                     "name": "xilLz4DecompressStream",
-                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_stream.cpp",
-                    "num_compute_units": "2"
+                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_stream.cpp"
                 },
                 {
                     "name": "xilDecompDatamover",
-                    "location": "LIB_DIR/L2/tests/src/block_decomp_multibyte_dm.cpp",
-                    "num_compute_units": "2"
+                    "location": "LIB_DIR/L2/tests/src/block_decomp_multibyte_dm.cpp"
                 }
             ]
         }

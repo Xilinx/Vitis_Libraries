@@ -48,7 +48,6 @@
                 "LIB_DIR/common/thirdParty/zlib-1.2.7/adler32.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/",
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/libs/compress/",
                 "LIB_DIR/common/thirdParty/zlib-1.2.7"
@@ -66,8 +65,7 @@
         ], 
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../security/L1/include",
-                "LIB_DIR/L2/tests/src"
+                "LIB_DIR/../security/L1/include"
             ], 
             "symbols": [
                 "GZIP_STREAM", 

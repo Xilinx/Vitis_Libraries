@@ -9,7 +9,7 @@ standard Snappy. Xilinx implementation of Snappy application is aimed at
 achieving high throughput for both compression and decompression. This
 Xilinx Snappy application is developed and tested on Xilinx Alveo U200.
 To know more about standard Snappy application please refer
-https://github.com/snappy/snappy
+https://github.com/google/snappy
 
 This application is accelerated using generic hardware architecture for
 LZ based data compression algorithms.
@@ -54,7 +54,7 @@ Software & Hardware
 
 ::
 
-     Software: Xilinx Vitis 2021.1
+     Software: Xilinx Vitis 2021.2
      Hardware: xilinx_u200_xdma_201830_2 (Xilinx Alveo U200)
 
 Usage

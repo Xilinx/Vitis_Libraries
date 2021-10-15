@@ -594,7 +594,7 @@ void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
 }
 
 template <int DATAWIDTH, int BURST_SIZE>
-void s2mmEosStreamSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH + 8> >& inStream) {
+void s2mmEosStreamSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH + (DATAWIDTH / 8)> >& inStream) {
     /**
      * @brief This module reads DATAWIDTH data from stream based on
      * size stream and writes the data to DDR.
@@ -607,27 +607,26 @@ void s2mmEosStreamSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH 
      * @param outSize output data size
      */
 
-    bool eos = false;
-    ap_uint<DATAWIDTH + 8> dummy = 0;
+    const uint8_t c_parallelByte = DATAWIDTH / 8;
+    ap_uint<c_parallelByte> strb = 1;
+    ap_uint<DATAWIDTH + c_parallelByte> dummy = 0;
 s2mm_eos_simple:
-    for (int j = 0; eos == false; j += BURST_SIZE) {
+    for (int j = 0; strb != 0; j += BURST_SIZE) {
         for (int i = 0; i < BURST_SIZE; i++) {
 #pragma HLS PIPELINE II = 1
-            ap_uint<DATAWIDTH + 8> inValue = (eos == true) ? dummy : inStream.read();
-            bool eos_tmp = (eos == true) ? true : inValue.range(DATAWIDTH + 7, DATAWIDTH);
-            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH - 1, 0);
+            ap_uint<DATAWIDTH + c_parallelByte> inValue = (strb == 0) ? dummy : inStream.read();
+            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH + (c_parallelByte - 1), c_parallelByte);
+            strb = inValue.range(c_parallelByte - 1, 0);
             out[j + i] = outValue;
-            eos = eos_tmp;
         }
     }
 }
 
 template <int DATAWIDTH, int BURST_SIZE>
 void s2mmWithSize(ap_uint<DATAWIDTH>* out,
-                  hls::stream<ap_uint<DATAWIDTH + 8> >& inStream,
+                  hls::stream<ap_uint<DATAWIDTH + (DATAWIDTH / 8)> >& inStream,
                   const uint32_t index,
-                  uint32_t* decSize,
-                  hls::stream<uint32_t>& decSizeStream) {
+                  uint32_t* decSize) {
     /**
      * @brief This module reads DATAWIDTH data from stream based on
      * size stream and writes the data to DDR.
@@ -640,20 +639,23 @@ void s2mmWithSize(ap_uint<DATAWIDTH>* out,
      * @param outSize output data size
      */
 
-    bool eos = false;
-    ap_uint<DATAWIDTH + 8> dummy = 0;
+    const uint8_t c_parallelByte = DATAWIDTH / 8;
+    ap_uint<c_parallelByte> strb = 1;
+    uint32_t outSize = 0;
+    ap_uint<DATAWIDTH + c_parallelByte> dummy = 0;
 s2mmWithSize:
-    for (int j = 0; eos == false; j += BURST_SIZE) {
+    for (int j = 0; strb != 0; j += BURST_SIZE) {
         for (int i = 0; i < BURST_SIZE; i++) {
 #pragma HLS PIPELINE II = 1
-            ap_uint<DATAWIDTH + 8> inValue = (eos == true) ? dummy : inStream.read();
-            bool eos_tmp = (eos == true) ? true : inValue.range(DATAWIDTH + 7, DATAWIDTH);
-            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH - 1, 0);
+            ap_uint<DATAWIDTH + c_parallelByte> inValue = (strb == 0) ? dummy : inStream.read();
+            ap_uint<DATAWIDTH> outValue = inValue.range(DATAWIDTH + (c_parallelByte - 1), c_parallelByte);
+            strb = inValue.range(c_parallelByte - 1, 0);
+            uint16_t availData = (32 - __builtin_clz(strb));
+            outSize += (strb != 0) ? availData : 0;
             out[j + i] = outValue;
-            eos = eos_tmp;
         }
     }
-    decSize[index] = decSizeStream.read();
+    decSize[index] = outSize;
 }
 
 template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t, int TUSR_DWIDTH = 0>

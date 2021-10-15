@@ -44,8 +44,7 @@
     },
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.cfg",
-            "PROJECT/hls_directives.tcl"
+            "PROJECT/advanced.cfg"
         ],
         "compiler": {
             "includepaths": [

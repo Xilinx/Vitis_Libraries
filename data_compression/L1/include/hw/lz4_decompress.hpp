@@ -26,6 +26,7 @@
 #include "hls_stream.h"
 #include "lz_decompress.hpp"
 #include "lz4_specs.hpp"
+#include "inflate.hpp"
 
 #include <ap_int.h>
 #include <assert.h>
@@ -361,6 +362,8 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
         if (storedBlock) {
             lit_len = input_size;
             litlenStream << lit_len;
+            matchlenStream << 0;
+            offsetStream << 0;
             next_state = READ_LITERAL;
         }
         // Pre-read two data from the stream (two based on the READ_TOKEN)
@@ -394,9 +397,10 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
                 } else if (lit_len) {
                     next_state = READ_LITERAL;
                     litlenStream << lit_len;
+                    matchlenStream << 0;
+                    offsetStream << 0;
                 } else {
                     next_state = READ_OFFSET;
-                    litlenStream << lit_len;
                 }
             } else if (next_state == READ_LIT_LEN) {
                 ap_uint<8> token_value = input_window >> (input_index * 8);
@@ -408,6 +412,8 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
                 } else {
                     next_state = READ_LITERAL;
                     litlenStream << lit_len;
+                    matchlenStream << 0;
+                    offsetStream << 0;
                 }
             } else if (next_state == READ_LITERAL) {
                 outFlag = true;
@@ -427,13 +433,14 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
                 bool c0 = (token_match_len == 0xF);
                 incrInputIdx = 2;
                 match_len = token_match_len + 4; //+4 because of LZ4 standard
-                offsetStream << offset;
 
                 if (c0) {
                     next_state = READ_MATCH_LEN;
                 } else {
                     next_state = READ_TOKEN;
+                    litlenStream << 0;
                     matchlenStream << match_len;
+                    offsetStream << offset;
                 }
             } else if (next_state == READ_MATCH_LEN) {
                 ap_uint<8> token_value = input_window >> (input_index * 8);
@@ -444,7 +451,9 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
                     next_state = READ_MATCH_LEN;
                 } else {
                     next_state = READ_TOKEN;
+                    litlenStream << 0;
                     matchlenStream << match_len;
+                    offsetStream << offset;
                 }
             } else {
                 assert(0);
@@ -469,9 +478,6 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
                 outFlag = false;
             }
         }
-        // terminating last transaction
-        matchlenStream << 0;
-        offsetStream << 0;
     }
 
     // signalling end of transaction
@@ -484,8 +490,7 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE>
 void lz4CoreDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                             hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
-                             hls::stream<uint32_t>& outSizeStream,
+                             hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >& outStream,
                              hls::stream<uint32_t>& blockSizeStream) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
     typedef ap_uint<16> offset_dt;
@@ -495,17 +500,20 @@ void lz4CoreDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream
     hls::stream<offset_dt> offsetStream("offsetStream");
     hls::stream<uint32_t> matchlenStream("matchlenStream");
     hls::stream<dt_lz4BlockInfo> blockInfoStream("blockInfoStream");
-#pragma HLS STREAM variable = litlenStream depth = 32
-#pragma HLS STREAM variable = litStream depth = 32
-#pragma HLS STREAM variable = offsetStream depth = 32
-#pragma HLS STREAM variable = matchlenStream depth = 32
-#pragma HLS STREAM variable = blockInfoStream depth = 32
+    hls::stream<ap_uint<27> > lzInfoStream("lzInfoStream");
+#pragma HLS STREAM variable = litlenStream depth = 16
+#pragma HLS STREAM variable = litStream depth = 256
+#pragma HLS STREAM variable = offsetStream depth = 16
+#pragma HLS STREAM variable = matchlenStream depth = 16
+#pragma HLS STREAM variable = blockInfoStream depth = 4
+#pragma HLS STREAM variable = lzInfoStream depth = 4
 
 #pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = matchlenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzInfoStream type = FIFO impl = SRL
     dt_lz4BlockInfo blockInfo;
     for (int i = 0; i < 2; i++) {
         blockInfo.compressedSize = blockSizeStream.read();
@@ -515,14 +523,13 @@ void lz4CoreDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream
 #pragma HLS dataflow
     lz4MultiByteDecompress<PARALLEL_BYTES>(inStream, litlenStream, litStream, offsetStream, matchlenStream,
                                            blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, uint32_t>(litlenStream, litStream, offsetStream, matchlenStream,
-                                                               outStream, outSizeStream);
+    details::lzPreProcessingUnitLL<uint32_t, PARALLEL_BYTES>(litlenStream, matchlenStream, offsetStream, lzInfoStream);
+    lzMultiByteDecompressLL<PARALLEL_BYTES, HISTORY_SIZE, 16, ap_uint<17> >(litStream, lzInfoStream, outStream);
 }
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE>
 void lz4DecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                         hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >& outStream,
-                         hls::stream<uint32_t>& outSizeStream,
+                         hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >& outStream,
                          const uint32_t _input_size) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
     typedef ap_uint<16> offset_dt;
@@ -534,12 +541,14 @@ void lz4DecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
     hls::stream<offset_dt> offsetStream("offsetStream");
     hls::stream<uint32_t> matchlenStream("matchlenStream");
     hls::stream<dt_lz4BlockInfo> blockInfoStream("blockInfoStream");
-#pragma HLS STREAM variable = litlenStream depth = 32
-#pragma HLS STREAM variable = headerStream depth = 32
-#pragma HLS STREAM variable = litStream depth = 32
-#pragma HLS STREAM variable = offsetStream depth = 32
-#pragma HLS STREAM variable = matchlenStream depth = 32
-#pragma HLS STREAM variable = blockInfoStream depth = 32
+    hls::stream<ap_uint<27> > lzInfoStream("lzInfoStream");
+#pragma HLS STREAM variable = litlenStream depth = 16
+#pragma HLS STREAM variable = headerStream depth = 16
+#pragma HLS STREAM variable = litStream depth = 256
+#pragma HLS STREAM variable = offsetStream depth = 16
+#pragma HLS STREAM variable = matchlenStream depth = 16
+#pragma HLS STREAM variable = blockInfoStream depth = 4
+#pragma HLS STREAM variable = lzInfoStream depth = 4
 
 #pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
@@ -547,13 +556,14 @@ void lz4DecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
 #pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = matchlenStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzInfoStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     lz4HeaderProcessing<PARALLEL_BYTES>(inStream, headerStream, blockInfoStream, input_size1);
     lz4MultiByteDecompress<PARALLEL_BYTES, uint32_t>(headerStream, litlenStream, litStream, offsetStream,
                                                      matchlenStream, blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, uint32_t>(litlenStream, litStream, offsetStream, matchlenStream,
-                                                               outStream, outSizeStream);
+    details::lzPreProcessingUnitLL<uint32_t, PARALLEL_BYTES>(litlenStream, matchlenStream, offsetStream, lzInfoStream);
+    lzMultiByteDecompressLL<PARALLEL_BYTES, HISTORY_SIZE, 16, ap_uint<17> >(litStream, lzInfoStream, outStream);
 }
 
 } // namespace compression

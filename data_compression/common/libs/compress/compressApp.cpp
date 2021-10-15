@@ -301,11 +301,11 @@ void compressApp::runDecompress(compressBase* b, const std::string& m_compressed
         printTestSummaryHeader();
     }
     // Invoking design class virtaul decompress api
-    m_debytes = b->xilDecompress(in.data(), out.data(), m_inputsize);
+    m_enbytes = b->xilDecompress(in.data(), out.data(), m_inputsize);
 
     std::ofstream outFile(m_outFile_name, std::ofstream::binary);
 
-    outFile.write((char*)out.data(), m_debytes);
+    outFile.write((char*)out.data(), m_enbytes);
     // Close file
     outFile.close();
     printTestSummaryFooter(compressed_file);

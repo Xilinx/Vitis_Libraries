@@ -29,7 +29,7 @@
 #include "lz4_multibyte_decompress_stream.hpp"
 
 const int c_parallelBit = MULTIPLE_BYTES * 8;
-const int c_outstreamWidth = (MULTIPLE_BYTES * 8) + 8;
+const int c_outstreamWidth = (MULTIPLE_BYTES * 8) + MULTIPLE_BYTES;
 const int historySize = HISTORY_SIZE;
 
 extern "C" {
@@ -41,10 +41,11 @@ void xilLz4DecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& inaxi
 #pragma HLS interface axis port = inaxistream
 #pragma HLS interface axis port = outaxistream
 #pragma HLS interface axis port = outaxistreamsize
+#pragma HLS interface s_axilite port = inputSize bundle = control
+#pragma HLS interface s_axilite port = return bundle = control
 
     hls::stream<ap_uint<c_parallelBit> > inStream("inStream");
     hls::stream<ap_uint<c_outstreamWidth> > decompressedStream("decompressedStream");
-    hls::stream<uint32_t> decStreamSize;
 #pragma HLS STREAM variable = inStream depth = 32
 #pragma HLS STREAM variable = decompressedStream depth = 32
 #pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
@@ -54,10 +55,9 @@ void xilLz4DecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& inaxi
 
     xf::compression::details::kStreamRead<c_parallelBit>(inaxistream, inStream, inputSize);
 
-    xf::compression::lz4DecompressEngine<MULTIPLE_BYTES, historySize>(inStream, decompressedStream, decStreamSize,
-                                                                      inputSize);
+    xf::compression::lz4DecompressEngine<MULTIPLE_BYTES, historySize>(inStream, decompressedStream, inputSize);
 
     xf::compression::details::kStreamWriteMultiByteSize<c_parallelBit>(outaxistream, outaxistreamsize,
-                                                                       decompressedStream, decStreamSize);
+                                                                       decompressedStream);
 }
 }

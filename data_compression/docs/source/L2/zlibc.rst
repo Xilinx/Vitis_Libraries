@@ -42,7 +42,7 @@ kernels. The final Fmax achieved is 300MHz.
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   54K   7.5K   48.5K  127   64    
+Compress   54K   7.5K   48.5K  128   64    
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data

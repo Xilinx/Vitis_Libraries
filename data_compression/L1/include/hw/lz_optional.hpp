@@ -302,6 +302,9 @@ static void lz77DivideStatic(hls::stream<IntVectorStream_dt<32, 1> >& inStream,
  * @brief Objective of this module is to pick character with
  * higher match length in the offset window range.
  *
+ * @tparam MATCH_LEN match length
+ * @tparam OFFSET_WINDOW offset window range
+ *
  * @param inStream input stream
  * @param outStream output stream
  * @param input_size input stream size

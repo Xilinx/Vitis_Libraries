@@ -375,12 +375,17 @@ namespace compression {
  * output streams, one literal stream and other offset stream, then encoding is done
  * based on the snappy algorithm.
  *
-* @param inStream Input data stream
+ * @tparam MAX_LIT_COUNT encoded literal length count
+ * @tparam MAX_LIT_STREAM_SIZE encoded literal stream size
+ * @tparam PARALLEL_UNITS number of parallel processed units
+ *
+ * @param inStream Input data stream
  * @param outStream Output data stream
  * @param max_lit_limit Size for compressed stream
  * @param input_size Size of input data
  * @param endOfStream Stream indicating that all data is processed or not
  * @param compressdSizeStream Gives the compressed size for each 64K block
+ * @param index index value
  */
 template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE, int PARALLEL_UNITS>
 static void snappyCompress(hls::stream<ap_uint<32> >& inStream,

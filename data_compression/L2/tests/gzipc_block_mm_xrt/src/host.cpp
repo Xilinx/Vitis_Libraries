@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 
     // Design class object creating and constructor invocation
     std::unique_ptr<gzipXrtHost> gzip(
-        new gzipXrtHost(flow, d.getXclbin(), d.getInFileName(), d.getDeviceId(), decKernelType, d.getDesignFlow()));
+        new gzipXrtHost(flow, d.getXclbin(), d.getDeviceId(), decKernelType, d.getDesignFlow()));
 
     // Run API to launch the compress or decompress engine
     d.run(gzip.get(), enable_profile);

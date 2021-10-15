@@ -59,10 +59,7 @@ class gzipXrtHost : public gzipBase {
     // Constructor
     gzipXrtHost(enum State flow,
                 const std::string& xclbin,
-                const std::string& uncompFileName,
-                const bool isSeq = false,
                 uint8_t device_id = 0,
-                bool enable_profile = false,
                 uint8_t decKernelType = FULL,
                 uint8_t dflow = XILINX_GZIP,
                 bool freeRunKernel = false);

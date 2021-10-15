@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx Snappy Decompress 8 Parallel Bytes", 
+    "name": "Xilinx Snappy Decompress 4 Parallel Bytes", 
     "description": [
-        "Xilinx Snappy MultiByte Decompress: 8 parallel bytes processed at a time"
+        "Xilinx Snappy MultiByte Decompress:4 parallel bytes processed at a time"
     ], 
     "flow": "vitis", 
     "launch": [
@@ -34,10 +34,10 @@
         "host_exe": "xil_snappy", 
         "compiler": {
             "sources": [
-                "./src/host.cpp", 
-                "LIB_DIR/common/libs/compress/snappyOCLHost.cpp",
-                "LIB_DIR/common/libs/compress/snappyBase.cpp",
-                "LIB_DIR/common/libs/compress/snappyApp.cpp",
+                "./src/host.cpp",
+                "LIB_DIR/common/libs/compress/snappyOCLHost.cpp", 
+                "LIB_DIR/common/libs/compress/snappyBase.cpp", 
+                "LIB_DIR/common/libs/compress/snappyApp.cpp", 
                 "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
@@ -53,8 +53,11 @@
     }, 
     "v++": {
         "compiler": {
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
+            ],
             "symbols": [
-                "PARALLEL_BYTE=8"
+                "MULTIPLE_BYTES=8"
             ]
         }
     }, 

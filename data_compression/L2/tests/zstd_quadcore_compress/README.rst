@@ -16,12 +16,12 @@ Results
 Overall Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Zstd decompress kernel supporting Window Size of 32KB. The final Fmax achieved is 283MHz.
+Table below presents resource utilization of Xilinx Zstd decompress kernel supporting Window Size of 32KB. The final Fmax achieved is 284MHz.
 
 ========== ===== ====== ===== 
 Flow       LUT   BRAM   URAM  
 ========== ===== ====== ===== 
-Compress   40K   80     37   
+Compress   40K   79     37   
 ========== ===== ====== ===== 
 
 

@@ -54,6 +54,13 @@
             ]
         }
     }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/../security/L1/include"
+            ]
+        }
+    }, 
     "containers": [
         {
             "name": "compress_decompress", 

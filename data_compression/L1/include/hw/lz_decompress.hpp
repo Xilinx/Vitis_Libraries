@@ -340,9 +340,15 @@ void lzMultiByteDecompressLL(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStrea
     enum lzDecompressStates next_state = WRITE_LITERAL; // start from Read Literal Length
 
     ap_uint<c_parallelBit> ramHistory[2][c_ramHistSize];
+    if (HISTORY_SIZE >= (64 * 1024)) { // >64KB history size
+#pragma HLS dependence variable = ramHistory inter false
+#pragma HLS BIND_STORAGE variable = ramHistory type = RAM_2P impl = URAM latency = 1
+#pragma HLS ARRAY_PARTITION variable = ramHistory dim = 1 complete
+    } else {
 #pragma HLS dependence variable = ramHistory inter false
 #pragma HLS BIND_STORAGE variable = ramHistory type = RAM_2P impl = BRAM latency = 1
 #pragma HLS ARRAY_PARTITION variable = ramHistory dim = 1 complete
+    }
 
     ap_uint<c_parallelBit> regHistory[2][c_regHistSize];
 #pragma HLS ARRAY_PARTITION variable = regHistory dim = 0 complete

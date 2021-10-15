@@ -404,14 +404,14 @@ uint64_t lz4OCLHost::compressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t i
 
 // Core Decompress Engine API including kernel header processing
 uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input_size) {
-    size_t host_buffer_size = m_HostBufferSize;
+    size_t host_buffer_size = input_size * m_maxCR;
     uint32_t max_num_blks = (host_buffer_size) / (m_BlockSizeInKb * 1024);
     h_buf_in.resize(host_buffer_size);
     h_buf_out.resize(host_buffer_size);
-    h_decSize.resize(max_num_blks);
-    h_compressSize.resize(max_num_blks);
+    h_decSize.resize(host_buffer_size);
+    h_compressSize.resize(host_buffer_size);
 
-    m_compressSize.reserve(max_num_blks);
+    m_compressSize.reserve(host_buffer_size);
 
     // Maximum allowed outbuffer size, if it exceeds then exit
     uint32_t c_max_outbuf = input_size * m_maxCR;
@@ -428,6 +428,17 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
     uint64_t output_idx = 0;
     // To handle uncompressed blocks
     bool compressBlk = false;
+    // Device buffer allocation
+    buffer_input =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, host_buffer_size, h_buf_in.data());
+
+    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, c_max_outbuf, h_buf_out.data());
+
+    buffer_dec_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                     sizeof(uint32_t) * host_buffer_size, h_decSize.data());
+
+    buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                            sizeof(uint32_t) * host_buffer_size, h_compressSize.data());
 
     for (; inIdx < input_size;) {
         compute_cu = 0;
@@ -495,19 +506,6 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
 
         if (nblocks == 1 && compressed_size == block_size) break;
         if (compressBlk) {
-            // Device buffer allocation
-            buffer_input =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, buf_size, h_buf_in.data());
-
-            buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size * 2, h_buf_out.data());
-
-            buffer_dec_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                             sizeof(uint32_t) * bufblocks, h_decSize.data());
-
-            buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                    sizeof(uint32_t) * bufblocks, h_compressSize.data());
-
             // Set kernel arguments
             uint32_t narg = 0;
             decompress_kernel_lz4->setArg(narg++, *(buffer_input));
@@ -565,14 +563,14 @@ uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input
             total_decomression_size += block_size;
         }
 
-        if (compressBlk) {
-            // Delete device buffers
-            delete (buffer_input);
-            delete (buffer_output);
-            delete (buffer_dec_size);
-            delete (buffer_compressed_size);
-        }
     } // Top - Main loop ends here
+    // Delete device buffers
+    delete (buffer_input);
+    delete (buffer_output);
+    delete (buffer_dec_size);
+    delete (buffer_compressed_size);
+    h_buf_in.clear();
+    h_buf_out.clear();
     if (!m_enableProfile) {
         float throughput_in_mbps_1 = (float)input_size * 1000 / kernel_time_ns_1.count();
         std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
@@ -612,7 +610,7 @@ uint64_t lz4OCLHost::decompressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t
     decompress_kernel_lz4->setArg(3, inputSize_32t);
 
     // Migrate Memory - Map host to device buffers
-    m_q->enqueueMigrateMemObjects({*(buffer_input)}, 0);
+    m_q->enqueueMigrateMemObjects({*(buffer_input), *(bufferOutputSize), *(buffer_output)}, 0);
     m_q->finish();
     if (!m_enableProfile) {
         // Measure kernel execution time

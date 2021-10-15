@@ -1,15 +1,16 @@
 {
-    "name": "Xilinx GZip 32KB Compression (XRT Host)", 
+    "name": "[XRT]: Xilinx GZip 32KB Compression (XRT Host)", 
     "description": [
-        "Xilinx Gzip Compression (XRT Host) with 32 KB block size"
+        "[XRT]: Xilinx Gzip Compression (XRT Host) with 32 KB block size"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt", 
             "name": "generic launch for all flows"
         }
     ],
+    "config_make": "./config.mk", 
     "platform_blacklist": [
         "zc", 
         "vck"
@@ -19,6 +20,9 @@
         "u200", 
         "u50"
     ], 
+    "data": [
+        "PROJECT/data/sample.txt" 
+    ],   
     "host": {
         "host_exe": "xil_gzip", 
         "compiler": {
@@ -56,9 +60,6 @@
         "compiler": {
             "includepaths": [
                  "LIB_DIR/../security/L1/include"
-            ],
-            "symbols": [
-                "NUM_CORES=4"
             ]
         }
     }, 
@@ -101,7 +102,6 @@
             }
         ], 
         "targets": [
-            "vitis_sw_emu", 
             "vitis_hw_emu", 
             "vitis_hw"
         ], 

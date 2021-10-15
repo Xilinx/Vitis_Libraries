@@ -242,12 +242,16 @@ namespace compression {
  * @brief This is the core compression module which seperates the input stream into two
  * output streams, one literal stream and other offset stream, then lz4 encoding is done.
  *
+ * @tparam PARALLEL_UNITS number of parallel units
+ * @tparam MAX_LIT_COUNT encoded literal length count
+ *
  * @param inStream Input data stream
  * @param outStream Output data stream
  * @param max_lit_limit Size for compressed stream
  * @param input_size Size of input data
  * @param endOfStream Stream indicating that all data is processed or not
  * @param compressdSizeStream Gives the compressed size for each 64K block
+ * @param index index value
  *
  */
 template <int MAX_LIT_COUNT, int PARALLEL_UNITS>

@@ -218,6 +218,8 @@ static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >&
         if (storedBlock) {
             lit_len = input_size;
             litlenStream << lit_len;
+            matchlenStream << 0;
+            offsetStream << 0;
             next_state = READ_LITERAL;
         }
 
@@ -295,6 +297,8 @@ static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >&
                         incrInputIdx = 1;
                     }
                     litlenStream << lit_len;
+                    matchlenStream << 0;
+                    offsetStream << 0;
                     next_state = READ_LITERAL;
                 }
             } else if (next_state == READ_LITERAL) {
@@ -308,8 +312,6 @@ static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >&
                 }
                 if (lit_len == 0) {
                     next_state = READ_TOKEN;
-                    matchlenStream << 0;
-                    offsetStream << 0;
                 } else {
                     next_state = READ_LITERAL;
                 }

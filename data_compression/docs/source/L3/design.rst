@@ -25,7 +25,7 @@ Compression Kernel Design
 
 The design for LZ compression kernel is shown in the following figure:
 
-.. image:: ../../docs/_static/lzx_comp.png
+.. image:: ../../_static/lzx_comp.png
    :alt: LZ based Compression Kernel
    :width: 100%
    :align: center
@@ -48,7 +48,7 @@ Decompression Kernel Design
 
 The design for LZ decompression kernel is shown in the following figure:
 
-.. image:: ../../docs/_static/lzx_decomp.png
+.. image:: ../../_static/lzx_decomp.png
    :alt: LZ based Decompression Kernel
    :width: 100%
    :align: center
@@ -68,4 +68,3 @@ The following is a list of implemented compression algorithms:
 
 -  `LZ4 Compress/Decompress <./lz4_app>`__
 -  `GZip Compress/Decompress <./gzip_app>`__
--  `Zlib Compress Decompress <./zlib_app>`__

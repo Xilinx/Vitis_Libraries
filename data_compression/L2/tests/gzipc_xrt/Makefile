@@ -48,7 +48,7 @@ DEVICE ?= xilinx_u250_gen3x16_xdma_3_1_202020_1
 # ###################### Setting up default value of HOST_ARCH ####################### 
 HOST_ARCH ?= x86
 
-# #################### Checking if DEVICE in blacklist #############################
+# #################### Checking if DEVICE in blocklist #############################
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
@@ -56,7 +56,7 @@ ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
-# #################### Checking if DEVICE in whitelist ############################
+# #################### Checking if DEVICE in allowlist ############################
 ifneq ($(findstring xilinx_u250_gen3x16_xdma_3_1_202020_1, $(DEVICE)), xilinx_u250_gen3x16_xdma_3_1_202020_1)
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u50, $(DEVICE)), u50)
@@ -81,6 +81,7 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
+include ./config.mk
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
@@ -95,7 +96,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
-CXXFLAGS += -DGZIP_STREAM
+CXXFLAGS += -DGZIP_STREAM -DPERF_DM
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
@@ -124,7 +125,7 @@ CXXFLAGS += -I$(CUR_DIR)/src/
 
 EXE_NAME := xil_gzip
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -xbin $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/sample.txt
+HOST_ARGS := -xbin $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/data/sample.txt
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -135,9 +136,9 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src
 
-VPP_FLAGS += -DGZIP_STREAM -DPERF_DM 
+VPP_FLAGS += --config $(CUR_DIR)/hls.cfg
+VPP_FLAGS += -DGZIP_STREAM 
 
 # Kernel linker flags
 VPP_LDFLAGS_compress_temp := --config $(CUR_DIR)/connectivity.cfg

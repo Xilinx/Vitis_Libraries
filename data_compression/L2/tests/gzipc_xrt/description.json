@@ -1,15 +1,16 @@
 {
-    "name": "Xilinx GZip Streaming 32KB Compression", 
+    "name": "[XRT]: Xilinx GZip Streaming 32KB Compression", 
     "description": [
-        "Xilinx Gzip Streaming 32KB Compression"
+        "[XRT]: Xilinx Gzip Streaming 32KB Compression"
     ], 
     "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt", 
             "name": "generic launch for all flows"
         }
     ],
+    "config_make": "./config.mk",
     "platform_blacklist": [
         "zc", 
         "vck"
@@ -41,7 +42,8 @@
                 "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "symbols": [
-                "GZIP_STREAM"
+                "GZIP_STREAM",
+                "PERF_DM"
             ],
             "options" : "-std=c++1y"
         },
@@ -52,14 +54,19 @@
         }
     }, 
     "v++": {
+        "build_datafiles": [
+            "PROJECT/hls.cfg",
+            "PROJECT/hls_directives.tcl"
+        ],
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../security/L1/include",
-                "LIB_DIR/L2/tests/src"
+                "LIB_DIR/../security/L1/include"
             ],
             "symbols": [
-                "GZIP_STREAM",
-                "PERF_DM"
+                "GZIP_STREAM"
+            ],
+            "clflags": [
+                "--config PROJECT/hls.cfg"
             ]
         }
     }, 

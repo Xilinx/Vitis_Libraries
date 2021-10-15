@@ -39,10 +39,9 @@ typedef ap_uint<(MULTIPLE_BYTES * 8) + 8> uintV_t;
 
 void snappyMultiCoreDec(hls::stream<uintS_t>& inStream,
                         hls::stream<uint32_t>& inSizeStream,
-                        hls::stream<uintV_t>& outStream,
-                        hls::stream<uint32_t>& outSizeStream) {
+                        hls::stream<uintV_t>& outStream) {
     xf::compression::snappyMultiCoreDecompress<NUM_BLOCKS, MULTIPLE_BYTES, HISTORY_SIZE, BLOCK_SIZE>(
-        inStream, inSizeStream, outStream, outSizeStream);
+        inStream, inSizeStream, outStream);
 }
 
 void processFile(std::string& compFile_name,
@@ -53,7 +52,6 @@ void processFile(std::string& compFile_name,
     hls::stream<uint32_t> inStreamSize("compLength");
     hls::stream<bool> inStreamEos("inStreamEos");
     hls::stream<uintV_t> outStream("decompressOut");
-    hls::stream<uint32_t> outStreamSize("decompressOutSize");
 
     uint32_t comp_length = inSizeStream.read();
     inStreamSize << comp_length;
@@ -74,7 +72,7 @@ void processFile(std::string& compFile_name,
     }
 
     // DECOMPRESSION CALL
-    snappyMultiCoreDec(inStream, inStreamSize, outStream, outStreamSize);
+    snappyMultiCoreDec(inStream, inStreamSize, outStream);
 
     std::ofstream origFile;
     origFile.open(origFile_name, std::fstream::binary | std::fstream::out);
@@ -86,28 +84,22 @@ void processFile(std::string& compFile_name,
     }
 
     bool pass = true;
-    uint32_t outSize = outStreamSize.read();
-
     uint32_t outCnt = 0;
     uintV_t g;
     uintV_t o = outStream.read();
-    bool eosFlag = o.range((MULTIPLE_BYTES + 1) * 8 - 1, MULTIPLE_BYTES * 8);
-    while (!eosFlag) {
+    ap_uint<MULTIPLE_BYTES> strb = o.range(MULTIPLE_BYTES - 1, 0);
+    size_t size = __builtin_popcount(strb.to_uint());
+
+    while (size != 0) {
+        ap_uint<MULTIPLE_BYTES* 8> w = o.range((MULTIPLE_BYTES + 1) * 8 - 1, 8);
         // writing output file
-        if (outCnt + MULTIPLE_BYTES < outSize) {
-            origFile.write((char*)&o, MULTIPLE_BYTES);
-            outCnt += MULTIPLE_BYTES;
-        } else {
-            origFile.write((char*)&o, outSize - outCnt);
-            outCnt = outSize;
-        }
+        origFile.write((char*)&w, size);
 
         // Comparing with input file
         g = 0;
         uncompFile.read((char*)&g, MULTIPLE_BYTES);
-        if (o != g) {
-            uint8_t range = ((outSize - outCnt) > MULTIPLE_BYTES) ? MULTIPLE_BYTES : (outSize - outCnt);
-            for (uint8_t v = 0; v < range; v++) {
+        if (w != g) {
+            for (uint8_t v = 0; v < size; v++) {
                 uint8_t e = g.range((v + 1) * 8 - 1, v * 8);
                 uint8_t r = o.range((v + 1) * 8 - 1, v * 8);
                 if (e != r) {
@@ -121,7 +113,8 @@ void processFile(std::string& compFile_name,
         }
         // reading value from output stream
         o = outStream.read();
-        eosFlag = o.range((MULTIPLE_BYTES + 1) * 8 - 1, MULTIPLE_BYTES * 8);
+        strb = o.range(MULTIPLE_BYTES - 1, 0);
+        size = __builtin_popcount(strb.to_uint());
     }
 
     origFile.close();
