@@ -28,6 +28,21 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2021.2
+------
+
+In 2021.2 release, GQE start to support asynchronous input / output feature, along with multi-card support.
+
+* Asynchronous input / output: use std::future<size_t> to notify GQE L3 readiness of each input sections, and its value
+  is the effective row number of the input section. It will use std::promise<size_t> to notify the caller of GQE L3 the
+  readiness of each section of the final result, and its value is the effective row number of output section. Asynchronous
+  support will allow the FPGA start to process as soon as part of the input data is ready. In such way, FPGA won't wait until
+  all input data is ready and shrink the overhead to prepare data for FPGA.
+* Multi-Cards support: allows to identify multiple Alveo cards that suitable for working. It will load the same xclbins for
+  these cards and called them when there's more task than 1 cards could handle at the same time. The data structure will also
+  keep pinned host buffer and device buffer alive before they're explicitly released. This will help save the time to load
+  xclbins / create pinned buffer / create device buffer.
+
 2021.1
 ------
 

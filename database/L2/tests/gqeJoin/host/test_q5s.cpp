@@ -443,7 +443,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // result buff
-    size_t result_nrow = (1 << 26);
+    size_t result_nrow = (1 << 24);
     size_t table_result_depth = result_nrow / VEC_LEN; // 8 columns in one buffer
     size_t table_result_size = table_result_depth * VEC_LEN * TPCH_INT_SZ;
     ap_uint<512>* table_out_0 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
@@ -554,6 +554,9 @@ int main(int argc, const char* argv[]) {
 
     size_t flag_build = 0;
     size_t flag_probe = 1;
+
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
 #ifdef HLS_TEST
 
     ap_uint<256>* htb_buf0 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
@@ -589,9 +592,6 @@ int main(int argc, const char* argv[]) {
     std::cout << "probe ends................." << std::endl;
 
 #else
-
-    using namespace xf::common::utils_sw;
-    Logger logger(std::cout, std::cerr);
 
     // Get CL devices.
     cl_int err;

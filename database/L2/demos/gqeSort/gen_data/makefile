@@ -43,7 +43,7 @@ inc_opts = $(patsubst %,-I%,$(call uniq,$(call inc_paths,$1)))
 $(DATA_EXE): $(DATA_SRC) $(DATA_HDR)
 	mkdir -p $(BUILD_DIR)
 	g++ -std=c++11 -o $@ $(DATA_SRC) \
-		-I${XILINX_VIVADO}/include  \
+		-I${XILINX_HLS}/include  \
                 -I$(XILINX_XRT)/include \
                 -pthread  -L$(XILINX_XRT)/lib \
                 -g -Wall -Wno-unknown-pragmas -Wno-unused-label \

@@ -108,7 +108,7 @@ int main(int argc, const char* argv[]) {
             table_l_nrow = 6001215;
             break;
         case 2:
-            table_l_nrow = 11997996;
+            table_l_nrow = 11997941;
             break;
         case 4:
             table_l_nrow = 23996604;
@@ -202,20 +202,18 @@ int main(int argc, const char* argv[]) {
     // 32-bit data load from tpch data
     int32_t* table_l_in_0 = mm.aligned_alloc<int32_t>(table_l_nrow);
     int32_t* table_l_in_1 = mm.aligned_alloc<int32_t>(table_l_nrow);
-    int32_t* table_l_in_2 = mm.aligned_alloc<int32_t>(table_l_nrow);
 
     // 64-bit data actually used in gqe-int64 kernel
     int64_t* tab_l_col0 = mm.aligned_alloc<int64_t>(table_l_nrow);
     int64_t* tab_l_col1 = mm.aligned_alloc<int64_t>(table_l_nrow);
-    int64_t* tab_l_col2 = mm.aligned_alloc<int64_t>(table_l_nrow);
+    int64_t tab_l_val_len = (table_l_nrow + 7) / 8;
+    char* tab_l_valid = mm.aligned_alloc<char>(tab_l_val_len);
 
     int64_t* tab_o1_col0 = mm.aligned_alloc<int64_t>(table_l_nrow / BUILD_FACTOR);
     int64_t* tab_o1_col1 = mm.aligned_alloc<int64_t>(table_l_nrow / BUILD_FACTOR);
-    int64_t* tab_o1_col2 = mm.aligned_alloc<int64_t>(table_l_nrow / BUILD_FACTOR);
 
     int64_t* tab_o2_col0 = mm.aligned_alloc<int64_t>(table_l_nrow / BUILD_FACTOR);
     int64_t* tab_o2_col1 = mm.aligned_alloc<int64_t>(table_l_nrow / BUILD_FACTOR);
-    int64_t* tab_o2_col2 = mm.aligned_alloc<int64_t>(table_l_nrow / BUILD_FACTOR);
 
     int64_t table_c_nrow = table_l_nrow;
     int64_t table_c_nrow_depth = (table_c_nrow + VEC_LEN - 1) / VEC_LEN;
@@ -228,32 +226,33 @@ int main(int argc, const char* argv[]) {
     int err = 0;
     err += load_dat<int32_t>(table_l_in_0, "l_orderkey", in_dir, factor_l, table_l_nrow);
     err += load_dat<int32_t>(table_l_in_1, "l_extendedprice", in_dir, factor_l, table_l_nrow);
-    err += load_dat<int32_t>(table_l_in_2, "l_discount", in_dir, factor_l, table_l_nrow);
     if (err) return err;
     std::cout << "LineItem table has been read from disk" << std::endl;
+
+    // diable even rows of table L
+    for (int i = 0; i < tab_l_val_len; i++) {
+        tab_l_valid[i] = 0x55;
+    }
 
     // convert data from 32-bit to 64-bit, for testing only
     for (int i = 0; i < table_l_nrow; ++i) {
         tab_l_col0[i] = table_l_in_0[i];
         tab_l_col1[i] = table_l_in_1[i];
-        tab_l_col2[i] = table_l_in_2[i];
     }
     // build 0 - 1/BUILD_FACTOR of table L into bf1
     for (int i = 0; i < table_l_nrow / BUILD_FACTOR; i++) {
         tab_o1_col0[i] = table_l_in_0[i];
         tab_o1_col1[i] = table_l_in_1[i];
-        tab_o1_col2[i] = table_l_in_2[i];
     }
     // build 1/BUILD_FACTOR - 2/BUILD_FACTOR of table L into bf2
     for (int i = table_l_nrow / BUILD_FACTOR; i < (table_l_nrow / BUILD_FACTOR) * 2; i++) {
         tab_o2_col0[i - table_l_nrow / BUILD_FACTOR] = table_l_in_0[i];
         tab_o2_col1[i - table_l_nrow / BUILD_FACTOR] = table_l_in_1[i];
-        tab_o2_col2[i - table_l_nrow / BUILD_FACTOR] = table_l_in_2[i];
     }
 
     gqe::Table tab_l("Table L");
     tab_l.addCol("l_orderkey", gqe::TypeEnum::TypeInt64, tab_l_col0, table_l_nrow);
-    tab_l.addCol("l_extendedprice", gqe::TypeEnum::TypeInt64, tab_l_col1, table_l_nrow);
+    tab_l.genRowIDWithValidation("l_rowid", "l_valid", 1, 1, tab_l_valid, table_l_nrow);
 
     gqe::Table tab_o1("Table O1");
     tab_o1.addCol("l_orderkey", gqe::TypeEnum::TypeInt64, tab_o1_col0, table_l_nrow / BUILD_FACTOR);
@@ -272,8 +271,8 @@ int main(int argc, const char* argv[]) {
     bf1.merge(bf2);
 
     gqe::Table tab_c("Table C");
-    tab_c.addCol("c1", gqe::TypeEnum::TypeInt64, tab_c_col0, table_c_nrow);
-    tab_c.addCol("c2", gqe::TypeEnum::TypeInt64, tab_c_col1, table_c_nrow);
+    tab_c.addCol("c1", gqe::TypeEnum::TypeBool, tab_c_col0, table_c_nrow);
+    tab_c.addCol("c2", gqe::TypeEnum::TypeBool, tab_c_col1, table_c_nrow);
 
     tab_l.info();
     tab_o1.info();
@@ -290,39 +289,44 @@ int main(int argc, const char* argv[]) {
     gqe::StrategySet params;
     params.sec_l = sec_l;
     gqe::ErrCode err_code;
-    err_code = bigfilter.run(tab_l, "l_orderkey", bf1, "", tab_c, "c1=l_extendedprice, c2=l_orderkey", params);
+    err_code = bigfilter.run(tab_l, "l_orderkey", bf1, "l_rowid > 0", tab_c, "c2", params);
 
     if (err_code) {
         return err_code;
     }
 
     std::cout << "Check results on CPU" << std::endl;
-    // col0: l_extendedprice; col1: l_orderkey
-    int p_nrow = tab_c.getRowNum();
-    std::cout << "Output buffer has " << p_nrow << " rows." << std::endl;
+    // get total number of sections from output table
+    size_t p_nsec = tab_c.getSecNum();
 
     std::cout << "------------Checking result-------------" << std::endl;
     // save filtered key/payload to std::unordered_map for checking
     std::unordered_map<int64_t, int64_t> filtered_pairs;
-    for (int n = 0; n < p_nrow / 8; n++) {
-        for (int i = 0; i < 8; i++) {
-            // l_orderkey is stored to tab_c::col1, see command line bigfilter.run()
-            filtered_pairs.insert(std::make_pair<int64_t, int64_t>(tab_c_col1[n](63 + 64 * i, 64 * i),
-                                                                   tab_c_col0[n](63 + 64 * i, 64 * i)));
+    int64_t index = 0;
+    for (size_t n = 0; n < p_nsec; n++) {
+        // get number of rows for each section
+        size_t nrow_per_sec = tab_c.getSecRowNum(n);
+        // validation flag is stored to tab_c::c2, see command line bigfilter.run()
+        ap_uint<8>* p_ptr = (ap_uint<8>*)tab_c.getValColPointer(1, p_nsec, n);
+        // insert the valid key rows
+        for (size_t i = 0; i < nrow_per_sec; i++) {
+            if (p_ptr[i / (sizeof(ap_uint<8>) * 8)][i % (sizeof(ap_uint<8>) * 8)]) {
+                filtered_pairs.insert(
+                    std::make_pair<int64_t, int64_t>((int64_t)tab_l_col0[index], (int64_t)tab_l_col1[index]));
+            }
+            index++;
         }
-    }
-    for (int i = 0; i < p_nrow % 8; i++) {
-        // l_orderkey is stored to tab_c::col1, see command line bigfilter.run()
-        filtered_pairs.insert(std::make_pair<int64_t, int64_t>(tab_c_col1[p_nrow / 8](63 + 64 * i, 64 * i),
-                                                               tab_c_col0[p_nrow / 8](63 + 64 * i, 64 * i)));
     }
     // test each added key in the filtered key list
     int nerror = 0;
     for (int i = 0; i < (table_l_nrow / BUILD_FACTOR) * 2; i++) {
-        std::unordered_map<int64_t, int64_t>::const_iterator got = filtered_pairs.find((int64_t)tab_l_col0[i]);
-        if (got == filtered_pairs.end()) {
-            nerror++;
-            std::cout << "Missing key = " << tab_l_col0[i] << " in bloom-filter." << std::endl;
+        bool valid = (tab_l_valid[i / 8] >> (i % 8)) & 0x1;
+        if (valid) {
+            std::unordered_map<int64_t, int64_t>::const_iterator got = filtered_pairs.find((int64_t)tab_l_col0[i]);
+            if (got == filtered_pairs.end()) {
+                nerror++;
+                std::cout << "Missing key = " << tab_l_col0[i] << " in bloom-filter." << std::endl;
+            }
         }
     }
     if (nerror) std::cout << nerror << " errors found in " << table_l_nrow << " inputs.\n";

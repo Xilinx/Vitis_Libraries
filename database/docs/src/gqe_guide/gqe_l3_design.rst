@@ -53,6 +53,23 @@ When the build table is large, partitioning the input tables into multi-partitio
 .. CAUTION::
     With TPC-H Q5s query as the example, the solution 1 and 2 switching data size for build table is ~ SF8 (confirm?). Which is to say, when the scale factor is smaller than SF8, solution 1 is faster. For datasets larger than SF8, solution 2 would be faster.
 
+
+Workshop Design 
+===============
+
+Workshop consist of the following 3 parts:
+
+* A vector of Worker: each Worker instance will manage 1 Alveo card and managed device buffers their host mapping pinned buffers. They will handle 1) migration of input data from pinned memory to device memory, 2) kernel arguments setup and kernel call, 3) migration of meta data from device memory to pinned memory, 4) migration of result data from device memory to pinned memory based on meta data.
+* 1 MemCoppier, from host to pinned : has 8 threads to performance memcpy task from input memory to host mapping pinned buffer.
+* 1 MemCoppier, from pinned to host : has 8 threads to performance memcpy task from input memory to host mapping pinned buffer.
+
+Workshop's constructor will find all cards with the same desired shell, and load them with the xclbin files provided. After the constructor is done, it will create same number of worker with cards for managements. The openCL related context, program, kernel, command queue will only be released if the release function is called.
+
+Workshop support to performance Join on multiple cards, with asynchronous input and output. Please take reference of L3/tests/gqe/join case as example of how to notify readiness of each input section and how to wait for readiness of output sections.
+
+Workshop support two solultions for Join. Solution 1 is like Joiner's solution 1, solution 2 is like Joiner's solution 2. It does not provide standalone solution 0 because it is could be covered by solution 1. Workshop will handle task distribution between workers so this will be transparent to caller.
+
+
 Bloom-Filter Design 
 =========================
 
@@ -195,4 +212,6 @@ Others:
 1) Hash Partition only support max 2 keys, when grouping by more keys, use `solution 2`
 2) In solution 1, make one slice scale close to TPC-H SF1.
 3) In solution 2, make one partition scale close to TPC-H SF1.
+
+
 

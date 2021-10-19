@@ -29,8 +29,13 @@ BloomFilterConfig::BloomFilterConfig(Table tab_in,
                                      uint64_t bf_size,
                                      Table tab_out,
                                      std::string output_str) { // comma separated
+    // 0_ process gen-rowID_en & valid_en
+    bool gen_rowID_en = tab_in.getRowIDEnableFlag();
+    bool valid_en = tab_in.getValidEnableFlag();
+
     // 1) read in col names of input table
     std::vector<std::string> in_col_names = tab_in.getColNames();
+    std::vector<std::string> out_col_names = tab_out.getColNames();
     // verify the column num in input table is no more than 3
     CHECK_0(in_col_names, 3, "tab_in");
     // remove the space in str
@@ -54,15 +59,20 @@ BloomFilterConfig::BloomFilterConfig(Table tab_in,
     // write out column name(s) extracted from table out
     std::vector<std::string> write_out_cols;
     write_out_cols = extractWcol(output_str);
-    if (write_out_cols.size() > 3) {
-        std::cout << "No more than 3 columns can be output since we only have 3 input columns at most\n";
+    if (write_out_cols.size() > 1) {
+        std::cout
+            << "Error: no more than 1 column can be output since GQE (bloomfilter) only generates validation buffer\n";
+        exit(1);
+    }
+    if (findStrInd(out_col_names, write_out_cols[0]) == -1) {
+        std::cout << "Error: cannot find column " << write_out_cols[0] << " in output table\n";
         exit(1);
     }
 
     // 3) calc the sw_shuffle_scan cfg
-    sw_shuffle_scan.resize(2);
+    sw_shuffle_scan.resize(3);
     // sw scan-shuffle, puts key cols to 1st and 2nd col
-    ShuffleScan(filter_condition, filter_keys, write_out_cols, in_col_names, sw_shuffle_scan);
+    shuffleFilterScan(filter_keys, in_col_names, sw_shuffle_scan);
 
 #ifdef USER_DEBUG
     std::cout << "3.1. sw_shuffle_scan: ";
@@ -83,19 +93,14 @@ BloomFilterConfig::BloomFilterConfig(Table tab_in,
     int filter_keys_num = filter_keys.size();
     std::cout << "filter_keys_num: " << filter_keys_num << std::endl;
     std::cout << "in_col_names.size(): " << in_col_names.size() << std::endl;
-    // if input table have payload
-    if (write_out_cols.size() > filter_keys_num) {
-        col_out_names.push_back(in_col_names[2]);
-    } else {
-        col_out_names.push_back("unused");
-    }
-    // kernel output column 1 is unused in gqeFilter
+    // kernel output column 0 is used for ouputting the validation flags
+    col_out_names.push_back(write_out_cols[0]);
+    // kernel output column 1 is not used in gqeFilter
     col_out_names.push_back("unused");
-    // key0 + key1 (if existed) to kernel output column 2 + 3
-    std::copy(in_col_names.begin(), in_col_names.begin() + filter_keys_num, std::back_inserter(col_out_names));
-    if (filter_keys_num == 1) {
-        col_out_names.push_back("unused");
-    }
+    // kernel output column 2 is not used in gqeFilter
+    col_out_names.push_back("unused");
+    // kernel output column 3 is not used in gqeFilter
+    col_out_names.push_back("unused");
 #ifdef USER_DEBUG
     std::cout << "4.1. After bloomfilter, column names: " << std::endl;
     for (size_t i = 0; i < col_out_names.size(); i++) {
@@ -106,8 +111,8 @@ BloomFilterConfig::BloomFilterConfig(Table tab_in,
 
     // get the shuffle_write config
     // the cols before shuffle_write: col_out_names
-    // the cols after shuffle_write: extractWCols result: write_out_cols
-    sw_shuffle_write = ShuffleWrite(col_out_names, write_out_cols);
+    // the cols after shuffle_write: table out: out_col_names
+    sw_shuffle_write = shuffleWrite(col_out_names, out_col_names);
 
 #ifdef USER_DEBUG
     for (size_t i = 0; i < sw_shuffle_write.size(); i++) {
@@ -119,9 +124,15 @@ BloomFilterConfig::BloomFilterConfig(Table tab_in,
     std::cout << "----------cfg setup done---------" << std::endl;
 #endif
 
+    std::cout << "Warning: currently bloom-filter only supports key + validation bits input and emits validation bits "
+                 "as a column,\n";
+    std::cout
+        << "         to filter the invalid rows, the kernel ignores the user-specified dynamic filtering condition\n";
+    std::cout << "         from the gqe::Filter.run() and hard-coded condition \"row-id>0\" is applied to the dynamic "
+                 "filtering module\n";
     // 5) setup kernel cfg, which includes filter setup, input_col_en, wr_col_en
     // input_col_en and wr_col_en are taken from sw_shuffle_scan/write cfg
-    SetupKernelConfig(bf_size, filter_condition, filter_keys, sw_shuffle_scan, sw_shuffle_write);
+    SetupKernelConfig(bf_size, "", gen_rowID_en, valid_en, filter_keys, sw_shuffle_scan, sw_shuffle_write);
 }
 
 /**
@@ -134,6 +145,8 @@ BloomFilterConfig::BloomFilterConfig(Table tab_in,
  */
 void BloomFilterConfig::SetupKernelConfig(uint64_t bf_size,
                                           std::string filter_condition,
+                                          bool gen_rowID_en,
+                                          bool valid_en,
                                           std::vector<std::string> filter_keys,
                                           std::vector<int8_t> sw_shuffle_scan,
                                           std::vector<int8_t> sw_shuffle_write) {
@@ -154,6 +167,10 @@ void BloomFilterConfig::SetupKernelConfig(uint64_t bf_size,
         exit(1);
     }
     krncmd.setBloomfilterOn(bf_size);
+
+    // only validation buffer supported for gqeFilter
+    // 2 for gqeFilter kernel, 1 for big table (as gqeFilter only uses big table)
+    krncmd.setRowIDValidEnable(2, 1, gen_rowID_en, valid_en);
 
     // setup dynamic filter
     if (filter_condition != "") krncmd.setFilter(1, filter_condition);

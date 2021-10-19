@@ -20,7 +20,23 @@ namespace xf {
 namespace database {
 namespace gqe {
 
-std::vector<int8_t> PartJoinConfig::ShuffleWritePart(Table& tab_, std::vector<int8_t> sw_shuffle_scan_part_) {
+std::vector<int8_t> PartJoinConfig::shuffleWritePart(Table& tab_, std::vector<int8_t> sw_shuffle_scan_part_) {
+    bool gen_rowID_en = tab_.getRowIDEnableFlag();
+    std::vector<int8_t> shuffle_wr;
+    for (int i = 0; i < 3; ++i) {
+        if (sw_shuffle_scan_part_[i] != -1) {
+            shuffle_wr.push_back(i);
+        } else if (gen_rowID_en && i == 2) {
+            shuffle_wr.push_back(2);
+
+        } else {
+            shuffle_wr.push_back(-1);
+        }
+    }
+    return shuffle_wr;
+}
+
+std::vector<int8_t> PartJoinConfig::shuffleWritePart(TableSection& tab_, std::vector<int8_t> sw_shuffle_scan_part_) {
     bool gen_rowID_en = tab_.getRowIDEnableFlag();
     std::vector<int8_t> shuffle_wr;
     for (int i = 0; i < 3; ++i) {
@@ -67,6 +83,7 @@ PartJoinConfig::PartJoinConfig(Table a,
     // 1) read in col names of table a and b
     std::vector<std::string> a_col_names = a.getColNames();
     std::vector<std::string> b_col_names = b.getColNames();
+    std::vector<std::string> c_col_names = c.getColNames();
     int table_b_valid_col_num = b_col_names.size();
     // verify the column num in table A and B is no more than 3
     CHECK_0(a_col_names, 3, "A");
@@ -94,13 +111,13 @@ PartJoinConfig::PartJoinConfig(Table a,
 
     // write out cols name extracted from table out
     std::vector<std::string> write_out_cols;
-    write_out_cols = extractWcols(join_keys, output_str);
+    write_out_cols = extractWcols(join_keys, c_col_names, output_str);
 
     // 3) calc the sw_shuffle_scan cfg
     sw_shuffle_scan_part.resize(2);
     // sw scan-shuffle, puts key cols to 1st and 2nd col
-    ShuffleScan(filter_a, join_keys[0], write_out_cols, a_col_names, sw_shuffle_scan_part[0]);
-    ShuffleScan(filter_b, join_keys[1], write_out_cols, b_col_names, sw_shuffle_scan_part[1]);
+    shuffleScan(filter_a, join_keys[0], write_out_cols, a_col_names, sw_shuffle_scan_part[0]);
+    shuffleScan(filter_b, join_keys[1], write_out_cols, b_col_names, sw_shuffle_scan_part[1]);
 
 #ifdef USER_DEBUG
     std::cout << "3.1. sw_shuffle_scan_part_a: ";
@@ -126,8 +143,8 @@ PartJoinConfig::PartJoinConfig(Table a,
 #endif
 
     // updating row-id col name
-    UpdateRowIDCol(filter_a, a_col_names, a.getRowIDColName());
-    UpdateRowIDCol(filter_b, b_col_names, b.getRowIDColName());
+    updateRowIDCol(filter_a, a_col_names, a.getRowIDColName());
+    updateRowIDCol(filter_b, b_col_names, b.getRowIDColName());
 
 #ifdef USER_DEBUG
     std::cout << "3.3 after add row-id, column names: " << std::endl;
@@ -146,8 +163,8 @@ PartJoinConfig::PartJoinConfig(Table a,
     sw_shuffle_wr_part.resize(2);
     sw_shuffle_scan_hj.resize(2);
 
-    sw_shuffle_wr_part[0] = ShuffleWritePart(a, sw_shuffle_scan_part[0]);
-    sw_shuffle_wr_part[1] = ShuffleWritePart(b, sw_shuffle_scan_part[1]);
+    sw_shuffle_wr_part[0] = shuffleWritePart(a, sw_shuffle_scan_part[0]);
+    sw_shuffle_wr_part[1] = shuffleWritePart(b, sw_shuffle_scan_part[1]);
 
     // move part output to the first N output cols for join
     for (size_t i = 0; i < sw_shuffle_wr_part[0].size(); i++) {
@@ -190,7 +207,179 @@ PartJoinConfig::PartJoinConfig(Table a,
     // get the shuffle_wr config
     // the cols before shuffle_wr: col_out_names
     // the cols after shuffle_wr: extractWCols result: write_out_cols
-    sw_shuffle_wr_hj = ShuffleWrite(col_out_names, write_out_cols);
+    sw_shuffle_wr_hj = shuffleWrite(col_out_names, write_out_cols);
+
+#ifdef USER_DEBUG
+    for (size_t i = 0; i < sw_shuffle_wr_hj.size(); i++) {
+        std::cout << "sw_shuffle_wr_hj: " << (int)sw_shuffle_wr_hj[i] << std::endl;
+    }
+    for (size_t i = 0; i < write_out_cols.size(); i++) {
+        std::cout << "write_out_cols: " << write_out_cols[i] << std::endl;
+    }
+    std::cout << "----------cfg setup done---------" << std::endl;
+#endif
+
+    // 5) setup kernel cfg, which includes join setup, input_col_en, wr_col_en
+    // input_col_en and wr_col_en are taken from sw_shuffle_scan/wr cfg
+    SetupKernelConfig(join_type, filter_a, filter_b, gen_rowID_en, valid_en, join_keys);
+}
+
+// init to setup the partjoin config, which includes:
+//- sw_cfg_part: sw_shuffle_part cfg for scan and wr
+//- sw_cfg_hj: sw_shuffle_hj cfg for scan and wr
+//- krn_cfg_part: gqePart kernel used config
+//- krn_cfg_hj: gqeJoin kernel used config
+PartJoinConfig::PartJoinConfig(TableSection a,
+                               std::string filter_a,
+                               TableSection b,
+                               std::string filter_b,
+                               std::string join_str, // comma separated
+                               TableSection c,
+                               std::string output_str,
+                               int join_type) {
+    // 0) process gen-rowid_en  and val_en
+    bool gen_rowID_en[2];
+    bool valid_en[2];
+
+    gen_rowID_en[0] = a.getRowIDEnableFlag();
+    gen_rowID_en[1] = b.getRowIDEnableFlag();
+    valid_en[0] = a.getValidEnableFlag();
+    valid_en[1] = b.getValidEnableFlag();
+#ifdef USER_DEBUG
+    std::cout << "gen_rowID_en[0]: " << gen_rowID_en[0] << std::endl;
+    std::cout << "gen_rowID_en[1]: " << gen_rowID_en[1] << std::endl;
+    std::cout << "valid_en[0]: " << valid_en[0] << std::endl;
+    std::cout << "valid_en[1]: " << valid_en[1] << std::endl;
+#endif
+
+    // 1) read in col names of table a and b
+    std::vector<std::string> a_col_names = a.getColNames();
+    std::vector<std::string> b_col_names = b.getColNames();
+    std::vector<std::string> c_col_names = c.getColNames();
+    int table_b_valid_col_num = b_col_names.size();
+    // verify the column num in table A and B is no more than 3
+    CHECK_0(a_col_names, 3, "A");
+    CHECK_0(b_col_names, 3, "B");
+    // remove the space in str
+    xf::database::internals::filter_config::trim(join_str);
+    xf::database::internals::filter_config::trim(output_str);
+
+#ifdef USER_DEBUG
+    std::cout << "1. Get cols from table" << std::endl;
+    for (size_t i = 0; i < a_col_names.size(); i++) {
+        std::cout << a_col_names[i] << " ";
+    }
+    std::cout << std::endl;
+    for (size_t i = 0; i < b_col_names.size(); i++) {
+        std::cout << b_col_names[i] << " ";
+    }
+    std::cout << std::endl << "------------------" << std::endl;
+#endif
+
+    // 2) extract join key col and write out col from input info
+    //  join keys extracted from two input tables
+    std::vector<std::vector<std::string> > join_keys;
+    join_keys = extractKeys(join_str);
+
+    // write out cols name extracted from table out
+    std::vector<std::string> write_out_cols;
+    write_out_cols = extractWcols(join_keys, c_col_names, output_str);
+
+    // 3) calc the sw_shuffle_scan cfg
+    sw_shuffle_scan_part.resize(2);
+    // sw scan-shuffle, puts key cols to 1st and 2nd col
+    shuffleScan(filter_a, join_keys[0], write_out_cols, a_col_names, sw_shuffle_scan_part[0]);
+    shuffleScan(filter_b, join_keys[1], write_out_cols, b_col_names, sw_shuffle_scan_part[1]);
+
+#ifdef USER_DEBUG
+    std::cout << "3.1. sw_shuffle_scan_part_a: ";
+    for (size_t i = 0; i < sw_shuffle_scan_part[0].size(); i++) {
+        std::cout << (int)sw_shuffle_scan_part[0][i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "after sw_shuffle scan column names: " << std::endl;
+    for (size_t i = 0; i < a_col_names.size(); i++) {
+        std::cout << a_col_names[i] << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "3.2. sw_shuffle_scan_part_b: ";
+    for (size_t i = 0; i < sw_shuffle_scan_part[1].size(); i++) {
+        std::cout << (int)sw_shuffle_scan_part[1][i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "after sw_shuffle sacn column names: " << std::endl;
+    for (size_t i = 0; i < b_col_names.size(); i++) {
+        std::cout << b_col_names[i] << " ";
+    }
+#endif
+
+    // updating row-id col name
+    updateRowIDCol(filter_a, a_col_names, a.getRowIDColName());
+    updateRowIDCol(filter_b, b_col_names, b.getRowIDColName());
+
+#ifdef USER_DEBUG
+    std::cout << "3.3 after add row-id, column names: " << std::endl;
+    // tab a
+    for (size_t i = 0; i < a_col_names.size(); i++) {
+        std::cout << a_col_names[i] << " ";
+    }
+    // tab b
+    for (size_t i = 0; i < b_col_names.size(); i++) {
+        std::cout << b_col_names[i] << " ";
+    }
+    std::cout << std::endl << "------------------" << std::endl;
+#endif
+
+    // record the write out col order in partition kernel, which is actually the scan shuffle order for join kernel
+    sw_shuffle_wr_part.resize(2);
+    sw_shuffle_scan_hj.resize(2);
+
+    sw_shuffle_wr_part[0] = shuffleWritePart(a, sw_shuffle_scan_part[0]);
+    sw_shuffle_wr_part[1] = shuffleWritePart(b, sw_shuffle_scan_part[1]);
+
+    // move part output to the first N output cols for join
+    for (size_t i = 0; i < sw_shuffle_wr_part[0].size(); i++) {
+        sw_shuffle_scan_hj[0].push_back(sw_shuffle_wr_part[0][i]);
+    }
+    for (size_t i = 0; i < sw_shuffle_wr_part[1].size(); i++) {
+        sw_shuffle_scan_hj[1].push_back(sw_shuffle_wr_part[1][i]);
+    }
+
+    // 4) calc the shuffle wr cfg by "mimic kernel out col ==> compare with write out col"
+    // define the joined cols that mimic the hardware shuffle
+    // Join Keys
+    int join_keys_num = 1;
+    std::vector<std::string> col_out_names;
+    if (join_str != "") {
+        join_keys_num = join_keys[0].size();
+
+        col_out_names.push_back(b.getRowIDColName());
+        col_out_names.push_back(a.getRowIDColName());
+
+        // insert joined keys
+        col_out_names.insert(col_out_names.end(), a_col_names.begin(), a_col_names.begin() + join_keys_num);
+        if (join_keys_num == 1) {
+            col_out_names.push_back("unused");
+        }
+    } else {
+        if (table_b_valid_col_num != 0) {
+            std::cout << "WARNING: Bypass data and ignore table b." << std::endl;
+        }
+        std::copy(a_col_names.begin(), a_col_names.end(), std::back_inserter(col_out_names));
+    }
+#ifdef USER_DEBUG
+    std::cout << "4.1. After join, column names: " << std::endl;
+    for (size_t i = 0; i < col_out_names.size(); i++) {
+        std::cout << col_out_names[i] << " ";
+    }
+    std::cout << std::endl;
+#endif
+
+    // get the shuffle_wr config
+    // the cols before shuffle_wr: col_out_names
+    // the cols after shuffle_wr: extractWCols result: write_out_cols
+    sw_shuffle_wr_hj = shuffleWrite(col_out_names, write_out_cols);
 
 #ifdef USER_DEBUG
     for (size_t i = 0; i < sw_shuffle_wr_hj.size(); i++) {

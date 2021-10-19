@@ -27,44 +27,38 @@ namespace gqe {
 
 // calculates bloom-filter size under the equation provided in:
 // https://en.wikipedia.org/wiki/Bloom_filter
-// returns log2 of the number of bits needed.
-uint64_t BloomFilter::calcLogSize(uint64_t num_keys) {
-    /* p ~= (1 - e^(-kn/m))^k
-     * gqeFilter provides only one hash, so k=1
-     * p = 1 - e^(-n/m)
-     * m = -n / ln(1 - p)
-     */
-    float m = -1.0f * num_keys / log(1.0f - FPP);
-    if (dbg) std::cout << "DEBUG: Ideal BF size " << m << std::endl;
-    // need power of 2
-    uint64_t m2 = ceil(log2(m));
-    // not too small
-    m2 = (m2 < 15) ? 15 : m2; // at least 32K bit
-    return m2;
+// returns the number of bits needed.
+uint64_t BloomFilter::calcSize(uint64_t num_keys) {
+    // p ~= (1 - e^(-kn/m))^k
+    uint64_t ideal_size_in_bits = -4.0f * num_keys / log(1.0f - sqrt(sqrt(FPP))) + 1;
+    if (dbg) std::cout << "Debug: Ideal BF size in bits = " << ideal_size_in_bits << std::endl;
+    // need 4096-bit aligned, as hardware utilizes 8 HBMs with 8 * 64-bit width cache line size
+    uint64_t aligned_bits_num = 8 * 8 * 64;
+    uint64_t aligned_size_in_bits = ideal_size_in_bits / aligned_bits_num * aligned_bits_num +
+                                    ((ideal_size_in_bits % aligned_bits_num) > 0) * aligned_bits_num;
+    // 16Gbits is currently hardware limit.
+    if (aligned_size_in_bits >= 16UL * 1024 * 1024 * 1024) {
+        std::cout << "Requires " << (float)aligned_size_in_bits / (1 << 30) << " Gbits for " << num_keys
+                  << " unique keys, please reduce the number of unique keys\n";
+        exit(1);
+    }
+    std::cout << "Hardware bloom-filter size in bits = " << aligned_size_in_bits << std::endl << std::endl;
+    return aligned_size_in_bits;
 }
 
 // calculates bloom-filter size as well as allocates buffer for internal hash-table
 BloomFilter::BloomFilter(uint64_t num_keys, float fpp) : FPP(fpp) {
     // calculates bloom-filter size based on number of unique keys
-    bloom_filter_addr_bits = calcLogSize(num_keys);
-    if (dbg) std::cout << "DEBUG: BF address bits = " << bloom_filter_addr_bits << std::endl;
-    bloom_filter_bits = 1ULL << bloom_filter_addr_bits;
-    if (dbg) std::cout << "DEBUG: BF bits = " << bloom_filter_bits << std::endl;
-    // 34 is currently hardware limit.
-    if (bloom_filter_addr_bits > 34) {
-        std::cout << "Requires " << (float)bloom_filter_bits / (1 << 30) << " Gbits for " << num_keys
-                  << " unique keys, please reduce the number of unique keys\n";
-        exit(1);
-    }
+    bloom_filter_bits = calcSize(num_keys);
 
     // allocates buffer for internal hash-table
     // buffuers will be released automatically with the dead of the mm object
-    hash_table = mm.aligned_alloc<ap_uint<256>*>(8);
+    hash_table = mm.aligned_alloc<uint64_t*>(8);
     for (int i = 0; i < 8; i++) {
-        uint64_t nv = bloom_filter_bits / 8 / 256;
-        hash_table[i] = mm.aligned_alloc<ap_uint<256> >(nv);
+        uint64_t nv = bloom_filter_bits / 8 / (sizeof(uint64_t) * 8);
+        hash_table[i] = mm.aligned_alloc<uint64_t>(nv);
         // clean up the hash-table
-        memset(hash_table[i], 0, sizeof(ap_uint<256>) * nv);
+        memset(hash_table[i], 0, sizeof(uint64_t) * nv);
     }
 }
 
@@ -213,21 +207,30 @@ void BloomFilter::build(Table tab_in, std::string key_names_str) {
 #endif
             hash64 = hashLookup3(key_ptr[0][i], key_ptr[1][i]);
         }
-        // 34-bit binary for indicating a size of 16Gbit (2GB or 8 HBMs)
-        hash64 = hash64 & mask(34);
         // index of the HBM
-        uint64_t idx = hash64 >> 31; // 3 bits (31, 32, 33) for selecting HBM buffer.
-        // address within the HBM
-        uint64_t addr = hash64 & mask(bloom_filter_addr_bits - 3);
-        // assert bit in 256b vector
-        hash_table[idx][addr >> 8].set_bit(addr & 0xffULL, 1);
+        uint64_t idx = hash64 >> 61; // 3 bits (63, 62, 61) for selecting HBM buffer.
+        hash64 = hash64 & 0x1FFFFFFFFFFFFFFFUL;
+        // first hash is used to locate start of the block
+        uint32_t hash1 = (uint32_t)hash64;
+        uint32_t hash2 = (uint32_t)(hash64 >> 32);
+        uint32_t firstHash = hash1 + hash2;
+        uint32_t totalBlockCountEach = bloom_filter_bits / 64 / 8;
+        uint32_t blockIdx = firstHash % totalBlockCountEach;
+        uint32_t blockBaseOffset = blockIdx & 0xFFFFFFF8;
+        // subsequent K hashes are used to generate K bits within a cache line (4 blocks)
+        for (int i = 1; i <= NUM_HASH_FUNCS; i++) {
+            uint32_t combinedHash = hash1 + ((i + 1) * hash2);
+            uint32_t absOffset = blockBaseOffset + (combinedHash & 0x00000007);
+            int bitPos = (combinedHash >> 3) & 63;
+            hash_table[idx][absOffset] |= ((uint64_t)1 << bitPos);
+        }
     }
 }
 
 // merges the given bloom-filter into current one
 void BloomFilter::merge(BloomFilter& bf_in) {
     // get the hash-table of the input bloom-filter
-    ap_uint<256>** in_hash = bf_in.getHashTable();
+    uint64_t** in_hash = bf_in.getHashTable();
     uint64_t in_bf_size = bf_in.getBloomFilterSize();
 
     // same size?
@@ -239,14 +242,14 @@ void BloomFilter::merge(BloomFilter& bf_in) {
     // indexing each individual HBM storage
     for (int i = 0; i < 8; i++) {
         // merge BF2 into BF1
-        for (uint32_t j = 0; j < (bloom_filter_bits / 8 / 256); j++) {
+        for (uint32_t j = 0; j < (bloom_filter_bits / 8 / (sizeof(uint64_t) * 8)); j++) {
             hash_table[i][j] |= in_hash[i][j];
         }
     }
 }
 
 // gets hash-table
-ap_uint<256>** BloomFilter::getHashTable() const {
+uint64_t** BloomFilter::getHashTable() const {
     return hash_table;
 }
 

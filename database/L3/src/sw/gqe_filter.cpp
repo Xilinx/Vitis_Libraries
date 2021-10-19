@@ -181,23 +181,16 @@ class threading_pool {
                 gqe::utils::Timer tv;
                 tv.add(); // 0
 #endif
-                // save output data nrow
-                toutrow[q.sec] = probe_out_nrow;
+                // save output data nrow for each section
+                toutrow[q.sec] = q.meta_nrow;
 
                 int col_num = q.col_idx.size();
 
                 for (int i = 0; i < col_num; i++) {
                     if (q.col_idx[i] != -1) {
-                        int64_t u_dst_size = q.size[i];                      // user buffer size
-                        int64_t pout_size = probe_out_nrow * q.type_size[i]; // current section size needs to be output
-                        if (total_curr_nrow * q.type_size[i] + pout_size > u_dst_size) {
-                            std::cerr << "Error in checking probe memcpy out size: user buffer size(" << u_dst_size
-                                      << ") < output size(" << (total_curr_nrow * q.type_size[i] + pout_size) << ")"
-                                      << std::endl;
-                            std::cerr << "Please set enough buffer size for output table " << std::endl;
-                            exit(1);
-                        }
-                        memcpy(q.ptr_dst[i] + total_curr_nrow * q.type_size[i], q.ptr_src[i], pout_size);
+                        int64_t pout_size = q.meta_nrow / 8; // current section size needs to be output, as gqe::Table
+                                                             // splits number of rows in each section a multiple of 8
+                        memcpy(q.ptr_dst[i], q.ptr_src[i], pout_size);
                     }
                 }
 
@@ -250,21 +243,16 @@ class threading_pool {
                 gqe::utils::Timer tv;
                 tv.add(); // 0
 #endif
-                // save output data nrow
-                toutrow[q.sec] = probe_out_nrow;
+                // save output data nrow for each section
+                toutrow[q.sec] = q.meta_nrow;
+
                 int col_num = q.col_idx.size();
+
                 for (int i = 0; i < col_num; i++) {
                     if (q.col_idx[i] != -1) {
-                        int64_t u_dst_size = q.size[i];                      // user buffer size
-                        int64_t pout_size = probe_out_nrow * q.type_size[i]; // current section size needs to be output
-                        if (total_curr_nrow * q.type_size[i] + pout_size > u_dst_size) {
-                            std::cerr << "Error in checking probe memcpy out size: user buffer size(" << u_dst_size
-                                      << ") < output size(" << (total_curr_nrow * q.type_size[i] + pout_size) << ")"
-                                      << std::endl;
-                            std::cerr << "Please set enough buffer size for output table " << std::endl;
-                            exit(1);
-                        }
-                        memcpy(q.ptr_dst[i] + total_curr_nrow * q.type_size[i], q.ptr_src[i], pout_size);
+                        int64_t pout_size = q.meta_nrow / 8; // current section size needs to be output, as gqe::Table
+                                                             // splits number of rows in each section a multiple of 8
+                        memcpy(q.ptr_dst[i], q.ptr_src[i], pout_size);
                     }
                 }
 
@@ -317,7 +305,7 @@ ErrCode Filter::filter_sol(Table& tab_in,
                            Table& tab_out,
                            BloomFilterConfig& fcfg,
                            uint64_t bf_size_in_bits,
-                           ap_uint<256>** hash_table,
+                           uint64_t** hash_table,
                            StrategySet params) {
     gqe::utils::MM mm;
     // get filter kernel config
@@ -344,6 +332,9 @@ ErrCode Filter::filter_sol(Table& tab_in,
     // get total row number and valid col number
     int64_t l_nrow = tab_in.getRowNum();
     int l_valid_col_num = tab_in.getColNum();
+
+    // validation buffer has the same number of rows as input
+    tab_out.setRowNum(l_nrow);
     // int l_valid_col_num = q5s_filter_scan.size();
     int out_valid_col_num = tab_out.getColNum();
 #ifdef USER_DEBUG
@@ -353,6 +344,7 @@ ErrCode Filter::filter_sol(Table& tab_in,
 
     // checks if we should bring the section number from json or calculate them locally (evenly divided)
     tab_in.checkSecNum(sec_l);
+    tab_out.checkSecNum(sec_l);
     std::cout << "Finish table division\n";
     int table_l_sec_num = tab_in.getSecNum();
     int* table_l_sec_depth = new int[table_l_sec_num];
@@ -408,6 +400,15 @@ ErrCode Filter::filter_sol(Table& tab_in,
         }
     }
 
+    char* table_l_valid_user[table_l_sec_num];
+    int64_t table_l_valid_sec_size[table_l_sec_num];
+    if (tab_in.getValidEnableFlag()) {
+        for (size_t i = 0; i < table_l_sec_num; i++) {
+            table_l_valid_user[i] = tab_in.getValColPointer(sec_l, i);
+            table_l_valid_sec_size[i] = sizeof(char) * (table_l_sec_depth[i] + 7) / 8;
+        }
+    }
+
     // data load from disk. due to table size, data read into several sections
     char* table_l_user_col_sec[3][table_l_sec_num];
     for (int j = 0; j < 3; j++) {
@@ -419,6 +420,25 @@ ErrCode Filter::filter_sol(Table& tab_in,
             for (int i = 0; i < table_l_sec_num; ++i) {
                 table_l_user_col_sec[j][i] = mm.aligned_alloc<char>(8);
                 memset(table_l_user_col_sec[j][i], 0, 8);
+            }
+        }
+    }
+
+    // get sw_shuffle_write config
+    std::vector<int8_t> q5s_filter_wr = fcfg.getShuffleWrite();
+
+    // data store to disk, as input table is splitted into several sections
+    // the output table is divided the same way
+    char* table_out_user_col_sec[4][table_l_sec_num];
+    for (int j = 0; j < 4; j++) {
+        if (q5s_filter_wr[j] != -1) {
+            for (int i = 0; i < table_l_sec_num; i++) {
+                table_out_user_col_sec[j][i] = tab_out.getValColPointer(q5s_filter_wr[j], table_l_sec_num, i);
+            }
+        } else {
+            for (int i = 0; i < table_l_sec_num; i++) {
+                table_out_user_col_sec[j][i] = mm.aligned_alloc<char>(8);
+                memset(table_out_user_col_sec[j][i], 0, 8);
             }
         }
     }
@@ -440,37 +460,28 @@ ErrCode Filter::filter_sol(Table& tab_in,
         table_l_probe_in_col[i][1] = AllocHostBuf(1, table_l_sec_size_max[i]);
     }
 
+    // define input validation buffer
+    int din_val_l_len = (table_l_sec_depth_max + 7) / 8;
+    char* din_valid_l[2];
+    din_valid_l[0] = mm.aligned_alloc<char>(din_val_l_len);
+    din_valid_l[1] = mm.aligned_alloc<char>(din_val_l_len);
+
     // define probe kernel pinned host buffers, output
     // 4 for 4 coumns at max, 2 for ping & pong
     char* table_l_probe_out_col[4][2];
 
-    // get sw_shuffle_write config
-    std::vector<int8_t> q5s_filter_wr = fcfg.getShuffleWrite();
-    // define the final output and memset 0
-    char* table_out_col[4];
-    int64_t table_out_col_type[4];
+    // define the final output size
     int64_t table_out_sec_size[4];
-    int64_t table_l_probe_out_sec_size = 0;
-    for (int j = 0; j < 3; j++) {
-        if (q5s_filter_scan[j] != -1) {
-            if (table_l_sec_size_max[j] > table_l_probe_out_sec_size) {
-                table_l_probe_out_sec_size = table_l_sec_size_max[j];
-            }
-        }
-    }
+    int64_t table_l_probe_out_sec_size = table_l_sec_depth_max / 8 + ((table_l_sec_depth_max % 8) > 0);
     for (int i = 0; i < 4; i++) {
         if (q5s_filter_wr[i] != -1) {
 #ifdef USER_DEBUG
             std::cout << "i: " << i << ", q5s_filter_wr[i]: " << (int)q5s_filter_wr[i] << std::endl;
 #endif
             int shf_i = (int)q5s_filter_wr[i];
-            // input/output col type are int64
-            table_out_col_type[i] = tab_out.getColTypeSize(shf_i);
             table_out_sec_size[i] = table_l_probe_out_sec_size;
-            table_out_col[i] = tab_out.getColPointer(shf_i);
         } else {
             table_out_sec_size[i] = VEC_LEN;
-            table_out_col[i] = mm.aligned_alloc<char>(VEC_LEN);
         }
     }
 
@@ -526,10 +537,13 @@ ErrCode Filter::filter_sol(Table& tab_in,
     cl_mem_ext_ptr_t mext_cfg5s_ft;
     mext_cfg5s_ft = {XCL_BANK1, q5s_cfg_filter, 0};
 
-    char* din_valid = mm.aligned_alloc<char>(VEC_LEN);
-    cl_mem_ext_ptr_t mext_buf_valid = {XCL_BANK1, din_valid, 0};
-    cl_mem buf_valid = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                      VEC_LEN * sizeof(char), &mext_buf_valid, &err);
+    cl_mem_ext_ptr_t mext_buf_valid_l[2];
+    cl_mem buf_valid_l[2];
+    for (int i = 0; i < 2; i++) {
+        mext_buf_valid_l[i] = {XCL_BANK1, din_valid_l[i], 0};
+        buf_valid_l[i] = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                        din_val_l_len * sizeof(char), &mext_buf_valid_l[i], &err);
+    }
 
     cl_mem_ext_ptr_t mext_meta_probe_in[2], mext_meta_probe_out[2];
     mext_meta_probe_in[0] = {XCL_BANK1, meta_probe_in[0].meta(), 0};   // pkernel[0]};
@@ -678,7 +692,7 @@ ErrCode Filter::filter_sol(Table& tab_in,
         clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_table_l_probe_in_col[0][k]);
         clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_table_l_probe_in_col[1][k]);
         clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_table_l_probe_in_col[2][k]);
-        clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_valid);
+        clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_valid_l[k]);
         clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_cfg5s_ft);
         clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_meta_probe_in[k]);
         clSetKernelArg(pkernel[k], idx++, sizeof(cl_mem), &buf_meta_probe_out[k]);
@@ -798,6 +812,13 @@ ErrCode Filter::filter_sol(Table& tab_in,
                 probe_min[sec].size[i] = table_l_sec_depth[sec] * table_l_col_types[i];
             }
         }
+        if (tab_in.getRowIDEnableFlag() && tab_in.getValidEnableFlag()) {
+            probe_min[sec].col_idx.push_back(3);
+            probe_min[sec].size[3] = table_l_valid_sec_size[sec];
+            probe_min[sec].type_size[3] = sizeof(char);
+            probe_min[sec].ptr_src[3] = table_l_valid_user[sec];
+            probe_min[sec].ptr_dst[3] = din_valid_l[sid];
+        }
         if (sec > 1) {
             probe_min[sec].num_event_wait_list = evt_probe_h2d[sec - 2].size();
             probe_min[sec].event_wait_list = evt_probe_h2d[sec - 2].data();
@@ -839,16 +860,14 @@ ErrCode Filter::filter_sol(Table& tab_in,
         // 5) memcpy the output data back to user host buffer
         probe_mout[sec].sec = sec;
         probe_mout[sec].event = &evt_probe_memcpy_out[sec][0];
-        probe_mout[sec].meta_nrow = meta_probe_out[sid].getColLen();
-        probe_mout[sec].meta = &meta_probe_out[sid];
+        probe_mout[sec].meta_nrow = table_l_sec_depth[sec];
+        probe_mout[sec].meta = &meta_probe_out[sid]; // for accumulating the total number of valid rows
         for (int i = 0; i < 4; i++) {
             int shf_i = (int)q5s_filter_wr[i];
             probe_mout[sec].col_idx.push_back(shf_i);
             if (shf_i != -1) {
-                probe_mout[sec].ptr_dst[i] = table_out_col[i];
+                probe_mout[sec].ptr_dst[i] = table_out_user_col_sec[i][sec];
                 probe_mout[sec].ptr_src[i] = table_l_probe_out_col[i][sid];
-                probe_mout[sec].type_size[i] = table_out_col_type[i];
-                probe_mout[sec].size[i] = table_out_col_type[i] * tab_out.getRowNum();
             }
         }
         probe_mout[sec].num_event_wait_list = evt_probe_d2h[sec].size();
@@ -882,7 +901,7 @@ ErrCode Filter::filter_sol(Table& tab_in,
 #endif
         out_nrow_sum += pool.toutrow[sec];
     }
-    tab_out.setRowNum(out_nrow_sum);
+    std::cout << "Totally " << pool.probe_out_nrow_accu << " valid rows in " << l_nrow << " input rows.\n";
 
     //------------------------------------------------------------------------
     //-----------------print the execution time of each part------------------
@@ -899,7 +918,7 @@ ErrCode Filter::filter_sol(Table& tab_in,
     double total_time = 0;
     total_time = tv_ft.getMilliSec();
     std::cout << "bloom-filtering time: " << (double)total_time << "ms" << std::endl;
-    double out_bytes = (double)out_nrow_sum * sizeof(uint64_t) * out_valid_col_num / 1024 / 1024;
+    double out_bytes = (double)out_nrow_sum / 8 / 1024 / 1024;
 
     std::cout << "-----------------------Input/Output Info-----------------------" << std::endl;
     std::cout << "Table" << std::setw(20) << "Column Number" << std::setw(30) << "Row Number" << std::endl;
@@ -960,7 +979,7 @@ ErrCode Filter::run(Table& tab_in,
     ErrCode error_code;
     // gets information on input bloom-filter
     uint64_t in_bf_size = bf_in.getBloomFilterSize();
-    ap_uint<256>** in_hash_table = bf_in.getHashTable();
+    uint64_t** in_hash_table = bf_in.getHashTable();
     // gets shuffle/kernel configs for running
     BloomFilterConfig fcfg(tab_in, filter_condition, input_str, in_bf_size, tab_out, output_str);
     // performs bloom-filtering

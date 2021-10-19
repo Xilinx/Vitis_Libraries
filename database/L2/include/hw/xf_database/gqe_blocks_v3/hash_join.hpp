@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ void hash_join_plus_adapter(bool build_probe_flag,
     Split_1D<COL_OUT_NM>(joined_strm, e_joined_strm, out_strm, e_out_strm);
 }
 
-template <int COL_IN_NM, int CH_NM, int COL_OUT_NM, int ROUND_NM>
+template <int COL_IN_NM, int CH_NM, int COL_OUT_NM, int ROUND_NM, int GRP_SZ>
 void bloomfilter_join_plus_adapter(bool build_probe_flag,
                                    bool mk_on,
                                    bool bf_on,
@@ -244,8 +244,9 @@ void bloomfilter_join_plus_adapter(bool build_probe_flag,
     }
 #endif
 
-    // <int HASH_MODE, int KEYW, int PW, int S_PW, int B_PW, int HASHWH, int HASHWL, int HASHWJ,int ARW, int CH_NM>
-    xf::database::bloomFilterJoin<1, 128, 64, 64, 64, 3, 31, 17, 24, 4>(
+    // <int HASH_MODE, int KEYW, int PW, int S_PW, int B_PW, int HASHWH, int HASHWL, int HASHWJ,int ARW, int CH_NM, int
+    // GRP_SZ
+    xf::database::bloomFilterJoin<1, 128, 64, 64, 64, 3, 61, 17, 24, 4, GRP_SZ>(
         build_probe_flag, bf_on, bf_size_in_bits, join_flag_strm, key_strm, pld_strm, e_join_pld_strm, htb_buf0,
         htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6, htb_buf7, stb_buf0, stb_buf1, stb_buf2, stb_buf3,
         stb_buf4, stb_buf5, stb_buf6, stb_buf7, pu_b_status_strm, pu_e_status_strm, joined_strm, e_joined_strm);
@@ -310,7 +311,7 @@ void hash_join_wrapper(hls::stream<ap_uint<6> >& i_join_cfg_strm,
     }
 }
 
-template <int COL_IN_NM, int CH_NM, int COL_OUT_NM, int ROUND_NM>
+template <int COL_IN_NM, int CH_NM, int COL_OUT_NM, int ROUND_NM, int GRP_SZ>
 void bloomfilter_join_wrapper(hls::stream<ap_uint<36> >& bf_cfg_strm,
                               hls::stream<ap_uint<6> >& i_join_cfg_strm,
                               hls::stream<ap_uint<6> >& o_join_cfg_strm,
@@ -318,6 +319,7 @@ void bloomfilter_join_wrapper(hls::stream<ap_uint<36> >& bf_cfg_strm,
                               hls::stream<bool> e_in_strm[CH_NM],
                               hls::stream<ap_uint<8 * TPCH_INT_SZ> > out_strm[COL_OUT_NM],
                               hls::stream<bool>& e_out_strm,
+                              hls::stream<ap_uint<32> >& nr_row_strm,
                               ap_uint<256>* htb_buf0,
                               ap_uint<256>* htb_buf1,
                               ap_uint<256>* htb_buf2,
@@ -356,12 +358,16 @@ void bloomfilter_join_wrapper(hls::stream<ap_uint<36> >& bf_cfg_strm,
     if (jn_on) {
         pu_begin_status_strm.write(31);
         pu_begin_status_strm.write(0);
-        bloomfilter_join_plus_adapter<COL_IN_NM, CH_NM, COL_OUT_NM, ROUND_NM>(
+        bloomfilter_join_plus_adapter<COL_IN_NM, CH_NM, COL_OUT_NM, ROUND_NM, GRP_SZ>(
             bp_flag, mk_on, bf_on, bf_size_in_bits, join_flag_strm, in_strm, e_in_strm, out_strm, e_out_strm,
             pu_begin_status_strm, pu_end_status_strm, htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5,
             htb_buf6, htb_buf7, stb_buf0, stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
         int st1 = pu_end_status_strm.read();
         int st2 = pu_end_status_strm.read();
+        // only probe stage we need the number of ouput rows
+        if (bp_flag) {
+            nr_row_strm.write((ap_uint<32>)st2);
+        }
 #if !defined __SYNTHESIS__ && USER_DEBUG == 1
         printf("Hash join finished. status(%d, %d).\n", st1, st2);
 #endif

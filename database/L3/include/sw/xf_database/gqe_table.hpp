@@ -25,7 +25,7 @@ namespace database {
 namespace gqe {
 
 enum ErrCode { SUCCESS = 0, PARAM_ERROR = 1, MEM_ERROR = 2, DEV_ERROR = 3 };
-enum class TypeEnum { TypeInt32 = sizeof(int32_t), TypeInt64 = sizeof(int64_t), TypeBool };
+enum class TypeEnum { TypeInt32 = sizeof(int32_t), TypeInt64 = sizeof(int64_t), TypeBool = sizeof(bool) };
 
 struct ColPtr {
     void* ptr;
@@ -235,6 +235,9 @@ class Table {
      *
      */
     char* getValColPointer(int _slice_num, int j) const;
+
+    // get the validation buffer pointer from _col_ptr (column specified)
+    char* getValColPointer(int i, int _slice_num, int j) const;
 
     /**
      * @brief get column pointer.

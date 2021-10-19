@@ -62,7 +62,7 @@ class Filter : public Base {
                        Table& tab_out,
                        BloomFilterConfig& fcfg,
                        uint64_t bf_size_in_bits,
-                       ap_uint<256>** hash_table,
+                       unsigned long** hash_table,
                        StrategySet params);
 
    public:

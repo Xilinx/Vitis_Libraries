@@ -35,7 +35,7 @@ void BaseConfig::CHECK_0(std::vector<std::string> str, size_t len, std::string s
 }
 
 // align the joined key in two table to the same col name
-void BaseConfig::AlignColName(std::string& str, const std::string& from, const std::string& to) {
+void BaseConfig::alignColName(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
     while ((start_pos = str.find(from)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
@@ -128,11 +128,14 @@ std::vector<std::string> BaseConfig::extractKey(std::string input_str) {
 
 // extract the write out cols from table c string
 std::vector<std::string> BaseConfig::extractWcols(std::vector<std::vector<std::string> > join_keys,
+                                                  std::vector<std::string> c_col_names,
                                                   std::string outputs) {
     // write out cols idx extracted from table out, unuseful
     std::vector<std::string> write_out_col_idx;
     // write out cols name extracted from table out
-    std::vector<std::string> write_out_cols;
+    std::vector<std::string> write_out_col_key;
+    // mapped out col names as described in output mapping expression
+    std::vector<std::string> mapped_out_cols;
 
     std::vector<std::string> maps;
     std::istringstream f(outputs);
@@ -148,26 +151,36 @@ std::vector<std::string> BaseConfig::extractWcols(std::vector<std::vector<std::s
         for (size_t j = 0; j < join_keys[0].size(); j++) {
             size_t found = key_.find(join_keys[1][j]);
             if (found != std::string::npos) {
-                AlignColName(key_, join_keys[1][j], join_keys[0][j]);
+                alignColName(key_, join_keys[1][j], join_keys[0][j]);
             }
         }
         write_out_col_idx.push_back(idx_);
-        write_out_cols.push_back(key_);
+        write_out_col_key.push_back(key_);
     }
 #ifdef USER_DEBUG
     std::cout << "2.2. extractWcols" << std::endl;
-    for (size_t i = 0; i < write_out_cols.size(); i++) {
-        std::cout << write_out_col_idx[i] << "<--" << write_out_cols[i] << " ";
+    for (size_t i = 0; i < write_out_col_key.size(); i++) {
+        std::cout << write_out_col_idx[i] << "<--" << write_out_col_key[i] << " ";
     }
     std::cout << std::endl << "------------------" << std::endl;
 #endif
-    return write_out_cols;
+    if (c_col_names.size() != write_out_col_key.size()) {
+        std::cout << "Error: number of comlumns mismatched between output table and mapping\n";
+        exit(1);
+    }
+    // switch column order as described by output mapping
+    for (size_t i = 0; i < write_out_col_key.size(); i++) {
+        for (size_t j = 0; j < write_out_col_key.size(); j++) {
+            if (write_out_col_idx[j] == c_col_names[i]) {
+                mapped_out_cols.push_back(write_out_col_key[j]);
+            }
+        }
+    }
+    return mapped_out_cols;
 }
 
 // extract the write out cols from table c string (for gqeFilter only)
 std::vector<std::string> BaseConfig::extractWcol(std::string outputs) {
-    // write out cols idx extracted from table out, unuseful
-    std::vector<std::string> write_out_col_idx;
     // write out cols name extracted from table out
     std::vector<std::string> write_out_cols;
 
@@ -178,26 +191,23 @@ std::vector<std::string> BaseConfig::extractWcol(std::string outputs) {
         maps.push_back(s);
     }
     for (auto ss : maps) {
-        int notation_eq = ss.find_first_of("=");
-        std::string idx_ = ss.substr(0, notation_eq);
-        // which column in input table to be written out to output table
-        std::string key_ = ss.substr(notation_eq + 1);
-        write_out_col_idx.push_back(idx_);
+        // which column in output table to receives the validation flags
+        std::string key_ = ss;
         write_out_cols.push_back(key_);
     }
 #ifdef USER_DEBUG
     std::cout << "2.2. extractWcols" << std::endl;
     for (size_t i = 0; i < write_out_cols.size(); i++) {
-        std::cout << write_out_col_idx[i] << "<--" << write_out_cols[i] << " ";
+        std::cout << write_out_cols[i] << " ";
     }
     std::cout << std::endl << "\n------------------" << std::endl;
 #endif
     return write_out_cols;
 }
 
-// sw scan-shuffle
+// sw scan-shuffle for gqe Join/Part
 // - shuffle the key cols to col0/1. the pld col to col2
-void BaseConfig::ShuffleScan(std::string& filter_str_,
+void BaseConfig::shuffleScan(std::string& filter_str_,
                              std::vector<std::string> join_keys_,
                              std::vector<std::string> write_out_cols_,
                              std::vector<std::string>& col_names_,
@@ -263,8 +273,59 @@ void BaseConfig::ShuffleScan(std::string& filter_str_,
     //#endif
 }
 
+// sw scan-shuffle for gqe Filter
+// - shuffle the key cols to col0/1. disable the pld col
+void BaseConfig::shuffleFilterScan(std::vector<std::string> join_keys_,
+                                   std::vector<std::string>& col_names_,
+                                   std::vector<int8_t>& sw_shuffle_scan_) {
+    // re-order the input col with the following orders:
+    // join-key, pld
+    std::vector<int> idx_keys_; // join key
+    std::vector<int> idx_plds_; // pld
+
+    for (size_t i = 0; i < col_names_.size(); ++i) {
+        // check if col is key, get the idx
+        int found_key_idx = findStrInd(join_keys_, col_names_[i]);
+        // save the key idx
+        if (found_key_idx != -1) {
+            idx_keys_.push_back(i);
+        }
+    }
+    // dual key at maximum
+    assert(idx_keys_.size() < 3);
+    // no payload column for gqeFilter as row-id is generated in kernel
+    assert(idx_plds_.size() < 1);
+
+    // push the cols into cols_tab_ with the order: join_key, plds
+    std::vector<int8_t> cols_tab_;
+    for (size_t i = 0; i < idx_keys_.size(); ++i) {
+        cols_tab_.push_back(idx_keys_[i]);
+    }
+    if (idx_keys_.size() == 1) {
+        cols_tab_.push_back(-1);
+    }
+    if (idx_plds_.size() == 0) {
+        cols_tab_.push_back(-1);
+    }
+    assert(cols_tab_.size() == 3);
+
+    // the sw shuffle_scan config is ready, aka, cols_tab_
+    sw_shuffle_scan_ = cols_tab_;
+    // generating corresponding col_names after shuffle_scan
+    std::vector<std::string> col_names_helper;
+    std::copy(col_names_.begin(), col_names_.end(), std::back_inserter(col_names_helper));
+
+    col_names_.resize(3);
+    for (int i = 0; i < 3; i++) {
+        if (cols_tab_[i] == -1)
+            col_names_[i] = "unused";
+        else
+            col_names_[i] = col_names_helper[cols_tab_[i]];
+    }
+}
+
 // the shuffle used for write out cols, saves the shuffle targeting col
-std::vector<int8_t> BaseConfig::ShuffleWrite(std::vector<std::string> col_in_names,
+std::vector<int8_t> BaseConfig::shuffleWrite(std::vector<std::string> col_in_names,
                                              std::vector<std::string> col_wr_names) {
     std::vector<int8_t> shuffle_wr_order;
     for (size_t i = 0; i < col_in_names.size(); i++) {
@@ -284,7 +345,7 @@ std::vector<int8_t> BaseConfig::ShuffleWrite(std::vector<std::string> col_in_nam
     return shuffle_wr_order;
 }
 
-void BaseConfig::UpdateRowIDCol(std::string& filter_str_,
+void BaseConfig::updateRowIDCol(std::string& filter_str_,
                                 std::vector<std::string>& col_names_,
                                 std::string rowID_str_,
                                 std::vector<std::string> strs_) {
@@ -292,7 +353,7 @@ void BaseConfig::UpdateRowIDCol(std::string& filter_str_,
     col_names_[2] = rowID_str_;
     // 2)replace the filter_str with col name
     for (int i = 0; i < 3; i++) {
-        AlignColName(filter_str_, col_names_[i], strs_[i]);
+        alignColName(filter_str_, col_names_[i], strs_[i]);
     }
 }
 } // database

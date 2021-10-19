@@ -13,31 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "xf_database/gqe_join.hpp"
+#include "xf_database/gqe_input.hpp"
+#include "xf_database/gqe_utils.hpp"
+#include "xf_database/gqe_join_strategy.hpp"
+#include "xf_database/gqe_join_config.hpp"
+#include "xf_database/gqe_partjoin_config.hpp"
+#include "xf_database/gqe_workshop.hpp"
+#include <ap_int.h>
 #include "prepare.hpp"
 #include "x_utils.hpp"
 #include <unordered_map>
+#include <chrono>
+#include <thread>
 
 #include "xf_utils_sw/logger.hpp"
+
+using namespace std;
 
 #define VEC_LEN 8
 #define USER_DEBUG 1
 
 // load one col data into 1 buffer
 template <typename T>
-int load_dat(void* data, const std::string& name, const std::string& dir, const int sf, const size_t n) {
+int load_dat(void* data, const string& name, const string& dir, const int sf, const size_t n) {
     if (!data) {
         return -1;
     }
-    std::string fn = dir + "/dat" + std::to_string(sf) + "/" + name + ".dat";
+    string fn = dir + "/dat" + to_string(sf) + "/" + name + ".dat";
     FILE* f = fopen(fn.c_str(), "rb");
     if (!f) {
-        std::cerr << "ERROR: " << fn << " cannot be opened for binary read." << std::endl;
+        cerr << "ERROR: " << fn << " cannot be opened for binary read." << endl;
     }
     size_t cnt = fread(data, sizeof(T), n, f);
     fclose(f);
     if (cnt != n) {
-        std::cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << std::endl;
+        cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << endl;
         return -1;
     }
     return 0;
@@ -60,7 +70,7 @@ golden_data get_golden_sum(int o_row,
     int64_t sum = 0;
     int64_t cnt = 0;
 
-    std::unordered_multimap<uint64_t, uint64_t> ht1;
+    unordered_multimap<uint64_t, uint64_t> ht1;
 
     for (int i = 0; i < o_row; ++i) {
         char val_8 = tab_o_valid[i / 8];
@@ -69,7 +79,7 @@ golden_data get_golden_sum(int o_row,
         if (valid_o == 0) valid = 1;
         if (valid) {
             int64_t k = col_o_orderkey[i];
-            ht1.insert(std::make_pair(k, i + 1));
+            ht1.insert(make_pair(k, i + 1));
         }
     }
 
@@ -79,11 +89,6 @@ golden_data get_golden_sum(int o_row,
         // check hash table
         auto its = ht1.equal_range(k);
         for (auto it = its.first; it != its.second; ++it) {
-#ifdef USER_DEBUG
-            if (cnt < 16) {
-                std::cout << "key: " << k << ", o_rowid: " << it->second << ", l_rowid: " << i + 1 << std::endl;
-            }
-#endif
             int64_t sum_i = (k * k) % 10000;
             sum += sum_i;
             cnt++;
@@ -94,79 +99,61 @@ golden_data get_golden_sum(int o_row,
 
     result.sum = sum;
     result.nrow = cnt;
-#ifdef USER_DEBUG
-    std::cout << "INFO: CPU ref matched " << cnt << " rows, sum = " << sum << std::endl;
-#endif
-
     return result;
 }
 
 int main(int argc, const char* argv[]) {
-    std::cout << "--------------- Query 5 simplified, join --------------- " << std::endl;
+    cout << "--------------- Query 5 simplified, join --------------- " << endl;
 
     using namespace xf::common::utils_sw;
-    Logger logger(std::cout, std::cerr);
+    Logger logger(cout, cerr);
 
     // cmd arg parser.
     x_utils::ArgParser parser(argc, argv);
 
-    std::string xclbin_path;
+    string xclbin_path;
 #ifndef HLS_TEST
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-        std::cout << "ERROR: xclbin path is not set!\n";
+        cout << "ERROR: xclbin path is not set!\n";
         return 1;
     }
 #endif
-    std::string in_dir;
+    string in_dir;
     if (!parser.getCmdOption("-in", in_dir)) {
         in_dir = "db_data/";
     }
 
-    std::string scale;
+    string scale;
     int factor_o = 1;
     int factor_l = 1;
-    if (parser.getCmdOption("-O", scale)) {
-        try {
-            factor_o = std::stoi(scale);
-        } catch (...) {
-            factor_o = 1;
-        }
-    }
-    if (parser.getCmdOption("-L", scale)) {
-        try {
-            factor_l = std::stoi(scale);
-        } catch (...) {
-            factor_l = 1;
-        }
-    }
     int sim_scale = 1;
-    if (parser.getCmdOption("-scale", scale)) {
-        try {
-            sim_scale = std::stoi(scale);
-        } catch (...) {
-            sim_scale = 10000;
-        }
-    }
-    std::string validate = "on";
-    parser.getCmdOption("-validate", validate);
-    if (validate != "on" && validate != "off") validate = "on";
+    string validate = "on";
 
-    std::vector<std::string> cols_lt{"o_orderkey", "o_orderdate"};
-    std::vector<std::string> cols_rt{"l_orderkey"};
-
-    std::string in_dir_datl = prepare(in_dir, factor_o, cols_lt);
-    std::string in_dir_datr = prepare(in_dir, factor_l, cols_rt);
-    std::cout << "Read left table form " << in_dir_datl << std::endl;
-    std::cout << "Read right table form " << in_dir_datr << std::endl;
+    vector<string> cols_lt{"o_orderkey", "o_orderdate"};
+    vector<string> cols_rt{"l_orderkey"};
+    string in_dir_datl = prepare(in_dir, factor_o, cols_lt);
+    string in_dir_datr = prepare(in_dir, factor_l, cols_rt);
+    cout << "Read left table form " << in_dir_datl << endl;
+    cout << "Read right table form " << in_dir_datr << endl;
 
     // XXX dat files are still 32bit.
     generate_valid(in_dir, factor_o, "o_valid", "o_orderdate", 32, 19940101UL, 19950101UL);
 
-    size_t solution = 0;
-    size_t sec_o = 1; // set 0, use user's input section
-    size_t sec_l = 1; // set 0, use user's input section
+    size_t solution = 1;
+    size_t sec_o = 1;
+    size_t sec_l = 1;
+    size_t sec_c = sec_l;
     size_t slice_num = 1;
-    size_t log_part = 2;
+    size_t log_part = 3;
+    size_t part_num = 1 << log_part;
+
+    if (solution == 1) {
+        sec_c = sec_l;
+    } else if (solution == 2) {
+        sec_c = part_num;
+    } else {
+        cout << "unspported solution" << endl;
+    }
 
     // the coefficiency of partO output buffer expansion
     float coef_exp_partO = 2;
@@ -175,169 +162,17 @@ int main(int argc, const char* argv[]) {
     // the coefficiency of join output buffer expansion
     float coef_exp_join = 2;
 
-    std::string mode = "manual";
+    string mode = "manual";
     parser.getCmdOption("-mode", mode);
 
-    if (mode == "manual") {
-        std::cout << "Using StrategyManualSet" << std::endl;
-
-        if (parser.getCmdOption("-solution", scale)) {
-            try {
-                solution = std::stoi(scale);
-            } catch (...) {
-                solution = 2;
-            }
-        }
-        std::cout << "Select solution:" << solution << std::endl;
-
-        if (solution > 2) {
-            std::cout << "No supported Strategy" << std::endl;
-            return 1;
-        }
-
-        if (parser.getCmdOption("-sec_o", scale)) {
-            try {
-                sec_o = std::stoi(scale);
-            } catch (...) {
-                sec_o = 1;
-            }
-        }
-        if (parser.getCmdOption("-sec_l", scale)) {
-            try {
-                sec_l = std::stoi(scale);
-            } catch (...) {
-                sec_l = 1;
-            }
-        }
-        if (parser.getCmdOption("-log_part", scale)) {
-            try {
-                log_part = std::stoi(scale);
-            } catch (...) {
-                log_part = 2;
-            }
-        }
-        if (solution == 2 && log_part < 2) {
-            std::cout << "ERROR: partition number only supports >= 4 for now!!" << std::endl;
-            return -1;
-        }
-        if (parser.getCmdOption("-slice_num", scale)) {
-            try {
-                slice_num = std::stoi(scale);
-            } catch (...) {
-                slice_num = 1;
-            }
-        }
-        if (parser.getCmdOption("-coef_exp_partO", scale)) {
-            try {
-                coef_exp_partO = std::stof(scale);
-            } catch (...) {
-                coef_exp_partO = 2;
-            }
-        }
-        if (parser.getCmdOption("-coef_exp_partL", scale)) {
-            try {
-                coef_exp_partL = std::stof(scale);
-            } catch (...) {
-                coef_exp_partL = 2;
-            }
-        }
-        if (parser.getCmdOption("-coef_exp_join", scale)) {
-            try {
-                coef_exp_join = std::stof(scale);
-            } catch (...) {
-                coef_exp_join = 1;
-            }
-        }
-    } else if (mode == "v1") {
-        std::cout << "Using StrategyV1" << std::endl;
-    } else {
-        std::cout << "No supported Strategy" << std::endl;
-        return 1;
-    }
     int64_t table_o_nrow = 1500000 * factor_o;
     int64_t table_l_nrow = 6001215;
-    switch (factor_l) {
-        case 1:
-            table_l_nrow = 6001215;
-            break;
-        case 2:
-            table_l_nrow = 11997996;
-            break;
-        case 4:
-            table_l_nrow = 23996604;
-            break;
-        case 8:
-            table_l_nrow = 47989007;
-            break;
-        case 10:
-            table_l_nrow = 59986052;
-            break;
-        case 12:
-            table_l_nrow = 71985077;
-            break;
-        case 20:
-            table_l_nrow = 119994608;
-            break;
-        case 30:
-            table_l_nrow = 179998372;
-            break;
-        case 32:
-            table_l_nrow = 192000000;
-            break;
-        case 33:
-            table_l_nrow = 198000000;
-            break;
-        case 34:
-            table_l_nrow = 204000000;
-            break;
-        case 35:
-            table_l_nrow = 210000000;
-            break;
-        case 36:
-            table_l_nrow = 216000000;
-            break;
-        case 37:
-            table_l_nrow = 222000000;
-            break;
-        case 38:
-            table_l_nrow = 228000000;
-            break;
-        case 39:
-            table_l_nrow = 234000000;
-            break;
-        case 40:
-            table_l_nrow = 240012290;
-            break;
-        case 60:
-            table_l_nrow = 360011594;
-            break;
-        case 80:
-            table_l_nrow = 480025129;
-            break;
-        case 100:
-            table_l_nrow = 600037902;
-            break;
-        case 150:
-            table_l_nrow = 900035147;
-            break;
-        case 200:
-            table_l_nrow = 1200018434;
-            break;
-        case 250:
-            table_l_nrow = 1500000714;
-            break;
-        default:
-            table_l_nrow = 6001215;
-            std::cerr << "L factor not supported, using SF1" << std::endl;
-    }
-    if (factor_l > 30 && factor_l < 40) {
-        factor_l = 40;
-    }
+
     table_o_nrow /= sim_scale;
     table_l_nrow /= sim_scale;
 
-    std::cout << "Orders SF(" << factor_o << ")\t" << table_o_nrow << " rows\n"
-              << "Lineitem SF(" << factor_l << ")\t" << table_l_nrow << " rows\n";
+    cout << "Orders SF(" << factor_o << ")\t" << table_o_nrow << " rows\n"
+         << "Lineitem SF(" << factor_l << ")\t" << table_l_nrow << " rows\n";
 
     using namespace xf::database;
     gqe::utils::MM mm;
@@ -382,141 +217,135 @@ int main(int argc, const char* argv[]) {
     err += load_dat<int32_t>(table_o_in_0, "o_orderkey", in_dir, factor_o, table_o_nrow);
     err += load_dat<char>(tab_o_valid, "o_valid", in_dir, factor_o, tab_o_val_len);
     if (err) return err;
-    std::cout << "Orders table has been read from disk" << std::endl;
+    cout << "Orders table has been read from disk" << endl;
 
     // convert data from 32-bit to 64-bit, for testing only
     for (int i = 0; i < table_o_nrow; ++i) {
         tab_o_col0[i] = table_o_in_0[i];
         tab_o_col1[i] = table_o_in_1[i];
-        if (i < 64) std::cout << "Key: " << tab_o_col0[i] << ", o_rowid: " << i + 1 << std::endl;
     }
 
     err += load_dat<int32_t>(table_l_in_0, "l_orderkey", in_dir, factor_l, table_l_nrow);
     // err += load_dat<int32_t>(table_l_in_1, "l_orderkey", in_dir, factor_l, table_l_nrow);
     if (err) return err;
-    std::cout << "LineItem table has been read from disk" << std::endl;
+    cout << "LineItem table has been read from disk" << endl;
 
     // convert data from 32-bit to 64-bit, for testing only
     for (int i = 0; i < table_l_nrow; ++i) {
         tab_l_col0[i] = table_l_in_0[i];
         tab_l_col1[i] = table_l_in_1[i];
-        if (i < 64) std::cout << "Key: " << tab_l_col0[i] << ", l_rowid: " << i + 1 << std::endl;
     }
 
     bool valid_o = 1;
     bool valid_l = 0;
-    gqe::Table tab_o("Table O");
-    tab_o.addCol("o_orderkey", gqe::TypeEnum::TypeInt64, tab_o_col0, table_o_nrow);
-    // tab_o.addCol("o_orderkey1", gqe::TypeEnum::TypeInt64, tab_o_col1, table_o_nrow);
-    tab_o.genRowIDWithValidation("o_rowid", "o_valid", 1, valid_o, tab_o_valid, table_o_nrow); // gen row-id, use valid
 
-    gqe::Table tab_l("Table L");
-    tab_l.addCol("l_orderkey", gqe::TypeEnum::TypeInt64, tab_l_col0, table_l_nrow);
-    // tab_l.addCol("l_orderkey1", gqe::TypeEnum::TypeInt64, tab_l_col1, table_l_nrow);
-    tab_l.genRowIDWithValidation("l_rowid", "l_valid", 1, valid_l, tab_l_valid, table_l_nrow); // gen row-id, use valid
-
-    gqe::Table tab_c("Table C");
-    tab_c.addCol("c1", gqe::TypeEnum::TypeInt64, tab_c_col0, table_c_nrow);
-    tab_c.addCol("c2", gqe::TypeEnum::TypeInt64, tab_c_col1, table_c_nrow);
-    tab_c.addCol("c3", gqe::TypeEnum::TypeInt64, tab_c_col2, table_c_nrow);
-    // tab_c.addCol("c4", gqe::TypeEnum::TypeInt64, tab_c_col3, table_c_nrow);
-
-    tab_o.info();
-    tab_l.info();
-
-    gqe::FpgaInit init_ocl(xclbin_path);
-
-    init_ocl.createHostBufs();
-    init_ocl.createDevBufs();
-
-    // constructor
-    gqe::Joiner bigjoin(init_ocl);
-    bigjoin.SetBufAllocMaxNum(100);
-
-    gqe::ErrCode err_code;
-    if (mode == "v1") {
-        // use JoinStrategyV1
-        auto sv1 = new gqe::JoinStrategyV1();
-        err_code = bigjoin.run(tab_o, "o_rowid>0", tab_l, "", "o_orderkey = l_orderkey", tab_c,
-                               "c1=l_orderkey, c2=o_rowid, c3=l_rowid", gqe::INNER_JOIN, sv1);
-        if (!err_code) {
-            delete sv1;
-            std::cout << "Join done" << std::endl;
-        } else {
-            return err_code;
-        }
-    } else if (mode == "manual") {
-        // use JoinStrategyManualSet
-        auto smanual = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part, coef_exp_partO,
-                                                      coef_exp_partL, coef_exp_join);
-
-        err_code = bigjoin.run(tab_o, "o_rowid>0", tab_l, "", "o_orderkey = l_orderkey", tab_c,
-                               "c1=l_orderkey,c2=o_rowid, c3=l_rowid", gqe::INNER_JOIN, smanual);
-
-        if (!err_code) {
-            delete smanual;
-        } else {
-            return err_code;
-        }
+    vector<future<size_t> > tab_o_ready;
+    vector<future<size_t> > tab_l_ready;
+    vector<promise<size_t> > tab_c_ready_promise;
+    vector<future<size_t> > tab_c_ready;
+    tab_o_ready.resize(sec_o);
+    tab_l_ready.resize(sec_l);
+    tab_c_ready_promise.resize(sec_c);
+    tab_c_ready.resize(sec_c);
+    for (size_t i = 0; i < sec_c; i++) {
+        tab_c_ready[i] = tab_c_ready_promise[i].get_future();
     }
 
-    std::cout << "Aggregate in CPU" << std::endl;
+    gqe::TableSection tab_o("Table O", {"o_orderkey"}, {sizeof(int64_t)}, 1, valid_o, "o_rowid", "o_valid");
+    gqe::TableSection tab_l("Table L", {"l_orderkey"}, {sizeof(int64_t)}, 1, valid_l, "l_rowid", "l_valid");
+    gqe::TableSection tab_c("Table C", {"c1", "c2", "c3"}, {sizeof(int64_t), sizeof(int64_t), sizeof(int64_t)}, 0, 0,
+                            "", "");
+
+    for (size_t i = 0; i < sec_o; i++) {
+        tab_o_ready[i] =
+            async(&gqe::TableSection::addSec, &tab_o, vector<char*>({(char*)tab_o_col0}), tab_o_valid, table_o_nrow);
+    }
+    for (size_t i = 0; i < sec_l; i++) {
+        size_t d_row = (table_l_nrow + (8 * sec_l) - 1) / (8 * sec_l) * 8;
+        size_t d_bias = d_row * 8 * i;
+        size_t v_bias = d_row / 8;
+        size_t d_sec_nrow;
+        if (i != (sec_l - 1)) {
+            d_sec_nrow = d_row;
+        } else {
+            d_sec_nrow = table_l_nrow - i * d_row;
+        }
+        tab_l_ready[i] = async(&gqe::TableSection::addSec, &tab_l, vector<char*>({((char*)tab_l_col0) + d_bias}),
+                               tab_l_valid + v_bias, d_sec_nrow);
+    }
+    for (size_t i = 0; i < sec_c; i++) {
+        size_t d_row = (table_c_nrow + (8 * sec_c) - 1) / (8 * sec_c) * 8;
+        size_t d_bias = d_row * 8 * i;
+        size_t d_sec_nrow;
+        if (i != (sec_c - 1)) {
+            d_sec_nrow = d_row;
+        } else {
+            d_sec_nrow = table_c_nrow - i * d_row;
+        }
+        tab_c.addSec({((char*)tab_c_col0) + d_bias, ((char*)tab_c_col1) + d_bias, ((char*)tab_c_col2) + d_bias},
+                     nullptr, d_sec_nrow);
+    }
+
+    gqe::TableSection tab_part_o("Part O", {"o1", "o2", "o3"}, {sizeof(int64_t), sizeof(int64_t), sizeof(int64_t)}, 0,
+                                 0, "", "");
+    gqe::TableSection tab_part_l("Part L", {"l1", "l2", "l3"}, {sizeof(int64_t), sizeof(int64_t), sizeof(int64_t)}, 0,
+                                 0, "", "");
+
+    size_t table_part_o_nrow = table_o_nrow * coef_exp_partO;
+    size_t table_part_l_nrow = table_l_nrow * coef_exp_partL;
+    for (size_t i = 0; i < part_num; i++) {
+        size_t d_part_o_nrow = (table_part_o_nrow + part_num - 1) / part_num;
+        int64_t* tmp_o1 = mm.aligned_alloc<int64_t>(d_part_o_nrow);
+        int64_t* tmp_o2 = mm.aligned_alloc<int64_t>(d_part_o_nrow);
+        int64_t* tmp_o3 = mm.aligned_alloc<int64_t>(d_part_o_nrow);
+        tab_part_o.addSec({((char*)tmp_o1), ((char*)tmp_o2), ((char*)tmp_o3)}, nullptr, d_part_o_nrow);
+
+        size_t d_part_l_nrow = (table_part_l_nrow + part_num - 1) / part_num;
+        int64_t* tmp_l1 = mm.aligned_alloc<int64_t>(d_part_l_nrow);
+        int64_t* tmp_l2 = mm.aligned_alloc<int64_t>(d_part_l_nrow);
+        int64_t* tmp_l3 = mm.aligned_alloc<int64_t>(d_part_l_nrow);
+        tab_part_l.addSec({((char*)tmp_l1), ((char*)tmp_l2), ((char*)tmp_l3)}, nullptr, d_part_l_nrow);
+    }
+
+    gqe::Workshop wksp("xilinx_u280_xdma_201920_3", xclbin_path, gqe::WorkerFunctions::JOIN);
+
+    auto smanual = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part, coef_exp_partO,
+                                                  coef_exp_partL, coef_exp_join);
+
+    wksp.Join(&tab_o, "o_rowid>0", &tab_o_ready, &tab_part_o, &tab_l, "", &tab_l_ready, &tab_part_l,
+              "o_orderkey = l_orderkey", "c1=l_orderkey,c2=o_rowid,c3=l_rowid", &tab_c, &tab_c_ready_promise,
+              gqe::INNER_JOIN, smanual);
+
+    cout << "Aggregate in CPU" << endl;
     // calculate the aggr results: sum(l_extendedprice + orderkey)
     // col0: l_extendedprice; col1: l_orderkey
     int64_t sum = 0;
-    int p_nrow = tab_c.getRowNum();
-#ifdef USER_DEBUG
-    int cnt = 0;
-#endif
-    for (int n = 0; n < p_nrow / 8; n++) {
-        for (int i = 0; i < 8; i++) {
-            int64_t key = tab_c_col0[n](63 + 64 * i, 64 * i);
-            int64_t o_rowid = tab_c_col1[n](63 + 64 * i, 64 * i);
-            int64_t l_rowid = tab_c_col2[n](63 + 64 * i, 64 * i);
+    int p_nrow = 0;
 
-            int64_t sum_i = (key * key) % 10000;
-            sum += sum_i;
-
-#ifdef USER_DEBUG
-            if (cnt < 16) {
-                std::cout << "key: " << key << ", ";
-                std::cout << "o_rowid: (" << (o_rowid >> 32) << ", " << (o_rowid & 0xffffffff) << "), ";
-                std::cout << "l_rowid: (" << (l_rowid >> 32) << ", " << (l_rowid & 0xffffffff) << ") ";
-                std::cout << std::endl;
-            }
-            cnt++;
-#endif
+    for (size_t i = 0; i < sec_c; i++) {
+        size_t res_rows = tab_c_ready[i].get();
+        p_nrow += res_rows;
+        cout << "GQE Join returns: " << res_rows << " rows in section[" << i << "]" << endl;
+        int64_t* key = (int64_t*)tab_c.getColPointer(i, 0);
+        for (size_t j = 0; j < res_rows; j++) {
+            sum += key[j] * key[j] % 10000;
         }
     }
-    for (int n = 0; n < p_nrow % 8; n++) {
-        int64_t key = tab_c_col0[p_nrow / 8](63 + 64 * n, 64 * n);
-        int64_t o_rowid = tab_c_col1[p_nrow / 8](63 + 64 * n, 64 * n);
-        int64_t l_rowid = tab_c_col2[p_nrow / 8](63 + 64 * n, 64 * n);
-        int64_t sum_i = (key * key) % 10000;
-        sum += sum_i;
-#ifdef USER_DEBUG
-        if (cnt < 16) {
-            std::cout << "key: " << key << ", ";
-            std::cout << "o_rowid: (" << (o_rowid >> 32) << ", " << (o_rowid & 0xffffffff) << "), ";
-            std::cout << "l_rowid: (" << (l_rowid >> 32) << ", " << (l_rowid & 0xffffffff) << ") ";
-            std::cout << std::endl;
-        }
-        cnt++;
-#endif
-    }
-    std::cout << "Q5S Join done, rows: " << p_nrow << ", result: " << sum << std::endl;
+    cout << "GQE Join returns: " << p_nrow << " rows in total" << endl;
 
     int ret = 0;
     if (validate == "on") {
-        std::cout << "---------------------------------Checking result---------------------------------" << std::endl;
+        cout << "---------------------------------Checking result---------------------------------" << endl;
         golden_data golden;
         golden = get_golden_sum(table_o_nrow, tab_o_col0, tab_o_col1, valid_o, tab_o_valid, table_l_nrow, tab_l_col0,
                                 tab_l_col1, valid_l, tab_l_valid);
-        std::cout << "Golen: rows: " << golden.nrow << ", value: " << golden.sum << std::endl;
+        cout << "Golen: rows: " << golden.nrow << ", value: " << golden.sum << endl;
 
         ret = (golden.sum == sum) ? 0 : 1;
         ret ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS);
     }
 
-    return ret;
+    // return ret;
+    wksp.release();
+    return 0;
 }

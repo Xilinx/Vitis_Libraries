@@ -46,16 +46,17 @@ class BloomFilter {
     // false positive probability (FPP)
     const float FPP;
 
+    // number of hash functions
+    const int NUM_HASH_FUNCS = 4;
+
     // size of the bloom-filter in bits
     uint64_t bloom_filter_bits;
-    // log2 of the number of bits needed for hash-table
-    uint64_t bloom_filter_addr_bits;
 
     // hash-table of the bloom-filter
-    ap_uint<256>** hash_table;
+    uint64_t** hash_table;
 
-    // calculates the log2 of the number of bits needed for hash-table
-    uint64_t calcLogSize(uint64_t num_keys);
+    // calculates the number of bits needed for hash-table
+    uint64_t calcSize(uint64_t num_keys);
 
     // calculates hash value with the input key(s)
     uint64_t hashLookup3(uint64_t key0, uint64_t key1);
@@ -109,7 +110,7 @@ class BloomFilter {
      *
      * @return hash-table of the bloom-filter
      */
-    ap_uint<256>** getHashTable() const;
+    uint64_t** getHashTable() const;
 
     /**
      * @brief get the bloom-filter size

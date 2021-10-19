@@ -132,7 +132,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 gqeJoin_VPP_FLAGS += --hls.clock 250000000:gqeJoin
-VPP_LDFLAGS_gqe_join_v3 += --kernel_frequency 180
+VPP_LDFLAGS_gqe_join_v3 += --kernel_frequency 150
 
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))

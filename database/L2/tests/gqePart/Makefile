@@ -131,7 +131,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 gqePart_VPP_FLAGS += --hls.clock 200000000:gqePart
-VPP_LDFLAGS_gqe_part_v2 += --kernel_frequency 200
+VPP_LDFLAGS_gqe_part_v2 += --kernel_frequency 150
 
 
 # Kernel linker flags

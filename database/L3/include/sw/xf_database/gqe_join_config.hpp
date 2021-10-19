@@ -30,6 +30,7 @@
 #include "xf_database/gqe_utils.hpp"
 // L3
 #include "xf_database/gqe_table.hpp"
+#include "xf_database/gqe_input.hpp"
 #include "xf_database/gqe_base_config.hpp"
 
 namespace xf {
@@ -81,6 +82,33 @@ class JoinConfig : protected BaseConfig {
                std::string filter_b,
                std::string join_str, // comma separated
                Table c,
+               std::string output_str, // comma separated
+               int join_Type = INNER_JOIN);
+
+    /**
+    * @brief constructor of JoinConfig.
+    *
+    * The class generates join configure bits by parsing the join .run() arguments,
+    *
+    * @param a left table
+    * @param filter_a filter condition of left table
+    * @param b right table
+    * @param filter_b filter condition of right table
+    * @param join_str join condition(s)
+    * @param evals eval expressions list
+    * @param evals_const eval expression constant list
+    * @param c result table
+    * @param output_str output column mapping
+    * @param join_type INNER_JOIN(default) | SEMI_JOIN | ANTI_JOIN.
+    * @param part_tag if use partition kernel
+    *
+    */
+    JoinConfig(TableSection a,
+               std::string filter_a,
+               TableSection b,
+               std::string filter_b,
+               std::string join_str, // comma separated
+               TableSection c,
                std::string output_str, // comma separated
                int join_Type = INNER_JOIN);
 

@@ -38,7 +38,7 @@ namespace database {
 namespace gqe {
 
 // load kernel config and scan cols in
-template <int CH_NM, int COL_NM, int BLEN>
+template <int CH_NM, int COL_NM, int BLEN, int GRP_SZ>
 void load_cfg_and_scan(bool build_probe_flag,
                        ap_uint<512> din_krn_cfg[14],
                        ap_uint<512> din_meta[24],
@@ -54,14 +54,15 @@ void load_cfg_and_scan(bool build_probe_flag,
                        hls::stream<ap_uint<8> >& write_out_cfg_strm) {
     int64_t nrow;
     int secID;
+    bool bf_on;
     ap_uint<3> din_col_en;
     ap_uint<2> rowID_flags;
 
-    load_config(build_probe_flag, din_krn_cfg, din_meta, nrow, secID, join_cfg_strm, bf_cfg_strm, filter_cfg_strm,
-                din_col_en, rowID_flags, write_out_cfg_strm);
+    load_config(build_probe_flag, din_krn_cfg, din_meta, nrow, secID, bf_on, join_cfg_strm, bf_cfg_strm,
+                filter_cfg_strm, din_col_en, rowID_flags, write_out_cfg_strm);
 
-    scan_cols<CH_NM, COL_NM, BLEN>(rowID_flags, nrow, secID, din_col_en, din_col0, din_col1, din_col2, din_val,
-                                   ch_strms, e_ch_strms);
+    scan_cols<CH_NM, COL_NM, BLEN, GRP_SZ>(rowID_flags, nrow, secID, bf_on, din_col_en, din_col0, din_col1, din_col2,
+                                           din_val, ch_strms, e_ch_strms);
 }
 
 } // namespace gqe
@@ -237,6 +238,7 @@ extern "C" void gqeJoin(size_t _build_probe_flag, // build/probe flag
     const int ncol = 3;
     const int ncol_out = 4;
     const int burstlen = 32;
+    const int group_sz = 256;
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > ch_strms[nch][ncol];
 #pragma HLS stream variable = ch_strms depth = 32
@@ -278,9 +280,9 @@ extern "C" void gqeJoin(size_t _build_probe_flag, // build/probe flag
     hls::stream<ap_uint<36> > bf_cfg_strm;
 #pragma HLS stream variable = bf_cfg_strm depth = 2
 
-    load_cfg_and_scan<nch, ncol, burstlen>(build_probe_flag, din_krn_cfg, din_meta, din_col0, din_col1, din_col2,
-                                           din_val, join_cfg_strm, bf_cfg_strm, filter_cfg_strm, ch_strms, e_ch_strms,
-                                           write_out_cfg_strm);
+    load_cfg_and_scan<nch, ncol, burstlen, group_sz>(build_probe_flag, din_krn_cfg, din_meta, din_col0, din_col1,
+                                                     din_col2, din_val, join_cfg_strm, bf_cfg_strm, filter_cfg_strm,
+                                                     ch_strms, e_ch_strms, write_out_cfg_strm);
 
 #ifndef __SYNTHESIS__
     std::cout << "after scan" << std::endl;
@@ -354,11 +356,14 @@ extern "C" void gqeJoin(size_t _build_probe_flag, // build/probe flag
 #pragma HLS resource variable = jn_strm core = FIFO_LUTRAM
     hls::stream<bool> e_jn_strm;
 #pragma HLS stream variable = e_jn_strm depth = 32
+    hls::stream<ap_uint<32> > nr_row_strm("nr_row_strm");
+#pragma HLS stream variable = nr_row_strm depth = 2
+#pragma HLS resource variable = nr_row_strm core = FIFO_LUTRAM
 
-    bloomfilter_join_wrapper<ncol, nch, ncol_out, 1>(
+    bloomfilter_join_wrapper<ncol, nch, ncol_out, 1, group_sz>(
         bf_cfg_strm, join_cfg_demux_strm[1], join_cfg_hj_strm, demux_strms_1, e_demux_strms_1, jn_strm, e_jn_strm,
-        htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6, htb_buf7, stb_buf0, stb_buf1, stb_buf2,
-        stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
+        nr_row_strm, htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6, htb_buf7, stb_buf0, stb_buf1,
+        stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
 
 #ifndef __SYNTHESIS__
     std::cout << "passed join" << std::endl;
@@ -405,6 +410,6 @@ extern "C" void gqeJoin(size_t _build_probe_flag, // build/probe flag
 #endif
 
     write_table_hj<burstlen, 8 * TPCH_INT_SZ, VEC_LEN, ncol_out>(join_cfg_mux_strm, jn_mx_strm, e_jn_mx_strm,
-                                                                 write_out_cfg_strm, dout_col0, dout_col1, dout_col2,
-                                                                 dout_col3, dout_meta);
+                                                                 nr_row_strm, write_out_cfg_strm, dout_col0, dout_col1,
+                                                                 dout_col2, dout_col3, dout_meta);
 }

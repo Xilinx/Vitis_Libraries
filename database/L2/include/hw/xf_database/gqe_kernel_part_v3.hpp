@@ -26,9 +26,7 @@
 /**
  * @breif GQE partition kernel (64-bit key version)
  *
- * @param bucket_depth bucket depth
  * @param table_index table index indicating build table or join table
- * @param log_part log of number of partitions
  *
  * @param din_col input table columns
  * @param din_val validation bits column
@@ -40,33 +38,29 @@
  * @param dout_col output table columns
  *
  */
-extern "C" void gqePart(const int bucket_depth, // bucket depth
+extern "C" void gqePart(
+    // table index indicate build table or join table
+    const int tab_index,
 
-                        // table index indicate build table or join table
-                        const int tab_index,
+    // input data columns
+    hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col0,
+    hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col1,
+    hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col2,
 
-                        // the log partition number
-                        const int log_part,
+    // validation buffer
+    hls::burst_maxi<ap_uint<64> > din_val,
 
-                        // input data columns
-                        hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col0,
-                        hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col1,
-                        hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col2,
+    // kernel config
+    ap_uint<512> din_krn_cfg[14],
 
-                        // validation buffer
-                        hls::burst_maxi<ap_uint<64> > din_val,
+    // meta input buffer
+    ap_uint<512> din_meta[24],
+    // meta output buffer
+    ap_uint<512> dout_meta[24],
 
-                        // kernel config
-                        ap_uint<512> din_krn_cfg[14],
-
-                        // meta input buffer
-                        ap_uint<512> din_meta[24],
-                        // meta output buffer
-                        ap_uint<512> dout_meta[24],
-
-                        // output data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2);
+    // output data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2);
 
 #endif // _XF_DB_GQE_PART_V3_H_

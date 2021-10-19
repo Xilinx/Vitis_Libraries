@@ -49,33 +49,29 @@ const int HASHWH = 2;
 const int HASHWL = 8;
 
 #ifdef HLS_TEST
-extern "C" void gqePart(const int bucket_depth, // bucket depth
+extern "C" void gqePart(
+    // table index indicate build table or join table
+    const int tab_index,
 
-                        // table index indicate build table or join table
-                        const int tab_index,
+    // input data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col2,
 
-                        // the log partition number
-                        const int log_part,
+    ap_uint<64>* din_val,
 
-                        // input data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* din_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* din_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* din_col2,
+    // kernel config
+    ap_uint<512> din_krn_cfg[14],
 
-                        ap_uint<64>* din_val,
+    // meta input buffer
+    ap_uint<512> din_meta[24],
+    // meta output buffer
+    ap_uint<512> dout_meta[24],
 
-                        // kernel config
-                        ap_uint<512> din_krn_cfg[14],
-
-                        // meta input buffer
-                        ap_uint<512> din_meta[24],
-                        // meta output buffer
-                        ap_uint<512> dout_meta[24],
-
-                        // output data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2);
+    // output data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2);
 
 #endif
 
@@ -232,26 +228,25 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    int l_nrow = 100;
+    int l_nrow = 100; // 6001215;
     // int l_nrow = L_MAX_ROW / sim_scale;
     std::cout << "Lineitem " << l_nrow << " rows\n";
 
-    int log_part = 2;
+    int log_part = 3;
     if (parser.getCmdOption("-log_part", scale)) {
         try {
             log_part = std::stoi(scale);
         } catch (...) {
-            log_part = 2;
+            log_part = 3;
         }
     }
-    if (log_part < 2) {
-        std::cout << "ERROR: partition number only supports >= 4 !!" << std::endl;
+    if (log_part < 3) {
+        std::cout << "ERROR: partition number only supports >= 8 !!" << std::endl;
         return -1;
     }
 
     // --------- partitioning Table L ----------
     // partition setups
-    const int bucket_depth = 512;
     const int tab_index = 0;
     const int partition_num = 1 << log_part;
 
@@ -283,12 +278,12 @@ int main(int argc, const char* argv[]) {
     for (int i = 0; i < (l_nrow + 63) / 64; i++) {
         valid_in_col[i] = 0xffffffffffffffff;
     }
-    std::cout << "       Key0          Key1         Payload\n";
-    for (int i = 0; i < l_nrow; i++) {
-        std::cout << std::setw(10) << tab_part_in_col[0][i] << ",   ";
-        std::cout << std::setw(10) << tab_part_in_col[1][i] << ",   ";
-        std::cout << std::setw(10) << tab_part_in_col[2][i] << std::endl;
-    }
+    // std::cout << "       Key0          Key1         Payload\n";
+    // for (int i = 0; i < l_nrow; i++) {
+    //    std::cout << std::setw(10) << tab_part_in_col[0][i] << ",   ";
+    //    std::cout << std::setw(10) << tab_part_in_col[1][i] << ",   ";
+    //    std::cout << std::setw(10) << tab_part_in_col[2][i] << std::endl;
+    //}
     std::cout << "finished dat loading/generating" << std::endl;
 
     // partition output data
@@ -302,9 +297,9 @@ int main(int argc, const char* argv[]) {
     int tab_part_out_col_size = tab_part_out_col_nrow_512 * TPCH_INT_SZ * VEC_LEN;
 
     // partition_output data
-    ap_uint<512>* tab_part_out_col[3];
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* tab_part_out_col[3];
     for (int i = 0; i < 3; i++) {
-        tab_part_out_col[i] = mm.aligned_alloc<ap_uint<512> >(tab_part_out_col_nrow_512);
+        tab_part_out_col[i] = mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_LEN> >(tab_part_out_col_nrow_512);
     }
 
     ap_uint<512>* krn_cfg_part = mm.aligned_alloc<ap_uint<512> >(14);
@@ -318,6 +313,9 @@ int main(int argc, const char* argv[]) {
     krn_cfg_part[1].range(19, 19) = 1;
     // tab A valid_en
     krn_cfg_part[1].range(20, 20) = 1;
+
+    // log_part
+    krn_cfg_part[1].range(33, 30) = log_part;
 
     // filter
     uint32_t cfg[53];
@@ -340,10 +338,12 @@ int main(int argc, const char* argv[]) {
     meta_part_out.setCol(2, 2, tab_part_out_col_nrow_512);
     meta_part_out.meta();
 
+    int nerror = 0;
 #ifdef HLS_TEST
-    gqePart(bucket_depth, tab_index, log_part, (ap_uint<512>*)tab_part_in_col[0], (ap_uint<512>*)tab_part_in_col[1],
-            (ap_uint<512>*)tab_part_in_col[2], (ap_uint<64>*)valid_in_col, krn_cfg_part, meta_part_in.meta(),
-            meta_part_out.meta(), tab_part_out_col[0], tab_part_out_col[1], tab_part_out_col[2]);
+    gqePart(tab_index, (ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>*)tab_part_in_col[0],
+            (ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>*)tab_part_in_col[1],
+            (ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>*)tab_part_in_col[2], (ap_uint<64>*)valid_in_col, krn_cfg_part,
+            meta_part_in.meta(), meta_part_out.meta(), tab_part_out_col[0], tab_part_out_col[1], tab_part_out_col[2]);
 
     int* nrow_per_part = meta_part_out.getPartLen();
 
@@ -425,17 +425,17 @@ int main(int argc, const char* argv[]) {
 
     cl_mem_ext_ptr_t mext_tab_part_in_col[3];
     for (int i = 0; i < 3; ++i) {
-        mext_tab_part_in_col[i] = {(3 + i), tab_part_in_col[i], partkernel};
+        mext_tab_part_in_col[i] = {(1 + i), tab_part_in_col[i], partkernel};
     }
 
     cl_mem_ext_ptr_t mext_tab_part_out_col[3];
     for (int i = 0; i < 3; ++i) {
-        mext_tab_part_out_col[i] = {(10 + i), tab_part_out_col[i], partkernel};
+        mext_tab_part_out_col[i] = {(8 + i), tab_part_out_col[i], partkernel};
     }
 
-    cl_mem_ext_ptr_t mext_valid_in_col = {6, valid_in_col, partkernel};
+    cl_mem_ext_ptr_t mext_valid_in_col = {4, valid_in_col, partkernel};
 
-    cl_mem_ext_ptr_t mext_cfg_part = {7, krn_cfg_part, partkernel};
+    cl_mem_ext_ptr_t mext_cfg_part = {5, krn_cfg_part, partkernel};
 
     // dev buffers, part in
     cl_mem buf_tab_part_in_col[3];
@@ -461,12 +461,12 @@ int main(int argc, const char* argv[]) {
 
     cl_mem_ext_ptr_t mext_meta_part_in, mext_meta_part_out;
 
-    mext_meta_part_in = {8, meta_part_in.meta(), partkernel};
-    mext_meta_part_out = {9, meta_part_out.meta(), partkernel};
+    mext_meta_part_in = {6, meta_part_in.meta(), partkernel};
+    mext_meta_part_out = {7, meta_part_out.meta(), partkernel};
 
     cl_mem buf_meta_part_in;
     buf_meta_part_in = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                      (sizeof(ap_uint<512>) * 8), &mext_meta_part_in, &err);
+                                      (sizeof(ap_uint<512>) * 24), &mext_meta_part_in, &err);
     cl_mem buf_meta_part_out;
     buf_meta_part_out = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                        (sizeof(ap_uint<512>) * 24), &mext_meta_part_out, &err);
@@ -474,13 +474,10 @@ int main(int argc, const char* argv[]) {
     //----------------------partition L run-----------------------------
     std::cout << "------------------- Partitioning L table -----------------" << std::endl;
     int j = 0;
-    const int k_depth = 512;
     const int gen_row_id = 1;
     const int sec_id = 0;
     const int din_val_en = 0;
-    clSetKernelArg(partkernel, j++, sizeof(int), &k_depth);
     clSetKernelArg(partkernel, j++, sizeof(int), &tab_index);
-    clSetKernelArg(partkernel, j++, sizeof(int), &log_part);
     clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[0]);
     clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[1]);
     clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[2]);
@@ -548,7 +545,6 @@ int main(int argc, const char* argv[]) {
 
     // get number of rows from each partition
     int* nrow_per_part = meta_part_out.getPartLen();
-    int nerror = 0;
     for (int i = 0; i < partition_num; i++) {
         int offset = tab_part_out_col_eachpart_nrow_512 * i;
         int prow = nrow_per_part[i];
@@ -570,9 +566,9 @@ int main(int argc, const char* argv[]) {
                 ap_uint<64> key = tab_part_out_col[0][offset + n](m * 64 + 63, m * 64);
                 ap_uint<64> key2 = tab_part_out_col[1][offset + n](m * 64 + 63, m * 64);
                 ap_uint<64> rowid = tab_part_out_col[2][offset + n](m * 64 + 63, m * 64);
-                std::cout << std::setw(10) << (int64_t)key << ", ";
-                std::cout << std::setw(10) << (int64_t)key2 << ", ";
-                std::cout << std::setw(10) << (int64_t)rowid << std::endl;
+                // std::cout << std::setw(10) << (int64_t)key << ", ";
+                // std::cout << std::setw(10) << (int64_t)key2 << ", ";
+                // std::cout << std::setw(10) << (int64_t)rowid << std::endl;
                 // pre-check whether same key are in the same partition
                 if (key_part_map.find(key) != key_part_map.end()) {
                     // to make sure every key in each partition is orthogonal to those in the different partitions

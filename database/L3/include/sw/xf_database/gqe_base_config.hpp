@@ -51,28 +51,35 @@ class BaseConfig {
     std::vector<std::string> extractKey(std::string input_str);
 
     // get join wr_cols
-    std::vector<std::string> extractWcols(std::vector<std::vector<std::string> > join_keys, std::string outputs);
+    std::vector<std::string> extractWcols(std::vector<std::vector<std::string> > join_keys,
+                                          std::vector<std::string> c_col_names,
+                                          std::string outputs);
 
     // get filter wr_cols
     std::vector<std::string> extractWcol(std::string outputs);
 
     // align the key name from two tables to the same, e.g. o_orderkey, l_orderkey align to o_orderkey
-    void AlignColName(std::string& str, const std::string& from, const std::string& to);
+    void alignColName(std::string& str, const std::string& from, const std::string& to);
 
     // Calculate the ss position in join_str
     int findStrInd(std::vector<std::string> join_str, std::string ss);
 
-    // sw_shuffle for scan
-    void ShuffleScan(std::string& filter_str_,
+    // sw_shuffle for scan (gqeJoin)
+    void shuffleScan(std::string& filter_str_,
                      std::vector<std::string> join_keys_,
                      std::vector<std::string> write_out_cols_,
                      std::vector<std::string>& col_names_,
                      std::vector<int8_t>& sw_shuffle_scan_);
 
-    // sw_shuffle for wr
-    std::vector<int8_t> ShuffleWrite(std::vector<std::string> col_in_names, std::vector<std::string> col_wr_names);
+    // sw_shuffle for scan (gqeFilter)
+    void shuffleFilterScan(std::vector<std::string> join_keys_,
+                           std::vector<std::string>& col_names_,
+                           std::vector<int8_t>& sw_shuffle_scan_);
 
-    void UpdateRowIDCol(std::string& filter_str,
+    // sw_shuffle for wr
+    std::vector<int8_t> shuffleWrite(std::vector<std::string> col_in_names, std::vector<std::string> col_wr_names);
+
+    void updateRowIDCol(std::string& filter_str,
                         std::vector<std::string>& col_names_,
                         std::string rowID_str_,
                         std::vector<std::string> strs_ = {"a", "b", "c", "d"});

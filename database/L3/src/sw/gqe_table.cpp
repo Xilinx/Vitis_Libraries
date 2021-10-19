@@ -247,8 +247,13 @@ char* Table::getColPointer(int i, int _slice_num, int j) const {
 char* Table::getColPointer(int i) const {
     return _col_ptr[i][0];
 }
+
 char* Table::getValColPointer(int _slice_num, int j) const {
     if (_slice_num != 0) {
+        if (j >= _slice_num) {
+            std::cerr << "ERROR: exceeding the boundary limitation of the table\n";
+            exit(1);
+        }
         int64_t _nrow_align8 = (_nrow + 7) / 8;
         int64_t _nrow_avg = (_nrow_align8 + _slice_num - 1) / _slice_num * 8;
         int64_t offset = 0;
@@ -260,6 +265,26 @@ char* Table::getValColPointer(int _slice_num, int j) const {
         return (_val_ptr[0] + offset);
     } else {
         return _val_ptr[j];
+    }
+}
+
+char* Table::getValColPointer(int i, int _slice_num, int j) const {
+    if (_slice_num != 0) {
+        if (j >= _slice_num) {
+            std::cerr << "ERROR: exceeding the boundary limitation of the table\n";
+            exit(1);
+        }
+        int64_t _nrow_align8 = (_nrow + 7) / 8;
+        int64_t _nrow_avg = (_nrow_align8 + _slice_num - 1) / _slice_num * 8;
+        int64_t offset = 0;
+        if ((int64_t)j * (int64_t)_nrow_avg < _nrow) {
+            offset = (int64_t)j * (int64_t)_nrow_avg / 8 * sizeof(char);
+        } else {
+            offset = (int64_t)_nrow / 8 * sizeof(char);
+        }
+        return (_col_ptr[i][0] + offset);
+    } else {
+        return _col_ptr[i][j];
     }
 }
 
@@ -288,6 +313,11 @@ size_t Table::getSecNum() const {
 }
 
 void Table::checkSecNum(int sec_l) {
+    // guard sec_l as 256 sections is hard-coded in threading_pool of gqeFilter
+    if (sec_l > 256) {
+        std::cout << "Supported maximum number of sections up to 256, please reduce the sec_l\n";
+        exit(1);
+    }
     // divide evenly
     if (sec_l > 0) {
         _sec_num = sec_l;

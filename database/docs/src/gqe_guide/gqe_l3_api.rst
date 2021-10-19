@@ -41,3 +41,7 @@ These APIs are implemented as excutable classes for providing a structure-clean 
 
 .. include:: ../rst_3/class_xf_database_gqe_Aggregator.rst
 
+.. include:: class_xf_database_gqe_TableSection.rst
+
+.. include:: ../rst_3/class_xf_database_gqe_Workshop.rst
+

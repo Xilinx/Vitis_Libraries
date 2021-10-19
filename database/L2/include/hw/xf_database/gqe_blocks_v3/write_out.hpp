@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ void count_for_burst(hls::stream<bool>& i_bp_flag_strm,
                      hls::stream<bool>& e_in_strm,
                      hls::stream<ap_uint<elem_size * vec_len> > out_strm[col_num], // 512-bit out
                      hls::stream<ap_uint<8> >& o_nm_strm,
-                     hls::stream<ap_uint<32> >& rnm_strm,
                      hls::stream<ap_uint<8> >& i_wr_en_strm,
                      hls::stream<ap_uint<8> >& o_wr_en_strm) {
 #ifdef USER_DEBUG
@@ -83,14 +82,12 @@ void count_for_burst(hls::stream<bool>& i_bp_flag_strm,
     bool e = e_in_strm.read();
     if (build_probe_flag) {
         ap_uint<elem_size * vec_len> vecs[col_num];
-        int n = 0; // nrow count
         int r = 0; // element count in one 512b
         int b = 0; // burst length count
     LOOP_COUNT:
         while (!e) {
 #pragma HLS pipeline II = 1
             e = e_in_strm.read();
-            ++n;
             for (int c = 0; c < col_num; ++c) {
 #pragma HLS unroll
                 ap_uint<elem_size> t = in_strm[c].read();
@@ -148,10 +145,6 @@ void count_for_burst(hls::stream<bool>& i_bp_flag_strm,
 #ifndef __SYNTHESIS__
         std::cout << "o_nm_strm.size(): " << o_nm_strm.size() << std::endl;
 #endif
-
-        // write number of resulting rows to metaout
-        // dout_meta[0].range(71, 8) = n;
-        rnm_strm.write(n);
     }
 }
 
@@ -212,6 +205,7 @@ void write_table_hj_core(hls::stream<bool>& bp_flag_strm,
                          hls::stream<ap_uint<elem_size> > in_strm[col_num],
                          hls::stream<bool>& e_in_strm,
                          hls::stream<ap_uint<8> >& write_out_en_strm,
+                         hls::stream<ap_uint<32> >& nr_row_strm,
                          ap_uint<elem_size * vec_len>* ptr0,
                          ap_uint<elem_size * vec_len>* ptr1,
                          ap_uint<elem_size * vec_len>* ptr2,
@@ -225,13 +219,11 @@ void write_table_hj_core(hls::stream<bool>& bp_flag_strm,
 #pragma HLS stream variable = mid_vecs_strm depth = 64
     hls::stream<ap_uint<8> > mid_nm_strm;
 #pragma HLS stream variable = mid_nm_strm depth = 4
-    hls::stream<ap_uint<32> > mid_rnm_strm;
-#pragma HLS stream variable = mid_rnm_strm depth = 2
     hls::stream<bool> mid_bp_flag_strm;
 #pragma HLS stream variable = mid_bp_flag_strm depth = 2
 
     count_for_burst<burst_len, elem_size, vec_len, col_num>(bp_flag_strm, mid_bp_flag_strm, in_strm, e_in_strm,
-                                                            mid_vecs_strm, mid_nm_strm, mid_rnm_strm, write_out_en_strm,
+                                                            mid_vecs_strm, mid_nm_strm, write_out_en_strm,
                                                             write_out_en_mid_strm);
 #ifdef USER_DEBUG
     std::cout << "mid_nm_strm.size() = " << mid_nm_strm.size() << std::endl;
@@ -239,7 +231,7 @@ void write_table_hj_core(hls::stream<bool>& bp_flag_strm,
         std::cout << "mid_vecs_strm[" << c << "].size() = " << mid_vecs_strm[c].size() << std::endl;
     }
 #endif
-    burst_write_hj<burst_len, elem_size, vec_len, col_num>(mid_bp_flag_strm, mid_vecs_strm, mid_nm_strm, mid_rnm_strm,
+    burst_write_hj<burst_len, elem_size, vec_len, col_num>(mid_bp_flag_strm, mid_vecs_strm, mid_nm_strm, nr_row_strm,
                                                            write_out_en_mid_strm, ptr0, ptr1, ptr2, ptr3, dout_meta);
 }
 
@@ -248,6 +240,7 @@ template <int burst_len, int elem_size, int vec_len, int col_num>
 void write_table_hj(hls::stream<ap_uint<6> >& join_cfg_strm,
                     hls::stream<ap_uint<elem_size> > in_strm[col_num],
                     hls::stream<bool>& e_in_strm,
+                    hls::stream<ap_uint<32> >& nr_row_strm,
                     hls::stream<ap_uint<8> >& write_out_cfg_strm,
                     ap_uint<elem_size * vec_len>* ptr0,
                     ap_uint<elem_size * vec_len>* ptr1,
@@ -266,7 +259,7 @@ void write_table_hj(hls::stream<ap_uint<6> >& join_cfg_strm,
     write_prepare<elem_size, vec_len, col_num>(bp_flag, bp_flag_strm, write_out_cfg_strm, write_out_en_strm);
 
     write_table_hj_core<burst_len, elem_size, vec_len, col_num>(bp_flag_strm, in_strm, e_in_strm, write_out_en_strm,
-                                                                ptr0, ptr1, ptr2, ptr3, dout_meta);
+                                                                nr_row_strm, ptr0, ptr1, ptr2, ptr3, dout_meta);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -280,7 +273,7 @@ void countForBurstPart(hls::stream<ap_uint<elem_size*(1 << hash_wh)> > i_post_Ag
                        hls::stream<ap_uint<8> >& i_wr_cfg_strm,
                        hls::stream<int>& i_bit_num_strm,
                        hls::stream<ap_uint<10> >& i_nm_strm,
-                       hls::stream<ap_uint<12> >& i_bkpu_num_strm,
+                       hls::stream<ap_uint<10 + hash_wh> >& i_bkpu_num_strm,
 
                        hls::stream<ap_uint<elem_size * vec_len> > o_post_Agg[col_num],
                        hls::stream<ap_uint<8> > o_nm_512_strm[3],
@@ -298,16 +291,16 @@ void countForBurstPart(hls::stream<ap_uint<elem_size*(1 << hash_wh)> > i_post_Ag
 #endif
 
     const int sz = elem_size;
-    ap_uint<2> pu_idx;
+    ap_uint<hash_wh> pu_idx;
     ap_uint<10> bk_idx;
     int n = 0; // nrow count
     int r = 0; // element count in one 512b
     int b = 0; // burst lentg count
     ap_uint<sz * vec_len> vecs[col_num];
 #pragma HLS array_partition variable = vecs complete
-    int nrow_cnt[512];
+    int nrow_cnt[256];
 #pragma HLS resource variable = nrow_cnt core = RAM_S2P_BRAM
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 256; i++) {
 #pragma HLS PIPELINE II = 1
         nrow_cnt[i] = 0;
     }
@@ -361,7 +354,9 @@ void countForBurstPart(hls::stream<ap_uint<elem_size*(1 << hash_wh)> > i_post_Ag
 
                 std::cout << "t: " << t << std::endl;
 #endif
-                vecs[c].range(sz * PU * (vec_len / PU - 1) - 1, 0) = vecs[c].range(sz * vec_len - 1, sz * PU);
+                if (vec_len > PU) {
+                    vecs[c].range(sz * PU * (vec_len / PU - 1) - 1, 0) = vecs[c].range(sz * vec_len - 1, sz * PU);
+                }
                 vecs[c].range(sz * vec_len - 1, sz * PU * (vec_len / PU - 1)) = t;
             }
 
@@ -509,7 +504,7 @@ void write_table_part_core(hls::stream<ap_uint<elem_size*(1 << hash_wh)> > post_
                            hls::stream<ap_uint<8> >& i_wr_cfg_strm,
                            hls::stream<int>& i_bit_num_strm,
                            hls::stream<ap_uint<10> >& i_nm_strm,
-                           hls::stream<ap_uint<12> >& i_bkpu_num_strm,
+                           hls::stream<ap_uint<10 + hash_wh> >& i_bkpu_num_strm,
 
                            hls::stream<int>& o_per_part_nm_strm,
                            ap_uint<elem_size * vec_len>* ptr0,
@@ -555,7 +550,7 @@ void write_table_part(hls::stream<ap_uint<elem_size*(1 << hash_wh)> > post_Agg[c
                       hls::stream<ap_uint<8> >& i_wr_cfg_strm,
                       hls::stream<int>& i_bit_num_strm,
                       hls::stream<ap_uint<10> >& i_nm_strm,
-                      hls::stream<ap_uint<12> >& i_bkpu_num_strm,
+                      hls::stream<ap_uint<10 + hash_wh> >& i_bkpu_num_strm,
 
                       ap_uint<elem_size * vec_len>* ptr0,
                       ap_uint<elem_size * vec_len>* ptr1,

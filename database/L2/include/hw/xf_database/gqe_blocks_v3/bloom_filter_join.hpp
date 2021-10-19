@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,13 @@
 #endif
 
 #include "xf_database/hash_multi_join_build_probe.hpp"
+#include "xf_database/gqe_blocks_v3/crossbar.hpp"
+#include "xf_database/gqe_blocks_v3/collect.hpp"
 
 // FIXME For debug
 #ifndef __SYNTHESIS__
 #include <iostream>
+//#define DEBUG_BLOOMFILTER_JOIN
 #endif
 
 #define write_bit_vector0(i, v) \
@@ -145,6 +148,7 @@ void multi_probe_htb(bool bf_on,
                      hls::stream<ap_uint<B_PW> >& o_pld_strm,
                      hls::stream<ap_uint<ARW> >& o_nm2_strm,
                      hls::stream<bool>& o_e2_strm,
+                     hls::stream<ap_uint<B_PW> >& pld_inner_strm,
 
                      ap_uint<72>* bit_vector0,
                      ap_uint<72>* bit_vector1) {
@@ -273,6 +277,7 @@ LOOP_PROBE:
                 ap_uint<HASHWL> overflow_addr_out = 0;
                 if (bf_on) {
                     overflow_addr_out = hash_val_tmp;
+                    pld_inner_strm.write(pld);
                 } else {
                     overflow_addr_out.range(ARW - 1, 0) = overflow_ht_addr;
                 }
@@ -296,6 +301,10 @@ LOOP_PROBE:
     o_e2_strm.write(true);
 
     // for do-while in probe overflow stb
+    if (bf_on) {
+        // only for validation buffer, we need this payload info
+        pld_inner_strm.write(0);
+    }
     o_overflow_addr_strm.write(0);
     o_nm1_strm.write(0);
     o_e1_strm.write(true);
@@ -306,6 +315,7 @@ template <int KEYW, int S_PW, int HASHWH, int HASHWL, int ARW>
 void probe_overflow_stb(bool bf_on,
                         ap_uint<35> bf_size_in_bits,
                         // input base addr
+                        hls::stream<ap_uint<S_PW> >& i_pld_strm,
                         hls::stream<ap_uint<HASHWL> >& i_overflow_addr_strm,
                         hls::stream<ap_uint<ARW> >& i_overflow_nm_strm,
                         hls::stream<bool>& i_e_strm,
@@ -337,25 +347,47 @@ void probe_overflow_stb(bool bf_on,
     } else {
         ap_uint<HASHWL + 1> each_size = bf_size_in_bits >> HASHWH;
         do {
-#pragma HLS PIPELINE II = 1
+#pragma HLS PIPELINE II = 2
 
+            ap_uint<S_PW> i_pld = i_pld_strm.read();
             overflow_addr = i_overflow_addr_strm.read();
             nm = i_overflow_nm_strm.read();
             last = i_e_strm.read();
 
-            ap_uint<HASHWL + 1> hash = (ap_uint<HASHWL + 1>)overflow_addr % each_size;
-            ap_uint<HASHWL> addr = hash.range(HASHWL - 1, 0);
+            ap_uint<32> hash1 = overflow_addr.range(31, 0);
+            ap_uint<32> hash2 = 0;
+            hash2.range(31 - HASHWH, 0) = overflow_addr.range(HASHWL - 1, 32);
+            ap_uint<32> firstHash = hash1 + hash2;
+            ap_uint<32> totalBlockCountEach = each_size / 64;
+            ap_uint<32> blockIdx = firstHash % totalBlockCountEach;
+            ap_uint<32> cacheLineBaseOffset = (blockIdx >> 3) << 1;
 
-            ap_uint<256> element = htb_buf[addr.range(HASHWL - 1, Log2<256>::value)];
+            ap_uint<512> cache_line;
+            cache_line.range(255, 0) = htb_buf[cacheLineBaseOffset];
+            cache_line.range(511, 256) = htb_buf[cacheLineBaseOffset + 1];
 
-            ap_uint<KEYW> key = 0;
-            ap_uint<S_PW> pld = 0;
-            if (element[addr.range(Log2<256>::value - 1, 0)]) {
-                pld = 1;
+            bool bitIn[4] = {false};
+            // multi-hash
+            for (int i = 0; i < 4; i++) {
+#pragma HLS unroll
+                ap_uint<32> combinedHash = hash1 + ((i + 2) * hash2);
+                ap_uint<3> blockOffset = combinedHash & 0x00000007;
+                ap_uint<6> bitPos = (combinedHash >> 3) & 63;
+                bitIn[i] = cache_line[blockOffset * 64 + bitPos];
+            }
+            bool isIn = true;
+            for (int i = 0; i < 4; i++) {
+                isIn &= bitIn[i];
+            }
+
+            ap_uint<KEYW> o_key = 0;
+            ap_uint<S_PW> o_pld = isIn;
+            if (i_pld == ~ap_uint<S_PW>(0)) {
+                o_pld = ~ap_uint<S_PW>(0);
             }
             if (!last) {
-                o_overflow_s_key_strm.write(key);
-                o_overflow_s_pld_strm.write(pld);
+                o_overflow_s_key_strm.write(o_key);
+                o_overflow_s_pld_strm.write(o_pld);
             }
 
         } while (!last);
@@ -403,6 +435,9 @@ void multi_probe_wrapper(bool bf_on,
 #pragma HLS stream variable = e0_strm depth = 512
 #pragma HLS resource variable = e0_strm core = FIFO_SRL
 
+    hls::stream<ap_uint<S_PW> > pld_inner_strm("pld_inner_strm");
+#pragma HLS stream variable = pld_inner_strm depth = 8
+#pragma HLS resource variable = pld_inner_strm core = FIFO_SRL
     hls::stream<ap_uint<HASHWL> > overflow_addr_strm;
 #pragma HLS stream variable = overflow_addr_strm depth = 8
 #pragma HLS resource variable = overflow_addr_strm core = FIFO_SRL
@@ -418,7 +453,7 @@ void multi_probe_wrapper(bool bf_on,
 
                                                          base_addr_strm, nm0_strm, e0_strm, overflow_addr_strm,
                                                          nm1_strm, e1_strm, o_t_key_strm, o_t_pld_strm, o_nm_strm,
-                                                         o_e0_strm,
+                                                         o_e0_strm, pld_inner_strm,
 
                                                          bit_vector0, bit_vector1);
 
@@ -428,7 +463,8 @@ void multi_probe_wrapper(bool bf_on,
 
                                                  stb_buf);
 
-    probe_overflow_stb<KEYW, S_PW, HASHWH, HASHWL, ARW>(bf_on, bf_size_in_bits, overflow_addr_strm, nm1_strm, e1_strm,
+    probe_overflow_stb<KEYW, S_PW, HASHWH, HASHWL, ARW>(bf_on, bf_size_in_bits, pld_inner_strm, overflow_addr_strm,
+                                                        nm1_strm, e1_strm,
 
                                                         o_overflow_s_key_strm, o_overflow_s_pld_strm,
 
@@ -472,6 +508,7 @@ void initiate_uram(
     }
 #endif
 }
+
 /// @brief Top function of hash multi join PU
 template <int HASH_MODE, int HASHWH, int HASHWL, int HASHWJ, int KEYW, int S_PW, int T_PW, int ARW>
 void build_merge_multi_probe_wrapper(bool bf_on,
@@ -853,6 +890,7 @@ namespace database {
  * @tparam HASHWJ number of hash bits used for hash-table of join in PU.
  * @tparam ARW width of address, larger than 24 is suggested.
  * @tparam CH_NM number of input channels, 1,2,4.
+ * @tparam GRP_SZ number of rows per group (for validation buffer only).
  *
  * @param build_probe_flag 0 for build, 1 for probe
  *
@@ -889,7 +927,17 @@ namespace database {
  * @param j_strm output of joined result
  * @param j_e_strm end flag of joined result
  */
-template <int HASH_MODE, int KEYW, int PW, int S_PW, int B_PW, int HASHWH, int HASHWL, int HASHWJ, int ARW, int CH_NM>
+template <int HASH_MODE,
+          int KEYW,
+          int PW,
+          int S_PW,
+          int B_PW,
+          int HASHWH,
+          int HASHWL,
+          int HASHWJ,
+          int ARW,
+          int CH_NM,
+          int GRP_SZ>
 void bloomFilterJoin(bool build_probe_flag,
                      bool bf_on,
                      ap_uint<35> bf_size_in_bits,
@@ -947,73 +995,25 @@ void bloomFilterJoin(bool build_probe_flag,
 
     // dispatch k0_strm_arry, p0_strm_arry, e0strm_arry to channel1-4
     // Channel1
-    hls::stream<ap_uint<KEYW> > k1_strm_arry_c0[PU];
-#pragma HLS stream variable = k1_strm_arry_c0 depth = 8
-#pragma HLS array_partition variable = k1_strm_arry_c0 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c0 core = FIFO_SRL
-    hls::stream<ap_uint<PW> > p1_strm_arry_c0[PU];
-#pragma HLS stream variable = p1_strm_arry_c0 depth = 8
-#pragma HLS array_partition variable = p1_strm_arry_c0 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c0 core = FIFO_SRL
-    hls::stream<ap_uint<HASHWL> > hash_strm_arry_c0[PU];
-#pragma HLS stream variable = hash_strm_arry_c0 depth = 8
-#pragma HLS array_partition variable = hash_strm_arry_c0 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c0 core = FIFO_SRL
-    hls::stream<bool> e1_strm_arry_c0[PU];
-#pragma HLS stream variable = e1_strm_arry_c0 depth = 8
-#pragma HLS array_partition variable = e1_strm_arry_c0 dim = 1
-
+    hls::stream<ap_uint<KEYW + PW + HASHWL + 1> > pack_strm_arry_c0[PU];
+#pragma HLS stream variable = pack_strm_arry_c0 depth = 8
+#pragma HLS array_partition variable = pack_strm_arry_c0 dim = 1
+#pragma HLS resource variable = pack_strm_arry_c0 core = FIFO_SRL
     // Channel2
-    hls::stream<ap_uint<KEYW> > k1_strm_arry_c1[PU];
-#pragma HLS stream variable = k1_strm_arry_c1 depth = 8
-#pragma HLS array_partition variable = k1_strm_arry_c1 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c1 core = FIFO_SRL
-    hls::stream<ap_uint<PW> > p1_strm_arry_c1[PU];
-#pragma HLS stream variable = p1_strm_arry_c1 depth = 8
-#pragma HLS array_partition variable = p1_strm_arry_c1 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c1 core = FIFO_SRL
-    hls::stream<ap_uint<HASHWL> > hash_strm_arry_c1[PU];
-#pragma HLS stream variable = hash_strm_arry_c1 depth = 8
-#pragma HLS array_partition variable = hash_strm_arry_c1 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c1 core = FIFO_SRL
-    hls::stream<bool> e1_strm_arry_c1[PU];
-#pragma HLS stream variable = e1_strm_arry_c1 depth = 8
-#pragma HLS array_partition variable = e1_strm_arry_c1 dim = 1
-
+    hls::stream<ap_uint<KEYW + PW + HASHWL + 1> > pack_strm_arry_c1[PU];
+#pragma HLS stream variable = pack_strm_arry_c1 depth = 8
+#pragma HLS array_partition variable = pack_strm_arry_c1 dim = 1
+#pragma HLS resource variable = pack_strm_arry_c1 core = FIFO_SRL
     // Channel3
-    hls::stream<ap_uint<KEYW> > k1_strm_arry_c2[PU];
-#pragma HLS stream variable = k1_strm_arry_c2 depth = 8
-#pragma HLS array_partition variable = k1_strm_arry_c2 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c2 core = FIFO_SRL
-    hls::stream<ap_uint<PW> > p1_strm_arry_c2[PU];
-#pragma HLS stream variable = p1_strm_arry_c2 depth = 8
-#pragma HLS array_partition variable = p1_strm_arry_c2 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c2 core = FIFO_SRL
-    hls::stream<ap_uint<HASHWL> > hash_strm_arry_c2[PU];
-#pragma HLS stream variable = hash_strm_arry_c2 depth = 8
-#pragma HLS array_partition variable = hash_strm_arry_c2 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c2 core = FIFO_SRL
-    hls::stream<bool> e1_strm_arry_c2[PU];
-#pragma HLS stream variable = e1_strm_arry_c2 depth = 8
-#pragma HLS array_partition variable = e1_strm_arry_c2 dim = 1
-
+    hls::stream<ap_uint<KEYW + PW + HASHWL + 1> > pack_strm_arry_c2[PU];
+#pragma HLS stream variable = pack_strm_arry_c2 depth = 8
+#pragma HLS array_partition variable = pack_strm_arry_c2 dim = 1
+#pragma HLS resource variable = pack_strm_arry_c2 core = FIFO_SRL
     // Channel4
-    hls::stream<ap_uint<KEYW> > k1_strm_arry_c3[PU];
-#pragma HLS stream variable = k1_strm_arry_c3 depth = 8
-#pragma HLS array_partition variable = k1_strm_arry_c3 dim = 1
-#pragma HLS resource variable = k1_strm_arry_c3 core = FIFO_SRL
-    hls::stream<ap_uint<PW> > p1_strm_arry_c3[PU];
-#pragma HLS stream variable = p1_strm_arry_c3 depth = 8
-#pragma HLS array_partition variable = p1_strm_arry_c3 dim = 1
-#pragma HLS resource variable = p1_strm_arry_c3 core = FIFO_SRL
-    hls::stream<ap_uint<HASHWL> > hash_strm_arry_c3[PU];
-#pragma HLS stream variable = hash_strm_arry_c3 depth = 8
-#pragma HLS array_partition variable = hash_strm_arry_c3 dim = 1
-#pragma HLS resource variable = hash_strm_arry_c3 core = FIFO_SRL
-    hls::stream<bool> e1_strm_arry_c3[PU];
-#pragma HLS stream variable = e1_strm_arry_c3 depth = 8
-#pragma HLS array_partition variable = e1_strm_arry_c3 dim = 1
-
+    hls::stream<ap_uint<KEYW + PW + HASHWL + 1> > pack_strm_arry_c3[PU];
+#pragma HLS stream variable = pack_strm_arry_c3 depth = 8
+#pragma HLS array_partition variable = pack_strm_arry_c3 dim = 1
+#pragma HLS resource variable = pack_strm_arry_c3 core = FIFO_SRL
     // merge channel1-channel4 to here, then perform build or probe
     hls::stream<ap_uint<KEYW> > k1_strm_arry[PU];
 #pragma HLS stream variable = k1_strm_arry depth = 8
@@ -1077,7 +1077,7 @@ void bloomFilterJoin(bool build_probe_flag,
 
 //------------------------------read status-----------------------------------
 #ifndef __SYNTHESIS__
-#ifdef DEBUG
+#ifdef DEBUG_BLOOMFILTER_JOIN
     std::cout << "------------------------read status------------------------" << std::endl;
 #endif
 #endif
@@ -1085,36 +1085,63 @@ void bloomFilterJoin(bool build_probe_flag,
 
 //---------------------------------dispatch PU-------------------------------
 #ifndef __SYNTHESIS__
-#ifdef DEBUG
+#ifdef DEBUG_BLOOMFILTER_JOIN
     std::cout << "------------------------dispatch PU------------------------" << std::endl;
 #endif
 #endif
 
     if (CH_NM >= 1) {
-        details::hash_multi_join_build_probe::dispatch_wrapper<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU>(
-            k0_strm_arry[0], p0_strm_arry[0], e0_strm_arry[0], k1_strm_arry_c0, p1_strm_arry_c0, hash_strm_arry_c0,
-            e1_strm_arry_c0);
+        details::dispatch_unit<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU, CH_NM>(bf_on, k0_strm_arry[0], p0_strm_arry[0],
+                                                                               e0_strm_arry[0], pack_strm_arry_c0);
     }
 
     if (CH_NM >= 2) {
-        details::hash_multi_join_build_probe::dispatch_wrapper<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU>(
-            k0_strm_arry[1], p0_strm_arry[1], e0_strm_arry[1], k1_strm_arry_c1, p1_strm_arry_c1, hash_strm_arry_c1,
-            e1_strm_arry_c1);
+        details::dispatch_unit<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU, CH_NM>(bf_on, k0_strm_arry[1], p0_strm_arry[1],
+                                                                               e0_strm_arry[1], pack_strm_arry_c1);
     }
 
     if (CH_NM >= 4) {
-        details::hash_multi_join_build_probe::dispatch_wrapper<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU>(
-            k0_strm_arry[2], p0_strm_arry[2], e0_strm_arry[2], k1_strm_arry_c2, p1_strm_arry_c2, hash_strm_arry_c2,
-            e1_strm_arry_c2);
+        details::dispatch_unit<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU, CH_NM>(bf_on, k0_strm_arry[2], p0_strm_arry[2],
+                                                                               e0_strm_arry[2], pack_strm_arry_c2);
 
-        details::hash_multi_join_build_probe::dispatch_wrapper<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU>(
-            k0_strm_arry[3], p0_strm_arry[3], e0_strm_arry[3], k1_strm_arry_c3, p1_strm_arry_c3, hash_strm_arry_c3,
-            e1_strm_arry_c3);
+        details::dispatch_unit<HASH_MODE, KEYW, PW, HASHWH, HASHWL, PU, CH_NM>(bf_on, k0_strm_arry[3], p0_strm_arry[3],
+                                                                               e0_strm_arry[3], pack_strm_arry_c3);
     }
 
 //---------------------------------merge PU---------------------------------
 #ifndef __SYNTHESIS__
-#ifdef DEBUG
+#ifdef DEBUG_BLOOMFILTER_JOIN
+    std::cout << "     ";
+    for (int i = 0; i < PU; i++) {
+        std::cout << "       PU" << i;
+    }
+    std::cout << std::endl;
+    if (CH_NM >= 1) {
+        std::cout << "ch:0 ";
+        for (int i = 0; i < PU; i++) {
+            std::cout << std::setw(10) << pack_strm_arry_c0[i].size();
+        }
+        std::cout << std::endl;
+    }
+    if (CH_NM >= 2) {
+        std::cout << "ch:1 ";
+        for (int i = 0; i < PU; i++) {
+            std::cout << std::setw(10) << pack_strm_arry_c1[i].size();
+        }
+        std::cout << std::endl;
+    }
+    if (CH_NM >= 4) {
+        std::cout << "ch:2 ";
+        for (int i = 0; i < PU; i++) {
+            std::cout << std::setw(10) << pack_strm_arry_c2[i].size();
+        }
+        std::cout << std::endl;
+        std::cout << "ch:3 ";
+        for (int i = 0; i < PU; i++) {
+            std::cout << std::setw(10) << pack_strm_arry_c3[i].size();
+        }
+        std::cout << std::endl;
+    }
     std::cout << "------------------------merge PU------------------------" << std::endl;
 #endif
 #endif
@@ -1122,33 +1149,44 @@ void bloomFilterJoin(bool build_probe_flag,
     if (CH_NM == 1) {
         for (int p = 0; p < PU; ++p) {
 #pragma HLS unroll
-            details::hash_multi_join_build_probe::merge1_1_wrapper(
-                k1_strm_arry_c0[p], p1_strm_arry_c0[p], hash_strm_arry_c0[p], e1_strm_arry_c0[p],
+            details::merge1_1<KEYW, PW, HASHWL>(bf_on, pack_strm_arry_c0[p],
 
-                k1_strm_arry[p], p1_strm_arry[p], hash_strm_arry[p], e1_strm_arry[p]);
+                                                k1_strm_arry[p], p1_strm_arry[p], hash_strm_arry[p], e1_strm_arry[p]);
         }
     } else if (CH_NM == 2) {
         for (int p = 0; p < PU; p++) {
 #pragma HLS unroll
-            details::hash_multi_join_build_probe::merge2_1_wrapper(
-                k1_strm_arry_c0[p], k1_strm_arry_c1[p], p1_strm_arry_c0[p], p1_strm_arry_c1[p], hash_strm_arry_c0[p],
-                hash_strm_arry_c1[p], e1_strm_arry_c0[p], e1_strm_arry_c1[p],
+            details::merge2_1<KEYW, PW, HASHWL>(bf_on, pack_strm_arry_c0[p], pack_strm_arry_c1[p],
 
-                k1_strm_arry[p], p1_strm_arry[p], hash_strm_arry[p], e1_strm_arry[p]);
+                                                k1_strm_arry[p], p1_strm_arry[p], hash_strm_arry[p], e1_strm_arry[p]);
         }
     } else {
         // CH_NM == 4
         for (int p = 0; p < PU; p++) {
 #pragma HLS unroll
-            details::hash_multi_join_build_probe::merge4_1_wrapper(
-                k1_strm_arry_c0[p], k1_strm_arry_c1[p], k1_strm_arry_c2[p], k1_strm_arry_c3[p], p1_strm_arry_c0[p],
-                p1_strm_arry_c1[p], p1_strm_arry_c2[p], p1_strm_arry_c3[p], hash_strm_arry_c0[p], hash_strm_arry_c1[p],
-                hash_strm_arry_c2[p], hash_strm_arry_c3[p], e1_strm_arry_c0[p], e1_strm_arry_c1[p], e1_strm_arry_c2[p],
-                e1_strm_arry_c3[p],
+#ifndef __SYNTHESIS__
+#ifdef DEBUG_BLOOMFILTER_JOIN
+            std::cout << "PU" << p << "\n";
+#endif
+#endif
+            details::merge4_1<KEYW, PW, HASHWL>(bf_on, pack_strm_arry_c0[p], pack_strm_arry_c1[p], pack_strm_arry_c2[p],
+                                                pack_strm_arry_c3[p],
 
-                k1_strm_arry[p], p1_strm_arry[p], hash_strm_arry[p], e1_strm_arry[p]);
+                                                k1_strm_arry[p], p1_strm_arry[p], hash_strm_arry[p], e1_strm_arry[p]);
         }
     }
+#ifndef __SYNTHESIS__
+#ifdef DEBUG_BLOOMFILTER_JOIN
+    for (int i = 0; i < PU; i++) {
+        std::cout << "       PU" << i;
+    }
+    std::cout << std::endl;
+    for (int i = 0; i < PU; i++) {
+        std::cout << std::setw(10) << k1_strm_arry[i].size();
+    }
+    std::cout << std::endl;
+#endif
+#endif
 
     //-------------------------------PU----------------------------------------
     if (PU >= 1) {
@@ -1350,8 +1388,8 @@ void bloomFilterJoin(bool build_probe_flag,
     }
 
     //-----------------------------------Collect-----------------------------------
-    details::hash_multi_join_build_probe::collect_unit<PU, KEYW + S_PW + B_PW>(
-        bp_flag_c_strm, j0_strm_arry, e3_strm_arry, join_num, j_strm, j_e_strm);
+    details::collect<PU, KEYW, S_PW, B_PW, GRP_SZ>(bf_on, bp_flag_c_strm, j0_strm_arry, e3_strm_arry, join_num, j_strm,
+                                                   j_e_strm);
 
     //------------------------------Write Status-----------------------------------
     details::join_v3::sc::write_status<PU>(pu_end_status_strms, depth, join_num);

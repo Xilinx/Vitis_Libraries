@@ -24,6 +24,7 @@
 #include <cmath>
 // L3
 #include "xf_database/gqe_table.hpp"
+#include "xf_database/gqe_input.hpp"
 
 namespace xf {
 namespace database {
@@ -76,6 +77,7 @@ class JoinStrategyBase {
      *
      */
     virtual StrategySet getSolutionParams(Table tab_a, Table tab_b) { return StrategySet(); };
+    virtual StrategySet getSolutionParams(TableSection tab_a, TableSection tab_b) { return StrategySet(); };
     //
 };
 
@@ -231,6 +233,29 @@ class JoinStrategyManualSet : public JoinStrategyBase {
      *
      */
     StrategySet getSolutionParams(Table tab_a, Table tab_b) {
+#ifdef USER_DEBUG
+        std::cout << "create gqe::SOL" << sol << std::endl;
+        std::cout << "sec_o:" << sec_o << ", sec_l:" << sec_l << ", log_part:" << log_part
+                  << ", slice_num:" << slice_num << ", expansion_partO:" << _expansion_partO
+                  << " , expansion_partL: " << _expansion_partL << " , expansion_join: " << _expansion_join
+                  << std::endl;
+#endif
+
+        StrategySet params;
+
+        params.sol = sol;
+        params.sec_o = sec_o;
+        params.sec_l = sec_l;
+        params.slice_num = slice_num;
+        params.log_part = log_part;
+        params.coef_expansion_partO = coef_expansion_partO;
+        params.coef_expansion_partL = coef_expansion_partL;
+        params.coef_expansion_join = coef_expansion_join;
+
+        return params;
+    };
+
+    StrategySet getSolutionParams(TableSection tab_a, TableSection tab_b) {
 #ifdef USER_DEBUG
         std::cout << "create gqe::SOL" << sol << std::endl;
         std::cout << "sec_o:" << sec_o << ", sec_l:" << sec_l << ", log_part:" << log_part

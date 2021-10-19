@@ -51,9 +51,6 @@ HOST_ARCH ?= x86
 # #################### Checking if DEVICE in blacklist #############################
 
 # #################### Checking if DEVICE in whitelist ############################
-ifneq ($(findstring xilinx_u280_xdma_201920_3, $(DEVICE)), xilinx_u280_xdma_201920_3)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
 # ######################## Setting up Project Variables #################################
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -75,14 +72,16 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/host/test_q5s.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_table.cpp
 HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_base_config.cpp
 HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_join_config.cpp
 HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_partjoin_config.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_init.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_ocl.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_base.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_join.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_platform.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_worker.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_workshop.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_input.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_table.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/sw/gqe_memcpy.cpp
+
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include/sw
@@ -103,10 +102,11 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
-CXXFLAGS += -fmessage-length=0 -O3 -D XDEVICE=$(XDEVICE)
+CXXFLAGS += -fmessage-length=0 -O -D XDEVICE=$(XDEVICE)
 CXXFLAGS += -I$(CUR_DIR)/src/ 
+CXXFLAGS += -g 
 
 ifeq ($(HOST_ARCH), x86)
 LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
@@ -139,7 +139,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 gqeJoin_VPP_FLAGS += --hls.clock 250000000:gqeJoin
 gqePart_VPP_FLAGS += --hls.clock 250000000:gqePart
-VPP_LDFLAGS_gqe_join_part += --kernel_frequency 160
+VPP_LDFLAGS_gqe_join_part += --kernel_frequency 130
 
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))

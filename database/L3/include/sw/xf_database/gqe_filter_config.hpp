@@ -49,6 +49,8 @@ class BloomFilterConfig : protected BaseConfig {
     // setup kernel config (table_filter_cfg) for gqeFilter
     void SetupKernelConfig(uint64_t bf_size,
                            std::string filter_condition,
+                           bool gen_rowID_en,
+                           bool valid_en,
                            std::vector<std::string> filter_keys,
                            std::vector<int8_t> sw_shuffle_scan,
                            std::vector<int8_t> sw_shuffle_write);

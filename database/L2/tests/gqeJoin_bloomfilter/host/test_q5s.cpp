@@ -45,8 +45,11 @@ const int PU_NM = 8;
 // build l_nrow / BUILD_FACTOR into bloom-filter
 const int BUILD_FACTOR = 10;
 
-#define HASH_WIDTH_LOW 31
+#define HASH_WIDTH_LOW 61
 #define HASH_WIDTH_HIGH 3
+
+// number of hash functions in bloom-filter
+#define NUM_HASH_FUNCS 4
 
 #define rot(x, k) (((x) << (k)) | ((x) >> (32 - (k))));
 
@@ -424,6 +427,7 @@ int main(int argc, const char* argv[]) {
     // set up bloom-filter size
     std::string in_size;
     long bf_size = 256 * 1024;
+#ifndef HLS_TEST
     if (parser.getCmdOption("-size", in_size)) {
         try {
             bf_size = std::stol(in_size);
@@ -432,10 +436,12 @@ int main(int argc, const char* argv[]) {
             bf_size = 256 * 1024;
         }
     }
+#endif
 
     std::string scale;
     int factor_o = 1;
     int factor_l = 1;
+#ifndef HLS_TEST
     if (parser.getCmdOption("-O", scale)) {
         try {
             factor_o = std::stoi(scale);
@@ -450,6 +456,7 @@ int main(int argc, const char* argv[]) {
             factor_l = 1;
         }
     }
+#endif
 
     int32_t table_o_nrow = 1500000 * factor_o;
     // int32_t table_o_nrow = 400 * factor_o;
@@ -460,7 +467,7 @@ int main(int argc, const char* argv[]) {
             // table_l_nrow = 100000;
             break;
         case 2:
-            table_l_nrow = 11997996;
+            table_l_nrow = 11997941;
             break;
         case 4:
             table_l_nrow = 23996604;
@@ -533,7 +540,7 @@ int main(int argc, const char* argv[]) {
         factor_l = 40;
     }
 
-    int sim_scale = 10000;
+    int sim_scale = 1000;
     if (parser.getCmdOption("-scale", scale)) {
         try {
             sim_scale = std::stoi(scale);
@@ -605,79 +612,43 @@ int main(int argc, const char* argv[]) {
 
     // HBM storage allocations
     // total size split to 8 individual HBM pseudo channels with 256-bit for each block
-    int htb_buf_depth = bf_size / 8 / 256;
-    int stb_buf_depth = bf_size / 8 / 256;
+    int htb_buf_depth = bf_size / 8 / 256; // HT_BUFF_DEPTH;
+    int stb_buf_depth = bf_size / 8 / 256; // HT_BUFF_DEPTH;
     int htb_buf_size = sizeof(ap_uint<256>) * htb_buf_depth;
     int stb_buf_size = sizeof(ap_uint<256>) * stb_buf_depth;
-    ap_uint<256>* htb_buf0 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf1 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf2 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf3 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf4 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf5 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf6 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
-    ap_uint<256>* htb_buf7 = mm.aligned_alloc<ap_uint<256> >(htb_buf_depth);
+    unsigned long* htb_buf[PU_NM];
+    unsigned long* stb_buf[PU_NM];
+    for (int i = 0; i < PU_NM; i++) {
+        htb_buf[i] = (unsigned long*)mm.aligned_alloc<unsigned long>(htb_buf_depth / (sizeof(unsigned long) * 8) * 256);
+        stb_buf[i] = (unsigned long*)mm.aligned_alloc<unsigned long>(stb_buf_depth / (sizeof(unsigned long) * 8) * 256);
+    }
 
-    ap_uint<256>* stb_buf0 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf1 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf2 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf3 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf4 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf5 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf6 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-    ap_uint<256>* stb_buf7 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
-
-    // build bloom-filter
+    // build bloom-filter, using multi-hash algorithm build in Hive (number of hash functions is 4, default cache line
+    // size is 512-bit)
     for (int i = 0; i < l_nrow / BUILD_FACTOR; i++) {
-        ap_uint<64> hash = hashlookup3_64((ap_uint<64>)table_l_user_0[i], (ap_uint<64>)0);
-        ap_uint<HASH_WIDTH_HIGH> idx = hash.range(HASH_WIDTH_HIGH + HASH_WIDTH_LOW - 1, HASH_WIDTH_LOW);
-        ap_uint<HASH_WIDTH_LOW> addr = hash.range(HASH_WIDTH_LOW - 1, 0);
-        addr %= (bf_size >> HASH_WIDTH_HIGH);
-
-        switch (idx) {
-            case 0:
-                htb_buf0[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 1:
-                htb_buf1[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 2:
-                htb_buf2[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 3:
-                htb_buf3[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 4:
-                htb_buf4[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 5:
-                htb_buf5[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 6:
-                htb_buf6[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            case 7:
-                htb_buf7[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                break;
-            default:
-                htb_buf0[addr.range(HASH_WIDTH_LOW - 1, std::log2(256))] |=
-                    ((ap_uint<256>)1 << addr.range(std::log2(256) - 1, 0));
-                std::cerr << "Exceeding the range of the bloom-filter size." << std::endl;
+        unsigned long hash = (unsigned long)hashlookup3_64((ap_uint<64>)table_l_user_0[i], (ap_uint<64>)0);
+        unsigned long idx = hash >> HASH_WIDTH_LOW;
+        hash = hash & 0x1FFFFFFFFFFFFFFFUL;
+        // first hash is used to locate start of the block
+        unsigned int hash1 = (unsigned int)hash;
+        unsigned int hash2 = (unsigned int)(hash >> 32);
+        unsigned int firstHash = hash1 + hash2;
+        unsigned int totalBlockCountEach = bf_size / 64 / 8;
+        unsigned int blockIdx = firstHash % totalBlockCountEach;
+        unsigned int blockBaseOffset = blockIdx & 0xFFFFFFF8;
+        // subsequent K hashes are used to generate K bits within a cache line (4 blocks)
+        for (int i = 1; i <= NUM_HASH_FUNCS; i++) {
+            unsigned int combinedHash = hash1 + ((i + 1) * hash2);
+            unsigned int absOffset = blockBaseOffset + (combinedHash & 0x00000007);
+            int bitPos = (combinedHash >> 3) & 63;
+            htb_buf[idx][absOffset] |= ((unsigned long)1 << bitPos);
         }
     }
     std::cout << "Bloom-filter created and built" << std::endl;
 
     ap_uint<64>* din_val = mm.aligned_alloc<ap_uint<64> >((l_nrow + 63) / 64);
     for (int i = 0; i < (l_nrow + 63) / 64; i++) {
-        din_val[i] = 0xffffffffffffffff;
+        din_val[i] = 0x5555555555555555UL;
     }
 
     // result buff
@@ -712,8 +683,8 @@ int main(int argc, const char* argv[]) {
     // for enableing bloom-filter
     krn_cmd.setBloomfilterOn(bf_size);
 
-    // gen_rowID_en and validEn, using join config
-    krn_cmd.setRowIDValidEnable(0, 0, 0, 0);
+    // krn_id, table_id, gen_rowID_en, validEn,
+    krn_cmd.setRowIDValidEnable(2, 1, 1, 1);
 
     // for enabling output channels
     std::vector<int8_t> ch_out;
@@ -725,7 +696,7 @@ int main(int argc, const char* argv[]) {
 
     // no dynamic filtering by default, put the condition into the second paramter of setFilter for setting up the
     // filter
-    // krn_cmd.setFilter(1, "a > b");
+    // krn_cmd.setFilter(1, "c > 0");
 
     //--------------- metabuffer setup -----------------
     // setup probe used meta input
@@ -750,6 +721,9 @@ int main(int argc, const char* argv[]) {
     size_t flag_probe = 1;
     std::cout << "Kernel config & Meta set" << std::endl;
 
+    using namespace xf::common::utils_sw;
+    Logger logger(std::cout, std::cerr);
+
 #ifdef HLS_TEST
     ap_uint<512>* table_o_0_new = mm.aligned_alloc<ap_uint<512> >(table_o_depth);
     ap_uint<512>* table_o_1_new = mm.aligned_alloc<ap_uint<512> >(table_o_depth);
@@ -773,15 +747,14 @@ int main(int argc, const char* argv[]) {
     // bloom-filter probe
     std::cout << std::endl << "probe starts................." << std::endl;
     gqeJoin(flag_probe, table_l_0_new, table_l_1_new, table_l_2_new, din_val, krn_cmd.getConfigBits(),
-            meta_probe_in.meta(), meta_probe_out.meta(), table_out_0, table_out_1, table_out_2, table_out_3, htb_buf0,
-            htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6, htb_buf7, stb_buf0, stb_buf1, stb_buf2,
-            stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
+            meta_probe_in.meta(), meta_probe_out.meta(), table_out_0, table_out_1, table_out_2, table_out_3,
+            (ap_uint<256>*)htb_buf[0], (ap_uint<256>*)htb_buf[1], (ap_uint<256>*)htb_buf[2], (ap_uint<256>*)htb_buf[3],
+            (ap_uint<256>*)htb_buf[4], (ap_uint<256>*)htb_buf[5], (ap_uint<256>*)htb_buf[6], (ap_uint<256>*)htb_buf[7],
+            (ap_uint<256>*)stb_buf[0], (ap_uint<256>*)stb_buf[1], (ap_uint<256>*)stb_buf[2], (ap_uint<256>*)stb_buf[3],
+            (ap_uint<256>*)stb_buf[4], (ap_uint<256>*)stb_buf[5], (ap_uint<256>*)stb_buf[6], (ap_uint<256>*)stb_buf[7]);
     std::cout << "probe ends................." << std::endl;
 
 #else
-    using namespace xf::common::utils_sw;
-    Logger logger(std::cout, std::cerr);
-
     // Get CL devices.
     cl_int err;
     cl_context ctx;
@@ -818,22 +791,22 @@ int main(int argc, const char* argv[]) {
     mext_cfg5s = {5, krn_cmd.getConfigBits(), fkernel};
 
     cl_mem_ext_ptr_t memExt[PU_NM * 2];
-    memExt[0] = {12, htb_buf0, fkernel};
-    memExt[1] = {13, htb_buf1, fkernel};
-    memExt[2] = {14, htb_buf2, fkernel};
-    memExt[3] = {15, htb_buf3, fkernel};
-    memExt[4] = {16, htb_buf4, fkernel};
-    memExt[5] = {17, htb_buf5, fkernel};
-    memExt[6] = {18, htb_buf6, fkernel};
-    memExt[7] = {19, htb_buf7, fkernel};
-    memExt[8] = {20, stb_buf0, fkernel};
-    memExt[9] = {21, stb_buf1, fkernel};
-    memExt[10] = {22, stb_buf2, fkernel};
-    memExt[11] = {23, stb_buf3, fkernel};
-    memExt[12] = {24, stb_buf4, fkernel};
-    memExt[13] = {25, stb_buf5, fkernel};
-    memExt[14] = {26, stb_buf6, fkernel};
-    memExt[15] = {27, stb_buf7, fkernel};
+    memExt[0] = {12, htb_buf[0], fkernel};
+    memExt[1] = {13, htb_buf[1], fkernel};
+    memExt[2] = {14, htb_buf[2], fkernel};
+    memExt[3] = {15, htb_buf[3], fkernel};
+    memExt[4] = {16, htb_buf[4], fkernel};
+    memExt[5] = {17, htb_buf[5], fkernel};
+    memExt[6] = {18, htb_buf[6], fkernel};
+    memExt[7] = {19, htb_buf[7], fkernel};
+    memExt[8] = {20, stb_buf[0], fkernel};
+    memExt[9] = {21, stb_buf[1], fkernel};
+    memExt[10] = {22, stb_buf[2], fkernel};
+    memExt[11] = {23, stb_buf[3], fkernel};
+    memExt[12] = {24, stb_buf[4], fkernel};
+    memExt[13] = {25, stb_buf[5], fkernel};
+    memExt[14] = {26, stb_buf[6], fkernel};
+    memExt[15] = {27, stb_buf[7], fkernel};
 
     cl_mem_ext_ptr_t mext_table_out[5];
     mext_table_out[0] = {8, table_out_0, fkernel};
@@ -972,38 +945,30 @@ int main(int argc, const char* argv[]) {
 
     // =========== print result ===========
     // check the probe updated meta
-    int out_nrow = meta_probe_out.getColLen();
+    int out_nrow = l_nrow;
     int p_nrow = out_nrow;
     std::cout << "Output buffer has " << out_nrow << " rows." << std::endl;
 
     std::cout << "------------Checking result-------------" << std::endl;
     // save filtered key/payload to std::unordered_map for checking
     std::unordered_map<int64_t, int64_t> filtered_pairs;
-    for (int n = 0; n < p_nrow / 8; n++) {
-        for (int i = 0; i < 8; i++) {
-            int64_t pld = table_out_0[n](63 + 64 * i, 64 * i);
-            int64_t drop = table_out_1[n](63 + 64 * i, 64 * i);
-            int64_t key1 = table_out_2[n](63 + 64 * i, 64 * i);
-            int64_t key2 = table_out_3[n](63 + 64 * i, 64 * i);
-            filtered_pairs.insert(std::make_pair<int64_t, int64_t>(table_out_2[n](63 + 64 * i, 64 * i),
-                                                                   table_out_0[n](63 + 64 * i, 64 * i)));
+    for (int n = 0; n < p_nrow; n++) {
+        // valid key flag
+        if (table_out_0[n / (sizeof(ap_uint<512>) * 8)][n % (sizeof(ap_uint<512>) * 8)]) {
+            filtered_pairs.insert(
+                std::make_pair<int64_t, int64_t>((int64_t)table_l_user_0[n], (int64_t)table_l_user_2[n]));
         }
-    }
-    for (int i = 0; i < p_nrow % 8; i++) {
-        int64_t pld = table_out_0[p_nrow / 8](63 + 64 * i, 64 * i);
-        int64_t drop = table_out_1[p_nrow / 8](63 + 64 * i, 64 * i);
-        int64_t key1 = table_out_2[p_nrow / 8](63 + 64 * i, 64 * i);
-        int64_t key2 = table_out_3[p_nrow / 8](63 + 64 * i, 64 * i);
-        filtered_pairs.insert(std::make_pair<int64_t, int64_t>(table_out_2[p_nrow / 8](63 + 64 * i, 64 * i),
-                                                               table_out_0[p_nrow / 8](63 + 64 * i, 64 * i)));
     }
     // test each added key in the filtered key list
     int nerror = 0;
     for (int i = 0; i < l_nrow / BUILD_FACTOR; i++) {
-        std::unordered_map<int64_t, int64_t>::const_iterator got = filtered_pairs.find((int64_t)table_l_user_0[i]);
-        if (got == filtered_pairs.end()) {
-            nerror++;
-            std::cout << "Missing key = " << table_l_user_0[i] << " in bloom-filter." << std::endl;
+        // valid input row
+        if (din_val[i / 64][i % 64]) {
+            std::unordered_map<int64_t, int64_t>::const_iterator got = filtered_pairs.find((int64_t)table_l_user_0[i]);
+            if (got == filtered_pairs.end()) {
+                nerror++;
+                std::cout << "Missing key = " << table_l_user_0[i] << " in bloom-filter." << std::endl;
+            }
         }
     }
 

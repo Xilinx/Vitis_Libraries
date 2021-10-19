@@ -153,7 +153,7 @@ LOOP_DISPATCH:
 
         ap_uint<HASHWH + HASHWL> hash_val = i_hash_strm.read();
         ap_uint<HASHWL> hash_out = hash_val(HASHWL - 1, 0);
-        ap_uint<HASHWH + 1> pu_idx;
+        ap_uint<HASHWH> pu_idx;
         if (HASHWH > 0)
             pu_idx = hash_val(HASHWH + HASHWL - 1, HASHWL);
         else
@@ -788,7 +788,7 @@ void split_col(hls::stream<ap_uint<KEYW + PW> >& i_kpld_strm,
                hls::stream<ap_uint<10> >& mid_nm_strm,
                hls::stream<ap_uint<EW * PU> > mid_strm[COL_NM]) {
     ap_uint<EW * PU> st[COL_NM];
-    ap_uint<2> idx = 0;
+    ap_uint<Log2<PU>::value> idx = 0;
     ap_uint<KEYW + PW> dt = 0;
 
     ap_uint<10> nm = i_nm_strm.read();
@@ -826,10 +826,10 @@ void combine_pu(hls::stream<ap_uint<10> > i_bk_strm_arry[PU],
                 hls::stream<ap_uint<10> > i_nm_strm_arry[PU],
                 hls::stream<ap_uint<EW * PU> > i_strm_arry[PU][COL_NM],
 
-                hls::stream<ap_uint<12> >& o_bk_nm_strm,
+                hls::stream<ap_uint<10 + Log2<PU>::value> >& o_bk_nm_strm,
                 hls::stream<ap_uint<10> >& o_nm_strm,
                 hls::stream<ap_uint<EW * PU> > o_strm[COL_NM]) {
-    ap_uint<2> pu_idx = 0;
+    ap_uint<Log2<PU>::value> pu_idx = 0;
     ap_uint<EW * PU> tmp[COL_NM] = {0};
     ap_uint<PU> cond = 0;
     ap_uint<PU> last = -1;
@@ -873,7 +873,7 @@ void combine_read(hls::stream<ap_uint<KEYW + PW> > i_kpld_strm[PU],
                   hls::stream<ap_uint<10> > i_nm_strm[PU],
                   hls::stream<ap_uint<10> > i_bk_strm[PU],
 
-                  hls::stream<ap_uint<12> >& o_bk_nm_strm,
+                  hls::stream<ap_uint<10 + Log2<PU>::value> >& o_bk_nm_strm,
                   hls::stream<ap_uint<10> >& o_nm_strm,
                   hls::stream<ap_uint<EW * PU> > o_strm[COL_NM]) {
     hls::stream<ap_uint<10> > mid_bk_strm[PU];
@@ -938,7 +938,7 @@ void hashPartition(
     hls::stream<bool> e0_strm_arry[CH_NM],
 
     // output
-    hls::stream<ap_uint<12> >& o_bk_nm_strm,
+    hls::stream<ap_uint<10 + HASHWH> >& o_bk_nm_strm,
     hls::stream<ap_uint<10> >& o_nm_strm,
     hls::stream<ap_uint<EW*(1 << HASHWH)> > o_kpld_strm[COL_NM]) {
     enum { PU = (1 << HASHWH), BDEPTH = 512 * 4 };
