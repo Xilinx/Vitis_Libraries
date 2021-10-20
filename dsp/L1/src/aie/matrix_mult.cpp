@@ -175,6 +175,10 @@ inline void kernelMatMultClass<TT_DATA_A,
 
     const unsigned int numAReg = 2;
     const unsigned int numBReg = 2;
+    // ADL-719 workaround
+    // 0 disable pipelining, 1 do not decrement loop count, 2 decrement loop count once and duplicate loop to POSTAMBLE,
+    // 3 decrement loop count once for PREAMBLE, 4 decrement twice for PREAMBLE & POSTAMBLE
+    const unsigned int non_leaf_loop_sol = 4;
     // printf("M %d, N %d, K%d\n", M, N, K);
     // TT_DATA_A tiledWindowA[TP_DIM_A * TP_DIM_AB];
     // doTiling<M,N, TP_DIM_A, TP_DIM_AB, TP_DIM_A_LEADING>(inInterface.inWindowA, &tiledWindowA[0]);
@@ -208,7 +212,8 @@ inline void kernelMatMultClass<TT_DATA_A,
                                        : nullptr;
 
             for (unsigned BChunk = 0; BChunk < TP_DIM_B / K; BChunk += numBReg)
-                chess_prepare_for_pipelining chess_loop_count((TP_DIM_B / K) / numBReg) // TP_DIM_B/K)
+                chess_prepare_for_pipelining chess_pipeline_non_leaf_loop_solution(non_leaf_loop_sol)
+                    chess_loop_count((TP_DIM_B / K) / numBReg) // TP_DIM_B/K)
                 {
                     const TT_DATA_A* restrict pA1 = inputAPtr + ((AChunk * TP_DIM_AB / N + 0) * sizeTileA);
                     const TT_DATA_A* restrict pA2;

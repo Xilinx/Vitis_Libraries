@@ -56,6 +56,8 @@ Xilinx |reg| documentation is organized around a set of standard design processe
 
    -  :ref:`2_WIDGETS`
 
+   -  :ref:`2_DDS_MIXER`
+
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 
    -  :ref:`3_USING_EXAMPLES`
@@ -130,10 +132,10 @@ Vitis Tutorials
 
 Xilinx |reg| provides an extensive library of purpose build tutorials. It is recommended to visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with Vitis |trade| in-Depth tutorials.
 
-To learn how to use the Vitis core tools to develop for Versal |trade|, the first Adaptive Compute Acceleration Platform (ACAP) device from Xilinx please visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/master/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you may also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/master/AI_Engine_Development/Feature_Tutorials/08-dsp-library>`__
+To learn how to use the Vitis core tools to develop for Versal |trade|, the first Adaptive Compute Acceleration Platform (ACAP) device from Xilinx please visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you may also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/08-dsp-library>`__
 which demonstrates how to use kernels provided by the DSP library for a filtering application, how to analyze the design results, and how to use filter parameters to optimize the design's performance using simulation.
 
-Finally, Simulink users could be interested in `AI Engine DSP Library and Model Composer Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/master/AI_Engine_Development/Feature_Tutorials/10-aie-dsp-lib-model-composer>`__ which shows how to design AI Engine applications using Model Composer
+Finally, Simulink users could be interested in `AI Engine DSP Library and Model Composer Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/10-aie-dsp-lib-model-composer>`__ which shows how to design AI Engine applications using Model Composer
 
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN

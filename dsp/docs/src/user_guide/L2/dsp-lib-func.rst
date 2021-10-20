@@ -43,7 +43,7 @@ Additionally, each FIR filter has been placed in a unique FIR type namespace. Th
 *Table 1*: FIR Filter Classes
 
 +----------------------------------+-----------------------------------------------------------+
-|    **Function**                  |      **Namespace**                                        |
+|    **Function**                  | **Namespace and class name**                              |
 +==================================+===========================================================+
 |    Single rate, asymmetrical     | dsplib::fir::sr_asym::fir_sr_asym_graph                   |
 +----------------------------------+-----------------------------------------------------------+
@@ -95,7 +95,7 @@ The following table lists the supported combinations of data type and coefficien
 | 3. A mix of float and integer types is not supported.                                         |
 +-----------------------------------------------------------------------------------------------+
 
-For all filters, the coefficient values are passed, not as template parameters, but as an array argument to the constructor for non-reloadable configurations, or to the reload function for reloadable configurations. In the case of symmetrical filters, only the first half (plus any odd centre tap) need be passed, as the remainder may be derived by symmetry. For halfband filters, only the non-zero coefficients should be entered, so the length of the array expected will be the (TP_FIR_LEN+1)/4 + 1 for the centre tap.
+For all filters, the coefficient values are passed, not as template parameters, but as an array argument to the constructor for non-reloadable configurations, or to the reload function for reloadable configurations. In the case of symmetrical filters, only the first half (plus any odd centre tap) need be passed, as the remainder may be derived by symmetry. For halfband filters, only the non-zero coefficients should be entered, with the centre tap last in the array. The length of the array expected will therefore be (TP_FIR_LEN+1)/4+1, e.g. 4 non-zero tap values, including the centre tap, are expected for a halfband filter of length 11.
 
 The following table lists parameters supported by all the FIR filters:
 
@@ -113,7 +113,6 @@ The following table lists parameters supported by all the FIR filters:
 |                        |                |                |                |
 |                        |                |                |    1 =         |
 |                        |                |                |    ceiling     |
-|                        |                |                |    (round up)  |
 |                        |                |                |                |
 |                        |                |                |    2 =         |
 |                        |                |                |    positive    |
@@ -141,7 +140,8 @@ The following table lists parameters supported by all the FIR filters:
 +------------------------+----------------+----------------+----------------+
 |    TP_SHIFT            |    Unsigned    | The number of  |    0 to 61     |
 |                        |    int         | bits to shift  |                |
-|                        |                | accumulation   |                |
+|                        |                | unscaled       |                |
+|                        |                | result         |                |
 |                        |                | down by before |                |
 |                        |                | output.        |                |
 +------------------------+----------------+----------------+----------------+
@@ -189,12 +189,12 @@ The following table lists parameters supported by all the FIR filters:
 |    TP_DUAL_IP          |    Unsigned    | Use dual       |    Range 0     |
 |                        |    int         | inputs ports.  |    (single     |
 |                        |                |                |    input), 1   |
-|                        |                |                |    (dual       |
-|                        |                |                |    input).     |
-|                        |                |                |                |
-|                        |                |                |    Defaults to |
-|                        |                |                |    0 if not    |
-|                        |                |                |    set.        |
+|                        |                | An additional  |    (dual       |
+|                        |                | 'in2' input    |    input).     |
+|                        |                | port will      |                |
+|                        |                | appear on      |    Defaults to |
+|                        |                | the graph      |    0 if not    |
+|                        |                | when set to 1. |    set.        |
 |                        |                |                |                |
 |                        |                |                |                |
 +------------------------+----------------+----------------+----------------+
@@ -212,6 +212,13 @@ The following table lists parameters supported by all the FIR filters:
 | TP_NUM_OUTPUTS         |    Unsigned    | Number of      |                |
 |                        |    int         | fir output     |    1 to 2      |
 |                        |                | ports          |                |
+|                        |                |                |                |
+|                        |                | An additional  |    Defaults to |
+|                        |                | 'out2' output  |    1 if not    |
+|                        |                | port will      |    set.        |
+|                        |                | appear on      |                |
+|                        |                | the graph      |                |
+|                        |                | when set to 2. |                |
 +------------------------+----------------+----------------+----------------+
 |  TP_API                |    Unsigned    | I/O interface  |  0 = Window    |
 |                        |    int         | port type      |                |
@@ -220,26 +227,65 @@ The following table lists parameters supported by all the FIR filters:
 
 .. note:: The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.
 
-.. note:: TP_API template parameter is currently only supported wiht single rate FIRs.
+**TP_API** specifies if the input/output interface should be window-based or stream-based.
+The values supported are 0 (window API) or 1 (stream API).
+
+.. note:: TP_API template parameter is currently only supported with single rate FIRs.
+
+**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resource to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
+FIR graph instance consists of TP_CASC_LEN kernels and the FIR length (TP_FIR_LEN) is divided by the requested cascade length and each kernel in the graph gets assigned a fraction of the workload.
+Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.
+
+**TP_DUAL_IP** is an implementation trade-off between performance and resource utilization.
+Symmetric FIRs may be may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
+In addition, FIRs with streaming interface may utilize the second input port to maximize the available throughput.
+
+* When set to 0, the FIR is created with a single input port.
+
+* When set to 1, two input ports will be created.
+
+  .. note:: when used, port: ``` port<input> in2;``` will be added to the FIR.
+
+**TP_USE_COEFF_RELOAD**  allows the user to select if runtime coefficient reloading should be used.
+When defining the parameter:
+
+* 0 = static coefficients, defined in filter constructor
+
+* 1 = reloadable coefficients, passed as argument to runtime function.
+
+  .. note:: when used, port: ``` port<input> coeff;``` will be added to the FIR.
+
+
+**TP_NUM_OUTPUTS** sets the number of output ports to send the output data to. Supported range: 1 to 2.
+
+For Windows API, additional output provides flexibility in connecting FIR output with multiple destinations.
+Additional output ``out2`` is an exact copy of the data of the output port ``out``.
+
+Stream API uses the additional output port to increase the FIR's throughput. Please refer to :ref:`FIR_STREAM_OUTPUT` for more details.
+
+.. note:: when used, port: ``` port<output> out2;``` will be added to the FIR.
+
 
 Streaming interface for Filters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Streaming interfaces are now supported by single rate FIRs.
-When TP_API is set to 1 - kernel will be created with a native stream output interface and native stream input interface when possible (asymmetric FIRs).
+When TP_API is set to 1 the FIR will have stream API input and output ports. Such filters have lower latency than window API filters because there is no window to fill before execution can begin.
 
-.. note:: Streaming interface is currently only supported wiht single rate FIRs.
+.. note:: Streaming interface is currently only supported with single rate FIRs.
+
+.. _FIR_STREAM_OUTPUT:
 
 Stream Output
 -------------
 
 Stream output allows computed data samples to be directly sent over the stream without the requirement for a ping-pong window buffer.
-As a result, memory requirements and design's latency are reduced.
-Furthermore, the streaming output allows data samples to be broadcasted to multiple destinations.
+As a result, memory use and latency are reduced.
+Furthermore, the streaming output allows data samples to be broadcast to multiple destinations.
 
 To maximize the throughput, FIRs can be configured with 2 output stream ports.
 Set TP_NUM_OUTPUTS template parameter to 2, to create a FIR kernel with 2 output stream ports.
-In such scenario, kernel interleaves the output data with a 128-bit pattern, e.g.:
+In this scenario, the output data from the two streams is interleaved in chunks of 128 bits. E.g.:
 
 * samples 0-3 to be sent over output stream 0 for cint16 data type,
 
@@ -250,11 +296,11 @@ Stream Input for Asymmetric FIRs
 --------------------------------
 
 Stream input allows data samples to be directly written from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
-As a result, memory requirements and design's latency are reduced.
+As a result, memory requirements and latency are reduced.
 
 To maximize the throughput, Asymmetric FIRs can be configured with 2 input stream ports.
-Enable TP_DUAL_IP template parameter, by setting its value to 1, to create a FIR kernel with 2 input stream ports.
-In such case data should be organized in a 128-bit interleaved pattern, e.g.:
+Set TP_DUAL_IP to 1, to create a FIR instance with 2 input stream ports.
+In such a case the input data will be interleaved from the two ports to one data stream internally in 128 bit chunks, e.g.:
 
 * samples 0-3 to be received on input stream 0 for cint16 data type,
 
@@ -268,9 +314,8 @@ In such case data should be organized in a 128-bit interleaved pattern, e.g.:
 Stream Input for Symmetric FIRs
 --------------------------------
 
-Symmetric FIRs require access to data from 2 distinctive areas of the data sample pool and therefore require memory storage.
-Native stream input, where port is diretly connected to the kernel is not possible.
-Instead, stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.
+Symmetric FIRs require access to data from 2 distinctive areas of the data stream and therefore require memory storage.
+In symmetric FIRs the stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.
 
 
 .. _2_FFT_IFFT:
@@ -309,7 +354,8 @@ Table 4 lists the template parameters used to configure the top level graph of t
 |                      |                |                       |                            |
 +----------------------+----------------+-----------------------+----------------------------+
 |    TP_SHIFT          |    Unsigned    | The number of bits    |  0 to 61                   |
-|                      |    int         | to shift accumulation |                            |
+|                      |    int         | to shift unscaled     |                            |
+|                      |    int         | result                |                            |
 |                      |                | down by before output |                            |
 |                      |                |                       |                            |
 |                      |                |                       |                            |
@@ -495,7 +541,8 @@ An output port connects to a window, where the data for the output matrix will b
 |                TP_SHIFT    | Unsigned int   | power of 2     |   In range     |
 |                            |                | shift down     |   0 to 61      |
 |                            |                | applied to the |                |
-|                            |                | accumulation   |                |
+|                            |                | unscaled       |                |
+|                            |                | result         |                |
 |                            |                | of product     |                |
 |                            |                | terms before   |                |
 |                            |                | each output    |                |
@@ -506,7 +553,6 @@ An output port connects to a window, where the data for the output matrix will b
 |                            |                |                |                |
 |                            |                |                |    1 =         |
 |                            |                |                |    ceiling     |
-|                            |                |                |    (round up)  |
 |                            |                |                |                |
 |                            |                |                |    2 =         |
 |                            |                |                |    positive    |

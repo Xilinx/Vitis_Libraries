@@ -65,7 +65,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202110_1
+PLATFORM := xilinx_vck190_base_202120_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -73,7 +73,6 @@ PLATFORM_ALLOWLIST +=  vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
-
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
 BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
@@ -240,6 +239,8 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 
 endif
 
+######################### binary container global settings ##########################
+
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER): $(CUR_DIR)//test.cpp 
 	$(ECHO) "Compiling: libadf.a"
@@ -291,7 +292,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
 DATA_FILE := 
-DATA_DIR := $(CUR_DIR)//data/ 
+DATA_DIR := 
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)

@@ -24,15 +24,15 @@ This section provides the L2 performance benchmarks and QoR (Quality of Results)
 The QoR are reflected using the below metrics:
 
 - cycleCountAvg         - average cycle count that takes to execute kernel function (not including kernel/window buffer overheads).
-- throughputAvg         - input throughput calculated based on `cycleCountAvg`, taking into account input window size.
+- throughputAvg         - input throughput calculated based on `cycleCountAvg`, taking into account input window size (not including kernel/window buffer overheads).
 - initiationInterval    - time that must pass between two consecutive iterations execution starts of a given function, including overheads i.e., time between a function start and its previous start.
-- throughpuInitIntAvg   - input throughput calculated based on `initiationInterval`, taking into account input window size.
+- throughputInitIntAvg  - input throughput calculated based on `initiationInterval`, taking into account input window size.
 - NUM_BANKS             - number of memory banks used by the design
 - NUM_AIE               - number of AIE tiles used by the design
 - DATA_MEMORY           - total data memory in Bytes used by the design
 - PROGRAM_MEMORY        - program memory in Bytes used by each kernel
 
-In addition, for multi-kernel designs, each kernel may take different amount of time to execute and as a result, figures reported for each kernels `cycleCountAvg`, `throughputAvg` may vary slightly.
+In addition, for multi-kernel designs, each kernel may take a different amount of time to execute and as a result, figures reported for each kernel's `cycleCountAvg`, `throughputAvg` may vary slightly.
 
 To give a good comparison figure, the highest value of `cycleCountAvg` reported by each kernel in a multi-kernel configuration  will be presented as `cycleCountAvg` in the benchmark tables. Similarly, the lowest value of `throughputAvg`reported by each kernel will be presented as `throughputAvg`.
 
@@ -99,7 +99,7 @@ Following table gives results for the Widgets with a wide variety of supported p
 DDS/Mixer
 ~~~~~~~~~
 
-Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_WIDGETS`.
+Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: :ref:`2_CONFIGURATION_PARAMETERS_DDS_MIXER`.
 
 :download:`dds_mixer_benchmark.csv <../../csv_data_files/L2/dds_mixer_benchmark.csv>`
 

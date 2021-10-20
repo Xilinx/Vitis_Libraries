@@ -11,26 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.2
+# vitis makefile-generator v2.0.4
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<x86sim/aiesim/> DEVICE=<FPGA platform> HOST_ARCH=<aarch64 >"
+	$(ECHO) "  make all TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<x86sim/aiesim/> DEVICE=<FPGA platform> HOST_ARCH=<aarch64 >"
+	$(ECHO) "  make sd_card TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
 	$(ECHO) "      Command to prepare sd_card files."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<x86sim/aiesim/> DEVICE=<FPGA platform> HOST_ARCH=<aarch64 >"
+	$(ECHO) "  make run TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<x86sim/aiesim/> DEVICE=<FPGA platform> HOST_ARCH=<aarch64 >"
+	$(ECHO) "  make xclbin TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -38,10 +38,9 @@ help::
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
 	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
 	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
-	$(ECHO) "       export PERL=<path-to-perl-installation-location >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -59,19 +58,25 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting devault value
 TARGET ?= aiesim
-DEVICE ?= xilinx_vck190_base_202110_1
 HOST_ARCH ?= aarch64
 
-# ###dddd################# Checking if DEVICE in whitelist ############################
+#setting PLATFORM
+ifeq ($(PLATFORM),)
+PLATFORM := $(DEVICE)
+endif
+ifeq ($(PLATFORM),)
+PLATFORM := xilinx_vck190_base_202120_1
+endif
+
+# #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
-
-TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
-TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
-BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
-BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
+TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
+BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
@@ -92,6 +97,8 @@ LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
+CXXFLAGS += $(EXTRA_CXXFLAGS)
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 # aie template
 XILINX_VITIS_AIETOOLS ?=
@@ -182,6 +189,7 @@ AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/include/aie
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/tests/aie/common/inc
 AIE_CXXFLAGS += -I $(CUR_DIR)
 AIE_CXXFLAGS += --dataflow -v --device=$(DEVICE_FILE) $($(TAG)_TARGET_COMPILE_ARGS) --test-iterations=$(NITER_$(TAG)) -workdir=$($(TAG)_WORK_DIR) -Xpreproc="$(TAG_PREPROC_ARGS) -DCOEFF_FILE=$(LOC_COEFF_FILE) -DINPUT_FILE=$(LOC_INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DFIR_LEN=$(FIR_LEN) -DSHIFT=$(SHIFT) -DROUND_MODE=$(ROUND_MODE) -DCASC_LEN=$(CASC_LEN) -DDUAL_IP=$(DUAL_IP) -DUSE_COEFF_RELOAD=$(USE_COEFF_RELOAD) -DSTIM_TYPE=$(COEFF_STIM_TYPE) -DINTERPOLATE_FACTOR=$(INTERPOLATE_FACTOR) -DDECIMATE_FACTOR=$(DECIMATE_FACTOR)  -DNUM_OUTPUTS=$(NUM_OUTPUTS) "
+$(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
 BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)
@@ -211,6 +219,8 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 
 endif
 
+######################### binary container global settings ##########################
+
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER): $(XFLIB_DIR)/L2/tests/aie/fir_interpolate_fract_asym/test.cpp 
 	$(ECHO) "Compiling: libadf.a"
@@ -235,7 +245,7 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(XDEVICE)))
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
 K_IMAGE := $(SYSROOT)/../../uImage
 else
 K_IMAGE := $(SYSROOT)/../../Image
@@ -243,7 +253,7 @@ endif
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> $(RUN_SCRIPT)
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
 ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
@@ -277,21 +287,19 @@ $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-	$(VPP) -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
-
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
+RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
-RUN_DEPS += $(BINARY_CONTAINERS) $(AIE_CONTAINER)  $(EXE_FILE)  $(EMCONFIG)
 endif
-
 run: check_device pre_build $(RUN_DEPS)
 #x86sim
 ifeq ($(TARGET), x86sim)
@@ -315,12 +323,25 @@ ifeq ($(TARGET), aiesim)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
 #hw_emu
-ifeq ($(TARGET), hw_emu)
+ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 	
 else
-	export XCL_EMULATION_MODE=$(TARGET)
+	@echo $(RUN_DEPS)
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
+endif
+endif
+#sw_emu
+ifneq (,$(filter sw_emu, $(TARGET)))
+ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	
+else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1

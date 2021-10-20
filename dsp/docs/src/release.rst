@@ -30,7 +30,7 @@ The below features have been added to the library in this release.
 *  **DDS / Mixer** - new library element
 
 +---------------------------------------+-----------------------------------------------------------------------------+
-| **Function**                          | **Namespace**                                                               |
+| **Function**                          | **Namespace and class name**                                                |
 +=======================================+=============================================================================+
 | DDS / Mixer                           |  xf::dsp::aie::mixer::dds_mixer                                             |
 +---------------------------------------+-----------------------------------------------------------------------------+
@@ -63,7 +63,7 @@ The AI Engine DSP Library contains common parameterizable DSP functions used in 
 The DSPLib contains several variants of Finite Impulse Response (FIR) filters.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
-| **Function**                          | **Namespace**                                                               |
+| **Function**                          | **Namespace and class name**                                                |
 +=======================================+=============================================================================+
 | Single rate, asymmetrical             |  dsplib::fir::sr_asym::fir_sr_asym_graph                                    |
 +---------------------------------------+-----------------------------------------------------------------------------+
@@ -90,7 +90,7 @@ Both FIR length and cascade length can also be configured for all FIR variants.
 The DSPLib contains one FFT/iFFT solution. This is a single channel, single kernel decimation in time, (DIT), implementation with configurable point size, complex data types, cascade length and FFT/iFFT function.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
-| **Function**                          | **Namespace**                                                               |
+| **Function**                          | **Namespace and class name**                                                |
 +=======================================+=============================================================================+
 | Single Channel FFT/iFFT               |  dsplib::fft::fft_ifft_dit_1ch_graph                                        |
 +---------------------------------------+-----------------------------------------------------------------------------+
@@ -102,7 +102,7 @@ The DSPLib contains one Matrix Multiply/GEMM (GEneral Matrix Multiply) solution.
 
 
 +---------------------------------------+-----------------------------------------------------------------------------+
-| **Function**                          | **Namespace**                                                               |
+| **Function**                          | **Namespace and class name**                                                |
 +=======================================+=============================================================================+
 | Matrix Mult / GeMM                    |  dsplib::blas::matrix_mult::matrix_mult_graph                               |
 +---------------------------------------+-----------------------------------------------------------------------------+
@@ -112,7 +112,7 @@ The DSPLib contains one Matrix Multiply/GEMM (GEneral Matrix Multiply) solution.
 These widgets support converting between window and streams on the input to the DSPLib function and between streams to windows on the output of the DSPLib function where desired and additional widget for converting between real and complex data-types.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
-| **Function**                          | **Namespace**                                                               |
+| **Function**                          | **Namespace and class name**                                                |
 +=======================================+=============================================================================+
 | Stream to Window / Window to Stream   |  dsplib::widget::api_cast::widget_api_cast_graph                            |
 +---------------------------------------+-----------------------------------------------------------------------------+
