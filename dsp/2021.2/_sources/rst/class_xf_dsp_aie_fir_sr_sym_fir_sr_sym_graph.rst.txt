@@ -139,7 +139,7 @@ These are the templates to configure the Symmetric Single Rate FIR class.
           
           Note: due to the data buffering requirement imposed through symmetry, input interface is always set to window.
           
-          Auto-infeffed DMA stream-to-window conversion is applied when FIR is connected with an input stream. This is the class for the Symmetric Single Rate FIR graph
+          Auto-infeffed DMA stream-to-window conversion is applied when FIR is connected with an input stream.
 
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__sym_1_1fir__sr__sym__graph_1a8ccb404cdd7ad54c83e495e3b536cb34:
 .. _cid-xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph::create_connections:

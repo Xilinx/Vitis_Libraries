@@ -450,21 +450,21 @@
 <p>The QoR are reflected using the below metrics:</p>
 <ul class="simple">
 <li>cycleCountAvg         - average cycle count that takes to execute kernel function (not including kernel/window buffer overheads).</li>
-<li>throughputAvg         - input throughput calculated based on <cite>cycleCountAvg</cite>, taking into account input window size.</li>
+<li>throughputAvg         - input throughput calculated based on <cite>cycleCountAvg</cite>, taking into account input window size (not including kernel/window buffer overheads).</li>
 <li>initiationInterval    - time that must pass between two consecutive iterations execution starts of a given function, including overheads i.e., time between a function start and its&nbsp;previous start.</li>
-<li>throughpuInitIntAvg   - input throughput calculated based on <cite>initiationInterval</cite>, taking into account input window size.</li>
+<li>throughputInitIntAvg  - input throughput calculated based on <cite>initiationInterval</cite>, taking into account input window size.</li>
 <li>NUM_BANKS             - number of memory banks used by the design</li>
 <li>NUM_AIE               - number of AIE tiles used by the design</li>
 <li>DATA_MEMORY           - total data memory in Bytes used by the design</li>
 <li>PROGRAM_MEMORY        - program memory in Bytes used by each kernel</li>
 </ul>
-<p>In addition, for multi-kernel designs, each kernel may take different amount of time to execute and as a result, figures reported for each kernels <cite>cycleCountAvg</cite>, <cite>throughputAvg</cite> may vary slightly.</p>
+<p>In addition, for multi-kernel designs, each kernel may take a different amount of time to execute and as a result, figures reported for each kernel’s <cite>cycleCountAvg</cite>, <cite>throughputAvg</cite> may vary slightly.</p>
 <p>To give a good comparison figure, the highest value of <cite>cycleCountAvg</cite> reported by each kernel in a multi-kernel configuration  will be presented as <cite>cycleCountAvg</cite> in the benchmark tables. Similarly, the lowest value of <cite>throughputAvg`reported by each kernel will be presented as `throughputAvg</cite>.</p>
 <p>Furthermore, PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space deliminated).</p>
 <div class="section" id="filters">
 <h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
 <p>Following table gives results for FIR filter with a wide variety of supported parameters, which are defined in: <a class="reference internal" href="compiling-and-simulating.html#configuration-parameters-filters"><span class="std std-ref">L2 FIR configuration parameters</span></a></p>
-<p><a class="reference download internal" download="" href="../../_downloads/3fbb4fb31779016de3f144e56bd885cf/fir_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">fir_benchmark.csv</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/c62d704fb16c3859fc656a53a764b46a/fir_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">fir_benchmark.csv</span></code></a></p>
 <table border="1" class="docutils align-center" id="id1">
 <caption><span class="caption-text">FIR benchmark</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -531,21 +531,21 @@
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
-<td>21</td>
+<td>30</td>
 <td>1</td>
 <td>3</td>
 <td>384</td>
 <td>1</td>
 <td>0</td>
 <td>0</td>
-<td>1511</td>
-<td>254 MSa/s</td>
-<td>1577</td>
-<td>243 MSa/s</td>
+<td>2162</td>
+<td>177 MSa/s</td>
+<td>2229</td>
+<td>172 MSa/s</td>
 <td>5</td>
 <td>1</td>
-<td>11940</td>
-<td>2668</td>
+<td>12476</td>
+<td>2902</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint32</td>
@@ -1329,21 +1329,21 @@
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
-<td>30</td>
+<td>21</td>
 <td>1</td>
 <td>3</td>
 <td>384</td>
 <td>1</td>
 <td>0</td>
 <td>0</td>
-<td>2162</td>
-<td>177 MSa/s</td>
-<td>2229</td>
-<td>172 MSa/s</td>
+<td>1511</td>
+<td>254 MSa/s</td>
+<td>1577</td>
+<td>243 MSa/s</td>
 <td>5</td>
 <td>1</td>
-<td>12476</td>
-<td>2902</td>
+<td>11940</td>
+<td>2668</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
@@ -1367,6 +1367,25 @@
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
+<td>144</td>
+<td>1</td>
+<td>2</td>
+<td>432</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2152</td>
+<td>200 MSa/s</td>
+<td>2229</td>
+<td>193 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>10058</td>
+<td>3232</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_asym</td>
+<td>cint16</td>
+<td>int16</td>
 <td>140</td>
 <td>1</td>
 <td>7</td>
@@ -1383,7 +1402,7 @@
 <td>10098</td>
 <td>3218</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>140</td>
@@ -1402,7 +1421,7 @@
 <td>9730</td>
 <td>3276</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>12</td>
@@ -1421,7 +1440,7 @@
 <td>6442</td>
 <td>1876</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>12</td>
@@ -1440,7 +1459,7 @@
 <td>6694</td>
 <td>2966</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>12</td>
@@ -1459,7 +1478,7 @@
 <td>6674</td>
 <td>2198</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>12</td>
@@ -1478,7 +1497,7 @@
 <td>7162</td>
 <td>1894</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>12</td>
@@ -1497,7 +1516,7 @@
 <td>6674</td>
 <td>2198</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>99</td>
@@ -1515,25 +1534,6 @@
 <td>1</td>
 <td>9646</td>
 <td>3698</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>144</td>
-<td>1</td>
-<td>2</td>
-<td>432</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2152</td>
-<td>200 MSa/s</td>
-<td>2229</td>
-<td>193 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>10058</td>
-<td>3232</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
@@ -1557,6 +1557,25 @@
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>cint16</td>
+<td>30</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>644</td>
+<td>596 MSa/s</td>
+<td>703</td>
+<td>546 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>7378</td>
+<td>2398</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_asym</td>
+<td>cint16</td>
+<td>cint16</td>
 <td>21</td>
 <td>1</td>
 <td>3</td>
@@ -1573,7 +1592,7 @@
 <td>7110</td>
 <td>1966</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cfloat</td>
 <td>float</td>
 <td>99</td>
@@ -1592,7 +1611,7 @@
 <td>14781</td>
 <td>10934</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cfloat</td>
 <td>float</td>
 <td>9</td>
@@ -1611,7 +1630,7 @@
 <td>11237</td>
 <td>2512</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cfloat</td>
 <td>float</td>
 <td>30</td>
@@ -1630,7 +1649,7 @@
 <td>12001</td>
 <td>4796</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cfloat</td>
 <td>float</td>
 <td>21</td>
@@ -1649,7 +1668,7 @@
 <td>11669</td>
 <td>3640</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>99</td>
@@ -1667,25 +1686,6 @@
 <td>1</td>
 <td>17121</td>
 <td>12474</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>9</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>4591</td>
-<td>83 MSa/s</td>
-<td>4658</td>
-<td>82 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11441</td>
-<td>2776</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
@@ -1705,44 +1705,6 @@
 <td>1</td>
 <td>6656</td>
 <td>2194</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>30</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>644</td>
-<td>596 MSa/s</td>
-<td>703</td>
-<td>546 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>7378</td>
-<td>2398</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>144</td>
-<td>1</td>
-<td>4</td>
-<td>432</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1132</td>
-<td>381 MSa/s</td>
-<td>1210</td>
-<td>357 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>9770</td>
-<td>3300</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cfloat</td>
@@ -1766,21 +1728,21 @@
 <tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
-<td>15</td>
+<td>144</td>
 <td>1</td>
-<td>3</td>
-<td>384</td>
+<td>4</td>
+<td>432</td>
 <td>1</td>
 <td>0</td>
 <td>0</td>
-<td>183</td>
-<td>2098 MSa/s</td>
-<td>390</td>
-<td>984 MSa/s</td>
+<td>1132</td>
+<td>381 MSa/s</td>
+<td>1210</td>
+<td>357 MSa/s</td>
 <td>5</td>
 <td>1</td>
-<td>6692</td>
-<td>2362</td>
+<td>9770</td>
+<td>3300</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
@@ -1802,6 +1764,63 @@
 <td>3106</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_asym</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>9</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>4591</td>
+<td>83 MSa/s</td>
+<td>4658</td>
+<td>82 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>11441</td>
+<td>2776</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_asym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>15</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>249</td>
+<td>1542 MSa/s</td>
+<td>392</td>
+<td>979 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>6728</td>
+<td>3298</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_asym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>15</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>183</td>
+<td>2098 MSa/s</td>
+<td>390</td>
+<td>984 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6692</td>
+<td>2362</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>63</td>
@@ -1820,7 +1839,7 @@
 <td>7784</td>
 <td>2776</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -1839,7 +1858,7 @@
 <td>7482</td>
 <td>2732</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -1858,7 +1877,7 @@
 <td>6850</td>
 <td>2468</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -1877,7 +1896,7 @@
 <td>8778</td>
 <td>2468</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -1896,7 +1915,7 @@
 <td>7634</td>
 <td>2424</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>33</td>
@@ -1915,7 +1934,7 @@
 <td>7184</td>
 <td>2200</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>28</td>
@@ -1934,7 +1953,7 @@
 <td>7218</td>
 <td>2176</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>27</td>
@@ -1953,7 +1972,7 @@
 <td>7040</td>
 <td>2284</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>63</td>
@@ -1972,7 +1991,7 @@
 <td>8156</td>
 <td>2808</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
+<tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -1991,7 +2010,7 @@
 <td>6538</td>
 <td>1814</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_asym</td>
+<tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>237</td>
@@ -2009,6 +2028,25 @@
 <td>1</td>
 <td>15256</td>
 <td>4152</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_asym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>237</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>2361</td>
+<td>162 MSa/s</td>
+<td>2483</td>
+<td>154 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>11636</td>
+<td>4648</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_asym</td>
 <td>cint16</td>
@@ -2108,25 +2146,6 @@
 <tr class="row-even"><td>fir_decimate_asym</td>
 <td>cint16</td>
 <td>int16</td>
-<td>15</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>249</td>
-<td>1542 MSa/s</td>
-<td>392</td>
-<td>979 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>6728</td>
-<td>3298</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_asym</td>
-<td>cint16</td>
-<td>int16</td>
 <td>27</td>
 <td>1</td>
 <td>3</td>
@@ -2143,7 +2162,7 @@
 <td>6988</td>
 <td>2000</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>239</td>
@@ -2162,7 +2181,7 @@
 <td>15708</td>
 <td>4376</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>7</td>
@@ -2181,7 +2200,7 @@
 <td>8700</td>
 <td>2276</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint32</td>
 <td>int16</td>
 <td>239</td>
@@ -2200,7 +2219,7 @@
 <td>13122</td>
 <td>7258</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint32</td>
 <td>int16</td>
 <td>11</td>
@@ -2219,7 +2238,7 @@
 <td>8698</td>
 <td>2494</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint32</td>
 <td>int16</td>
 <td>15</td>
@@ -2238,691 +2257,7 @@
 <td>8770</td>
 <td>2756</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>128</td>
-<td>3</td>
-<td>0</td>
-<td>0</td>
-<td>221</td>
-<td>579 MSa/s</td>
-<td>284</td>
-<td>450 MSa/s</td>
-<td>9</td>
-<td>3</td>
-<td>12126</td>
-<td>2346 1952 2076</td>
-</tr>
 <tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint32</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2579</td>
-<td>99 MSa/s</td>
-<td>2671</td>
-<td>95 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11484</td>
-<td>4194</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint32</td>
-<td>15</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>549</td>
-<td>466 MSa/s</td>
-<td>613</td>
-<td>417 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8988</td>
-<td>1940</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>15</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>517</td>
-<td>495 MSa/s</td>
-<td>580</td>
-<td>441 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8832</td>
-<td>1784</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2183</td>
-<td>117 MSa/s</td>
-<td>2275</td>
-<td>112 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>10800</td>
-<td>3330</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>166</td>
-<td>1542 MSa/s</td>
-<td>518</td>
-<td>494 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8640</td>
-<td>2078</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>239</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>5046</td>
-<td>50 MSa/s</td>
-<td>5165</td>
-<td>49 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>13984</td>
-<td>4400</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>11</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>453</td>
-<td>565 MSa/s</td>
-<td>520</td>
-<td>492 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8720</td>
-<td>1896</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>614</td>
-<td>416 MSa/s</td>
-<td>722</td>
-<td>354 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>6614</td>
-<td>3642</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>552</td>
-<td>463 MSa/s</td>
-<td>631</td>
-<td>405 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6570</td>
-<td>2374</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>128</td>
-<td>5</td>
-<td>0</td>
-<td>0</td>
-<td>194</td>
-<td>659 MSa/s</td>
-<td>259</td>
-<td>494 MSa/s</td>
-<td>13</td>
-<td>5</td>
-<td>19250</td>
-<td>2162 1772 1846 1846 2104</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1586</td>
-<td>161 MSa/s</td>
-<td>1650</td>
-<td>155 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8626</td>
-<td>2474</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>cint32</td>
-<td>11</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>453</td>
-<td>565 MSa/s</td>
-<td>521</td>
-<td>491 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8796</td>
-<td>1928</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>8745</td>
-<td>29 MSa/s</td>
-<td>8846</td>
-<td>28 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>10410</td>
-<td>4020</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>5336</td>
-<td>47 MSa/s</td>
-<td>5413</td>
-<td>47 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>7216</td>
-<td>4926</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>15</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>517</td>
-<td>495 MSa/s</td>
-<td>580</td>
-<td>441 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8832</td>
-<td>1784</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>128</td>
-<td>2</td>
-<td>0</td>
-<td>0</td>
-<td>229</td>
-<td>558 MSa/s</td>
-<td>290</td>
-<td>441 MSa/s</td>
-<td>7</td>
-<td>2</td>
-<td>8564</td>
-<td>2444 2182</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1161</td>
-<td>220 MSa/s</td>
-<td>1239</td>
-<td>206 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6960</td>
-<td>2352</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>117</td>
-<td>2188 MSa/s</td>
-<td>261</td>
-<td>980 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5504</td>
-<td>2182</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>27</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>484</td>
-<td>528 MSa/s</td>
-<td>544</td>
-<td>470 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5808</td>
-<td>1792</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>239</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1422</td>
-<td>180 MSa/s</td>
-<td>1511</td>
-<td>169 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8992</td>
-<td>3490</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>23</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>388</td>
-<td>659 MSa/s</td>
-<td>447</td>
-<td>572 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5728</td>
-<td>1776</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>3771</td>
-<td>67 MSa/s</td>
-<td>3856</td>
-<td>66 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6570</td>
-<td>3672</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>85</td>
-<td>3011 MSa/s</td>
-<td>261</td>
-<td>980 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5490</td>
-<td>2082</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>11</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>453</td>
-<td>565 MSa/s</td>
-<td>521</td>
-<td>491 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8720</td>
-<td>1808</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>239</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>8316</td>
-<td>30 MSa/s</td>
-<td>8410</td>
-<td>30 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8130</td>
-<td>6306</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>15</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>102</td>
-<td>2509 MSa/s</td>
-<td>261</td>
-<td>980 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5570</td>
-<td>2058</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>386</td>
-<td>663 MSa/s</td>
-<td>445</td>
-<td>575 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5760</td>
-<td>2540</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>239</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>12290</td>
-<td>20 MSa/s</td>
-<td>12378</td>
-<td>20 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>9248</td>
-<td>8652</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>19</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1282</td>
-<td>199 MSa/s</td>
-<td>1344</td>
-<td>190 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5968</td>
-<td>2864</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>15</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>846</td>
-<td>302 MSa/s</td>
-<td>906</td>
-<td>282 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5888</td>
-<td>2428</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>99</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2183</td>
-<td>117 MSa/s</td>
-<td>2275</td>
-<td>112 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>10800</td>
-<td>3330</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>166</td>
-<td>1542 MSa/s</td>
-<td>518</td>
-<td>494 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8640</td>
-<td>2006</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>239</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>5046</td>
-<td>50 MSa/s</td>
-<td>5165</td>
-<td>49 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>13984</td>
-<td>4400</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>19</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>986</td>
-<td>259 MSa/s</td>
-<td>1045</td>
-<td>244 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5642</td>
-<td>2564</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>70</td>
-<td>3657 MSa/s</td>
-<td>261</td>
-<td>980 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5490</td>
-<td>1910</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>99</td>
@@ -2941,7 +2276,653 @@
 <td>15688</td>
 <td>2162 1772 1772 2048</td>
 </tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2579</td>
+<td>99 MSa/s</td>
+<td>2671</td>
+<td>95 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>11484</td>
+<td>4194</td>
+</tr>
 <tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>15</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>549</td>
+<td>466 MSa/s</td>
+<td>613</td>
+<td>417 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8988</td>
+<td>1940</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>15</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>580</td>
+<td>441 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8832</td>
+<td>1784</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2183</td>
+<td>117 MSa/s</td>
+<td>2275</td>
+<td>112 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>10800</td>
+<td>3330</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>166</td>
+<td>1542 MSa/s</td>
+<td>518</td>
+<td>494 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8640</td>
+<td>2078</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>239</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>5046</td>
+<td>50 MSa/s</td>
+<td>5165</td>
+<td>49 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>13984</td>
+<td>4400</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>11</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>453</td>
+<td>565 MSa/s</td>
+<td>520</td>
+<td>492 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8720</td>
+<td>1896</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>614</td>
+<td>416 MSa/s</td>
+<td>722</td>
+<td>354 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>6614</td>
+<td>3642</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>552</td>
+<td>463 MSa/s</td>
+<td>631</td>
+<td>405 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6570</td>
+<td>2374</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>128</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>194</td>
+<td>659 MSa/s</td>
+<td>259</td>
+<td>494 MSa/s</td>
+<td>13</td>
+<td>5</td>
+<td>19250</td>
+<td>2162 1772 1846 1846 2104</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1586</td>
+<td>161 MSa/s</td>
+<td>1650</td>
+<td>155 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8626</td>
+<td>2474</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>11</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>453</td>
+<td>565 MSa/s</td>
+<td>521</td>
+<td>491 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8796</td>
+<td>1928</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>8745</td>
+<td>29 MSa/s</td>
+<td>8846</td>
+<td>28 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>10410</td>
+<td>4020</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>5336</td>
+<td>47 MSa/s</td>
+<td>5413</td>
+<td>47 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>7216</td>
+<td>4926</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>15</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>580</td>
+<td>441 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8832</td>
+<td>1784</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>128</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>229</td>
+<td>558 MSa/s</td>
+<td>290</td>
+<td>441 MSa/s</td>
+<td>7</td>
+<td>2</td>
+<td>8564</td>
+<td>2444 2182</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1161</td>
+<td>220 MSa/s</td>
+<td>1239</td>
+<td>206 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6960</td>
+<td>2352</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>117</td>
+<td>2188 MSa/s</td>
+<td>261</td>
+<td>980 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5504</td>
+<td>2182</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>27</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>484</td>
+<td>528 MSa/s</td>
+<td>544</td>
+<td>470 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5808</td>
+<td>1792</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>239</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1422</td>
+<td>180 MSa/s</td>
+<td>1511</td>
+<td>169 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8992</td>
+<td>3490</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>23</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>388</td>
+<td>659 MSa/s</td>
+<td>447</td>
+<td>572 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5728</td>
+<td>1776</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>3771</td>
+<td>67 MSa/s</td>
+<td>3856</td>
+<td>66 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6570</td>
+<td>3672</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>85</td>
+<td>3011 MSa/s</td>
+<td>261</td>
+<td>980 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5490</td>
+<td>2082</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>11</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>453</td>
+<td>565 MSa/s</td>
+<td>521</td>
+<td>491 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8720</td>
+<td>1808</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>239</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>8316</td>
+<td>30 MSa/s</td>
+<td>8410</td>
+<td>30 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8130</td>
+<td>6306</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>15</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>102</td>
+<td>2509 MSa/s</td>
+<td>261</td>
+<td>980 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5570</td>
+<td>2058</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>386</td>
+<td>663 MSa/s</td>
+<td>445</td>
+<td>575 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5760</td>
+<td>2540</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>239</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>12290</td>
+<td>20 MSa/s</td>
+<td>12378</td>
+<td>20 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>9248</td>
+<td>8652</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>19</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1282</td>
+<td>199 MSa/s</td>
+<td>1344</td>
+<td>190 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5968</td>
+<td>2864</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>15</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>846</td>
+<td>302 MSa/s</td>
+<td>906</td>
+<td>282 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5888</td>
+<td>2428</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2183</td>
+<td>117 MSa/s</td>
+<td>2275</td>
+<td>112 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>10800</td>
+<td>3330</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>166</td>
+<td>1542 MSa/s</td>
+<td>518</td>
+<td>494 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8640</td>
+<td>2006</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>239</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>5046</td>
+<td>50 MSa/s</td>
+<td>5165</td>
+<td>49 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>13984</td>
+<td>4400</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>19</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>986</td>
+<td>259 MSa/s</td>
+<td>1045</td>
+<td>244 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5642</td>
+<td>2564</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -2960,7 +2941,45 @@
 <td>5490</td>
 <td>1910</td>
 </tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>2</td>
+<td>128</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>222</td>
+<td>576 MSa/s</td>
+<td>285</td>
+<td>449 MSa/s</td>
+<td>9</td>
+<td>3</td>
+<td>12126</td>
+<td>2346 1952 2076</td>
+</tr>
 <tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>70</td>
+<td>3657 MSa/s</td>
+<td>261</td>
+<td>980 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5490</td>
+<td>1910</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>15</td>
@@ -2979,7 +2998,7 @@
 <td>5570</td>
 <td>1940</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>11</td>
@@ -2998,7 +3017,7 @@
 <td>5582</td>
 <td>2406</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>11</td>
@@ -3017,7 +3036,7 @@
 <td>5562</td>
 <td>1904</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>11</td>
@@ -3036,7 +3055,7 @@
 <td>5562</td>
 <td>1904</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>99</td>
@@ -3055,7 +3074,7 @@
 <td>6960</td>
 <td>2336</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>7</td>
@@ -3074,7 +3093,7 @@
 <td>5504</td>
 <td>2264</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>27</td>
@@ -3093,7 +3112,7 @@
 <td>5808</td>
 <td>1792</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>239</td>
@@ -3112,7 +3131,7 @@
 <td>8992</td>
 <td>3486</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>15</td>
@@ -3131,7 +3150,7 @@
 <td>5570</td>
 <td>1924</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>23</td>
@@ -3150,7 +3169,7 @@
 <td>5728</td>
 <td>1776</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>float</td>
 <td>7</td>
@@ -3169,7 +3188,7 @@
 <td>8896</td>
 <td>2316</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>float</td>
 <td>15</td>
@@ -3188,7 +3207,7 @@
 <td>9088</td>
 <td>2880</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>float</td>
 <td>11</td>
@@ -3207,7 +3226,7 @@
 <td>8976</td>
 <td>2384</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>99</td>
@@ -3226,7 +3245,7 @@
 <td>11740</td>
 <td>6394</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>7</td>
@@ -3245,7 +3264,7 @@
 <td>8956</td>
 <td>2328</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>15</td>
@@ -3264,7 +3283,7 @@
 <td>9244</td>
 <td>2376</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>11</td>
@@ -3283,7 +3302,7 @@
 <td>9052</td>
 <td>2536</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3302,7 +3321,7 @@
 <td>5490</td>
 <td>1910</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>float</td>
 <td>99</td>
@@ -3321,7 +3340,7 @@
 <td>11056</td>
 <td>5614</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>15</td>
@@ -3340,7 +3359,7 @@
 <td>5598</td>
 <td>2444</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cfloat</td>
 <td>float</td>
 <td>239</td>
@@ -3359,7 +3378,7 @@
 <td>14240</td>
 <td>10108</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>19</td>
@@ -3378,7 +3397,7 @@
 <td>5670</td>
 <td>2540</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>19</td>
@@ -3397,7 +3416,7 @@
 <td>5642</td>
 <td>1956</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3416,25 +3435,6 @@
 <td>5490</td>
 <td>1910</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>7</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>70</td>
-<td>3657 MSa/s</td>
-<td>261</td>
-<td>980 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5490</td>
-<td>1894</td>
-</tr>
 <tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
@@ -3455,6 +3455,25 @@
 <td>1894</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>7</td>
+<td>1</td>
+<td>2</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>70</td>
+<td>3657 MSa/s</td>
+<td>261</td>
+<td>980 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>5490</td>
+<td>1894</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3473,7 +3492,7 @@
 <td>3186</td>
 <td>1738</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3492,7 +3511,7 @@
 <td>8562</td>
 <td>1878</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3511,7 +3530,7 @@
 <td>5510</td>
 <td>2294</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3530,7 +3549,7 @@
 <td>5490</td>
 <td>1894</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3549,7 +3568,7 @@
 <td>3954</td>
 <td>1848</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3568,7 +3587,7 @@
 <td>5490</td>
 <td>1894</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3587,7 +3606,7 @@
 <td>5490</td>
 <td>1926</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>55</td>
@@ -3606,7 +3625,7 @@
 <td>8498</td>
 <td>2462</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>27</td>
@@ -3625,7 +3644,7 @@
 <td>5758</td>
 <td>2570</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>27</td>
@@ -3644,7 +3663,7 @@
 <td>5722</td>
 <td>1902</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>27</td>
@@ -3663,7 +3682,7 @@
 <td>8026</td>
 <td>2206</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>239</td>
@@ -3682,7 +3701,7 @@
 <td>8254</td>
 <td>4116</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>239</td>
@@ -3701,7 +3720,7 @@
 <td>8130</td>
 <td>3622</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_hb</td>
+<tr class="row-odd"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -3720,7 +3739,7 @@
 <td>14706</td>
 <td>1878</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_hb</td>
+<tr class="row-even"><td>fir_decimate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>23</td>
@@ -3738,6 +3757,25 @@
 <td>1</td>
 <td>5650</td>
 <td>1900</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>334</td>
+<td>1149 MSa/s</td>
+<td>523</td>
+<td>734 MSa/s</td>
+<td>13</td>
+<td>5</td>
+<td>26764</td>
+<td>2528 2232 2084 2090 2386</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -3818,25 +3856,6 @@
 <tr class="row-even"><td>fir_decimate_sym</td>
 <td>cint16</td>
 <td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>720</td>
-<td>533 MSa/s</td>
-<td>792</td>
-<td>484 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>7760</td>
-<td>3634</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
 <td>9</td>
 <td>1</td>
 <td>3</td>
@@ -3852,101 +3871,6 @@
 <td>1</td>
 <td>6555</td>
 <td>2212</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>9</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>117</td>
-<td>3282 MSa/s</td>
-<td>388</td>
-<td>989 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6555</td>
-<td>2196</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>9</td>
-<td>1</td>
-<td>3</td>
-<td>192</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>77</td>
-<td>2493 MSa/s</td>
-<td>196</td>
-<td>979 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>4507</td>
-<td>2196</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>9</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>117</td>
-<td>3282 MSa/s</td>
-<td>388</td>
-<td>989 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6555</td>
-<td>2196</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>99</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>5</td>
-<td>0</td>
-<td>0</td>
-<td>334</td>
-<td>1149 MSa/s</td>
-<td>523</td>
-<td>734 MSa/s</td>
-<td>13</td>
-<td>5</td>
-<td>26764</td>
-<td>2528 2232 2084 2090 2386</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>9</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>117</td>
-<td>3282 MSa/s</td>
-<td>388</td>
-<td>989 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6555</td>
-<td>2196</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -3968,289 +3892,23 @@
 <td>2544</td>
 </tr>
 <tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint32</td>
 <td>cint16</td>
-<td>24</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>908</td>
-<td>422 MSa/s</td>
-<td>978</td>
-<td>392 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>12139</td>
-<td>2288</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>int32</td>
-<td>8</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>-384000 MSa/s</td>
-<td>775</td>
-<td>495 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11692</td>
-<td>1606</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>8</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>-384000 MSa/s</td>
-<td>775</td>
-<td>495 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11692</td>
-<td>1606</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>96</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2641</td>
-<td>145 MSa/s</td>
-<td>2725</td>
-<td>140 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>13963</td>
-<td>3562</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>cint32</td>
-<td>21</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1137</td>
-<td>337 MSa/s</td>
-<td>1203</td>
-<td>319 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11284</td>
-<td>2662</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>cint32</td>
-<td>30</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1248</td>
-<td>307 MSa/s</td>
-<td>1316</td>
-<td>291 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11580</td>
-<td>2878</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>cint32</td>
+<td>int16</td>
 <td>9</td>
 <td>1</td>
 <td>3</td>
-<td>384</td>
+<td>192</td>
 <td>1</td>
 <td>0</td>
 <td>0</td>
-<td>497</td>
-<td>772 MSa/s</td>
-<td>776</td>
-<td>494 MSa/s</td>
+<td>77</td>
+<td>2493 MSa/s</td>
+<td>196</td>
+<td>979 MSa/s</td>
 <td>5</td>
 <td>1</td>
-<td>10900</td>
-<td>2070</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>cint32</td>
-<td>99</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>4349</td>
-<td>88 MSa/s</td>
-<td>4433</td>
-<td>86 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14084</td>
-<td>3954</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>int32</td>
-<td>24</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>908</td>
-<td>422 MSa/s</td>
-<td>978</td>
-<td>392 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>12139</td>
-<td>2276</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>int32</td>
-<td>30</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1624</td>
-<td>236 MSa/s</td>
-<td>1696</td>
-<td>226 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>12291</td>
-<td>2412</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint32</td>
-<td>int32</td>
-<td>96</td>
-<td>1</td>
-<td>2</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2641</td>
-<td>145 MSa/s</td>
-<td>2725</td>
-<td>140 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>13963</td>
-<td>3562</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>int32</td>
-<td>int32</td>
-<td>21</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>551</td>
-<td>696 MSa/s</td>
-<td>610</td>
-<td>629 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6816</td>
-<td>2138</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>int32</td>
-<td>int32</td>
-<td>30</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>744</td>
-<td>516 MSa/s</td>
-<td>804</td>
-<td>477 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6916</td>
-<td>2294</td>
-</tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
-<td>int32</td>
-<td>int32</td>
-<td>9</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>147</td>
-<td>2612 MSa/s</td>
-<td>389</td>
-<td>987 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6607</td>
-<td>2464</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>int32</td>
-<td>int32</td>
-<td>99</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1140</td>
-<td>336 MSa/s</td>
-<td>1212</td>
-<td>316 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8248</td>
-<td>3048</td>
+<td>4507</td>
+<td>2196</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -4274,6 +3932,63 @@
 <tr class="row-even"><td>fir_decimate_sym</td>
 <td>cint32</td>
 <td>cint16</td>
+<td>24</td>
+<td>1</td>
+<td>2</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>908</td>
+<td>422 MSa/s</td>
+<td>978</td>
+<td>392 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>12139</td>
+<td>2288</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>9</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>117</td>
+<td>3282 MSa/s</td>
+<td>388</td>
+<td>989 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6555</td>
+<td>2196</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>99</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>720</td>
+<td>533 MSa/s</td>
+<td>792</td>
+<td>484 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>7760</td>
+<td>3634</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>cint16</td>
 <td>30</td>
 <td>1</td>
 <td>2</td>
@@ -4289,6 +4004,253 @@
 <td>1</td>
 <td>12291</td>
 <td>2424</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>96</td>
+<td>1</td>
+<td>2</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2641</td>
+<td>145 MSa/s</td>
+<td>2725</td>
+<td>140 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>13963</td>
+<td>3562</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>21</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1137</td>
+<td>337 MSa/s</td>
+<td>1203</td>
+<td>319 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>11284</td>
+<td>2662</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>30</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1248</td>
+<td>307 MSa/s</td>
+<td>1316</td>
+<td>291 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>11580</td>
+<td>2878</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>9</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>497</td>
+<td>772 MSa/s</td>
+<td>776</td>
+<td>494 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>10900</td>
+<td>2070</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>cint32</td>
+<td>99</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>4349</td>
+<td>88 MSa/s</td>
+<td>4433</td>
+<td>86 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14084</td>
+<td>3954</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>int32</td>
+<td>24</td>
+<td>1</td>
+<td>2</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>908</td>
+<td>422 MSa/s</td>
+<td>978</td>
+<td>392 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>12139</td>
+<td>2276</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>int32</td>
+<td>30</td>
+<td>1</td>
+<td>2</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1624</td>
+<td>236 MSa/s</td>
+<td>1696</td>
+<td>226 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>12291</td>
+<td>2412</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>cint32</td>
+<td>int32</td>
+<td>96</td>
+<td>1</td>
+<td>2</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2641</td>
+<td>145 MSa/s</td>
+<td>2725</td>
+<td>140 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>13963</td>
+<td>3562</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>int32</td>
+<td>int32</td>
+<td>21</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>551</td>
+<td>696 MSa/s</td>
+<td>610</td>
+<td>629 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6816</td>
+<td>2138</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>int32</td>
+<td>int32</td>
+<td>30</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>744</td>
+<td>516 MSa/s</td>
+<td>804</td>
+<td>477 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6916</td>
+<td>2294</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>int32</td>
+<td>int32</td>
+<td>9</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>147</td>
+<td>2612 MSa/s</td>
+<td>389</td>
+<td>987 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6607</td>
+<td>2464</td>
+</tr>
+<tr class="row-odd"><td>fir_decimate_sym</td>
+<td>int32</td>
+<td>int32</td>
+<td>99</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1140</td>
+<td>336 MSa/s</td>
+<td>1212</td>
+<td>316 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8248</td>
+<td>3048</td>
+</tr>
+<tr class="row-even"><td>fir_decimate_sym</td>
+<td>cint16</td>
+<td>int16</td>
+<td>9</td>
+<td>1</td>
+<td>3</td>
+<td>384</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>117</td>
+<td>3282 MSa/s</td>
+<td>388</td>
+<td>989 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6555</td>
+<td>2196</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -4314,19 +4276,19 @@
 <td>int16</td>
 <td>60</td>
 <td>1</td>
-<td>3</td>
+<td>2</td>
 <td>384</td>
 <td>1</td>
-<td>0</td>
-<td>0</td>
-<td>491</td>
-<td>782 MSa/s</td>
-<td>557</td>
-<td>689 MSa/s</td>
-<td>5</td>
 <td>1</td>
-<td>7170</td>
-<td>2728</td>
+<td>0</td>
+<td>667</td>
+<td>575 MSa/s</td>
+<td>779</td>
+<td>492 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>11266</td>
+<td>3084</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -4527,25 +4489,6 @@
 <td>384</td>
 <td>1</td>
 <td>0</td>
-<td>0</td>
-<td>0</td>
-<td>-384000 MSa/s</td>
-<td>389</td>
-<td>987 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6567</td>
-<td>1706</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>15</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
 <td>1</td>
 <td>289</td>
 <td>1328 MSa/s</td>
@@ -4556,7 +4499,7 @@
 <td>6603</td>
 <td>2220</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
+<tr class="row-even"><td>fir_decimate_sym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>16</td>
@@ -4574,25 +4517,6 @@
 <td>1</td>
 <td>7081</td>
 <td>2118</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
-<td>18</td>
-<td>1</td>
-<td>3</td>
-<td>384</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>-384000 MSa/s</td>
-<td>389</td>
-<td>987 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>6670</td>
-<td>1746</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -4694,19 +4618,19 @@
 <td>int16</td>
 <td>60</td>
 <td>1</td>
-<td>2</td>
+<td>3</td>
 <td>384</td>
 <td>1</td>
-<td>1</td>
 <td>0</td>
-<td>667</td>
-<td>575 MSa/s</td>
-<td>779</td>
-<td>492 MSa/s</td>
-<td>7</td>
+<td>0</td>
+<td>491</td>
+<td>782 MSa/s</td>
+<td>557</td>
+<td>689 MSa/s</td>
+<td>5</td>
 <td>1</td>
-<td>11266</td>
-<td>3084</td>
+<td>7170</td>
+<td>2728</td>
 </tr>
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
@@ -4787,25 +4711,6 @@
 <tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
 <td>int16</td>
-<td>24</td>
-<td>1</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>-256000 MSa/s</td>
-<td>278</td>
-<td>920 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>5658</td>
-<td>1778</td>
-</tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
-<td>cint16</td>
-<td>int16</td>
 <td>240</td>
 <td>1</td>
 <td>2</td>
@@ -4822,7 +4727,7 @@
 <td>8490</td>
 <td>3362</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
+<tr class="row-even"><td>fir_decimate_sym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>237</td>
@@ -4841,7 +4746,7 @@
 <td>13604</td>
 <td>3624</td>
 </tr>
-<tr class="row-even"><td>fir_decimate_sym</td>
+<tr class="row-odd"><td>fir_decimate_sym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>237</td>
@@ -4860,7 +4765,7 @@
 <td>9736</td>
 <td>3972</td>
 </tr>
-<tr class="row-odd"><td>fir_decimate_sym</td>
+<tr class="row-even"><td>fir_decimate_sym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>27</td>
@@ -4879,7 +4784,7 @@
 <td>6752</td>
 <td>2234</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>58</td>
@@ -4898,7 +4803,7 @@
 <td>16974</td>
 <td>4088</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>32</td>
@@ -4917,7 +4822,7 @@
 <td>15838</td>
 <td>3074</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>48</td>
@@ -4936,7 +4841,7 @@
 <td>16478</td>
 <td>3736</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>44</td>
@@ -4955,7 +4860,7 @@
 <td>16350</td>
 <td>3500</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>40</td>
@@ -4974,7 +4879,7 @@
 <td>16158</td>
 <td>3432</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>20</td>
@@ -4993,7 +4898,7 @@
 <td>15390</td>
 <td>2330</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5012,7 +4917,7 @@
 <td>8590</td>
 <td>2100</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>12</td>
@@ -5031,7 +4936,7 @@
 <td>15070</td>
 <td>1986</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>8</td>
@@ -5050,7 +4955,7 @@
 <td>14782</td>
 <td>2460</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>64</td>
@@ -5069,7 +4974,7 @@
 <td>16350</td>
 <td>4292</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>32</td>
@@ -5088,7 +4993,7 @@
 <td>15454</td>
 <td>2980</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5107,7 +5012,7 @@
 <td>8590</td>
 <td>2116</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>64</td>
@@ -5126,7 +5031,7 @@
 <td>17118</td>
 <td>4330</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>16</td>
@@ -5145,7 +5050,7 @@
 <td>15198</td>
 <td>2142</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>72</td>
@@ -5164,7 +5069,7 @@
 <td>17438</td>
 <td>4682</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>int32</td>
 <td>int32</td>
 <td>64</td>
@@ -5183,7 +5088,7 @@
 <td>10462</td>
 <td>4242</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>8</td>
@@ -5202,7 +5107,7 @@
 <td>14878</td>
 <td>2878</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5221,7 +5126,7 @@
 <td>8590</td>
 <td>2116</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>int32</td>
 <td>int32</td>
 <td>8</td>
@@ -5240,7 +5145,7 @@
 <td>8702</td>
 <td>2544</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>int32</td>
 <td>int32</td>
 <td>32</td>
@@ -5259,7 +5164,7 @@
 <td>9438</td>
 <td>2928</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>int32</td>
 <td>int16</td>
 <td>8</td>
@@ -5278,7 +5183,7 @@
 <td>8590</td>
 <td>1990</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>int32</td>
 <td>int16</td>
 <td>64</td>
@@ -5297,7 +5202,7 @@
 <td>9566</td>
 <td>3142</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>int32</td>
 <td>int16</td>
 <td>32</td>
@@ -5316,7 +5221,7 @@
 <td>8990</td>
 <td>2158</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>80</td>
@@ -5335,7 +5240,7 @@
 <td>17758</td>
 <td>5000</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>int32</td>
 <td>8</td>
@@ -5354,7 +5259,7 @@
 <td>14782</td>
 <td>2460</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>int32</td>
 <td>32</td>
@@ -5373,7 +5278,7 @@
 <td>15454</td>
 <td>2980</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>int16</td>
 <td>8</td>
@@ -5392,7 +5297,7 @@
 <td>14702</td>
 <td>1878</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>int16</td>
 <td>64</td>
@@ -5411,7 +5316,7 @@
 <td>15710</td>
 <td>3092</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>int16</td>
 <td>32</td>
@@ -5430,7 +5335,7 @@
 <td>15134</td>
 <td>2174</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>96</td>
@@ -5449,7 +5354,7 @@
 <td>18398</td>
 <td>4024</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>88</td>
@@ -5468,7 +5373,7 @@
 <td>18078</td>
 <td>3848</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint32</td>
 <td>int32</td>
 <td>64</td>
@@ -5487,7 +5392,7 @@
 <td>16350</td>
 <td>4292</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5506,7 +5411,7 @@
 <td>8590</td>
 <td>2084</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5525,7 +5430,7 @@
 <td>3982</td>
 <td>2100</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5544,7 +5449,7 @@
 <td>8590</td>
 <td>2084</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>32</td>
@@ -5563,7 +5468,7 @@
 <td>9438</td>
 <td>2928</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>64</td>
@@ -5582,7 +5487,7 @@
 <td>10462</td>
 <td>4242</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>8</td>
@@ -5601,7 +5506,7 @@
 <td>8702</td>
 <td>2604</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>128</td>
@@ -5620,7 +5525,7 @@
 <td>10718</td>
 <td>4500</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>128</td>
@@ -5639,7 +5544,7 @@
 <td>15003</td>
 <td>3232 3086</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>128</td>
@@ -5658,7 +5563,7 @@
 <td>19320</td>
 <td>2876 3360 3544</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>128</td>
@@ -5677,7 +5582,7 @@
 <td>23573</td>
 <td>2224 1968 1968 2112</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>128</td>
@@ -5696,7 +5601,7 @@
 <td>27922</td>
 <td>3320 3086 3086 3098 2000</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>16</td>
@@ -5715,7 +5620,7 @@
 <td>8702</td>
 <td>2452</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>16</td>
@@ -5734,7 +5639,7 @@
 <td>8738</td>
 <td>4432</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>240</td>
@@ -5753,7 +5658,7 @@
 <td>12734</td>
 <td>4722</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>240</td>
@@ -5772,7 +5677,7 @@
 <td>13218</td>
 <td>5620</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -5791,7 +5696,7 @@
 <td>8910</td>
 <td>2000</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -5810,7 +5715,7 @@
 <td>12122</td>
 <td>3588</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -5829,7 +5734,7 @@
 <td>14918</td>
 <td>2004</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>128</td>
@@ -5848,7 +5753,7 @@
 <td>10978</td>
 <td>5164</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -5867,7 +5772,7 @@
 <td>27222</td>
 <td>3226</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -5886,7 +5791,7 @@
 <td>21182</td>
 <td>3838</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5905,7 +5810,7 @@
 <td>8590</td>
 <td>2084</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5924,7 +5829,7 @@
 <td>8590</td>
 <td>2100</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5943,7 +5848,7 @@
 <td>8626</td>
 <td>3288</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5962,7 +5867,7 @@
 <td>8590</td>
 <td>2084</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -5981,7 +5886,7 @@
 <td>5518</td>
 <td>2084</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -6000,7 +5905,7 @@
 <td>27022</td>
 <td>2084</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>8</td>
@@ -6019,7 +5924,7 @@
 <td>14734</td>
 <td>2084</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>64</td>
@@ -6038,7 +5943,7 @@
 <td>9566</td>
 <td>3142</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>32</td>
@@ -6057,7 +5962,7 @@
 <td>9058</td>
 <td>3022</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>32</td>
@@ -6076,7 +5981,7 @@
 <td>8990</td>
 <td>2158</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>30</td>
@@ -6095,7 +6000,7 @@
 <td>18398</td>
 <td>3850</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>30</td>
@@ -6114,7 +6019,7 @@
 <td>12294</td>
 <td>3838</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_asym</td>
+<tr class="row-even"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>64</td>
@@ -6133,7 +6038,7 @@
 <td>9698</td>
 <td>3750</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_asym</td>
+<tr class="row-odd"><td>fir_interpolate_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>30</td>
@@ -6152,7 +6057,7 @@
 <td>8986</td>
 <td>3400</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -6171,7 +6076,7 @@
 <td>13302</td>
 <td>3730</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -6190,7 +6095,7 @@
 <td>12854</td>
 <td>3730</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>48</td>
@@ -6209,7 +6114,7 @@
 <td>7638</td>
 <td>4532</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>41</td>
@@ -6228,7 +6133,7 @@
 <td>10608</td>
 <td>4904</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>40</td>
@@ -6247,7 +6152,7 @@
 <td>15374</td>
 <td>4740</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>40</td>
@@ -6266,7 +6171,7 @@
 <td>16654</td>
 <td>4964</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>36</td>
@@ -6285,7 +6190,7 @@
 <td>19750</td>
 <td>5514</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -6304,7 +6209,7 @@
 <td>11254</td>
 <td>3754</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>36</td>
@@ -6323,7 +6228,7 @@
 <td>18598</td>
 <td>5342</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>40</td>
@@ -6342,7 +6247,7 @@
 <td>17294</td>
 <td>4978</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>60</td>
@@ -6361,7 +6266,7 @@
 <td>14774</td>
 <td>3778</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>95</td>
@@ -6380,7 +6285,7 @@
 <td>16036</td>
 <td>3958</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>75</td>
@@ -6399,7 +6304,7 @@
 <td>22254</td>
 <td>4290 3850 3762</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>84</td>
@@ -6418,7 +6323,7 @@
 <td>20502</td>
 <td>4310</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>84</td>
@@ -6437,7 +6342,7 @@
 <td>12886</td>
 <td>4210</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>84</td>
@@ -6456,7 +6361,7 @@
 <td>23190</td>
 <td>4386</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>84</td>
@@ -6475,7 +6380,7 @@
 <td>24534</td>
 <td>4346</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>84</td>
@@ -6494,7 +6399,7 @@
 <td>14230</td>
 <td>4344</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>96</td>
@@ -6513,7 +6418,7 @@
 <td>15014</td>
 <td>3406</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>96</td>
@@ -6532,7 +6437,7 @@
 <td>19366</td>
 <td>3450</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>96</td>
@@ -6551,7 +6456,7 @@
 <td>20902</td>
 <td>3454</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>60</td>
@@ -6570,7 +6475,7 @@
 <td>22366</td>
 <td>5000</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>36</td>
@@ -6589,7 +6494,7 @@
 <td>18022</td>
 <td>4742</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>72</td>
@@ -6608,7 +6513,7 @@
 <td>13534</td>
 <td>3282</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>36</td>
@@ -6627,7 +6532,7 @@
 <td>16870</td>
 <td>4574</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>36</td>
@@ -6646,7 +6551,7 @@
 <td>20326</td>
 <td>4862</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>32</td>
@@ -6665,7 +6570,7 @@
 <td>12646</td>
 <td>1942</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>36</td>
@@ -6684,7 +6589,7 @@
 <td>6806</td>
 <td>4750</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>108</td>
@@ -6703,7 +6608,7 @@
 <td>31158</td>
 <td>6122</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>108</td>
@@ -6722,7 +6627,7 @@
 <td>34614</td>
 <td>6182</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>108</td>
@@ -6741,7 +6646,7 @@
 <td>36342</td>
 <td>6046</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>108</td>
@@ -6760,7 +6665,7 @@
 <td>41526</td>
 <td>6190</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>120</td>
@@ -6779,7 +6684,7 @@
 <td>20718</td>
 <td>4906</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>120</td>
@@ -6798,7 +6703,7 @@
 <td>28718</td>
 <td>4924</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>120</td>
@@ -6817,7 +6722,7 @@
 <td>24558</td>
 <td>4890</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>12</td>
@@ -6836,7 +6741,7 @@
 <td>4518</td>
 <td>1874</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>16</td>
@@ -6855,7 +6760,7 @@
 <td>5462</td>
 <td>1824</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>20</td>
@@ -6874,7 +6779,7 @@
 <td>7974</td>
 <td>2172</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>20</td>
@@ -6893,7 +6798,7 @@
 <td>8294</td>
 <td>2184</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>108</td>
@@ -6912,7 +6817,7 @@
 <td>39798</td>
 <td>6118</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>20</td>
@@ -6931,7 +6836,7 @@
 <td>10342</td>
 <td>2216</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>20</td>
@@ -6950,7 +6855,7 @@
 <td>8614</td>
 <td>2216</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>32</td>
@@ -6969,7 +6874,7 @@
 <td>11622</td>
 <td>1894</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>28</td>
@@ -6988,7 +6893,7 @@
 <td>13670</td>
 <td>3642</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>28</td>
@@ -7007,7 +6912,7 @@
 <td>13222</td>
 <td>3642</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>32</td>
@@ -7026,7 +6931,7 @@
 <td>12134</td>
 <td>1934</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>28</td>
@@ -7045,7 +6950,7 @@
 <td>12326</td>
 <td>3706</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>28</td>
@@ -7064,7 +6969,7 @@
 <td>11878</td>
 <td>3616</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -7083,7 +6988,7 @@
 <td>8830</td>
 <td>2988</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_fract_asym</td>
+<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>24</td>
@@ -7102,7 +7007,7 @@
 <td>11902</td>
 <td>2382</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_fract_asym</td>
+<tr class="row-even"><td>fir_interpolate_fract_asym</td>
 <td>cint16</td>
 <td>int16</td>
 <td>28</td>
@@ -7121,7 +7026,7 @@
 <td>12774</td>
 <td>3670</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>99</td>
@@ -7140,7 +7045,7 @@
 <td>16893</td>
 <td>3078</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>239</td>
@@ -7159,7 +7064,7 @@
 <td>18209</td>
 <td>4086</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>239</td>
@@ -7178,7 +7083,7 @@
 <td>19965</td>
 <td>4122</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>15</td>
@@ -7197,7 +7102,7 @@
 <td>15037</td>
 <td>2622</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>11</td>
@@ -7216,7 +7121,7 @@
 <td>14909</td>
 <td>2362</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>99</td>
@@ -7235,7 +7140,7 @@
 <td>16177</td>
 <td>3088</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>7</td>
@@ -7254,7 +7159,7 @@
 <td>14721</td>
 <td>2120</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>7</td>
@@ -7273,7 +7178,7 @@
 <td>14813</td>
 <td>2246</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>99</td>
@@ -7290,9 +7195,9 @@
 <td>13</td>
 <td>5</td>
 <td>19667</td>
-<td>1944 1810 1768 1768 1834</td>
+<td>1944 1810 1768 1770 1850</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>11</td>
@@ -7311,7 +7216,7 @@
 <td>14801</td>
 <td>2250</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>99</td>
@@ -7330,7 +7235,7 @@
 <td>9303</td>
 <td>2786</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>99</td>
@@ -7349,7 +7254,7 @@
 <td>9259</td>
 <td>2518</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>99</td>
@@ -7366,9 +7271,9 @@
 <td>11</td>
 <td>4</td>
 <td>16297</td>
-<td>1944 1810 1810 1850</td>
+<td>1944 1810 1808 1850</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>99</td>
@@ -7386,519 +7291,6 @@
 <td>3</td>
 <td>12927</td>
 <td>1944 1810 1848</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>99</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1521</td>
-<td>168 MSa/s</td>
-<td>1589</td>
-<td>161 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>9649</td>
-<td>2680</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>175</td>
-<td>1462 MSa/s</td>
-<td>516</td>
-<td>496 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8563</td>
-<td>2152</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>11</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>502</td>
-<td>509 MSa/s</td>
-<td>1027</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14779</td>
-<td>2198</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>15</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>423</td>
-<td>605 MSa/s</td>
-<td>1026</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14849</td>
-<td>2232</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>15</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>503</td>
-<td>508 MSa/s</td>
-<td>1027</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14787</td>
-<td>2198</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>19</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>214</td>
-<td>1196 MSa/s</td>
-<td>517</td>
-<td>495 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8651</td>
-<td>2146</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>422</td>
-<td>606 MSa/s</td>
-<td>1026</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14707</td>
-<td>1942</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>175</td>
-<td>1462 MSa/s</td>
-<td>516</td>
-<td>496 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8563</td>
-<td>2152</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>175</td>
-<td>1462 MSa/s</td>
-<td>516</td>
-<td>496 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8577</td>
-<td>2112</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>27</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>359</td>
-<td>713 MSa/s</td>
-<td>520</td>
-<td>492 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8753</td>
-<td>2726</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>239</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2412</td>
-<td>106 MSa/s</td>
-<td>2486</td>
-<td>102 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11105</td>
-<td>3162</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int32</td>
-<td>23</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>296</td>
-<td>864 MSa/s</td>
-<td>519</td>
-<td>493 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8737</td>
-<td>2534</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>99</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>873</td>
-<td>293 MSa/s</td>
-<td>941</td>
-<td>272 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>9259</td>
-<td>2564</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>229</td>
-<td>1117 MSa/s</td>
-<td>517</td>
-<td>495 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8563</td>
-<td>1910</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>239</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1168</td>
-<td>219 MSa/s</td>
-<td>1242</td>
-<td>206 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>10243</td>
-<td>3118</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>239</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2429</td>
-<td>105 MSa/s</td>
-<td>2516</td>
-<td>101 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>17347</td>
-<td>3356</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>int32</td>
-<td>int16</td>
-<td>15</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>231</td>
-<td>1108 MSa/s</td>
-<td>517</td>
-<td>495 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8579</td>
-<td>2054</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>239</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>14694</td>
-<td>17 MSa/s</td>
-<td>14768</td>
-<td>17 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>11361</td>
-<td>5668</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>15</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1459</td>
-<td>175 MSa/s</td>
-<td>1517</td>
-<td>168 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8897</td>
-<td>2356</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>99</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2027</td>
-<td>126 MSa/s</td>
-<td>2100</td>
-<td>121 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>16177</td>
-<td>3088</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>391</td>
-<td>654 MSa/s</td>
-<td>1025</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14721</td>
-<td>2026</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>239</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>6711</td>
-<td>38 MSa/s</td>
-<td>6798</td>
-<td>37 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>18209</td>
-<td>4086</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>15</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>423</td>
-<td>605 MSa/s</td>
-<td>1026</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14849</td>
-<td>2232</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int32</td>
-<td>11</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>392</td>
-<td>653 MSa/s</td>
-<td>1025</td>
-<td>249 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>14801</td>
-<td>2120</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint32</td>
-<td>int16</td>
-<td>99</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2862</td>
-<td>89 MSa/s</td>
-<td>2937</td>
-<td>87 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>15787</td>
-<td>2664</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>float</td>
-<td>float</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>547</td>
-<td>468 MSa/s</td>
-<td>605</td>
-<td>423 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8833</td>
-<td>2440</td>
-</tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>175</td>
-<td>1462 MSa/s</td>
-<td>516</td>
-<td>496 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8563</td>
-<td>2136</td>
 </tr>
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
@@ -7920,6 +7312,120 @@
 <td>2014 1880</td>
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>99</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1521</td>
+<td>168 MSa/s</td>
+<td>1589</td>
+<td>161 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>9649</td>
+<td>2680</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>11</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>502</td>
+<td>509 MSa/s</td>
+<td>1027</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14779</td>
+<td>2198</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>15</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>423</td>
+<td>605 MSa/s</td>
+<td>1026</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14849</td>
+<td>2232</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>15</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>503</td>
+<td>508 MSa/s</td>
+<td>1027</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14787</td>
+<td>2198</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>19</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>214</td>
+<td>1196 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8651</td>
+<td>2146</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>422</td>
+<td>606 MSa/s</td>
+<td>1026</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14707</td>
+<td>1942</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -7937,6 +7443,424 @@
 <td>1</td>
 <td>8563</td>
 <td>2152</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>175</td>
+<td>1462 MSa/s</td>
+<td>516</td>
+<td>496 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8577</td>
+<td>2112</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>27</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>359</td>
+<td>713 MSa/s</td>
+<td>520</td>
+<td>492 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8753</td>
+<td>2726</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>239</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2412</td>
+<td>106 MSa/s</td>
+<td>2486</td>
+<td>102 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>11105</td>
+<td>3162</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int32</td>
+<td>23</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>296</td>
+<td>864 MSa/s</td>
+<td>519</td>
+<td>493 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8737</td>
+<td>2534</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>99</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>873</td>
+<td>293 MSa/s</td>
+<td>941</td>
+<td>272 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>9259</td>
+<td>2564</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>229</td>
+<td>1117 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8563</td>
+<td>1910</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>239</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1168</td>
+<td>219 MSa/s</td>
+<td>1242</td>
+<td>206 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>10243</td>
+<td>3118</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>239</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2429</td>
+<td>105 MSa/s</td>
+<td>2516</td>
+<td>101 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>17347</td>
+<td>3356</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>int32</td>
+<td>int16</td>
+<td>15</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>231</td>
+<td>1108 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8579</td>
+<td>2054</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>239</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>14694</td>
+<td>17 MSa/s</td>
+<td>14768</td>
+<td>17 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>11361</td>
+<td>5668</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>15</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1459</td>
+<td>175 MSa/s</td>
+<td>1517</td>
+<td>168 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8897</td>
+<td>2356</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>99</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2027</td>
+<td>126 MSa/s</td>
+<td>2100</td>
+<td>121 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>16177</td>
+<td>3088</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>391</td>
+<td>654 MSa/s</td>
+<td>1025</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14721</td>
+<td>2026</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>239</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>6711</td>
+<td>38 MSa/s</td>
+<td>6798</td>
+<td>37 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>18209</td>
+<td>4086</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>15</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>423</td>
+<td>605 MSa/s</td>
+<td>1026</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14849</td>
+<td>2232</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int32</td>
+<td>11</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>392</td>
+<td>653 MSa/s</td>
+<td>1025</td>
+<td>249 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>14801</td>
+<td>2120</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint32</td>
+<td>int16</td>
+<td>99</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2862</td>
+<td>89 MSa/s</td>
+<td>2937</td>
+<td>87 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>15787</td>
+<td>2664</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>float</td>
+<td>float</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>547</td>
+<td>468 MSa/s</td>
+<td>605</td>
+<td>423 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8833</td>
+<td>2440</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>175</td>
+<td>1462 MSa/s</td>
+<td>516</td>
+<td>496 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8563</td>
+<td>2136</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>175</td>
+<td>1462 MSa/s</td>
+<td>516</td>
+<td>496 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8563</td>
+<td>2152</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>7</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>175</td>
+<td>1462 MSa/s</td>
+<td>516</td>
+<td>496 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8563</td>
+<td>2152</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>15</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>175</td>
+<td>1462 MSa/s</td>
+<td>518</td>
+<td>494 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>8607</td>
+<td>2496</td>
 </tr>
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
@@ -8073,6 +7997,25 @@
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
+<td>int16</td>
+<td>19</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>231</td>
+<td>1108 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8651</td>
+<td>2202</td>
+</tr>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
+<td>cint16</td>
 <td>cint16</td>
 <td>239</td>
 <td>2</td>
@@ -8089,25 +8032,6 @@
 <td>1</td>
 <td>11105</td>
 <td>3158</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>23</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>296</td>
-<td>864 MSa/s</td>
-<td>519</td>
-<td>493 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8737</td>
-<td>2566</td>
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cfloat</td>
@@ -8263,22 +8187,22 @@
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
-<td>int16</td>
-<td>15</td>
+<td>cint16</td>
+<td>23</td>
 <td>2</td>
 <td>1</td>
 <td>256</td>
 <td>1</td>
 <td>0</td>
+<td>0</td>
+<td>296</td>
+<td>864 MSa/s</td>
+<td>519</td>
+<td>493 MSa/s</td>
+<td>5</td>
 <td>1</td>
-<td>175</td>
-<td>1462 MSa/s</td>
-<td>518</td>
-<td>494 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>8607</td>
-<td>2496</td>
+<td>8737</td>
+<td>2566</td>
 </tr>
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
@@ -8289,15 +8213,15 @@
 <td>256</td>
 <td>1</td>
 <td>0</td>
-<td>0</td>
+<td>1</td>
 <td>231</td>
 <td>1108 MSa/s</td>
-<td>517</td>
-<td>495 MSa/s</td>
-<td>5</td>
+<td>519</td>
+<td>493 MSa/s</td>
+<td>8</td>
 <td>1</td>
-<td>8651</td>
-<td>2202</td>
+<td>8679</td>
+<td>2722</td>
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
@@ -8328,6 +8252,25 @@
 <td>1</td>
 <td>0</td>
 <td>0</td>
+<td>169</td>
+<td>1514 MSa/s</td>
+<td>499</td>
+<td>513 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8663</td>
+<td>2048</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>23</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
 <td>231</td>
 <td>1108 MSa/s</td>
 <td>507</td>
@@ -8337,25 +8280,6 @@
 <td>8659</td>
 <td>2286</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>19</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>231</td>
-<td>1108 MSa/s</td>
-<td>519</td>
-<td>493 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>8679</td>
-<td>2722</td>
-</tr>
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
@@ -8376,25 +8300,6 @@
 <td>2136</td>
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>int16</td>
-<td>7</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>175</td>
-<td>1462 MSa/s</td>
-<td>516</td>
-<td>496 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>8563</td>
-<td>2136</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -8413,7 +8318,7 @@
 <td>3955</td>
 <td>2120</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -8432,7 +8337,7 @@
 <td>14707</td>
 <td>2136</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -8451,7 +8356,7 @@
 <td>3187</td>
 <td>2136</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -8470,7 +8375,7 @@
 <td>8563</td>
 <td>2136</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -8489,7 +8394,7 @@
 <td>5491</td>
 <td>2136</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>7</td>
@@ -8507,6 +8412,25 @@
 <td>1</td>
 <td>8563</td>
 <td>2136</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>47</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>244</td>
+<td>1049 MSa/s</td>
+<td>513</td>
+<td>499 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>11050</td>
+<td>2382</td>
 </tr>
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
@@ -8530,25 +8454,6 @@
 <tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
-<td>239</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>2867</td>
-<td>89 MSa/s</td>
-<td>2941</td>
-<td>87 MSa/s</td>
-<td>5</td>
-<td>1</td>
-<td>10243</td>
-<td>3136</td>
-</tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
-<td>cint16</td>
-<td>int16</td>
 <td>47</td>
 <td>2</td>
 <td>1</td>
@@ -8565,7 +8470,7 @@
 <td>8803</td>
 <td>1888</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>43</td>
@@ -8584,7 +8489,7 @@
 <td>11042</td>
 <td>2430</td>
 </tr>
-<tr class="row-odd"><td>fir_interpolate_hb</td>
+<tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>43</td>
@@ -8603,7 +8508,7 @@
 <td>8795</td>
 <td>1914</td>
 </tr>
-<tr class="row-even"><td>fir_interpolate_hb</td>
+<tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
 <td>27</td>
@@ -8621,6 +8526,25 @@
 <td>1</td>
 <td>8703</td>
 <td>2934</td>
+</tr>
+<tr class="row-even"><td>fir_interpolate_hb</td>
+<td>cint16</td>
+<td>int16</td>
+<td>27</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>231</td>
+<td>1108 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>8667</td>
+<td>2334</td>
 </tr>
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
@@ -8663,40 +8587,40 @@
 <tr class="row-odd"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
-<td>47</td>
+<td>7</td>
 <td>2</td>
 <td>1</td>
 <td>256</td>
 <td>1</td>
-<td>1</td>
 <td>0</td>
-<td>244</td>
-<td>1049 MSa/s</td>
-<td>513</td>
-<td>499 MSa/s</td>
-<td>7</td>
+<td>0</td>
+<td>175</td>
+<td>1462 MSa/s</td>
+<td>516</td>
+<td>496 MSa/s</td>
+<td>5</td>
 <td>1</td>
-<td>11050</td>
-<td>2382</td>
+<td>8563</td>
+<td>2136</td>
 </tr>
 <tr class="row-even"><td>fir_interpolate_hb</td>
 <td>cint16</td>
 <td>int16</td>
-<td>23</td>
+<td>239</td>
 <td>2</td>
 <td>1</td>
 <td>256</td>
 <td>1</td>
 <td>0</td>
 <td>0</td>
-<td>169</td>
-<td>1514 MSa/s</td>
-<td>499</td>
-<td>513 MSa/s</td>
+<td>2867</td>
+<td>89 MSa/s</td>
+<td>2941</td>
+<td>87 MSa/s</td>
 <td>5</td>
 <td>1</td>
-<td>8663</td>
-<td>2048</td>
+<td>10243</td>
+<td>3136</td>
 </tr>
 <tr class="row-odd"><td>fir_sr_asym</td>
 <td>cint32</td>
@@ -8761,18 +8685,18 @@
 <td>8</td>
 <td>1</td>
 <td>1</td>
-<td>256</td>
+<td>64</td>
 <td>1</td>
 <td>0</td>
+<td>0</td>
+<td>69</td>
+<td>927 MSa/s</td>
+<td>124</td>
+<td>516 MSa/s</td>
+<td>5</td>
 <td>1</td>
-<td>165</td>
-<td>1551 MSa/s</td>
-<td>275</td>
-<td>930 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>6526</td>
-<td>2514</td>
+<td>3418</td>
+<td>1902</td>
 </tr>
 <tr class="row-odd"><td>fir_sr_asym</td>
 <td>cint16</td>
@@ -9103,18 +9027,18 @@
 <td>8</td>
 <td>1</td>
 <td>1</td>
-<td>64</td>
+<td>256</td>
 <td>1</td>
 <td>0</td>
-<td>0</td>
-<td>69</td>
-<td>927 MSa/s</td>
-<td>124</td>
-<td>516 MSa/s</td>
-<td>5</td>
 <td>1</td>
-<td>3418</td>
-<td>1902</td>
+<td>165</td>
+<td>1551 MSa/s</td>
+<td>275</td>
+<td>930 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>6526</td>
+<td>2514</td>
 </tr>
 <tr class="row-odd"><td>fir_sr_asym</td>
 <td>cint16</td>
@@ -10414,7 +10338,7 @@
 <div class="section" id="fft">
 <h2>FFT<a class="headerlink" href="#fft" title="Permalink to this headline">¶</a></h2>
 <p>Following table gives results for the FFT/IFFT function with a wide variety of supported parameters, which are defined in: <a class="reference internal" href="compiling-and-simulating.html#configuration-parameters-fft"><span class="std std-ref">L2 FFT configuration parameters</span></a>.</p>
-<p><a class="reference download internal" download="" href="../../_downloads/9f00409ea28d1144e881ff44b72cef39/fft_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">fft_benchmark.csv</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/8a7f7a08158782ca29fb32492ddfc819/fft_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">fft_benchmark.csv</span></code></a></p>
 <table border="1" class="docutils align-center" id="id2">
 <caption><span class="caption-text">FFT benchmark</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -10479,42 +10403,194 @@
 <td>9190</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
 <td>cint16</td>
+<td>1024</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>492</td>
+<td>2081 MSa/s</td>
+<td>2080</td>
+<td>492 MSa/s</td>
+<td>38</td>
+<td>4</td>
+<td>127008</td>
+<td>24 1 24 1 2894 24 3 24 3 2990 25 1 25 1 6556 25 3 25 3 3550</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
 <td>cint16</td>
-<td>256</td>
+<td>1024</td>
 <td>1</td>
 <td>3</td>
 <td>1</td>
-<td>256</td>
+<td>1024</td>
 <td>0</td>
 <td>0</td>
-<td>344</td>
-<td>744 MSa/s</td>
-<td>641</td>
-<td>399 MSa/s</td>
-<td>15</td>
+<td>700</td>
+<td>1462 MSa/s</td>
+<td>2076</td>
+<td>493 MSa/s</td>
+<td>31</td>
 <td>3</td>
-<td>42536</td>
-<td>24 0 24 0 6732 24 1 24 1 3006 25 0 25 0 2910</td>
+<td>101928</td>
+<td>24 2 24 2 9500 25 0 25 0 2894 25 2 25 2 2990</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>1024</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>700</td>
+<td>1462 MSa/s</td>
+<td>2071</td>
+<td>494 MSa/s</td>
+<td>22</td>
+<td>2</td>
+<td>76848</td>
+<td>24 1 24 1 3974 25 0 25 0 9500</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>1024</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>1054</td>
+<td>971 MSa/s</td>
+<td>2070</td>
+<td>494 MSa/s</td>
+<td>13</td>
+<td>1</td>
+<td>51768</td>
+<td>12928</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>1024</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>1782</td>
+<td>574 MSa/s</td>
+<td>2071</td>
+<td>494 MSa/s</td>
+<td>9</td>
+<td>1</td>
+<td>51640</td>
+<td>5010</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
 <td>cint16</td>
-<td>256</td>
+<td>64</td>
 <td>1</td>
 <td>1</td>
+<td>1</td>
+<td>64</td>
 <td>0</td>
-<td>256</td>
 <td>0</td>
-<td>0</td>
-<td>469</td>
-<td>545 MSa/s</td>
-<td>512</td>
-<td>500 MSa/s</td>
+<td>488</td>
+<td>131 MSa/s</td>
+<td>532</td>
+<td>120 MSa/s</td>
 <td>8</td>
 <td>1</td>
-<td>16824</td>
-<td>4322</td>
+<td>11832</td>
+<td>7660</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>64</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>64</td>
+<td>0</td>
+<td>0</td>
+<td>203</td>
+<td>315 MSa/s</td>
+<td>245</td>
+<td>261 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>11704</td>
+<td>3100</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>1024</td>
+<td>1</td>
+<td>5</td>
+<td>1</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>427</td>
+<td>2398 MSa/s</td>
+<td>2085</td>
+<td>491 MSa/s</td>
+<td>49</td>
+<td>5</td>
+<td>152088</td>
+<td>24 2 24 2 2862 24 4 24 4 2990 25 0 25 0 3622 25 2 25 2 3598 25 4 25 4 3550</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>512</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>512</td>
+<td>0</td>
+<td>0</td>
+<td>933</td>
+<td>548 MSa/s</td>
+<td>978</td>
+<td>523 MSa/s</td>
+<td>9</td>
+<td>1</td>
+<td>25528</td>
+<td>4722</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>32</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>32</td>
+<td>0</td>
+<td>0</td>
+<td>349</td>
+<td>91 MSa/s</td>
+<td>393</td>
+<td>81 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>11320</td>
+<td>7460</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
@@ -10538,6 +10614,101 @@
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
 <td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>469</td>
+<td>545 MSa/s</td>
+<td>512</td>
+<td>500 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>16824</td>
+<td>4322</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>344</td>
+<td>744 MSa/s</td>
+<td>641</td>
+<td>399 MSa/s</td>
+<td>15</td>
+<td>3</td>
+<td>42536</td>
+<td>24 0 24 0 6732 24 1 24 1 3006 25 0 25 0 2910</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>3</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>299</td>
+<td>856 MSa/s</td>
+<td>526</td>
+<td>486 MSa/s</td>
+<td>15</td>
+<td>3</td>
+<td>42280</td>
+<td>24 0 24 0 2898 24 1 24 1 2082 25 0 25 0 1954</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>347</td>
+<td>737 MSa/s</td>
+<td>596</td>
+<td>429 MSa/s</td>
+<td>11</td>
+<td>2</td>
+<td>29744</td>
+<td>24 0 24 0 4006 25 0 25 0 6732</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>250</td>
+<td>1024 MSa/s</td>
+<td>440</td>
+<td>581 MSa/s</td>
+<td>14</td>
+<td>2</td>
+<td>29552</td>
+<td>24 0 24 0 2754 25 0 25 0 2898</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
 <td>512</td>
 <td>0</td>
 <td>1</td>
@@ -10553,177 +10724,6 @@
 <td>1</td>
 <td>25528</td>
 <td>4722</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>512</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>512</td>
-<td>0</td>
-<td>0</td>
-<td>933</td>
-<td>548 MSa/s</td>
-<td>978</td>
-<td>523 MSa/s</td>
-<td>9</td>
-<td>1</td>
-<td>25528</td>
-<td>4722</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>64</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>64</td>
-<td>0</td>
-<td>0</td>
-<td>203</td>
-<td>315 MSa/s</td>
-<td>245</td>
-<td>261 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>11704</td>
-<td>3100</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>64</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>64</td>
-<td>0</td>
-<td>0</td>
-<td>488</td>
-<td>131 MSa/s</td>
-<td>532</td>
-<td>120 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>11832</td>
-<td>7660</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>1024</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>1782</td>
-<td>574 MSa/s</td>
-<td>2071</td>
-<td>494 MSa/s</td>
-<td>9</td>
-<td>1</td>
-<td>51640</td>
-<td>5010</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>1024</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>1054</td>
-<td>971 MSa/s</td>
-<td>2070</td>
-<td>494 MSa/s</td>
-<td>13</td>
-<td>1</td>
-<td>51768</td>
-<td>12928</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>1024</td>
-<td>1</td>
-<td>2</td>
-<td>1</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>700</td>
-<td>1462 MSa/s</td>
-<td>2071</td>
-<td>494 MSa/s</td>
-<td>22</td>
-<td>2</td>
-<td>76848</td>
-<td>24 1 24 1 3974 25 0 25 0 9500</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>1024</td>
-<td>1</td>
-<td>3</td>
-<td>1</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>700</td>
-<td>1462 MSa/s</td>
-<td>2076</td>
-<td>493 MSa/s</td>
-<td>31</td>
-<td>3</td>
-<td>101928</td>
-<td>24 2 24 2 9500 25 0 25 0 2894 25 2 25 2 2990</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>1024</td>
-<td>1</td>
-<td>4</td>
-<td>1</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>492</td>
-<td>2081 MSa/s</td>
-<td>2080</td>
-<td>492 MSa/s</td>
-<td>38</td>
-<td>4</td>
-<td>127008</td>
-<td>24 1 24 1 2894 24 3 24 3 2990 25 1 25 1 6556 25 3 25 3 3550</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>1024</td>
-<td>1</td>
-<td>5</td>
-<td>1</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>427</td>
-<td>2398 MSa/s</td>
-<td>2085</td>
-<td>491 MSa/s</td>
-<td>49</td>
-<td>5</td>
-<td>152088</td>
-<td>24 2 24 2 2862 24 4 24 4 2990 25 0 25 0 3622 25 2 25 2 3598 25 4 25 4 3550</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
@@ -10745,25 +10745,6 @@
 <td>4098</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>3</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>299</td>
-<td>856 MSa/s</td>
-<td>526</td>
-<td>486 MSa/s</td>
-<td>15</td>
-<td>3</td>
-<td>42280</td>
-<td>24 0 24 0 2898 24 1 24 1 2082 25 0 25 0 1954</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
 <td>128</td>
@@ -10782,176 +10763,119 @@
 <td>67440</td>
 <td>24 0 24 0 2624 25 0 25 0 2958</td>
 </tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>16</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>3993</td>
-<td>256 MSa/s</td>
-<td>4054</td>
-<td>252 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>42424</td>
-<td>2230</td>
-</tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
-<td>16</td>
+<td>128</td>
 <td>1</td>
 <td>1</td>
 <td>0</td>
-<td>16</td>
+<td>128</td>
 <td>0</td>
 <td>0</td>
-<td>79</td>
-<td>202 MSa/s</td>
-<td>114</td>
-<td>140 MSa/s</td>
+<td>282</td>
+<td>453 MSa/s</td>
+<td>320</td>
+<td>400 MSa/s</td>
 <td>7</td>
 <td>1</td>
-<td>10168</td>
-<td>1778</td>
+<td>13752</td>
+<td>3858</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>1871</td>
-<td>547 MSa/s</td>
-<td>2073</td>
-<td>493 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>43448</td>
-<td>4512</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>256</td>
+<td>64</td>
 <td>1</td>
 <td>2</td>
 <td>0</td>
 <td>1024</td>
 <td>0</td>
 <td>0</td>
-<td>963</td>
-<td>1063 MSa/s</td>
-<td>2072</td>
-<td>494 MSa/s</td>
-<td>12</td>
-<td>2</td>
-<td>68464</td>
-<td>24 0 24 0 3058 25 0 25 0 2974</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>465</td>
-<td>550 MSa/s</td>
-<td>524</td>
-<td>488 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>18872</td>
-<td>4306</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>548</td>
-<td>467 MSa/s</td>
-<td>600</td>
-<td>426 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>19000</td>
-<td>10160</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>32</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>4069</td>
-<td>251 MSa/s</td>
-<td>4129</td>
-<td>248 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>42424</td>
-<td>2524</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>32</td>
-<td>1</td>
-<td>2</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>3008</td>
-<td>340 MSa/s</td>
-<td>3078</td>
-<td>332 MSa/s</td>
+<td>2114</td>
+<td>484 MSa/s</td>
+<td>2185</td>
+<td>468 MSa/s</td>
 <td>12</td>
 <td>2</td>
 <td>67440</td>
-<td>24 0 24 0 2172 25 0 25 0 1680</td>
+<td>24 0 24 0 2602 25 0 25 0 1890</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>64</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>3000</td>
+<td>341 MSa/s</td>
+<td>3060</td>
+<td>334 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>42424</td>
+<td>3118</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
-<td>32</td>
+<td>512</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>1115</td>
+<td>918 MSa/s</td>
+<td>2072</td>
+<td>494 MSa/s</td>
+<td>14</td>
+<td>2</td>
+<td>71024</td>
+<td>24 0 24 0 2990 25 0 25 0 3350</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>512</td>
 <td>1</td>
 <td>1</td>
 <td>0</td>
-<td>32</td>
+<td>1024</td>
 <td>0</td>
 <td>0</td>
-<td>139</td>
-<td>230 MSa/s</td>
-<td>176</td>
-<td>181 MSa/s</td>
-<td>7</td>
+<td>1895</td>
+<td>540 MSa/s</td>
+<td>2073</td>
+<td>493 MSa/s</td>
+<td>8</td>
 <td>1</td>
-<td>10680</td>
-<td>2358</td>
+<td>46008</td>
+<td>4802</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>512</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>512</td>
+<td>0</td>
+<td>0</td>
+<td>733</td>
+<td>698 MSa/s</td>
+<td>1069</td>
+<td>478 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>29752</td>
+<td>12976</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
@@ -10975,78 +10899,192 @@
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
-<td>512</td>
+<td>32</td>
 <td>1</td>
 <td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>1895</td>
-<td>540 MSa/s</td>
-<td>2073</td>
-<td>493 MSa/s</td>
-<td>8</td>
 <td>1</td>
-<td>46008</td>
-<td>4802</td>
+<td>32</td>
+<td>0</td>
+<td>0</td>
+<td>320</td>
+<td>100 MSa/s</td>
+<td>364</td>
+<td>87 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>10808</td>
+<td>7280</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
-<td>512</td>
+<td>32</td>
 <td>1</td>
-<td>2</td>
+<td>1</td>
 <td>0</td>
-<td>1024</td>
+<td>32</td>
 <td>0</td>
 <td>0</td>
-<td>1115</td>
-<td>918 MSa/s</td>
-<td>2072</td>
-<td>494 MSa/s</td>
-<td>14</td>
-<td>2</td>
-<td>71024</td>
-<td>24 0 24 0 2990 25 0 25 0 3350</td>
+<td>139</td>
+<td>230 MSa/s</td>
+<td>176</td>
+<td>181 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>10680</td>
+<td>2358</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
 <td>cint16</td>
-<td>64</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>3000</td>
-<td>341 MSa/s</td>
-<td>3060</td>
-<td>334 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>42424</td>
-<td>3118</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>64</td>
+<td>32</td>
 <td>1</td>
 <td>2</td>
 <td>0</td>
 <td>1024</td>
 <td>0</td>
 <td>0</td>
-<td>2114</td>
-<td>484 MSa/s</td>
-<td>2185</td>
-<td>468 MSa/s</td>
+<td>3008</td>
+<td>340 MSa/s</td>
+<td>3078</td>
+<td>332 MSa/s</td>
 <td>12</td>
 <td>2</td>
 <td>67440</td>
-<td>24 0 24 0 2602 25 0 25 0 1890</td>
+<td>24 0 24 0 2172 25 0 25 0 1680</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>32</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>4069</td>
+<td>251 MSa/s</td>
+<td>4129</td>
+<td>248 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>42424</td>
+<td>2524</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>548</td>
+<td>467 MSa/s</td>
+<td>600</td>
+<td>426 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>19000</td>
+<td>10160</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>465</td>
+<td>550 MSa/s</td>
+<td>524</td>
+<td>488 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>18872</td>
+<td>4306</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>963</td>
+<td>1063 MSa/s</td>
+<td>2072</td>
+<td>494 MSa/s</td>
+<td>12</td>
+<td>2</td>
+<td>68464</td>
+<td>24 0 24 0 3058 25 0 25 0 2974</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>1871</td>
+<td>547 MSa/s</td>
+<td>2073</td>
+<td>493 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>43448</td>
+<td>4512</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>16</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>16</td>
+<td>0</td>
+<td>0</td>
+<td>79</td>
+<td>202 MSa/s</td>
+<td>114</td>
+<td>140 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>10168</td>
+<td>1778</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>16</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>3993</td>
+<td>256 MSa/s</td>
+<td>4054</td>
+<td>252 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>42424</td>
+<td>2230</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
@@ -11054,56 +11092,18 @@
 <td>128</td>
 <td>1</td>
 <td>1</td>
-<td>0</td>
+<td>1</td>
 <td>128</td>
 <td>0</td>
 <td>0</td>
-<td>282</td>
-<td>453 MSa/s</td>
-<td>320</td>
-<td>400 MSa/s</td>
+<td>487</td>
+<td>262 MSa/s</td>
+<td>532</td>
+<td>240 MSa/s</td>
 <td>7</td>
 <td>1</td>
-<td>13752</td>
-<td>3858</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>347</td>
-<td>737 MSa/s</td>
-<td>596</td>
-<td>429 MSa/s</td>
-<td>11</td>
-<td>2</td>
-<td>29744</td>
-<td>24 0 24 0 4006 25 0 25 0 6732</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>2</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>250</td>
-<td>1024 MSa/s</td>
-<td>440</td>
-<td>581 MSa/s</td>
-<td>14</td>
-<td>2</td>
-<td>29552</td>
-<td>24 0 24 0 2754 25 0 25 0 2898</td>
+<td>13880</td>
+<td>10160</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
@@ -11125,213 +11125,61 @@
 <td>10862</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>128</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>256</td>
 <td>1</td>
 <td>1</td>
-<td>1</td>
-<td>128</td>
+<td>0</td>
+<td>256</td>
 <td>0</td>
 <td>0</td>
-<td>721</td>
-<td>177 MSa/s</td>
-<td>766</td>
-<td>167 MSa/s</td>
-<td>7</td>
+<td>469</td>
+<td>545 MSa/s</td>
+<td>567</td>
+<td>451 MSa/s</td>
+<td>8</td>
 <td>1</td>
-<td>13880</td>
-<td>7158</td>
+<td>16824</td>
+<td>4322</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>16</td>
-<td>1</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>256</td>
+<td>0</td>
 <td>1</td>
 <td>0</td>
-<td>16</td>
+<td>256</td>
 <td>0</td>
 <td>0</td>
-<td>126</td>
-<td>126 MSa/s</td>
-<td>168</td>
-<td>95 MSa/s</td>
-<td>7</td>
+<td>469</td>
+<td>545 MSa/s</td>
+<td>512</td>
+<td>500 MSa/s</td>
+<td>8</td>
 <td>1</td>
-<td>10168</td>
-<td>2344</td>
+<td>16824</td>
+<td>4322</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>2048</td>
 <td>1</td>
 <td>1</td>
 <td>0</td>
-<td>1024</td>
+<td>2048</td>
 <td>0</td>
 <td>0</td>
-<td>5225</td>
-<td>195 MSa/s</td>
-<td>5286</td>
-<td>193 MSa/s</td>
-<td>7</td>
+<td>3913</td>
+<td>523 MSa/s</td>
+<td>3974</td>
+<td>515 MSa/s</td>
+<td>13</td>
 <td>1</td>
-<td>43448</td>
-<td>4956</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>1306</td>
-<td>196 MSa/s</td>
-<td>1469</td>
-<td>174 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>18872</td>
-<td>4684</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>976</td>
-<td>262 MSa/s</td>
-<td>1024</td>
-<td>250 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>19000</td>
-<td>7862</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>2</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>2935</td>
-<td>348 MSa/s</td>
-<td>3021</td>
-<td>338 MSa/s</td>
-<td>12</td>
-<td>2</td>
-<td>68464</td>
-<td>24 0 24 0 3278 25 0 25 0 3248</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>2</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>802</td>
-<td>319 MSa/s</td>
-<td>1155</td>
-<td>221 MSa/s</td>
-<td>10</td>
-<td>2</td>
-<td>31600</td>
-<td>24 0 24 0 3160 25 0 25 0 3020</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>2</td>
-<td>1</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>652</td>
-<td>392 MSa/s</td>
-<td>1065</td>
-<td>240 MSa/s</td>
-<td>10</td>
-<td>2</td>
-<td>31792</td>
-<td>24 0 24 0 4916 25 0 25 0 5738</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>3</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>633</td>
-<td>404 MSa/s</td>
-<td>1070</td>
-<td>239 MSa/s</td>
-<td>14</td>
-<td>3</td>
-<td>44328</td>
-<td>24 0 24 0 3160 24 1 24 1 2296 25 0 25 0 2028</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>256</td>
-<td>1</td>
-<td>3</td>
-<td>1</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>564</td>
-<td>453 MSa/s</td>
-<td>1076</td>
-<td>237 MSa/s</td>
-<td>15</td>
-<td>3</td>
-<td>44584</td>
-<td>24 0 24 0 5738 24 1 24 1 3796 25 0 25 0 3562</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>32</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>6297</td>
-<td>162 MSa/s</td>
-<td>6358</td>
-<td>161 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>42424</td>
-<td>3538</td>
+<td>79288</td>
+<td>5490</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
@@ -11358,6 +11206,310 @@
 <td>32</td>
 <td>1</td>
 <td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>6297</td>
+<td>162 MSa/s</td>
+<td>6358</td>
+<td>161 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>42424</td>
+<td>3538</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>564</td>
+<td>453 MSa/s</td>
+<td>1076</td>
+<td>237 MSa/s</td>
+<td>15</td>
+<td>3</td>
+<td>44584</td>
+<td>24 0 24 0 5738 24 1 24 1 3796 25 0 25 0 3562</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>3</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>633</td>
+<td>404 MSa/s</td>
+<td>1070</td>
+<td>239 MSa/s</td>
+<td>14</td>
+<td>3</td>
+<td>44328</td>
+<td>24 0 24 0 3160 24 1 24 1 2296 25 0 25 0 2028</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>652</td>
+<td>392 MSa/s</td>
+<td>1065</td>
+<td>240 MSa/s</td>
+<td>10</td>
+<td>2</td>
+<td>31792</td>
+<td>24 0 24 0 4916 25 0 25 0 5738</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>802</td>
+<td>319 MSa/s</td>
+<td>1155</td>
+<td>221 MSa/s</td>
+<td>10</td>
+<td>2</td>
+<td>31600</td>
+<td>24 0 24 0 3160 25 0 25 0 3020</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>2935</td>
+<td>348 MSa/s</td>
+<td>3021</td>
+<td>338 MSa/s</td>
+<td>12</td>
+<td>2</td>
+<td>68464</td>
+<td>24 0 24 0 3278 25 0 25 0 3248</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>976</td>
+<td>262 MSa/s</td>
+<td>1142</td>
+<td>224 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>19000</td>
+<td>7862</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>256</td>
+<td>0</td>
+<td>0</td>
+<td>1306</td>
+<td>196 MSa/s</td>
+<td>1469</td>
+<td>174 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>18872</td>
+<td>4684</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>256</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>5225</td>
+<td>195 MSa/s</td>
+<td>5286</td>
+<td>193 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>43448</td>
+<td>4956</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>16</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>16</td>
+<td>0</td>
+<td>0</td>
+<td>126</td>
+<td>126 MSa/s</td>
+<td>168</td>
+<td>95 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>10168</td>
+<td>2344</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>128</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>392</td>
+<td>326 MSa/s</td>
+<td>754</td>
+<td>169 MSa/s</td>
+<td>14</td>
+<td>3</td>
+<td>35368</td>
+<td>24 0 24 0 5146 24 1 24 1 3796 25 0 25 0 3562</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>128</td>
+<td>1</td>
+<td>3</td>
+<td>0</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>286</td>
+<td>447 MSa/s</td>
+<td>571</td>
+<td>224 MSa/s</td>
+<td>14</td>
+<td>3</td>
+<td>35112</td>
+<td>24 0 24 0 2720 24 1 24 1 2296 25 0 25 0 2028</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>128</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>489</td>
+<td>261 MSa/s</td>
+<td>771</td>
+<td>166 MSa/s</td>
+<td>12</td>
+<td>2</td>
+<td>24624</td>
+<td>24 0 24 0 5850 25 0 25 0 4250</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>128</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>371</td>
+<td>345 MSa/s</td>
+<td>590</td>
+<td>216 MSa/s</td>
+<td>10</td>
+<td>2</td>
+<td>24432</td>
+<td>24 0 24 0 3144 25 0 25 0 2580</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>128</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>770</td>
+<td>166 MSa/s</td>
+<td>872</td>
+<td>146 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>13880</td>
+<td>7158</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>128</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>647</td>
+<td>197 MSa/s</td>
+<td>746</td>
+<td>171 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>13752</td>
+<td>4204</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>32</td>
+<td>1</td>
+<td>1</td>
 <td>1</td>
 <td>32</td>
 <td>0</td>
@@ -11372,6 +11524,25 @@
 <td>5600</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>64</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>64</td>
+<td>0</td>
+<td>0</td>
+<td>193</td>
+<td>331 MSa/s</td>
+<td>231</td>
+<td>277 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>11704</td>
+<td>2972</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>32</td>
@@ -11389,25 +11560,6 @@
 <td>2</td>
 <td>67440</td>
 <td>24 0 24 0 2650 25 0 25 0 2250</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>512</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>5495</td>
-<td>186 MSa/s</td>
-<td>5556</td>
-<td>184 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>47544</td>
-<td>5464</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
@@ -11427,82 +11579,6 @@
 <td>1</td>
 <td>31160</td>
 <td>5068</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cfloat</td>
-<td>cfloat</td>
-<td>512</td>
-<td>1</td>
-<td>2</td>
-<td>0</td>
-<td>1024</td>
-<td>0</td>
-<td>0</td>
-<td>2804</td>
-<td>365 MSa/s</td>
-<td>2894</td>
-<td>353 MSa/s</td>
-<td>14</td>
-<td>2</td>
-<td>72560</td>
-<td>24 0 24 0 3264 25 0 25 0 3724</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>256</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>469</td>
-<td>545 MSa/s</td>
-<td>567</td>
-<td>451 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>16824</td>
-<td>4322</td>
-</tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>256</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>256</td>
-<td>0</td>
-<td>0</td>
-<td>469</td>
-<td>545 MSa/s</td>
-<td>512</td>
-<td>500 MSa/s</td>
-<td>8</td>
-<td>1</td>
-<td>16824</td>
-<td>4322</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>2048</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>2048</td>
-<td>0</td>
-<td>0</td>
-<td>3913</td>
-<td>523 MSa/s</td>
-<td>3974</td>
-<td>515 MSa/s</td>
-<td>13</td>
-<td>1</td>
-<td>79288</td>
-<td>5490</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
@@ -11547,6 +11623,101 @@
 <td>cint16</td>
 <td>128</td>
 <td>1</td>
+<td>3</td>
+<td>1</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>274</td>
+<td>467 MSa/s</td>
+<td>496</td>
+<td>258 MSa/s</td>
+<td>15</td>
+<td>3</td>
+<td>34344</td>
+<td>24 0 24 0 6716 24 1 24 1 3006 25 0 25 0 2910</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>128</td>
+<td>1</td>
+<td>3</td>
+<td>0</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>159</td>
+<td>805 MSa/s</td>
+<td>335</td>
+<td>382 MSa/s</td>
+<td>15</td>
+<td>3</td>
+<td>34088</td>
+<td>24 0 24 0 2498 24 1 24 1 2082 25 0 25 0 1954</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>128</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>280</td>
+<td>457 MSa/s</td>
+<td>475</td>
+<td>269 MSa/s</td>
+<td>13</td>
+<td>2</td>
+<td>23600</td>
+<td>24 0 24 0 6716 25 0 25 0 4006</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>128</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>161</td>
+<td>795 MSa/s</td>
+<td>300</td>
+<td>426 MSa/s</td>
+<td>12</td>
+<td>2</td>
+<td>23408</td>
+<td>24 0 24 0 2754 25 0 25 0 2498</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>128</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>128</td>
+<td>0</td>
+<td>0</td>
+<td>498</td>
+<td>257 MSa/s</td>
+<td>568</td>
+<td>225 MSa/s</td>
+<td>8</td>
+<td>1</td>
+<td>12856</td>
+<td>10532</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>128</td>
+<td>1</td>
 <td>1</td>
 <td>0</td>
 <td>128</td>
@@ -11554,31 +11725,12 @@
 <td>0</td>
 <td>291</td>
 <td>439 MSa/s</td>
-<td>329</td>
-<td>389 MSa/s</td>
+<td>354</td>
+<td>361 MSa/s</td>
 <td>8</td>
 <td>1</td>
 <td>12728</td>
 <td>3938</td>
-</tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint32</td>
-<td>cint16</td>
-<td>64</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>64</td>
-<td>0</td>
-<td>0</td>
-<td>193</td>
-<td>331 MSa/s</td>
-<td>231</td>
-<td>277 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>11704</td>
-<td>2972</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
@@ -11602,27 +11754,27 @@
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
 <td>cint16</td>
-<td>1024</td>
-<td>1</td>
+<td>128</td>
+<td>0</td>
 <td>1</td>
 <td>0</td>
-<td>1024</td>
+<td>128</td>
 <td>0</td>
 <td>0</td>
-<td>1790</td>
-<td>572 MSa/s</td>
-<td>1842</td>
-<td>555 MSa/s</td>
-<td>10</td>
+<td>291</td>
+<td>439 MSa/s</td>
+<td>329</td>
+<td>389 MSa/s</td>
+<td>8</td>
 <td>1</td>
-<td>43448</td>
-<td>5122</td>
+<td>12728</td>
+<td>3938</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>1024</td>
-<td>0</td>
+<td>1</td>
 <td>1</td>
 <td>0</td>
 <td>1024</td>
@@ -11638,6 +11790,25 @@
 <td>5122</td>
 </tr>
 <tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>1024</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>1790</td>
+<td>572 MSa/s</td>
+<td>1842</td>
+<td>555 MSa/s</td>
+<td>10</td>
+<td>1</td>
+<td>43448</td>
+<td>5122</td>
+</tr>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>64</td>
@@ -11649,14 +11820,14 @@
 <td>0</td>
 <td>3011</td>
 <td>340 MSa/s</td>
-<td>3099</td>
+<td>3101</td>
 <td>330 MSa/s</td>
 <td>12</td>
 <td>2</td>
 <td>67440</td>
-<td>24 0 24 0 2814 25 0 25 0 2762</td>
+<td>24 0 24 0 2814 25 0 25 0 2778</td>
 </tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>64</td>
@@ -11675,7 +11846,7 @@
 <td>11832</td>
 <td>6416</td>
 </tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>64</td>
@@ -11694,7 +11865,7 @@
 <td>11704</td>
 <td>3836</td>
 </tr>
-<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
 <td>cfloat</td>
 <td>cfloat</td>
 <td>64</td>
@@ -11713,24 +11884,43 @@
 <td>42424</td>
 <td>4132</td>
 </tr>
-<tr class="row-even"><td>fft_ifft_dit_1ch</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>128</td>
+<tr class="row-odd"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>512</td>
+<td>1</td>
+<td>2</td>
 <td>0</td>
+<td>1024</td>
+<td>0</td>
+<td>0</td>
+<td>2804</td>
+<td>365 MSa/s</td>
+<td>2894</td>
+<td>353 MSa/s</td>
+<td>14</td>
+<td>2</td>
+<td>72560</td>
+<td>24 0 24 0 3264 25 0 25 0 3724</td>
+</tr>
+<tr class="row-even"><td>fft_ifft_dit_1ch</td>
+<td>cfloat</td>
+<td>cfloat</td>
+<td>512</td>
+<td>1</td>
 <td>1</td>
 <td>0</td>
-<td>128</td>
+<td>1024</td>
 <td>0</td>
 <td>0</td>
-<td>291</td>
-<td>439 MSa/s</td>
-<td>329</td>
-<td>389 MSa/s</td>
+<td>5495</td>
+<td>186 MSa/s</td>
+<td>5556</td>
+<td>184 MSa/s</td>
 <td>8</td>
 <td>1</td>
-<td>12728</td>
-<td>3938</td>
+<td>47544</td>
+<td>5464</td>
 </tr>
 <tr class="row-odd"><td>fft_ifft_dit_1ch</td>
 <td>cint32</td>
@@ -11761,7 +11951,7 @@
 <p class="first admonition-title">Note</p>
 <p class="last">cycleCountAvg does not include the cycle count information for the additional shuffling/tiling widget kernels, but initiationInterval and PROGRAM_MEMORY do include shuffling/tiling widget kernels.</p>
 </div>
-<p><a class="reference download internal" download="" href="../../_downloads/6a6cf48b647d629ca9383b3604e82d38/matrix_mult_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">matrix_mult_benchmark.csv</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/dac7495ea41702dc65daa3e56eea3150/matrix_mult_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">matrix_mult_benchmark.csv</span></code></a></p>
 <table border="1" class="docutils align-center" id="id3">
 <caption><span class="caption-text">Matrix Multiply benchmark</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -11835,30 +12025,8 @@
 <td>1766 3032 1766 3280 1766 3280 1766 1342 3520</td>
 </tr>
 <tr class="row-odd"><td>matrix_mult</td>
-<td>int16</td>
-<td>int16</td>
-<td>16</td>
-<td>16</td>
-<td>16</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>256</td>
-<td>256</td>
-<td>1</td>
-<td>16</td>
-<td>240.0</td>
-<td>17066 MSa/s</td>
-<td>5401.0</td>
-<td>795 MSa/s</td>
-<td>11</td>
-<td>3</td>
-<td>13326</td>
-<td>1854 2012 1390</td>
-</tr>
-<tr class="row-even"><td>matrix_mult</td>
-<td>int16</td>
-<td>cint32</td>
+<td>cint16</td>
+<td>int32</td>
 <td>8</td>
 <td>64</td>
 <td>4</td>
@@ -11869,38 +12037,38 @@
 <td>256</td>
 <td>4</td>
 <td>16</td>
-<td>172.0</td>
-<td>2976 MSa/s</td>
-<td>4701.0</td>
-<td>121 MSa/s</td>
-<td>25</td>
+<td>274.0</td>
+<td>1868 MSa/s</td>
+<td>6439.0</td>
+<td>86 MSa/s</td>
+<td>33</td>
 <td>9</td>
-<td>36015</td>
-<td>2318 1798 2302 1806 2318 1806 2350 1198 2024</td>
-</tr>
-<tr class="row-odd"><td>matrix_mult</td>
-<td>int16</td>
-<td>cint16</td>
-<td>16</td>
-<td>16</td>
-<td>16</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>256</td>
-<td>256</td>
-<td>1</td>
-<td>16</td>
-<td>336.0</td>
-<td>12190 MSa/s</td>
-<td>6837.0</td>
-<td>621 MSa/s</td>
-<td>11</td>
-<td>3</td>
-<td>17424</td>
-<td>2198 2408 1662</td>
+<td>35759</td>
+<td>1782 2750 1782 2862 1782 2862 1782 1326 3100</td>
 </tr>
 <tr class="row-even"><td>matrix_mult</td>
+<td>cint32</td>
+<td>cint16</td>
+<td>8</td>
+<td>64</td>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>512</td>
+<td>256</td>
+<td>4</td>
+<td>16</td>
+<td>235.0</td>
+<td>2178 MSa/s</td>
+<td>5775.0</td>
+<td>97 MSa/s</td>
+<td>28</td>
+<td>9</td>
+<td>43951</td>
+<td>1886 1684 1886 1750 1886 1750 1886 1198 1952</td>
+</tr>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint32</td>
 <td>cint32</td>
 <td>8</td>
@@ -11922,9 +12090,9 @@
 <td>48553</td>
 <td>1870 1924 1870 2084 1870 2084 1870 1198 2244</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint32</td>
-<td>cint16</td>
+<td>int32</td>
 <td>8</td>
 <td>64</td>
 <td>4</td>
@@ -11943,6 +12111,28 @@
 <td>9</td>
 <td>43951</td>
 <td>1886 1684 1886 1750 1886 1750 1886 1198 1952</td>
+</tr>
+<tr class="row-odd"><td>matrix_mult</td>
+<td>float</td>
+<td>cfloat</td>
+<td>8</td>
+<td>64</td>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>512</td>
+<td>256</td>
+<td>4</td>
+<td>16</td>
+<td>425.0</td>
+<td>1204 MSa/s</td>
+<td>8976.0</td>
+<td>60 MSa/s</td>
+<td>25</td>
+<td>9</td>
+<td>41134</td>
+<td>2710 2354 2710 2496 2710 2496 2710 1198 2720</td>
 </tr>
 <tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
@@ -11965,6 +12155,94 @@
 <td>3</td>
 <td>10257</td>
 <td>1854 2334 1358</td>
+</tr>
+<tr class="row-odd"><td>matrix_mult</td>
+<td>int16</td>
+<td>cint32</td>
+<td>8</td>
+<td>64</td>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>512</td>
+<td>256</td>
+<td>4</td>
+<td>16</td>
+<td>172.0</td>
+<td>2976 MSa/s</td>
+<td>4701.0</td>
+<td>121 MSa/s</td>
+<td>25</td>
+<td>9</td>
+<td>36015</td>
+<td>2318 1798 2302 1806 2318 1806 2350 1198 2024</td>
+</tr>
+<tr class="row-even"><td>matrix_mult</td>
+<td>int16</td>
+<td>int16</td>
+<td>16</td>
+<td>16</td>
+<td>16</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>256</td>
+<td>256</td>
+<td>1</td>
+<td>16</td>
+<td>240.0</td>
+<td>17066 MSa/s</td>
+<td>5401.0</td>
+<td>795 MSa/s</td>
+<td>11</td>
+<td>3</td>
+<td>13326</td>
+<td>1854 2012 1390</td>
+</tr>
+<tr class="row-odd"><td>matrix_mult</td>
+<td>int32</td>
+<td>cint16</td>
+<td>8</td>
+<td>64</td>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>512</td>
+<td>256</td>
+<td>4</td>
+<td>16</td>
+<td>274.0</td>
+<td>1868 MSa/s</td>
+<td>6439.0</td>
+<td>86 MSa/s</td>
+<td>33</td>
+<td>9</td>
+<td>35759</td>
+<td>1782 2750 1782 2862 1782 2862 1782 1326 3100</td>
+</tr>
+<tr class="row-even"><td>matrix_mult</td>
+<td>int16</td>
+<td>cint16</td>
+<td>16</td>
+<td>16</td>
+<td>16</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>256</td>
+<td>256</td>
+<td>1</td>
+<td>16</td>
+<td>336.0</td>
+<td>12190 MSa/s</td>
+<td>6837.0</td>
+<td>621 MSa/s</td>
+<td>11</td>
+<td>3</td>
+<td>17424</td>
+<td>2198 2408 1662</td>
 </tr>
 <tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
@@ -12033,94 +12311,28 @@
 <td>1766 2030 1214</td>
 </tr>
 <tr class="row-even"><td>matrix_mult</td>
-<td>cint16</td>
-<td>cint16</td>
+<td>cfloat</td>
+<td>float</td>
 <td>8</td>
-<td>4</td>
 <td>64</td>
+<td>4</td>
 <td>1</td>
 <td>1</td>
 <td>1</td>
-<td>32</td>
+<td>512</td>
 <td>256</td>
-<td>1</td>
+<td>4</td>
 <td>16</td>
-<td>289.0</td>
-<td>7086 MSa/s</td>
-<td>8563.0</td>
-<td>246 MSa/s</td>
-<td>10</td>
-<td>3</td>
-<td>19537</td>
-<td>1278 1846 1462</td>
+<td>336.0</td>
+<td>1523 MSa/s</td>
+<td>7469.0</td>
+<td>73 MSa/s</td>
+<td>25</td>
+<td>9</td>
+<td>45230</td>
+<td>1982 2252 1982 2268 1982 2268 1982 1198 2488</td>
 </tr>
 <tr class="row-odd"><td>matrix_mult</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>8</td>
-<td>4</td>
-<td>512</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>32</td>
-<td>2048</td>
-<td>1</td>
-<td>16</td>
-<td>2079.0</td>
-<td>7880 MSa/s</td>
-<td>64546.0</td>
-<td>254 MSa/s</td>
-<td>15</td>
-<td>3</td>
-<td>105553</td>
-<td>1278 1846 1478</td>
-</tr>
-<tr class="row-even"><td>matrix_mult</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>8</td>
-<td>4</td>
-<td>512</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>32</td>
-<td>2048</td>
-<td>1</td>
-<td>100</td>
-<td>2079.0</td>
-<td>7880 MSa/s</td>
-<td>408624.0</td>
-<td>40 MSa/s</td>
-<td>13</td>
-<td>2</td>
-<td>86541</td>
-<td>1846 1478</td>
-</tr>
-<tr class="row-odd"><td>matrix_mult</td>
-<td>cint16</td>
-<td>cint16</td>
-<td>8</td>
-<td>4</td>
-<td>4</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>32</td>
-<td>16</td>
-<td>1</td>
-<td>16</td>
-<td>46.0</td>
-<td>2782 MSa/s</td>
-<td>1881.0</td>
-<td>78 MSa/s</td>
-<td>11</td>
-<td>3</td>
-<td>8017</td>
-<td>1678 1198 1102</td>
-</tr>
-<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>1024</td>
@@ -12142,7 +12354,7 @@
 <td>67849</td>
 <td>1892</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>1024</td>
@@ -12164,7 +12376,7 @@
 <td>105553</td>
 <td>1102 1876 1230</td>
 </tr>
-<tr class="row-even"><td>matrix_mult</td>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>16</td>
@@ -12186,7 +12398,7 @@
 <td>8329</td>
 <td>2686</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>16</td>
@@ -12208,7 +12420,7 @@
 <td>19473</td>
 <td>2246 2646 1662</td>
 </tr>
-<tr class="row-even"><td>matrix_mult</td>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>16</td>
@@ -12230,7 +12442,7 @@
 <td>19473</td>
 <td>2246 2646 1662</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>16</td>
@@ -12252,7 +12464,7 @@
 <td>73997</td>
 <td>1662 2702</td>
 </tr>
-<tr class="row-even"><td>matrix_mult</td>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>24</td>
@@ -12274,7 +12486,7 @@
 <td>9553</td>
 <td>1876 1246 1102</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>32</td>
@@ -12296,7 +12508,7 @@
 <td>26761</td>
 <td>3798</td>
 </tr>
-<tr class="row-even"><td>matrix_mult</td>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>32</td>
@@ -12318,7 +12530,7 @@
 <td>37581</td>
 <td>1406 3798</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>32</td>
@@ -12340,7 +12552,7 @@
 <td>43145</td>
 <td>3798</td>
 </tr>
-<tr class="row-even"><td>matrix_mult</td>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>32</td>
@@ -12362,7 +12574,7 @@
 <td>43145</td>
 <td>3798</td>
 </tr>
-<tr class="row-odd"><td>matrix_mult</td>
+<tr class="row-even"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>64</td>
@@ -12384,7 +12596,7 @@
 <td>100489</td>
 <td>3774</td>
 </tr>
-<tr class="row-even"><td>matrix_mult</td>
+<tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
 <td>64</td>
@@ -12406,49 +12618,115 @@
 <td>100489</td>
 <td>3774</td>
 </tr>
+<tr class="row-even"><td>matrix_mult</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>8</td>
+<td>4</td>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>32</td>
+<td>16</td>
+<td>1</td>
+<td>16</td>
+<td>46.0</td>
+<td>2782 MSa/s</td>
+<td>1881.0</td>
+<td>78 MSa/s</td>
+<td>11</td>
+<td>3</td>
+<td>8017</td>
+<td>1678 1198 1102</td>
+</tr>
 <tr class="row-odd"><td>matrix_mult</td>
 <td>cint16</td>
 <td>cint16</td>
+<td>8</td>
+<td>4</td>
+<td>512</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
 <td>32</td>
-<td>128</td>
-<td>32</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>4096</td>
-<td>4096</td>
-<td>2</td>
+<td>2048</td>
+<td>1</td>
 <td>100</td>
-<td>8594.0</td>
-<td>7625 MSa/s</td>
-<td>865304.0</td>
-<td>75 MSa/s</td>
-<td>12</td>
+<td>2079.0</td>
+<td>7880 MSa/s</td>
+<td>408624.0</td>
+<td>40 MSa/s</td>
+<td>13</td>
 <td>2</td>
-<td>78095</td>
-<td>Work/aie/25_0/Release/25_0.map- Work/aie/26_0/Release/26_0.map-</td>
+<td>86541</td>
+<td>1846 1478</td>
 </tr>
 <tr class="row-even"><td>matrix_mult</td>
-<td>int16</td>
-<td>int16</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>8</td>
+<td>4</td>
+<td>512</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>32</td>
+<td>2048</td>
+<td>1</td>
+<td>16</td>
+<td>2079.0</td>
+<td>7880 MSa/s</td>
+<td>64546.0</td>
+<td>254 MSa/s</td>
+<td>15</td>
+<td>3</td>
+<td>105553</td>
+<td>1278 1846 1478</td>
+</tr>
+<tr class="row-odd"><td>matrix_mult</td>
+<td>cint16</td>
+<td>cint16</td>
+<td>8</td>
+<td>4</td>
+<td>64</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>32</td>
+<td>256</td>
+<td>1</td>
+<td>16</td>
+<td>289.0</td>
+<td>7086 MSa/s</td>
+<td>8563.0</td>
+<td>246 MSa/s</td>
+<td>10</td>
+<td>3</td>
+<td>19537</td>
+<td>1278 1846 1462</td>
+</tr>
+<tr class="row-even"><td>matrix_mult</td>
+<td>int32</td>
+<td>int32</td>
 <td>8</td>
 <td>64</td>
 <td>4</td>
 <td>1</td>
-<td>0</td>
+<td>1</td>
 <td>1</td>
 <td>512</td>
 <td>256</td>
 <td>4</td>
 <td>16</td>
-<td>0.0</td>
-<td>-512000 MSa/s</td>
-<td>3674.0</td>
-<td>149 MSa/s</td>
-<td>24</td>
-<td>6</td>
-<td>19805</td>
-<td>1278 1886 1294 1294 1854 1792</td>
+<td>126.0</td>
+<td>4063 MSa/s</td>
+<td>4008.0</td>
+<td>145 MSa/s</td>
+<td>30</td>
+<td>9</td>
+<td>35375</td>
+<td>1782 1848 1782 2012 1782 2012 1782 1198 2146</td>
 </tr>
 </tbody>
 </table>
@@ -12456,25 +12734,27 @@
 <div class="section" id="widgets">
 <h2>Widgets<a class="headerlink" href="#widgets" title="Permalink to this headline">¶</a></h2>
 <p>Following table gives results for the Widgets with a wide variety of supported parameters, which are defined in: <a class="reference internal" href="compiling-and-simulating.html#configuration-parameters-widgets"><span class="std std-ref">L2 Widgets Configuration Parameters</span></a>.</p>
-<p><a class="reference download internal" download="" href="../../_downloads/599e96cb52b36e587d0fa459ecbe9523/widget_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">widget_benchmark.csv</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/0fa943c8c7516255aa0f0a6c8a4b40c2/widget_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">widget_benchmark.csv</span></code></a></p>
 <table border="1" class="docutils align-center" id="id4">
 <caption><span class="caption-text">Widgets benchmark</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Library Element</th>
@@ -12484,280 +12764,530 @@
 <th class="head">NUM_INPUTS</th>
 <th class="head">WINDOW_VSIZE</th>
 <th class="head">NUM_OUTPUT_CLONES</th>
+<th class="head">PATTERN</th>
 <th class="head">cycleCountAvg</th>
 <th class="head">throughputAvg</th>
 <th class="head">initiationInterval</th>
-<th class="head">throughpuInitIntAvg</th>
+<th class="head">throughputInitIntAvg</th>
 <th class="head">NUM_BANKS</th>
-<th class="head">NUM_AIE</th>
+<th class="head">NUM_ME</th>
 <th class="head">DATA_MEMORY</th>
 <th class="head">PROGRAM_MEMORY</th>
+<th class="head">DATA_OUT_TYPE</th>
 </tr>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>widget_api_cast</td>
 <td>cfloat</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
 <td>256</td>
-<td>1</td>
-<td>88</td>
-<td>2909 MSa/s</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>91</td>
+<td>2813 MSa/s</td>
 <td>517</td>
 <td>495 MSa/s</td>
 <td>5</td>
 <td>1</td>
 <td>8980</td>
-<td>1388</td>
+<td>1372</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-odd"><td>widget_api_cast</td>
-<td>cfloat</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
+<td>int32</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>2.0</td>
 <td>256</td>
-<td>2</td>
-<td>531</td>
-<td>482 MSa/s</td>
-<td>574</td>
-<td>445 MSa/s</td>
-<td>3</td>
-<td>1</td>
-<td>4884</td>
-<td>1224</td>
-</tr>
-<tr class="row-even"><td>widget_api_cast</td>
-<td>cfloat</td>
-<td>1</td>
-<td>0</td>
-<td>2</td>
-<td>256</td>
-<td>3</td>
-<td>531</td>
-<td>482 MSa/s</td>
-<td>600</td>
-<td>426 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>13076</td>
-<td>1698</td>
-</tr>
-<tr class="row-odd"><td>widget_api_cast</td>
-<td>cint16</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>56</td>
-<td>4571 MSa/s</td>
-<td>263</td>
-<td>973 MSa/s</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>274</td>
+<td>934 MSa/s</td>
+<td>309</td>
+<td>828 MSa/s</td>
 <td>5</td>
 <td>1</td>
 <td>4884</td>
-<td>1388</td>
+<td>1358</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>widget_api_cast</td>
+<td>int32</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>275</td>
+<td>930 MSa/s</td>
+<td>300</td>
+<td>853 MSa/s</td>
+<td>3</td>
+<td>1</td>
+<td>2836</td>
+<td>1176</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>widget_api_cast</td>
+<td>cint32</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>4.0</td>
+<td>0.0</td>
+<td>535</td>
+<td>478 MSa/s</td>
+<td>592</td>
+<td>432 MSa/s</td>
+<td>9</td>
+<td>1</td>
+<td>17172</td>
+<td>1792</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>widget_api_cast</td>
+<td>cint32</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>531</td>
+<td>482 MSa/s</td>
+<td>559</td>
+<td>457 MSa/s</td>
+<td>3</td>
+<td>1</td>
+<td>4884</td>
+<td>1176</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>widget_api_cast</td>
+<td>cint16</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>2.0</td>
+<td>256</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>273</td>
+<td>937 MSa/s</td>
+<td>296</td>
+<td>864 MSa/s</td>
+<td>3</td>
+<td>1</td>
+<td>2836</td>
+<td>1170</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>widget_api_cast</td>
 <td>cint16</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
 <td>256</td>
-<td>2</td>
-<td>90</td>
-<td>2844 MSa/s</td>
+<td>3.0</td>
+<td>0.0</td>
+<td>280</td>
+<td>914 MSa/s</td>
+<td>327</td>
+<td>782 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>6932</td>
+<td>1566</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>widget_api_cast</td>
+<td>cint16</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>275</td>
+<td>930 MSa/s</td>
+<td>311</td>
+<td>823 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>4884</td>
+<td>1374</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>widget_api_cast</td>
+<td>cint32</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>2.0</td>
+<td>256</td>
+<td>4.0</td>
+<td>0.0</td>
+<td>535</td>
+<td>478 MSa/s</td>
+<td>593</td>
+<td>431 MSa/s</td>
+<td>9</td>
+<td>1</td>
+<td>17172</td>
+<td>1824</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>widget_api_cast</td>
+<td>cint16</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>274</td>
+<td>934 MSa/s</td>
+<td>299</td>
+<td>856 MSa/s</td>
+<td>3</td>
+<td>1</td>
+<td>2836</td>
+<td>1160</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>widget_api_cast</td>
+<td>cint16</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>3.0</td>
+<td>0.0</td>
+<td>127</td>
+<td>2015 MSa/s</td>
+<td>264</td>
+<td>969 MSa/s</td>
+<td>9</td>
+<td>1</td>
+<td>8980</td>
+<td>1792</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>widget_api_cast</td>
+<td>cint16</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>93</td>
+<td>2752 MSa/s</td>
 <td>264</td>
 <td>969 MSa/s</td>
 <td>7</td>
 <td>1</td>
 <td>6932</td>
-<td>1660</td>
-</tr>
-<tr class="row-odd"><td>widget_api_cast</td>
-<td>cint16</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>256</td>
-<td>3</td>
-<td>124</td>
-<td>2064 MSa/s</td>
-<td>265</td>
-<td>966 MSa/s</td>
-<td>9</td>
-<td>1</td>
-<td>8980</td>
-<td>1904</td>
+<td>1612</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>widget_api_cast</td>
 <td>cint16</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
 <td>256</td>
-<td>1</td>
-<td>274</td>
-<td>934 MSa/s</td>
-<td>314</td>
-<td>815 MSa/s</td>
-<td>3</td>
-<td>1</td>
-<td>2836</td>
-<td>1208</td>
-</tr>
-<tr class="row-odd"><td>widget_api_cast</td>
-<td>cint16</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>256</td>
-<td>1</td>
-<td>272</td>
-<td>941 MSa/s</td>
-<td>310</td>
-<td>825 MSa/s</td>
-<td>3</td>
-<td>1</td>
-<td>2836</td>
-<td>1202</td>
-</tr>
-<tr class="row-even"><td>widget_api_cast</td>
-<td>cint16</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>256</td>
-<td>2</td>
-<td>275</td>
-<td>930 MSa/s</td>
-<td>329</td>
-<td>778 MSa/s</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>59</td>
+<td>4338 MSa/s</td>
+<td>263</td>
+<td>973 MSa/s</td>
 <td>5</td>
 <td>1</td>
 <td>4884</td>
-<td>1406</td>
+<td>1372</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-odd"><td>widget_api_cast</td>
-<td>cint16</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
+<td>cfloat</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>2.0</td>
 <td>256</td>
-<td>3</td>
-<td>280</td>
-<td>914 MSa/s</td>
-<td>349</td>
-<td>733 MSa/s</td>
-<td>7</td>
-<td>1</td>
-<td>6932</td>
-<td>1658</td>
-</tr>
-<tr class="row-even"><td>widget_api_cast</td>
-<td>cint16</td>
-<td>1</td>
-<td>0</td>
-<td>2</td>
-<td>256</td>
-<td>1</td>
-<td>273</td>
-<td>937 MSa/s</td>
-<td>311</td>
-<td>823 MSa/s</td>
-<td>3</td>
-<td>1</td>
-<td>2836</td>
-<td>1218</td>
-</tr>
-<tr class="row-odd"><td>widget_api_cast</td>
-<td>cint32</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>256</td>
-<td>2</td>
+<td>3.0</td>
+<td>0.0</td>
 <td>531</td>
 <td>482 MSa/s</td>
-<td>574</td>
-<td>445 MSa/s</td>
+<td>577</td>
+<td>443 MSa/s</td>
+<td>7</td>
+<td>1</td>
+<td>13076</td>
+<td>1606</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>widget_api_cast</td>
+<td>cfloat</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>256</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>531</td>
+<td>482 MSa/s</td>
+<td>559</td>
+<td>457 MSa/s</td>
 <td>3</td>
 <td>1</td>
 <td>4884</td>
-<td>1224</td>
-</tr>
-<tr class="row-even"><td>widget_api_cast</td>
-<td>cint32</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>256</td>
-<td>4</td>
-<td>535</td>
-<td>478 MSa/s</td>
-<td>619</td>
-<td>413 MSa/s</td>
-<td>9</td>
-<td>1</td>
-<td>17172</td>
-<td>1848</td>
+<td>1176</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-odd"><td>widget_api_cast</td>
-<td>cint32</td>
-<td>1</td>
-<td>0</td>
-<td>2</td>
+<td>cint16</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
 <td>256</td>
-<td>4</td>
-<td>535</td>
-<td>478 MSa/s</td>
-<td>622</td>
-<td>411 MSa/s</td>
-<td>9</td>
-<td>1</td>
-<td>17172</td>
-<td>1920</td>
-</tr>
-<tr class="row-even"><td>widget_api_cast</td>
-<td>int32</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>256</td>
-<td>2</td>
-<td>275</td>
-<td>930 MSa/s</td>
-<td>315</td>
-<td>812 MSa/s</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>272</td>
+<td>941 MSa/s</td>
+<td>295</td>
+<td>867 MSa/s</td>
 <td>3</td>
 <td>1</td>
 <td>2836</td>
-<td>1224</td>
+<td>1154</td>
+<td>&#160;</td>
 </tr>
-<tr class="row-odd"><td>widget_api_cast</td>
-<td>int32</td>
-<td>1</td>
-<td>0</td>
-<td>2</td>
+<tr class="row-even"><td>widget_real2complex</td>
+<td>int16</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
 <td>256</td>
-<td>2</td>
-<td>274</td>
-<td>934 MSa/s</td>
-<td>329</td>
-<td>778 MSa/s</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>87</td>
+<td>2942 MSa/s</td>
+<td>262</td>
+<td>977 MSa/s</td>
 <td>5</td>
 <td>1</td>
-<td>4884</td>
-<td>1390</td>
+<td>3860</td>
+<td>1444</td>
+<td>cint16</td>
+</tr>
+<tr class="row-odd"><td>widget_real2complex</td>
+<td>int16</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1024</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>279</td>
+<td>3670 MSa/s</td>
+<td>1022</td>
+<td>1001 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>13076</td>
+<td>1444</td>
+<td>cint16</td>
+</tr>
+<tr class="row-even"><td>widget_real2complex</td>
+<td>float</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>256</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>404</td>
+<td>633 MSa/s</td>
+<td>520</td>
+<td>492 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6932</td>
+<td>1422</td>
+<td>cfloat</td>
+</tr>
+<tr class="row-odd"><td>widget_real2complex</td>
+<td>float</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1024</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1556</td>
+<td>658 MSa/s</td>
+<td>2056</td>
+<td>498 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>25364</td>
+<td>1422</td>
+<td>cfloat</td>
+</tr>
+<tr class="row-even"><td>widget_real2complex</td>
+<td>cint32</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>256</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>86</td>
+<td>2976 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6932</td>
+<td>1412</td>
+<td>int32</td>
+</tr>
+<tr class="row-odd"><td>widget_real2complex</td>
+<td>cint16</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1024</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>150</td>
+<td>6826 MSa/s</td>
+<td>1029</td>
+<td>995 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>13076</td>
+<td>1412</td>
+<td>int16</td>
+</tr>
+<tr class="row-even"><td>widget_real2complex</td>
+<td>cint16</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>256</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>54</td>
+<td>4740 MSa/s</td>
+<td>260</td>
+<td>984 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>3860</td>
+<td>1428</td>
+<td>int16</td>
+</tr>
+<tr class="row-odd"><td>widget_real2complex</td>
+<td>cfloat</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>256</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>86</td>
+<td>2976 MSa/s</td>
+<td>517</td>
+<td>495 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6932</td>
+<td>1412</td>
+<td>float</td>
+</tr>
+<tr class="row-even"><td>widget_real2complex</td>
+<td>cfloat</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1024</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>278</td>
+<td>3683 MSa/s</td>
+<td>2055</td>
+<td>498 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>25364</td>
+<td>1412</td>
+<td>float</td>
+</tr>
+<tr class="row-odd"><td>widget_real2complex</td>
+<td>int32</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1024</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1556</td>
+<td>658 MSa/s</td>
+<td>2056</td>
+<td>498 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>25364</td>
+<td>1422</td>
+<td>cint32</td>
+</tr>
+<tr class="row-even"><td>widget_real2complex</td>
+<td>cint32</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>1024</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>278</td>
+<td>3683 MSa/s</td>
+<td>2055</td>
+<td>498 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>25364</td>
+<td>1412</td>
+<td>int32</td>
+</tr>
+<tr class="row-odd"><td>widget_real2complex</td>
+<td>int32</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>256</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>404</td>
+<td>633 MSa/s</td>
+<td>520</td>
+<td>492 MSa/s</td>
+<td>5</td>
+<td>1</td>
+<td>6932</td>
+<td>1422</td>
+<td>cint32</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="dds-mixer">
 <h2>DDS/Mixer<a class="headerlink" href="#dds-mixer" title="Permalink to this headline">¶</a></h2>
-<p>Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: <a class="reference internal" href="compiling-and-simulating.html#configuration-parameters-widgets"><span class="std std-ref">L2 Widgets Configuration Parameters</span></a>.</p>
-<p><a class="reference download internal" download="" href="../../_downloads/49a883bad89a20068b08cbf6efc0d340/dds_mixer_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">dds_mixer_benchmark.csv</span></code></a></p>
+<p>Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: <a class="reference internal" href="compiling-and-simulating.html#configuration-parameters-dds-mixer"><span class="std std-ref">L2 DDS/Mixer Configuration Parameters</span></a>.</p>
+<p><a class="reference download internal" download="" href="../../_downloads/369020e1c3617413c29a762f83c00056/dds_mixer_benchmark.csv"><code class="xref download docutils literal notranslate"><span class="pre">dds_mixer_benchmark.csv</span></code></a></p>
 <table border="1" class="docutils align-center" id="id5">
 <caption><span class="caption-text">DDS/Mixer benchmark</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
 <colgroup>

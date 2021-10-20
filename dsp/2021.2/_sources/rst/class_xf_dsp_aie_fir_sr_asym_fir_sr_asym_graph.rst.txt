@@ -167,7 +167,7 @@ These are the templates to configure the Asymmetric Single Rate FIR class.
             
             Note: Dual input streams offer no throughput gain if only single output stream would be used. Therefore, dual input streams are only supported with 2 output streams.
             
-            Note: Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows. This is the class for the Asymmetric Single Rate FIR graph
+            Note: Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows.
 
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1sr__asym_1_1fir__sr__asym__graph_1a87879f7d88af759f028391f7bba3ba5e:
 .. _cid-xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph::create_connections:

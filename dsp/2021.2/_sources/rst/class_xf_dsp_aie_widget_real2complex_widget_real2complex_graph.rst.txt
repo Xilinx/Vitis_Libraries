@@ -47,7 +47,7 @@ These are the templates to configure the function.
     *
         - TP_WINDOW_VSIZE
 
-        - describes the number of samples in the window API used if either input or output is a window. Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE. This is the class for the Widget API Cast graph
+        - describes the number of samples in the window API used if either input or output is a window. Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
 
 .. ref-code-block:: cpp
 	:class: overview-code-block

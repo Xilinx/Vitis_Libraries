@@ -349,10 +349,7 @@
 <li class="toctree-l1"><a class="reference internal" href="compiling-and-simulating.html">Compiling and Simulating Using the Makefile</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Using the Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#compiling-and-simulating-using-the-example-design">Compiling and Simulating Using the Example Design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-the-vitis-unified-software-platform-to-run-an-example-design">Using the Vitis Unified Software Platform to Run an Example Design</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#steps-for-creating-the-example-project-in-the-vitis-ide">Steps for Creating the Example Project in the Vitis IDE</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-vitis-unified-software-platform">Using the Vitis Unified Software Platform</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-graph-coding">Example Graph Coding</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#test-h">test.h</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#test-cpp">test.cpp</a></li>
@@ -491,59 +488,10 @@
 </li>
 </ol>
 </div>
-<div class="section" id="using-the-vitis-unified-software-platform-to-run-an-example-design">
-<h2>Using the Vitis Unified Software Platform to Run an Example Design<a class="headerlink" href="#using-the-vitis-unified-software-platform-to-run-an-example-design" title="Permalink to this headline">¶</a></h2>
-<p>This section briefly describes how to create, build, and simulate a library element example using the Vitis™ integrated design environment (IDE).</p>
-<div class="section" id="steps-for-creating-the-example-project-in-the-vitis-ide">
-<h3>Steps for Creating the Example Project in the Vitis IDE<a class="headerlink" href="#steps-for-creating-the-example-project-in-the-vitis-ide" title="Permalink to this headline">¶</a></h3>
-<p>Fir129Example_system is a pre-packaged Vitis project (in compressed format) that can be downloaded here: <a class="reference external" href="https://www.xilinx.com/bin/public/openDownload?filename=examples.vitis-2021.1.Fir129Example_system_2021_06_24.ide.zip">Fir129Example_system</a>. This can be imported into the Vitis IDE in a few steps, as described below.</p>
-<ol class="arabic">
-<li><p class="first">Set the environment variable DSPLIB_ROOT. This must be set to the path to your directory where DSPLib is installed.</p>
-<pre class="highlight literal-block">
-<span></span><span class="n">setenv</span> <span class="n">DSPLIB_ROOT</span> <span class="o">&lt;</span><span class="n">your</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="n">dsplib</span><span class="o">&gt;</span>
-</pre>
-</li>
-<li><p class="first">Type <cite>vitis</cite> to launch the Vitis IDE, and create a new workspace.</p>
-</li>
-<li><p class="first">Select <strong>File → Import → Vitis project</strong> exported zip file.</p>
-</li>
-<li><p class="first">Click <strong>Next</strong> and browse to your download directory and select the downloaded ZIP file.</p>
-</li>
-<li><p class="first">Set the correct path to the VCK190 platform file directory.</p>
-<ol class="loweralpha">
-<li><p class="first">In the Vitis IDE, expand the <strong>Fir129Example [ aiengine ]</strong> project and double-click the <cite>Fir129Example.prj</cite> file.</p>
-</li>
-<li><p class="first">On the <strong>Platform Invalid</strong> prompt, select <strong>Add platform to repository</strong>.</p>
-<p><img alt="image7" src="../../_images/image5.png" /></p>
-</li>
-<li><p class="first">Navigate to the installed vck190 platform file (.xpfm).</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The VCK190 base platform must be downloaded from the Xilinx lounge.</p>
-</div>
-</li>
-</ol>
-</li>
-<li><p class="first">Set the Active configuration to <strong>Emulation-AIE</strong> for the design.</p>
-<ol class="loweralpha">
-<li><p class="first">Right-click the <strong>Fir129Example [ aiengine ]</strong> and select <strong>C/C++ Build Settings → Manage Configurations → Select Emulation-AIE → Set Active</strong>.</p>
-<p><img alt="image8" src="../../_images/image6.png" /></p>
-</li>
-<li><p class="first">Click <strong>OK</strong>.</p>
-</li>
-<li><p class="first">Select <strong>Apply and Close</strong>.</p>
-</li>
-</ol>
-</li>
-<li><p class="first">Build the project by right-clicking the <strong>Fir129Example [ aiengine]</strong> project and select <strong>Build Project</strong>.</p>
-</li>
-<li><p class="first">Perform simulation after the project is built by right-clicking the <strong>Fir129Example [ aiengine ]</strong> project and select <strong>Run As → 1. Launch AIE Emulator</strong></p>
-<p><img alt="image9" src="../../_images/image7.png" /></p>
-</li>
-<li><p class="first">After simulation is complete, navigate to <strong>Fir129Example [ aiengine] → Emulation-AIE → aiesimulator_output → data</strong> and compare output.txt with the fir_out_ref.txt file in the data folder.</p>
-</li>
-</ol>
-</div>
+<div class="section" id="using-the-vitis-unified-software-platform">
+<h2>Using the Vitis Unified Software Platform<a class="headerlink" href="#using-the-vitis-unified-software-platform" title="Permalink to this headline">¶</a></h2>
+<p>To create, build, and simulate a library element example using the Vitis™ integrated design environment (IDE), please see the <a class="reference external" href="https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/08-dsp-library">DSP Library Vitis Feature Tutorial</a>
+.</p>
 </div>
 <div class="section" id="example-graph-coding">
 <h2>Example Graph Coding<a class="headerlink" href="#example-graph-coding" title="Permalink to this headline">¶</a></h2>
@@ -571,9 +519,9 @@
                 <span class="mi">620</span><span class="p">,</span> <span class="o">-</span><span class="mi">376</span><span class="p">,</span> <span class="o">-</span><span class="mi">360</span><span class="p">,</span> <span class="mi">822</span><span class="p">,</span> <span class="o">-</span><span class="mi">409</span><span class="p">,</span> <span class="o">-</span><span class="mi">585</span><span class="p">,</span> <span class="mi">1118</span><span class="p">,</span> <span class="o">-</span><span class="mi">437</span><span class="p">,</span> <span class="o">-</span><span class="mi">973</span><span class="p">,</span> <span class="mi">1625</span><span class="p">,</span> <span class="o">-</span><span class="mi">458</span><span class="p">,</span> <span class="o">-</span><span class="mi">1801</span><span class="p">,</span> <span class="mi">2810</span><span class="p">,</span> <span class="o">-</span><span class="mi">470</span><span class="p">,</span> <span class="o">-</span><span class="mi">5012</span><span class="p">,</span> <span class="mi">10783</span><span class="p">,</span>
                 <span class="mi">25067</span><span class="p">};</span>
        <span class="o">//</span><span class="n">FIR</span> <span class="n">Graph</span> <span class="k">class</span>
-       <span class="nc">xf</span><span class="p">::</span><span class="n">dsp</span><span class="p">::</span><span class="n">aie</span><span class="p">::</span><span class="n">fir</span><span class="p">::</span><span class="n">sr_sym</span><span class="p">::</span><span class="n">fir_sr_sym_graph</span><span class="o">&lt;</span><span class="n">cint16</span><span class="p">,</span> <span class="n">int16</span><span class="p">,</span>
-       <span class="n">FIR129_LENGTH</span><span class="p">,</span> <span class="n">FIR129_SHIFT</span><span class="p">,</span> <span class="n">FIR129_ROUND_MODE</span><span class="p">,</span> <span class="n">FIR129_INPUT_SAMPLES</span><span class="o">&gt;</span>
-       <span class="n">firGraph</span><span class="p">;</span>
+       <span class="nc">xf</span><span class="p">::</span><span class="n">dsp</span><span class="p">::</span><span class="n">aie</span><span class="p">::</span><span class="n">fir</span><span class="p">::</span><span class="n">sr_sym</span><span class="p">::</span>
+          <span class="n">fir_sr_sym_graph</span><span class="o">&lt;</span><span class="n">cint16</span><span class="p">,</span> <span class="n">int16</span><span class="p">,</span> <span class="n">FIR129_LENGTH</span><span class="p">,</span> <span class="n">FIR129_SHIFT</span><span class="p">,</span> <span class="n">FIR129_ROUND_MODE</span><span class="p">,</span> <span class="n">FIR129_INPUT_SAMPLES</span><span class="o">&gt;</span>
+             <span class="n">firGraph</span><span class="p">;</span>
        <span class="n">public</span><span class="p">:</span>
        <span class="n">port</span><span class="o">&lt;</span><span class="nb">input</span><span class="o">&gt;</span> <span class="ow">in</span><span class="p">;</span>
        <span class="n">port</span><span class="o">&lt;</span><span class="n">output</span><span class="o">&gt;</span> <span class="n">out</span><span class="p">;</span>
@@ -582,8 +530,7 @@
           <span class="o">//</span> <span class="n">Make</span> <span class="n">connections</span>
           <span class="o">//</span> <span class="n">Size</span> <span class="n">of</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">Bytes</span><span class="o">.</span>
           <span class="o">//</span> <span class="n">Margin</span> <span class="n">gets</span> <span class="n">automatically</span> <span class="n">added</span> <span class="n">within</span> <span class="n">the</span> <span class="n">FIR</span> <span class="n">graph</span> <span class="n">class</span><span class="o">.</span>
-          <span class="o">//</span> <span class="n">Margin</span> <span class="n">equals</span> <span class="n">to</span> <span class="n">FIR</span> <span class="n">length</span> <span class="n">rounded</span> <span class="n">up</span> <span class="n">to</span> <span class="n">nearest</span> <span class="n">multiple</span> <span class="n">of</span> <span class="mi">32</span>
-          <span class="n">Bytes</span><span class="o">.</span>
+          <span class="o">//</span> <span class="n">Margin</span> <span class="n">equals</span> <span class="n">to</span> <span class="n">FIR</span> <span class="n">length</span> <span class="n">rounded</span> <span class="n">up</span> <span class="n">to</span> <span class="n">nearest</span> <span class="n">multiple</span> <span class="n">of</span> <span class="mi">32</span> <span class="n">Bytes</span><span class="o">.</span>
           <span class="n">connect</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="ow">in</span><span class="p">,</span> <span class="n">firGraph</span><span class="o">.</span><span class="ow">in</span><span class="p">);</span>
           <span class="n">connect</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">firGraph</span><span class="o">.</span><span class="n">out</span><span class="p">,</span> <span class="n">out</span><span class="p">);</span>
        <span class="p">};</span>

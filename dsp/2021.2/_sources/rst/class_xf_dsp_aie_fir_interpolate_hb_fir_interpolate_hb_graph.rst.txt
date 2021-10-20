@@ -149,7 +149,7 @@ These are the templates to configure the halfband interpolator FIR class.
           
           Note: Upshift UCT is only supported with 16-bit coefficient types, i.e. int16 and cint16.
           
-          TP_UPSHIFT_UCT must be in the range 0 to 47. This is the class for the halfband interpolator FIR graph
+          TP_UPSHIFT_UCT must be in the range 0 to 47.
 
 .. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a7b2c3bfdd3a6c305d8fd66951f3091ad:
 .. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::getkernelarchs:

@@ -450,7 +450,7 @@
             
   <div class="section" id="compiling-and-simulating-using-the-makefile">
 <span id="compiling-and-simulating"></span><h1>Compiling and Simulating Using the Makefile<a class="headerlink" href="#compiling-and-simulating-using-the-makefile" title="Permalink to this headline">¶</a></h1>
-<p>A Makefile is included with each library element. It is located in the <cite>L2/tests/aie/&lt;library_element&gt;</cite> directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs.</p>
+<p>A Makefile is included with each library element. It is located in the <cite>L2/tests/aie/&lt;library_element&gt;</cite> directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs. Alternatively, these defaults may be overridden by arguments to the make command as described below.</p>
 <p>Prerequisites:</p>
 <pre class="highlight literal-block">
 <span></span><span class="n">source</span> <span class="o">&lt;</span><span class="n">your</span><span class="o">-</span><span class="n">Vitis</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">path</span><span class="o">&gt;/</span><span class="n">lin64</span><span class="o">/</span><span class="n">Vitis</span><span class="o">/</span><span class="n">HEAD</span><span class="o">/</span><span class="n">settings64</span><span class="o">.</span><span class="n">csh</span>
@@ -458,7 +458,7 @@
 <span class="n">source</span> <span class="o">&lt;</span><span class="n">your</span><span class="o">-</span><span class="n">XRT</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">path</span><span class="o">&gt;/</span><span class="n">xbb</span><span class="o">/</span><span class="n">xrt</span><span class="o">/</span><span class="n">packages</span><span class="o">/</span><span class="n">xrt</span><span class="o">-</span><span class="mf">2.1</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">centos</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">xilinx</span><span class="o">/</span><span class="n">xrt</span><span class="o">/</span><span class="n">setup</span><span class="o">.</span><span class="n">csh</span>
 <span class="n">setenv</span> <span class="n">DSPLIB_ROOT</span> <span class="o">&lt;</span><span class="n">your</span><span class="o">-</span><span class="n">Vitis</span><span class="o">-</span><span class="n">libraries</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">path</span><span class="o">/</span><span class="n">dsp</span><span class="o">&gt;</span>
 </pre>
-<p>Use the following steps to compile, simulate the reference model with the x86sim target and the AIE graphs using AIE emulation plaftorm. The output of the reference model ( <cite>logs/ref_output.txt</cite> ) is verified against the output of the AIE graphs ( <cite>logs/uut_output.txt</cite> ).</p>
+<p>Use the following steps to compile and simulate the reference model with the x86sim target, then to compile and simulate the library element graph using the AIE emulation platform. The output of the reference model ( <cite>logs/ref_output.txt</cite> ) is verified against the output of the AIE graphs ( <cite>logs/uut_output.txt</cite> ).</p>
 <pre class="highlight literal-block">
 <span></span><span class="n">make</span> <span class="n">run</span>
 </pre>
@@ -469,49 +469,53 @@
 <p>For list of all the configurable parameters, see the <a class="reference internal" href="#configuration-parameters"><span class="std std-ref">L2 Library Element Configuration Parameters</span></a>.</p>
 <p>List of all Makefile targets:</p>
 <pre class="highlight literal-block">
-<span></span><span class="n">make</span> <span class="nb">all</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">aiesim</span><span class="o">/</span><span class="n">x86sim</span><span class="o">/</span><span class="n">hw_emu</span><span class="o">/</span><span class="n">hw</span><span class="o">&gt;</span> <span class="n">DEVICE</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
+<span></span><span class="n">make</span> <span class="nb">all</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">x86sim</span><span class="o">/</span><span class="n">aiesim</span><span class="o">/&gt;</span> <span class="n">PLATFORM</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
     <span class="n">Command</span> <span class="n">to</span> <span class="n">generate</span> <span class="n">the</span> <span class="n">design</span> <span class="k">for</span> <span class="n">specified</span> <span class="n">Target</span> <span class="ow">and</span> <span class="n">Shell</span><span class="o">.</span>
+    <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">HOST_ARCH</span><span class="o">=</span><span class="n">aarch64</span><span class="o">.</span> <span class="n">HOST_ARCH</span> <span class="ow">is</span> <span class="n">required</span> <span class="k">for</span> <span class="n">SoC</span> <span class="n">shells</span>
+
+<span class="n">make</span> <span class="n">sd_card</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">x86sim</span><span class="o">/</span><span class="n">aiesim</span><span class="o">/&gt;</span> <span class="n">PLATFORM</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
+    <span class="n">Command</span> <span class="n">to</span> <span class="n">prepare</span> <span class="n">sd_card</span> <span class="n">files</span><span class="o">.</span>
+    <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">HOST_ARCH</span><span class="o">=</span><span class="n">aarch64</span><span class="o">.</span> <span class="n">HOST_ARCH</span> <span class="ow">is</span> <span class="n">required</span> <span class="k">for</span> <span class="n">SoC</span> <span class="n">shells</span>
+
+<span class="n">make</span> <span class="n">run</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">x86sim</span><span class="o">/</span><span class="n">aiesim</span><span class="o">/&gt;</span> <span class="n">PLATFORM</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
+    <span class="n">Command</span> <span class="n">to</span> <span class="n">run</span> <span class="n">application</span> <span class="ow">in</span> <span class="n">emulation</span><span class="o">.</span>
+    <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">HOST_ARCH</span><span class="o">=</span><span class="n">aarch64</span><span class="o">.</span> <span class="n">HOST_ARCH</span> <span class="n">required</span> <span class="k">for</span> <span class="n">SoC</span> <span class="n">shells</span>
+
+<span class="n">make</span> <span class="n">xclbin</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">x86sim</span><span class="o">/</span><span class="n">aiesim</span><span class="o">/&gt;</span> <span class="n">PLATFORM</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
+    <span class="n">Command</span> <span class="n">to</span> <span class="n">build</span> <span class="n">xclbin</span> <span class="n">application</span><span class="o">.</span>
+    <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">HOST_ARCH</span><span class="o">=</span><span class="n">aarch64</span><span class="o">.</span> <span class="n">HOST_ARCH</span> <span class="ow">is</span> <span class="n">required</span> <span class="k">for</span> <span class="n">SoC</span> <span class="n">shells</span>
+
+<span class="n">make</span> <span class="n">host</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">x86sim</span><span class="o">/</span><span class="n">aiesim</span><span class="o">/&gt;</span>
+    <span class="n">Command</span> <span class="n">to</span> <span class="n">build</span> <span class="n">host</span> <span class="n">application</span><span class="o">.</span>
+    <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">HOST_ARCH</span><span class="o">=</span><span class="n">aarch64</span><span class="o">.</span> <span class="n">HOST_ARCH</span> <span class="ow">is</span> <span class="n">required</span> <span class="k">for</span> <span class="n">SoC</span> <span class="n">shells</span>
 
 <span class="n">make</span> <span class="n">clean</span>
     <span class="n">Command</span> <span class="n">to</span> <span class="n">remove</span> <span class="n">the</span> <span class="n">generated</span> <span class="n">non</span><span class="o">-</span><span class="n">hardware</span> <span class="n">files</span><span class="o">.</span>
 
 <span class="n">make</span> <span class="n">cleanall</span>
     <span class="n">Command</span> <span class="n">to</span> <span class="n">remove</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">generated</span> <span class="n">files</span><span class="o">.</span>
-
-<span class="n">make</span> <span class="n">sd_card</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">aiesim</span><span class="o">/</span><span class="n">x86sim</span><span class="o">/</span><span class="n">hw_emu</span><span class="o">/</span><span class="n">hw</span><span class="o">&gt;</span> <span class="n">DEVICE</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
-    <span class="n">Command</span> <span class="n">to</span> <span class="n">prepare</span> <span class="n">sd_card</span> <span class="n">files</span><span class="o">.</span>
-    <span class="n">This</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">only</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">embedded</span> <span class="n">device</span><span class="o">.</span>
-
-<span class="n">make</span> <span class="n">run</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">aiesim</span><span class="o">/</span><span class="n">x86sim</span><span class="o">/</span><span class="n">hw_emu</span><span class="o">/</span><span class="n">hw</span><span class="o">&gt;</span> <span class="n">DEVICE</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
-    <span class="n">Command</span> <span class="n">to</span> <span class="n">run</span> <span class="n">application</span> <span class="ow">in</span> <span class="n">emulation</span> <span class="ow">or</span> <span class="n">on</span> <span class="n">board</span><span class="o">.</span>
-
-<span class="n">make</span> <span class="n">build</span> <span class="n">TARGET</span><span class="o">=&lt;</span><span class="n">aiesim</span><span class="o">/</span><span class="n">x86sim</span><span class="o">/</span><span class="n">hw_emu</span><span class="o">/</span><span class="n">hw</span><span class="o">&gt;</span> <span class="n">DEVICE</span><span class="o">=&lt;</span><span class="n">FPGA</span> <span class="n">platform</span><span class="o">&gt;</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
-    <span class="n">Command</span> <span class="n">to</span> <span class="n">build</span> <span class="n">xclbin</span> <span class="n">application</span><span class="o">.</span>
-
-<span class="n">make</span> <span class="n">host</span> <span class="n">HOST_ARCH</span><span class="o">=&lt;</span><span class="n">aarch64</span><span class="o">&gt;</span>
-    <span class="n">Command</span> <span class="n">to</span> <span class="n">build</span> <span class="n">host</span> <span class="n">application</span><span class="o">.</span>
 </pre>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,</p>
+<p>For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH must be set to either aarch32 or aarch64. For example,</p>
 <pre class="highlight last literal-block">
 <span></span><span class="n">export</span> <span class="n">SYSROOT</span><span class="o">=&lt;</span> <span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">platform</span><span class="o">-</span><span class="n">sysroot</span> <span class="o">&gt;</span>
 <span class="n">export</span> <span class="n">EDGE_COMMON_SW</span><span class="o">=&lt;</span> <span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">rootfs</span><span class="o">-</span><span class="ow">and</span><span class="o">-</span><span class="n">Image</span><span class="o">-</span><span class="n">files</span> <span class="o">&gt;</span>
 <span class="n">export</span> <span class="n">PERL</span><span class="o">=&lt;</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">perl</span><span class="o">-</span><span class="n">installation</span><span class="o">-</span><span class="n">location</span> <span class="o">&gt;</span>
 </pre>
 </div>
-<p>Simulation results and diff results are located in the in <cite>L2/tests/aie/&lt;library_element&gt;/logs/status.txt</cite> file. To perform a x86 compilation/simulation, run</p>
+<p>On completion of the make, the file <cite>L2/tests/aie/&lt;library_element&gt;/logs/status.txt</cite> will contain the result of compilation, simulation and an indication of whether the reference model and AIE model outputs match.</p>
+<p>To perform a x86 compilation/simulation, run:</p>
 <pre class="highlight literal-block">
 <span></span><span class="n">make</span> <span class="n">run</span> <span class="n">TARGET</span><span class="o">=</span><span class="n">x86sim</span><span class="o">.</span>
 </pre>
-<p>It is also possible to randomly generate coefficient and input data, or to generate specific stimulus patterns like ALL_ONES, IMPULSE, etc. by running</p>
+<p>It is also possible to randomly generate coefficient and input data, or to generate specific stimulus patterns like ALL_ONES, IMPULSE, etc. by running:</p>
 <pre class="highlight literal-block">
 <span></span><span class="n">make</span> <span class="n">run</span> <span class="n">STIM_TYPE</span><span class="o">=</span><span class="mf">4.</span>
 </pre>
 <div class="section" id="l2-library-element-unit-test">
 <h2>L2 Library Element Unit Test<a class="headerlink" href="#l2-library-element-unit-test" title="Permalink to this headline">¶</a></h2>
 <p>Each library element category comes supplied with a test harness which is an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the <cite>L2/tests/aie/&lt;library_element&gt;/test.hpp</cite> and <cite>L2/tests/aie/&lt;library_element&gt;/test.cpp</cite> file.</p>
-<p>Each library element filter category also has a reference model which is used by the test harness. The reference models graphs are to be found in the <cite>L2/tests/aie/inc/&lt;library_element&gt;_ref_graph.hpp</cite> file.</p>
 <p>Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the <cite>L1/include/aie/&lt;library_element&gt;.hpp</cite> and the <cite>L1/src/aie/&lt;library_element&gt;.cpp</cite> files.</p>
 <p>An example of how a library element may be configured by a parent graph is provided in the <cite>L2/examples/fir_129t_sym</cite> folder. The example graph, test.h, in the <cite>L2/examples/fir_129t_sym</cite> folder instantiates the fir_sr_sym graph configured to be a 129-tap filter. This example exposes the ports such that the parent graph can be used to replace an existing 129-tap symmetric filter point solution design.</p>
 </div>
@@ -520,7 +524,7 @@
 <div class="section" id="l2-fir-configuration-parameters">
 <span id="configuration-parameters-filters"></span><h3>L2 FIR configuration parameters<a class="headerlink" href="#l2-fir-configuration-parameters" title="Permalink to this headline">¶</a></h3>
 <p>The list below consists of configurable parameters for FIR library elements with their default values.</p>
-<p><em>Table 14</em>: L2 FIR configuration parameters</p>
+<p><em>Table 15</em>: L2 FIR configuration parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -594,6 +598,22 @@ see note below</td>
 <td>16</td>
 <td>Number of iterations to execute.</td>
 </tr>
+<tr class="row-odd"><td>USE_COEFF_RELOAD</td>
+<td>unsigned</td>
+<td>0</td>
+<td>Use 2 sets of reloadable
+coefficients, where the second set
+deliberately corrupts a single,
+randomly selected coefficient.</td>
+</tr>
+<tr class="row-even"><td>PORT_API</td>
+<td>unsigned</td>
+<td>0</td>
+<td><p class="first">Graph’s port API.</p>
+<p>0 - window</p>
+<p class="last">1 - stream</p>
+</td>
+</tr>
 <tr class="row-odd"><td>GEN_INPUT_DATA</td>
 <td>bool</td>
 <td>true</td>
@@ -666,7 +686,7 @@ defined in: COEFF_FILE</p>
 <div class="section" id="l2-fft-configuration-parameters">
 <span id="configuration-parameters-fft"></span><h3>L2 FFT configuration parameters<a class="headerlink" href="#l2-fft-configuration-parameters" title="Permalink to this headline">¶</a></h3>
 <p>For the FFT/iFFT library element the list of configurable parameters and default values is presented below.</p>
-<p><em>Table 15</em>: L2 FFT configuration parameters</p>
+<p><em>Table 16</em>: L2 FFT configuration parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -767,7 +787,7 @@ defined in: INPUT_FILE</p>
 <div class="section" id="l2-matrix-multiply-configuration-parameters">
 <span id="configuration-parameters-gemm"></span><h3>L2 Matrix Multiply Configuration Parameters<a class="headerlink" href="#l2-matrix-multiply-configuration-parameters" title="Permalink to this headline">¶</a></h3>
 <p>For the Matrix Multiply (GeMM) library element the list of configurable parameters and default values is presented below.</p>
-<p><em>Table 16</em>: L2 Matrix Multiply configuration parameters</p>
+<p><em>Table 17</em>: L2 Matrix Multiply configuration parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -904,7 +924,7 @@ defined in: INPUT_FILE</p>
 <div class="section" id="l2-widgets-configuration-parameters">
 <span id="configuration-parameters-widgets"></span><h3>L2 Widgets Configuration Parameters<a class="headerlink" href="#l2-widgets-configuration-parameters" title="Permalink to this headline">¶</a></h3>
 <p>For the Widgets library elements the list of configurable parameters and default values is presented below.</p>
-<p><em>Table 17</em>: L2 Widget API Casts Configuration Parameters</p>
+<p><em>Table 18</em>: L2 Widget API Casts Configuration Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -967,9 +987,14 @@ or from the input window
 to dual output streams.</p>
 </td>
 </tr>
+<tr class="row-odd"><td>NITER</td>
+<td>unsigned</td>
+<td>16</td>
+<td>Number of iterations to execute.</td>
+</tr>
 </tbody>
 </table>
-<p><em>Table 18</em>: L2 Widget Real to Complex Configuration Parameters</p>
+<p><em>Table 19</em>: L2 Widget Real to Complex Configuration Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -1000,6 +1025,11 @@ to dual output streams.</p>
 <td>256</td>
 <td>Input/Output window size.</td>
 </tr>
+<tr class="row-odd"><td>NITER</td>
+<td>unsigned</td>
+<td>16</td>
+<td>Number of iterations to execute.</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition note">
@@ -1010,7 +1040,7 @@ to dual output streams.</p>
 <div class="section" id="l2-dds-mixer-configuration-parameters">
 <span id="configuration-parameters-dds-mixer"></span><h3>L2 DDS/Mixer Configuration Parameters<a class="headerlink" href="#l2-dds-mixer-configuration-parameters" title="Permalink to this headline">¶</a></h3>
 <p>For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.</p>
-<p><em>Table 19</em>: L2 DDS/Mixer Configuration Parameters</p>
+<p><em>Table 20</em>: L2 DDS/Mixer Configuration Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />

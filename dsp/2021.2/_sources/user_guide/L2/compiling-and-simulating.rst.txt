@@ -20,7 +20,7 @@
 Compiling and Simulating Using the Makefile
 *******************************************
 
-A Makefile is included with each library element. It is located in the `L2/tests/aie/<library_element>` directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs.
+A Makefile is included with each library element. It is located in the `L2/tests/aie/<library_element>` directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs. Alternatively, these defaults may be overridden by arguments to the make command as described below.
 
 Prerequisites:
 
@@ -32,7 +32,7 @@ Prerequisites:
         setenv DSPLIB_ROOT <your-Vitis-libraries-install-path/dsp>
 
 
-Use the following steps to compile, simulate the reference model with the x86sim target and the AIE graphs using AIE emulation plaftorm. The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs ( `logs/uut_output.txt` ).
+Use the following steps to compile and simulate the reference model with the x86sim target, then to compile and simulate the library element graph using the AIE emulation platform. The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs ( `logs/uut_output.txt` ).
 
 .. code-block::
 
@@ -50,29 +50,33 @@ List of all Makefile targets:
 
 .. code-block::
 
-        make all TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to generate the design for specified Target and Shell.
+    make all TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+        Command to generate the design for specified Target and Shell.
+        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
 
-        make clean
-            Command to remove the generated non-hardware files.
+    make sd_card TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+        Command to prepare sd_card files.
+        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
 
-        make cleanall
-            Command to remove all the generated files.
+    make run TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+        Command to run application in emulation.
+        By default, HOST_ARCH=aarch64. HOST_ARCH required for SoC shells
 
-        make sd_card TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to prepare sd_card files.
-            This target is only used in embedded device.
+    make xclbin TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+        Command to build xclbin application.
+        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
 
-        make run TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to run application in emulation or on board.
+    make host HOST_ARCH=<x86sim/aiesim/>
+        Command to build host application.
+        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
 
-        make build TARGET=<aiesim/x86sim/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch64>
-            Command to build xclbin application.
+    make clean
+        Command to remove the generated non-hardware files.
 
-        make host HOST_ARCH=<aarch64>
-            Command to build host application.
+    make cleanall
+        Command to remove all the generated files.
 
-.. note:: For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,
+.. note:: For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH must be set to either aarch32 or aarch64. For example,
 
             .. code-block::
 
@@ -80,13 +84,15 @@ List of all Makefile targets:
                 export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
                 export PERL=<path-to-perl-installation-location >
 
-Simulation results and diff results are located in the in `L2/tests/aie/<library_element>/logs/status.txt` file. To perform a x86 compilation/simulation, run
+On completion of the make, the file `L2/tests/aie/<library_element>/logs/status.txt` will contain the result of compilation, simulation and an indication of whether the reference model and AIE model outputs match.
+
+To perform a x86 compilation/simulation, run:
 
 .. code-block::
 
     make run TARGET=x86sim.
 
-It is also possible to randomly generate coefficient and input data, or to generate specific stimulus patterns like ALL_ONES, IMPULSE, etc. by running
+It is also possible to randomly generate coefficient and input data, or to generate specific stimulus patterns like ALL_ONES, IMPULSE, etc. by running:
 
 .. code-block::
 
@@ -96,8 +102,6 @@ L2 Library Element Unit Test
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each library element category comes supplied with a test harness which is an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
-
-Each library element filter category also has a reference model which is used by the test harness. The reference models graphs are to be found in the `L2/tests/aie/inc/<library_element>_ref_graph.hpp` file.
 
 Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
 
@@ -115,7 +119,7 @@ L2 FIR configuration parameters
 
 The list below consists of configurable parameters for FIR library elements with their default values.
 
-*Table 14*: L2 FIR configuration parameters
+*Table 15*: L2 FIR configuration parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -151,6 +155,18 @@ The list below consists of configurable parameters for FIR library elements with
 |                        |                |                | see note below                       |
 +------------------------+----------------+----------------+--------------------------------------+
 | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| USE_COEFF_RELOAD       |    unsigned    |    0           | Use 2 sets of reloadable             |
+|                        |                |                | coefficients, where the second set   |
+|                        |                |                | deliberately corrupts a single,      |
+|                        |                |                | randomly selected coefficient.       |
++------------------------+----------------+----------------+--------------------------------------+
+| PORT_API               |    unsigned    |    0           | Graph's port API.                    |
+|                        |                |                |                                      |
+|                        |                |                | 0 - window                           |
+|                        |                |                |                                      |
+|                        |                |                | 1 - stream                           |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 | GEN_INPUT_DATA         |    bool        |    true        | Generate input data samples.         |
@@ -224,7 +240,7 @@ L2 FFT configuration parameters
 
 For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
 
-*Table 15*: L2 FFT configuration parameters
+*Table 16*: L2 FFT configuration parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -294,7 +310,7 @@ L2 Matrix Multiply Configuration Parameters
 
 For the Matrix Multiply (GeMM) library element the list of configurable parameters and default values is presented below.
 
-*Table 16*: L2 Matrix Multiply configuration parameters
+*Table 17*: L2 Matrix Multiply configuration parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -391,7 +407,7 @@ L2 Widgets Configuration Parameters
 
 For the Widgets library elements the list of configurable parameters and default values is presented below.
 
-*Table 17*: L2 Widget API Casts Configuration Parameters
+*Table 18*: L2 Widget API Casts Configuration Parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -425,9 +441,12 @@ For the Widgets library elements the list of configurable parameters and default
 |                        |                |                | to dual output streams.              |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
+| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
 
 
-*Table 18*: L2 Widget Real to Complex Configuration Parameters
+*Table 19*: L2 Widget Real to Complex Configuration Parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -439,6 +458,9 @@ For the Widgets library elements the list of configurable parameters and default
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
++------------------------+----------------+----------------+--------------------------------------+
+| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+|                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 
 
@@ -452,7 +474,7 @@ L2 DDS/Mixer Configuration Parameters
 
 For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.
 
-*Table 19*: L2 DDS/Mixer Configuration Parameters
+*Table 20*: L2 DDS/Mixer Configuration Parameters
 
 +------------------------+----------------+----------------+--------------------------------------+
 |     **Name**           |    **Type**    |  **Default**   |   Description                        |

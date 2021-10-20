@@ -487,7 +487,7 @@
 <td>sets the number of output ports to write the input data to. Note that while input data from multiple ports is independent, data out is not.</td>
 </tr>
 <tr class="row-odd"><td>TP_PATTERN</td>
-<td>sets the interleave or deinterleave pattern for configurations using dual streams, since streams are not considered clones for input nor for output. The patterns supported are: 0 (default) : 128bits are taken from each input, concatenated to 256b and output to window. or one 256b window read is split into upper and lower 128b cunks for output. 1 : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa. 2 : kSplit. The window is split into 2 halves with each half going to a stream. This is the class for the Widget API Cast graph</td>
+<td>sets the interleave or deinterleave pattern for configurations using dual streams, since streams are not considered clones for input nor for output. The patterns supported are: 0 (default) : 128bits are taken from each input, concatenated to 256b and output to window. or one 256b window read is split into upper and lower 128b cunks for output. 1 : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa. 2 : kSplit. The window is split into 2 halves with each half going to a stream.</td>
 </tr>
 </tbody>
 </table>

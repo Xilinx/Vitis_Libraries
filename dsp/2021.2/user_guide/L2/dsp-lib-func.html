@@ -356,7 +356,11 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fft-ifft">FFT/iFFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fft-ifft">FFT/iFFT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scaling">Scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constraints">Constraints</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#matrix-multiply">Matrix Multiply</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#widgets">Widgets</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#widget-api-cast">Widget API Cast</a></li>
@@ -480,7 +484,7 @@
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head"><strong>Function</strong></th>
-<th class="head"><strong>Namespace</strong></th>
+<th class="head"><strong>Namespace and class name</strong></th>
 </tr>
 </thead>
 <tbody valign="top">
@@ -606,7 +610,7 @@ type</td>
 </tr>
 </tbody>
 </table>
-<p>For all filters, the coefficient values are passed, not as template parameters, but as an array argument to the constructor for non-reloadable configurations, or to the reload function for reloadable configurations. In the case of symmetrical filters, only the first half (plus any odd centre tap) need be passed, as the remainder may be derived by symmetry. For halfband filters, only the non-zero coefficients should be entered, so the length of the array expected will be the (TP_FIR_LEN+1)/4 + 1 for the centre tap.</p>
+<p>For all filters, the coefficient values are passed, not as template parameters, but as an array argument to the constructor for non-reloadable configurations, or to the reload function for reloadable configurations. In the case of symmetrical filters, only the first half (plus any odd centre tap) need be passed, as the remainder may be derived by symmetry. For halfband filters, only the non-zero coefficients should be entered, with the centre tap last in the array. The length of the array expected will therefore be (TP_FIR_LEN+1)/4+1, e.g. 4 non-zero tap values, including the centre tap, are expected for a halfband filter of length 11.</p>
 <p>The following table lists parameters supported by all the FIR filters:</p>
 <p><em>Table 3</em>: Parameters Supported by FIR Filters</p>
 <table border="1" class="docutils">
@@ -639,8 +643,7 @@ int</td>
 truncate or
 floor</p>
 <p>1 =
-ceiling
-(round up)</p>
+ceiling</p>
 <p>2 =
 positive
 infinity</p>
@@ -666,7 +669,8 @@ to odd</p>
 int</td>
 <td>The number of
 bits to shift
-accumulation
+unscaled
+result
 down by before
 output.</td>
 <td>0 to 61</td>
@@ -737,8 +741,15 @@ set.</p>
 <tr class="row-odd"><td>TP_DUAL_IP</td>
 <td>Unsigned
 int</td>
-<td>Use dual
-inputs ports.</td>
+<td><p class="first">Use dual
+inputs ports.</p>
+<p class="last">An additional
+‘in2’ input
+port will
+appear on
+the graph
+when set to 1.</p>
+</td>
 <td><p class="first">Range 0
 (single
 input), 1
@@ -774,10 +785,21 @@ set.</p>
 <tr class="row-odd"><td>TP_NUM_OUTPUTS</td>
 <td>Unsigned
 int</td>
-<td>Number of
+<td><p class="first">Number of
 fir output
-ports</td>
-<td>1 to 2</td>
+ports</p>
+<p class="last">An additional
+‘out2’ output
+port will
+appear on
+the graph
+when set to 2.</p>
+</td>
+<td><p class="first">1 to 2</p>
+<p class="last">Defaults to
+1 if not
+set.</p>
+</td>
 </tr>
 <tr class="row-even"><td>TP_API</td>
 <td>Unsigned
@@ -794,27 +816,65 @@ port type</td>
 <p class="first admonition-title">Note</p>
 <p class="last">The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.</p>
 </div>
+<p><strong>TP_API</strong> specifies if the input/output interface should be window-based or stream-based.
+The values supported are 0 (window API) or 1 (stream API).</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">TP_API template parameter is currently only supported wiht single rate FIRs.</p>
+<p class="last">TP_API template parameter is currently only supported with single rate FIRs.</p>
+</div>
+<p><strong>TP_CASC_LEN</strong> describes the number of AIE processors to split the operation over, which allows resource to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
+FIR graph instance consists of TP_CASC_LEN kernels and the FIR length (TP_FIR_LEN) is divided by the requested cascade length and each kernel in the graph gets assigned a fraction of the workload.
+Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.</p>
+<p><strong>TP_DUAL_IP</strong> is an implementation trade-off between performance and resource utilization.
+Symmetric FIRs may be may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
+In addition, FIRs with streaming interface may utilize the second input port to maximize the available throughput.</p>
+<ul>
+<li><p class="first">When set to 0, the FIR is created with a single input port.</p>
+</li>
+<li><p class="first">When set to 1, two input ports will be created.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">when used, port: <code class="docutils literal notranslate"> <span class="pre">port&lt;input&gt;</span> <span class="pre">in2;</span></code> will be added to the FIR.</p>
+</div>
+</li>
+</ul>
+<p><strong>TP_USE_COEFF_RELOAD</strong>  allows the user to select if runtime coefficient reloading should be used.
+When defining the parameter:</p>
+<ul>
+<li><p class="first">0 = static coefficients, defined in filter constructor</p>
+</li>
+<li><p class="first">1 = reloadable coefficients, passed as argument to runtime function.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">when used, port: <code class="docutils literal notranslate"> <span class="pre">port&lt;input&gt;</span> <span class="pre">coeff;</span></code> will be added to the FIR.</p>
+</div>
+</li>
+</ul>
+<p><strong>TP_NUM_OUTPUTS</strong> sets the number of output ports to send the output data to. Supported range: 1 to 2.</p>
+<p>For Windows API, additional output provides flexibility in connecting FIR output with multiple destinations.
+Additional output <code class="docutils literal notranslate"><span class="pre">out2</span></code> is an exact copy of the data of the output port <code class="docutils literal notranslate"><span class="pre">out</span></code>.</p>
+<p>Stream API uses the additional output port to increase the FIR’s throughput. Please refer to <a class="reference internal" href="#fir-stream-output"><span class="std std-ref">Stream Output</span></a> for more details.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">when used, port: <code class="docutils literal notranslate"> <span class="pre">port&lt;output&gt;</span> <span class="pre">out2;</span></code> will be added to the FIR.</p>
 </div>
 </div>
 <div class="section" id="streaming-interface-for-filters">
 <h3>Streaming interface for Filters<a class="headerlink" href="#streaming-interface-for-filters" title="Permalink to this headline">¶</a></h3>
 <p>Streaming interfaces are now supported by single rate FIRs.
-When TP_API is set to 1 - kernel will be created with a native stream output interface and native stream input interface when possible (asymmetric FIRs).</p>
+When TP_API is set to 1 the FIR will have stream API input and output ports. Such filters have lower latency than window API filters because there is no window to fill before execution can begin.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Streaming interface is currently only supported wiht single rate FIRs.</p>
+<p class="last">Streaming interface is currently only supported with single rate FIRs.</p>
 </div>
 <div class="section" id="stream-output">
-<h4>Stream Output<a class="headerlink" href="#stream-output" title="Permalink to this headline">¶</a></h4>
+<span id="fir-stream-output"></span><h4>Stream Output<a class="headerlink" href="#stream-output" title="Permalink to this headline">¶</a></h4>
 <p>Stream output allows computed data samples to be directly sent over the stream without the requirement for a ping-pong window buffer.
-As a result, memory requirements and design’s latency are reduced.
-Furthermore, the streaming output allows data samples to be broadcasted to multiple destinations.</p>
+As a result, memory use and latency are reduced.
+Furthermore, the streaming output allows data samples to be broadcast to multiple destinations.</p>
 <p>To maximize the throughput, FIRs can be configured with 2 output stream ports.
 Set TP_NUM_OUTPUTS template parameter to 2, to create a FIR kernel with 2 output stream ports.
-In such scenario, kernel interleaves the output data with a 128-bit pattern, e.g.:</p>
+In this scenario, the output data from the two streams is interleaved in chunks of 128 bits. E.g.:</p>
 <ul class="simple">
 <li>samples 0-3 to be sent over output stream 0 for cint16 data type,</li>
 <li>samples 4-7 to be sent over output stream 1 for cint16 data type.</li>
@@ -823,10 +883,10 @@ In such scenario, kernel interleaves the output data with a 128-bit pattern, e.g
 <div class="section" id="stream-input-for-asymmetric-firs">
 <h4>Stream Input for Asymmetric FIRs<a class="headerlink" href="#stream-input-for-asymmetric-firs" title="Permalink to this headline">¶</a></h4>
 <p>Stream input allows data samples to be directly written from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
-As a result, memory requirements and design’s latency are reduced.</p>
+As a result, memory requirements and latency are reduced.</p>
 <p>To maximize the throughput, Asymmetric FIRs can be configured with 2 input stream ports.
-Enable TP_DUAL_IP template parameter, by setting its value to 1, to create a FIR kernel with 2 input stream ports.
-In such case data should be organized in a 128-bit interleaved pattern, e.g.:</p>
+Set TP_DUAL_IP to 1, to create a FIR instance with 2 input stream ports.
+In such a case the input data will be interleaved from the two ports to one data stream internally in 128 bit chunks, e.g.:</p>
 <ul class="simple">
 <li>samples 0-3 to be received on input stream 0 for cint16 data type,</li>
 <li>samples 4-7 to be received on input stream 1 for cint16 data type.</li>
@@ -837,29 +897,27 @@ In such case data should be organized in a 128-bit interleaved pattern, e.g.:</p
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows. This is the class for the Asymmetric Single Rate FIR graph</p>
+<p class="last">Dual input ports offer no throughput gain if port api is windows. Therefore, dual input ports are only supported with streams and not windows.</p>
 </div>
 </div>
 <div class="section" id="stream-input-for-symmetric-firs">
 <h4>Stream Input for Symmetric FIRs<a class="headerlink" href="#stream-input-for-symmetric-firs" title="Permalink to this headline">¶</a></h4>
-<p>Symmetric FIRs require access to data from 2 distinctive areas of the data sample pool and therefore require memory storage.
-Native stream input, where port is diretly connected to the kernel is not possible.
-Instead, stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.</p>
-<p>FIRs can be configured to produce multiple output ports, with help of TP_NUM_OUTPUTS.</p>
+<p>Symmetric FIRs require access to data from 2 distinctive areas of the data stream and therefore require memory storage.
+In symmetric FIRs the stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.</p>
 </div>
 </div>
 </div>
 <div class="section" id="fft-ifft">
 <span id="id2"></span><h2>FFT/iFFT<a class="headerlink" href="#fft-ifft" title="Permalink to this headline">¶</a></h2>
-<p>The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation with configurable point size, data type, and FFT/iFFT function.</p>
-<p>Point size may be any power of 2 from 16 to 4096, but this upper limit will be reduced to 2048 for cint16 data type and 1024 for cfloat or cint32 data type where the FFT kernel uses ping-pong window input. The 4096 limit may only be achieved where the FFT receives and outputs data to/from kernels on the same processor.</p>
+<p>The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation. It has configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface api (stream/window) and parallelism factor.
+Table 4 lists the template parameters used to configure the top level graph of the fft_ifft_dit_1ch_graph class.</p>
 <p><em>Table 4</em>: FFT Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="27%" />
-<col width="20%" />
-<col width="20%" />
-<col width="34%" />
+<col width="25%" />
+<col width="18%" />
+<col width="26%" />
+<col width="31%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head"><strong>Name</strong></th>
@@ -879,9 +937,9 @@ cfloat</td>
 </tr>
 <tr class="row-odd"><td>TT_TWIDDLE</td>
 <td>Typename</td>
-<td>The twiddle
-factor type.
-Determined
+<td>The twiddle factor
+type.
+Determined by
 by TT_DATA</td>
 <td>Set to cint16 for data
 type of cint16 or cint32
@@ -891,13 +949,11 @@ of  cfloat.</td>
 <tr class="row-even"><td>TP_POINT_SIZE</td>
 <td>Unsigned
 int</td>
-<td>The number
-of samples
-in a frame
-to be
-processed</td>
+<td>The number of
+samples in a frame
+to be processed</td>
 <td>2^N, where N is in the
-range 4 to 12, though
+range 4 to 16, though
 the upper limit may be
 constrained by device
 resources.</td>
@@ -905,30 +961,27 @@ resources.</td>
 <tr class="row-odd"><td>TP_FFT_NIFFT</td>
 <td>Unsigned
 int</td>
-<td>Forward or
-reverse
+<td>Forward or reverse
 transform</td>
 <td>0 (IFFT) or
 1 (FFT).</td>
 </tr>
 <tr class="row-even"><td>TP_SHIFT</td>
 <td>Unsigned
+int
 int</td>
-<td>The number of
-bits to shift
-accumulation
-down by before
-output.</td>
+<td>The number of bits
+to shift unscaled
+result
+down by before output</td>
 <td>0 to 61</td>
 </tr>
 <tr class="row-odd"><td>TP_CASC_LEN</td>
 <td>Unsigned
 int</td>
-<td>The number
-of kernels
+<td>The number of kernels
 the FFT will
-be divided
-over.</td>
+be divided over.</td>
 <td><p class="first">1 to 12.
 Defaults to 1
 if not set.</p>
@@ -946,46 +999,130 @@ the max is CEIL(N/2).</p>
 <tr class="row-even"><td>TP_DYN_PT_SIZE</td>
 <td>Unsigned
 int</td>
-<td>FFT point
-size</td>
-<td>2^N, where
-N is 2 to 12</td>
+<td>Selects static point
+size or runtime
+dynamic point size</td>
+<td>0 (Static point size)
+1 (dynamic point size)</td>
 </tr>
 <tr class="row-odd"><td>TP_WINDOW_VSIZE</td>
 <td>Unsigned
 int</td>
-<td>The number
-of samples
-in the
-input
-window.</td>
-<td><p class="first">Must be a multiple of the
+<td>The number of samples
+in the input window.</td>
+<td>Must be a multiple of the
 number of lanes used
-(typically 4 or 8).</p>
-<p class="last">No
+(typically 4 or 8). No
 enforced range, but large
 windows will result in
 mapper errors due to
-excessive memory usage.</p>
-</td>
+excessive memory usage.</td>
+</tr>
+<tr class="row-even"><td>TP_API</td>
+<td>Unsigned
+int</td>
+<td>Selects between
+streams and windows
+for I/O</td>
+<td>0 (windows for input
+and output),
+1 (streams for input
+and output)</td>
+</tr>
+<tr class="row-odd"><td>TP_PARALLEL_POWER</td>
+<td>Unsigned
+int</td>
+<td>Selects the
+parallelism factor
+as a power of 2</td>
+<td>0 to 4 (1 to 16 kernel
+-lanes of processing)</td>
 </tr>
 </tbody>
 </table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The number of lanes is the number of data elements that are being processed in parallel. This varies depending on the data type (i.e., number of bits in each element) and the register or bus width.</p>
-</div>
-<p>This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32. In the final stage, the result is scaled by 17 bits for point size from 16 to 1024, by 18 for 2048, and by 19 for 4096.</p>
-<p>No scaling is applied at any point when the data type is cfloat. The graph entry point is the following:</p>
+<p><strong>TT_DATA</strong>: Supports only the 3 types listed. For real-only FFT/IFFT operation, consider using the library element widget_real2complex to convert real-only data to complex and vice versa.</p>
+<p><strong>TT_TWIDDLE</strong>: Is entirely determined by the choice of TT_DATA.</p>
+<p><strong>TP_POINT_SIZE</strong>: Must be a power of 2 with a minimum value of 16. The maximum value supported by the library element is 65536, but the achievable maximum will be determined by mapping limitations. For instance, a single tile implementation can achieve a maximum of 4096, but this may require single rather than pingpong window interfaces depending on data type.</p>
+<p><strong>TP_SHIFT</strong>: Can be used to implement the 1/N scaling of an IFFT.</p>
+<p><strong>TP_CASC_LEN</strong>: Splits the FFT/IFFT operation over multiple kernels in series, with each subsequent kernel being placed on an adjacent tile. This is to achieve higher throughput.</p>
+<p><strong>TP_DYN_PT_SIZE</strong>: When set to static point size all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to dynamic point size each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1 TP_POINT_SIZE describes the maximum point size which may be input.</p>
+<p><em>Table 5</em>: Header Format</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="16%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Field name</th>
+<th class="head">Location (TT_DATA
+sample)</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Direction</td>
+<td>0 (real part)</td>
+<td>0 (inverse FFT) 1 (forward FFT)</td>
+</tr>
+<tr class="row-odd"><td>Point size (radix2 stages)</td>
+<td>1 (real part)</td>
+<td>Point size described as a power of 2. E.g. 5 described a   point size of 32.</td>
+</tr>
+<tr class="row-even"><td>Reserved</td>
+<td>2</td>
+<td>reserved</td>
+</tr>
+<tr class="row-odd"><td>Status (output only)</td>
+<td>3 (real part)</td>
+<td>0 = legal point size, 1 = illegal point size</td>
+</tr>
+</tbody>
+</table>
+<p>The locations are set to suit TT_DATA type. That is, for TT_DATA=cint16, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
+Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the second cint32 value’s real part holds the Point size (radix2) field.</p>
+<p>Note that for TT_DATA=cfloat, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.</p>
+<p><strong>TP_WINDOW_VSIZE</strong>: Describes the number of data samples in the supplied window. If stream input is selected, an FFT operation will not begin until this number of samples has been input. TP_WINDOW_VSIZE does not include the 256 bit header when dynamic point size is used. TP_WINDOW_VSIZE is intended to improve performance for small point sizes by incurring the kernel acquisition and release overheads only once per window rather than once per frame of data.</p>
+<p><strong>TP_API</strong>: Selects between window (0) and stream (1) input/output. When set to 1, the FFT will have 2 stream port per subframe processor so as to maximize performance. Samples must be input to each stream in turn. E.g. with TP_PARALLEL_POWER=2 there will be 8 stream inputs. Samples 0 to 7 must be input one to each port, followed by samples 8 to 15, so port(0) will receive samples 0, 8, 16, etc.
+On output, each stream will output a splice of the overall frame. So in the above example, output port(0) will output samples 0 to TP_POINT_SIZE/8-1.</p>
+<p><strong>TP_PARALLEL_POWER</strong>: If greater than 0, TP_CASC_LEN applies to the subframe FFT rather than the FFT as a whole. For instance, with TP_POINT_SIZE=16384 and TP_PARALLEL_POWER = 3 there will be 8 subframe FFTs each of point size 2048. The TP_CASC_LEN in this case would be limited to 6 for integer TT_DATA types and 11 for TT_DATA = cfloat.</p>
+<p>TP_PARALLEL_POWER is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram <a class="reference internal" href="#figure-1"><span class="std std-ref">Figure 1: Applying Design Constraints</span></a> shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.</p>
+<div class="section" id="scaling">
+<h3>Scaling<a class="headerlink" href="#scaling" title="Permalink to this headline">¶</a></h3>
+<p>This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32.</p>
+<p>In the case of TP_PARALLEL_POWER &gt; 0 for cint16, scaling is applied at the end of the subframe processor and in each radix2 combiner stage so that cint16 is the data type used for internal streams for maximal performance. In this case, TP_SHIFT-TP_PARALLEL_POWER is applied as the TP_SHIFT value to each subframe processor and a TP_SHIFT of 1 is applied in each radix2 combiner stage. Better noise performance may be achieved at the expense of throughput by using TT_DATA=cint32.</p>
+<p>No scaling is applied at any point when the data type is cfloat. Setting TP_SHIFT to any value other than 0 when TT_DATA is cfloat will result in an error.”</p>
+<p>The graph entry point is the following:</p>
 <pre class="highlight literal-block">
 <span></span><span class="n">xf</span><span class="p">::</span><span class="n">dsp</span><span class="p">::</span><span class="n">aie</span><span class="p">::</span><span class="n">fft</span><span class="p">::</span><span class="n">fft_ifft_dit_1ch_graph</span>
 </pre>
+</div>
+<div class="section" id="constraints">
+<h3>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h3>
+<p>The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See <a class="reference internal" href="#figure-1"><span class="std std-ref">Figure 1: Applying Design Constraints</span></a> below.</p>
+<div class="figure" id="id6">
+<span id="figure-1"></span><img alt="../../_images/figure8.png" src="../../_images/figure8.png" />
+<p class="caption"><span class="caption-text"><em>Figure 1:</em> <strong>Applying Design Constraints</strong></span></p>
+</div>
+<p>The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.</p>
+<p>The stream to window conversion kernels on input and output to the fft subframes are at the same level as m_fftKernels and are called m_inWidgetKernel and m_outWidgetKernel respectively.
+Each level of recursion will also contain an array of radix2 combiner kernels and associated stream to window conversion kernels. These are seen as a column of kernels in the above figure.
+Their instance names are m_r2Comb[] for the radix2 combiners and m_combInKernel[] and m_combOutKernel[] for the input and output widget kernels respectively.</p>
+<p>Examples of constraints: For TP_PARALLEL_POWER=2, to set the runtime ratio of the 3rd of 4 subframe FFTs, the constraint could look like this:</p>
+<pre class="highlight literal-block">
+<span></span><span class="n">Runtime</span><span class="o">&lt;</span><span class="n">ratio</span><span class="o">&gt;</span><span class="p">(</span><span class="n">myFFT</span><span class="o">.</span><span class="n">FFTsubframe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">FFTsubframe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">FFTstrproc</span><span class="o">.</span><span class="n">m_kernels</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">;</span> <span class="o">//</span><span class="n">where</span> <span class="n">myFFT</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">instance</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">FFT</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">design</span><span class="o">.</span>
+</pre>
+<p>For the same example, to ensure that the second radix2 combiner kernel in the first column of combiners and its input widget do not share a tile, the constraint could look like this:</p>
+<pre class="highlight literal-block">
+<span></span><span class="n">not_equal</span><span class="p">(</span><span class="n">location</span><span class="o">&lt;</span><span class="n">kernel</span><span class="o">&gt;</span><span class="p">(</span><span class="n">myFFT</span><span class="o">.</span><span class="n">FFTsubframe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">m_combInKernel</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="n">location</span><span class="o">&lt;</span><span class="n">kernel</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">myFFT</span><span class="o">.</span><span class="n">FFTsubframe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">m_r2Comb</span><span class="p">[</span><span class="mi">1</span><span class="p">]));</span>
+</pre>
+</div>
 </div>
 <div class="section" id="matrix-multiply">
 <span id="id3"></span><h2>Matrix Multiply<a class="headerlink" href="#matrix-multiply" title="Permalink to this headline">¶</a></h2>
 <p>The DSPLib contains one Matrix Multiply/GEMM (GEneral Matrix Multiply) solution. The gemm has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a template parameter TP_DIM_A to describe the number of rows of A. The number of columns of inA must be equal to the number of rows of inB. This is denoted with the template parameter TP_DIM_AB. The number of columns of B is denoted by TP_DIM_B.</p>
 <p>An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have rows = inA rows (TP_DIM_A) and columns = inB (TP_DIM_B) columns. The data type of both input matrices can be configured and the data type of the output is derived from the inputs.</p>
-<p><em>Table 5</em>: Matrix Multiply Parameters</p>
+<p><em>Table 6</em>: Matrix Multiply Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="37%" />
@@ -1060,7 +1197,8 @@ Matrix B</td>
 <td>power of 2
 shift down
 applied to the
-accumulation
+unscaled
+result
 of product
 terms before
 each output</td>
@@ -1074,8 +1212,7 @@ each output</td>
 truncate or
 floor</p>
 <p>1 =
-ceiling
-(round up)</p>
+ceiling</p>
 <p>2 =
 positive
 infinity</p>
@@ -1244,7 +1381,7 @@ set.</td>
 <p class="first admonition-title">Note</p>
 <p class="last">Indices are quoted assuming a row major matrix. A column major matrix would be the transpose of the table below.</p>
 </div>
-<p><em>Table 6</em>: Matrix Multiply 4x4 tiling pattern</p>
+<p><em>Table 7</em>: Matrix Multiply 4x4 tiling pattern</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -1555,7 +1692,7 @@ set.</td>
 <p>This is stored contiguously in memory like:</p>
 <p>0, 1, 2, 3, 16, 17, 18, 19, 32, 33, 34, 35, 48, 49, 50, 51, 4, 5, 6, 7, 20, 21, 22, 23, 36, 37, 38, 39, 52, 53, 54, 55, 8, 9, 10, 11, 24, 25, 26, 27, 40, 41, 42, 43, 56, 57, 58, 59, 12, 13, 14, 15, 28, 29, 30, 31, 44, 45, 46, 47, 60, 61, 62, 63, 64, 65, 66, 67, 80, 81, 82, 83, 96, 97, 98, 99, 112, 113, 114, 115, … , 204, 205, 206, 207, 220, 221, 222, 223, 236, 237, 238, 239, 252, 253, 254, 255</p>
 <p>The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x2 tiling pattern.</p>
-<p><em>Table 7</em>: Matrix Multiply 4x2 tiling pattern</p>
+<p><em>Table 8</em>: Matrix Multiply 4x2 tiling pattern</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -1871,7 +2008,7 @@ set.</td>
 <p>0, 1, 16, 17, 32, 33, 48, 49, 2, 3, 18, 19, 34, 35, 50, 51, …, 206, 207, 222, 223, 238, 239, 254, 255</p>
 <p>Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tiling) will result in a 16x16 matrix with 4x2 tiling.</p>
 <p>The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type:</p>
-<p><em>Table 8</em>: Matrix Multiply tiling pattern combination</p>
+<p><em>Table 9</em>: Matrix Multiply tiling pattern combination</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="17%" />
@@ -2019,7 +2156,7 @@ set.</td>
 <p>If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above. When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph.</p>
 <p>Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B.</p>
 <p><strong>Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)</strong>:</p>
-<p><em>Table 9</em>: Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)</p>
+<p><em>Table 10</em>: Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -2332,7 +2469,7 @@ set.</td>
 </tbody>
 </table>
 <p><strong>Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)</strong>:</p>
-<p><em>Table 10</em>: Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)</p>
+<p><em>Table 11</em>: Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="9%" />
@@ -2667,7 +2804,7 @@ set.</td>
 <div class="section" id="widget-api-cast">
 <h3>Widget API Cast<a class="headerlink" href="#widget-api-cast" title="Permalink to this headline">¶</a></h3>
 <p>The DSPLib contains a Widget API Cast solution, which provides flexibilty when connecting other kernels. This component is able to change the stream interface to window interface and vice-versa. It may be configured to read two input stream interfaces and interleave data onto an output window interface. In addition, multiple copies of output window may be configured to allow extra flexibility when connecting to further kernels.</p>
-<p><em>Table 11</em>: Widget API Cast Parameters</p>
+<p><em>Table 12</em>: Widget API Cast Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -2783,7 +2920,7 @@ to dual output streams.</td>
 <div class="section" id="widget-real-to-complex">
 <h3>Widget Real to Complex<a class="headerlink" href="#widget-real-to-complex" title="Permalink to this headline">¶</a></h3>
 <p>The DSPLib contains a Widget Real to Complex solution, which provides a utility to convert real data to complex or vice versa.</p>
-<p><em>Table 12</em>: Widget Real to Complex Parameters</p>
+<p><em>Table 13</em>: Widget Real to Complex Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="26%" />
@@ -2862,7 +2999,7 @@ RAM use.</p>
 <p>The DSPLib contains a DDS and Mixer solution.</p>
 <p>In DDS Only mode, there is a single output port that contains the sin/cosine components corresponding to the programmed phase increment. The phase increment is a fixed uint32 value provided as a constructor argument, where 2^31 corresponds to Pi (180 degrees phase increment). The number of samples sent through the output port is determined by the TP_INPUT_WINDOW_SIZE parameter. The output port can be a window interface or a stream interface depending on the use of TP_API.</p>
 <p>Mixer inputs are enabled with the TP_MIXER_MODE template parameter. There are two modes that have the mixer functionality enabled. In MIXER_MODE_1, a single input port is exposed and the input samples are complex multiplied by the DDS output for the given phase increment. In MIXER_MODE_2, two input ports are exposed for multi-carrier operation, with the first behaving as in MIXER_MODE_1, and the second input port getting complex multiplied with the complex conjugate of the DDS signal then accumulated to the result of the first complex multiply operation.</p>
-<p><em>Table 13</em>: DDS / Mixer Parameters</p>
+<p><em>Table 14</em>: DDS / Mixer Parameters</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="28%" />
