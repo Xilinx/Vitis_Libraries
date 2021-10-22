@@ -39,7 +39,7 @@
 #define NDATA (NMAX / NPARTS) // for every uram group
 
 // It must be larger than latency=32 + 10 > 42
-#define SWAITLEN (1024)
+#define SWAITLEN (1 << 14)
 #define HWAITLEN (64)
 
 // if you want to debug, you can open this
@@ -503,7 +503,7 @@ inline void checkMapHbm_th(int32_t NV,
 #pragma HLS INLINE off
     ap_int<DSTREAML> tmpWrStr;
     ap_int<DSTREAML> tmpWaStr;
-    ap_int<DSTREAML> waitBuf[2048];
+    ap_int<DSTREAML> waitBuf[SWAITLEN];
     ap_int<DWIDTHS> vid, oldCid, newCid;
     ap_uint<1> isF;
     int pHead = 0, pEnd = 0;
@@ -579,7 +579,7 @@ WAITTING_LOOP:
         vv.i = tmpWaStr(DWIDTHS - 1, 0);
         printf("\033[32mClear cache: vid=%d\033[0m\n", vv.f);
 #endif
-        if (mapTmp == -1) printf("\033[31mWarning: waitting\033[0m\n");
+        if (mapTmp == -1) printf("\033[31mWarning: waiting\033[0m\n");
     }
 
     e_str_update->write(true);

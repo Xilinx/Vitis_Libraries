@@ -37,7 +37,7 @@ The kernel will do the following steps:
 
 1. Set Uram: Load the original cids of the graph and scan vertices to set URAM. If vertex's cid is first appear, the flag on URAM will be writen true，otherwise the flag will be writen false.
 
-2. Lookup HBM: Lookup HBM to get new cid that have been writen success, put it into stream. If the cid haven't writen success, the cid will be put a waitting buffer. The buffer is a first-in first-out circular cache and read it regularly.
+2. Lookup HBM: Lookup HBM to get new cid that have been writen success, put it into stream. If the cid haven't writen success, the cid will be put a waiting buffer. The buffer is a first-in first-out circular cache and read it regularly.
 
 3. Updated HBM: Scan stream to get new cid and write back to HBM.
 
