@@ -12,7 +12,7 @@ Currently, this library offers three levels of acceleration:
 * The kernel level is for pre-defined kernels that are the C++ implementation of BLAS functions. These implementations are intended to demonstrate how FPGA kernels are defined and how L1 primitive functions can be used by any Vitis users to build their kernels for their applications. 
 * The software APIs level is an implementation of BLAS on top of the XILINX runtime (XRT). It allows software developers to use Vitis BLAS library without writing any runtime functions and hardware configurations.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/blas/2021.1/) for more details.
+Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/blas/2021.2/) for more details.
 
 
 ## Requirements
@@ -36,7 +36,7 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2021.1,
+This library is designed to work with Vitis 2021.2,
 and a matching version of XRT should be installed.
 
 ## Running Test Cases
@@ -49,7 +49,7 @@ HLS cases can only be found in `L1/tests` folder, and are created to test module
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2021.1/settings64.sh
+    source <install path>/Vitis/2021.2/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
@@ -102,10 +102,10 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 ## Benchmark Result
 
-More details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/blas/2021.1/benchmark.html).
+More details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/blas/2021.2/benchmark.html).
 
 ## Documentations
-For more details of the blas library, please refer to [blas Library Documentation](https://xilinx.github.io/Vitis_Libraries/blas/2021.1/index.html).
+For more details of the blas library, please refer to [blas Library Documentation](https://xilinx.github.io/Vitis_Libraries/blas/2021.2/index.html).
 
 
 ## License
