@@ -35,7 +35,7 @@ The cipherkey length for AES should be 128/192/256 bits.
 Our implementation takes a fix-sized (128 bits per block) data stream, but text in real world has a variety of lengths.
 Thus, you need to provide the data length in bits accompany with the data.
 
-.. _`NIST800_38D`: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
+.. _`NIST800_38D`: https://csrc.nist.gov/publications/detail/sp/800-38d/final
 
 Implementation on FPGA
 ======================

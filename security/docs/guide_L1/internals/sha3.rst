@@ -44,7 +44,7 @@ Currently, this library supports all of the algorithms mentioned above.
 * SHAKE-128
 * SHAKE-256
 
-.. _`FIPS 202`: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+.. _`FIPS 202`: https://csrc.nist.gov/publications/detail/fips/202/final
 
 Implementation on FPGA
 ======================

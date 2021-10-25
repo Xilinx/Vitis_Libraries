@@ -9,11 +9,11 @@ Since all the primitive code is developed in HLS C++ with the permissive Apache 
 advanced users can easily tailor, optimize or assemble property logic.
 Benchmarks of 4 different acceleration applications are also provided with the library for easy on-boarding and comparison.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/2021.1/index.html)
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/2021.2/index.html)
 
 ## Benchmark Result
 
-A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://xilinx.github.io/Vitis_Libraries/security/2021.1/benchmark/result.html).
+A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://xilinx.github.io/Vitis_Libraries/security/2021.2/benchmark/result.html).
 
 ## Library Contents
 
@@ -121,6 +121,7 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 | shake128 | SHAKE-128 algorithm implementation | L1 |
 | shake256 | SHAKE-256 algorithm implementation | L1 |
 | blake2b | BLAKE2B algorithm implementation | L1 |
+| keccak_256 | KECCAK-256 algorithm implementation | L1 |
 | vdf_evaluate | Evaluate VDF implementation | L1 |
 | verifyWesolowski | Verify VDF Wesolowski implementation | L1 |
 | verifyPietrzak | Verify VDF Pietrzak implementation | L1 |
