@@ -141,6 +141,9 @@ int main(int argc, const char* argv[]) {
     double* dataP = aligned_alloc<double>(MAXN);
     double* dataC = aligned_alloc<double>(inout_size);
     double* dataD = aligned_alloc<double>(inout_size);
+    for (size_t i = 0; i < inout_size; i++) {
+        dataD[i] = 0;
+    }
 
     // Generate general matrix dataAN x dataAN
     matGen<double>(dataAN, dataAN, seed, dataA);
