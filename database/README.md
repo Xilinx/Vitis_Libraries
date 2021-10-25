@@ -19,7 +19,7 @@ At each level, this library strives to make modules configurable through documen
 so that advanced users can easily tailor, optimize or combine with property logic for specific needs.
 Test cases are provided for all the public APIs, and can be used as examples of usage.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/2021.1/) for more details.
+Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/2021.2/) for more details.
 
 ## Requirements
 
@@ -125,10 +125,10 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 ## Benchmark Result
 
 In `L1/benchmarks`, a list of key primitives are combined with data-loading/storing modules and built into xclbins targeting Alveo U280.
-For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/database/2021.1/benchmark/benchmark.html).
+For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/database/2021.2/benchmark/benchmark.html).
 
 ## Documentations
-For more details of the database library, please refer to [Database Library Documentation](https://xilinx.github.io/Vitis_Libraries/xf_database/2021.1/index.html).
+For more details of the database library, please refer to [Database Library Documentation](https://xilinx.github.io/Vitis_Libraries/xf_database/2021.2/index.html).
 
 
 ## License
