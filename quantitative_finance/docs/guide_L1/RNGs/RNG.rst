@@ -165,10 +165,9 @@ As shown in the diagram below, if parameters took the value at left, it would be
    :width: 80%
    :align: center
 
-References: `AS 241`_, `Acklam`_.
+References: `AS 241`_.
 
 .. _`AS 241`: http://csg.sph.umich.edu/abecasis/gas_power_calculator/algorithm-as-241-the-percentage-points-of-the-normal-distribution.pdf
-.. _`Acklam`: http://home.online.no/~pjacklam/notes/invnorm/index.html
 
 Box-Muller transformation based NRNG
 ------------------------------------

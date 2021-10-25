@@ -11,7 +11,7 @@ The Vitis Quantitative Finance Library provides comprehensive tools from the bot
 
 * The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without engaging hardware development.
 
-Check the [comprehensive HTML documentation](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/2021.1/index.html) for more details.
+Check the [comprehensive HTML documentation](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/2021.2/index.html) for more details.
 
 ## Library Contents
 
@@ -92,7 +92,7 @@ Check the [comprehensive HTML documentation](https://xilinx.github.io/Vitis_Libr
 
 ### Software Platform
 
-This library is designed to work with Vitis 2021.1 and later, and therefore inherits the system requirements of Vitis and XRT.
+This library is designed to work with Vitis 2021.2 and later, and therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
@@ -109,7 +109,7 @@ Hardware modules and kernels are designed to work with Alveo cards. Specific req
 Setup the build environment using the Vitis and XRT scripts, and set the PLATFORM_REPO_PATHS to installation folder of platform files.
 
 ```console
-    $ source <install path>/Vitis/2021.1/settings64.sh
+    $ source <install path>/Vitis/2021.2/settings64.sh
     $ source /opt/xilinx/xrt/setup.sh
     $ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
@@ -205,9 +205,9 @@ $ cd output
 $ ./mc_example
 ```
 ## Benchmark Result
-In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/tree/gh-pages/2021.1/benchmark/benchmark.html).
+In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/2021.2/benchmark.html).
 ## Documentations
-For more details of the Graph library, please refer to [Vitis Quantitative_Finance Library Documentation](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/2021.1/index.html).
+For more details of the Graph library, please refer to [Vitis Quantitative_Finance Library Documentation](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/2021.2/index.html).
 
 ## License
 
