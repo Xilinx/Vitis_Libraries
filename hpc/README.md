@@ -38,7 +38,7 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2021.1,
+This library is designed to work with Vitis 2021.2,
 and a matching version of XRT should be installed.
 
 ## Running Test Cases
@@ -51,7 +51,7 @@ HLS cases can only be found in `L1/tests` folder, and are created to test module
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2021.1/settings64.sh
+    source <install path>/Vitis/2021.2/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
@@ -102,11 +102,11 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these Kernels are built into xclbins targeting Alveo U250, U280 or U50. We achieved a good performance against several problem sizes. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/hpc/2021.1/benchmark.html). 
+In `L2/benchmarks`, these Kernels are built into xclbins targeting Alveo U250, U280 or U50. We achieved a good performance against several problem sizes. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/hpc/2021.2/benchmark.html). 
 
 ## Documentations
 
-For more details of the HPC library, please refer to [Vitis HPC Library Documentation](https://xilinx.github.io/Vitis_Libraries/hpc/2021.1/index.html).
+For more details of the HPC library, please refer to [Vitis HPC Library Documentation](https://xilinx.github.io/Vitis_Libraries/hpc/2021.2/index.html).
 
 ## License
 

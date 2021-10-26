@@ -41,7 +41,7 @@
                     "hls_vivado_impl": 40960, 
                     "hls_csynth": 10240
                 }, 
-                "max_time_min": 300
+                "max_time_min": 1200
             }
         ], 
         "targets": [

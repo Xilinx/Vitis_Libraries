@@ -104,8 +104,8 @@ HOST_ARGS := $(BUILD_DIR)/ data_64 1 64 1
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --hls.jobs 8
-VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
+VPP_FLAGS += --hls.jobs 16
+VPP_LDFLAGS += --vivado.synth.jobs 16 --vivado.impl.jobs 16
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u250.cfg
 endif

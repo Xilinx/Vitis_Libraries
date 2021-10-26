@@ -10,7 +10,7 @@ several FPGA and CPU platforms. It supports software and hardware emulation as w
 - Vitis BLAS library is required to build any projects in Vitis HPC library
 -  According to the benchmark application, Alveo U250, U280 or U50 need to be installed and correctly configured.
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2021.1 installed and configured
+- Xilinx Vitis 2021.2 installed and configured
 
 ## Building
 
@@ -38,7 +38,7 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 ```
 
 ### Python 3.6+
-Follow the steps as per https://xilinx.github.io/Vitis_Libraries/blas/2021.1/user_guide/L1/pyenvguide.html to set up Python3 environment.
+Follow the steps as per https://xilinx.github.io/Vitis_Libraries/blas/2021.2/user_guide/L1/pyenvguide.html to set up Python3 environment.
 
 ### Datasets
 - For dense matrix conjugate gradient solver, data are randomly generated during benchmark
