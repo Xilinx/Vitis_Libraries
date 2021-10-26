@@ -37,7 +37,7 @@ and a matching version of XRT should be installed.
 
 ## Benchmark Result
 
-In `L2/benchmarks`, more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/blas/2021.1/user_guide/L2/L2_benchmark_spmv.html).
+In `L2/benchmarks`, more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/sparse/2021.1/benchmark/spmv_double.html).
 
 ## Documentations
 For more details of the sparse library, please refer to [sparse Library Documentation](https://xilinx.github.io/Vitis_Libraries/sparse/2021.1/index.html).
