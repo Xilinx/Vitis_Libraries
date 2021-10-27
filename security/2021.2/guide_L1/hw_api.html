@@ -400,6 +400,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#crc32">crc32</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#crc32-overload-1">crc32 overload (1)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#crc32-overload-2">crc32 overload (2)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crc32-overload-3">crc32 overload (3)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#crc32c">crc32c</a><ul>
@@ -2763,9 +2764,57 @@ Confidentiality” The implementation is modified for better performance.</p>
 </table>
 </div>
 <div class="section" id="crc32">
-<span id="cid-xf-security-crc32"></span><span id="doxid-namespacexf-1-1security-1a0ceb380d148ca9c60cc4a3ac9e15b5a8"></span><h2>crc32<a class="headerlink" href="#crc32" title="Permalink to this headline">¶</a></h2>
+<span id="cid-xf-security-crc32"></span><span id="doxid-namespacexf-1-1security-1ade96bdae2a80577b61b06f951b6bcb1b"></span><h2>crc32<a class="headerlink" href="#crc32" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="crc32-overload-1">
 <h3>crc32 overload (1)<a class="headerlink" href="#crc32-overload-1" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/crc32.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">W</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">crc32</span> <span class="p">(</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">crcInitStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">*</span><span class="n">W</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;&gt;&amp;</span> <span class="n">inPackLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endInPackLenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">outStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">endOutStrm</span>
+    <span class="p">)</span>
+</pre>
+<p>crc32 computes the CRC32 check value of an input data.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>W</td>
+<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16.</td>
+</tr>
+<tr class="row-even"><td>crcInitStrm</td>
+<td>initialize crc32 value</td>
+</tr>
+<tr class="row-odd"><td>inStrm</td>
+<td>input messages to be checked</td>
+</tr>
+<tr class="row-even"><td>inPackLenStrm</td>
+<td>effetive lengths of input message pack, 1~W. 0 means end of message</td>
+</tr>
+<tr class="row-odd"><td>endInPackLenStrm</td>
+<td>end flag of inPackLenStrm, 1 “false” for 1 message, 1 “true” means no message anymore.</td>
+</tr>
+<tr class="row-even"><td>outStrm</td>
+<td>crc32 result to output</td>
+</tr>
+<tr class="row-odd"><td>endOutStrm</td>
+<td>end flag of outStrm</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="crc32-overload-2">
+<span id="cid-xf-security-crc32-2"></span><span id="doxid-namespacexf-1-1security-1a0ceb380d148ca9c60cc4a3ac9e15b5a8"></span><h3>crc32 overload (2)<a class="headerlink" href="#crc32-overload-2" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/crc32.hpp&quot;</span>
 </pre>
@@ -2812,8 +2861,8 @@ Confidentiality” The implementation is modified for better performance.</p>
 </tbody>
 </table>
 </div>
-<div class="section" id="crc32-overload-2">
-<span id="cid-xf-security-crc32-2"></span><span id="doxid-namespacexf-1-1security-1a2278349080adda5242a272c3a7f76820"></span><h3>crc32 overload (2)<a class="headerlink" href="#crc32-overload-2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="crc32-overload-3">
+<span id="cid-xf-security-crc32-3"></span><span id="doxid-namespacexf-1-1security-1a2278349080adda5242a272c3a7f76820"></span><h3>crc32 overload (3)<a class="headerlink" href="#crc32-overload-3" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/crc32.hpp&quot;</span>
 </pre>
@@ -2837,7 +2886,7 @@ Confidentiality” The implementation is modified for better performance.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>W</td>
-<td>byte number of input data, the value of W includes 1, 2, 4, 8, 16, 32, 64.</td>
+<td>byte number of input data, the value of W includes 32, 64.</td>
 </tr>
 <tr class="row-even"><td>crcInitStrm</td>
 <td>initialize crc32 value</td>
