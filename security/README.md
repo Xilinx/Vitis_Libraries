@@ -13,7 +13,7 @@ Benchmarks of 4 different acceleration applications are also provided with the l
 
 ## Benchmark Result
 
-A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://xilinx.github.io/Vitis_Libraries/security/2021.2/benchmark/result.html).
+A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://xilinx.github.io/Vitis_Libraries/security/2021.2/benchmark.html).
 
 ## Library Contents
 
