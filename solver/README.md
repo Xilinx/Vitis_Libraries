@@ -27,4 +27,4 @@ Currently this includes the following operations for dense matrix
 In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/solver/2021.2/benchmark.html).
   
 ## Documentations
-For more details of the Graph library, please refer to [Vitis Solver Library Documentation](https://xilinx.github.io/Vitis_Libraries/xf_solver/2021.2/index.html).
+For more details of the Graph library, please refer to [Vitis Solver Library Documentation](https://xilinx.github.io/Vitis_Libraries/solver/2021.2/index.html).
