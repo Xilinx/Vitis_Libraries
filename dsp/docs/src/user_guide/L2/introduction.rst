@@ -39,6 +39,8 @@ Xilinx |reg| documentation is organized around a set of standard design processe
 
    -  :ref:`2_DSP_LIB_FUNC`
 
+   -  :ref:`2_COMPILING_AND_SIMULATING`
+
    -  :ref:`3_USING_EXAMPLES`
 
    -  :ref:`4_API_REFERENCE`
@@ -59,6 +61,8 @@ Xilinx |reg| documentation is organized around a set of standard design processe
    -  :ref:`2_DDS_MIXER`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
+
+   -  :ref:`2_COMPILING_AND_SIMULATING`
 
    -  :ref:`3_USING_EXAMPLES`
 

@@ -7,10 +7,6 @@ Current version provides:
 
 Note: Only L1/L2 promitives are delivered currently.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/dsp/2021.1/)
-
-
-
 Copyright 2021 Xilinx, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
