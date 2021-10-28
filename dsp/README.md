@@ -5,7 +5,7 @@ Current version provides:
 - L1 level HLS C++ implementation of Discrete Fourier Transform using Fast Fourier Transform algorithm for acceleration on Xilinx FPGAs.
 - L2 level AIE C++ graph implementation of FFT, FIRs, Matrix Multiply (GeMM) and utility Widgets.
 
-Note: Only L1/L2 promitives are delivered currently.
+Note: Only L1/L2 primitives are delivered currently.
 
 Copyright 2021 Xilinx, Inc.
 
