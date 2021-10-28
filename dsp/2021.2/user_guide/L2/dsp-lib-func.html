@@ -826,7 +826,7 @@ The values supported are 0 (window API) or 1 (stream API).</p>
 FIR graph instance consists of TP_CASC_LEN kernels and the FIR length (TP_FIR_LEN) is divided by the requested cascade length and each kernel in the graph gets assigned a fraction of the workload.
 Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.</p>
 <p><strong>TP_DUAL_IP</strong> is an implementation trade-off between performance and resource utilization.
-Symmetric FIRs may be may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
+Symmetric FIRs may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
 In addition, FIRs with streaming interface may utilize the second input port to maximize the available throughput.</p>
 <ul>
 <li><p class="first">When set to 0, the FIR is created with a single input port.</p>
@@ -1086,7 +1086,7 @@ Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the he
 <p><strong>TP_API</strong>: Selects between window (0) and stream (1) input/output. When set to 1, the FFT will have 2 stream port per subframe processor so as to maximize performance. Samples must be input to each stream in turn. E.g. with TP_PARALLEL_POWER=2 there will be 8 stream inputs. Samples 0 to 7 must be input one to each port, followed by samples 8 to 15, so port(0) will receive samples 0, 8, 16, etc.
 On output, each stream will output a splice of the overall frame. So in the above example, output port(0) will output samples 0 to TP_POINT_SIZE/8-1.</p>
 <p><strong>TP_PARALLEL_POWER</strong>: If greater than 0, TP_CASC_LEN applies to the subframe FFT rather than the FFT as a whole. For instance, with TP_POINT_SIZE=16384 and TP_PARALLEL_POWER = 3 there will be 8 subframe FFTs each of point size 2048. The TP_CASC_LEN in this case would be limited to 6 for integer TT_DATA types and 11 for TT_DATA = cfloat.</p>
-<p>TP_PARALLEL_POWER is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram <a class="reference internal" href="#figure-1"><span class="std std-ref">Figure 1: Applying Design Constraints</span></a> shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.</p>
+<p>TP_PARALLEL_POWER is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram <a class="reference internal" href="#figure-1"><span class="std std-ref">Figure 2: Applying Design Constraints</span></a> shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.</p>
 <div class="section" id="scaling">
 <h3>Scaling<a class="headerlink" href="#scaling" title="Permalink to this headline">¶</a></h3>
 <p>This FFT implementation does not implement the 1/N scaling of an IFFT. Internally, for cint16 and cint32 data, an internal data type of cint32 is used. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits). Distortion caused by saturation will be possible for large point sizes and large values when the data type is cint32.</p>
@@ -1099,10 +1099,10 @@ On output, each stream will output a splice of the overall frame. So in the abov
 </div>
 <div class="section" id="constraints">
 <h3>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h3>
-<p>The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See <a class="reference internal" href="#figure-1"><span class="std std-ref">Figure 1: Applying Design Constraints</span></a> below.</p>
+<p>The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See <a class="reference internal" href="#figure-1"><span class="std std-ref">Figure 2: Applying Design Constraints</span></a> below.</p>
 <div class="figure" id="id6">
-<span id="figure-1"></span><img alt="../../_images/figure8.png" src="../../_images/figure8.png" />
-<p class="caption"><span class="caption-text"><em>Figure 1:</em> <strong>Applying Design Constraints</strong></span></p>
+<span id="figure-1"></span><img alt="../../_images/X25897.png" src="../../_images/X25897.png" />
+<p class="caption"><span class="caption-text"><em>Figure 2:</em> <strong>Applying Design Constraints</strong></span></p>
 </div>
 <p>The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.</p>
 <p>The stream to window conversion kernels on input and output to the fft subframes are at the same level as m_fftKernels and are called m_inWidgetKernel and m_outWidgetKernel respectively.

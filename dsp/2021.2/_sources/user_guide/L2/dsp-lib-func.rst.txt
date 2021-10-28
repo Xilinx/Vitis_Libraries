@@ -237,7 +237,7 @@ FIR graph instance consists of TP_CASC_LEN kernels and the FIR length (TP_FIR_LE
 Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.
 
 **TP_DUAL_IP** is an implementation trade-off between performance and resource utilization.
-Symmetric FIRs may be may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
+Symmetric FIRs may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
 In addition, FIRs with streaming interface may utilize the second input port to maximize the available throughput.
 
 * When set to 0, the FIR is created with a single input port.
@@ -462,9 +462,9 @@ Constraints
 The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See :ref:`FIGURE_1` below.
 
 .. _FIGURE_1:
-.. figure:: ./media/figure8.png
+.. figure:: ./media/X25897.png
 
-    *Figure 1:* **Applying Design Constraints**
+    *Figure 2:* **Applying Design Constraints**
 
 The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.
 
