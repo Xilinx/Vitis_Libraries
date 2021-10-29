@@ -239,7 +239,7 @@ runhls: data setup | check_vivado check_vpp
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log ecc_test.prj
+	rm -rf settings.tcl *_hls.log ecdsa_nistp256_sign_test.prj
 
 # Used by Jenkins test
 cleanall: clean

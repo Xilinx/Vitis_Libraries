@@ -51,6 +51,7 @@ template <int N>
 ap_uint<N> monProduct(ap_uint<N> opA, ap_uint<N> opB, ap_uint<N> opM) {
     ap_uint<N + 2> s = 0;
     ap_uint<1> a0 = opA[0];
+MON_PRODUCT_MOD:
     for (int i = 0; i < N; i++) {
         ap_uint<1> qa = opB[i];
         ap_uint<1> qm = s[0] ^ (opB[i] & a0);
@@ -115,7 +116,9 @@ ap_uint<N> simpleMod(ap_uint<L> dividend, ap_uint<N> divisor) {
  */
 template <int N>
 ap_uint<N> productMod(ap_uint<N> opA, ap_uint<N> opB, ap_uint<N> opM) {
+#pragma HLS inline off
     ap_uint<N + 1> tmp = 0;
+PRODUCT_MOD:
     for (int i = N - 1; i >= 0; i--) {
         tmp <<= 1;
         if (tmp >= opM) {
@@ -244,7 +247,9 @@ ap_uint<N> modularInv(ap_uint<N> opA, ap_uint<N> opM) {
     ap_uint<N + 1> r = 0;
     ap_uint<32> k = 0;
 
+INV_MOD_I:
     while (v > 0) {
+#pragma HLS loop_tripcount max = 256
         if (u[0] == 0) {
             u >>= 1;
             s <<= 1;
@@ -272,7 +277,9 @@ ap_uint<N> modularInv(ap_uint<N> opA, ap_uint<N> opM) {
 
     k -= N;
 
+INV_MOD_II:
     for (int i = 0; i < k; i++) {
+#pragma HLS loop_tripcount max = 256
         if (r[0] == 1) {
             r += opM;
         }

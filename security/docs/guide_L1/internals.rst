@@ -40,6 +40,8 @@ Design Internals
    internals/dsa.rst
    internals/ecb.rst
    internals/ecc.rst
+   internals/ecdsa_nistp256.rst
+   internals/ecdsa_secp256k1.rst
    internals/gcm.rst
    internals/gmac.rst
    internals/hmac.rst

@@ -125,6 +125,9 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 | vdf_evaluate | Evaluate VDF implementation | L1 |
 | verifyWesolowski | Verify VDF Wesolowski implementation | L1 |
 | verifyPietrzak | Verify VDF Pietrzak implementation | L1 |
+| ecdsa_nistp256 | ECDSA with curve nistp256 implementation | L1 |
+| ecdsa_secp256k1 | ECDSA with curve secp256k1 implementation | L1 |
+
 
 ## Requirements
 

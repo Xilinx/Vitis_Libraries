@@ -35,6 +35,7 @@ Release Note
 The 2021.2 release provide support for:
 * KECCAK-256
 * CRC32C
+* NIST P-256
 
 2021.1
 ------

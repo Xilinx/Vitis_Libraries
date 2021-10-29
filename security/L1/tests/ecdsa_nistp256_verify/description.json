@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ECDSA Sign", 
+    "name": "Xilinx ECDSA NISTP256 Verify", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -10,7 +10,7 @@
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
-    "project": "ecc_test", 
+    "project": "ecdsa_nistp256_verify_test", 
     "solution": "solution1", 
     "clock": "3.33", 
     "topfunction": "test", 

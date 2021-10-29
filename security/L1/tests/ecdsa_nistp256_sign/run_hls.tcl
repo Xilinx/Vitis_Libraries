@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "ecc_test.prj"
+set PROJ "ecdsa_nistp256_sign_test.prj"
 set SOLN "solution1"
 
 if {![info exists CLKP]} {

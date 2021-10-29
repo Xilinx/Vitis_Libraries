@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-#include "xf_security/ecdsa.hpp"
+#include "xf_security/ecdsa_nistp256.hpp"
 
 void test(ap_uint<256> hash, ap_uint<256> Qx, ap_uint<256> Qy, ap_uint<256> r, ap_uint<256> s, bool& ifValid) {
-    xf::security::ecdsaSecp256k1<256> processor;
-    processor.init();
-    ifValid = processor.verify(r, s, hash, Qx, Qy);
+    ifValid = xf::security::nistp256Verify(r, s, hash, Qx, Qy);
 }
 
 int main() {
-    ap_uint<256> m = ap_uint<256>("0x4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a");
-    ap_uint<256> r = ap_uint<256>("0x241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795");
-    ap_uint<256> s = ap_uint<256>("0x021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e");
-    ap_uint<256> Qx = ap_uint<256>("0x779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcd");
-    ap_uint<256> Qy = ap_uint<256>("0xe94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f");
+    ap_uint<256> m = ap_uint<256>("0x44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56");
+    ap_uint<256> r = ap_uint<256>("0xf3ac8061b514795b8843e3d6629527ed2afd6b1f6a555a7acabb5e6f79c8c2ac");
+    ap_uint<256> s = ap_uint<256>("0x8bf77819ca05a6b2786c76262bf7371cef97b218e96f175a3ccdda2acc058903");
+    ap_uint<256> Qx = ap_uint<256>("0x1ccbe91c075fc7f4f033bfa248db8fccd3565de94bbfb12f3c59ff46c271bf83");
+    ap_uint<256> Qy = ap_uint<256>("0xce4014c68811f9a21a1fdb2c0e6113e06db7ca93b7404e78dc7ccd5ca89a4ca9");
 
     bool ifValid;
 

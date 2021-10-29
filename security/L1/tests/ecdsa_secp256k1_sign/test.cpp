@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_security/ecdsa.hpp"
+#include "xf_security/ecdsa_secp256k1.hpp"
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
