@@ -426,6 +426,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#aes192ecbdecrypt">aes192EcbDecrypt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#aes256ecbencrypt">aes256EcbEncrypt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#aes256ecbdecrypt">aes256EcbDecrypt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nistp256sign">nistp256Sign</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nistp256verify">nistp256Verify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#aes128gcmencrypt">aes128GcmEncrypt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#aes128gcmdecrypt">aes128GcmDecrypt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#aes192gcmencrypt">aes192GcmEncrypt</a></li>
@@ -3747,6 +3749,86 @@ Confidentiality” The implementation is modified for better performance.</p>
 </tr>
 <tr class="row-odd"><td>endPlaintextStrm</td>
 <td>End flag of block stream plaintext, 1 bit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="nistp256sign">
+<span id="cid-xf-security-nistp256sign"></span><span id="doxid-namespacexf-1-1security-1aaa03be8d03321923eac2a6e05e5f1e28"></span><h2>nistp256Sign<a class="headerlink" href="#nistp256sign" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/ecdsa_nistp256.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">bool</span> <span class="n">nistp256Sign</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">hash</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">k</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">privateKey</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;&amp;</span> <span class="n">r</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;&amp;</span> <span class="n">s</span>
+    <span class="p">)</span>
+</pre>
+<p>signing function. It will return true if input parameters are legal, otherwise return false.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>hash</td>
+<td>digest value of message to be signed, with length set to 256.</td>
+</tr>
+<tr class="row-even"><td>k</td>
+<td>A random key to sign the message, should kept different each time to be used.</td>
+</tr>
+<tr class="row-odd"><td>privateKey</td>
+<td>Private Key to sign the message</td>
+</tr>
+<tr class="row-even"><td>r</td>
+<td>part of signing pair {r, s}</td>
+</tr>
+<tr class="row-odd"><td>s</td>
+<td>part of signing pair {r, s}</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="nistp256verify">
+<span id="cid-xf-security-nistp256verify"></span><span id="doxid-namespacexf-1-1security-1acf36d91e32f8023fb1c9de8c9b45bea8"></span><h2>nistp256Verify<a class="headerlink" href="#nistp256verify" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_security/ecdsa_nistp256.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">bool</span> <span class="n">nistp256Verify</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">s</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">hash</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">Px</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">Py</span>
+    <span class="p">)</span>
+</pre>
+<p>verifying function. It will return true if verified, otherwise false.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>r</td>
+<td>part of signing pair {r, s}</td>
+</tr>
+<tr class="row-even"><td>s</td>
+<td>part of signing pair {r, s}</td>
+</tr>
+<tr class="row-odd"><td>hash</td>
+<td>digest value of message to be signed, with length set to 256.</td>
+</tr>
+<tr class="row-even"><td>Px</td>
+<td>X coordinate of public key point P.</td>
+</tr>
+<tr class="row-odd"><td>Py</td>
+<td>Y coordinate of public key point P.</td>
 </tr>
 </tbody>
 </table>

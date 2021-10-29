@@ -412,7 +412,7 @@
 <div class="toctree-wrapper compound">
 </div>
 <pre class="highlight overview-code-block literal-block">
-<span></span><span class="cp">#include</span> <span class="cpf">&quot;ecdsa.hpp&quot;</span>
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;ecdsa_jocobian.hpp&quot;</span>
 </pre>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
@@ -430,7 +430,7 @@
 </tbody>
 </table>
 <pre class="highlight overview-code-block literal-block" id="cid-xf-security-ecdsasecp256k1-dotproduct">
-<span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a70229ee175e366677b629a9def794816"></span><span id="cid-xf-security-ecdsasecp256k1-productjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aed529ec45313820b0547beced1501c87"></span><span id="cid-xf-security-ecdsasecp256k1-doublejacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aeb506204ff3ac51c15ad384824d05f0b"></span><span id="cid-xf-security-ecdsasecp256k1-addjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a2f03f0b1b0c7909821c1d76576caed35"></span><span id="cid-xf-security-ecdsasecp256k1-fromjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a734d1cc9e6ae52bff0d0c3adfef1a229"></span><span id="cid-xf-security-ecdsasecp256k1-tojacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a39d801630af5b407ccac4bc3102d5479"></span><span id="cid-xf-security-ecdsasecp256k1-add"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aaed23e9be778e820e608a4192df2c8cb"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-n"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a6234012f4f77698becd1ee7fe9fee16c"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a6b2fcc3fd9c6a3df841e99abc9d97807"></span><span id="cid-xf-security-ecdsasecp256k1-ecdsasecp256k1"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aed33fce5bfe9d26038b1569c5cbc4791"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p3"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a67064ab0b2a4060041cb4f5090f4881d"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p2"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a317e99a2aa55830c8f9922995c1658bb"></span><span id="cid-xf-security-ecdsasecp256k1-a"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a3107c36b06f2f2cab84644ce23add2d0"></span><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">HashW</span><span class="o">&gt;</span>
+<span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a70229ee175e366677b629a9def794816"></span><span id="cid-xf-security-ecdsasecp256k1-add"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aaed23e9be778e820e608a4192df2c8cb"></span><span id="cid-xf-security-ecdsasecp256k1-dotproductnafprecomputejacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1af02e42e0866b2133222152d5777417b7"></span><span id="cid-xf-security-ecdsasecp256k1-dotproductjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a405673919093638b40b45d961400f63e"></span><span id="cid-xf-security-ecdsasecp256k1-addjacobianaffine"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a96884b90a6285376224aab2a3caeddb5"></span><span id="cid-xf-security-ecdsasecp256k1-doublejacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aeb506204ff3ac51c15ad384824d05f0b"></span><span id="cid-xf-security-ecdsasecp256k1-addjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a2f03f0b1b0c7909821c1d76576caed35"></span><span id="cid-xf-security-ecdsasecp256k1-fromjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a734d1cc9e6ae52bff0d0c3adfef1a229"></span><span id="cid-xf-security-ecdsasecp256k1-tojacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a39d801630af5b407ccac4bc3102d5479"></span><span id="cid-xf-security-ecdsasecp256k1-getnaf"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a31660f6e7938024162efc269d248535f"></span><span id="cid-xf-security-ecdsasecp256k1-getneg"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a6de3e3a7e4670cedfd740f92322a363c"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-n"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a6234012f4f77698becd1ee7fe9fee16c"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a6b2fcc3fd9c6a3df841e99abc9d97807"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p4"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a4b08d4c7bcfe92007b2efb2b0072ea19"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p3"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a67064ab0b2a4060041cb4f5090f4881d"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p2"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a317e99a2aa55830c8f9922995c1658bb"></span><span id="cid-xf-security-ecdsasecp256k1-productmod-p1"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a27393e8f80fbef71051c5cfc4f737208"></span><span id="cid-xf-security-ecdsasecp256k1-ecdsasecp256k1"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aed33fce5bfe9d26038b1569c5cbc4791"></span><span id="cid-xf-security-ecdsasecp256k1-productjacobian"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aed529ec45313820b0547beced1501c87"></span><span id="cid-xf-security-ecdsasecp256k1-precomputey"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1af50fc6c2d548e7812e300e989eb054e6"></span><span id="cid-xf-security-ecdsasecp256k1-precomputex"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1aef39aee08c54a607401d8fb4b5860c4a"></span><span id="cid-xf-security-ecdsasecp256k1-a"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a3107c36b06f2f2cab84644ce23add2d0"></span><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">HashW</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="n">ecdsaSecp256k1</span>
 
 <span class="c1">// fields</span>
@@ -440,7 +440,9 @@
 <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <a class="reference internal" href="#doxid-classxf-1-1security-1-1ecdsa-secp256k1-1afa80a855de827286fd10343bd0c51ad5"><span class="std std-ref">p</span></a><span></span>
 <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <a class="reference internal" href="#doxid-classxf-1-1security-1-1ecdsa-secp256k1-1adde29438dcdde47e46a48207dedbce62"><span class="std std-ref">Gx</span></a><span></span>
 <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <a class="reference internal" href="#doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a8e900d97a5e2aae0438e5e94f717aeb5"><span class="std std-ref">Gy</span></a><span></span>
-<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <a class="reference internal" href="#doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a9c5daad16317d137e4a7fc39c2d923e7"><span class="std std-ref">n</span></a>
+<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <a class="reference internal" href="#doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a9c5daad16317d137e4a7fc39c2d923e7"><span class="std std-ref">n</span></a><span></span>
+<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">preComputeX</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
+<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">preComputeY</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
 </pre>
 <div class="section" id="fields">
 <h3>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h3>
@@ -573,6 +575,31 @@
 <td>X coordinate of public key point P.</td>
 </tr>
 <tr class="row-odd"><td>Py</td>
+<td>Y coordinate of public key point P.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="verifypubkey">
+<span id="cid-xf-security-ecdsasecp256k1-verifypubkey"></span><span id="doxid-classxf-1-1security-1-1ecdsa-secp256k1-1a4e7250ce4f1eea9a8931c10d4e50dbc2"></span><h3>verifyPubKey<a class="headerlink" href="#verifypubkey" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">bool</span> <span class="n">verifyPubKey</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">Px</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span> <span class="n">Py</span>
+    <span class="p">)</span>
+</pre>
+<p>Verifying Public Key. It will return true if verified, otherwise false.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Px</td>
+<td>X coordinate of public key point P.</td>
+</tr>
+<tr class="row-even"><td>Py</td>
 <td>Y coordinate of public key point P.</td>
 </tr>
 </tbody>

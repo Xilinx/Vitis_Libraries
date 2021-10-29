@@ -6,8 +6,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 	<head>
 		<meta charset="utf-8">
-		<meta content="Vitis, Security, Library, ECC, ECDSA, EdDSA, Secp256k1, Ed25519, Cryptography" name="keywords" />
-<meta content="ECC is a public-key cryptosystem. Its encryption key is public and different from decryption key." name="description" />
+		<meta content="Vitis, Security, Library, CBC, mode" name="keywords" />
+<meta content="The Cipher Block Chaining (CBC) mode is a typical block cipher mode of operation using block cipher algorithm." name="description" />
 <meta content="Document" name="xlnxdocumentclass" />
 <meta content="Tutorials" name="xlnxdocumenttype" />
 
@@ -61,8 +61,8 @@
   <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ECDSA nistp256" href="ecdsa_nistp256.html" />
-    <link rel="prev" title="ECB Mode" href="ecb.html" /> 
+    <link rel="next" title="GCM Mode" href="gcm.html" />
+    <link rel="prev" title="ECDSA nistp256" href="ecdsa_nistp256.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -358,18 +358,15 @@
 <li class="toctree-l3"><a class="reference internal" href="des.html">DES and 3DES Algorithms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dsa.html">Digital Signature Algorithm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ecb.html">ECB Mode</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Elliptic-curve Cryptography</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#elliptic-curve-digital-signature-algorithm">Elliptic Curve Digital Signature Algorithm</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#edwards-curve-digital-signature-algorithm">Edwards-curve Digital Signature Algorithm</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#reference">Reference</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="ecc.html">Elliptic-curve Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ecc.html#elliptic-curve-digital-signature-algorithm">Elliptic Curve Digital Signature Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ecc.html#edwards-curve-digital-signature-algorithm">Edwards-curve Digital Signature Algorithm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ecdsa_nistp256.html">ECDSA nistp256</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ecdsa_secp256k1.html">ECDSA secp256k1</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ECDSA secp256k1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation-on-fpga">Implementation on FPGA</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gcm.html">GCM Mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gmac.html">GMAC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hmac.html">HMAC Algorithms</a></li>
@@ -448,7 +445,7 @@
         
           <li><a href="../internals.html">Design Internals</a> &raquo;</li>
         
-      <li>Elliptic-curve Cryptography</li>
+      <li>ECDSA secp256k1</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -465,29 +462,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elliptic-curve-cryptography">
-<h1>Elliptic-curve Cryptography<a class="headerlink" href="#elliptic-curve-cryptography" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="ecdsa-secp256k1">
+<h1>ECDSA secp256k1<a class="headerlink" href="#ecdsa-secp256k1" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>ECC(Elliptic-curve Cryptography) is a public-key cryptosystem. Its encryption key is public and different from decryption key. ECC allows smaller keys compared to non-EC cryptography to provide equivalent security.
-ECC cryptosystem includes key generation, key distribution, encryption/decryption and padding schemes. In this release we provide the encryption/decryption part.
-Current implementation is a templated design which could adapt to various curve parameters.</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Elliptic Curve Digital Signature Algorithm (ECDSA) is a variant of the Digital Signature Algorithm (DSA) which is based on elliptic curve cryptography(ECC).
+The elliptic curve secp256k1 we used to sign and verify signature is specified with a set of parameters defined in <a class="reference external" href="https://www.secg.org/sec2-v2.pdf">Standards for Efficient
+Cryptography 2 (SEC 2) 2.4.1</a>.</p>
 </div>
-<div class="section" id="elliptic-curve-digital-signature-algorithm">
-<h1>Elliptic Curve Digital Signature Algorithm<a class="headerlink" href="#elliptic-curve-digital-signature-algorithm" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+<div class="section" id="implementation-on-fpga">
+<h2>Implementation on FPGA<a class="headerlink" href="#implementation-on-fpga" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="signing-point-multiplication-kg">
+<h3>Signing (point multiplication kG)<a class="headerlink" href="#signing-point-multiplication-kg" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Use a precompute table of multiples of curve base point G.</li>
+<li>Use NAF notation for k.</li>
+<li>Optimized modular multiplicaion based on prime p .</li>
+<li>Point addition/doubling calculated in Jacobian coordinate.</li>
+<li>Time used to generate signature is around 0.2ms.</li>
+</ul>
 </div>
-<p>Elliptic Curve Digital Signature Algorithm (ECDSA) is a variant of Digital Signature Algorithm which utilize elliptic curve cryptography. In this release, we provide support for curve Secp256k1.</p>
+<div class="section" id="verification-point-multiplication-ag-bp">
+<h3>Verification (point multiplication aG+bP)<a class="headerlink" href="#verification-point-multiplication-ag-bp" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Use a precompute table of multiples of curve base point G.</li>
+<li>Use NAF notation for a.</li>
+<li>Optimized modular multiplicaion based on prime p.</li>
+<li>Point addition/doubling calculated in Jacobian coordinate.</li>
+<li>Time used to verify signature is around 0.9ms.</li>
+</ul>
 </div>
-<div class="section" id="edwards-curve-digital-signature-algorithm">
-<h1>Edwards-curve Digital Signature Algorithm<a class="headerlink" href="#edwards-curve-digital-signature-algorithm" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-</div>
-<p>Edwards-curve Digital Signature Algorithm provide digital signature functionalities using a vriant of n twisted Edwards curves. In this release, we provide support for curve ed25519.</p>
-<div class="section" id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
-<p>Peter Montgomery. “Modular Multiplication Without Trial Division”, Mathematics of Computation, vol. 44 no. 170, pp. 519–521, April 1985
-RFC 8032 “Edwards-Curve Digital Signature Algorithm (EdDSA)”.</p>
 </div>
 </div>
 
@@ -507,10 +513,10 @@ RFC 8032 “Edwards-Curve Digital Signature Algorithm (EdDSA)”.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ecdsa_nistp256.html" class="btn btn-neutral float-right" title="ECDSA nistp256" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="gcm.html" class="btn btn-neutral float-right" title="GCM Mode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ecb.html" class="btn btn-neutral float-left" title="ECB Mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="ecdsa_nistp256.html" class="btn btn-neutral float-left" title="ECDSA nistp256" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
