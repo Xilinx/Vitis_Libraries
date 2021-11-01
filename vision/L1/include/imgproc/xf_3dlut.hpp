@@ -279,15 +279,18 @@ ROW_LOOP:
             _FIXED_LUT_TYPE dist_b = index_b - pixelIndex.B;
 
             /* No need to interpolate for border pixels*/
-            if (pixelIndex.R == lutdim - 1) {
+            //            if (pixelIndex.R == lutdim - 1) {
+            if (pixelIndex.R + 1 == lutdim) {
                 outR = borderLutRX[pixelIndex.B][pixelIndex.G];
                 outG = borderLutGX[pixelIndex.B][pixelIndex.G];
                 outB = borderLutBX[pixelIndex.B][pixelIndex.G];
-            } else if (pixelIndex.G == lutdim - 1) {
+                //            } else if (pixelIndex.G == lutdim - 1) {
+            } else if (pixelIndex.G + 1 == lutdim) {
                 outR = borderLutRY[pixelIndex.B][pixelIndex.R];
                 outG = borderLutGY[pixelIndex.B][pixelIndex.R];
                 outB = borderLutBY[pixelIndex.B][pixelIndex.R];
-            } else if (pixelIndex.B == lutdim - 1) {
+                //            } else if (pixelIndex.B == lutdim - 1) {
+            } else if (pixelIndex.B + 1 == lutdim) {
                 outR = borderLutRZ[pixelIndex.G][pixelIndex.R];
                 outG = borderLutGZ[pixelIndex.G][pixelIndex.R];
                 outB = borderLutBZ[pixelIndex.G][pixelIndex.R];
@@ -297,7 +300,8 @@ ROW_LOOP:
                  * as few values of the cube reside in main 3d array
                  * and the rest in the borderLut array(s).
                  */
-                if (pixelIndex.R == lutdim - 2) { // x-dimension
+                //                if (pixelIndex.R == lutdim - 2) { // x-dimension
+                if (pixelIndex.R + 2 == lutdim) { // x-dimension
 
                     cubeBufferR.P001 = borderLutRX[pixelIndex.B][pixelIndex.G];
                     cubeBufferG.P001 = borderLutGX[pixelIndex.B][pixelIndex.G];
@@ -315,8 +319,10 @@ ROW_LOOP:
                     cubeBufferG.P111 = borderLutGX[pixelIndex.B + 1][pixelIndex.G + 1];
                     cubeBufferB.P111 = borderLutBX[pixelIndex.B + 1][pixelIndex.G + 1];
 
-                    if (pixelIndex.R == lutdim - 2 && pixelIndex.G == lutdim - 2 &&
-                        pixelIndex.B < lutdim - 2) { // x-y border
+                    //                    if (pixelIndex.R == lutdim - 2 && pixelIndex.G == lutdim - 2 &&
+                    //                        pixelIndex.B < lutdim - 2) { // x-y border
+                    if (pixelIndex.R + 2 == lutdim && pixelIndex.G + 2 == lutdim &&
+                        pixelIndex.B + 2 < lutdim) { // x-y border
 
                         cubeBufferR.P000 = lutGrid_r[pixelIndex.B][pixelIndex.G][pixelIndex.R];
                         cubeBufferG.P000 = lutGrid_g[pixelIndex.B][pixelIndex.G][pixelIndex.R];
@@ -334,8 +340,10 @@ ROW_LOOP:
                         cubeBufferG.P110 = borderLutGY[pixelIndex.B + 1][pixelIndex.R];
                         cubeBufferB.P110 = borderLutBY[pixelIndex.B + 1][pixelIndex.R];
 
-                    } else if (pixelIndex.R == lutdim - 2 && pixelIndex.B == lutdim - 2 &&
-                               pixelIndex.G < lutdim - 2) { // x-z border
+                        //                    } else if (pixelIndex.R == lutdim - 2 && pixelIndex.B == lutdim - 2 &&
+                        //                               pixelIndex.G < lutdim - 2) { // x-z border
+                    } else if (pixelIndex.R + 2 == lutdim && pixelIndex.B + 2 == lutdim &&
+                               pixelIndex.G + 2 < lutdim) { // x-z border
 
                         cubeBufferR.P000 = lutGrid_r[pixelIndex.B][pixelIndex.G][pixelIndex.R];
                         cubeBufferG.P000 = lutGrid_g[pixelIndex.B][pixelIndex.G][pixelIndex.R];
@@ -352,8 +360,10 @@ ROW_LOOP:
                         cubeBufferR.P110 = borderLutRZ[pixelIndex.G + 1][pixelIndex.R];
                         cubeBufferG.P110 = borderLutGZ[pixelIndex.G + 1][pixelIndex.R];
                         cubeBufferB.P110 = borderLutBZ[pixelIndex.G + 1][pixelIndex.R];
-                    } else if (pixelIndex.R == lutdim - 2 && pixelIndex.G == lutdim - 2 &&
-                               pixelIndex.B == lutdim - 2) { // x-y-z border
+                        //                    } else if (pixelIndex.R == lutdim - 2 && pixelIndex.G == lutdim - 2 &&
+                        //                               pixelIndex.B == lutdim - 2) { // x-y-z border
+                    } else if (pixelIndex.R + 2 == lutdim && pixelIndex.G + 2 == lutdim &&
+                               pixelIndex.B + 2 == lutdim) { // x-y-z border
 
                         cubeBufferR.P000 = lutGrid_r[pixelIndex.B][pixelIndex.G][pixelIndex.R];
                         cubeBufferG.P000 = lutGrid_g[pixelIndex.B][pixelIndex.G][pixelIndex.R];
@@ -387,10 +397,13 @@ ROW_LOOP:
                         cubeBufferG.P110 = lutGrid_g[pixelIndex.B + 1][pixelIndex.G + 1][pixelIndex.R];
                         cubeBufferB.P110 = lutGrid_b[pixelIndex.B + 1][pixelIndex.G + 1][pixelIndex.R];
                     }
-                } else if (pixelIndex.G == lutdim - 2) { // y-dimension
+                    //                } else if (pixelIndex.G == lutdim - 2) { // y-dimension
+                } else if (pixelIndex.G + 2 == lutdim) { // y-dimension
 
-                    if (pixelIndex.B == lutdim - 2 && pixelIndex.G == lutdim - 2 &&
-                        pixelIndex.R < lutdim - 2) { // y-z border
+                    //                    if (pixelIndex.B == lutdim - 2 && pixelIndex.G == lutdim - 2 &&
+                    //                        pixelIndex.R < lutdim - 2) { // y-z border
+                    if (pixelIndex.B + 2 == lutdim && pixelIndex.G + 2 == lutdim &&
+                        pixelIndex.R + 2 < lutdim) { // y-z border
 
                         cubeBufferR.P000 = lutGrid_r[pixelIndex.B][pixelIndex.G][pixelIndex.R];
                         cubeBufferG.P000 = lutGrid_g[pixelIndex.B][pixelIndex.G][pixelIndex.R];
@@ -457,7 +470,8 @@ ROW_LOOP:
                         cubeBufferG.P111 = borderLutGY[pixelIndex.B + 1][pixelIndex.R + 1];
                         cubeBufferB.P111 = borderLutBY[pixelIndex.B + 1][pixelIndex.R + 1];
                     }
-                } else if (pixelIndex.B == lutdim - 2) { // z-dimension
+                    //                } else if (pixelIndex.B == lutdim - 2) { // z-dimension
+                } else if (pixelIndex.B + 2 == lutdim) { // z-dimension
 
                     cubeBufferR.P000 = lutGrid_r[pixelIndex.B][pixelIndex.G][pixelIndex.R];
                     cubeBufferG.P000 = lutGrid_g[pixelIndex.B][pixelIndex.G][pixelIndex.R];

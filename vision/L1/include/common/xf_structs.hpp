@@ -35,6 +35,17 @@
 namespace xf {
 namespace cv {
 
+template <int T>
+ap_uint<T> xf_satcast(int in_val) {
+    if (in_val > ((1 << T) - 1)) {
+        return ((1 << T) - 1);
+    } else if (in_val < 0) {
+        return 0;
+    } else {
+        return in_val;
+    }
+}
+
 template <typename T>
 T float2ap_uint(float val) {
     T* val_out = (T*)(&val);
@@ -602,6 +613,7 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::init(int _rows, int _cols, bool
 
     rows = _rows;
     cols = _cols;
+    allocatedFlag = 0;
     size = _rows * ((_cols + NPPC - 1) >> XF_BITSHIFT(NPPC));
 
     if (allocate) {

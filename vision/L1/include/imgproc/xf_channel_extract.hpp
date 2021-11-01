@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ void xfChannelExtractKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> i, j, k;
     XF_TNAME(SRC_T, NPC) in_pix;
     XF_TNAME(DST_T, NPC) out_pix;
-    ap_uint<XF_PIXELDEPTH(DST_T)> result;
+    ap_uint<XF_DTPIXELDEPTH(DST_T, NPC)> result;
     int shift = 0;
     int bitdepth_src = XF_DTPIXELDEPTH(SRC_T, NPC) / XF_CHANNELS(SRC_T, NPC);
     int bitdepth_dst = XF_DTPIXELDEPTH(DST_T, NPC) / XF_CHANNELS(DST_T, NPC);
@@ -82,6 +82,8 @@ RowLoop:
                 // clang-format on
                 y = k * (XF_CHANNELS(SRC_T, NPC));
                 result = in_pix.range(y + shift + noofbits - 1, y + shift);
+                // if(i==100)
+                // std::cout<<(int)result<<" ";
                 out_pix.range(k + (noofbits - 1), k) = result;
             }
 
@@ -102,9 +104,9 @@ void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
            "Invalid Channel Value. See xf_channel_extract_e enumerated type");
     assert(((_src_mat.rows <= ROWS) && (_src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_dst_mat.rows <= ROWS) && (_dst_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-    assert((SRC_T == XF_8UC4 || SRC_T == XF_8UC3) && (DST_T == XF_8UC1) &&
+    assert((SRC_T == XF_8UC4 || SRC_T == XF_8UC3 || SRC_T == XF_16UC3) && (DST_T == XF_8UC1 || DST_T == XF_16UC1) &&
            "Source image should be of 4 channels and destination image of 1 channel");
-//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "NPC must be XF_NPPC1 or XF_NPPC2");
 #endif
     short width = _src_mat.cols >> XF_BITSHIFT(NPC);
 

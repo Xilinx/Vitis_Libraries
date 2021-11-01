@@ -58,6 +58,33 @@ inline ap_uint<16> xf_satcast_aec<ap_uint<16> >(int v) {
 
 namespace xf {
 namespace cv {
+
+template <int SRC_T, int DST_T, int SIN_CHANNEL_TYPE, int ROWS, int COLS, int NPC = 1>
+void autoexposurecorrection_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                                 uint32_t hist_array1[1][256],
+                                 uint32_t hist_array2[1][256]) {
+#pragma HLS INLINE OFF
+
+    int rows = src.rows;
+    int cols = src.cols;
+
+    uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
+    uint16_t rows_shifted = rows;
+
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage1(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage2(rows, cols);
+
+    xf::cv::duplicateMat(src, vimage1, vimage2);
+
+    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC,
+                      XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
+                      XF_CHANNELS(SIN_CHANNEL_TYPE, NPC)>(vimage1, hist_array1, rows_shifted, cols_shifted);
+
+    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC),
+               (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, dst, rows_shifted, cols_shifted);
+}
+
 template <int SRC_T, int DST_T, int SIN_CHANNEL_TYPE, int ROWS, int COLS, int NPC = 1>
 void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,

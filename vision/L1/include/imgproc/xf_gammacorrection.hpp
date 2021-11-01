@@ -35,28 +35,27 @@ template <int SRC_T,
           int COLS_TRIP>
 void xFGAMMAKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
-                   unsigned char lut_table[256 * 3],
+                   unsigned char lut_table[256 * PLANES],
                    uint16_t height,
                    uint16_t width) {
     // width = width >> XF_BITSHIFT(NPC);
     ap_uint<13> i, j, k;
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
 
-    unsigned char lut_0[XF_NPIXPERCYCLE(NPC)][256], lut_1[XF_NPIXPERCYCLE(NPC)][256], lut_2[XF_NPIXPERCYCLE(NPC)][256];
+    unsigned char lut_p[XF_NPIXPERCYCLE(NPC) * PLANES]
+                       [256]; //, lut_1[XF_NPIXPERCYCLE(NPC)][256], lut_2[XF_NPIXPERCYCLE(NPC)][256];
 
 // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=lut_0 complete dim=1
-		#pragma HLS ARRAY_PARTITION variable=lut_1 complete dim=1
-		#pragma HLS ARRAY_PARTITION variable=lut_2 complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=lut_p complete dim=1
     // clang-format on
 
     // creating a temporary buffers for Resource Optimization and Performance optimization
 
     for (i = 0; i < (XF_NPIXPERCYCLE(NPC)); i++) {
-        for (j = 0; j < 256; j++) {
-            lut_0[i][j] = lut_table[j];
-            lut_1[i][j] = lut_table[j + 256];
-            lut_2[i][j] = lut_table[j + 512];
+        for (k = 0; k < PLANES; k++) {
+            for (j = 0; j < 256; j++) {
+                lut_p[i * PLANES + k][j] = lut_table[256 * k + j];
+            }
         }
     }
 
@@ -81,23 +80,15 @@ rowLoop:
 
             val_src = _src.read(i * width + j);
 
-            for (int p = 0, b = 0; p < XF_NPIXPERCYCLE(NPC); p++, b = b + 3) {
+            for (int p = 0, b = 0; p < XF_NPIXPERCYCLE(NPC) * PLANES; p++, b = b + 3) {
 // clang-format off
 #pragma HLS unroll
                 // clang-format on
-                XF_CTUNAME(SRC_T, NPC) val1 = val_src.range(b * STEP + STEP - 1, b * STEP);
-                XF_CTUNAME(SRC_T, NPC)
-                val2 = val_src.range(b * STEP + STEP * 2 - 1, b * STEP + STEP);
-                XF_CTUNAME(SRC_T, NPC)
-                val3 = val_src.range(b * STEP + STEP * 3 - 1, b * STEP + STEP * 2);
+                XF_CTUNAME(SRC_T, NPC) val1 = val_src.range(p * STEP + STEP - 1, p * STEP);
 
-                XF_CTUNAME(SRC_T, NPC) outval1 = lut_0[p][val1];
-                XF_CTUNAME(SRC_T, NPC) outval2 = lut_1[p][val2];
-                XF_CTUNAME(SRC_T, NPC) outval3 = lut_2[p][val3];
+                XF_CTUNAME(SRC_T, NPC) outval1 = lut_p[p][val1];
 
-                val_dst.range(b * STEP + STEP - 1, b * STEP) = outval1;
-                val_dst.range(b * STEP + STEP * 2 - 1, b * STEP + STEP) = outval2;
-                val_dst.range(b * STEP + STEP * 3 - 1, b * STEP + STEP * 2) = outval3;
+                val_dst.range(p * STEP + STEP - 1, p * STEP) = outval1;
             }
 
             _dst.write(i * width + j, val_dst);
@@ -107,7 +98,7 @@ rowLoop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
-                     unsigned char lut_table[256 * 3]) {
+                     unsigned char lut_table[256 * XF_CHANNELS(SRC_T, NPC)]) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on

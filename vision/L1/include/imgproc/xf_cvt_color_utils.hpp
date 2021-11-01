@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,18 +143,39 @@ void ExtractUYVYPixels(XF_SNAME(WORDWIDTH) pix, ap_uint8_t* buf) {
     int k;
     XF_SNAME(WORDWIDTH) val;
     int pos = 0;
-    val = (XF_SNAME(WORDWIDTH))pix;
+
     for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH)); k += 8) {
 // clang-format off
         #pragma HLS unroll
-        // clang-format on
-        uint8_t p;
-        // Get bits from certain range of positions.
+        // clang-format on			
+		val = (XF_SNAME(WORDWIDTH))pix;
+		uint8_t p;
+        
+		// Get bits from certain range of positions.
         p = val.range(k + 7, k);
         buf[pos++] = p;
     }
 }
 
+template <int SRC_T, int NPC, int WORDWIDTH>
+void ExtractUYVYPixels(XF_SNAME(WORDWIDTH) pix, XF_CTUNAME(SRC_T, NPC) buf[]) {
+	
+    int k;
+    XF_SNAME(WORDWIDTH) val;
+    int pos = 0;
+	const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+	XF_CTUNAME(SRC_T, NPC) p;
+	
+    val = (XF_SNAME(WORDWIDTH))pix;
+    for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH)); k += STEP) {
+// clang-format off
+        #pragma HLS unroll
+        // clang-format on
+        // Get bits from certain range of positions.
+        p = val.range(k + STEP - 1, k);
+        buf[pos++] = p;
+    }
+}
 /****************************************************************************
  * Extract R, G, B, A values into a buffer
  ***************************************************************************/
@@ -746,6 +767,19 @@ static uint8_t saturate_cast(int32_t Value, int32_t offset) {
 
     return Value_uchar;
 }
+static uint16_t _saturate_cast(uint32_t Value, int32_t offset) {
+    // Right shifting Value 15 times to get the integer part
+    int Value_int = (Value >> 15) + offset;
+    int Value_uchar = 0;
+    if (Value_int > 65535)
+        Value_uchar = 65535;
+    else if (Value_int < 0)
+        Value_uchar = 0;
+    else
+        Value_uchar = (uint16_t)Value_int;
+
+    return Value_uchar;
+}
 static uint8_t saturate_cast(int32_t Value, int32_t offset, int fbits) {
     // Right shifting Value 15 times to get the integer part
     int Value_int = (Value >> fbits) + offset;
@@ -887,6 +921,36 @@ static uint8_t Calculate_Z(uint8_t R, uint8_t G, uint8_t B) {
     // clang-format on
     int32_t Z = (R * (short int)_CVT_Z1) + (G * (short int)_CVT_Z2) + (B * (short int)_CVT_Z3);
     uint8_t sat_Z = saturate_cast(Z, 0);
+
+    return (sat_Z);
+}
+static uint16_t _Calculate_X(uint16_t R, uint16_t G, uint16_t B) {
+// clang-format off
+    #pragma HLS INLINE
+    // clang-format on
+    uint32_t X =
+        ((uint32_t)R * (uint32_t)_CVT_X1) + ((uint32_t)G * (uint32_t)_CVT_X2) + ((uint32_t)B * (uint32_t)_CVT_X3);
+    uint16_t sat_X = _saturate_cast(X, 0);
+
+    return (sat_X);
+}
+static uint16_t _Calculate_Y(uint16_t R, uint16_t G, uint16_t B) {
+// clang-format off
+    #pragma HLS INLINE
+    // clang-format on
+    uint32_t Y =
+        ((uint32_t)R * (uint32_t)_CVT_Y1) + ((uint32_t)G * (uint32_t)_CVT_Y2) + ((uint32_t)B * (uint32_t)_CVT_Y3);
+    uint16_t sat_Y = _saturate_cast(Y, 0);
+
+    return (sat_Y);
+}
+static uint16_t _Calculate_Z(uint16_t R, uint16_t G, uint16_t B) {
+// clang-format off
+    #pragma HLS INLINE
+    // clang-format on
+    uint32_t Z =
+        ((uint32_t)R * (uint32_t)_CVT_Z1) + ((uint32_t)G * (uint32_t)_CVT_Z2) + ((uint32_t)B * (uint32_t)_CVT_Z3);
+    uint16_t sat_Z = _saturate_cast(Z, 0);
 
     return (sat_Z);
 }

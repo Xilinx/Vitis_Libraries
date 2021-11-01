@@ -156,10 +156,15 @@ void xFUpdateTextureSum(unsigned char window[WSIZE][L_WIN_COLS],
 text_sum_loop1:
     for (int i = 0; i < WSIZE; i++) {
 // clang-format off
-        #pragma HLS UNROLL
+#pragma HLS UNROLL
         // clang-format on
-        col_sums += (i > row ? 0 : xFabsdiff2((int)(l_tmp[i]), cap)) -
-                    (((col < WSIZE) || (i > row)) ? 0 : xFabsdiff2((int)window[i][WSIZE - 1], cap));
+        if (i <= row) {
+            if (col < WSIZE) {
+                col_sums += xFabsdiff2((int)(l_tmp[i]), cap);
+            } else {
+                col_sums += xFabsdiff2((int)(l_tmp[i]), cap) - xFabsdiff2((int)window[i][WSIZE - 1], cap);
+            }
+        }
     }
 
     int tmp_prev[2];

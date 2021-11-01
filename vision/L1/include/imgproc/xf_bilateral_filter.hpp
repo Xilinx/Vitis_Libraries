@@ -559,6 +559,7 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=exp_lut_sigma_color complete dim=1
     #pragma HLS ARRAY_PARTITION variable=exp_lut_sigma_color complete dim=2
+    #pragma HLS bind_storage variable=exp_lut_sigma_color type=RAM_1WNR
     // clang-format on
 
     if (NPC == 8) {

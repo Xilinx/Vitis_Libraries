@@ -175,8 +175,9 @@ loop_row_axi2mat:
  *  input: img
  *  output: AXI_video_strm
  */
-template <int W, int TYPE, int ROWS, int COLS, int NPPC>
-int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& img, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
+template <int W, int TYPE, int ROWS, int COLS, int NPPC, int XFCV_DEPTH = 2>
+int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCV_DEPTH>& img,
+                   hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
     ap_axiu<W, 1, 1, 1> axi;
     int res = 0;
 

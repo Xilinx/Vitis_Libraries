@@ -185,6 +185,52 @@ void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                       XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
                       (COLS >> XF_BITSHIFT(NPC))>(src1, dst, src1.rows, width, rgain, bgain);
 }
+
+template <int SRC_T, int ROWS, int COLS, int NPC = 1>
+void gaincontrol_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+                      xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+                      unsigned short lgain) {
+#pragma HLS INLINE OFF
+#ifndef __SYNTHESIS__
+    assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
+    assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
+#endif
+    short width = src1.cols >> XF_BITSHIFT(NPC);
+    short height = src1.rows;
+
+    ap_uint<13> i, j, k, l;
+
+    const int STEP = XF_PIXELWIDTH(SRC_T, NPC);
+
+    XF_TNAME(SRC_T, NPC) pxl_pack_out;
+    XF_TNAME(SRC_T, NPC) pxl_pack1, pxl_pack2;
+RowLoop:
+    for (i = 0; i < height; i++) {
+#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
+#pragma HLS LOOP_FLATTEN OFF
+    ColLoop:
+        for (j = 0; j < width; j++) {
+#pragma HLS LOOP_TRIPCOUNT min = COLS / NPC max = COLS / NPC
+#pragma HLS pipeline
+
+            pxl_pack1 = (src1.read(i * width + j)); // reading from 1st input stream
+
+        ProcLoop:
+            for (l = 0; l < (XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)); l++) {
+                XF_PTNAME(XF_DEPTH(SRC_T, NPC))
+                pxl1 = pxl_pack1.range(l * STEP + STEP - 1, l * STEP); // extracting each pixel in case of 8-pixel mode
+                XF_PTNAME(XF_DEPTH(SRC_T, NPC)) t;
+
+                int v2 = (int)((pxl1 * lgain) >> 7);
+                t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
+
+                pxl_pack_out.range(l * STEP + STEP - 1, l * STEP) = t;
+            }
+
+            dst.write(i * width + j, pxl_pack_out); // writing into ouput stream
+        }
+    }
+}
 }
 }
 

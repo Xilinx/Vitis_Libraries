@@ -293,7 +293,7 @@ int main(int argc, char** argv)
 
         run_test(dhdl, top, bufferHandles);
 
-        printf("verfifying teh results\n");
+        printf("verifying the results\n");
 
         int errorCount = 0;
 

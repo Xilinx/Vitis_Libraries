@@ -413,9 +413,9 @@ Row_Loop:
                 Core_Process<BFORMAT, SRC_T, NPC, XF_DEPTH(SRC_T, NPC), __BWIDTH>(imgblock, b, g, r, i, j * NPC + loop,
                                                                                   loop);
 
-                b = xf_satcast<XF_CTUNAME(DST_T, NPC)>(b);
-                g = xf_satcast<XF_CTUNAME(DST_T, NPC)>(g);
-                r = xf_satcast<XF_CTUNAME(DST_T, NPC)>(r);
+                b = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(b);
+                g = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(g);
+                r = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(r);
 
                 if (XF_CHANNELS(DST_T, NPC) == 4) {
                     res_pixel[loop].range(4 * out_step - 1, 3 * out_step) = MAXVAL(out_step);
