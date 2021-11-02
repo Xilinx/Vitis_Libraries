@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx GZIP 8KB Compress Streaming Test", 
+    "name": "Xilinx GZIP 8KB Compress Streaming HLS Test", 
     "description": "Test Design to validate Streaming GZIP 8KB compression", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -682,7 +682,7 @@ void zlibMultiTreegenStream(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >
                             hls::stream<ap_uint<4> >& coreIdxStream) {
     constexpr int c_litDistCodeDepth = 286 + 30 + 4;
 #pragma HLS dataflow
-    constexpr int c_numTreegen = 1 + ((NUM_BLOCK - 1) / BLOCK_SIZE_IN_KB); // 32 / BLOCK_SIZE_IN_KB;
+    constexpr int c_numTreegen = 1 + ((NUM_BLOCK - 1) / BLOCK_SIZE_IN_KB);
     hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> > lz77SerialTree[c_numTreegen];
     hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> > hufSerialCodeStream[c_numTreegen];
     hls::stream<uint8_t> idxNum("idxNum");

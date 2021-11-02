@@ -112,7 +112,7 @@ void hlsStream2axiu(hls::stream<IntVectorStream_dt<8, OUT_DWIDTH / 8> >& inputSt
         outAxiStream << t1;
     }
 
-AXI2HLS:
+HLS2AXIS:
     while (strb != 0) {
 #pragma HLS PIPELINE II = 1
         outSize += strb;

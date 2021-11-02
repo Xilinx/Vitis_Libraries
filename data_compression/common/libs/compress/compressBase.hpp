@@ -53,7 +53,7 @@ class compressBase {
    protected:
     uint16_t m_maxCR;
     bool m_enableProfile;
-    uint8_t m_isSeq;
+    uint8_t m_isSeq = 1;
 };
 
 #endif // _XFCOMPRESSION_COMPRESS_BASE_HPP_

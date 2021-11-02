@@ -4,6 +4,7 @@
         "GZip application for DDR resides in `L3/demos/gzip_app` directory."
     ],
     "flow": "vitis",
+    "default_device": "u250",
     "platform_blacklist": [
         "other"
     ],
@@ -19,7 +20,7 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
             ]
         }
     ],

@@ -13,10 +13,11 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin"
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin"
             ]
         }
     ], 
+    "default_device": "u200",
     "platform_blacklist": [
         "zc"
     ], 

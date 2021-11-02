@@ -75,10 +75,15 @@ endif
 lib: $(LIBZLIB_NAME)
 	cp $(ZLIBDIR)/ . -rf
 	cp $(XFLIB_DIR)/L3/demos/libzso/config.mk $(PWD)/$(ZLIBVER)/
-	cp $(XFLIB_DIR)/L3/src/zlib.cpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/gzipOCLHost.cpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/gzipBase.cpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/gzipApp.cpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/L3/src/zlibDriver.cpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/L3/src/zlibFactory.cpp $(PWD)/$(ZLIBVER)/
-	cp $(XFLIB_DIR)/L3/include/zlib.hpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/gzipOCLHost.hpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/gzipBase.hpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/gzipApp.hpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/common/libs/compress/compressBase.hpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/L3/include/zlibDriver.hpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/L3/include/zlibFactory.hpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/common/libs/cmdparser/* $(PWD)/$(ZLIBVER)/ 

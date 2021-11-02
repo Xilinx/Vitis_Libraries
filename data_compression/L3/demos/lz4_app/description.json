@@ -4,6 +4,7 @@
         "LZ4 Application resides in `L3/demos/lz4_app` directory."
     ],
     "flow": "vitis",
+    "default_device": "u200",
     "platform_blacklist": [
         "zc",
         "vck",
@@ -23,7 +24,7 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
             ]
         }
     ],

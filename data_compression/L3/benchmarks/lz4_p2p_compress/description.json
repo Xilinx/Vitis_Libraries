@@ -4,6 +4,7 @@
         "LZ4_P2P application for Compression resides in `L3/benchmarks/lz4_p2p_compress` directory."
     ],
     "flow": "vitis",
+    "default_device": "samsung_u2",
     "platform_blacklist": [
         "u50",
         "u280",
@@ -25,7 +26,7 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
             ]
         }
     ],

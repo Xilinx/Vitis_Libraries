@@ -168,7 +168,11 @@ void compressApp::printTestSummaryFooter(const std::string& testFile) {
 #endif
         double enbytes = m_enbytes;
         fileUnit = getFileSizeUnit(enbytes);
-        (m_compress_flow) ? std::cout << "Compressed file size(" << fileUnit << ")\t\t:" << enbytes : std::cout << "\t";
+        if (m_compress_flow) {
+            std::cout << "\nCompression is successful. No errors found.\n";
+            std::cout << "Compressed file size(" << fileUnit << ")\t\t:" << enbytes;
+        } else
+            std::cout << "\nDecompression is successful. No errors found.\n";
         std::cout << std::endl;
     }
 }

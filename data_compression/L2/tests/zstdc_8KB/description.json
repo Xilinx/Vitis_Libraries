@@ -4,6 +4,7 @@
         "Xilinx ZSTD Compression for 8KB block with four compression engine"
     ], 
     "flow": "vitis",
+    "default_device": "u200",
     "platform_whitelist": [
         "u200", 
         "u250", 
@@ -24,7 +25,7 @@
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/xilZstdCompressStream.xclbin"
+                  "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/xilZstdCompressStream.xclbin"
              ]
         }
     ], 

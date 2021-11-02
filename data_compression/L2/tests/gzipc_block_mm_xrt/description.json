@@ -11,6 +11,7 @@
         }
     ],
     "config_make": "./config.mk", 
+    "default_device": "u250",
     "platform_blacklist": [
         "zc", 
         "vck"
@@ -102,6 +103,7 @@
             }
         ], 
         "targets": [
+            "vitis_sw_emu",
             "vitis_hw_emu", 
             "vitis_hw"
         ], 

@@ -4,6 +4,7 @@
         "Xilinx ZSTD Decompression for 32KB block since with 4 Byte data width"
     ], 
     "flow": "vitis", 
+    "default_device": "u200",
     "platform_blacklist": [], 
     "platform_whitelist": [
         "u200", 
@@ -22,7 +23,7 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
             ]
         }
     ],

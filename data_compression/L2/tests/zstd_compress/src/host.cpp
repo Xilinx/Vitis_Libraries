@@ -32,4 +32,5 @@ int main(int argc, char* argv[]) {
 
     // Run API to launch the compress or decompress engine
     d.run(zstd.get(), enable_profile);
+    return 0;
 }

@@ -1939,6 +1939,9 @@ size_t gzipOCLHost::compressEngineSeq(
     if (!this->is_freeRunKernel()) {
         OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
     }
+#ifdef DISABLE_FREE_RUNNING_KERNEL
+    OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
+#endif
 
     auto c_inputSize = input_size;
     auto num_itr = 1;

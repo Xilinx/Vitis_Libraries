@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Gzip Multibyte Dynamic Block Streaming Decompress HLS Test",
+    "name": "Xilinx Gzip Low Latency Multibyte Dynamic Block Streaming Decompress HLS Test",
     "description": "Test Design to validate core Gzip decompress module",
     "flow": "hls",
     "platform_whitelist": [

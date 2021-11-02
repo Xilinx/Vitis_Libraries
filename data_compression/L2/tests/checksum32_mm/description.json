@@ -10,6 +10,7 @@
             "name": "generic launch for all flows"
         }
     ], 
+    "default_device": "u200",
     "platform_blacklist": [
         "zc"
     ], 

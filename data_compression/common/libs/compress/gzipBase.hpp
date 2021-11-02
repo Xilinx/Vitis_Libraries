@@ -55,7 +55,7 @@ const auto MAX_NUMBER_BLOCKS = (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024));
 // Enums for
 enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
 enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
-enum design_flow { XILINX_GZIP, XILINX_ZLIB };
+enum design_flow { XILINX_GZIP = 0, XILINX_ZLIB };
 
 // Kernel names
 const std::vector<std::string> compress_kernel_names = {"xilLz77Compress", "xilGzipComp", "xilGzipCompBlock"};

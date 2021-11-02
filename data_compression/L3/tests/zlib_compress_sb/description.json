@@ -1,9 +1,10 @@
 {
-    "name": "Xilinx FPGA Based GZip/Zlib Compression Slave Bridge Design",
+    "name": "[Slave Bridge]: Xilinx FPGA Based GZip/Zlib Compression Slave Bridge Design",
     "description": [
-        "GZip/Zlib Compress application supports Slave Bridge and  resides in `L3/tests/zlib_compress_sb` directory."
+        "[Slave Bridge]: GZip/Zlib Compress application supports Slave Bridge and  resides in `L3/tests/zlib_compress_sb` directory."
     ],
     "flow": "vitis",
+    "default_device": "u50_gen3x16_nodma",
     "platform_blacklist": [
         "vck",
         "u200",
@@ -14,7 +15,7 @@
     ],
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt",
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt --sw_pipeline 2",
             "name": "generic launch for all flows"
         }
     ],
@@ -24,7 +25,10 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp",
-                "LIB_DIR/L3/src/zlib.cpp",
+                "LIB_DIR/common/libs/compress/gzipOCLHost.cpp",
+                "LIB_DIR/common/libs/compress/gzipBase.cpp",
+                "LIB_DIR/common/libs/compress/gzipApp.cpp",
+                "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp",
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
                 "LIB_DIR/common/libs/logger/logger.cpp",
@@ -34,7 +38,8 @@
             "includepaths": [
                 "LIB_DIR/L3/include",
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/common/thirdParty/zlib-1.2.7"
+                "LIB_DIR/common/thirdParty/zlib-1.2.7",
+                "LIB_DIR/common/libs/compress/"
             ],
             "options": "-O3 ",
             "symbols": [

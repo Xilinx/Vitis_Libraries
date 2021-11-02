@@ -37,7 +37,10 @@ void xilGzipComp(hls::stream<ap_axiu<GMEM_DWIDTH, 0, 0, 0> >& inaxistream,
 // For free running kernel, user needs to specify ap_ctrl_none for return port.
 // This will create the kernel without AXI lite interface. Kernel will always be
 // in running states.
+#ifndef DISABLE_FREE_RUNNING_KERNEL
 #pragma HLS interface ap_ctrl_none port = return
+#endif
+
 #pragma HLS dataflow
 #ifdef NO_SYNTH
     while (1) {

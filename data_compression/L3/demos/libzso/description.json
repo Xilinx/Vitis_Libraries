@@ -4,6 +4,7 @@
         "ZLIB Shared Object demo present in `L3/demo/libzso` directory."
     ], 
     "flow": "vitis", 
+    "default_device": "u50",
     "platform_blacklist": [
         "u200", 
         "u250", 

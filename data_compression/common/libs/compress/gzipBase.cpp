@@ -191,8 +191,7 @@ uint64_t gzipBase::xilDecompress(uint8_t* in, uint8_t* out, uint64_t input_size)
         return 0;
     }
     uint64_t debytes;
-
-    if (m_isSeq) {
+    if (m_isSeq == compressBase::SEQ) {
 // Decompression Engine multiple CUs.
 #ifdef DECOMPRESS_MM
         debytes = decompressEngineMMSeq(in, out, input_size, input_size * m_maxCR);

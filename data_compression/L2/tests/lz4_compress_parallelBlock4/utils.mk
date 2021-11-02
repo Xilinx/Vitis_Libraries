@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.3
+# vitis makefile-generator v2.0.4
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -55,18 +55,18 @@ check_device:
 	inallowlist=False; \
 	inblocklist=False; \
 	for dev in $(PLATFORM_ALLOWLIST); \
-	    do if [[ $$(echo $(XPLATFORM) | grep $$dev) != "" ]]; \
+	    do if [[ $$(echo $(PLATFORM_NAME) | grep $$dev) != "" ]]; \
 		then inallowlist=True; fi; \
 	done ;\
 	for dev in $(PLATFORM_BLOCKLIST); \
-	    do if [[ $$(echo $(XPLATFORM) | grep $$dev) != "" ]]; \
+	    do if [[ $$(echo $(PLATFORM_NAME) | grep $$dev) != "" ]]; \
 		then inblocklist=True; fi; \
 	done ;\
 	if [[ $$inallowlist == False ]]; \
-	    then echo "[Warning]: The device $(XPLATFORM) not in allowlist."; \
+	    then echo "[Warning]: The device $(PLATFORM_NAME) not in allowlist."; \
 	fi; \
 	if [[ $$inblocklist == True ]]; \
-	    then echo "[ERROR]: The device $(XPLATFORM) in blocklist."; exit 1;\
+	    then echo "[ERROR]: The device $(PLATFORM_NAME) in blocklist."; exit 1;\
 	fi;
 
 #get HOST_ARCH by PLATFORM
@@ -177,9 +177,6 @@ endif
 endif
 
 ifneq (,$(wildcard $(PLATFORM)))
-XPLATFORM := $(PLATFORM)
-else
-ifneq (,$(wildcard $(PLATFORM)))
 # Use PLATFORM as a file path
 XPLATFORM := $(PLATFORM)
 else
@@ -215,7 +212,6 @@ XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ 
 endif # 3.2
 endif # 3
 endif
-endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(PLATFORM)'.
@@ -234,7 +230,7 @@ endif
 
 #   device2xsa - create a filesystem friendly name from device name
 #   $(1) - full name of device
-XPLATFORM = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
+PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
 
 
 # Cleaning stuff

@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
     compressBase::State flow = compressBase::BOTH;
     compressBase::Level lflow = compressBase::OLAP;
     gzipBase::d_type decKernelType = gzipBase::FULL;
-
     // Driver class object
     gzipApp d(argc, argv, lflow);
 

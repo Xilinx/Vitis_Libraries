@@ -1,7 +1,6 @@
-#include "zlib.hpp"
+#include "gzipOCLHost.hpp"
 #include "deflate.h"
 #include "zlibDriver.hpp"
-using namespace xf::compression;
 
 class zlibFactory {
    public:

@@ -1,6 +1,5 @@
-#include "zlib.hpp"
+#include "gzipOCLHost.hpp"
 #include "deflate.h"
-using namespace xf::compression;
 #ifndef DEFLATE_BUFFER
 #define DEFLATE_BUFFER (1024 * 1024)
 #endif
@@ -31,7 +30,7 @@ class zlibDriver {
     bool getZlibInstance(void);
     bool allocateCU(z_streamp strm);
     bool getErrStatus(void) { return m_status; }
-    xfZlib* getZlibPtr(void) { return m_xlz; }
+    gzipOCLHost* getZlibPtr(void) { return m_xlz; }
     void releaseZlibCU(z_streamp strm);
 
     bool isDecompressEligible() { return m_decompressEligible; }
@@ -49,7 +48,7 @@ class zlibDriver {
     // Mapping (Driver Class)
     std::map<z_streamp, zlibDriver*> m_driverMapObj;
     int m_flow = XILINX_DEFLATE;
-    xfZlib* m_xlz = nullptr;
+    gzipOCLHost* m_xlz = nullptr;
     int m_cuid = 0;
     int m_bank = 0;
     cl::Device m_deviceid;

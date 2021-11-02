@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZLIB 32KB Static Compress Streaming AXI Test", 
+    "name": "Xilinx ZLIB 32KB Static Compress Streaming AXI HLS Test", 
     "description": "Test Design to validate Streaming ZLIB 32KB static compression", 
     "flow": "hls", 
     "platform_whitelist": [

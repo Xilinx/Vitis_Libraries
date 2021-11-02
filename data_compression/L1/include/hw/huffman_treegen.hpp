@@ -243,7 +243,7 @@ radix_sort:
 
 template <int SYMBOL_BITS>
 void _rdxsrtInitHistogram(ap_uint<SYMBOL_BITS> digit_histogram[RADIX]) {
-#pragma HLS INLINE off
+#pragma HLS INLINE
 init_histogram:
     for (uint8_t i = 0; i < RADIX; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min = 16 max = 16 avg = 16
@@ -272,7 +272,7 @@ void filterRadixSortPart1(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& 
                           hls::stream<ap_uint<9> >& heapLenStream2,
                           hls::stream<ap_uint<c_tgnSymbolBits> >& maxCodes,
                           hls::stream<bool>& isEOBlocks) {
-#pragma HLS allocation function instances = _rdxsrtInitHistogram limit = 1
+    //#pragma HLS allocation function instances = _rdxsrtInitHistogram<SYMBOL_BITS> limit = 1
     // Filter input frequencies and partial radix sort (1st half)
     const ap_uint<9> hctMeta[2] = {c_litCodeCount, c_dstCodeCount};
     // internal buffers
@@ -295,9 +295,6 @@ filter_partsort_ldblock:
         ap_uint<9> i_symbolSize = hctMeta[metaIdx]; // current symbol size
         uint16_t heapLength = 0;
 
-        // pre-initialize
-        _rdxsrtInitHistogram<SYMBOL_BITS>(digit_histogram);
-
         ap_uint<c_tgnSymbolBits> smLen = 0;
         bool read_flag = false;
         auto curFreq = inFreqStream.read();
@@ -305,6 +302,9 @@ filter_partsort_ldblock:
         last = (curFreq.strobe == 0);
         if (metaIdx == 0) isEOBlocks << last;
         if (last) break;
+
+        // pre-initialize
+        _rdxsrtInitHistogram<SYMBOL_BITS>(digit_histogram);
 
     filter_compute_histogram:
         for (uint16_t n = 0; n < i_symbolSize; ++n) {
@@ -393,13 +393,12 @@ filter_partsort_ldblock:
         // filter-sort for literals and distances
         ap_uint<9> i_symbolSize = hctMeta[metaIdx]; // current symbol size
         uint16_t heapLength = 0;
-        // const uint8_t c_sftLim = ((1 + (MAX_FREQ_DWIDTH - 1) / (2 * BITS_PER_LOOP)) * BITS_PER_LOOP);
-
-        // pre-initialize
-        _rdxsrtInitHistogram<SYMBOL_BITS>(digit_histogram);
 
         auto inHeapV = inHeapStream.read();
         if (inHeapV.strobe == 0) break;
+
+        // pre-initialize
+        _rdxsrtInitHistogram<SYMBOL_BITS>(digit_histogram);
 
     read_heap_compute_histogram:
         for (; inHeapV.strobe > 0; inHeapV = inHeapStream.read()) {
@@ -462,7 +461,7 @@ void radixPartialFinalSort(hls::stream<DSVectorStream_dt<Symbol<MAX_FREQ_DWIDTH>
                            hls::stream<DSVectorStream_dt<Symbol<MAX_FREQ_DWIDTH>, 1> >& outHeapStream1,
                            hls::stream<DSVectorStream_dt<Symbol<MAX_FREQ_DWIDTH>, 1> >& outHeapStream2,
                            uint8_t shiftNum) {
-#pragma HLS allocation function instances = _rdxsrtInitHistogram limit = 1
+    //#pragma HLS allocation function instances = _rdxsrtInitHistogram<SYMBOL_BITS> limit = 1
     // partial radix sort, 2nd half
     const ap_uint<9> hctMeta[2] = {c_litCodeCount, c_dstCodeCount};
     // internal buffers
@@ -486,11 +485,11 @@ filter_partsort_ldblock:
         uint16_t heapLength = 0;
         // const uint8_t c_sftLim = ((1 + (MAX_FREQ_DWIDTH - 1) / (2 * BITS_PER_LOOP)) * BITS_PER_LOOP);
 
-        // pre-initialize
-        _rdxsrtInitHistogram<SYMBOL_BITS>(digit_histogram);
-
         auto inHeapV = inHeapStream.read();
         if (inHeapV.strobe == 0) break;
+
+        // pre-initialize
+        _rdxsrtInitHistogram<SYMBOL_BITS>(digit_histogram);
 
     read_heap_compute_histogram:
         for (; inHeapV.strobe > 0; inHeapV = inHeapStream.read()) {
@@ -1200,13 +1199,14 @@ void huffFilterRadixSort(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& i
                          hls::stream<ap_uint<9> >& heapLenStream2,
                          hls::stream<ap_uint<c_tgnSymbolBits> >& maxCodes,
                          hls::stream<bool>& isEOBlocks) {
+#pragma HLS INLINE
     constexpr uint8_t c_maxSftLim = 1 + ((MAX_FREQ_DWIDTH - 1) / BITS_PER_LOOP);
     constexpr uint8_t c_maxSft = BITS_PER_LOOP * (c_maxSftLim - 1);
     // internal streams
     hls::stream<DSVectorStream_dt<Symbol<MAX_FREQ_DWIDTH>, 1> > intlHeapStream[c_maxSftLim - 1];
 #pragma HLS STREAM variable = intlHeapStream depth = 32
 
-#pragma HLS DATAFLOW
+#pragma HLS DATAFLOW disable_start_propagation
     filterRadixSortPart1<SYMBOL_SIZE, SYMBOL_BITS, MAX_FREQ_DWIDTH, WRITE_MXC>(
         inFreqStream, intlHeapStream[0], heapLenStream1, heapLenStream2, maxCodes, isEOBlocks);
 
@@ -1352,16 +1352,20 @@ void canonizeGetCodes(hls::stream<DSVectorStream_dt<Symbol<MAX_FREQ_DWIDTH>, 1> 
                       hls::stream<DSVectorStream_dt<Histogram, 1> >& lengthHistogramStream,
                       hls::stream<DSVectorStream_dt<Codeword, 1> >& outCodes) {
     const ap_uint<9> hctMeta[2] = {c_litCodeCount, c_dstCodeCount};
+    static bool initBitsMem = true;
     // internal buffers
-    ap_uint<4> symbol_bits[SYMBOL_SIZE];
+    static ap_uint<4> symbol_bits[SYMBOL_SIZE];
     Histogram length_histogram[c_lengthHistogram];
     ap_uint<1> metaIdx = 0;
     DSVectorStream_dt<Codeword, 1> cdVal;
-init_smb_buffer:
-    for (uint16_t i = 0; i < SYMBOL_SIZE; ++i) {
+    if (initBitsMem) { // init only once
+    init_smb_buffer:
+        for (uint16_t i = 0; i < SYMBOL_SIZE; ++i) {
 #pragma HLS LOOP_TRIPCOUNT max = SYMBOL_SIZE
 #pragma HLS PIPELINE off
-        symbol_bits[i] = 0;
+            symbol_bits[i] = 0;
+        }
+        initBitsMem = false;
     }
 construct_tree_ldblock:
     while (true) {
@@ -1600,9 +1604,9 @@ void huffConstructTreeStream(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> 
                                       {c_dstCodeCount, c_dstCodeCount, c_maxCodeBits},
                                       {c_blnCodeCount, c_blnCodeCount, c_maxBLCodeBits}};
 
-    ap_uint<9> i_symbolSize = hctMeta[metaIdx][0]; // current symbol size
-    ap_uint<9> i_treeDepth = hctMeta[metaIdx][1];  // current tree depth
-    ap_uint<9> i_maxBits = hctMeta[metaIdx][2];    // current max bits
+    const ap_uint<9> i_symbolSize = hctMeta[metaIdx][0]; // current symbol size
+    const ap_uint<9> i_treeDepth = hctMeta[metaIdx][1];  // current tree depth
+    const ap_uint<9> i_maxBits = hctMeta[metaIdx][2];    // current max bits
 
     while (isEOBlocks.read() == false) {
         // internal buffers
@@ -1617,19 +1621,22 @@ void huffConstructTreeStream(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> 
         IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> curFreq;
         uint16_t heapLength = 0;
 
-    init_buffers:
-        for (ap_uint<9> i = 0; i < i_symbolSize; ++i) {
+        {
+#pragma HLS dataflow
+        init_buffers:
+            for (ap_uint<9> i = 0; i < i_symbolSize; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min = 19 max = 286
-#pragma HLS PIPELINE II = 1
-            parent[i] = 0;
-            if (i < LENGTH_SIZE) length_histogram[i] = 0;
-            temp_array[i] = 0;
-            symbol_bits[i] = 0;
-            heap[i].value = 0;
-            heap[i].frequency = 0;
+#pragma HLS PIPELINE off
+                parent[i] = 0;
+                if (i < LENGTH_SIZE) length_histogram[i] = 0;
+                temp_array[i] = 0;
+                symbol_bits[i] = 0;
+                /*heap[i].value = 0;
+                heap[i].frequency = 0;*/
+            }
+            // filter the input, write 0 heapLength at end of block
+            filter<MAX_FREQ_DWIDTH>(inFreq, heap, &heapLength, maxCodes, i_symbolSize);
         }
-        // filter the input, write 0 heapLength at end of block
-        filter<MAX_FREQ_DWIDTH>(inFreq, heap, &heapLength, maxCodes, i_symbolSize);
 
         // sort the input
         radixSort_1<SYMBOL_SIZE, SYMBOL_BITS, MAX_FREQ_DWIDTH>(heap, heapLength);
@@ -2347,6 +2354,7 @@ void zlibTreegenStream(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& lz7
 #pragma HLS STREAM variable = heapStream depth = 320
 #pragma HLS STREAM variable = ldCodes2 depth = 320
 #pragma HLS STREAM variable = ldMaxCodes2 depth = 4
+#pragma HLS STREAM variable = eoBlocks depth = 8
 
 // DATAFLOW
 #pragma HLS DATAFLOW
@@ -2412,6 +2420,7 @@ void zlibTreegenStreamLL(hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >& l
 #pragma HLS STREAM variable = blMaxCodes depth = 4
 #pragma HLS STREAM variable = intlHufCodeStream depth = 320
 #pragma HLS STREAM variable = isEOBlocks depth = 8
+#pragma HLS STREAM variable = eoBlocks depth = 8
 
 // DATAFLOW
 #pragma HLS DATAFLOW

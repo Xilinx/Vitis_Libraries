@@ -11,22 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.3
+# vitis makefile-generator v2.0.4
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86 aarch64 x86 x86  >"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86/aarch64>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86 aarch64 x86 x86  >"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86/aarch64>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86 aarch64 x86 x86  >"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86/aarch64>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -64,19 +64,19 @@ ifeq ($(PLATFORM),)
 PLATFORM := xilinx_u250_gen3x16_xdma_3_1_202020_1
 endif
 
-# ###dddd################# Checking if PLATFORM in whitelist ############################
+# #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  xilinx_u250_gen3x16_xdma_3_1_202020_1 u200 u50 vck190 aws-vu9p-f1
 PLATFORM_BLOCKLIST +=  zc
 
 include ./utils.mk
-include ././config.mk
-TEMP_DIR := _x_temp.$(TARGET).$(XPLATFORM)
-TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XPLATFORM)
-BUILD_DIR := build_dir.$(TARGET).$(XPLATFORM)
-BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XPLATFORM)
+TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
+BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
+include ././config.mk
 
 EXE_FILE_DEPS :=
 BINARY_CONTAINERS_DEPS :=
@@ -133,10 +133,10 @@ VPP_FLAGS +=   --config $(CUR_DIR)/hls.cfg
 VPP_FLAGS +=  -D GZIP_STREAM -D STATIC_MODE
 VPP_FLAGS +=  -I $(XFLIB_DIR)/../security/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/src
 
+######################### binary container global settings ##########################
 VPP_LDFLAGS_compress_temp := --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_compress += $(VPP_LDFLAGS_compress_temp)
 
-########################## binary container global settings ##########################
 BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilGzipComp.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_compress_OBJS)
 BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilDataMover.xo
@@ -159,7 +159,7 @@ $(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_perf_dm.cpp
 	$(VPP) -c $(VPP_FLAGS_xilDataMover) $(VPP_FLAGS) -k xilDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/compress $(VPP_LDFLAGS)  $(VPP_LDFLAGS_compress) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/compress $(VPP_LDFLAGS)  $(VPP_LDFLAGS_compress) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 ifeq ($(HOST_ARCH), x86)
@@ -178,7 +178,7 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(XPLATFORM)))
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
 K_IMAGE := $(SYSROOT)/../../uImage
 else
 K_IMAGE := $(SYSROOT)/../../Image
@@ -220,50 +220,47 @@ $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-	$(VPP) -t $(TARGET) --platform $(PLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
-
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
-ifneq (,$(filter x86sim aiesim, $(TARGET)))
-RUN_DEPS += $(AIE_CONTAINER)
-else
-RUN_DEPS += $(AIE_CONTAINER) $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
-endif
-
 run: check_device  $(RUN_DEPS)
-#x86sim
-ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=./Work 
-	
-endif
-#aiesim
-ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=./Work --profile 
-	
-endif
-#hw_emu and sw_emu
-ifneq (,$(filter sw_emu hw_emu, $(TARGET)))
+#hw_emu
+ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+endif
+endif
+#sw_emu
+ifneq (,$(filter sw_emu, $(TARGET)))
+ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+else
+	@echo $(RUN_DEPS)
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 endif
 endif
 #hw
 ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	$(EXE_FILE) $(HOST_ARGS)
-	
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -292,10 +289,6 @@ xclbin:  check_vpp check_xrt $(BINARY_CONTAINERS)
 else
 xclbin:  check_vpp check_sysroot $(BINARY_CONTAINERS) 
 endif
-
-.PHONY: x86sim
-x86sim: $(AIE_CONTAINER)
-	$(X86SIMULATOR) --pkg-dir=./Work
 
 ############################## Cleaning Rules ##############################
 cleanh:

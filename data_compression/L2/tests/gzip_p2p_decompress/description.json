@@ -5,6 +5,7 @@
     ], 
     "config_make": "./config.mk", 
     "flow": "vitis", 
+    "default_device": "samsung_u2",
     "platform_blacklist": [
         "zc"
     ], 
@@ -26,7 +27,7 @@
     "post_launch": [
         {
             "launch_cmd": [
-                "./run.sh HOST_EXE LIB_DIR BUILD/decompress_stream.xclbin"
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/decompress_stream.xclbin"
             ]
         }
     ],

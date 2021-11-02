@@ -224,17 +224,18 @@ bool zlibDriver::getStatus(void) {
 // Proivde xfZlib object
 bool zlibDriver::getZlibInstance(void) {
     bool ret = false;
+    gzipBase::design_flow flow = gzipBase::XILINX_ZLIB;
     if (this->m_flow == XILINX_DEFLATE) {
         if (this->m_xlz == nullptr) {
-            this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, COMP_ONLY, this->m_context, this->m_program,
-                                     this->m_deviceid, XILINX_ZLIB, this->m_bank);
+            this->m_xlz = new gzipOCLHost(this->m_u50_xclbin.c_str(), false, COMP_ONLY, this->m_context,
+                                          this->m_program, this->m_deviceid, flow, this->m_bank);
             if (this->m_xlz->error_code()) {
                 ret = true;
             }
         }
     } else if (this->m_flow == XILINX_INFLATE) {
-        this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, DECOMP_ONLY, this->m_context, this->m_program,
-                                 this->m_deviceid, XILINX_ZLIB);
+        this->m_xlz = new gzipOCLHost(this->m_u50_xclbin.c_str(), false, DECOMP_ONLY, this->m_context, this->m_program,
+                                      this->m_deviceid, flow);
         if (this->m_xlz->error_code()) {
             ret = true;
         }
