@@ -218,7 +218,9 @@ int graph_run(xrtDeviceHandle& dhdl, const axlf* top, std::vector<xrtBufferHandl
     // graph execution for AIE
     //////////////////////////////////////////
     printf("graph init. This does nothing because CDO in boot PDI already configures AIE.\n");
+    float alpha = 0.5f;
     mygraph.init();
+    mygraph.update(mygraph.alpha, alpha);
 
     printf("graph run(%u)\n", 1);
     mygraph.run(1);
