@@ -254,15 +254,13 @@ loop_height:
                         if (store_row) {
                             // Store every 3rd row in a buffer
                             lineBuf[pl][(j / 2) - 1] = pixval[pl];
+                            if (i != 0) {
+                                bufUram[pl][((i - 1) / 2) % (WIN_ROW / 2)][(j / 2) - 1].range(71, 48) = pixval[pl];
+                            }
                         } else {
                             // Read the stored row and fill in
                             prev_pixval[pl] = lineBuf[pl][(j / 2) - 1];
-                        }
-
-                        if (i != 0) {
-                            if (store_row) {
-                                bufUram[pl][((i - 1) / 2) % (WIN_ROW / 2)][(j / 2) - 1].range(71, 48) = pixval[pl];
-                            } else {
+                            if (i != 0) {
                                 pixval_2[pl].range(23, 0) = prev_pixval[pl];
                                 pixval_2[pl].range(47, 24) = pixval[pl];
                                 bufUram[pl][((i - 1) / 2) % (WIN_ROW / 2)][(j / 2) - 1].range(47, 0) = pixval_2[pl];
