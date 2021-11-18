@@ -16,8 +16,8 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_32_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_32_bits, "data/output.txt");
+PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
+PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
 
 simulation::platform<1, 1> platform(in1, out1);
 
@@ -26,9 +26,30 @@ gaussianGraph gauss2_graph;
 connect<> net0(platform.src[0], gauss2_graph.in);
 connect<> net1(gauss2_graph.out, platform.sink[0]);
 
+#define SRS_SHIFT 10
+float kData[9] = {0.01134, 0.08382, 0.01134, 0.08382, 0.61932, 0.08382, 0.01134, 0.08382, 0.01134};
+
+template <int SHIFT, int VECTOR_SIZE>
+auto float2fixed_coeff(float data[9]) {
+    // 3x3 kernel positions
+    //
+    // k0 k1 0 k2 0
+    // k3 k4 0 k5 0
+    // k6 k7 0 k8 0
+    std::array<int16_t, VECTOR_SIZE> ret;
+    ret.fill(0);
+    for (int i = 0; i < 3; i++) {
+        ret[5 * i + 0] = data[3 * i + 0] * (1 << SHIFT);
+        ret[5 * i + 1] = data[3 * i + 1] * (1 << SHIFT);
+        ret[5 * i + 3] = data[3 * i + 2] * (1 << SHIFT);
+    }
+    return ret;
+}
+
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
     gauss2_graph.init();
+    gauss2_graph.update(gauss2_graph.kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
     gauss2_graph.run(1);
     gauss2_graph.end();
     return 0;

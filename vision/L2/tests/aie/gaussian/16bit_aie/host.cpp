@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "graph.h"
+#include "graph.cpp"
 
 #include <common/xf_aie_utils.hpp>
 #include <stdio.h>
@@ -43,9 +43,7 @@ extern "C" {
 #include <xaiengine.h>
 }
 
-int16_t sizein = TILE_WINDOW_SIZE / sizeof(int32_t);
-
-gaussianGraph gauss2_graph;
+int16_t sizein = TILE_WINDOW_SIZE / sizeof(int16_t);
 
 static std::vector<char>
 
@@ -107,28 +105,30 @@ int init_platform(xrtDeviceHandle& dhdl, const std::string& fnm)
  */
 int data_buffer_init(xrtDeviceHandle& dhdl,
                      std::vector<xrtBufferHandle>& bufferHandles,
-                     int32_t* imgBuffer,
+                     int16_t* imgBuffer,
                      int sizeIn,
                      int sizeOut,
-                     std::vector<uint32_t*>& bufferMapped) {
+                     std::vector<int16_t*>& bufferMapped) {
     printf("DEBUG: data_buffer_init\n");
     //////////////////////////////////////////
     // input memory
     // No cache no sync seems not working. Should ask SSW team to investigate.
     //////////////////////////////////////////
 
-    xrtBufferHandle in_bohdl = xrtBOAlloc(dhdl, sizeIn * sizeof(int32_t), 0, 0);
-    auto in_bomapped = reinterpret_cast<uint32_t*>(xrtBOMap(in_bohdl));
-    memcpy(in_bomapped, imgBuffer, sizeIn * sizeof(int32_t));
+    printf("sizes in data_buffer_init: %d %d\n", sizeIn, sizeOut);
+
+    xrtBufferHandle in_bohdl = xrtBOAlloc(dhdl, sizeIn * sizeof(int16_t), 0, 0);
+    auto in_bomapped = reinterpret_cast<int16_t*>(xrtBOMap(in_bohdl));
+    memcpy(in_bomapped, imgBuffer, sizeIn * sizeof(int16_t));
     printf("Input memory virtual addr 0x%llu\n", in_bomapped);
 
     //////////////////////////////////////////
     // output memory
     //////////////////////////////////////////
 
-    xrtBufferHandle out_bohdl = xrtBOAlloc(dhdl, sizeOut * sizeof(int32_t), 0, 0);
-    auto out_bomapped = reinterpret_cast<uint32_t*>(xrtBOMap(out_bohdl));
-    memset(out_bomapped, 0xABCDEF00, sizeOut * sizeof(int32_t));
+    xrtBufferHandle out_bohdl = xrtBOAlloc(dhdl, sizeOut * sizeof(int16_t), 0, 0);
+    auto out_bomapped = reinterpret_cast<int16_t*>(xrtBOMap(out_bohdl));
+    memset(out_bomapped, 0xABCDEF00, sizeOut * sizeof(int16_t));
     printf("Output memory virtual addr 0x%llu\n", out_bomapped);
 
     bufferHandles.push_back(in_bohdl);
@@ -202,6 +202,8 @@ int graph_run(xrtDeviceHandle& dhdl, const axlf* top, std::vector<xrtBufferHandl
     printf("graph init. This does nothing because CDO in boot PDI already configures AIE.\n");
     gauss2_graph.init();
 
+    gauss2_graph.update(gauss2_graph.kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
+
     printf("graph run(%u)\n", 1);
     gauss2_graph.run(1);
 
@@ -250,7 +252,7 @@ int run_test(xrtDeviceHandle& dhdl, const axlf* top, std::vector<xrtBufferHandle
  */
 int cleanup_platform(xrtDeviceHandle& dhdl,
                      std::vector<xrtBufferHandle>& bufferHandles,
-                     std::vector<uint32_t*>& bufferMapped) {
+                     std::vector<int16_t*>& bufferMapped) {
     std::cout << "Releasing remaining XRT objects...\n";
     xrtBOFree(bufferHandles[0]);
     xrtBOFree(bufferHandles[1]);
@@ -275,7 +277,7 @@ int main(int argc, char** argv)
         const axlf* top = reinterpret_cast<const axlf*>(xclbin.data());
 
         std::vector<xrtBufferHandle> bufferHandles;
-        std::vector<uint32_t*> bufferMapped;
+        std::vector<int16_t*> bufferMapped;
 
         //////////////////////////////////////////
 
@@ -286,7 +288,7 @@ int main(int argc, char** argv)
         // This is using low-level XRT call xrtBOAlloc to allocate the memory
 
         //////////////////////////////////////////
-        data_buffer_init(dhdl, bufferHandles, int32input, sizein, sizein, bufferMapped);
+        data_buffer_init(dhdl, bufferHandles, int16input, sizein, sizein, bufferMapped);
 
         run_test(dhdl, top, bufferHandles);
 
@@ -296,14 +298,13 @@ int main(int argc, char** argv)
         int errorCount = 0;
 
         {
-            int32_t* outp = (int32_t*)xf::cv::aie::xfGetImgDataPtr(bufferMapped[1]);
-            int32_t* refp = (int32_t*)xf::cv::aie::xfGetImgDataPtr(int32golden);
+            int16_t* outp = (int16_t*)xf::cv::aie::xfGetImgDataPtr(bufferMapped[1]);
+            int16_t* refp = (int16_t*)xf::cv::aie::xfGetImgDataPtr(int16golden);
             for (int i = 0; i < TILE_ELEMENTS; i++) {
                 if (outp[i] != refp[i]) {
-                    int diff = abs(int(bufferMapped[1][i] - int32golden[i]));
+                    int diff = abs(int(outp[i] - refp[i]));
                     if (diff > error_threshold) {
-                        printf("Error found @ %d, %d != %d	%d\n", i, bufferMapped[1][i], int32golden[i],
-                               bufferMapped[0][i]);
+                        printf("Error found @ %d, %d != %d\n", i, outp[i], refp[i]);
                         errorCount++;
                     }
                 }

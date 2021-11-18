@@ -1,5 +1,5 @@
 # Vitis Vision Library
-The Vitis Vision library is a set of 90+ kernels, optimized for Xilinx FPGAs, AI Engine and SoCs, based on the OpenCV computer vision library. The kernels in the Vitis Vision library are optimized and supported in the Xilinx Vitis Tool Suite.
+The Vitis Vision library is a set of 90+ kernels, optimized for Xilinx™ FPGAs, AI Engine™, and SoCs, based on the OpenCV computer vision library. The kernels in the Vitis Vision library are optimized and supported in the Xilinx Vitis™ Tool Suite.
 
 # DESIGN FILE HIERARCHY
 The library is organized into the following folders -
@@ -15,16 +15,21 @@ The library is organized into the following folders -
 The organization of contents in each folder is described in the readmes of the respective folders.
 
 ## HARDWARE and SOFTWARE REQUIREMENTS
-The Vitis Vision library is designed to work with Zynq, Zynq Ultrascale+, VCK190, and Alveo FPGAs. The library has been verified on zcu102, zcu104, vck190, U50, and U200 boards.
+The Vitis Vision library is designed to work with Zynq, Zynq Ultrascale+, VCK190, and Alveo™ FPGAs. The library has been verified on zcu102, zcu104, vck190, U50, and U200 boards.
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2021.2](https://www.xilinx.com/html_docs/xilinx2021_1/vitis_doc/acceleration_installation.html#dhg1543555360045__ae364401) or later version and the corresponding licenses.
-* Xilinx® Runtime ([XRT](https://www.xilinx.com/html_docs/xilinx2021_1/vitis_doc/acceleration_installation.html#dhg1543555360045__ae364401)) must be installed. XRT provides software interface to Xilinx FPGAs.
-* Install/compile [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) libraries(with compatible libjpeg.so). Appropriate version (X86/aarch32/aarch64) of compiler must be used based on the available processor for the target board.
-* libOpenCL.so must be installed if not present.
+* Valid installation of [Vitis™ 2021.2](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Xilinx® Runtime ([XRT](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to Xilinx FPGAs.
+* Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries(with compatible libjpeg.so). x86 libs have to be used for
+
+		a) L1 flow irrespective of target FPGA device being PCIe or embedded.
+		b) L2/L3 flow when the target device is PCIe based.
+		
+	For L2/L3 flow targeting embedded platforms, aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.	
+* libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
 * [Install the card](https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_9/ug1301-getting-started-guide-alveo-accelerator-cards.pdf) for which the platform is supported in Vitis 2021.2 or later versions.
-* If targeting an [embedded platform](https://www.xilinx.com/html_docs/xilinx2021_1/vitis_doc/acceleration_installation.html#dhg1543555360045__ae364401) , set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
+* If targeting an embedded platform, [install]((https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q)) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
 
 ##### OpenCV Installation Guidance:
 
@@ -54,11 +59,11 @@ The below steps can help install the basic libs required to compile and link the
 
 The OpenCV includes and libs will be in the *install* directory
 
-##### Vitis HLS flow
+##### Vitis HLS™ flow
 
 L1 functions are targeted for Vitis HLS flow, where C-Simulation, Synthesis, Co-Simulation and RTL implementation can be performed. Vitis and OpenCV-4.4.0 x86 version libs need to be installed before hand. Rest of the prerequisites are optional to use this flow.
 
-Please refer to L1 readme on how to setup the environment and run the functions
+Please refer to [L1 readme](https://github.com/Xilinx/Vitis_Libraries/blob/master/vision/L1/README.md) on how to setup the environment and run the functions.
 
 ##### Vitis Flow
 
@@ -66,16 +71,16 @@ L2/L3 functions are targeted for Vitis flow, where software-emulation, hardware-
 
 All the prerequisites need to be installed before starting with Vitis flow. For embedded devices, platforms and common images have to downloaded separately from the Xilinx official [download center](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-platforms.html).
 
-All the limitations and constraints of Vitis (OS support, compatibility etc.) are also applicable to Vitis Vison library.
+All the limitations and constraints of Vitis ([OS support, compatibility](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installation-Requirements) etc.) are also applicable to Vitis Vison library.
 
-Please refer to L2/L3 readme on how to setup the environment and run the functions
+Please refer to [L2/L3 readme](https://github.com/Xilinx/Vitis_Libraries/blob/master/vision/L2/README.md) on how to setup the environment and run the functions.
 
 ## OTHER INFORMATION
 Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
 [Xilinx Vitis Vision User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2021.2/index.html)
 
 ## SUPPORT
-For questions and to get help on this project or your own projects, visit the [Xilinx Forums](https://forums.xilinx.com/t5/Vitis-Acceleration-SDAccel-SDSoC/bd-p/tools_v)
+For questions and to get help on this project or your own projects, visit the [Xilinx Forums](https://support.xilinx.com/s/topic/0TO2E000000YKYAWA4/vitis-acceleration-acceleration?language=en_US)
 
 ## LICENSE AND CONTRIBUTING TO THE REPOSITORY
 The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
@@ -104,20 +109,23 @@ This library is written by developers at
 
 **Versal AI Engine additions** :
 
+    • Preprocess for DNN
+		- Function used in many ML pre-processing tasks to do normalization and other tasks. 
+
     • Back to back filter2D with batch size three support  
-		application showcasing increasing throughput of single filter2D kernel,
-        by doing 3, back-2-back filter2D achieving 555 FPS with PL datamovers.
+		- Application showcasing increasing throughput of single filter2D kernel,
+        	by doing 3, back-2-back filter2D achieving 555 FPS with PL datamovers.
 
 **New Programmable Logic (PL) functions and features**
 
     • ISP pipeline and functions:
 		• End to End Mono Image Processing (ISP) pipeline with CLAHE TMO
-			useful for ISP pipelines with monochrome sensors
+			- Useful for ISP pipelines with monochrome sensors
 		• RGB-IR along-with RGB-IR Image Processing (ISP) pipeline
-			useful for ISP pipelines with IR sensors
+			- Useful for ISP pipelines with IR sensors
 		• Global Tone Mapping (GTM) along with an ISP pipeline using GTM
-			adding to growing TMO (tone-mapping-operators) in the library for different quality
-            and area tradeoff purposes: CLAHE, Local Tone Mapping, Quantization and Dithering
+			- Adding to growing TMO (tone-mapping-operators) in the library for different quality
+            	and area tradeoff purposes: CLAHE, Local Tone Mapping, Quantization and Dithering
 
 
 **Known issues**
@@ -125,6 +133,8 @@ This library is written by developers at
   * Vitis GUI projects on RHEL83 and CEntOS82 may fail because of a lib conflict in the
      LD_LIBRARY_PATH setting. User needs to remove ${env_var:LD_LIBRARY_PATH} from the project
       environment settings for the function to build successfully.
-  * SVM L2 function fails emulation with 2021.2 Vitis.
-  * rgbir2bayer, isppipeline_rgbir functions are not supported on 2021.2 Vitis. Please use 2021.1
+  * SVM L2 PL function fails emulation with 2021.2 Vitis. Please use 2021.1
+    Vitis for this function.
+  * rgbir2bayer, isppipeline_rgbir PL functions are not supported on 2021.2 Vitis. Please use 2021.1
     Vitis for these 2 functions.
+  * Hardware emulation in AIE testcases may throw segmentation fault at the end, although completing the functional test successfully.
