@@ -266,7 +266,7 @@ L1
 
 L1 provides the basic primitives which cover the most common algorithms in security.
 
-The recommend flow to evaluate and test L1 components is described as follows using Vivado HLS tool.
+The recommend flow to evaluate and test L1 components is described as follows using Vitis HLS tool.
 A top level C/C++ testbench (typically `algorithm_name.cpp`) prepares the input data, passes them to the design under test, then performs any output data post processing and validation checks.
 
 A Makefile is used to drive this flow with available steps including `CSIM` (high level simulation), `CSYNTH` (high level synthesis to RTL) and `COSIM` (cosimulation between software testbench and generated RTL), `VIVADO_SYN` (synthesis by Vivado), `VIVADO_IMPL` (implementation by Vivado). The flow is launched from the shell by calling `make` with variables set as in the example below:
