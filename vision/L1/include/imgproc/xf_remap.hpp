@@ -377,7 +377,7 @@ loop_height:
 
                                 int t2 = d10;
                                 d10 = d11;
-                                d11 = d10;
+                                d11 = t2;
                                 // std::swap(d10,d11);
                             }
                             if (y % 2) {
@@ -387,7 +387,7 @@ loop_height:
 
                                 int t2 = d01;
                                 d01 = d11;
-                                d11 = d01;
+                                d11 = t2;
                                 // std::swap(d00,d10);
                                 // std::swap(d01,d11);
                             }
