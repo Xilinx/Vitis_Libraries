@@ -45,7 +45,7 @@ Otherwise, full path to .xpfm file needs to be provided through the `DEVICE` var
 L1 provides the modules to work distribution and result collection in different algorithms, manipulate streams:
 including combination, duplication, synchronization, and shuffle, updates URAM array in tighter initiation internal (II).
 
-The recommend flow to evaluate and test L1 components is described as follows using Vivado HLS tool.
+The recommend flow to evaluate and test L1 components is described as follows using Vitis HLS tool.
 A top level C/C++ testbench (typically `algorithm_name.cpp`) prepares the input data, passes them to the design under test,
 then performs any output data post processing and validation checks.
 
