@@ -10,7 +10,7 @@ This level of API is mainly provide for hardware-savvy HLS developers. The API d
 
 'include' folder contains the definitions of all the functions in various hpp files
 
-'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform C-Simulation, Synthesis, Co-Simulation etc., of the corresponding function in the example folder using standalone Vivado HLS.
+'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform C-Simulation, Synthesis, Co-Simulation etc., of the corresponding function in the example folder using standalone Vitis HLS.
 
 
 ### Commands to run:
