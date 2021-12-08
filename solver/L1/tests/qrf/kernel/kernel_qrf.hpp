@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef __KERNEL_QRF__
+#define __KERNEL_QRF__
+#include "dut_type_float.hpp"
+//#include "dut_type_complex.hpp"
 
-/**
- * @file xf_solver_L1.h
- * @brief Top-levle header for XF Solver Libaray level-1.
- */
+const int A_ROWS = QRF_A_ROWS;
+const int A_COLS = QRF_A_COLS;
+const bool TRANSPOSED_Q = QRF_TRANSPOSED_Q;
 
-#ifndef _XF_SOLVER_L1_HPP_
-#define _XF_SOLVER_L1_HPP_
-
-#include "hw/pseudosqrt.hpp"
-#include "hw/qrf.hpp"
-
+extern "C" void kernel_qrf_0(const MATRIX_IN_T A[A_ROWS][A_COLS],
+                             MATRIX_OUT_T Q[A_ROWS][A_ROWS],
+                             MATRIX_OUT_T R[A_ROWS][A_COLS]);
 #endif

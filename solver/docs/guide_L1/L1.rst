@@ -1,0 +1,56 @@
+..
+   Copyright 2021 Xilinx, Inc.
+  
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+.. meta::
+   :keywords: Vitis, Solver, Library
+   :description: Vitis Solver library L1 module user guide.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+**************************************
+L1 Module User Guide
+**************************************
+
+There are a number of commonly used linear algebra functions in L1 module. All the functions in L1 module use two-dimensional arrarys to represent matrices. The data type supported is listed as bellow.
+
+.. table::  
+    :align: center
+
+    +------------------+---------------------+
+    |       APIs       |      Data Type      |
+    +==================+=====================+
+    | qrf              | float               |    
+    |                  +---------------------+
+    |                  | x_complex<float>    |    
+    +------------------+---------------------+
+
+
+.. toctree::
+   :maxdepth: 2
+
+APIs 
+-------------
+.. toctree::
+   :maxdepth: 2
+
+   api.rst
+
+Core Utility
+---------------------------
+.. toctree::
+   :maxdepth: 2
+  
+   utility.rst
+

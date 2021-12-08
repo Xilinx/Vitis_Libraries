@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-/**
- * @file xf_solver_L1.h
- * @brief Top-levle header for XF Solver Libaray level-1.
- */
+#ifndef __DUT_TYPE__H__
+#define __DUT_TYPE__H__
 
-#ifndef _XF_SOLVER_L1_HPP_
-#define _XF_SOLVER_L1_HPP_
-
-#include "hw/pseudosqrt.hpp"
-#include "hw/qrf.hpp"
+typedef float MATRIX_IN_T;
+typedef float MATRIX_OUT_T;
 
 #endif
