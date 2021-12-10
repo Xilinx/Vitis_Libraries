@@ -25,49 +25,80 @@ Benchmark
     
 .. _pictures:
 
-Pictures
+Pictures & Performance
 -----------
 
-The data is used by benchmarks, our commonly used pictures are listed in table 1. 
+1. JPEG Decoder: This API supports the ‘Sequential DCT-based mode’ of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy.
+   It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle. 
+   It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.
+2. Pik Encoder: This API is based on Google’s PIK, which was ‘chosen as the base framework for JPEG XL’. 
+   The pikEnc is based on the ‘fast mode’ of PIK which can provide better encoding efficnty than most of other still image encoding methods.
+   The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. 
+   It can proved higher throughput and lower latency compared to software-based solutions.
+our commonly used pictures are listed in table below. 
 
-.. table:: Table 1 Pictures for benchmark
+.. table:: Table 1 Cosim benchmark for Huffman Decoder(L1)
     :align: center
 
-    +--------------------+----------+-------------+
-    |   Pictures         |  Format  |    Size     |
-    +====================+==========+=============+
-    |  android.jpg       |    420   |  960*1280   |
-    +--------------------+----------+-------------+
-    |  offset.jpg        |    422   |  5184*3456  |
-    +--------------------+----------+-------------+
-    |  hq.jpg            |    444   |  5760*3840  |
-    +--------------------+----------+-------------+
-    |  iphone.jpg        |    420   |  3264*2448  |
-    +--------------------+----------+-------------+
-    |  lena_c_512.png    |    444   |   512*512   |
-    +--------------------+----------+-------------+
-    |  1920x1080.png     |    444   |  1920*1080  |
-    +--------------------+----------+-------------+
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
+    |   Pictures         |  Format  |    Size     | Compress ratio | cosim Freq(MHz) | input speed(MB/s)| QPS | time(ms) |
+    +====================+==========+=============+================+=================+==================+=====+==========+
+    |  lena_c_512.jpg    |    420   |   512*512   |  5.2           | 300             |  174             | 2288| 0.437    |
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
+    |  t0.jpg            |    420   |   616*516   |  9.3           | 300             |  147             | 2890| 0.346    |
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
+    |  android.jpg       |    420   |  960*1280   |  14.2          | 300             |  145             | 1125| 0.889    |
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
+    |  offset.jpg        |    422   |  5184*3456  |  4.6           | 300             |  209             | 27  | 37.25    |
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
+    |  hq.jpg            |    444   |  5760*3840  |  2.8           | 300             |  233             | 10  | 101.1    |
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
+    |  iphone.jpg        |    420   |  3264*2448  |  5.4           | 300             |  213             | 96  | 10.47    |
+    +--------------------+----------+-------------+----------------+-----------------+------------------+-----+----------+
 
-Performance
+
+.. table:: Table 2 On board benchmark for JPEG Decoder(L2)
+    :align: center
+
+    +--------------------+----------+-------------+----------------+-----------+------------------+-----+----------+
+    |   Pictures         |  Format  |    Size     | Compress ratio | Freq(MHz) | input speed(MB/s)| QPS | time(ms) |
+    +====================+==========+=============+================+===========+==================+=====+==========+
+    |  lena_c_512.jpg    |    420   |   512*512   |  5.2           | 243       |  87              | 1148| 0.871    |
+    +--------------------+----------+-------------+----------------+-----------+------------------+-----+----------+
+    |  t0.jpg            |    420   |   616*516   |  9.3           | 243       |  66              | 1292| 0.774    |
+    +--------------------+----------+-------------+----------------+-----------+------------------+-----+----------+
+.. table:: Table 3 On board benchmark for Pik Eecoder(L2)
+    :align: center
+
+    +--------------------+------------------+-------------+-------------+-------------+------------+---------------------+------+
+    |   Pictures         |      Size        | Kernel1(ms) | Kernel2(ms) | Kernel3(ms) | Freq(MHz)  | input speed(MPIX/s) | QPS  |
+    +====================+==================+=============+=============+=============+============+=====================+======+
+    |  lena_c_512.png    |     512*512      |    16       |      14     |      7      |     200    |      16.4           | 62.5 |
+    +--------------------+------------------+-------------+-------------+-------------+------------+---------------------+------+
+    |  lena_c_1024.png   |    1024*1024     |    52       |      48     |     24      |     200    |      20.2           | 19.2 |
+    +--------------------+------------------+-------------+-------------+-------------+------------+---------------------+------+
+    |  lena_c_2048.png   |    2048*2048     |    191      |      180    |     86      |     200    |      22.0           | 5.2  |
+    +--------------------+------------------+-------------+-------------+-------------+------------+---------------------+------+
+
+Resource Utilization
 -----------
 
 For representing the resource utilization in each benchmark, we separate the overall utilization into 2 parts, where P stands for the resource usage in
 platform, that is those instantiated in static region of the FPGA card, as well as K represents those used in kernels (dynamic region). The input is
 png, jpg, pik, e.g. format, and the target device is set to Alveo U200.
 
-.. table:: Table 2 Performance for processing pictures on FPGA
+.. table:: Table 4 Resource Utilization
     :align: center
 
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |    Architecture     |     Picture      |  Latency(ms) |  Timing  |    LUT(P/K)    |  BRAM(P/K)  |  URAM(P/K) |  DSP(P/K)  |
-    +=====================+==================+==============+==========+================+=============+============+============+
-    | JPEG Huffman Decoder|   android.jpg    |    0.889     |  270MHz  |  108.1K/7.9K   |   178/5     |    0/0     |     4/12   |
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |  JPEG Decoder       |   android.jpg    |    1.515     |  243MHz  |  108.1K/23.1K  |   178/28    |    0/0     |     4/39   |
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |  PIK Encoder        |  lena_c_512.png  |    16.0      |  300MHz  |  150.9K/439.4K |   338/62    |    0/16    |     7/0    |
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
+    +------------------------+----------+----------------+-------------+------------+------------+
+    |    Architecture        |  Freq    |    LUT(P/K)    |  BRAM(P/K)  |  URAM(P/K) |  DSP(P/K)  |
+    +========================+==========+================+=============+============+============+
+    | JPEG Huffman Decoder   |  270MHz  |  108.1K/7.9K   |   178/5     |    0/0     |     4/12   |
+    +------------------------+----------+----------------+-------------+------------+------------+
+    |  JPEG Decoder          |  243MHz  |  108.1K/23.1K  |   178/28    |    0/0     |     4/39   |
+    +------------------------+----------+----------------+-------------+------------+------------+
+    |  PIK Encoder           |  300MHz  |  150.9K/439.4K |   338/62    |    0/16    |     7/0    |
+    +------------------------+----------+----------------+-------------+------------+------------+
 
 These are details for benchmark result and usage steps.
 

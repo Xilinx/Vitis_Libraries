@@ -44,6 +44,22 @@
 		    ]
 		}
 	    }
+	},
+        "u280": {
+	    "host": {
+	        "compiler": {
+		    "symbols": [
+		        "USE_HBM"
+		    ]
+		}
+	    },
+	    "v++": {
+	        "compiler": {
+		    "cflags": [
+		        "--config PROJECT/conn_u280_u50.ini"
+		    ]
+		}
+	    }
 	}
     },
     "launch": [
