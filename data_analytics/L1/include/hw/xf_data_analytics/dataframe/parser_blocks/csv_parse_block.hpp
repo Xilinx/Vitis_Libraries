@@ -19,7 +19,7 @@
  */
 #ifndef XF_DATA_ANALYTICS_L1_DATAFRAME_CSV_PARSE_BLOCK_HPP
 #define XF_DATA_ANALYTICS_L1_DATAFRAME_CSV_PARSE_BLOCK_HPP
-#include "xf_data_analytics/dataframe/parser_blocks/line_parser.hpp"
+#include "xf_data_analytics/dataframe/parser_blocks/csv_line_parser.hpp"
 #include "xf_data_analytics/dataframe/parser_blocks/parse_double.hpp"
 #include "xf_data_analytics/dataframe/parser_blocks/parse_date.hpp"
 #include "xf_data_analytics/dataframe/df_utils.hpp"

@@ -30,7 +30,7 @@ Setup the build environment using the Vitis and XRT scripts, and set the ``PLATF
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
-The recommend flow to evaluate and test L1 components is described as follows using Vivado HLS tool.
+The recommend flow to evaluate and test L1 components is described as follows using Vitis HLS tool.
 A top level C/C++ testbench (typically ``algorithm_name.cpp``) prepares the input data,
 passes them to the design under test, then performs any output data post processing and validation checks.
 

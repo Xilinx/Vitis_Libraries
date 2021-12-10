@@ -31,6 +31,7 @@ namespace xf {
 namespace data_analytics {
 namespace dataframe {
 namespace internal {
+template <int MODE>
 static void split(bool last,
                   bool first,
                   hls::stream<ap_uint<128> >& i_strm,
@@ -55,10 +56,15 @@ static void split(bool last,
             is_delimiter = true;
         else
             is_delimiter = false;
-        // reserve the line delimiter for CSV parser
+
         if (fnd_head) {
-            o_strm.write(i_8);
-            o_e_strm.write(false);
+            if (MODE == 1 && !is_delimiter) { // JSON, remove '\n'
+                o_strm.write(i_8);
+                o_e_strm.write(false);
+            } else if (MODE == 0) { // CSV, reserve '\n'
+                o_strm.write(i_8);
+                o_e_strm.write(false);
+            }
         }
         if (!fnd_head && is_delimiter) fnd_head = true;
     }
@@ -136,7 +142,7 @@ void readBlock(ap_uint<29> base_addr_buff[NM],
     }
 }
 
-template <int NM>
+template <int NM, int MODE>
 void readWrapper(ap_uint<29> base_addr_buff[NM],
                  ap_uint<29> nm_buff[NM],
                  ap_uint<128>* ddr_buff,
@@ -156,11 +162,11 @@ void readWrapper(ap_uint<29> base_addr_buff[NM],
     for (int i = 0; i < NM; ++i) {
 #pragma HLS unroll
         if (i == 0)
-            split(false, true, d_128_strm[i], m_e_strm[i], o_strm[i], e_strm[i]);
+            split<MODE>(false, true, d_128_strm[i], m_e_strm[i], o_strm[i], e_strm[i]);
         else if (i == NM - 1)
-            split(true, false, d_128_strm[i], m_e_strm[i], o_strm[i], e_strm[i]);
+            split<MODE>(true, false, d_128_strm[i], m_e_strm[i], o_strm[i], e_strm[i]);
         else
-            split(false, false, d_128_strm[i], m_e_strm[i], o_strm[i], e_strm[i]);
+            split<MODE>(false, false, d_128_strm[i], m_e_strm[i], o_strm[i], e_strm[i]);
     }
 }
 
@@ -222,7 +228,24 @@ void readCSV(ap_uint<128> ddr_buff[2000], hls::stream<ap_uint<8> > o_strm[NM], h
     ap_uint<29> nm_buff[NM];
 
     blockDivide<NM>(base_addr_buff, nm_buff, ddr_buff);
-    readWrapper<NM>(base_addr_buff, nm_buff, ddr_buff, o_strm, e_strm);
+    readWrapper<NM, 0>(base_addr_buff, nm_buff, ddr_buff, o_strm, e_strm);
+}
+
+/**
+ * @brief read JSON line to multiple stream for PUs
+ *
+ * @tparam NM number of PU
+ * @param ddr_buff buffer of JSON file
+ * @param o_strm output stream of string
+ * @param e_strm output end flag of i_strm
+ **/
+template <int NM>
+void readJSON(ap_uint<128> ddr_buff[2000], hls::stream<ap_uint<8> > o_strm[NM], hls::stream<bool> e_strm[NM]) {
+    ap_uint<29> base_addr_buff[NM];
+    ap_uint<29> nm_buff[NM];
+
+    blockDivide<NM>(base_addr_buff, nm_buff, ddr_buff);
+    readWrapper<NM, 1>(base_addr_buff, nm_buff, ddr_buff, o_strm, e_strm);
 }
 }
 }

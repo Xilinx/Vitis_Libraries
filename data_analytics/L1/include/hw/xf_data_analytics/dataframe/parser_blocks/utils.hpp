@@ -24,15 +24,6 @@ namespace xf {
 namespace data_analytics {
 namespace dataframe {
 namespace internal {
-struct Node {
-    ap_uint<12> next;
-    ap_uint<12> base_addr;
-};
-struct FieldInfo {
-    ap_uint<12> head;
-    ap_uint<12> tail;
-    ap_uint<20> size; // ap_uint<32>
-};
 
 inline double bitsToDouble(uint64_t in) {
     union {

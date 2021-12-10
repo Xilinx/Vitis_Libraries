@@ -15,19 +15,19 @@
  */
 
 /**
- * @file csv_parser.hpp
- * @brief parse one standard CSV file, output each field row by row with obj-stream interface
+ * @file json_parser.hpp
+ * @brief parse one standard pre-flatten JSON file, output each field row by row with obj-stream interface
  *
  * This file is part of Vitis Data Analytics Library.
  */
 
-#ifndef XF_DATA_ANALYTICS_L1_DATAFRAME_CSV_PARSER_HPP
-#define XF_DATA_ANALYTICS_L1_DATAFRAME_CSV_PARSER_HPP
+#ifndef XF_DATA_ANALYTICS_L1_DATAFRAME_JSON_PARSER_HPP
+#define XF_DATA_ANALYTICS_L1_DATAFRAME_JSON_PARSER_HPP
 
 #include "xf_data_analytics/common/obj_interface.hpp"
 #include "xf_data_analytics/dataframe/df_utils.hpp"
 #include "xf_data_analytics/dataframe/parser_blocks/read_block.hpp"
-#include "xf_data_analytics/dataframe/parser_blocks/csv_parse_block.hpp"
+#include "xf_data_analytics/dataframe/parser_blocks/json_parse_block.hpp"
 
 #ifndef __SYNTHESIS__
 #include <iostream>
@@ -42,22 +42,35 @@ namespace internal {
 /**
  * @brief read the schema and cache the type of each enable column
  **/
-template <int PU_NUM>
+template <int PU_NUM, int COL_NUM>
 void readSchema(ap_uint<8>* schema,
-                ap_uint<8> type_buff[PU_NUM][256],
-                ap_uint<4> type_valid_buff[PU_NUM][256],
-                ap_uint<9>& num_of_column) {
-    ap_uint<9> valid_column = 0;
+
+                ap_uint<9>& num_of_column,
+                ap_uint<COL_NUM>& mask_cfg,
+                ap_uint<8> key_buff[PU_NUM][COL_NUM][256],
+                ap_uint<4> type_buff[PU_NUM][COL_NUM]) {
     int cnt = 0;
-    int addr = 2;
+    int addr = 4;
     bool str_start = false;
     bool val_start = false;
-    bool mk_start = false;
-    ap_uint<4> type_tmp;
+    ap_uint<8> str_len = 0;
+    ap_uint<9> column_nm = 0;
 
     ap_uint<16> nm;
-    nm.range(7, 0) = schema[0];
-    nm.range(15, 8) = schema[1];
+    mask_cfg.range(7, 0) = schema[0];
+    mask_cfg.range(15, 8) = schema[1];
+    nm.range(7, 0) = schema[2];
+    nm.range(15, 8) = schema[3];
+    // init key buffer
+    for (int i = 0; i < 256; ++i) {
+        for (int j = 0; j < COL_NUM; ++j) {
+#pragma HLS pipeline II = 1
+            for (int k = 0; k < PU_NUM; ++k) {
+                key_buff[k][j][i] = '\0';
+            }
+        }
+    }
+
 READ_SCHEMA_CORE_LOOP:
     for (int i = 0; i < nm; ++i) {
 #pragma HLS pipeline II = 1
@@ -68,26 +81,26 @@ READ_SCHEMA_CORE_LOOP:
             str_start = true;
         } else if (str_start && in == '"') {
             str_start = false;
+            str_len = 0;
         } else if (!str_start && in == ':') {
             val_start = true;
         } else if (val_start) {
             val_start = false;
-            type_tmp = in(3, 0);
-        } else if (!mk_start && in == ' ') {
-            mk_start = true;
-        } else if (mk_start) {
-            mk_start = false;
             for (int j = 0; j < PU_NUM; ++j) {
 #pragma HLS unroll
-                if (in == '1') type_valid_buff[j][valid_column] = type_tmp;
-                type_buff[j][cnt] = ((ap_uint<3>)0, in[0], type_tmp(3, 0));
+                type_buff[j][cnt] = in;
             }
-            if (in == '1') valid_column++;
-        } else { // column name
+            column_nm++;
+        } else {
+            for (int j = 0; j < PU_NUM; ++j) {
+#pragma HLS unroll
+                key_buff[j][cnt][str_len] = in;
+            }
+            str_len++;
         }
     }
 
-    num_of_column = valid_column;
+    num_of_column = column_nm;
 }
 
 /**
@@ -196,14 +209,15 @@ inline void mergeLine(hls::stream<Object> i_obj_array_strm[PU_NUM / 2][2],
 }
 
 /**
- * @brief main function of CSV parser
+ * @brief main function of JSON parser
  **/
-template <int PU_NUM>
-void parseCSVCore(ap_uint<128>* csv_buff,
-                  ap_uint<8> type_buff[PU_NUM][256],
-                  ap_uint<4> type_valid_buff[PU_NUM][256],
-                  const ap_uint<9> num_of_column,
-                  hls::stream<Object>& o_obj_strm) {
+template <int PU_NUM, int COL_NUM>
+void parseJSONCore(ap_uint<128>* json_buff,
+                   ap_uint<9> num_of_column,
+                   ap_uint<COL_NUM> mask_cfg,
+                   ap_uint<8> key_buff[PU_NUM][COL_NUM][256],
+                   ap_uint<4> type_buff[PU_NUM][COL_NUM],
+                   hls::stream<Object>& o_obj_strm) {
 #pragma HLS dataflow
 
     hls::stream<ap_uint<8> > s_w8_strm[PU_NUM];
@@ -222,28 +236,28 @@ void parseCSVCore(ap_uint<128>* csv_buff,
 #pragma HLS array_partition variable = o_ln_e_strm dim = 0
 #pragma HLS bind_storage variable = o_ln_e_strm type = fifo impl = lutram
 
-    readCSV<PU_NUM>(csv_buff, s_w8_strm, s_e_strm);
+    readJSON<PU_NUM>(json_buff, s_w8_strm, s_e_strm);
 
     if (PU_NUM >= 2) {
-        parseBlock(num_of_column, type_buff[0], type_valid_buff[0], s_w8_strm[0], s_e_strm[0], o_ln_e_strm[0][0],
+        parseBlock(num_of_column, mask_cfg, key_buff[0], type_buff[0], s_w8_strm[0], s_e_strm[0], o_ln_e_strm[0][0],
                    t_obj_array_strm[0][0]);
-        parseBlock(num_of_column, type_buff[1], type_valid_buff[1], s_w8_strm[1], s_e_strm[1], o_ln_e_strm[0][1],
+        parseBlock(num_of_column, mask_cfg, key_buff[1], type_buff[1], s_w8_strm[1], s_e_strm[1], o_ln_e_strm[0][1],
                    t_obj_array_strm[0][1]);
     }
     if (PU_NUM >= 4) {
-        parseBlock(num_of_column, type_buff[2], type_valid_buff[2], s_w8_strm[2], s_e_strm[2], o_ln_e_strm[1][0],
+        parseBlock(num_of_column, mask_cfg, key_buff[2], type_buff[2], s_w8_strm[2], s_e_strm[2], o_ln_e_strm[1][0],
                    t_obj_array_strm[1][0]);
-        parseBlock(num_of_column, type_buff[3], type_valid_buff[3], s_w8_strm[3], s_e_strm[3], o_ln_e_strm[1][1],
+        parseBlock(num_of_column, mask_cfg, key_buff[3], type_buff[3], s_w8_strm[3], s_e_strm[3], o_ln_e_strm[1][1],
                    t_obj_array_strm[1][1]);
     }
     if (PU_NUM >= 8) {
-        parseBlock(num_of_column, type_buff[4], type_valid_buff[4], s_w8_strm[4], s_e_strm[4], o_ln_e_strm[2][0],
+        parseBlock(num_of_column, mask_cfg, key_buff[4], type_buff[4], s_w8_strm[4], s_e_strm[4], o_ln_e_strm[2][0],
                    t_obj_array_strm[2][0]);
-        parseBlock(num_of_column, type_buff[5], type_valid_buff[5], s_w8_strm[5], s_e_strm[5], o_ln_e_strm[2][1],
+        parseBlock(num_of_column, mask_cfg, key_buff[5], type_buff[5], s_w8_strm[5], s_e_strm[5], o_ln_e_strm[2][1],
                    t_obj_array_strm[2][1]);
-        parseBlock(num_of_column, type_buff[6], type_valid_buff[6], s_w8_strm[6], s_e_strm[6], o_ln_e_strm[3][0],
+        parseBlock(num_of_column, mask_cfg, key_buff[6], type_buff[6], s_w8_strm[6], s_e_strm[6], o_ln_e_strm[3][0],
                    t_obj_array_strm[3][0]);
-        parseBlock(num_of_column, type_buff[7], type_valid_buff[7], s_w8_strm[7], s_e_strm[7], o_ln_e_strm[3][1],
+        parseBlock(num_of_column, mask_cfg, key_buff[7], type_buff[7], s_w8_strm[7], s_e_strm[7], o_ln_e_strm[3][1],
                    t_obj_array_strm[3][1]);
     }
 
@@ -253,30 +267,33 @@ void parseCSVCore(ap_uint<128>* csv_buff,
 } // namespace internal
 
 /**
- * @brief read one standard CSV file from DDR and parse into object stream with schma defination
+ * @brief read one standard JSON file from DDR and parse into object stream with schma defination
  *
- * @tparam PU_NUM number of CSV parse core, only support 2/4/8
- * @param csv_buf buffer of CSV file
+ * @tparam PU_NUM number of JSON parse core, only support 2/4/8
+ * @tparam COL_NUM number of maximum column, should be power of 2
+ * @param json_buf buffer of JSON file
  * @param schema name, data type and is_filter flag for each column
  * @param o_obj_strm output object stream for selected columns
  *
  **/
-template <int PU_NUM = 8>
-void csvParser(ap_uint<128>* csv_buf, ap_uint<8>* schema, hls::stream<Object>& o_obj_strm) {
-    ap_uint<8> type_buf[PU_NUM][256];
+template <int PU_NUM = 4, int COL_NUM = 16>
+void jsonParser(ap_uint<128>* json_buf, ap_uint<8>* schema, hls::stream<Object>& o_obj_strm) {
+    ap_uint<8> key_buf[PU_NUM][COL_NUM][256];
+#pragma HLS array_partition variable = key_buf dim = 1
+#pragma HLS array_partition variable = key_buf dim = 2
+#pragma HLS bind_storage variable = key_buf type = ram_1p impl = lutram
+    ap_uint<4> type_buf[PU_NUM][COL_NUM];
 #pragma HLS array_partition variable = type_buf dim = 1
 #pragma HLS bind_storage variable = type_buf type = ram_1p impl = lutram
-    ap_uint<4> type_valid_buf[PU_NUM][256];
-#pragma HLS array_partition variable = type_valid_buf dim = 1
-#pragma HLS bind_storage variable = type_valid_buf type = ram_1p impl = lutram
 
     static_assert((PU_NUM == 2 || PU_NUM == 4 || PU_NUM == 8), "Only support 2/4/8 PU setting");
 
     ap_uint<9> num_of_column;
+    ap_uint<COL_NUM> mask_cfg;
 
-    internal::readSchema<PU_NUM>(schema, type_buf, type_valid_buf, num_of_column);
+    internal::readSchema<PU_NUM, COL_NUM>(schema, num_of_column, mask_cfg, key_buf, type_buf);
 
-    internal::parseCSVCore<PU_NUM>(csv_buf, type_buf, type_valid_buf, num_of_column, o_obj_strm);
+    internal::parseJSONCore<PU_NUM>(json_buf, num_of_column, mask_cfg, key_buf, type_buf, o_obj_strm);
 }
 } // namespace dataframe
 } // namespace data_analytics
