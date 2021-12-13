@@ -366,6 +366,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#hardware-functions-in-xf-data-analytics-dataframe">Hardware Functions in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::dataframe</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#csvparser">csvParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jsonparser">jsonParser</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#readfromdataframe">readFromDataFrame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writetodataframe">writeToDataFrame</a></li>
 </ul>
@@ -1127,6 +1128,48 @@
 <td>name, data type and is_filter flag for each column</td>
 </tr>
 <tr class="row-even"><td>o_obj_strm</td>
+<td>output object stream for selected columns</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="jsonparser">
+<span id="cid-xf-data-analytics-dataframe-jsonparser"></span><span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1a084821e1fa5fcc6ff557626b5873c616"></span><h2>jsonParser<a class="headerlink" href="#jsonparser" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/dataframe/json_parser.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">PU_NUM</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">COL_NUM</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">jsonParser</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">128</span><span class="o">&gt;*</span> <span class="n">json_buf</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">schema</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><a class="reference internal" href="../rst_L1/struct_xf_data_analytics_dataframe_Object.html#doxid-structxf-1-1data-analytics-1-1dataframe-1-1-object"><span class="std std-ref">Object</span></a><span></span><span class="o">&gt;&amp;</span> <span class="n">o_obj_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>read one standard JSON file from DDR and parse into object stream with schma defination</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>PU_NUM</td>
+<td>number of JSON parse core, only support 2/4/8</td>
+</tr>
+<tr class="row-even"><td>COL_NUM</td>
+<td>number of maximum column, should be power of 2</td>
+</tr>
+<tr class="row-odd"><td>json_buf</td>
+<td>buffer of JSON file</td>
+</tr>
+<tr class="row-even"><td>schema</td>
+<td>name, data type and is_filter flag for each column</td>
+</tr>
+<tr class="row-odd"><td>o_obj_strm</td>
 <td>output object stream for selected columns</td>
 </tr>
 </tbody>

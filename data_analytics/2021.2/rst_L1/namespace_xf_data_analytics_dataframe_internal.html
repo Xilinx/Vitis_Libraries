@@ -513,6 +513,47 @@
 </pre>
 <p>main function of CSV parser</p>
 </div>
+<div class="section" id="cid-xf-data-analytics-dataframe-internal-readschema-2">
+<span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1-1internal-1ad1be639be38fd485bfe9525a401b2f9c"></span><span id="id1"></span><h2>readSchema<a class="headerlink" href="#cid-xf-data-analytics-dataframe-internal-readschema-2" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/dataframe/json_parser.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">PU_NUM</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">COL_NUM</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">readSchema</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">schema</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">9</span><span class="o">&gt;&amp;</span> <span class="n">num_of_column</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">COL_NUM</span><span class="o">&gt;&amp;</span> <span class="n">mask_cfg</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">key_buff</span> <span class="p">[</span><span class="n">PU_NUM</span><span class="p">][</span><span class="n">COL_NUM</span><span class="p">][</span><span class="mi">256</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span> <span class="n">type_buff</span> <span class="p">[</span><span class="n">PU_NUM</span><span class="p">][</span><span class="n">COL_NUM</span><span class="p">]</span>
+    <span class="p">)</span>
+</pre>
+<p>read the schema and cache the type of each enable column</p>
+</div>
+<div class="section" id="parsejsoncore">
+<span id="cid-xf-data-analytics-dataframe-internal-parsejsoncore"></span><span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1-1internal-1ae1514afeb941d96c554a6a3150932dc7"></span><h2>parseJSONCore<a class="headerlink" href="#parsejsoncore" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/dataframe/json_parser.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">PU_NUM</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">COL_NUM</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">parseJSONCore</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">128</span><span class="o">&gt;*</span> <span class="n">json_buff</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">9</span><span class="o">&gt;</span> <span class="n">num_of_column</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">COL_NUM</span><span class="o">&gt;</span> <span class="n">mask_cfg</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span> <span class="n">key_buff</span> <span class="p">[</span><span class="n">PU_NUM</span><span class="p">][</span><span class="n">COL_NUM</span><span class="p">][</span><span class="mi">256</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span> <span class="n">type_buff</span> <span class="p">[</span><span class="n">PU_NUM</span><span class="p">][</span><span class="n">COL_NUM</span><span class="p">],</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><a class="reference internal" href="struct_xf_data_analytics_dataframe_Object.html#doxid-structxf-1-1data-analytics-1-1dataframe-1-1-object"><span class="std std-ref">Object</span></a><span></span><span class="o">&gt;&amp;</span> <span class="n">o_obj_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>main function of JSON parser</p>
+</div>
 <div class="section" id="genaddr64">
 <span id="cid-xf-data-analytics-dataframe-internal-genaddr64"></span><span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1-1internal-1aed2a1c844a74efb41aec7e2f521eba86"></span><h2>genAddr64<a class="headerlink" href="#genaddr64" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">
@@ -931,7 +972,7 @@
 </table>
 </div>
 <div class="section" id="cid-xf-data-analytics-dataframe-internal-memmanage-2">
-<span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1-1internal-1a3846fa6b9e1ac47263ec7f430bdc3803"></span><span id="id1"></span><h2>memManage<a class="headerlink" href="#cid-xf-data-analytics-dataframe-internal-memmanage-2" title="Permalink to this headline">¶</a></h2>
+<span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1-1internal-1a3846fa6b9e1ac47263ec7f430bdc3803"></span><span id="id2"></span><h2>memManage<a class="headerlink" href="#cid-xf-data-analytics-dataframe-internal-memmanage-2" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/dataframe/write_to_parquet.hpp&quot;</span>
 </pre>
