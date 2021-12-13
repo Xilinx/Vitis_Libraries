@@ -58,7 +58,7 @@ int host_ParserParameters(int argc,
     int has_numThread = general_findPara(argc, argv, "-thread");
     int has_num_par = general_findPara(argc, argv, "-num_par");
     int has_gh_par = general_findPara(argc, argv, "-gh_par");
-    int has_flow_prune = general_findPara(argc, argv, "-prun");
+    int has_flow_prune = general_findPara(argc, argv, "-prun") || general_findPara(argc, argv, "-fast");
 
     if (has_opts_C_thresh != -1) {
         rec[has_opts_C_thresh] = true;
@@ -233,29 +233,8 @@ int LvTest_main_par(int argc, char** argv) {
     int num_par;
     int gh_par;
     bool usingPrune = false;
-    int numThreads; /*= GetNumThreadsForOpMP(argc, argv);
+    int numThreads;
 
-
-   if( general_findPara(argc, argv, "-prun")!=-1 ||  general_findPara(argc, argv, "-lvprun")!=-1||
-   general_findPara(argc, argv, "-fast")!=-1)
-   {
-           usingPrune=true;
-           argc--;
-   }
-   host_ParserParameters(
-      argc,
-      argv,
-      opts_C_thresh,    //double opts_C_thresh; //Threshold with coloring on
-      opts_minGraphSize,//long   opts_minGraphSize; //Min |V| to enable coloring
-      opts_threshold,   //double opts_threshold; //Value of threshold
-      opts_ftype,       //int    opts_ftype; //File type
-      opts_inFile,      //char   opts_inFile[4096];
-      opts_coloring,    //bool   opts_coloring;
-      opts_output,      //bool   opts_output;
-      opts_VF,          //bool   opts_VF;
-      opts_xclbinPath);
-
- */
     host_ParserParameters(argc, argv,
                           opts_C_thresh,     // double opts_C_thresh; //Threshold with coloring on
                           opts_minGraphSize, // long   opts_minGraphSize; //Min |V| to enable coloring
@@ -272,12 +251,6 @@ int LvTest_main_par(int argc, char** argv) {
     pglv_src->SetByOhterG(G);
     long NV_begin = pglv_src->G->numVertices;
     long* C_orig = pglv_src->C; //= (long *) malloc (NV_begin * sizeof(long)); assert(C_orig != 0);
-
-    /*  #pragma omp parallel for
-      for (long i=0; i<NV_begin; i++) {
-           C_orig[i] = -1;
-      }
-     */
 
     if (!usingPrune) {
         runLouvainWithFPGA_demo(G, C_orig, opts_xclbinPath, opts_coloring, opts_minGraphSize, opts_threshold,

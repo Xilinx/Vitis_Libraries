@@ -26,6 +26,21 @@ namespace graph {
 namespace L3 {
 
 /**
+ * @brief louvain algorithm is implemented.
+ *
+ * @param handle Graph library L3 handle
+ * @param flowMode flowMode of multi louvain kernel. 
+ * LOUVAINMOD_PRUNING_KERNEL = 1 is a 1cu kernel design fit for u50
+ * LOUVAINMOD_2CU_U55C_KERNEL = 2 a 2cu kernel design fit for u55c
+ * the performance of one compute unit by different board is the same
+ * @param glv the original graph info before partition.
+ * @param pglv one of the partitioned sub-graph info to input to kernel.
+ * @param para_lv parameters of louvain kernel
+ *
+ */
+void louvainModularity(
+    std::shared_ptr<xf::graph::L3::Handle> handle, int flowMode, GLV* glv, GLV* pglv, LouvainPara* para_lv);
+/**
  * @brief twoHop algorithm is implemented.
  *
  * @param handle Graph library L3 handle

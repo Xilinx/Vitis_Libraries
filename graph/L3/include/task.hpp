@@ -497,6 +497,56 @@ auto createL3(Q& q, F&& f, Args&&... args) -> event<int> {
     return e;
 }
 
+inline void louvainWorker(queue& q,
+                          class openXRM* xrm,
+                          std::string kernelName,
+                          std::string kernelAlias,
+                          unsigned int requestLoad,
+                          unsigned int deviceNm,
+                          unsigned int cuNm) {
+    int requestNm = deviceNm * cuNm;
+    xrmCuResource* resR[requestNm];
+    int pendingRequests;
+    int curRequestId = 0;
+
+    while (true) {
+        class task t[requestNm];
+        pendingRequests = 0;
+        for (int i = 0; i < requestNm; ++i) {
+            // q.getWork is blocking until it has a job
+            t[i] = q.getWork();
+
+            resR[i] = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+            memset(resR[i], 0, sizeof(xrmCuResource));
+            pendingRequests++;
+            if (q.empty()) break; // no more requests execute pending ones.
+        }
+
+#ifndef NDEBUG
+// std::cout << "DEBUG: " << __FUNCTION__
+//          << " pendingRequests" << pendingRequests
+//          << " curRequestId " << curRequestId << std::endl;
+#endif
+        bool toStop = false;
+        for (int i = 0; i < pendingRequests; ++i) {
+            if (!t[i].valid()) toStop = true;
+        }
+        if (toStop) break;
+
+        for (int i = 0; i < pendingRequests; i++) {
+            unsigned int deviceID = curRequestId / cuNm;
+            unsigned int cuID = curRequestId % cuNm;
+            unsigned int channelID = 0;
+            std::string instanceName = "PLACEHOLDER";
+
+            t[i].execute(deviceID, cuID, channelID, xrm, resR[curRequestId], instanceName);
+
+            curRequestId++;
+            if (curRequestId == requestNm) curRequestId = 0;
+        }
+    }
+}
+
 inline void worker(queue& q,
                    class openXRM* xrm,
                    std::string kernelName,

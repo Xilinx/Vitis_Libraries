@@ -27,7 +27,8 @@ ifndef XILINX_XRT
 endif
 
 #Checks for g++
-CXX := g++
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++ 
+$(warning [WARNING]: CXX is $(CXX).)
 ifeq ($(HOST_ARCH), x86)
 ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
 ifndef XILINX_VIVADO
@@ -47,13 +48,14 @@ endif
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include
+CXXFLAGS += -I$(XFLIB_DIR)/L3/graphPartition/grappolo/include
 CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 XILINX_XRM=/opt/xilinx/xrm
 
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
-CXXFLAGS += -fmessage-length=0 -O3
+CXXFLAGS += -fmessage-length=0 -O3 -Ofast -DNDEBUG
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
 ifneq ($(HOST_ARCH), x86)
@@ -66,6 +68,27 @@ CXXFLAGS += -D USE_HBM
 libGRAPHL3 = $(XFLIB_DIR)/L3/lib/libgraphL3.so
 libgraphL3 : $(libGRAPHL3)
 CPP_PATH += $(XFLIB_DIR)/L3/src/common.cpp
+
+#for graph partition API
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/louvainPartition/ParLV.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/louvainPartition/partitionLouvain.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/louvainPartition/xilinxlouvain.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/RngStream.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/parseInputFiles.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/parallelLouvainMethod.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/utilityClusteringFunctions.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/parseInputParameters.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/coloringDistanceOne.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/vertexFollowing.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/utilityFunctions.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/driverForGraphClustering.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/buildNextPhase.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/louvainMultiPhaseRun.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/graphPartition/grappolo/src/parallelLouvainWithColoring.cpp
+
+#for graph API
+CPP_PATH += $(XFLIB_DIR)/L3/src/op_louvainmodularity.cpp
+CPP_PATH += $(XFLIB_DIR)/L3/src/louvainRun.cpp
 CPP_PATH += $(XFLIB_DIR)/L3/src/op_twohop.cpp
 CPP_PATH += $(XFLIB_DIR)/L3/src/op_sp.cpp
 CPP_PATH += $(XFLIB_DIR)/L3/src/op_trianglecount.cpp

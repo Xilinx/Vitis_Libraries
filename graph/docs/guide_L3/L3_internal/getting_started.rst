@@ -35,6 +35,7 @@ Software Requirements
 Hardware Requirements
 #####################
 * `Alveo U50 <https://www.xilinx.com/products/boards-and-kits/alveo/u50.html>`_
+* `Alveo U55C <https://www.xilinx.com/applications/data-center/high-performance-computing/u55c.html>`_
 
 
 Environment Setup
@@ -65,7 +66,11 @@ In order to build **libgraphL3.so**, please follow the following steps:
 
 .. code-block:: sh
 
-	cd xf_graph/L3/lib
-	./build_so.sh
+   cd xf_graph/L3/lib
+   ./build_so.sh
+   cd xf_graph/L3/tests
+   ./pre_launch.sh
   
 After the build is complete, **libgraphL3.so** should be available in *Vitis_Libraries/graph/L3/lib*
+ 
+

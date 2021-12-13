@@ -33,6 +33,14 @@ int runMultiEvents(uint32_t number, std::vector<xf::graph::L3::event<int> >& f) 
     return ret;
 }
 
+void louvainModularity(
+    std::shared_ptr<xf::graph::L3::Handle> handle, int flowMode, GLV* glv, GLV* pglv, LouvainPara* para_lv) {
+#ifndef NDEBUG
+    std::cout << "DEBUG: " << __FUNCTION__ << " handle=" << handle << std::endl;
+#endif
+    (handle->oplouvainmod)->demo_par_core(0, flowMode, glv, pglv, para_lv);
+};
+
 event<int> twoHop(xf::graph::L3::Handle& handle,
                   uint32_t* numPart,
                   uint64_t** pairPart,

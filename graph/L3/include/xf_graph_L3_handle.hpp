@@ -19,6 +19,16 @@
 #ifndef _XF_GRAPH_L3_HANDLE_HPP_
 #define _XF_GRAPH_L3_HANDLE_HPP_
 
+#define XF_GRAPH_L3_MAX_DEVICES_PER_NODE 16 // maximu supported devices per node
+#define XF_GRAPH_L3_SUCCESS 0
+#define XF_GRAPH_L3_ERROR_CONFIG_FILE_NOT_EXIST -2
+#define XF_GRAPH_L3_ERROR_XCLBIN_FILE_NOT_EXIST -3
+#define XF_GRAPH_L3_ERROR_DLOPEN -5
+#define XF_GRAPH_L3_ERROR_NOT_ENOUGH_DEVICES -6
+#define XF_GRAPH_L3_ERROR_CU_NOT_SETUP -7
+#define XF_GRAPH_L3_ERROR_ALLOC_CU -8
+#define XF_GRAPH_L3_ERROR_DLSYM -9
+
 #include "op_pagerank.hpp"
 #include "op_sp.hpp"
 #include "op_trianglecount.hpp"
@@ -30,6 +40,7 @@
 #include "op_similaritysparse.hpp"
 #include "op_similaritydense.hpp"
 #include "op_twohop.hpp"
+#include "op_louvainmodularity.hpp"
 
 namespace xf {
 namespace graph {
@@ -64,18 +75,15 @@ class Handle {
         unsigned int deviceNeeded = 0;       // requested FPGA device number
         unsigned int cuPerBoard = 1;         // requested FPGA device number
         std::vector<unsigned int> deviceIDs; // deviceID
-        void setKernelName(char* input) {
-            std::string tmp = "";
-            kernelName = input;
-            kernelAlias = (char*)tmp.c_str();
-        }
-        void setKernelAlias(char* input) {
-            std::string tmp = "";
-            kernelName = (char*)tmp.c_str();
-            kernelAlias = input;
-        }
+        void setKernelName(char* input) { kernelName = input; }
+        void setKernelAlias(char* input) { kernelAlias = input; }
     };
 
+    /**
+     * \brief xilinx FPGA Resource Manager operation
+     *
+     */
+    class opLouvainModularity* oplouvainmod;
     /**
      * \brief twohop operation
      *
@@ -138,6 +146,7 @@ class Handle {
     class openXRM* xrm;
 
     Handle() {
+        oplouvainmod = new class opLouvainModularity;
         optwohop = new class opTwoHop;
         oppg = new class opPageRank;
         opsp = new class opSP;
@@ -154,11 +163,18 @@ class Handle {
 
     void free();
 
+    void showHandleInfo();
+
     int setUp();
+    int setUp(std::string deviceNames); // Set up the handle with specified device names
 
     void getEnv();
 
+    void getEnvMultiBoards();
+
     void addOp(singleOP op);
+
+    uint32_t getNumDevices() { return numDevices; }
 
    private:
     uint32_t maxCU;
@@ -166,6 +182,12 @@ class Handle {
     uint32_t deviceNm;
 
     uint32_t numDevices;
+
+    uint32_t totalSupportedDevices_;
+
+    std::vector<std::string> supportedDeviceNames_;
+
+    uint32_t supportedDeviceIds[XF_GRAPH_L3_MAX_DEVICES_PER_NODE];
 
     uint64_t maxChannelSize;
 
@@ -175,6 +197,13 @@ class Handle {
 
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName);
     std::future<int> loadXclbinAsync(unsigned int deviceId, char* xclbinName);
+
+    int32_t initOpLouvainModularity(std::string xclbinFile,
+                                    std::string kernelName,
+                                    std::string kernelAlias,
+                                    unsigned int requestLoad,
+                                    unsigned int deviceNeeded,
+                                    unsigned int cuPerBoard);
 
     void initOpTwoHop(const char* kernelName,
                       char* xclbinFile,

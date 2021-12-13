@@ -55,7 +55,11 @@ endif
 
 # #################### Checking if DEVICE in whitelist ############################
 ifneq ($(findstring u50, $(DEVICE)), u50)
+ifneq ($(findstring u280, $(DEVICE)), u280)
+ifneq ($(findstring u55c, $(DEVICE)), u55c)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
+endif
 endif
 
 # ######################## Setting up Project Variables #################################
@@ -119,22 +123,22 @@ endif
 
 # ######################### Host compiler global settings ############################
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
-CXXFLAGS += -fmessage-length=0 -O3 -DPRAGMA -Ofast -fopenmp -fPIC -DMULTITHREAD
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+CXXFLAGS += -fmessage-length=0 -O3 -DPRAGMA -Ofast -fopenmp -fPIC -DMULTITHREAD -B/usr/lib/x86_64-linux-gnu
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 ifeq ($(HOST_ARCH), x86)
 LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-CXXFLAGS += -D USE_HBM
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u55c/'))
+CXXFLAGS += -D USE_U55C
 endif
 
 # ################### Setting package and image directory #######################
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -x $(BUILD_DIR)/kernel_louvain.xclbin -f 3 -c -m 10000 -prun $(CUR_DIR)/data/example-wt.txt
+HOST_ARGS :=  -x $(BUILD_DIR)/kernel_louvain.xclbin -f 3 -c -m 10000 $(CUR_DIR)/data/example-wt.txt -prun
 LIBRARY_PATH =$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 
 # ##################### Kernel compiler global settings ##########################
@@ -142,7 +146,15 @@ VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
 VPP_FLAGS += --hls.jobs 8
 VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS += --config $(CUR_DIR)/conn_u50_u280.cfg
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50_u280.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=$(CUR_DIR)/postSysLink.tcl
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50_u280.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=$(CUR_DIR)/postSysLink.tcl
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u55c/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u55c.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=$(CUR_DIR)/postSysLink.tcl
 endif
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
@@ -156,8 +168,8 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/louvain_fast/kernel
 
 kernel_louvain_VPP_FLAGS +=  -D KERNEL_NAME=kernel_louvain
-kernel_louvain_VPP_FLAGS += --hls.clock 300000000:kernel_louvain
-VPP_LDFLAGS_kernel_louvain += --kernel_frequency 300
+kernel_louvain_VPP_FLAGS += --hls.clock 250000000:kernel_louvain
+VPP_LDFLAGS_kernel_louvain += --kernel_frequency 250
 
 
 # Kernel args

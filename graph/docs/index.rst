@@ -83,7 +83,7 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
 
 .. toctree::
    :caption: L3 User Guide
-   :maxdepth: 3
+   :maxdepth: 4
 
    guide_L3/utilization_L3.rst
 

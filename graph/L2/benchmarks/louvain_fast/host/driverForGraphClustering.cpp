@@ -68,51 +68,51 @@ int xai_close(xaiHandle xaiInstance) {
   return 0;
 }
 
-int xai_louvain_main(int argc, char** argv) {
-  std::cout << "called xai_louvain_main, argc: " << argc << "argv 1: " << argv[1] << std::flush;
-  //Parse Input parameters:
-  double opts_C_thresh;     //Threshold with coloring on
-  long   opts_minGraphSize; //Min |V| to enable coloring
-  double opts_threshold;    //Value of threshold
-  int    opts_ftype;        //File type
-  char   opts_inFile[4096];
-  bool   opts_coloring;
-  bool   opts_output;
-  bool   opts_VF;
-  char   opts_xclbinPath[4096];
+// int xai_louvain_main(int argc, char** argv) {
+//   std::cout << "called xai_louvain_main, argc: " << argc << "argv 1: " << argv[1] << std::flush;
+//   //Parse Input parameters:
+//   double opts_C_thresh;     //Threshold with coloring on
+//   long   opts_minGraphSize; //Min |V| to enable coloring
+//   double opts_threshold;    //Value of threshold
+//   int    opts_ftype;        //File type
+//   char   opts_inFile[4096];
+//   bool   opts_coloring;
+//   bool   opts_output;
+//   bool   opts_VF;
+//   char   opts_xclbinPath[4096];
 
-  host_ParserParameters(argc, argv,
-  		  opts_C_thresh,    //double opts_C_thresh; //Threshold with coloring on
-  		  opts_minGraphSize,//long   opts_minGraphSize; //Min |V| to enable coloring
-  		  opts_threshold,   //double opts_threshold; //Value of threshold
-  		  opts_ftype,       //int    opts_ftype; //File type
-  		  opts_inFile,      //char   opts_inFile[4096];
-  		  opts_coloring,    //bool   opts_coloring;
-  		  opts_output,      //bool   opts_output;
-  		  opts_VF,          //bool   opts_VF;
-  		  opts_xclbinPath);
-  int numThreads = NUMTHREAD; // using fixed number of thread instead of omp_get_num_threads();
-  //Parse the graphNew in Matrix Market format
-  graphNew* G = host_PrepareGraph( opts_ftype, opts_inFile, opts_VF);
-   //Datastructures to store clustering information
-  long NV_begin = G->numVertices;
-  long *C_orig = (long *) malloc (NV_begin * sizeof(long)); assert(C_orig != 0);
-  #pragma omp parallel for
-  for (long i=0; i<NV_begin; i++) {
-  	   C_orig[i] = -1;
-  }
+//   host_ParserParameters(argc, argv,
+//   		  opts_C_thresh,    //double opts_C_thresh; //Threshold with coloring on
+//   		  opts_minGraphSize,//long   opts_minGraphSize; //Min |V| to enable coloring
+//   		  opts_threshold,   //double opts_threshold; //Value of threshold
+//   		  opts_ftype,       //int    opts_ftype; //File type
+//   		  opts_inFile,      //char   opts_inFile[4096];
+//   		  opts_coloring,    //bool   opts_coloring;
+//   		  opts_output,      //bool   opts_output;
+//   		  opts_VF,          //bool   opts_VF;
+//   		  opts_xclbinPath);
+//   int numThreads = NUMTHREAD; // using fixed number of thread instead of omp_get_num_threads();
+//   //Parse the graphNew in Matrix Market format
+//   graphNew* G = host_PrepareGraph( opts_ftype, opts_inFile, opts_VF);
+//    //Datastructures to store clustering information
+//   long NV_begin = G->numVertices;
+//   long *C_orig = (long *) malloc (NV_begin * sizeof(long)); assert(C_orig != 0);
+//   #pragma omp parallel for
+//   for (long i=0; i<NV_begin; i++) {
+//   	   C_orig[i] = -1;
+//   }
 
-  runLouvainWithFPGA(G, C_orig, opts_xclbinPath, opts_coloring, opts_minGraphSize,
-			opts_threshold,
-			opts_C_thresh,
-			numThreads);
+//   runLouvainWithFPGA(G, C_orig, opts_xclbinPath, opts_coloring, opts_minGraphSize,
+// 			opts_threshold,
+// 			opts_C_thresh,
+// 			numThreads);
 
-   //Check if cluster ids need to be written to a file:
-  if( opts_output ) host_writeOut( opts_inFile, NV_begin, C_orig);
-  //Cleanup:
-  if( C_orig != 0 ) free(C_orig);
-  return 0;
-}//End of main()
+//    //Check if cluster ids need to be written to a file:
+//   if( opts_output ) host_writeOut( opts_inFile, NV_begin, C_orig);
+//   //Cleanup:
+//   if( C_orig != 0 ) free(C_orig);
+//   return 0;
+// }//End of main()
 
 
 int host_ParserParameters(

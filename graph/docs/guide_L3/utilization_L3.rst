@@ -29,9 +29,14 @@ The graph L3 layer provides an asynchronous and easy-to-integrate framework. By 
 
 
 .. toctree::
-	:maxdepth: 1
+	:maxdepth: 4
 
 	L3_internal/getting_started.rst
 	L3_internal/user_model.rst
+	L3_internal/louvainPartition.rst
+	L3_internal/louvainRun.rst
+
+
+
 
    

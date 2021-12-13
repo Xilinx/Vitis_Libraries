@@ -32,7 +32,9 @@ class clHandle {
     cl::CommandQueue q;
     cl::Program::Binaries xclBins;
     cl::Program program;
+    cl::Kernel kernel;
     cl::Buffer* buffer;
+    xrmCuResource* resR;
     unsigned int deviceID;
     unsigned int cuID;
     unsigned int dupID;
