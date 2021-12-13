@@ -341,6 +341,7 @@
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L1/L1.html">L1 Module User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../L2.html">L2 Module User Guide</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark</span></p>
@@ -491,11 +492,11 @@ INFO: Total Execution <span class="nb">time</span> <span class="m">53</span>.365
 <h2>Profiling<a class="headerlink" href="#profiling" title="Permalink to this headline">¶</a></h2>
 <p>The GESVJ is validated on Xilinx Alveo U250 board.
 The accuracy of GESVDJ implementation has been verified with Lapack dgesvd (QR based SVD) and dgesvj (Jacobi SVD) functions.
-The hardware resources and performance for double datatype gesvj is listed in <a class="reference internal" href="#tabgesvjdouble"><span class="std std-numref">Table 3</span></a>.
+The hardware resources and performance for double datatype gesvj is listed in <a class="reference internal" href="#tabgesvjdouble"><span class="std std-numref">Table 4</span></a>.
 To describe the resource utilization, we separate the overall utilization into two parts, P stands for the resource usage in platform, that is those instantiated in static region of the FPGA card, K stands for those used in kernels(dynamic region).
 The Unroll factor means how many CUs are configured to calculate Matrix in parell.</p>
 <span id="tabgesvjdouble"></span><table border="1" class="docutils align-center" id="id1">
-<caption><span class="caption-number">Table 3 </span><span class="caption-text">double Type GESVJ performance table</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-number">Table 4 </span><span class="caption-text">double Type GESVJ performance table</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="12%" />
 <col width="7%" />
@@ -629,7 +630,7 @@ The Unroll factor means how many CUs are configured to calculate Matrix in parel
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on September 26, 2021.
+        Last updated on December 12, 2021.
       </span>
 
     </p>

@@ -6,11 +6,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 	<head>
 		<meta charset="utf-8">
-		<meta content="GESVJ, SVD, general, matrix, Decomposition, Singular" name="keywords" />
-<meta content="One-sided Jacobi alogirhm is a classic and robust method to calculate Singular Value Decompositon (SVD)." name="description" />
-<meta content="Document" name="xlnxdocumentclass" />
-<meta content="Tutorials" name="xlnxdocumenttype" />
-
+		
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -20,8 +16,8 @@
 		<meta property="og:title" content=""/>
 		<meta property="og:description"/>
 		<!-- favicon -->
-		<link rel="icon" type="image/vnd.microsoft.icon" href="../../../_static/favicon.ico"/>
-		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../../../_static/favicon.ico"/>
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
 		<!-- Fonts -->
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
 
@@ -31,38 +27,36 @@
   
 
   
-      <script type="text/javascript" src="../../../_static/js/jquery.min.js"></script>
-	  <script type="text/javascript" src="../../../_static/js/gtm.js"></script>
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-    <script type="text/javascript" src="../../../_static/js/d3dd8c60ed.js"></script>
-    <script type="text/javascript" src="../../../_static/js/common-ui-all.min.js"></script>
-    <script type="text/javascript" src="../../../_static/js/header-footer.min.js"></script>
-    <script type="text/javascript" src="../../../_static/js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="../../../_static/js/CoveoJsSearch.Lazy.min.js"></script>
-    <script type="text/javascript" src="../../../_static/js/linkid.js"></script>
-    <script type="text/javascript" src="../../../_static/js/Searchbox.min.js"></script>
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/common-ui-all.min.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/header-footer.min.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/pro.min.css" media="all" />
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="General QR Decomposition (GEQRF)" href="../geqrf/geqrf.html" />
-    <link rel="prev" title="Singular Value Decomposition for symmetric matrix (GESVDJ)" href="../gesvdj/gesvdj.html" /> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -173,7 +167,7 @@
 																	</ul>
 																</div>
 															</div>
-															<script type="text/javascript" src="../../../_static/js/gtm.js"></script>
+															<script type="text/javascript" src="../_static/js/gtm.js"></script>
 															<!--<div class="mini-nav">
 																<button type="button" data-function="xilinx-mobile-menu" id="nav-toggle" class="navbar-toggle collapsed visible-xs-block" aria-expanded="false">
 																<span></span>
@@ -300,7 +294,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Solver Library
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Solver Library
           
 
           
@@ -317,7 +311,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -337,33 +331,16 @@
             
               <p class="caption"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Library Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Library Overview</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../guide_L1/L1.html">L1 Module User Guide</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../L2.html">L2 Module User Guide</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../../L2.html#supported-numerical-methods">Supported Numerical Methods</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../../L2_methods.html">Matrix Decomposition</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../gesvdj/gesvdj.html">Singular Value Decomposition for symmetric matrix (GESVDJ)</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Singular Value Decomposition for general matrix (GESVJ)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../geqrf/geqrf.html">General QR Decomposition (GEQRF)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../getrf/getrf.html">Lower-Upper Decomposition (GETRF)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../getrf_nopivot/getrf_nopivot.html">Lower-Upper Decomposition (GETRF_NOPIVOT)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../potrf/potrf.html">Cholesky Decomposition for SPD matrix (POTRF)</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../L2_methods.html#linear-solver">Linear Solver</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../L2_methods.html#eigenvalue-solver">Eigenvalue Solver</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../L2.html#level-ii-apis">Level II APIs</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L2/L2.html">L2 Module User Guide</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../benchmark.html">Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark</a></li>
 </ul>
 
             
@@ -380,7 +357,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Vitis Solver Library</a>
+          <a href="../index.html">Vitis Solver Library</a>
         
       </nav>
 
@@ -409,13 +386,9 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../../L2.html">L2 Module User Guide</a> &raquo;</li>
-        
-          <li><a href="../../L2_methods.html">Matrix Decomposition</a> &raquo;</li>
-        
-      <li>Singular Value Decomposition for general matrix (GESVJ)</li>
+      <li>template struct xf::solver::qrf_traits</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -432,111 +405,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="singular-value-decomposition-for-general-matrix-gesvj">
-<h1>Singular Value Decomposition for general matrix (GESVJ)<a class="headerlink" href="#singular-value-decomposition-for-general-matrix-gesvj" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>One-sided Jacobi alogirhm is a classic and robust method to calculate Singular Value Decompositon (SVD), which can be applied for any dense matrix with the size of <span class="math notranslate nohighlight">\(M \times N\)</span>. In this library, it is denoted as GESVJ, same as the API name used in LAPACK.</p>
-<div class="math notranslate nohighlight">
-\[A = U \Sigma V^T\]</div>
-<p>where <span class="math notranslate nohighlight">\(A\)</span> is a dense symmetric matrix of size <span class="math notranslate nohighlight">\(m \times n\)</span>, <span class="math notranslate nohighlight">\(U\)</span> is <span class="math notranslate nohighlight">\(m \times m\)</span> matrix with orthonormal columns and and <span class="math notranslate nohighlight">\(V\)</span> is <span class="math notranslate nohighlight">\(n \times n\)</span> matrix with orthonormal columns, and <span class="math notranslate nohighlight">\(\Sigma\)</span> is diagonal matrix.
-The maximum matrix size supported in FPGA is templated by NRMAX, NCMAX.</p>
-</div>
-<div class="section" id="algorithm">
-<h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
-<p>The calculation process of one-sided Jacobi SVD method is as follows:</p>
-<ol class="arabic simple">
-<li>Initialize matrix V = I</li>
-<li>Select two columns (i, j), i &lt; j, of matrix A, namely <span class="math notranslate nohighlight">\(A_i\)</span> and <span class="math notranslate nohighlight">\(A_j\)</span>. Accumulate two columns of data by fomular</li>
-</ol>
-<div class="math notranslate nohighlight">
-\[\begin{split}&amp;b_{ii} = A_i^TA_i = ||A_i||^2 \\
-&amp;b_{jj} = A_j^TA_j = ||A_j||^2 \\
-&amp;b_{ij} = A_i^TA_j\end{split}\]</div>
-<p>A <span class="math notranslate nohighlight">\(2 \times 2\)</span> matrix can be obtained and noted as:</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{bmatrix}
-  b_{ii}\  b_{ij}\\
-  b_{ji}\  b_{jj}\\
-\end{bmatrix}\end{split}\]</div>
-<p>where <span class="math notranslate nohighlight">\(b_{ij}\)</span> equals <span class="math notranslate nohighlight">\(b_{ji}\)</span>.</p>
-<ol class="arabic simple" start="3">
-<li>Solve the <span class="math notranslate nohighlight">\(2 \times 2\)</span> symmetric SVD with Jacobi rotation:</li>
-</ol>
-<div class="math notranslate nohighlight">
-\[\begin{split}&amp;\tau = (b_{ii} - b_{jj}) / (2 * b_{ij}))    \\
-&amp;t = sign(\tau)/(|\tau| + \sqrt{(1 + \tau^2)})  \\
-&amp;c = 1 / \sqrt{(1+t^2)} \\
-&amp;s = c * t \\\end{split}\]</div>
-<p>if we put s and c in a matrix as J, then J equals</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{bmatrix}
-  1\ \ \ \ \  0\ ...\ 0\ \ 0\ \\
-  0\ \ \ \ \ c\ ...\ s\ \ 0\ \\
-  0\ \ \ \ \ 0\ ...\ 0\ \ 0\ \\
-  0\ -s\ ...\ c\ \ 0\ \\
-  0\ \ \ \ \ 0\ ...\ 0\ \ 1\ \\
-\end{bmatrix}\end{split}\]</div>
-<ol class="arabic simple" start="4">
-<li>Update the i and j columns of matrix A and V by</li>
-</ol>
-<div class="math notranslate nohighlight">
-\[\begin{split}A = A J\\
-V = V J\end{split}\]</div>
-<ol class="arabic simple" start="5">
-<li>Calculate converage of <span class="math notranslate nohighlight">\(2 \times 2\)</span> matrix by</li>
-</ol>
-<div class="math notranslate nohighlight">
-\[conv = |b_{ij}| / \sqrt{(b_{ii}b_{jj})}\]</div>
-<p>and select the max converage of all pairs (i, j).</p>
-<ol class="arabic simple" start="6">
-<li>Repeat steps 2-4 until all pairs of (i, j) are calculated and updated.</li>
-<li>If the max converage among all paris of (i, j) is bigger than 1.e-8, repeat steps 2-6 again, which is also called one sweep.</li>
-<li>When the converge is small enough, calculate the matrix U and S for each <span class="math notranslate nohighlight">\(i = 1, ..., n\)</span> by</li>
-</ol>
-<div class="math notranslate nohighlight">
-\[\begin{split}&amp;s_i =||a_i||_2 \\
-&amp;u_i = a_i / s_i\end{split}\]</div>
-</div>
-<div class="section" id="architecture">
-<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
-<p>From the algorithm, we know that the core part of the computation is two columns of data read-and-accumulate, and then updating corresponding two columns of data in Matrix A and V. In this library, we implement this core module in the following architecture.</p>
-<div class="figure align-center">
-<a class="reference internal image-reference" href="../../../_images/gesvj_structure.png"><img alt="../../../_images/gesvj_structure.png" src="../../../_images/gesvj_structure.png" style="width: 40%;" /></a>
-</div>
-<p>It can be seen from the architecture, steps 2-5 (each pair of i and j) of the algorithm is divided into three stages:</p>
-<dl class="docutils">
-<dt>Stage 1:</dt>
-<dd><ol class="first last loweralpha simple">
-<li>read two columns of data of A to BRAM and accumulate to <span class="math notranslate nohighlight">\(b_{ii}\)</span>, <span class="math notranslate nohighlight">\(b_{jj}\)</span> and <span class="math notranslate nohighlight">\(b_{ij}\)</span>.</li>
-<li>preload two columns of data of matrix V to BRAM.</li>
-</ol>
-</dd>
-<dt>Stage 2:</dt>
-<dd>Calculate SVD for <span class="math notranslate nohighlight">\(2 \times 2\)</span> matrix</dd>
-<dt>Stage 3:</dt>
-<dd><ol class="first last loweralpha simple">
-<li>Update two columns of data in matrix A</li>
-<li>Update two columns of data in matrix V.</li>
-<li>Meanwhile, calculate converage for current pair (i, j).</li>
-</ol>
-</dd>
-</dl>
-<p>Since operating data of matrix A and V are independent, two modules of stage 1 are running in parallel. Meanwhile, thress modules of stage 3 run in parallel. The last module of stage 3 calculates converage using <span class="math notranslate nohighlight">\(2 \times 2\)</span> matrix data. This converage computing process is in read-and-accu module of stage 1 according to the algorithm. However, it requires ~60 cycles, which is also a lot after partitioning matrix A by row. Therefore, this calculation process is extracted as a submodule in stage 3.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>Why updating matrix V is divided into two modules?</p>
-<p>From the figure, we can see that there are two modules related to matrix V, preload two columns of data of V to BRAM, and updating V. In our design, matrix A and V are all saved in URAM. And for each URAM, only 2 ports of read/write are supported. Since matrix A cummulated <span class="math notranslate nohighlight">\(2 \times 2\)</span> data need 100+ cycles to do SVD. We may preload two columns of V into BRAMs via 2-reading ports of URAM. And using two writting ports when updating data in V.</p>
-<p class="last">Besides, in order to speed up the data reading and updating of matrix V data, the matrix V is partitioned by NCU through its row. For each CU, matrix V is read/written using 2 URAM ports.</p>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>Supported data size:</p>
-<p class="last">The supported maximum size of matrix A that templated by NRMAX and NCMAX is 512. The partitioning number MCU and NCU can support up to 16, respectively.</p>
-</div>
+  <div class="section" id="template-struct-xf-solver-qrf-traits">
+<span id="cid-xf-solver-qrf-traits"></span><span id="doxid-structxf-1-1solver-1-1qrf-traits"></span><span id="index-0"></span><h1>template struct xf::solver::qrf_traits<a class="headerlink" href="#template-struct-xf-solver-qrf-traits" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;qrf.hpp&quot;</span>
+</pre>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-solver-qrf-traits-unroll-factor">
+<span id="doxid-structxf-1-1solver-1-1qrf-traits-1ad88b3457aa08d900fbe68b8453ea235c"></span><span id="cid-xf-solver-qrf-traits-update-ii"></span><span id="doxid-structxf-1-1solver-1-1qrf-traits-1a54cb832a69a93f4d50542b423ea0b332"></span><span id="cid-xf-solver-qrf-traits-calc-rot-ii"></span><span id="doxid-structxf-1-1solver-1-1qrf-traits-1a618d513b32ba55badb371034b904929a"></span><span id="cid-xf-solver-qrf-traits-arch"></span><span id="doxid-structxf-1-1solver-1-1qrf-traits-1ae5d4f9fe42122272b287a96d0c16a19e"></span><span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">RowsA</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">ColsA</span><span class="p">,</span>
+    <span class="k">typename</span> <span class="n">InputType</span><span class="p">,</span>
+    <span class="k">typename</span> <span class="n">OutputType</span>
+    <span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">qrf_traits</span>
+
+<span class="c1">// fields</span>
+
+<span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">ARCH</span>
+<span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">CALC_ROT_II</span>
+<span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">UPDATE_II</span>
+<span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">UNROLL_FACTOR</span>
+</pre>
 </div>
 
 
@@ -552,15 +443,6 @@ V = V J\end{split}\]</div>
 
 
 	  <!-- Sphinx Page Footer block -->
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../geqrf/geqrf.html" class="btn btn-neutral float-right" title="General QR Decomposition (GEQRF)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="../gesvdj/gesvdj.html" class="btn btn-neutral float-left" title="Singular Value Decomposition for symmetric matrix (GESVDJ)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>
