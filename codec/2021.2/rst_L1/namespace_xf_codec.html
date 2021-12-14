@@ -428,6 +428,7 @@
 <span id="doxid-namespacexf-1-1codec-1a2e5da0b8f19effcaf64c6726da50ace2"></span><span id="cid-xf-codec-hls-jpeg-zigzag-to-raster"></span><span id="doxid-namespacexf-1-1codec-1a9d871222775e514a78395ddde346ee5e"></span><span></span><span class="c1">// namespaces</span>
 
 <span class="k">namespace</span> <a class="reference internal" href="../rst_L2/namespace_xf_codec_details.html#doxid-namespacexf-1-1codec-1-1details"><span class="std std-ref">xf::codec::details</span></a><span></span>
+<span class="k">namespace</span> <a class="reference internal" href="namespace_xf_codec_internal.html#doxid-namespacexf-1-1codec-1-1internal"><span class="std std-ref">xf::codec::internal</span></a><span></span>
 
 <span class="c1">// enums</span>
 
@@ -447,6 +448,42 @@
 <span class="k">static</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_jpeg_zigzag_to_raster</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
 <span class="k">const</span> <span class="kt">short</span> <span class="n">hls_icos_base_8192_scaled</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
 </pre>
+<div class="section" id="hls-encodecoefforders">
+<span id="cid-xf-codec-hls-encodecoefforders"></span><span id="doxid-namespacexf-1-1codec-1ae5a78a24560cc83b86c1f63b3933c4cd"></span><h2>hls_EncodeCoeffOrders<a class="headerlink" href="#hls-encodecoefforders" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;hls_EncodeCoeffOrders.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">hls_EncodeCoeffOrders</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">used_orders</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span> <span class="n">orderStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;&gt;&amp;</span> <span class="n">tokenStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">e_tokenStrm</span>
+    <span class="p">)</span>
+</pre>
+<p>jpegxl order tokenize function.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>used_orders</td>
+<td>the input for complete ac type</td>
+</tr>
+<tr class="row-even"><td>orderStrm</td>
+<td>the input for image scan order</td>
+</tr>
+<tr class="row-odd"><td>tokenStrm</td>
+<td>the output for tokens initialization</td>
+</tr>
+<tr class="row-even"><td>e_tokenStrm</td>
+<td>the output for tokens stream</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="kernelparserdecodertop">
 <span id="cid-xf-codec-kernelparserdecodertop"></span><span id="doxid-namespacexf-1-1codec-1a7bd39567440dfdf11edb051dfaae5795"></span><h2>kernelParserDecoderTop<a class="headerlink" href="#kernelparserdecodertop" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">

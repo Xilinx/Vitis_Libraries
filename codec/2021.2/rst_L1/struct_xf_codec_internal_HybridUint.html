@@ -56,8 +56,8 @@
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="namespace codec" href="../rst_L1/namespace_xf_codec.html" />
-    <link rel="prev" title="Release Note" href="../release.html" /> 
+    <link rel="next" title="enum xf::codec::COLOR_FORMAT" href="enum_xf_codec_COLOR_FORMAT.html" />
+    <link rel="prev" title="enum xf::codec::internal::Type" href="enum_xf_codec_internal_Type.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -338,14 +338,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Document</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html">namespace codec</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/api.html">API Document</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="internals.html">Design Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L2 User Guide</span></p>
 <ul>
@@ -404,7 +401,13 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>API Document</li>
+          <li><a href="../guide_L1/api.html">API Document</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_codec.html">namespace codec</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_codec_internal.html">namespace internal</a> &raquo;</li>
+        
+      <li>struct xf::codec::internal::HybridUint</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -421,17 +424,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-document">
-<h1>API Document<a class="headerlink" href="#api-document" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="struct-xf-codec-internal-hybriduint">
+<span id="cid-xf-codec-internal-hybriduint"></span><span id="doxid-structxf-1-1codec-1-1internal-1-1-hybrid-uint"></span><span id="index-0"></span><h1>struct xf::codec::internal::HybridUint<a class="headerlink" href="#struct-xf-codec-internal-hybriduint" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html">namespace codec</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html#hls-encodecoefforders">hls_EncodeCoeffOrders</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html#kernelparserdecodertop">kernelParserDecoderTop</a></li>
-</ul>
-</li>
-</ul>
 </div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;hls_EncodeCoeffOrders.hpp&quot;</span>
+</pre>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-internal-hybriduint-hybriduint">
+<span id="doxid-structxf-1-1codec-1-1internal-1-1-hybrid-uint-1a201ef5d322bdd29defd8595ca6d8bd02"></span><span id="cid-xf-codec-internal-hybriduint-lsb-in-token"></span><span id="doxid-structxf-1-1codec-1-1internal-1-1-hybrid-uint-1a5251eb89fffbce1722cd9d0b8ae8d390"></span><span id="cid-xf-codec-internal-hybriduint-msb-in-token"></span><span id="doxid-structxf-1-1codec-1-1internal-1-1-hybrid-uint-1ae05400900ecb6e72d6d9bfc368eb819e"></span><span id="cid-xf-codec-internal-hybriduint-split-exponent"></span><span id="doxid-structxf-1-1codec-1-1internal-1-1-hybrid-uint-1a0fd3c080cdcbe33b82d2ad92c654d3ce"></span><span></span><span class="c1">// fields</span>
+
+<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">split_exponent</span>
+<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">msb_in_token</span>
+<span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">lsb_in_token</span>
+</pre>
 </div>
 
 
@@ -450,10 +456,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../rst_L1/namespace_xf_codec.html" class="btn btn-neutral float-right" title="namespace codec" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="enum_xf_codec_COLOR_FORMAT.html" class="btn btn-neutral float-right" title="enum xf::codec::COLOR_FORMAT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../release.html" class="btn btn-neutral float-left" title="Release Note" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="enum_xf_codec_internal_Type.html" class="btn btn-neutral float-left" title="enum xf::codec::internal::Type" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

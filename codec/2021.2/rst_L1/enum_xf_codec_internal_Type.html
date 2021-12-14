@@ -56,8 +56,8 @@
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="namespace codec" href="../rst_L1/namespace_xf_codec.html" />
-    <link rel="prev" title="Release Note" href="../release.html" /> 
+    <link rel="next" title="struct xf::codec::internal::HybridUint" href="struct_xf_codec_internal_HybridUint.html" />
+    <link rel="prev" title="namespace internal" href="namespace_xf_codec_internal.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -338,14 +338,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Document</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html">namespace codec</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/api.html">API Document</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="internals.html">Design Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L2 User Guide</span></p>
 <ul>
@@ -404,7 +401,13 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>API Document</li>
+          <li><a href="../guide_L1/api.html">API Document</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_codec.html">namespace codec</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_codec_internal.html">namespace internal</a> &raquo;</li>
+        
+      <li>enum xf::codec::internal::Type</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -421,17 +424,40 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-document">
-<h1>API Document<a class="headerlink" href="#api-document" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html">namespace codec</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html#hls-encodecoefforders">hls_EncodeCoeffOrders</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html#kernelparserdecodertop">kernelParserDecoderTop</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <div class="section" id="enum-xf-codec-internal-type">
+<span id="cid-xf-codec-internal-type"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685"></span><span id="index-0"></span><h1>enum xf::codec::internal::Type<a class="headerlink" href="#enum-xf-codec-internal-type" title="Permalink to this headline">¶</a></h1>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-internal-type-knumvalidstrategies">
+<span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685aebfd79c92bf700054c1b27d9ca953514"></span><span id="cid-xf-codec-internal-type-dct128x256"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a691831ccbfbf73e7a0605998b6178417"></span><span id="cid-xf-codec-internal-type-dct256x128"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a1244ec2e60358130233b4a065881e7f6"></span><span id="cid-xf-codec-internal-type-dct256x256"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a12785292c27ed5c586a7f0cec3fb937d"></span><span id="cid-xf-codec-internal-type-dct64x128"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a9912d9f1ddedb229e3887e6f0cce061f"></span><span id="cid-xf-codec-internal-type-dct128x64"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a4996b7f2dd1106014cbde9bfd4a369a8"></span><span id="cid-xf-codec-internal-type-dct128x128"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a03849ecd06cb6d1953aa903c34609f6d"></span><span id="cid-xf-codec-internal-type-dct32x64"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a829fbbd27a1b431b236c155b59a22ea3"></span><span id="cid-xf-codec-internal-type-dct64x32"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a0fa56886d3d5a553864c76a6b3cf6d77"></span><span id="cid-xf-codec-internal-type-dct64x64"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685ac6262aea87d5072b7c9faf3138007c83"></span><span id="cid-xf-codec-internal-type-afv3"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a71874c7d60b0fd483f3298c907510dba"></span><span id="cid-xf-codec-internal-type-afv2"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a6531014aac4e3484f741e4d2be1cba30"></span><span id="cid-xf-codec-internal-type-afv1"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685ad1988aed3a82bb264db23b66b9bb2e29"></span><span id="cid-xf-codec-internal-type-afv0"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a85872be6abc12182f9e4375ffaa6edeb"></span><span id="cid-xf-codec-internal-type-dct8x4"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a38ddf065a2db2dad1b38e50067fbeeb7"></span><span id="cid-xf-codec-internal-type-dct4x8"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685ad2c8393aaf0cf029f9e13462998888ee"></span><span id="cid-xf-codec-internal-type-dct16x32"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685ad0cd4eacaa97c2f1719b814870dc7567"></span><span id="cid-xf-codec-internal-type-dct32x16"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a9bbdd31b8d6f7c0ec506ab216a27dee7"></span><span id="cid-xf-codec-internal-type-dct8x32"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a03fe6555a26cee106eb0593cbd464a75"></span><span id="cid-xf-codec-internal-type-dct32x8"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a3aa3e70543d17aa57772870984940595"></span><span id="cid-xf-codec-internal-type-dct8x16"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a473cf3631569f9ef2aaa16d34842bc38"></span><span id="cid-xf-codec-internal-type-dct16x8"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a9412e3e7fb8478d249b670439ed6f223"></span><span id="cid-xf-codec-internal-type-dct32x32"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a36c86871c4c51bf2de62bbfe61461122"></span><span id="cid-xf-codec-internal-type-dct16x16"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a44b0481a493e85db8b423e418984e7e6"></span><span id="cid-xf-codec-internal-type-dct4x4"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a76d1e65a7ea8590473588469aeb270fd"></span><span id="cid-xf-codec-internal-type-dct2x2"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685aa6155ad570a2dbecaeaccd32416c2c97"></span><span id="cid-xf-codec-internal-type-identity"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a804a297f61c80329dbeb4c7be732b32f"></span><span id="cid-xf-codec-internal-type-dct"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685a628246af2d7ba69ed3d8cb5481e4f7d4"></span><span></span><span class="c1">// enum values</span>
+
+<span class="n">DCT</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">IDENTITY</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">DCT2X2</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">DCT4X4</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">DCT16X16</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">DCT32X32</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">DCT16X8</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">DCT8X16</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">DCT32X8</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">DCT8X32</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">DCT32X16</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">DCT16X32</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">DCT4X8</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">DCT8X4</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="n">AFV0</span> <span class="o">=</span> <span class="mi">14</span>
+<span class="n">AFV1</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">AFV2</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">AFV3</span> <span class="o">=</span> <span class="mi">17</span>
+<span class="n">DCT64X64</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">DCT64X32</span> <span class="o">=</span> <span class="mi">19</span>
+<span class="n">DCT32X64</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">DCT128X128</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="n">DCT128X64</span> <span class="o">=</span> <span class="mi">22</span>
+<span class="n">DCT64X128</span> <span class="o">=</span> <span class="mi">23</span>
+<span class="n">DCT256X256</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">DCT256X128</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="n">DCT128X256</span> <span class="o">=</span> <span class="mi">26</span>
+<span class="n">kNumValidStrategies</span>
+</pre>
 </div>
 
 
@@ -450,10 +476,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../rst_L1/namespace_xf_codec.html" class="btn btn-neutral float-right" title="namespace codec" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="struct_xf_codec_internal_HybridUint.html" class="btn btn-neutral float-right" title="struct xf::codec::internal::HybridUint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../release.html" class="btn btn-neutral float-left" title="Release Note" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="namespace_xf_codec_internal.html" class="btn btn-neutral float-left" title="namespace internal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

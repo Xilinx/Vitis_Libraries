@@ -56,8 +56,8 @@
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="namespace codec" href="../rst_L1/namespace_xf_codec.html" />
-    <link rel="prev" title="Release Note" href="../release.html" /> 
+    <link rel="next" title="enum xf::codec::internal::Type" href="enum_xf_codec_internal_Type.html" />
+    <link rel="prev" title="namespace details" href="namespace_xf_codec_details.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -338,14 +338,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Document</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html">namespace codec</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/api.html">API Document</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="internals.html">Design Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide_L1/internals.html">Design Internals</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L2 User Guide</span></p>
 <ul>
@@ -404,7 +401,11 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>API Document</li>
+          <li><a href="../guide_L1/api.html">API Document</a> &raquo;</li>
+        
+          <li><a href="namespace_xf_codec.html">namespace codec</a> &raquo;</li>
+        
+      <li>namespace internal</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -421,17 +422,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-document">
-<h1>API Document<a class="headerlink" href="#api-document" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="namespace-internal">
+<span id="cid-xf-codec-internal"></span><span id="doxid-namespacexf-1-1codec-1-1internal"></span><span id="index-0"></span><h1>namespace internal<a class="headerlink" href="#namespace-internal" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html">namespace codec</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html#hls-encodecoefforders">hls_EncodeCoeffOrders</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rst_L1/namespace_xf_codec.html#kernelparserdecodertop">kernelParserDecoderTop</a></li>
-</ul>
-</li>
-</ul>
 </div>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-internal-updatetoken">
+<span id="doxid-namespacexf-1-1codec-1-1internal-1a0437791b11174edd35e1a8b8069109bc"></span><span id="cid-xf-codec-internal-updatelehmer"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a87e1f05b7f5e6a244c131d4b09aa0307"></span><span id="cid-xf-codec-internal-updatecore"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a6bae01fdbcd7f32268b03fec50930368"></span><span id="cid-xf-codec-internal-lehmercore"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1adf2917e71f7fb391ec9646a991b4f3ba"></span><span id="cid-xf-codec-internal-inittemp"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1adbbc7ce6567ada2e610f2f7205c9a152"></span><span id="cid-xf-codec-internal-loadzigzag"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a4be22a6a0623e351d422acb01b2672d5"></span><span id="cid-xf-codec-internal-scanstrategy"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1adeba22e2adf7dd7b28dbfc20036c78f2"></span><span id="cid-xf-codec-internal-hls-coeffordercontext"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1af2a14323e5b616e1eef559b937dbe69e"></span><span id="cid-xf-codec-internal-hls-encode"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a73f749a4bcab2dc1f80f672d91d7ca08"></span><span id="cid-xf-codec-internal-ktotaltablesize"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a04746d6d41f96bc92e549f69ccb0112e"></span><span id="cid-xf-codec-internal-coefforderlut"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a914a5c7b31acbf36da8f6110f87ece1c"></span><span id="cid-xf-codec-internal-kstrategyorder"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a8c688b84fa38bf5ae01cbfa4b83b577b"></span><span id="cid-xf-codec-internal-koffset"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a50a3463c833fc7520097f40907f0c845"></span><span id="cid-xf-codec-internal-kpermutationcontexts"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a2f0fe5a506e18f708cc9a323589b1b30"></span><span id="cid-xf-codec-internal-kmaxcoeffarea"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a839750fa6b05f93008bbda3c993180b4"></span><span id="cid-xf-codec-internal-kmaxblockdim"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1aa852b0de95085365aae817c2ffac8e39"></span><span id="cid-xf-codec-internal-kmaxcoeffblocks"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a4bff3b7009ebe3b6a56f9a176bf0982f"></span><span id="cid-xf-codec-internal-kdctblocksize"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a1d3e92cb3fc0eca276a2197cea38dfe6"></span><span id="cid-xf-codec-internal-kblockdim"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1a6eeb57721d66081e37bb7467f582d559"></span><span id="cid-xf-codec-internal-length"></span><span id="doxid-namespacexf-1-1codec-1-1internal-1aeef23e3d03275612534021144ffda6e5"></span><span></span><span class="c1">// enums</span>
+
+<span class="k">enum</span> <a class="reference internal" href="enum_xf_codec_internal_Type.html#doxid-namespacexf-1-1codec-1-1internal-1ac74086367570ad6949b5b975ecc80685"><span class="std std-ref">Type</span></a><span></span>
+
+<span class="c1">// structs</span>
+
+<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_internal_HybridUint.html#doxid-structxf-1-1codec-1-1internal-1-1-hybrid-uint"><span class="std std-ref">HybridUint</span></a><span></span>
+
+<span class="c1">// global variables</span>
+
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">LENGTH</span>
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">kBlockDim</span>
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">kDCTBlockSize</span>
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">kMaxCoeffBlocks</span>
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">kMaxBlockDim</span>
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">kMaxCoeffArea</span>
+<span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">kPermutationContexts</span>
+<span class="k">static</span> <span class="k">constexpr</span> <span class="kt">size_t</span> <span class="n">kOffset</span><span class="p">[</span><span class="n">kNumValidStrategies</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">constexpr</span> <span class="kt">uint8_t</span> <span class="n">kStrategyOrder</span><span class="p">[]</span>
+<span class="k">static</span> <span class="k">constexpr</span> <span class="kt">size_t</span> <span class="n">coeffOrderLut</span><span class="p">[</span><span class="mi">1536</span><span class="p">]</span>
+<span class="k">static</span> <span class="k">constexpr</span> <span class="kt">size_t</span> <span class="n">kTotalTableSize</span>
+</pre>
 </div>
 
 
@@ -450,10 +467,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../rst_L1/namespace_xf_codec.html" class="btn btn-neutral float-right" title="namespace codec" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="enum_xf_codec_internal_Type.html" class="btn btn-neutral float-right" title="enum xf::codec::internal::Type" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../release.html" class="btn btn-neutral float-left" title="Release Note" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="namespace_xf_codec_details.html" class="btn btn-neutral float-left" title="namespace details" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
