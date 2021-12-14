@@ -6,11 +6,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 	<head>
 		<meta charset="utf-8">
-		<meta content="graph, running flow, asynchronous" name="keywords" />
-<meta content="A series of classes are provided that represent the various graph models that are supported. These classes provide all the methods that are required to run that graph model on a given HW device." name="description" />
-<meta content="Document" name="xlnxdocumentclass" />
-<meta content="Tutorials" name="xlnxdocumenttype" />
-
+		
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -61,8 +57,8 @@
   <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Louvain Paritition Demo" href="louvainPartition.html" />
-    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+    <link rel="next" title="API Document" href="../api.html" />
+    <link rel="prev" title="Louvain Paritition Demo" href="louvainPartition.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -360,17 +356,13 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../utilization_L3.html">User Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Running Examples</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#basic-flow">Basic Flow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#asynchronous-execution">Asynchronous Execution</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#example-of-using-multiple-requests">Example of using multiple requests</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="user_model.html">Running Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="louvainPartition.html">Louvain Paritition Demo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="louvainRun.html">Louvain Modularity Launch Demo</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Louvain Modularity Launch Demo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launch-u50-flow">Launch u50 Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#launch-u55c-flow">Launch u55c Flow</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -433,7 +425,7 @@
         
           <li><a href="../utilization_L3.html">User Guide</a> &raquo;</li>
         
-      <li>Running Examples</li>
+      <li>Louvain Modularity Launch Demo</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -450,162 +442,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="running-examples">
-<h1>Running Examples<a class="headerlink" href="#running-examples" title="Permalink to this headline">¶</a></h1>
-<p>A series of classes are provided that represent the various graph models that are supported.
-These classes provide all the methods that are required to run that graph model on a given HW device.</p>
-<div class="section" id="basic-flow">
-<h2>Basic Flow<a class="headerlink" href="#basic-flow" title="Permalink to this headline">¶</a></h2>
-<p>The hardware deployments and API executions have been seperated. All the harware deployment related information should be defined in the struct of xf::graph::L3::Handle::singleOP.
-To run an example there are 8 basic steps:</p>
+  <div class="section" id="louvain-modularity-launch-demo">
+<h1>Louvain Modularity Launch Demo<a class="headerlink" href="#louvain-modularity-launch-demo" title="Permalink to this headline">¶</a></h1>
+<p>To load and launch louvain Modularity for multi compute units on multi boards, we provided louvainRun API with two kernel modes which command is -kernel_mode.</p>
 <ul class="simple">
-<li>Instantiate an instance of struct xf::graph::L3::Handle::singleOP</li>
-<li>Instantiate an instance of class xf::graph::L3::Handle</li>
-<li>Deploy hardwares by using the instance of struct singleOP</li>
-<li>Instantiate an instance of class xf::graph::L3::Graph and load data</li>
-<li>Load Graph instance to hardwares</li>
-<li>Run the model (as many times as required)</li>
-<li>Release the Handle instance in order to recycle harware resources</li>
-<li>Release the Graph instance and buffers in order to avoid memory leaks</li>
+<li>LOUVAINMOD_PRUNING_KERNEL, -kernel_mode 1, launch the pre-build L2 u50 1 cu kernel on multi boards.</li>
+<li>LOUVAINMOD_2CU_U55C_KERNEL, -kernel_mode 2, launch the pre-build L2 u55c 2 cu kernel on multi boards parallelly.</li>
 </ul>
-</div>
-<div class="section" id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="launch-u50-flow">
+<h2>Launch u50 Flow<a class="headerlink" href="#launch-u50-flow" title="Permalink to this headline">¶</a></h2>
+<p>Ensure run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
+Ensure export the right $(PROJECTPATH) for the L2 pre-build U50 xclbin path, this xclbin may need 777 permission by xrm.</p>
 <pre class="highlight literal-block">
-<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_graph_L3.hpp&quot;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;cstring&gt;</span><span class="cp"></span>
-
-<span class="cp">#define DT float</span>
-
-<span class="c1">//----------------- Setup shortestPathFloat thread -------------</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">opName</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">kernelName</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">requestLoad</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">xclbinPath</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">deviceNeeded</span><span class="p">;</span>
-
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">Handle</span><span class="o">::</span><span class="n">singleOP</span> <span class="n">op0</span><span class="p">;</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">operationName</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">opName</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">setKernelName</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">kernelName</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">requestLoad</span> <span class="o">=</span> <span class="n">requestLoad</span><span class="p">;</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">xclbinFile</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">xclbinPath</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">deviceNeeded</span> <span class="o">=</span> <span class="n">deviceNeeded</span><span class="p">;</span>
-
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">Handle</span> <span class="n">handle0</span><span class="p">;</span>
-<span class="n">handle0</span><span class="p">.</span><span class="n">addOp</span><span class="p">(</span><span class="n">op0</span><span class="p">);</span>
-<span class="n">handle0</span><span class="p">.</span><span class="n">setUp</span><span class="p">();</span>
-
-<span class="c1">//----------------- Readin Graph data ---------------------------</span>
-<span class="kt">uint32_t</span> <span class="n">numVertices</span><span class="p">;</span>
-<span class="kt">uint32_t</span> <span class="n">numEdges</span><span class="p">;</span>
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="p">,</span> <span class="n">DT</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">(</span><span class="s">&quot;CSR&quot;</span><span class="p">,</span> <span class="n">numVertices</span><span class="p">,</span> <span class="n">numEdges</span><span class="p">);</span>
-
-<span class="c1">//----------------- Load Graph ----------------------------------</span>
-<span class="p">(</span><span class="n">handle0</span><span class="p">.</span><span class="n">opsp</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">loadGraph</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
-
-<span class="c1">//---------------- Run L3 API -----------------------------------</span>
-<span class="kt">bool</span> <span class="n">weighted</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="kt">uint32_t</span> <span class="n">nSource</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="kt">uint32_t</span> <span class="n">sourceID</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
-<span class="kt">uint32_t</span> <span class="n">length</span> <span class="o">=</span> <span class="p">((</span><span class="n">numVertices</span> <span class="o">+</span> <span class="mi">1023</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
-<span class="n">DT</span><span class="o">**</span> <span class="n">result</span><span class="p">;</span>
-<span class="kt">uint32_t</span><span class="o">**</span> <span class="n">pred</span><span class="p">;</span>
-<span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DT</span><span class="o">*</span><span class="p">[</span><span class="n">nSource</span><span class="p">];</span>
-<span class="n">pred</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">uint32_t</span><span class="o">*</span><span class="p">[</span><span class="n">nSource</span><span class="p">];</span>
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nSource</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">aligned_alloc</span><span class="o">&lt;</span><span class="n">DT</span><span class="o">&gt;</span><span class="p">(</span><span class="n">length</span><span class="p">);</span>
-    <span class="n">pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">aligned_alloc</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">length</span><span class="p">);</span>
-<span class="p">}</span>
-<span class="k">auto</span> <span class="n">ev</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">shortestPath</span><span class="p">(</span><span class="n">handle0</span><span class="p">,</span> <span class="n">nSource</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sourceID</span><span class="p">,</span> <span class="n">weighted</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">pred</span><span class="p">);</span>
-<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">ev</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-
-<span class="c1">//--------------- Free and delete -----------------------------------</span>
-<span class="p">(</span><span class="n">handle0</span><span class="p">.</span><span class="n">opsp</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">();</span>
-<span class="n">handle0</span><span class="p">.</span><span class="n">free</span><span class="p">();</span>
-<span class="n">g</span><span class="p">.</span><span class="n">freeBuffers</span><span class="p">();</span>
-
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nSource</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">free</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
-    <span class="n">free</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
-<span class="p">}</span>
-<span class="k">delete</span><span class="p">[]</span> <span class="n">result</span><span class="p">;</span>
-<span class="k">delete</span><span class="p">[]</span> <span class="n">pred</span><span class="p">;</span>
+<span></span><span class="nb">cd</span> L3/tests/louvainRun
+make host
+./build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/host.exe -x <span class="k">$(</span>PROJECTPATH<span class="k">)</span>/build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernel_louvain.xclbin -kernel_mode <span class="m">1</span> -num_devices <span class="m">1</span> -devices xilinx_u50_gen3x16_xdma_201920_3 -num_level <span class="m">100</span> -num_iter <span class="m">100</span> -load_alveo_partitions ../louvainPartition/example_tx.par.proj -setwkr <span class="m">0</span> -driverAlone
+</pre>
+<p>Louvain fast Input Arguments:</p>
+<pre class="highlight literal-block">
+<span></span>Usage: host.exe -<span class="o">[</span>-kernel_mode -x -num_devices -devices -num_level -num_iter -load_alveo_partitions -setwkr -driverAlone<span class="o">]</span>
+      -kernel_mode:                 the kernel mode  : <span class="m">1</span> is u50 <span class="m">1</span> cu, <span class="m">2</span> is <span class="k">for</span> u55c 2cu parallel launch in louvainRunSubGraph
+      -x:                           path of the xclbin : path
+      -num_devices:                 the number of boards : <span class="m">1</span>~n
+      -devices:                     the shell name of device : xilinx_u50_gen3x16_xdma_201920_3 xilinx_u55c_gen3x16_xdma_base_2
+      -num_level:                   the max number of level or phase the louvain modularity : <span class="m">1</span>~n
+      -num_iter:                    the max number of iteration the louvain modularity ：1~n
+      -load_alveo_partitions：      the project to be load : *.par.proj
+      -setwkr                       the number Client nodes in CS modes, currently is <span class="m">0</span> : <span class="m">0</span>
+      -driverAlone                  only use the Server node in CS modes.
 </pre>
 </div>
-<div class="section" id="asynchronous-execution">
-<h2>Asynchronous Execution<a class="headerlink" href="#asynchronous-execution" title="Permalink to this headline">¶</a></h2>
-<p>Each API in Graph L3 is implemented in asynchronous mode. So they can receive multi-requests at the same time and if hardware resources are sufficient, different Graph L3 APIs can be executed at the same time. The L3 framework can fully use the hardware resources and achieve high throughput scheduling.</p>
-<div class="section" id="example-of-using-multiple-requests">
-<h3>Example of using multiple requests<a class="headerlink" href="#example-of-using-multiple-requests" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="launch-u55c-flow">
+<h2>Launch u55c Flow<a class="headerlink" href="#launch-u55c-flow" title="Permalink to this headline">¶</a></h2>
+<p>Ensure run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
+Ensure export the right $(PROJECTPATH) for the L2 pre-build U55C xclbin path, this xclbin may need 777 permission by xrm.</p>
 <pre class="highlight literal-block">
-<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_graph_L3.hpp&quot;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;cstring&gt;</span><span class="cp"></span>
-
-<span class="cp">#define DT float</span>
-
-<span class="c1">//----------------- Setup shortestPathFloat thread -------------</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">opName</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">kernelName</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">requestLoad</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">xclbinPath</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">deviceNeeded</span><span class="p">;</span>
-
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">Handle</span><span class="o">::</span><span class="n">singleOP</span> <span class="n">op0</span><span class="p">;</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">operationName</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">opName</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">setKernelName</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">kernelName</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">requestLoad</span> <span class="o">=</span> <span class="n">requestLoad</span><span class="p">;</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">xclbinFile</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">xclbinPath</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-<span class="n">op0</span><span class="p">.</span><span class="n">deviceNeeded</span> <span class="o">=</span> <span class="n">deviceNeeded</span><span class="p">;</span>
-
-<span class="c1">//----------------- Setup pageRank thread -------------</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">opName2</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">kernelName2</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">requestLoad2</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">xclbinPath2</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">deviceNeeded2</span><span class="p">;</span>
-
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">Handle</span><span class="o">::</span><span class="n">singleOP</span> <span class="n">op1</span><span class="p">;</span>
-<span class="n">op1</span><span class="p">.</span><span class="n">operationName</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">opName2</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-<span class="n">op1</span><span class="p">.</span><span class="n">setKernelName</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">kernelName2</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
-<span class="n">op1</span><span class="p">.</span><span class="n">requestLoad</span> <span class="o">=</span> <span class="n">requestLoad2</span><span class="p">;</span>
-<span class="n">op1</span><span class="p">.</span><span class="n">xclbinFile</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">xclbinPath2</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-<span class="n">op1</span><span class="p">.</span><span class="n">deviceNeeded</span> <span class="o">=</span> <span class="n">deviceNeeded2</span><span class="p">;</span>
-
-<span class="n">handle0</span><span class="p">.</span><span class="n">addOp</span><span class="p">(</span><span class="n">op1</span><span class="p">);</span>
-<span class="n">handle0</span><span class="p">.</span><span class="n">setUp</span><span class="p">();</span>
-
-<span class="c1">//----------------- Readin Graph data ---------------------------</span>
-<span class="kt">uint32_t</span> <span class="n">numVertices</span><span class="p">;</span>
-<span class="kt">uint32_t</span> <span class="n">numEdges</span><span class="p">;</span>
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="p">,</span> <span class="n">DT</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">(</span><span class="s">&quot;CSR&quot;</span><span class="p">,</span> <span class="n">numVertices</span><span class="p">,</span> <span class="n">numEdges</span><span class="p">);</span>
-<span class="kt">uint32_t</span> <span class="n">numVertices2</span><span class="p">;</span>
-<span class="kt">uint32_t</span> <span class="n">numEdges2</span><span class="p">;</span>
-<span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="p">,</span> <span class="n">DT</span><span class="o">&gt;</span> <span class="n">g2</span><span class="p">(</span><span class="s">&quot;CSR&quot;</span><span class="p">,</span> <span class="n">numVertices2</span><span class="p">,</span> <span class="n">numEdges2</span><span class="p">);</span>
-
-<span class="c1">//----------------- Load Graph ----------------------------------</span>
-<span class="p">(</span><span class="n">handle0</span><span class="p">.</span><span class="n">opsp</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">loadGraph</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
-<span class="p">(</span><span class="n">handle0</span><span class="p">.</span><span class="n">oppg</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">loadGraph</span><span class="p">(</span><span class="n">g2</span><span class="p">);</span>
-
-<span class="c1">//---------------- Run L3 API -----------------------------------</span>
-<span class="k">auto</span> <span class="n">ev1</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">shortestPath</span><span class="p">(</span><span class="n">handle0</span><span class="p">,</span> <span class="n">nSource1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sourceID1</span><span class="p">,</span> <span class="n">weighted1</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">result1</span><span class="p">,</span> <span class="n">pred1</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">ev2</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">shortestPath</span><span class="p">(</span><span class="n">handle0</span><span class="p">,</span> <span class="n">nSource2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sourceID2</span><span class="p">,</span> <span class="n">weighted2</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">result2</span><span class="p">,</span> <span class="n">pred2</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">ev3</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">shortestPath</span><span class="p">(</span><span class="n">handle0</span><span class="p">,</span> <span class="n">nSource3</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sourceID3</span><span class="p">,</span> <span class="n">weighted3</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">result3</span><span class="p">,</span> <span class="n">pred3</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">ev4</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">shortestPath</span><span class="p">(</span><span class="n">handle0</span><span class="p">,</span> <span class="n">nSource4</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sourceID5</span><span class="p">,</span> <span class="n">weighted4</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">result4</span><span class="p">,</span> <span class="n">pred4</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">ev5</span> <span class="o">=</span> <span class="n">xf</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">L3</span><span class="o">::</span><span class="n">pageRankWeight</span><span class="p">(</span><span class="n">handle0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">pagerank</span><span class="p">);</span>
-<span class="kt">int</span> <span class="n">ret1</span> <span class="o">=</span> <span class="n">ev1</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-<span class="kt">int</span> <span class="n">ret2</span> <span class="o">=</span> <span class="n">ev2</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-<span class="kt">int</span> <span class="n">ret3</span> <span class="o">=</span> <span class="n">ev3</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-<span class="kt">int</span> <span class="n">ret4</span> <span class="o">=</span> <span class="n">ev4</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-<span class="kt">int</span> <span class="n">ret5</span> <span class="o">=</span> <span class="n">ev5</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-
-<span class="c1">//--------------- Free and delete -----------------------------------</span>
-<span class="p">(</span><span class="n">handle0</span><span class="p">.</span><span class="n">opsp</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">();</span>
-<span class="p">(</span><span class="n">handle0</span><span class="p">.</span><span class="n">oppg</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">();</span>
-<span class="n">handle0</span><span class="p">.</span><span class="n">free</span><span class="p">();</span>
-<span class="n">g</span><span class="p">.</span><span class="n">freeBuffers</span><span class="p">();</span>
-<span class="n">g2</span><span class="p">.</span><span class="n">freeBuffers</span><span class="p">();</span>
+<span></span><span class="nb">cd</span> L3/tests/louvainRun
+make host
+./build_dir.sw_emu.xilinx_u55c_gen3x16_xdma_base_2/host.exe -x <span class="k">$(</span>PROJECTPATH<span class="k">)</span>/build_dir.sw_emu.xilinx_u55c_gen3x16_xdma_base_2/kernel_louvain.xclbin -kernel_mode <span class="m">2</span> -num_devices <span class="m">1</span> -devices xilinx_u55c_gen3x16_xdma_base_2 -num_level <span class="m">100</span> -num_iter <span class="m">100</span> -load_alveo_partitions ../louvainPartition/example_tx.par.proj -setwkr <span class="m">0</span> -driverAlone
 </pre>
-</div>
 </div>
 </div>
 
@@ -625,10 +500,10 @@ To run an example there are 8 basic steps:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="louvainPartition.html" class="btn btn-neutral float-right" title="Louvain Paritition Demo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Document" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="louvainPartition.html" class="btn btn-neutral float-left" title="Louvain Paritition Demo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

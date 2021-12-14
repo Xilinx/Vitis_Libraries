@@ -361,6 +361,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="L3_internal/getting_started.html">Getting Started</a></li>
 <li class="toctree-l2"><a class="reference internal" href="L3_internal/user_model.html">Running Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/louvainPartition.html">Louvain Paritition Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/louvainRun.html">Louvain Modularity Launch Demo</a></li>
 </ul>
 </li>
 </ul>
@@ -443,8 +445,32 @@
 <p>The graph L3 layer provides an asynchronous and easy-to-integrate framework. By using the Xilinx FPGA Resource Manager (XRM) and this completely original and innovative L3 asynchronous framework, users can easily call the L3 asynchronous APIs in their pure software (heterochronous or synchronous) codes without the need of considering any hardware related things. The innovative L3 asynchronous framework can automatically acquire current platform’s available resources (available FPGA boards, boards’ serie numbers, available compute units, kernel names, etc.). In addition, this framework seperates FPGA deployments with L3 API calling, so the graph L3 layer can be easily deployed in the Cloud and can be easily used by pure software developers.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="L3_internal/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="L3_internal/user_model.html">Running Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="L3_internal/getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/getting_started.html#software-requirements">Software Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/getting_started.html#hardware-requirements">Hardware Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/getting_started.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/getting_started.html#building-the-dynamic-library">Building the dynamic library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L3_internal/user_model.html">Running Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/user_model.html#basic-flow">Basic Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/user_model.html#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/user_model.html#asynchronous-execution">Asynchronous Execution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="L3_internal/user_model.html#example-of-using-multiple-requests">Example of using multiple requests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L3_internal/louvainPartition.html">Louvain Paritition Demo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/louvainPartition.html#linear-louvain-partition-flow">Linear Louvain Partition Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/louvainPartition.html#bfs-louvain-partition-flow">BFS Louvain Partition Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L3_internal/louvainRun.html">Louvain Modularity Launch Demo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/louvainRun.html#launch-u50-flow">Launch u50 Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="L3_internal/louvainRun.html#launch-u55c-flow">Launch u55c Flow</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>

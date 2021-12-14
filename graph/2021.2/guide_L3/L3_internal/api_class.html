@@ -456,13 +456,14 @@
 <h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
 <hr class="docutils" />
 <p>Graph library <a class="reference internal" href="../../rst_L3/namespace_xf_graph_L3.html#doxid-namespacexf-1-1graph-1-1-l3"><span class="std std-ref">L3</span></a> handle.</p>
-<pre class="highlight overview-code-block literal-block" id="cid-xf-graph-l3-handle-addop">
-<span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a742480835e7c1d9d02acc9335a222f90"></span><span id="cid-xf-graph-l3-handle-getenv"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a92e8b99c3718f5fa04aba02819a56198"></span><span id="cid-xf-graph-l3-handle-setup"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1adb44baa88ce458e1fea43552259d8bdd"></span><span id="cid-xf-graph-l3-handle-free"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1afebc2e31a7acfd5f674a06ddc912ff54"></span><span id="cid-xf-graph-l3-handle-handle"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1ab9a55fc84535047772c492a08ace7127"></span><span></span><span class="c1">// structs</span>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-graph-l3-handle-getnumdevices">
+<span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a1c92428a3158c27647f183917db38c12"></span><span id="cid-xf-graph-l3-handle-addop"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a742480835e7c1d9d02acc9335a222f90"></span><span id="cid-xf-graph-l3-handle-getenvmultiboards"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1ac2859d1d3da006645246a4ea06e9dd48"></span><span id="cid-xf-graph-l3-handle-getenv"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a92e8b99c3718f5fa04aba02819a56198"></span><span id="cid-xf-graph-l3-handle-setup-2"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a15f317225b91248839030aaf7c0fd1ea"></span><span id="cid-xf-graph-l3-handle-setup"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1adb44baa88ce458e1fea43552259d8bdd"></span><span id="cid-xf-graph-l3-handle-showhandleinfo"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1ab1e5261ea7c60cd15a2d9c8930e2f566"></span><span id="cid-xf-graph-l3-handle-free"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1afebc2e31a7acfd5f674a06ddc912ff54"></span><span id="cid-xf-graph-l3-handle-handle"></span><span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1ab9a55fc84535047772c492a08ace7127"></span><span></span><span class="c1">// structs</span>
 
 <span class="k">struct</span> <a class="reference internal" href="../../rst_L3/struct_xf_graph_L3_Handle_singleOP.html#doxid-structxf-1-1graph-1-1-l3-1-1-handle-1-1single-o-p"><span class="std std-ref">singleOP</span></a><span></span>
 
 <span class="c1">// fields</span>
 
+<span class="k">class</span> <span class="n">opLouvainModularity</span><span class="o">*</span> <a class="reference internal" href="../../rst_L3/class_xf_graph_L3_Handle.html#doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a6e0eadefaf93333e08a24125a59e7f6e"><span class="std std-ref">oplouvainmod</span></a><span></span>
 <span class="k">class</span> <span class="n">opTwoHop</span><span class="o">*</span> <a class="reference internal" href="../../rst_L3/class_xf_graph_L3_Handle.html#doxid-classxf-1-1graph-1-1-l3-1-1-handle-1aafc32a038cd235b2a19f160ffb3c945a"><span class="std std-ref">optwohop</span></a><span></span>
 <span class="k">class</span> <span class="n">opPageRank</span><span class="o">*</span> <a class="reference internal" href="../../rst_L3/class_xf_graph_L3_Handle.html#doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a1ca82f9f0cf5306a464bbf294577c22b"><span class="std std-ref">oppg</span></a><span></span>
 <span class="k">class</span> <span class="n">opSP</span><span class="o">*</span> <a class="reference internal" href="../../rst_L3/class_xf_graph_L3_Handle.html#doxid-classxf-1-1graph-1-1-l3-1-1-handle-1ac2451387522af604b59797f1a1ecf1ba"><span class="std std-ref">opsp</span></a><span></span>
@@ -479,6 +480,10 @@
 </div>
 <div class="section" id="fields">
 <h3>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight title-code-block literal-block" id="cid-xf-graph-l3-handle-oplouvainmod">
+<span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1a6e0eadefaf93333e08a24125a59e7f6e"></span><span></span><span class="k">class</span> <span class="n">opLouvainModularity</span><span class="o">*</span> <span class="n">oplouvainmod</span>
+</pre>
+<p>xilinx FPGA Resource Manager operation</p>
 <pre class="highlight title-code-block literal-block" id="cid-xf-graph-l3-handle-optwohop">
 <span id="doxid-classxf-1-1graph-1-1-l3-1-1-handle-1aafc32a038cd235b2a19f160ffb3c945a"></span><span></span><span class="k">class</span> <span class="n">opTwoHop</span><span class="o">*</span> <span class="n">optwohop</span>
 </pre>

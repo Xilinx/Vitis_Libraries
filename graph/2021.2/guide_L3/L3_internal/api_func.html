@@ -359,6 +359,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Document</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">namespace xf::graph::L3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#louvainmodularity">louvainModularity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#twohop">twoHop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pagerankweight">pageRankWeight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#shortestpath">shortestPath</a></li>
@@ -463,6 +464,46 @@
             
   <div class="section" id="namespace-xf-graph-l3">
 <h1>namespace xf::graph::L3<a class="headerlink" href="#namespace-xf-graph-l3" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="louvainmodularity">
+<span id="cid-xf-graph-l3-louvainmodularity"></span><span id="doxid-namespacexf-1-1graph-1-1-l3-1af45f2c0056389552605517351acfb7b1"></span><h2>louvainModularity<a class="headerlink" href="#louvainmodularity" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_graph_L3.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">louvainModularity</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span> <span class="o">&lt;</span><a class="reference internal" href="../../rst_L3/class_xf_graph_L3_Handle.html#doxid-classxf-1-1graph-1-1-l3-1-1-handle"><span class="std std-ref">xf::graph::L3::Handle</span></a><span></span><span class="o">&gt;</span> <span class="n">handle</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">flowMode</span><span class="p">,</span>
+    <span class="n">GLV</span><span class="o">*</span> <span class="n">glv</span><span class="p">,</span>
+    <span class="n">GLV</span><span class="o">*</span> <span class="n">pglv</span><span class="p">,</span>
+    <span class="n">LouvainPara</span><span class="o">*</span> <span class="n">para_lv</span>
+    <span class="p">)</span>
+</pre>
+<p>louvain algorithm is implemented.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>handle</td>
+<td>Graph library <a class="reference internal" href="../../rst_L3/namespace_xf_graph_L3.html#doxid-namespacexf-1-1graph-1-1-l3"><span class="std std-ref">L3</span></a> handle</td>
+</tr>
+<tr class="row-even"><td>flowMode</td>
+<td>flowMode of multi louvain kernel. LOUVAINMOD_PRUNING_KERNEL = 1 is a 1cu kernel design fit for u50 LOUVAINMOD_2CU_U55C_KERNEL = 2 a 2cu kernel design fit for u55c the performance of one compute unit by different board is the same</td>
+</tr>
+<tr class="row-odd"><td>glv</td>
+<td>the original graph info before partition.</td>
+</tr>
+<tr class="row-even"><td>pglv</td>
+<td>one of the partitioned sub-graph info to input to kernel.</td>
+</tr>
+<tr class="row-odd"><td>para_lv</td>
+<td>parameters of louvain kernel</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="twohop">
 <span id="cid-xf-graph-l3-twohop"></span><span id="doxid-namespacexf-1-1graph-1-1-l3-1a60b6033bcdb790e71acd675ed7a7959f"></span><h2>twoHop<a class="headerlink" href="#twohop" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">

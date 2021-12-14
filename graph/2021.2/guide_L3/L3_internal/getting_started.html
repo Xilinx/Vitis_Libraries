@@ -367,6 +367,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="user_model.html">Running Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="louvainPartition.html">Louvain Paritition Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="louvainRun.html">Louvain Modularity Launch Demo</a></li>
 </ul>
 </li>
 </ul>
@@ -461,6 +463,7 @@
 <h2>Hardware Requirements<a class="headerlink" href="#hardware-requirements" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://www.xilinx.com/products/boards-and-kits/alveo/u50.html">Alveo U50</a></li>
+<li><a class="reference external" href="https://www.xilinx.com/applications/data-center/high-performance-computing/u55c.html">Alveo U55C</a></li>
 </ul>
 </div>
 <div class="section" id="environment-setup">
@@ -498,6 +501,8 @@
 <pre class="highlight literal-block">
 <span></span><span class="nb">cd</span> xf_graph/L3/lib
 ./build_so.sh
+<span class="nb">cd</span> xf_graph/L3/tests
+./pre_launch.sh
 </pre>
 <p>After the build is complete, <strong>libgraphL3.so</strong> should be available in <em>Vitis_Libraries/graph/L3/lib</em></p>
 </div>

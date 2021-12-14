@@ -470,14 +470,14 @@
 </ul>
 <p>Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.</p>
 <pre class="highlight literal-block">
-<span></span>make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u50_gen3x16_xdma_201920_3
+<span></span>make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u55c_gen3x16_xdma_2_202110_1
 </pre>
 <ul class="simple">
 <li><strong>Run kernel(Step 3)</strong></li>
 </ul>
 <p>To get the benchmark results, please run the following command.</p>
 <pre class="highlight literal-block">
-<span></span>./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/host.exe -x build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_louvain.xclbin -f <span class="m">3</span> -c -o -m <span class="m">10</span> -prun data/example-wt.txt
+<span></span>./build_dir.hw.xilinx_u55c_gen3x16_xdma_2_202110_1/host.exe -x build_dir.hw.xilinx_u55c_gen3x16_xdma_2_202110_1/kernel_louvain.xclbin -f <span class="m">3</span> -c -o -m <span class="m">10</span> data/example-wt.txt -prun
 </pre>
 <p>Louvain fast Input Arguments:</p>
 <pre class="highlight literal-block">
@@ -536,7 +536,45 @@ TOTAL PostPost                 : <span class="m">0</span>.225914 <span class="o"
 <p>The hardware resource utilizations are listed in the following table.
 Different tool versions may result slightly different resource.</p>
 <table border="1" class="docutils align-center" id="id1">
-<caption><span class="caption-text">Table 1 Hardware resources for Louvain fast</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-text">Table 1 Hardware resources for Louvain fast in u55c now in 21.2, higher frequency and lower resources.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="22%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="11%" />
+<col width="20%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Kernel</td>
+<td>BRAM</td>
+<td>URAM</td>
+<td>DSP</td>
+<td>FF</td>
+<td>LUT</td>
+<td>Frequency(MHz)</td>
+</tr>
+<tr class="row-even"><td>kernel_louvain_0</td>
+<td>150</td>
+<td>208</td>
+<td>118</td>
+<td>169109</td>
+<td>147344</td>
+<td>214.1</td>
+</tr>
+<tr class="row-odd"><td>kernel_louvain_1</td>
+<td>150</td>
+<td>208</td>
+<td>118</td>
+<td>169109</td>
+<td>147344</td>
+<td>214.1</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils align-center" id="id2">
+<caption><span class="caption-text">Table 2 Hardware resources for Louvain fast in u50 before 21.2</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="22%" />
 <col width="12%" />
@@ -565,19 +603,20 @@ Different tool versions may result slightly different resource.</p>
 </tr>
 </tbody>
 </table>
-<p>Table 2 Louvain FPGA acceleration benchmark</p>
+<p>Table 3 Louvain FPGA acceleration benchmark by L2</p>
 <a class="reference internal image-reference" href="../../_images/louvainPerformace.PNG"><img alt="Performance of louvainPerformance" class="align-center" src="../../_images/louvainPerformace.PNG" style="width: 90%;" /></a>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ol class="last arabic simple">
-<li>2 FPGA versions of kernel are used:
-* Normal kernel    : 18.1 X
-* Prune kernel     : 33.1 X without modularity loss VS. parallel Louvain on CPU
+<li>3 FPGA versions of kernel are used:
+* Normal kernel      : 18.1 X
+* Prune kernel       : 33.1 X without modularity loss VS. parallel Louvain on CPU
+* Opt kernel in u55c : 65.6 X without modularity loss by just 1cu VS. parallel Louvain on CPU
 * the Latency time = CPU time + FPGA time</li>
 <li>TigerGraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 &#64;2.60GHz, cache(20480 KB), cores(8).</li>
 <li>Parallel Louvain running on Intel(R) Xeon(R) CPU E5-2690 v4 &#64; 2.60GHz, cache(35840 KB), cores(14).</li>
 <li>time unit: second.</li>
-<li>FPGA platorm is Alveo u50</li>
+<li>FPGA platorm is Alveo u50 for Prune kernel, Alveo u55c for 2cu opt kernel</li>
 </ol>
 </div>
 <div class="toctree-wrapper compound">
