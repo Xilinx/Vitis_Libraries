@@ -112,6 +112,8 @@ void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin
     std::cout << std::fixed << std::setprecision(3) << std::endl
               << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
+    std::cout << "\nDecompression is successful. No errors found.\n";
+    std::cout << std::endl;
 }
 
 void xil_validate(std::string& file_list) {
@@ -173,4 +175,5 @@ int main(int argc, char* argv[]) {
     } else if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
         xil_decompress_top(decompress_mod, decompress_bin, deviceId, enable_p2p);
+    return 0;
 }

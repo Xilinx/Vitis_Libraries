@@ -88,6 +88,7 @@ void xil_compress_file_list(std::string& file_list, uint32_t block_size, std::st
         outFileList.push_back(out_file);
     }
     compress_multiple_files(inFileList, outFileList, block_size, compress_bin, enable_p2p);
+    std::cout << "\nCompression is successful. No errors found.\n";
     std::cout << std::endl;
 }
 
@@ -104,6 +105,7 @@ void xil_compress_file(std::string& file, uint32_t block_size, std::string& comp
     origFileList.push_back(orig_file);
     outFileList.push_back(out_file);
     compress_multiple_files(inFileList, outFileList, block_size, compress_bin, enable_p2p);
+    std::cout << "\nCompression is successful. No errors found.\n";
     std::cout << std::endl;
 }
 

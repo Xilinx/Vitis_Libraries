@@ -18,15 +18,15 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86/aarch64>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86/aarch64>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86/aarch64>"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -65,8 +65,8 @@ PLATFORM := xilinx_u250_gen3x16_xdma_3_1_202020_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  xilinx_u250_gen3x16_xdma_3_1_202020_1 u200 u50 vck190 aws-vu9p-f1
-PLATFORM_BLOCKLIST +=  zc
+PLATFORM_ALLOWLIST +=  xilinx_u250_gen3x16_xdma_3_1_202020_1 u200 u50
+PLATFORM_BLOCKLIST +=  zc vck
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -106,60 +106,50 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-HOST_SRCS += $(CUR_DIR)/src/host.cpp $(XFLIB_DIR)/common/libs/compress/gzipOCLHost.cpp $(XFLIB_DIR)/common/libs/compress/gzipBase.cpp $(XFLIB_DIR)/common/libs/compress/gzipApp.cpp $(XFLIB_DIR)/common/libs/compress/compressApp.cpp $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp $(XFLIB_DIR)/common/libs/logger/logger.cpp $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c 
-CXXFLAGS +=  -D GZIP_STREAM -D PERF_DM -D BLOCK_SIZE_IN_KB=8
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/libs/compress/ -I $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7 -I $(XFLIB_DIR)/L2/tests/src -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
-CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
+HOST_SRCS += $(CUR_DIR)/src/host.cpp $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp 
+CXXFLAGS +=  -D BLOCK_SIZE_IN_KB=32
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/src/ -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/libs/compress/ -I $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7 -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
 
-else 
-HOST_SRCS += $(CUR_DIR)/src/host.cpp $(XFLIB_DIR)/common/libs/compress/gzipOCLHost.cpp $(XFLIB_DIR)/common/libs/compress/gzipBase.cpp $(XFLIB_DIR)/common/libs/compress/gzipApp.cpp $(XFLIB_DIR)/common/libs/compress/compressApp.cpp $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp $(XFLIB_DIR)/common/libs/logger/logger.cpp $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c 
-CXXFLAGS +=  -D GZIP_STREAM -D PERF_DM -D BLOCK_SIZE_IN_KB=8
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/libs/compress/ -I $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7 -I $(XFLIB_DIR)/L2/tests/src -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
-
-endif
-EXE_NAME := xil_gzip
+EXE_NAME := xil_zlib
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
 
-HOST_ARGS := -xbin $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/data/sample.txt
+HOST_ARGS := $(BUILD_DIR)/decompress.xclbin $(CUR_DIR)/sample.txt.gz
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 
 ########################## Kernel compiler global settings ##########################
 VPP_FLAGS +=   --config $(CUR_DIR)/hls.cfg
-VPP_FLAGS +=  -D GZIP_STREAM -D BLOCKSIZE_IN_KB=8
+VPP_FLAGS +=  -D GZIP_STREAM -D BLOCKSIZE_IN_KB=32 -D STRTGY=1
 VPP_FLAGS +=  -I $(XFLIB_DIR)/../security/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/src
 
 ######################### binary container global settings ##########################
-VPP_LDFLAGS_compress_temp := --config $(CUR_DIR)/connectivity.cfg
-VPP_LDFLAGS_compress += $(VPP_LDFLAGS_compress_temp)
+VPP_LDFLAGS_decompress_temp := --config $(CUR_DIR)/connectivity.cfg
+VPP_LDFLAGS_decompress += $(VPP_LDFLAGS_decompress_temp)
 
-BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilGzipComp.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_compress_OBJS)
-BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilDataMover.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_compress_OBJS)
 ifeq ($(HOST_ARCH), x86)
-BINARY_CONTAINERS += $(BUILD_DIR)/compress.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/decompress.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/compress_pkg.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/compress.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/decompress_pkg.xclbin
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/decompress.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/xilGzipComp.xo: $(XFLIB_DIR)/L2/src/gzip_compress_multicore_stream.cpp 
-	$(ECHO) "Compiling Kernel: xilGzipComp"
+$(TEMP_DIR)/xilDecompress.xo: $(XFLIB_DIR)/L2/src/gzip_decompress_multicore.cpp 
+	$(ECHO) "Compiling Kernel: xilDecompress"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_xilGzipComp) $(VPP_FLAGS) -k xilGzipComp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_xilDecompress) $(VPP_FLAGS) -k xilDecompress -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+BINARY_CONTAINER_decompress_OBJS += $(TEMP_DIR)/xilDecompress.xo
 $(TEMP_DIR)/xilDataMover.xo: $(XFLIB_DIR)/L2/tests/src/block_stream_perf_dm.cpp 
 	$(ECHO) "Compiling Kernel: xilDataMover"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_xilDataMover) $(VPP_FLAGS) -k xilDataMover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+BINARY_CONTAINER_decompress_OBJS += $(TEMP_DIR)/xilDataMover.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_decompress_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/compress $(VPP_LDFLAGS)  $(VPP_LDFLAGS_compress) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/decompress $(VPP_LDFLAGS)  $(VPP_LDFLAGS_decompress) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 ifeq ($(HOST_ARCH), x86)
@@ -204,7 +194,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(CUR_DIR)//data/sample.txt 
+DATA_FILE := 
 DATA_DIR := 
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
@@ -235,12 +225,12 @@ ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+	
 endif
 endif
 #sw_emu
@@ -248,19 +238,19 @@ ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+	
 endif
 endif
 #hw
 ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	$(EXE_FILE) $(HOST_ARGS)
-	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
+	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -299,7 +289,7 @@ cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
 	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* $(CUR_DIR)/test.list $(CUR_DIR)/sample_run.* $(CUR_DIR)/data/sample.txt.* 
+	-$(RMDIR) _x_temp.* $(CUR_DIR)/test.list $(CUR_DIR)/sample_run.* 
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str

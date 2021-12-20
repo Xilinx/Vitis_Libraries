@@ -45,7 +45,8 @@
                 "LIB_DIR/L3/include",
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/thirdParty/zlib-1.2.7",
-                "LIB_DIR/common/libs/compress/"
+                "LIB_DIR/common/libs/compress/",
+                "LIB_DIR/L2/tests/src/"
             ],
             "options": "-O3 ",
             "symbols": [

@@ -108,7 +108,7 @@ endif
 #Inclue Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp $(XFLIB_DIR)/common/libs/compress/gzipOCLHost.cpp $(XFLIB_DIR)/common/libs/compress/gzipBase.cpp $(XFLIB_DIR)/common/libs/compress/gzipApp.cpp $(XFLIB_DIR)/common/libs/compress/compressApp.cpp $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp $(XFLIB_DIR)/common/libs/logger/logger.cpp $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c 
 CXXFLAGS +=  -D C_COMPUTE_UNIT=2 -D D_COMPUTE_UNIT=8 -D PARALLEL_BLOCK=4
-CXXFLAGS +=  -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7 -I $(XFLIB_DIR)/common/libs/compress/ -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
+CXXFLAGS +=  -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7 -I $(XFLIB_DIR)/common/libs/compress/ -I $(XFLIB_DIR)/L2/tests/src/ -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
 CXXFLAGS += -O3 
 
 EXE_NAME := xil_gzip

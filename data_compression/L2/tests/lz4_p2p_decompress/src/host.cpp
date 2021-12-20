@@ -165,6 +165,8 @@ void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::str
     std::cout << "Output Location: " << lz_decompress_out.c_str() << std::endl;
 #endif
     delete (xlz);
+    std::cout << "\nDecompression is successful. No errors found.\n";
+    std::cout << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -221,4 +223,5 @@ int main(int argc, char* argv[]) {
     if (!filelist.empty()) {
         xilBatchVerify(filelist, bSize, decompress_bin, enable_p2p);
     }
+    return 0;
 }

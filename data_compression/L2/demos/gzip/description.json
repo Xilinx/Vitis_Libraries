@@ -50,7 +50,8 @@
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/thirdParty/zlib-1.2.7",
-                "LIB_DIR/common/libs/compress/"
+                "LIB_DIR/common/libs/compress/",
+                "LIB_DIR/L2/tests/src"
             ], 
             "symbols": [
                 "GZIP_MULTICORE_COMPRESS", 
