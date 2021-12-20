@@ -18,9 +18,9 @@
 #define __DUT_QRF_H__
 
 #include "hls_x_complex.h"
+#include "utils/x_hls_traits.h"
 #include "dut_type_float.hpp"
 //#include "dut_type_complex.hpp"
-#include "utils/x_tb_utils.h" // for calcULP
 #include <limits>
 
 template <typename T>

@@ -23,13 +23,12 @@
 
 #include "test_qrf.hpp"
 #include "kernel_qrf.hpp"
-#include "utils.hpp"
-#include "utils/x_matrix_utils.h"
+#include "src/utils.hpp"
+#include "utils/x_matrix_utils.hpp"
 
 // shipped utils
-#include "utils/matrix_test_utils.h"
-#include "utils/type_test_utils.h"
-#include "utils/x_tb_utils.h" // for calcULP
+#include "src/matrix_test_utils.hpp"
+#include "src/type_test_utils.hpp"
 
 #include <stdio.h>
 #include <vector>
@@ -217,10 +216,10 @@ int main(int argc, char* argv[]) {
     bool matched_lapack_R = false;
 
     printf("Running %lu %s tests per matrix type on %d x %d matrices with TransposedQ %d\n", num_tests,
-           hls::x_is_float(R_expected[0][0]) ? "single precision"
-                                             : hls::x_is_double(R_expected[0][0])
-                                                   ? "double precision"
-                                                   : hls::x_is_fixed(R_expected[0][0]) ? "fixed point" : "Unknown type",
+           x_is_float(R_expected[0][0])
+               ? "single precision"
+               : x_is_double(R_expected[0][0]) ? "double precision"
+                                               : x_is_fixed(R_expected[0][0]) ? "fixed point" : "Unknown type",
            A_ROWS, A_COLS, TRANSPOSED_Q);
 
     std::cout << " MIN: " << hls::numeric_limits<MATRIX_IN_BASE_T>::min() << std::endl;
@@ -261,7 +260,7 @@ int main(int argc, char* argv[]) {
 
                 // Read input matrix and golden matrix from files
                 std::string base_path;
-                if (hls::x_is_complex(A[0][0]) == true) {
+                if (x_is_complex(A[0][0]) == true) {
                     base_path = "../../../../datas/complex/";
                 } else {
                     base_path = "../../../../datas/float/";
@@ -293,16 +292,32 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+                hls::stream<MATRIX_IN_T> matrixAStrm;
+                hls::stream<MATRIX_IN_T> matrixQStrm;
+                hls::stream<MATRIX_IN_T> matrixRStrm;
+                for (int r = 0; r < A_ROWS; r++) {
+                    for (int c = 0; c < A_COLS; c++) {
+                        matrixAStrm.write(A[r][c]);
+                    }
+                }
+
                 // Get Actual results
                 //
                 // Q is output in (conjugate) transposed form, specified in generic_wrapper.cpp,
                 // which means Q*A = R
                 // ====================================================================
-                kernel_qrf_0(A, Q, R);
+                kernel_qrf_0(matrixAStrm, matrixQStrm, matrixRStrm);
 
                 // Force zeros in lower triangle of our R, as we did that for LAPACK as well
                 for (int r = 0; r < A_ROWS; r++) {
+                    for (int c = 0; c < A_ROWS; c++) {
+                        Q[r][c] = matrixQStrm.read();
+                    }
+                }
+
+                for (int r = 0; r < A_ROWS; r++) {
                     for (int c = 0; c < A_COLS; c++) {
+                        R[r][c] = matrixRStrm.read();
                         if (r > c) {
                             R[r][c] = 0;
                         }
@@ -329,8 +344,8 @@ int main(int argc, char* argv[]) {
 
                 // Check 1: Complex matrices should have a real-valued diagonal (for QR inverse, and also to match
                 // Matlab/LAPACK results)
-                if (hls::x_is_complex(R_expected[0][0]) == true) {
-                    //      printf("INFO: Checking for real-valued diagonal entries\n");
+                if (x_is_complex(R_expected[0][0]) == true) {
+                    // printf("INFO: Checking for real-valued diagonal entries\n");
                     for (int r = 0; r < A_ROWS; r++) {
                         for (int c = 0; c < A_COLS; c++) {
                             if (r == c) {
@@ -470,6 +485,8 @@ int main(int argc, char* argv[]) {
                 //----------------------------------------------------------------------------------------------------------------------------------------
 
                 R_DUT_ratio = (double)R_delta_norm / ((double)A_ROWS * (double)A_norm * (double)eps);
+                std::cout << R_DUT_ratio << " " << R_delta_norm << " " << A_ROWS << " " << A_norm << " " << eps
+                          << std::endl;
                 R_LAPACK_ratio = (double)R_delta_lapack_norm / ((double)A_ROWS * (double)A_norm * (double)eps);
 
                 // Check that the norm values are OK and we are not comparing two bad ratios
@@ -712,6 +729,19 @@ int main(int argc, char* argv[]) {
                 if ((R_ratio_difference > 0 && debug > 0) || debug > 1 || R_DUT_ratio > R_ratio_threshold) {
                     printf("  A=\n");
                     xf::solver::print_matrix<A_ROWS, A_COLS, MATRIX_IN_T, xf::solver::NoTranspose>(A, "   ",
+                                                                                                   print_precision, 1);
+                    printf("  Q=\n");
+                    xf::solver::print_matrix<A_ROWS, A_ROWS, MATRIX_IN_T, xf::solver::NoTranspose>(Q, "   ",
+                                                                                                   print_precision, 1);
+                    printf("  Q_expeced=\n");
+                    xf::solver::print_matrix<A_ROWS, A_ROWS, MATRIX_IN_T, xf::solver::NoTranspose>(Q_expected, "   ",
+                                                                                                   print_precision, 1);
+
+                    printf("  R=\n");
+                    xf::solver::print_matrix<A_ROWS, A_COLS, MATRIX_IN_T, xf::solver::NoTranspose>(R, "   ",
+                                                                                                   print_precision, 1);
+                    printf("  R_expeced=\n");
+                    xf::solver::print_matrix<A_ROWS, A_COLS, MATRIX_IN_T, xf::solver::NoTranspose>(R_expected, "   ",
                                                                                                    print_precision, 1);
                     printf("  R_restored=\n");
                     xf::solver::print_matrix<A_ROWS, A_COLS, MATRIX_IN_T, xf::solver::NoTranspose>(R_restored, "   ",

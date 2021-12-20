@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef TYPE_TEST_UTILS__H__
-#define TYPE_TEST_UTILS__H__
+#ifndef _XF_SOLVER_TYPE_TEST_UTILS_HPP_
+#define _XF_SOLVER_TYPE_TEST_UTILS_HPP_
 
 // -------------------------------------------------
 // Utilities for *test* code to help work with types
@@ -28,8 +28,6 @@
 // ======================================================================
 //
 #include <complex>
-
-namespace hls {
 
 // Generic types
 // -------------
@@ -111,46 +109,46 @@ bool x_is_complex(ap_fixed<W, I, Q, O, N> x) {
 // ---------
 
 template <typename S>
-bool x_is_complex(x_complex<S> x) {
+bool x_is_complex(hls::x_complex<S> x) {
     return true;
 };
 
 template <>
-bool x_is_float(x_complex<float> x) {
+bool x_is_float(hls::x_complex<float> x) {
     return true;
 };
 template <>
-bool x_is_float(x_complex<double> x) {
+bool x_is_float(hls::x_complex<double> x) {
     return false;
 };
 template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
-bool x_is_float(x_complex<ap_fixed<W, I, Q, O, N> > x) {
+bool x_is_float(hls::x_complex<ap_fixed<W, I, Q, O, N> > x) {
     return false;
 };
 
 template <>
-bool x_is_double(x_complex<float> x) {
+bool x_is_double(hls::x_complex<float> x) {
     return false;
 };
 template <>
-bool x_is_double(x_complex<double> x) {
+bool x_is_double(hls::x_complex<double> x) {
     return true;
 };
 template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
-bool x_is_double(x_complex<ap_fixed<W, I, Q, O, N> > x) {
+bool x_is_double(hls::x_complex<ap_fixed<W, I, Q, O, N> > x) {
     return false;
 };
 
 template <>
-bool x_is_fixed(x_complex<float> x) {
+bool x_is_fixed(hls::x_complex<float> x) {
     return false;
 };
 template <>
-bool x_is_fixed(x_complex<double> x) {
+bool x_is_fixed(hls::x_complex<double> x) {
     return false;
 };
 template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
-bool x_is_fixed(x_complex<ap_fixed<W, I, Q, O, N> > x) {
+bool x_is_fixed(hls::x_complex<ap_fixed<W, I, Q, O, N> > x) {
     return true;
 };
 
@@ -240,7 +238,5 @@ bool x_is_fixed(std::complex<ap_fixed<W, I, Q, O, N> > x) {
 //
 //
 //  exit(0);
-
-} // end namespace hls
 
 #endif

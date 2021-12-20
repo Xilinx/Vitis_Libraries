@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MATRIX_TEST_UTILS__H__
-#define MATRIX_TEST_UTILS__H__
+#ifndef _XF_SOLVER_MATRIX_TEST_UTILS_HPP_
+#define _XF_SOLVER_MATRIX_TEST_UTILS_HPP_
 
 // -------------------------------------------------
 // Utilities for matrix *test* code.
@@ -29,11 +29,12 @@
 #include "hls_x_complex.h"
 #include "utils/std_complex_utils.h"
 #include "utils/x_hls_utils.h"
+#include "utils/x_hls_traits.h"
 
 // test_utils
-#include "x_tb_utils.h"
-#include "scalar_test_utils.h"
-#include "type_test_utils.h"
+#include "src/x_tb_utils.hpp"
+#include "src/scalar_test_utils.hpp"
+#include "src/type_test_utils.hpp"
 
 #include <iomanip>
 #include <string>
@@ -215,8 +216,8 @@ T_BASE norm1_magnitude(T_BASE re, T_BASE im) {
     const T_BASE ZERO = 0.0f;
     T_BASE t;
 
-    re = hls_tb::fabs(re); // should call float version of fabs in C++?
-    im = hls_tb::fabs(im);
+    re = solver_tb::fabs(re); // should call float version of fabs in C++?
+    im = solver_tb::fabs(im);
     if (re > im) {
         t = im / re;
         return re * sqrt(ONE + t * t); // should call float version of sqrt in C++?

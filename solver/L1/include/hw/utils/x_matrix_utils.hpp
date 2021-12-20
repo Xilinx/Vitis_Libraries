@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_MATRIX_UTILS_H
-#define XF_MATRIX_UTILS_H
+#ifndef _XF_SOLVER_MATRIX_UTILS_HPP_
+#define _XF_SOLVER_MATRIX_UTILS_HPP_
 
 #include "ap_fixed.h"
 #include "utils/x_hls_utils.h"

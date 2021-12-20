@@ -2,7 +2,7 @@
  * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this file except in compliance with the Licens/.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef X_TB_UTILS_H
-#define X_TB_UTILS_H
+#ifndef _XF_SOLVER_X_TB_UTILS_HPP_
+#define _XF_SOLVER_X_TB_UTILS_HPP_
 
 #include <iostream>
 #include <sstream>
@@ -34,7 +34,7 @@
 #include "hls_x_complex.h"
 #include <complex>
 
-namespace hls_tb {
+namespace solver_tb {
 template <bool B, class T = void>
 struct enable_if {};
 
@@ -163,7 +163,7 @@ static std::string binary(half x) {
     s << std::hex << x.get_bits() << " " << s2;
     return s.str();
 }
-namespace hls_tb {
+namespace solver_tb {
 #ifdef X_AP_FLOAT_H
 template <int W, int I, int E_W, bool N>
 ap_float<W + 1, I + 1, E_W, N> fabs(ap_float<W, I, E_W, N> x) {
@@ -362,7 +362,7 @@ void save_to_file(char* file_name, T* source_array, int array_size) {
 * Returns true if error is within a certain threshold (0.1%)
 */
 static int comp_approx(float d1, float d2, float base, float err) {
-    float diff = hls_tb::fabs(d1 - d2);
+    float diff = solver_tb::fabs(d1 - d2);
     float perc = 100 * diff / base;
     printf("comp_approx (%e, %e), delta: %e, base: %e\n", d1, d2, perc, base);
     if (perc >= err) printf("Exceed error threshold!\n");
@@ -437,7 +437,7 @@ static int scan_file_for_avg(float dummy, char* target_file, int start_index, in
         while (counter < stop_index) {
             fscanf(file_id, "%e", &value);
             if (counter >= start_index - 1) {
-                avg += hls_tb::fabs(value);
+                avg += solver_tb::fabs(value);
                 counter++;
                 //		  printf("current avg = %e (%e/%d), val: %e\n",avg/counter,avg,counter,value);
             }
@@ -4265,7 +4265,7 @@ class corner_cases_generator : public generator<T> {
 };
 
 template <int W>
-class corner_cases_generator<ap_uint<W>, typename hls_tb::enable_if<true>::type> : public generator<ap_uint<W> > {
+class corner_cases_generator<ap_uint<W>, typename solver_tb::enable_if<true>::type> : public generator<ap_uint<W> > {
    public:
     typedef ap_uint<W> T;
     corner_cases_generator() {
@@ -4283,7 +4283,7 @@ class corner_cases_generator<ap_uint<W>, typename hls_tb::enable_if<true>::type>
 };
 
 template <int W>
-class corner_cases_generator<ap_int<W>, typename hls_tb::enable_if<true>::type> : public generator<ap_int<W> > {
+class corner_cases_generator<ap_int<W>, typename solver_tb::enable_if<true>::type> : public generator<ap_int<W> > {
    public:
     typedef ap_int<W> T;
     corner_cases_generator() {
@@ -4306,7 +4306,7 @@ class corner_cases_generator<ap_int<W>, typename hls_tb::enable_if<true>::type> 
 };
 
 template <int W, int I, ap_q_mode Q, ap_o_mode O>
-class corner_cases_generator<ap_ufixed<W, I, Q, O>, typename hls_tb::enable_if<true>::type>
+class corner_cases_generator<ap_ufixed<W, I, Q, O>, typename solver_tb::enable_if<true>::type>
     : public generator<ap_ufixed<W, I, Q, O> > {
    public:
     typedef ap_ufixed<W, I, Q, O> T;
@@ -4325,7 +4325,7 @@ class corner_cases_generator<ap_ufixed<W, I, Q, O>, typename hls_tb::enable_if<t
 };
 
 template <int W, int I, ap_q_mode Q, ap_o_mode O>
-class corner_cases_generator<ap_fixed<W, I, Q, O>, typename hls_tb::enable_if<true>::type>
+class corner_cases_generator<ap_fixed<W, I, Q, O>, typename solver_tb::enable_if<true>::type>
     : public generator<ap_fixed<W, I, Q, O> > {
    public:
     typedef ap_fixed<W, I, Q, O> T;
@@ -4350,21 +4350,21 @@ class corner_cases_generator<ap_fixed<W, I, Q, O>, typename hls_tb::enable_if<tr
 };
 
 template <>
-class corner_cases_generator<half, typename hls_tb::enable_if<true>::type> : public array_generator<half> {
+class corner_cases_generator<half, typename solver_tb::enable_if<true>::type> : public array_generator<half> {
    public:
     corner_cases_generator()
         : array_generator<half>(half_corner_cases, sizeof(half_corner_cases) / sizeof(half_corner_cases[0])) {}
 };
 
 template <>
-class corner_cases_generator<float, typename hls_tb::enable_if<true>::type> : public array_generator<float> {
+class corner_cases_generator<float, typename solver_tb::enable_if<true>::type> : public array_generator<float> {
    public:
     corner_cases_generator()
         : array_generator<float>(float_corner_cases, sizeof(float_corner_cases) / sizeof(float_corner_cases[0])) {}
 };
 
 template <>
-class corner_cases_generator<double, typename hls_tb::enable_if<true>::type> : public array_generator<double> {
+class corner_cases_generator<double, typename solver_tb::enable_if<true>::type> : public array_generator<double> {
    public:
     corner_cases_generator()
         : array_generator<double>(double_corner_cases, sizeof(double_corner_cases) / sizeof(double_corner_cases[0])) {}
@@ -4374,7 +4374,7 @@ template <class T, class Enable = void>
 class rand_generator;
 
 template <class T>
-class rand_generator<T, typename hls_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
+class rand_generator<T, typename solver_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
    public:
     rand_generator(int N) {
         std::cout << "rand Generator\n";
@@ -4462,7 +4462,7 @@ class rand_generator<ap_ufixed<W, I, Q, O>, void> : public generator<ap_ufixed<W
 };
 
 template <typename T>
-class rand_generator<T, typename hls_tb::enable_if<is_integraltype<T>::value>::type> : public generator<T> {
+class rand_generator<T, typename solver_tb::enable_if<is_integraltype<T>::value>::type> : public generator<T> {
    public:
     rand_generator(int N) {
         generator<T>::values.resize(N);
@@ -4489,7 +4489,7 @@ template <class T, class Enable = void>
 class rand_range_generator;
 
 template <class T>
-class rand_range_generator<T, typename hls_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
+class rand_range_generator<T, typename solver_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
    public:
     rand_range_generator(T minVal, T maxVal, int N) {
         generator<T>::values.resize(N);
@@ -4541,7 +4541,7 @@ class rand_range_generator<ap_ufixed<W, I, Q, O>, void> : public generator<ap_uf
 };
 
 template <class T>
-class rand_range_generator<T, typename hls_tb::enable_if<is_integraltype<T>::value>::type> : public generator<T> {
+class rand_range_generator<T, typename solver_tb::enable_if<is_integraltype<T>::value>::type> : public generator<T> {
    public:
     rand_range_generator(T minVal, T maxVal, int N) {
         generator<T>::values.resize(N);
@@ -4570,7 +4570,7 @@ template <class T, class Enable = void>
 class range_generator;
 
 template <class T>
-class range_generator<T, typename hls_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
+class range_generator<T, typename solver_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
    public:
     range_generator(T minVal, T maxVal, int N) {
         generator<T>::values.resize(N);
@@ -4603,7 +4603,7 @@ class range_generator<T, typename hls_tb::enable_if<is_fptype<T>::value>::type> 
 };
 
 template <class T>
-class range_generator<T, typename hls_tb::enable_if<enable_or<is_integraltype<T>, is_fixedtype<T> >::value>::type>
+class range_generator<T, typename solver_tb::enable_if<enable_or<is_integraltype<T>, is_fixedtype<T> >::value>::type>
     : public generator<T> {
    public:
     range_generator(T minVal, T maxVal, int N) {
@@ -4686,7 +4686,7 @@ template <class T, class Enable = void>
 class dense_generator;
 
 template <class T>
-class dense_generator<T, typename hls_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
+class dense_generator<T, typename solver_tb::enable_if<is_fptype<T>::value>::type> : public generator<T> {
    public:
     dense_generator(T centerVal, int N) {
         generator<T>::values.resize(N);
@@ -4702,7 +4702,7 @@ class dense_generator<T, typename hls_tb::enable_if<is_fptype<T>::value>::type> 
 };
 
 template <int W, int I, ap_q_mode Q, ap_o_mode O>
-class dense_generator<ap_fixed<W, I, Q, O>, typename hls_tb::enable_if<true>::type>
+class dense_generator<ap_fixed<W, I, Q, O>, typename solver_tb::enable_if<true>::type>
     : public generator<ap_fixed<W, I, Q, O> > {
    public:
     typedef ap_fixed<W, I, Q, O> T;
@@ -4719,7 +4719,7 @@ class dense_generator<ap_fixed<W, I, Q, O>, typename hls_tb::enable_if<true>::ty
 };
 
 template <int W, int I, ap_q_mode Q, ap_o_mode O>
-class dense_generator<ap_ufixed<W, I, Q, O>, typename hls_tb::enable_if<true>::type>
+class dense_generator<ap_ufixed<W, I, Q, O>, typename solver_tb::enable_if<true>::type>
     : public generator<ap_ufixed<W, I, Q, O> > {
    public:
     typedef ap_ufixed<W, I, Q, O> T;
@@ -4768,7 +4768,7 @@ template <class T, class Enable = void>
 class exhaustive_generator;
 
 template <int W, int I, ap_q_mode Q, ap_o_mode O>
-class exhaustive_generator<ap_fixed<W, I, Q, O>, typename hls_tb::enable_if<W <= 16>::type>
+class exhaustive_generator<ap_fixed<W, I, Q, O>, typename solver_tb::enable_if<W <= 16>::type>
     : public generator<ap_fixed<W, I, Q, O> > {
    public:
     typedef ap_fixed<W, I, Q, O> T;
@@ -4784,7 +4784,7 @@ class exhaustive_generator<ap_fixed<W, I, Q, O>, typename hls_tb::enable_if<W <=
 };
 
 template <int W, int I, ap_q_mode Q, ap_o_mode O>
-class exhaustive_generator<ap_ufixed<W, I, Q, O>, typename hls_tb::enable_if<W <= 16>::type>
+class exhaustive_generator<ap_ufixed<W, I, Q, O>, typename solver_tb::enable_if<W <= 16>::type>
     : public generator<ap_ufixed<W, I, Q, O> > {
    public:
     typedef ap_ufixed<W, I, Q, O> T;

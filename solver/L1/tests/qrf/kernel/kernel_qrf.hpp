@@ -16,13 +16,14 @@
 #ifndef __KERNEL_QRF__
 #define __KERNEL_QRF__
 #include "dut_type_float.hpp"
+#include "hls_stream.h"
 //#include "dut_type_complex.hpp"
 
 const int A_ROWS = QRF_A_ROWS;
 const int A_COLS = QRF_A_COLS;
 const bool TRANSPOSED_Q = QRF_TRANSPOSED_Q;
 
-extern "C" void kernel_qrf_0(const MATRIX_IN_T A[A_ROWS][A_COLS],
-                             MATRIX_OUT_T Q[A_ROWS][A_ROWS],
-                             MATRIX_OUT_T R[A_ROWS][A_COLS]);
+extern "C" void kernel_qrf_0(hls::stream<MATRIX_IN_T>& matrixAStrm,
+                             hls::stream<MATRIX_OUT_T>& matrixQStrm,
+                             hls::stream<MATRIX_OUT_T>& matrixRStrm);
 #endif

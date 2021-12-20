@@ -16,16 +16,13 @@
 
 #include "kernel_qrf.hpp"
 #include "xf_solver_L1.hpp"
-struct my_qrf_traits : xf::solver::qrf_traits<A_ROWS, A_COLS, MATRIX_IN_T, MATRIX_OUT_T> {
+struct my_qrf_traits : xf::solver::qrfTraits {
     static const int ARCH = SEL_ARCH;
 };
 
-extern "C" void kernel_qrf_0(const MATRIX_IN_T A[A_ROWS][A_COLS],
-                             MATRIX_OUT_T Q[A_ROWS][A_ROWS],
-                             MATRIX_OUT_T R[A_ROWS][A_COLS]) {
-    if (SEL_ARCH == 1) {
-        xf::solver::qrf<TRANSPOSED_Q, A_ROWS, A_COLS, MATRIX_IN_T, MATRIX_OUT_T>(A, Q, R);
-    } else {
-        xf::solver::qrf_top<TRANSPOSED_Q, A_ROWS, A_COLS, my_qrf_traits, MATRIX_IN_T, MATRIX_OUT_T>(A, Q, R);
-    }
+extern "C" void kernel_qrf_0(hls::stream<MATRIX_IN_T>& matrixAStrm,
+                             hls::stream<MATRIX_OUT_T>& matrixQStrm,
+                             hls::stream<MATRIX_OUT_T>& matrixRStrm) {
+    xf::solver::qrf<TRANSPOSED_Q, A_ROWS, A_COLS, MATRIX_IN_T, MATRIX_OUT_T, my_qrf_traits>(matrixAStrm, matrixQStrm,
+                                                                                            matrixRStrm);
 }

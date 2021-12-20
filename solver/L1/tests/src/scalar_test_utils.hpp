@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SCALAR_TEST_UTILS__H__
-#define SCALAR_TEST_UTILS__H__
+#ifndef _XF_SOLVER_SCALAR_TEST_UTILS_HPP_
+#define _XF_SOLVER_SCALAR_TEST_UTILS_HPP_
 
 // -------------------------------------------------
 // Utilities for scalar *test* code.
@@ -27,8 +27,6 @@
 
 #include "hls_x_complex.h"
 #include <complex>
-// test_utils
-#include "x_tb_utils.h" // for calcULP
 
 // ======================================================================
 // Compare a single value

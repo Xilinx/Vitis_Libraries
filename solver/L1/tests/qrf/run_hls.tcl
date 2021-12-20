@@ -25,8 +25,8 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "./kernel/kernel_qrf_0.cpp" -cflags "-DQRF_A_ROWS=3 -DQRF_A_COLS=3 -DQRF_TRANSPOSED_Q=0 -DSEL_ARCH=0 -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/../utils/L1/include/ "
-add_files -tb "./host/test_qrf.cpp" -cflags "-DQRF_A_ROWS=3 -DQRF_A_COLS=3 -DQRF_TRANSPOSED_Q=0 -DSEL_ARCH=0 -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I ./host -I${XF_PROJ_ROOT}/../utils/L1/include/ "
+add_files "./kernel/kernel_qrf_0.cpp" -cflags "-DQRF_A_ROWS=3 -DQRF_A_COLS=3 -DQRF_TRANSPOSED_Q=0 -DSEL_ARCH=0 -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/tests/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/../utils/L1/include/ "
+add_files -tb "./host/test_qrf.cpp" -cflags "-DQRF_A_ROWS=3 -DQRF_A_COLS=3 -DQRF_TRANSPOSED_Q=0 -DSEL_ARCH=0 -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/tests/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I ./host -I${XF_PROJ_ROOT}/../utils/L1/include/ "
 set_top kernel_qrf_0
 
 open_solution -reset $SOLN

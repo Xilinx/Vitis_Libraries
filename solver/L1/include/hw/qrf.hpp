@@ -16,19 +16,18 @@
 
 /**
  * @file qrf.hpp
- * @brief This files contains implentation of qrf.
- * - QRF functions
- * -#  QRF                 : Entry point function
- * -#  QRF_TOP             : Top level function that selects implementation architecture and internal types based on a
- * -#  traits class.
- * -#  QRF_BASIC           : Basic implementation requiring lower resource
- * -#  QRF_ALT             : Optimized for throughput requiring more resources
+ * @brief This files contains implentation of QRF functions
+ *   - QRF                 : Entry point function
+ *   - QRF_TOP             : Top level function that selects implementation architecture and internal types based on a
+ * traits class.
+ *   - QRF_BASIC           : Basic implementation requiring lower resource
+ *   - QRF_ALT             : Optimized for throughput requiring more resources
  */
 
-#ifndef XF_QRF_H
-#define XF_QRF_H
+#ifndef _XF_SOLVER_QRF_HPP_
+#define _XF_SOLVER_QRF_HPP_
 
-#include "utils/x_matrix_utils.h"
+#include "utils/x_matrix_utils.hpp"
 #include "hls_x_complex.h"
 #include "utils/std_complex_utils.h"
 #include "hls_stream.h"
@@ -43,14 +42,15 @@ namespace solver {
 
 // ===================================================================================================================
 // Traits struct defining architecture selection
-template <int RowsA, int ColsA, typename InputType, typename OutputType>
-struct qrf_traits {
+struct qrfTraits {
     static const int ARCH = 1;        // Select implementation. 0=Basic. 1=Lower latency/thoughput architecture.
     static const int CALC_ROT_II = 1; // Specify the rotation calculation loop target II of the QRF_ALT architecture(1)
     static const int UPDATE_II = 4;   // Specify the pipelining target for the Q & R update loops
     static const int UNROLL_FACTOR =
         1; // Specify the unrolling factor for Q & R update loops of the QRF_ALT architecture(1)
 };
+
+struct DEFAULT_QRF_TRAITS : qrfTraits {};
 
 // ===================================================================================================================
 // Helper functions
@@ -460,7 +460,9 @@ struct qrf_alt_config {
 // ===================================================================================================================
 // QRF_BASIC
 template <bool TransposedQ, int RowsA, int ColsA, typename QRF_TRAITS, typename InputType, typename OutputType>
-void qrf_basic(const InputType A[RowsA][ColsA], OutputType Q[RowsA][RowsA], OutputType R[RowsA][ColsA]) {
+void qrf_basic(hls::stream<InputType>& matrixAStrm,
+               hls::stream<OutputType>& matrixQStrm,
+               hls::stream<OutputType>& matrixRStrm) {
     // Verify that template parameters are correct in simulation
     if (RowsA < ColsA) {
 #ifndef __SYNTHESIS__
@@ -499,7 +501,7 @@ qrf_in_row_assign:
     qrf_in_col_assign_Ri:
         for (int c = 0; c < ColsA; c++) {
 #pragma HLS PIPELINE
-            Ri[r][c] = A[r][c];
+            Ri[r][c] = matrixAStrm.read();
         }
     }
 
@@ -555,31 +557,28 @@ qrf_col_loop:
 // Assign final outputs
 qrf_out_row_assign:
     for (int r = 0; r < RowsA; r++) {
-    qrf_out_col_assign_Q:
+    qrf_out_col_assign:
         for (int c = 0; c < RowsA; c++) {
 #pragma HLS PIPELINE
             if (TransposedQ == true) {
-                Q[r][c] = Qi[r][c];
+                matrixQStrm.write(Qi[r][c]);
             } else {
-                Q[c][r] = hls::x_conj(Qi[r][c]);
+                matrixQStrm.write(hls::x_conj(Qi[c][r]));
             }
-        }
-    qrf_out_col_assign_R:
-        for (int c = 0; c < ColsA; c++) {
-#pragma HLS PIPELINE
-            if (r <= c) {
-                // Values in the lower triangle are undefined
-                R[r][c] = Ri[r][c];
+
+            if (c < ColsA) {
+                matrixRStrm.write(Ri[r][c]);
             }
         }
     }
-
 } // end template qrf_basic
 
 // ===================================================================================================================
 // QRF_ALT: Optimized for throughput.
 template <bool TransposedQ, int RowsA, int ColsA, typename QRF_TRAITS, typename InputType, typename OutputType>
-void qrf_alt(const InputType A[RowsA][ColsA], OutputType Q[RowsA][RowsA], OutputType R[RowsA][ColsA]) {
+void qrf_alt(hls::stream<InputType>& matrixAStrm,
+             hls::stream<OutputType>& matrixQStrm,
+             hls::stream<OutputType>& matrixRStrm) {
     // Verify that template parameters are correct in simulation
     if (RowsA < ColsA) {
         exit(1);
@@ -629,7 +628,7 @@ row_copy:
     col_copy_r_i:
         for (int c = 0; c < ColsA; c++) {
 #pragma HLS PIPELINE
-            r_i[r][c] = A[r][c];
+            r_i[r][c] = matrixAStrm.read();
         }
     }
 
@@ -704,41 +703,22 @@ row_assign_loop:
     for (int r = 0; r < RowsA; r++) {
 // Merge loops to parallelize the Q and R writes
 #pragma HLS LOOP_MERGE force
-    col_r_assign_loop:
-        for (int c = 0; c < ColsA; c++) {
-#pragma HLS PIPELINE
-            R[r][c] = r_i[r][c];
-        }
-    col_q_assign_loop:
+    col_assign_loop:
         for (int c = 0; c < RowsA; c++) {
 #pragma HLS PIPELINE
             if (TransposedQ == true) {
-                Q[r][c] = q_i[r][c];
+                matrixQStrm.write(q_i[r][c]);
             } else {
-                Q[c][r] = hls::x_conj(q_i[r][c]);
+                matrixQStrm.write(hls::x_conj(q_i[c][r]));
+            }
+
+            if (c < ColsA) {
+                matrixRStrm.write(r_i[r][c]);
             }
         }
     }
 
 } // end qrf_alt
-
-// ===================================================================================================================
-// QRF_TOP: Top level function that selects implementation architecture
-// o Call this function directly if you wish to override the default architecture choice
-template <bool TransposedQ, int RowsA, int ColsA, typename QRF_TRAITS, typename InputType, typename OutputType>
-void qrf_top(const InputType A[RowsA][ColsA], OutputType Q[RowsA][RowsA], OutputType R[RowsA][ColsA]) {
-    switch (QRF_TRAITS::ARCH) {
-        case 0:
-            qrf_basic<TransposedQ, RowsA, ColsA, QRF_TRAITS, InputType, OutputType>(A, Q, R);
-            break;
-        case 1:
-            qrf_alt<TransposedQ, RowsA, ColsA, QRF_TRAITS, InputType, OutputType>(A, Q, R);
-            break;
-        default:
-            qrf_basic<TransposedQ, RowsA, ColsA, QRF_TRAITS, InputType, OutputType>(A, Q, R);
-            break;
-    }
-}
 
 /**
  * @brief QRF, to computes the full QR factorization (QR decomposition) of input matrix A, A=QR, producing orthogonal
@@ -749,15 +729,35 @@ void qrf_top(const InputType A[RowsA][ColsA], OutputType Q[RowsA][RowsA], Output
  * @tparam ColsA           Number of columns in input matrix A
  * @tparam InputType       Input data type
  * @tparam OutputType      Output data type
+ * @tparam QRF_TRAITS      qrfTraits type with specified values
  *
  * @param A                Input matrix
  * @param Q                Orthogonal output matrix
  * @param R                Upper triangular output matrix
  */
-template <bool TransposedQ, int RowsA, int ColsA, typename InputType, typename OutputType>
-void qrf(const InputType A[RowsA][ColsA], OutputType Q[RowsA][RowsA], OutputType R[RowsA][ColsA]) {
-    typedef qrf_traits<RowsA, ColsA, InputType, OutputType> DEFAULT_QRF_TRAITS;
-    qrf_top<TransposedQ, RowsA, ColsA, DEFAULT_QRF_TRAITS, InputType, OutputType>(A, Q, R);
+template <bool TransposedQ,
+          int RowsA,
+          int ColsA,
+          typename InputType,
+          typename OutputType,
+          typename QRF_TRAITS = DEFAULT_QRF_TRAITS>
+void qrf(hls::stream<InputType>& matrixAStrm,
+         hls::stream<OutputType>& matrixQStrm,
+         hls::stream<OutputType>& matrixRStrm) {
+    switch (QRF_TRAITS::ARCH) {
+        case 0:
+            qrf_basic<TransposedQ, RowsA, ColsA, QRF_TRAITS, InputType, OutputType>(matrixAStrm, matrixQStrm,
+                                                                                    matrixRStrm);
+            break;
+        case 1:
+            qrf_alt<TransposedQ, RowsA, ColsA, QRF_TRAITS, InputType, OutputType>(matrixAStrm, matrixQStrm,
+                                                                                  matrixRStrm);
+            break;
+        default:
+            qrf_basic<TransposedQ, RowsA, ColsA, QRF_TRAITS, InputType, OutputType>(matrixAStrm, matrixQStrm,
+                                                                                    matrixRStrm);
+            break;
+    }
 }
 } // namespace solver
 } // namespace xf
