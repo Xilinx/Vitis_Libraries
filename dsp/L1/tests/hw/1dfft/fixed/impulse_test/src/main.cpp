@@ -22,14 +22,14 @@
 #define NUM_TEST 1
 
 int main(int argc, char** argv) {
-    T_in inData[SSR][FFT_LEN / SSR];
-    T_out outData[SSR][FFT_LEN / SSR];
+    hls::stream<T_in> inData[SSR];
+    hls::stream<T_out> outData[SSR];
     for (int r = 0; r < SSR; ++r) {
         for (int t = 0; t < FFT_LEN / SSR; ++t) {
             if (r == 0 && t == 0)
-                inData[r][t] = 1;
+                inData[r].write(T_in(1));
             else
-                inData[r][t] = 0;
+                inData[r].write(T_in(0));
         }
     }
     for (int t = 0; t < NUM_TEST; ++t) {
@@ -40,7 +40,8 @@ int main(int argc, char** argv) {
     int errs = 0;
     for (int r = 0; r < SSR; ++r) {
         for (int t = 0; t < FFT_LEN / SSR; ++t) {
-            if (outData[r][t].real() != 1 || outData[r][t].imag() != 0) errs++;
+            T_out tmp = outData[r].read();
+            if (tmp.real() != 1 || tmp.imag() != 0) errs++;
         }
     }
     return errs;

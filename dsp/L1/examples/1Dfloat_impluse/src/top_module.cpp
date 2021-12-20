@@ -17,6 +17,6 @@
 //================================== End Lic =================================================
 #include "top_module.hpp"
 #include "data_path.hpp"
-void fft_top(T_in p_inData[SSR][FFT_LEN / SSR], T_out p_outData[SSR][FFT_LEN / SSR]) {
+void fft_top(hls::stream<T_in> p_inData[SSR], hls::stream<T_out> p_outData[SSR]) {
     xf::dsp::fft::fft<fftParams, IID>(p_inData, p_outData);
 }
