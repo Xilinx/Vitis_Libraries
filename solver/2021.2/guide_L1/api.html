@@ -426,7 +426,7 @@
   <div class="section" id="apis">
 <h1>APIs<a class="headerlink" href="#apis" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="qrf">
-<span id="cid-xf-solver-qrf"></span><span id="doxid-namespacexf-1-1solver-1a0372113585c1faf4c96a42dfac2db59b"></span><h2>qrf<a class="headerlink" href="#qrf" title="Permalink to this headline">¶</a></h2>
+<span id="cid-xf-solver-qrf"></span><span id="doxid-namespacexf-1-1solver-1a51770e62cfa2504bf8a89c0fb023c06e"></span><h2>qrf<a class="headerlink" href="#qrf" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;qrf.hpp&quot;</span>
 </pre>
@@ -436,12 +436,13 @@
     <span class="kt">int</span> <span class="n">RowsA</span><span class="p">,</span>
     <span class="kt">int</span> <span class="n">ColsA</span><span class="p">,</span>
     <span class="k">typename</span> <span class="n">InputType</span><span class="p">,</span>
-    <span class="k">typename</span> <span class="n">OutputType</span>
+    <span class="k">typename</span> <span class="n">OutputType</span><span class="p">,</span>
+    <span class="k">typename</span> <span class="n">QRF_TRAITS</span> <span class="o">=</span> <span class="n">DEFAULT_QRF_TRAITS</span>
     <span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">qrf</span> <span class="p">(</span>
-    <span class="k">const</span> <span class="n">InputType</span> <span class="n">A</span> <span class="p">[</span><span class="n">RowsA</span><span class="p">][</span><span class="n">ColsA</span><span class="p">],</span>
-    <span class="n">OutputType</span> <span class="n">Q</span> <span class="p">[</span><span class="n">RowsA</span><span class="p">][</span><span class="n">RowsA</span><span class="p">],</span>
-    <span class="n">OutputType</span> <span class="n">R</span> <span class="p">[</span><span class="n">RowsA</span><span class="p">][</span><span class="n">ColsA</span><span class="p">]</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">InputType</span><span class="o">&gt;&amp;</span> <span class="n">matrixAStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">OutputType</span><span class="o">&gt;&amp;</span> <span class="n">matrixQStrm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">OutputType</span><span class="o">&gt;&amp;</span> <span class="n">matrixRStrm</span>
     <span class="p">)</span>
 </pre>
 <p>QRF, to computes the full QR factorization (QR decomposition) of input matrix A, A=QR, producing orthogonal output matrix Q and upper-triangular matrix R.</p>
@@ -467,13 +468,16 @@
 <tr class="row-odd"><td>OutputType</td>
 <td>Output data type</td>
 </tr>
-<tr class="row-even"><td>A</td>
+<tr class="row-even"><td>QRF_TRAITS</td>
+<td><a class="reference internal" href="../rst_L1/struct_xf_solver_qrfTraits.html#doxid-structxf-1-1solver-1-1qrf-traits"><span class="std std-ref">qrfTraits</span></a> type with specified values</td>
+</tr>
+<tr class="row-odd"><td>A</td>
 <td>Input matrix</td>
 </tr>
-<tr class="row-odd"><td>Q</td>
+<tr class="row-even"><td>Q</td>
 <td>Orthogonal output matrix</td>
 </tr>
-<tr class="row-even"><td>R</td>
+<tr class="row-odd"><td>R</td>
 <td>Upper triangular output matrix</td>
 </tr>
 </tbody>
@@ -510,7 +514,7 @@
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on December 12, 2021.
+        Last updated on December 19, 2021.
       </span>
 
     </p>
