@@ -1,69 +1,87 @@
 Library Element,DATA_TYPE,TWIDDLE_TYPE,POINT_SIZE,FFT_NIFFT,CASC_LEN,DYN_PT_SIZE,WINDOW_VSIZE,API_IO,PARALLEL_POWER,cycleCountAvg,throughputAvg,initiationInterval,throughputInitIntAvg,NUM_BANKS,NUM_ME,DATA_MEMORY,PROGRAM_MEMORY
 fft_ifft_dit_1ch,cfloat,cfloat,1024,1,1,1,1024,0,0,2390,428 MSa/s,2983,343 MSa/s,13,1,55864,9190
-fft_ifft_dit_1ch,cint16,cint16,256,1,3,1,256,0,0,344,744 MSa/s,641,399 MSa/s,15,3,42536,24 0 24 0 6732 24 1 24 1 3006 25 0 25 0 2910
-fft_ifft_dit_1ch,cint16,cint16,256,1,1,0,256,0,0,469,545 MSa/s,512,500 MSa/s,8,1,16824,4322
-fft_ifft_dit_1ch,cint16,cint16,32,0,1,0,32,0,0,130,246 MSa/s,167,191 MSa/s,8,1,11192,2310
-fft_ifft_dit_1ch,cint16,cint16,512,0,1,0,512,0,0,933,548 MSa/s,978,523 MSa/s,9,1,25528,4722
-fft_ifft_dit_1ch,cint16,cint16,512,1,1,0,512,0,0,933,548 MSa/s,978,523 MSa/s,9,1,25528,4722
-fft_ifft_dit_1ch,cint16,cint16,64,1,1,0,64,0,0,203,315 MSa/s,245,261 MSa/s,8,1,11704,3100
-fft_ifft_dit_1ch,cint16,cint16,64,1,1,1,64,0,0,488,131 MSa/s,532,120 MSa/s,8,1,11832,7660
-fft_ifft_dit_1ch,cint32,cint16,1024,1,1,0,1024,0,0,1782,574 MSa/s,2071,494 MSa/s,9,1,51640,5010
+fft_ifft_dit_1ch,cint32,cint16,1024,1,3,1,1024,0,0,700,1462 MSa/s,2076,493 MSa/s,31,3,101928,9500 2894 2990
+fft_ifft_dit_1ch,cint32,cint16,1024,1,2,1,1024,0,0,700,1462 MSa/s,2071,494 MSa/s,22,2,76848,3974 9500
 fft_ifft_dit_1ch,cint32,cint16,1024,1,1,1,1024,0,0,1054,971 MSa/s,2070,494 MSa/s,13,1,51768,12928
-fft_ifft_dit_1ch,cint32,cint16,1024,1,2,1,1024,0,0,700,1462 MSa/s,2071,494 MSa/s,22,2,76848,24 1 24 1 3974 25 0 25 0 9500
-fft_ifft_dit_1ch,cint32,cint16,1024,1,3,1,1024,0,0,700,1462 MSa/s,2076,493 MSa/s,31,3,101928,24 2 24 2 9500 25 0 25 0 2894 25 2 25 2 2990
-fft_ifft_dit_1ch,cint32,cint16,1024,1,4,1,1024,0,0,492,2081 MSa/s,2080,492 MSa/s,38,4,127008,24 1 24 1 2894 24 3 24 3 2990 25 1 25 1 6556 25 3 25 3 3550
-fft_ifft_dit_1ch,cint32,cint16,1024,1,5,1,1024,0,0,427,2398 MSa/s,2085,491 MSa/s,49,5,152088,24 2 24 2 2862 24 4 24 4 2990 25 0 25 0 3622 25 2 25 2 3598 25 4 25 4 3550
-fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,1024,0,0,2207,463 MSa/s,2268,451 MSa/s,7,1,42424,4098
-fft_ifft_dit_1ch,cint16,cint16,256,1,3,0,256,0,0,299,856 MSa/s,526,486 MSa/s,15,3,42280,24 0 24 0 2898 24 1 24 1 2082 25 0 25 0 1954
-fft_ifft_dit_1ch,cint32,cint16,128,1,2,0,1024,0,0,1219,840 MSa/s,2076,493 MSa/s,12,2,67440,24 0 24 0 2624 25 0 25 0 2958
-fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,1024,0,0,3993,256 MSa/s,4054,252 MSa/s,7,1,42424,2230
-fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,16,0,0,79,202 MSa/s,114,140 MSa/s,7,1,10168,1778
-fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,1024,0,0,1871,547 MSa/s,2073,493 MSa/s,7,1,43448,4512
-fft_ifft_dit_1ch,cint32,cint16,256,1,2,0,1024,0,0,963,1063 MSa/s,2072,494 MSa/s,12,2,68464,24 0 24 0 3058 25 0 25 0 2974
-fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,256,0,0,465,550 MSa/s,524,488 MSa/s,7,1,18872,4306
-fft_ifft_dit_1ch,cint32,cint16,256,1,1,1,256,0,0,548,467 MSa/s,600,426 MSa/s,7,1,19000,10160
-fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,1024,0,0,4069,251 MSa/s,4129,248 MSa/s,7,1,42424,2524
-fft_ifft_dit_1ch,cint32,cint16,32,1,2,0,1024,0,0,3008,340 MSa/s,3078,332 MSa/s,12,2,67440,24 0 24 0 2172 25 0 25 0 1680
-fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,32,0,0,139,230 MSa/s,176,181 MSa/s,7,1,10680,2358
-fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,512,0,0,936,547 MSa/s,1040,492 MSa/s,8,1,29624,4626
-fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,1024,0,0,1895,540 MSa/s,2073,493 MSa/s,8,1,46008,4802
-fft_ifft_dit_1ch,cint32,cint16,512,1,2,0,1024,0,0,1115,918 MSa/s,2072,494 MSa/s,14,2,71024,24 0 24 0 2990 25 0 25 0 3350
-fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,1024,0,0,3000,341 MSa/s,3060,334 MSa/s,7,1,42424,3118
-fft_ifft_dit_1ch,cint32,cint16,64,1,2,0,1024,0,0,2114,484 MSa/s,2185,468 MSa/s,12,2,67440,24 0 24 0 2602 25 0 25 0 1890
-fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,128,0,0,282,453 MSa/s,320,400 MSa/s,7,1,13752,3858
-fft_ifft_dit_1ch,cint16,cint16,256,1,2,1,256,0,0,347,737 MSa/s,596,429 MSa/s,11,2,29744,24 0 24 0 4006 25 0 25 0 6732
-fft_ifft_dit_1ch,cint16,cint16,256,1,2,0,256,0,0,250,1024 MSa/s,440,581 MSa/s,14,2,29552,24 0 24 0 2754 25 0 25 0 2898
+fft_ifft_dit_1ch,cint32,cint16,1024,1,1,0,1024,0,0,1782,574 MSa/s,2071,494 MSa/s,9,1,51640,5010
+fft_ifft_dit_1ch,cint16,cint16,64,1,1,1,64,0,0,488,131 MSa/s,532,120 MSa/s,8,1,11832,7660
+fft_ifft_dit_1ch,cint16,cint16,64,1,1,0,64,0,0,203,315 MSa/s,245,261 MSa/s,8,1,11704,3100
+fft_ifft_dit_1ch,cint16,cint16,512,1,1,0,512,0,0,933,548 MSa/s,978,523 MSa/s,9,1,25528,4722
+fft_ifft_dit_1ch,cint16,cint16,512,0,1,0,512,0,0,933,548 MSa/s,978,523 MSa/s,9,1,25528,4722
+fft_ifft_dit_1ch,cint16,cint16,32,0,1,1,32,0,0,349,91 MSa/s,393,81 MSa/s,8,1,11320,7460
+fft_ifft_dit_1ch,cint16,cint16,32,0,1,0,32,0,0,130,246 MSa/s,167,191 MSa/s,8,1,11192,2310
+fft_ifft_dit_1ch,cint16,cint16,256,1,1,0,256,0,0,469,545 MSa/s,512,500 MSa/s,8,1,16824,4322
+fft_ifft_dit_1ch,cint16,cint16,256,1,3,1,256,0,0,344,744 MSa/s,641,399 MSa/s,15,3,42536,6732 3006 2910
+fft_ifft_dit_1ch,cint16,cint16,256,1,3,0,256,0,0,299,856 MSa/s,526,486 MSa/s,15,3,42280,2898 2082 1954
+fft_ifft_dit_1ch,cint16,cint16,256,1,2,1,256,0,0,347,737 MSa/s,596,429 MSa/s,11,2,29744,4006 6732
+fft_ifft_dit_1ch,cint16,cint16,256,1,2,0,256,0,0,250,1024 MSa/s,440,581 MSa/s,14,2,29552,2754 2898
 fft_ifft_dit_1ch,cint16,cint16,256,1,1,1,256,0,0,577,443 MSa/s,679,377 MSa/s,8,1,16952,10862
-fft_ifft_dit_1ch,cfloat,cfloat,128,1,1,1,128,0,0,721,177 MSa/s,766,167 MSa/s,7,1,13880,7158
-fft_ifft_dit_1ch,cfloat,cfloat,16,1,1,0,16,0,0,126,126 MSa/s,168,95 MSa/s,7,1,10168,2344
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,1024,0,0,5225,195 MSa/s,5286,193 MSa/s,7,1,43448,4956
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,256,0,0,1306,196 MSa/s,1469,174 MSa/s,7,1,18872,4684
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,1,256,0,0,976,262 MSa/s,1024,250 MSa/s,7,1,19000,7862
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,1024,0,0,2935,348 MSa/s,3021,338 MSa/s,12,2,68464,24 0 24 0 3278 25 0 25 0 3248
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,256,0,0,802,319 MSa/s,1155,221 MSa/s,10,2,31600,24 0 24 0 3160 25 0 25 0 3020
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,1,256,0,0,652,392 MSa/s,1065,240 MSa/s,10,2,31792,24 0 24 0 4916 25 0 25 0 5738
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,3,0,256,0,0,633,404 MSa/s,1070,239 MSa/s,14,3,44328,24 0 24 0 3160 24 1 24 1 2296 25 0 25 0 2028
-fft_ifft_dit_1ch,cfloat,cfloat,256,1,3,1,256,0,0,564,453 MSa/s,1076,237 MSa/s,15,3,44584,24 0 24 0 5738 24 1 24 1 3796 25 0 25 0 3562
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,1024,0,0,6297,162 MSa/s,6358,161 MSa/s,7,1,42424,3538
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,32,0,0,213,150 MSa/s,255,125 MSa/s,7,1,10680,3268
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,1,32,0,0,529,60 MSa/s,573,55 MSa/s,7,1,10808,5600
-fft_ifft_dit_1ch,cfloat,cfloat,32,1,2,0,1024,0,0,3774,271 MSa/s,3863,265 MSa/s,12,2,67440,24 0 24 0 2650 25 0 25 0 2250
-fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,1024,0,0,5495,186 MSa/s,5556,184 MSa/s,8,1,47544,5464
-fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,512,0,0,2735,187 MSa/s,2786,183 MSa/s,8,1,31160,5068
-fft_ifft_dit_1ch,cfloat,cfloat,512,1,2,0,1024,0,0,2804,365 MSa/s,2894,353 MSa/s,14,2,72560,24 0 24 0 3264 25 0 25 0 3724
 fft_ifft_dit_1ch,cint16,cint16,256,1,1,0,256,0,0,469,545 MSa/s,567,451 MSa/s,8,1,16824,4322
+fft_ifft_dit_1ch,cint32,cint16,1024,1,4,1,1024,0,0,492,2081 MSa/s,2080,492 MSa/s,38,4,127008,2894 2990 6556 3550
+fft_ifft_dit_1ch,cint32,cint16,1024,1,5,1,1024,0,0,427,2398 MSa/s,2085,491 MSa/s,49,5,152088,2862 2990 3622 3598 3550
+fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,1024,0,0,2207,463 MSa/s,2268,451 MSa/s,7,1,42424,4098
+fft_ifft_dit_1ch,cint32,cint16,128,1,2,0,1024,0,0,1219,840 MSa/s,2076,493 MSa/s,12,2,67440,2624 2958
+fft_ifft_dit_1ch,cint32,cint16,64,1,2,0,1024,0,0,2114,484 MSa/s,2185,468 MSa/s,12,2,67440,2602 1890
+fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,1024,0,0,3000,341 MSa/s,3060,334 MSa/s,7,1,42424,3118
+fft_ifft_dit_1ch,cint32,cint16,512,1,2,0,1024,0,0,1115,918 MSa/s,2072,494 MSa/s,14,2,71024,2990 3350
+fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,1024,0,0,1895,540 MSa/s,2073,493 MSa/s,8,1,46008,4802
+fft_ifft_dit_1ch,cint32,cint16,512,1,1,1,512,0,0,733,698 MSa/s,1069,478 MSa/s,8,1,29752,12976
+fft_ifft_dit_1ch,cint32,cint16,512,1,1,0,512,0,0,936,547 MSa/s,1040,492 MSa/s,8,1,29624,4626
+fft_ifft_dit_1ch,cint32,cint16,32,1,1,1,32,0,0,320,100 MSa/s,364,87 MSa/s,7,1,10808,7280
+fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,32,0,0,139,230 MSa/s,176,181 MSa/s,7,1,10680,2358
 fft_ifft_dit_1ch,cint16,cint16,256,0,1,0,256,0,0,469,545 MSa/s,512,500 MSa/s,8,1,16824,4322
+fft_ifft_dit_1ch,cint32,cint16,32,1,2,0,1024,0,0,3008,340 MSa/s,3078,332 MSa/s,12,2,67440,2172 1680
+fft_ifft_dit_1ch,cint32,cint16,256,1,1,1,256,0,0,548,467 MSa/s,600,426 MSa/s,7,1,19000,10160
+fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,256,0,0,465,550 MSa/s,524,488 MSa/s,7,1,18872,4306
+fft_ifft_dit_1ch,cint32,cint16,256,1,2,0,1024,0,0,963,1063 MSa/s,2072,494 MSa/s,12,2,68464,3058 2974
+fft_ifft_dit_1ch,cint32,cint16,256,1,1,0,1024,0,0,1871,547 MSa/s,2073,493 MSa/s,7,1,43448,4512
+fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,16,0,0,79,202 MSa/s,114,140 MSa/s,7,1,10168,1778
+fft_ifft_dit_1ch,cint32,cint16,16,1,1,0,1024,0,0,3993,256 MSa/s,4054,252 MSa/s,7,1,42424,2230
+fft_ifft_dit_1ch,cint32,cint16,128,1,1,1,128,0,0,487,262 MSa/s,532,240 MSa/s,7,1,13880,10160
+fft_ifft_dit_1ch,cint32,cint16,128,1,1,0,128,0,0,282,453 MSa/s,320,400 MSa/s,7,1,13752,3858
+fft_ifft_dit_1ch,cint32,cint16,32,1,1,0,1024,0,0,4069,251 MSa/s,4129,248 MSa/s,7,1,42424,2524
 fft_ifft_dit_1ch,cint16,cint16,2048,1,1,0,2048,0,0,3913,523 MSa/s,3974,515 MSa/s,13,1,79288,5490
 fft_ifft_dit_1ch,cint16,cint16,2048,0,1,0,2048,0,0,3913,523 MSa/s,3974,515 MSa/s,13,1,79288,5490
 fft_ifft_dit_1ch,cint16,cint16,16,1,1,0,16,0,0,81,197 MSa/s,117,136 MSa/s,8,1,10936,1796
-fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,0,0,291,439 MSa/s,329,389 MSa/s,8,1,12728,3938
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,3,1,256,0,0,564,453 MSa/s,1076,237 MSa/s,15,3,44584,5738 3796 3562
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,3,0,256,0,0,633,404 MSa/s,1070,239 MSa/s,14,3,44328,3160 2296 2028
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,1,256,0,0,652,392 MSa/s,1065,240 MSa/s,10,2,31792,4916 5738
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,256,0,0,802,319 MSa/s,1155,221 MSa/s,10,2,31600,3160 3020
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,2,0,1024,0,0,2935,348 MSa/s,3021,338 MSa/s,12,2,68464,3278 3248
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,1,256,0,0,976,262 MSa/s,1142,224 MSa/s,7,1,19000,7862
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,1,256,0,0,976,262 MSa/s,1024,250 MSa/s,7,1,19000,7862
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,256,0,0,1306,196 MSa/s,1469,174 MSa/s,7,1,18872,4684
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,1024,0,0,6297,162 MSa/s,6358,161 MSa/s,7,1,42424,3538
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,256,0,0,1306,196 MSa/s,1351,189 MSa/s,7,1,18872,4684
+fft_ifft_dit_1ch,cfloat,cfloat,16,1,1,0,16,0,0,126,126 MSa/s,168,95 MSa/s,7,1,10168,2344
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,3,1,128,0,0,392,326 MSa/s,754,169 MSa/s,14,3,35368,5146 3796 3562
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,3,0,128,0,0,286,447 MSa/s,571,224 MSa/s,14,3,35112,2720 2296 2028
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,2,1,128,0,0,489,261 MSa/s,771,166 MSa/s,12,2,24624,5850 4250
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,2,0,128,0,0,371,345 MSa/s,590,216 MSa/s,10,2,24432,3144 2580
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,1,1,128,0,0,770,166 MSa/s,872,146 MSa/s,7,1,13880,7158
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,1,1,128,0,0,721,177 MSa/s,766,167 MSa/s,7,1,13880,7158
+fft_ifft_dit_1ch,cfloat,cfloat,128,1,1,0,128,0,0,647,197 MSa/s,746,171 MSa/s,7,1,13752,4204
+fft_ifft_dit_1ch,cfloat,cfloat,256,1,1,0,1024,0,0,5225,195 MSa/s,5286,193 MSa/s,7,1,43448,4956
 fft_ifft_dit_1ch,cint32,cint16,64,1,1,0,64,0,0,193,331 MSa/s,231,277 MSa/s,7,1,11704,2972
-fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,1,1,205,624 MSa/s,590,242 MSa/s,14,4,38624,23 0 23 0 3558 24 0 24 0 2134 25 0 25 0 3542 26 0 26 0 2134
-fft_ifft_dit_1ch,cint16,cint16,1024,1,1,0,1024,0,0,1790,572 MSa/s,1842,555 MSa/s,10,1,43448,5122
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,0,32,0,0,213,150 MSa/s,255,125 MSa/s,7,1,10680,3268
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,2,0,1024,0,0,3774,271 MSa/s,3863,265 MSa/s,12,2,67440,2650 2250
+fft_ifft_dit_1ch,cint16,cint16,128,1,3,1,128,0,0,274,467 MSa/s,496,258 MSa/s,15,3,34344,6716 3006 2910
+fft_ifft_dit_1ch,cint16,cint16,128,1,3,0,128,0,0,159,805 MSa/s,335,382 MSa/s,15,3,34088,2498 2082 1954
+fft_ifft_dit_1ch,cint16,cint16,128,1,2,1,128,0,0,280,457 MSa/s,475,269 MSa/s,13,2,23600,6716 4006
+fft_ifft_dit_1ch,cint16,cint16,128,1,2,0,128,0,0,161,795 MSa/s,300,426 MSa/s,12,2,23408,2754 2498
+fft_ifft_dit_1ch,cint16,cint16,128,1,1,1,128,0,0,498,257 MSa/s,568,225 MSa/s,8,1,12856,10532
+fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,0,0,291,439 MSa/s,354,361 MSa/s,8,1,12728,3938
+fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,0,0,291,439 MSa/s,329,389 MSa/s,8,1,12728,3938
+fft_ifft_dit_1ch,cint16,cint16,128,1,1,0,128,1,1,205,624 MSa/s,592,241 MSa/s,14,4,38624,3618 2210 3618 2210
+fft_ifft_dit_1ch,cfloat,cfloat,32,1,1,1,32,0,0,529,60 MSa/s,573,55 MSa/s,7,1,10808,5600
+fft_ifft_dit_1ch,cint16,cint16,128,0,1,0,128,0,0,291,439 MSa/s,329,389 MSa/s,8,1,12728,3938
 fft_ifft_dit_1ch,cint16,cint16,1024,0,1,0,1024,0,0,1790,572 MSa/s,1842,555 MSa/s,10,1,43448,5122
-fft_ifft_dit_1ch,cfloat,cfloat,64,1,2,0,1024,0,0,3011,340 MSa/s,3099,330 MSa/s,12,2,67440,24 0 24 0 2814 25 0 25 0 2762
+fft_ifft_dit_1ch,cfloat,cfloat,64,1,2,0,1024,0,0,3011,340 MSa/s,3099,330 MSa/s,12,2,67440,2814 2762
 fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,1,64,0,0,581,110 MSa/s,625,102 MSa/s,7,1,11832,6416
 fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,0,64,0,0,347,184 MSa/s,389,164 MSa/s,7,1,11704,3836
 fft_ifft_dit_1ch,cfloat,cfloat,64,1,1,0,1024,0,0,5453,187 MSa/s,5514,185 MSa/s,7,1,42424,4132
-fft_ifft_dit_1ch,cint16,cint16,128,0,1,0,128,0,0,291,439 MSa/s,329,389 MSa/s,8,1,12728,3938
+fft_ifft_dit_1ch,cfloat,cfloat,512,1,2,0,1024,0,0,2804,365 MSa/s,2894,353 MSa/s,14,2,72560,3264 3724
+fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,512,0,0,2735,187 MSa/s,2786,183 MSa/s,8,1,31160,5068
+fft_ifft_dit_1ch,cfloat,cfloat,512,1,1,0,1024,0,0,5495,186 MSa/s,5556,184 MSa/s,8,1,47544,5464
+fft_ifft_dit_1ch,cint16,cint16,1024,1,1,0,1024,0,0,1790,572 MSa/s,1842,555 MSa/s,10,1,43448,5122
 fft_ifft_dit_1ch,cint32,cint16,64,1,1,1,64,0,0,442,144 MSa/s,486,131 MSa/s,7,1,11832,7216

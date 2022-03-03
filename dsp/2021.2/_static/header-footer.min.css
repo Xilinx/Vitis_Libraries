@@ -380,7 +380,7 @@ body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container
 body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container .scroll-wrapper button.submit{margin-top:60px}
 body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container .scroll-wrapper form{padding:0}
 body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container.active{right:0;left:initial}
-.xilinx-bs3 footer{font-size:13px;z-index:0;background:#171c2d;color:#fff;padding-top:0px;padding-bottom:0px;}
+.xilinx-bs3 footer{font-size:13px;z-index:0;background:#171c2d;color:#fff;padding-top:20px;padding-bottom:20px}
 .xilinx-bs3 footer .main-footer{border-bottom:1px solid #282d3f;padding-bottom:15px}
 .xilinx-bs3 footer .main-footer .xilinxList .container-fluid{padding-left:15px;padding-right:15px}
 .xilinx-bs3 footer .main-footer .col-md-2{text-align:center;padding:0}
@@ -403,7 +403,7 @@ body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container
 .xilinx-bs3 footer a{color:#fff}
 .xilinx-bs3 footer a:hover,.xilinx-bs3 footer a:focus{color:#e00000;text-decoration:none}
 .xilinx-bs3 footer ul{list-style:none;padding-left:0}
-.xilinx-bs3 footer .sub-footer{margin-top:10px}
+.xilinx-bs3 footer .sub-footer{margin-top:30px}
 .xilinx-bs3 footer .sub-footer span.copyright{font-size:12px;text-align:center;padding:25px 15px 0 0;float:left;width:100%}
 .xilinx-bs3 footer .sub-footer .lang-select{text-align:center;margin-bottom:20px}
 .xilinx-bs3 footer .sub-footer .lang-select button{width:160px;-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;background:#282d3f;padding:4px 10px}
@@ -416,10 +416,10 @@ body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container
 .xilinx-bs3 footer .sub-footer .lang-select ul li:first-of-type a{border-top-left-radius:5px;border-top-right-radius:5px}
 .xilinx-bs3 footer .sub-footer .lang-select ul li a{text-align:center;padding:10px 20px;color:#fff}
 .xilinx-bs3 footer .sub-footer .lang-select ul li a:hover{background-color:#008282 !important}
-.xilinx-bs3 footer .sub-footer ul.sub-menu{margin-top:0px}
+.xilinx-bs3 footer .sub-footer ul.sub-menu{margin-top:15px}
 .xilinx-bs3 footer .sub-footer ul.sub-menu>li{display:block;text-align:center;padding:0}
 .xilinx-bs3 footer .sub-footer ul.sub-menu>li a{font-size:12px;padding:6px 0;display:inline-block}
-.xilinx-bs3 footer .sub-footer ul.social-menu{width:100%;text-align:center;}
+.xilinx-bs3 footer .sub-footer ul.social-menu{width:100%;text-align:center;margin:10px 0}
 .xilinx-bs3 footer .sub-footer ul.social-menu>li a:hover,.xilinx-bs3 footer .sub-footer ul.social-menu>li a:focus{color:#fff}
 .xilinx-bs3 footer .sub-footer ul.social-menu>li a .icon{display:inline-block;vertical-align:middle;height:32px;width:32px;font:normal normal normal 15px/2 'Font Awesome\ 5 Pro';background-color:#282d3f;-webkit-transition:background-color .4s ease;transition:background-color .4s ease;-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px}
 .xilinx-bs3 footer .sub-footer ul.social-menu>li a .icon:before{position:relative;top:2px}
@@ -466,9 +466,6 @@ body .xilinx-bs3 header.site-header nav .main-nav .navbar-column .cart-container
 .xilinx-bs3 footer .sub-footer ul.sub-menu>li a{padding:0;margin-right:8px}
 .xilinx-bs3 footer .sub-footer ul.sub-menu>li:last-of-type:after{content:""}
 .xilinx-bs3 footer .sub-footer ul.social-menu{width:auto;margin:0}
-
-.xilinx-bs3 footer {padding-left:320px;}
-
 }
 .xilinx-bs3 .callout-banner{width:100%;height:30px;padding-top:3px;background-color:#282d3f;color:#fff;text-align:center;font-size:14px;clear:both}
 .xilinx-bs3 .callout-banner a{color:#fff;text-decoration:underline}
