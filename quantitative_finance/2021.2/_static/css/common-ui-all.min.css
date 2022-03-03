@@ -1,7 +1,6 @@
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
 body{margin:0}
 article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section{display:block}
-summary{}
 audio,canvas,progress,video{display:inline-block;vertical-align:baseline}
 audio:not([controls]){display:none;height:0}
 [hidden],template{display:none}
@@ -17,6 +16,7 @@ sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
 sup{top:-0.5em}
 sub{bottom:-0.25em}
 img{border:0}
+summary{}
 svg:not(:root){overflow:hidden}
 figure{margin:1em 40px}
 hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
@@ -1147,7 +1147,7 @@ button.close{padding:0;cursor:pointer;background:transparent;border:0;-webkit-ap
 .invisible{visibility:hidden}
 .text-hide{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0}
 .hidden{display:none !important}
-.affix{position:fixed}
+.affix{/*position:fixed */}
 @-ms-viewport{width:device-width}
 .visible-xs,.visible-sm,.visible-md,.visible-lg{display:none !important}
 .visible-xs-block,.visible-xs-inline,.visible-xs-inline-block,.visible-sm-block,.visible-sm-inline,.visible-sm-inline-block,.visible-md-block,.visible-md-inline,.visible-md-inline-block,.visible-lg-block,.visible-lg-inline,.visible-lg-inline-block{display:none !important}
