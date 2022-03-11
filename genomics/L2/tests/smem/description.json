@@ -1,0 +1,107 @@
+{
+    "name": "Xilinx SMEM Test (Supermaximal Exact Match)", 
+    "description": [
+        "Xilinx SMEM is an accelerated version of BWA-MEM seeding stage algorithm named SMEM"
+    ], 
+    "flow": "vitis", 
+    "launch": [
+        {
+            "cmd_args": "BUILD/smem.xclbin LIB_DIR/common/data/smem/files/", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "platform_blocklist": [
+        "zc", 
+        "u50"
+    ], 
+    "platform_allowlist": [
+        "u250",
+        "u200"
+    ],
+    "host": {
+        "host_exe": "xil_smem", 
+        "compiler": {
+            "sources": [
+                "./src/host.cpp", 
+                "$(wildcard LIB_DIR/common/libs/smem/*.cpp)", 
+                "$(wildcard LIB_DIR/common/libs/xcl2/*.cpp)" 
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/libs/smem/",
+                "LIB_DIR/common/libs/xcl2"
+            ], 
+            "symbols": [
+                "COMPUTE_UNIT=1"
+            ]
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                 "LIB_DIR/L2/include",
+                 "LIB_DIR/L1/include/hw",
+                 "LIB_DIR/common/libs/smem",
+                 "LIB_DIR/L2/src"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "name": "smem", 
+            "accelerators": [
+                {
+                    "name": "mem_collect_intv_core", 
+                    "location": "LIB_DIR/L2/src/smem.cpp"
+                } 
+            ]
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 600, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
+    }
+}

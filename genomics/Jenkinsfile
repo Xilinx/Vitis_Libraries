@@ -1,0 +1,4 @@
+@Library('pipeline-library')_
+
+VitisLibPipeline (branch: 'master', libname: 'xf_genomics', run_sw_in_pr: 'true',
+TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu', email: 'heeran@xilinx.com', devtest: 'RunDeploy.sh', TOOLVERSION: '2021.2_released')
