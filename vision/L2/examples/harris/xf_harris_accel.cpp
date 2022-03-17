@@ -30,10 +30,6 @@ void cornerHarris_accel(
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    const int pROWS = HEIGHT;
-    const int pCOLS = WIDTH;
-    const int pNPC1 = NPIX;
-
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX> in_mat(rows, cols);
 // clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
