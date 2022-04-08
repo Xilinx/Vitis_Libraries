@@ -108,6 +108,7 @@ CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O0 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
+CXXFLAGS += $(EXTRA_CXXFLAGS)
 
 ifeq ($(HOST_ARCH), x86)
 LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
@@ -120,7 +121,7 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  $(BUILD_DIR)/cscmv.xclbin $(CUR_DIR)/data/app.bin
 
 # ##################### Kernel compiler global settings ##########################
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2 -R 2
 VPP_FLAGS += --jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 VPP_FLAGS += --config $(CUR_DIR)/compile_opts.cfg
@@ -134,6 +135,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw/fp32
 VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 VPP_LDFLAGS_cscmv += --kernel_frequency 250

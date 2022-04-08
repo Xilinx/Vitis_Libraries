@@ -1,14 +1,13 @@
 {
     "gui": true, 
-    "exclude": "README.md", 
     "name": "Xilinx CSCMV Sequential Run", 
-    "description": "", 
+    "description": "Test case for sparse matrix-vector multiplication which is stored in Compressed Sparse Column Format(CSC)", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "vck190",
         "other"
     ], 
@@ -27,7 +26,7 @@
     "launch": [
         {
             "name": "generic launch for all flows", 
-            "cmd_args": " BUILD/cscmv.xclbin BUILD/data/app.bin"
+            "cmd_args": " BUILD/cscmv.xclbin PROJECT/data/app.bin"
         }
     ], 
     "pre_launch": [

@@ -108,6 +108,7 @@ CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
 CXXFLAGS += -I$(CUR_DIR)/src/ 
+CXXFLAGS += $(EXTRA_CXXFLAGS)
 
 ifeq ($(HOST_ARCH), x86)
 LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
@@ -120,7 +121,7 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  $(BUILD_DIR)/cscmv.xclbin $(CUR_DIR)/data/app.bin
 
 # ##################### Kernel compiler global settings ##########################
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2 -R 2
 VPP_FLAGS += --jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/sw
@@ -134,6 +135,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../blas/L1/include/hw
 cscmvSeqKernel_VPP_FLAGS += --config $(CUR_DIR)/compile_opts_seq.cfg
 cscmvSeqKernel_VPP_FLAGS += --hls.clock 300000000:cscmvSeqKernel
 VPP_LDFLAGS_cscmv += --kernel_frequency 300
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 VPP_FLAGS += -DSPARSE_maxParamDdrBlocks=1024 -DSPARSE_maxParamHbmBlocks=512 -DSPARSE_paramOffset=1024 -DSPARSE_maxColMemBlocks=128 -DSPARSE_maxColParBlocks=512 -DSPARSE_maxRowBlocks=512 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_hbmMemBits=256 -DSPARSE_ddrMemBits=512 -DSPARSE_hbmChannels=1 -DSPARSE_hbmChannelMegaBytes=256 -DSPARSE_printWidth=6 -DSPARSE_pageSize=4096 -DDEBUG_dumpData=0 -DSEQ_KERNEL=0 
 

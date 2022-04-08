@@ -4,10 +4,10 @@
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "vck190",
         "other"
     ], 
@@ -15,7 +15,7 @@
         "u280": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/compile_opts.cfg"
                     ]
                 }
@@ -163,7 +163,7 @@
                 }, 
                 "max_time_min": {
                     "vitis_hw_build": 2350, 
-                    "vitis_hw_emu": 470, 
+                    "vitis_hw_emu": 1200, 
                     "vitis_hw_run": 10
                 }
             }

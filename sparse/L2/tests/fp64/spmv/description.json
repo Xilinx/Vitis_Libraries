@@ -4,10 +4,10 @@
     "description": "Xilinx SPARSE Test", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "vck190",
         "other"
     ], 
@@ -138,7 +138,11 @@
                     "vitis_hw_emu": 28672, 
                     "vitis_hw_run": 10240
                 }, 
-                "max_time_min": 520
+                "max_time_min": {
+		    "vitis_hw_build": 720,
+		    "vitis_hw_emu": 1200,
+		    "vitis_hw_run": 720
+		}
             }
         ], 
         "targets": [

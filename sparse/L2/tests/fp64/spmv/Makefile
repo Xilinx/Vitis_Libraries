@@ -111,6 +111,7 @@ CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -g -O0
 CXXFLAGS += -I$(CUR_DIR)/src/ 
+CXXFLAGS += $(EXTRA_CXXFLAGS)
 
 ifeq ($(HOST_ARCH), x86)
 LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
@@ -123,7 +124,7 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS := $(BUILD_DIR)/spmv.xclbin $(CUR_DIR)/sig_dat $(CUR_DIR)/vec_dat  nasa2910
 
 # ##################### Kernel compiler global settings ##########################
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2 -R 2
 VPP_FLAGS += --jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/sw
@@ -147,6 +148,7 @@ storeYkernel_VPP_FLAGS += --hls.clock 333000000:storeYkernel
 VPP_LDFLAGS_spmv += --kernel_frequency 333
 
 VPP_FLAGS += -DSPARSE_dataType=double -DSPARSE_indexType=uint16_t -DSPARSE_parEntries=4 -DSPARSE_hbmChannels=16 -DSPARSE_hbmMemBits=256 -DSPARSE_maxRows=4096 -DSPARSE_maxCols=4096 -DSPARSE_accLatency=8 -DSPARSE_dataBits=64 -DSPARSE_indexBits=16 
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 # Kernel linker flags
 VPP_LDFLAGS_spmv_temp := --config $(CUR_DIR)/opts.cfg
