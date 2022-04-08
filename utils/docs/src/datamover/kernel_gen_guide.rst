@@ -32,11 +32,6 @@ The kernel generator consists of the following parts:
     Generated kernels are not self-contained source code, they would reference low-level block implementation headers in ``L1/include`` folder.
     Ensure that folder is passed to Vitis compiler as header search path when compiling project using generated PL kernels.
 
-**Usage**
-
-.. code-block:: bash
-
-    L2/scripts/generate_kernels MY_KERNELS.json
 
 Kernel Templates
 ----------------
@@ -126,6 +121,18 @@ The ``StoreStreamToMater`` kernel should also have 2 data paths. As we want to l
 
 Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels that can be generated.
 
+**Exampple of How to generate kernels**
+
+.. code-block:: bash
+
+    cd L2/tests/datamover/load_master_to_stream
+    make pre_build
+    # The pre_build command is as follows:
+    # pre_build:
+    #     make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
+
+
+
 Data Converter
 --------------
 
@@ -161,12 +168,55 @@ Please be noticed that there are several limitations for this data converter, so
 Full Example Projects
 ---------------------
 
+* **Work Directory**
+Choose `load_master_to_stream` as example, show the steps of build and run kernel
+
 .. code-block:: bash
 
     cd L2/tests/datamover/load_master_to_stream
-    # Only HW_EMU and HW run available
-    make run TARGET=hw_emu
+
+* **Setup environment**
+Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
+
+.. code-block:: bash
+
+   source /opt/xilinx/Vitis/2022.1/settings64.sh
+   source /opt/xilinx/xrt/setup.sh
+   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+
+* **Build and Run Kernel**
+
+.. code-block:: bash
+
+    make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm HOST_ARCH=aarch64
 
 .. ATTENTION::
-    Kernel-to-kernel streaming is not available in software emulation, design can only be enulated in hardware emulation.
+    * Only HW_EMU and HW run available
+    * Kernel-to-kernel streaming is not available in software emulation, design can only be enulated in hardware emulation.
+
+
+* **Performance**
+    A serial of tests for 1 channel datamover from DDR to Stream is as bellow. The frequency in this test is 300MHz, and the platform is vck190.
+
+    +------------------------+--------------------+-------------------+
+    | Input_Size (Byte)      |  Kernel_Time (ms)  |  BandWidth(GB/s)  |
+    +------------------------+--------------------+-------------------+
+    | 16777216 (2^24 Byte)   |       8.51274      |   1.879535849     | 
+    +------------------------+--------------------+-------------------+
+    | 33554432 (2^25 Byte)   |       17.1036      |   1.870951145     | 
+    +------------------------+--------------------+-------------------+
+    | 67108864 (2^26 Byte)   |       34.4284      |   1.858930418     | 
+    +------------------------+--------------------+-------------------+
+    | 134217728 (2^27 Byte)  |       70.3489      |   1.819502508     | 
+    +------------------------+--------------------+-------------------+
+    | 268435456 (2^28 Byte)  |       137.864      |   1.856902455     | 
+    +------------------------+--------------------+-------------------+
+    | 536870912 (2^29 Byte)  |       274.997      |   1.861838493     | 
+    +------------------------+--------------------+-------------------+
+    | 1073741824 (2^30 Byte) |       551.768      |   1.85585246      | 
+    +------------------------+--------------------+-------------------+
+
+
+
+
 

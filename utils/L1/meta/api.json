@@ -1,0 +1,824 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::common::utils_hw::axiToMultiStream",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::axiToMultiStream",
+                "display_name": "axiToMultiStream",
+                "brief": "Loading multiple categories of data from one AXI master to streams.",
+                "target_domain": "",
+                "header_file_name": [
+                    "axi_to_multi_stream.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_BurstLen",
+                        "type": "int",
+                        "description": "burst length."
+                    },
+                    {
+                        "name": "_WAxi",
+                        "type": "int",
+                        "description": "width of AXI port, must be power of 2 and between 8 to 512."
+                    },
+                    {
+                        "name": "_TStrm0",
+                        "type": "typename",
+                        "description": "first stream's type."
+                    },
+                    {
+                        "name": "_TStrm1",
+                        "type": "typename",
+                        "description": "second stream's type."
+                    },
+                    {
+                        "name": "_TStrm2",
+                        "type": "typename",
+                        "description": "third stream's type."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "rbuf",
+                        "direction": "",
+                        "type": "ap_uint< _WAxi > *"
+                    },
+                    {
+                        "name": "ostrm0",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm0 > &"
+                    },
+                    {
+                        "name": "e_ostrm0",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm1 > &ostrm1, hls::stream< bool > &e_ostrm1, hls::stream< _TStrm2 > &ostrm2, hls::stream< bool > &e_ostrm2, const int len[3], const int offset[3]"
+                    },
+                    {
+                        "name": "ostrm1",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm1 > &"
+                    },
+                    {
+                        "name": "e_ostrm1",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm2 > &ostrm2, hls::stream< bool > &e_ostrm2, const int len[3], const int offset[3]"
+                    },
+                    {
+                        "name": "ostrm2",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm2 > &"
+                    },
+                    {
+                        "name": "e_ostrm2",
+                        "direction": "",
+                        "type": "const int len[3], const int offset[3]"
+                    },
+                    {
+                        "name": "len",
+                        "direction": "",
+                        "type": "const int[3],"
+                    },
+                    {
+                        "name": "offset",
+                        "direction": "",
+                        "type": "const int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::axiToStream",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::axiToStream",
+                "display_name": "axiToStream",
+                "brief": "Loading data elements from AXI master to stream.",
+                "target_domain": "",
+                "header_file_name": [
+                    "axi_to_stream.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_BurstLen",
+                        "type": "int",
+                        "description": "burst length of AXI buffer, default is 32."
+                    },
+                    {
+                        "name": "_WAxi",
+                        "type": "int",
+                        "description": "width of AXI port, must be power of 2 and between 8 to 512."
+                    },
+                    {
+                        "name": "_TStrm",
+                        "type": "typename",
+                        "description": "stream's type, e.g. ap_uint<aligned_width> for a aligned_width stream."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "rbuf",
+                        "direction": "",
+                        "type": "ap_uint< _WAxi > *"
+                    },
+                    {
+                        "name": "num",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "ostrm",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm > &"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": ""
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::axiToCharStream",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::axiToCharStream",
+                "display_name": "axiToCharStream",
+                "brief": "Loading char data from AXI master to stream.",
+                "target_domain": "",
+                "header_file_name": [
+                    "axi_to_stream.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_BurstLen",
+                        "type": "int",
+                        "description": "burst length of AXI buffer, default is 32."
+                    },
+                    {
+                        "name": "_WAxi",
+                        "type": "int",
+                        "description": "width of AXI port, must be power of 2 and between 8 to 512."
+                    },
+                    {
+                        "name": "_TStrm",
+                        "type": "typename",
+                        "description": "stream's type."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "rbuf",
+                        "direction": "",
+                        "type": "ap_uint< _WAxi > *"
+                    },
+                    {
+                        "name": "ostrm",
+                        "direction": "",
+                        "type": "hls::stream< _TStrm > &"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": "const int len, const int offset=0"
+                    },
+                    {
+                        "name": "len",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "offset",
+                        "direction": "",
+                        "type": "const int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "Multiplexer<S, W> xf::common::utils_hw::makeMux",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "Multiplexer<S, W> xf::common::utils_hw::makeMux",
+                "display_name": "makeMux",
+                "brief": "Create",
+                "target_domain": "",
+                "header_file_name": [
+                    "multiplexer.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "S",
+                        "type": "Muxide",
+                        "description": "side of FIFO, must be provide by user."
+                    },
+                    {
+                        "name": "W",
+                        "type": "int",
+                        "description": "width of FIFO, can be inferred."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p",
+                        "direction": "",
+                        "type": "hls::stream< a"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamCombine",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamCombine",
+                "display_name": "streamCombine",
+                "brief": "Combine multiple streams into one, shift selected streams to LSB side.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_combine.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_WIn",
+                        "type": "int",
+                        "description": "input stream width."
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "number of input streams."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "select_cfg",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _NStrm > > &"
+                    },
+                    {
+                        "name": "istrms",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WIn > >[_NStrm],"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "ostrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WIn *_NStrm > > &"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": "LSBSideT al"
+                    },
+                    {
+                        "name": "alg",
+                        "direction": "",
+                        "type": "LSBSideT al"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamDiscard",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamDiscard",
+                "display_name": "streamDiscard",
+                "brief": "Discard multiple streams with end flag helper for each.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_discard.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_TIn",
+                        "type": "typename",
+                        "description": "streams' type"
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "the number of streams"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "istrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn >"
+                    },
+                    {
+                        "name": "e_istrms",
+                        "direction": "",
+                        "type": "[_NStrm]"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamDup",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamDup",
+                "display_name": "streamDup",
+                "brief": "Duplicate stream.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_dup.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_TIn",
+                        "type": "typename",
+                        "description": "input stream width."
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "number of output stream."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "istrm",
+                        "direction": "",
+                        "type": "hls::stream< _TIn > &"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": "hls::stream< _TIn > ostrms[_NStrm], hls::stream< bool > e_ostrms[_NStrm]"
+                    },
+                    {
+                        "name": "ostrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn >"
+                    },
+                    {
+                        "name": "e_ostrms",
+                        "direction": "",
+                        "type": "[_NStrm]"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamNToOne",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamNToOne",
+                "display_name": "streamNToOne",
+                "brief": "stream distribute, skip to read the empty input streams.",
+                "target_domain": "",
+                "header_file_name": [
+                    "load_balance.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw/stream_n_to_one"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_WInStrm",
+                        "type": "int",
+                        "description": "input stream width."
+                    },
+                    {
+                        "name": "_WOutStrm",
+                        "type": "int",
+                        "description": "output stream width."
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "number of input streams."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "istrms",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WInStrm > >[_NStrm],"
+                    },
+                    {
+                        "name": "e_istrms",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WOutStrm > > &ostrm, hls::stream< bool > &e_ostrm, LoadBalanceT al"
+                    },
+                    {
+                        "name": "ostrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WOutStrm > > &"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": "LoadBalanceT al"
+                    },
+                    {
+                        "name": "alg",
+                        "direction": "",
+                        "type": "LoadBalanceT al"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamOneToN",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamOneToN",
+                "display_name": "streamOneToN",
+                "brief": "stream distribute, using load-balancing algorithm.",
+                "target_domain": "",
+                "header_file_name": [
+                    "load_balance.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw/stream_one_to_n"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_WInStrm",
+                        "type": "int",
+                        "description": "input stream width."
+                    },
+                    {
+                        "name": "_WOutStrm",
+                        "type": "int",
+                        "description": "output stream width."
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "number of output stream."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "istrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WInStrm > > &"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WOutStrm > > ostrms[_NStrm], hls::stream< bool > e_ostrms[_NStrm], LoadBalanceT alg"
+                    },
+                    {
+                        "name": "ostrms",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WOutStrm > >[_NStrm],"
+                    },
+                    {
+                        "name": "e_ostrms",
+                        "direction": "",
+                        "type": "LoadBalanceT al"
+                    },
+                    {
+                        "name": "alg",
+                        "direction": "",
+                        "type": "LoadBalanceT al"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamReorder",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamReorder",
+                "display_name": "streamReorder",
+                "brief": "Window-reorder in a stream.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_reorder.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_TIn",
+                        "type": "typename",
+                        "description": "input type."
+                    },
+                    {
+                        "name": "_WindowSize",
+                        "type": "int",
+                        "description": "size of reorder window."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "order_cfg",
+                        "direction": "",
+                        "type": "hls::stream< int > &"
+                    },
+                    {
+                        "name": "istrm",
+                        "direction": "",
+                        "type": "hls::stream< _TIn > &"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": "hls::stream< _TIn > &ostrm, hls::stream< bool > &e_ostrm"
+                    },
+                    {
+                        "name": "ostrm",
+                        "direction": "",
+                        "type": "hls::stream< _TIn > &"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": ""
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamShuffle",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamShuffle",
+                "display_name": "streamShuffle",
+                "brief": "Shuffle the contents from an array of streams to another.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_shuffle.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_INStrm",
+                        "type": "int",
+                        "description": "number of input stream."
+                    },
+                    {
+                        "name": "_ONstrm",
+                        "type": "int",
+                        "description": "number of output stream."
+                    },
+                    {
+                        "name": "_TIn",
+                        "type": "typename",
+                        "description": "input type."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "order_cfg",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 8 *_ONstrm > > &"
+                    },
+                    {
+                        "name": "istrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn >[_INStrm],"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "ostrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn >[_ONstrm],"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &e_ost"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamSplit",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamSplit",
+                "display_name": "streamSplit",
+                "brief": "split one wide stream into multiple streams, start from the LSB.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_split.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_WIn",
+                        "type": "int",
+                        "description": "input stream width, should be no less than _WOut * _NStrm."
+                    },
+                    {
+                        "name": "_WOut",
+                        "type": "int",
+                        "description": "output stream width."
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "number of output stream."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "istrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WIn > > &"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WOut > > ostrms[_NStrm], hls::stream< bool > &e_ostrm, LSBSideT alg"
+                    },
+                    {
+                        "name": "ostrms",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WOut > >[_NStrm],"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "alg",
+                        "direction": "",
+                        "type": "LSBSideT al"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamSync",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamSync",
+                "display_name": "streamSync",
+                "brief": "Synchronize streams for successor module.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_sync.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_TIn",
+                        "type": "typename",
+                        "description": "input type."
+                    },
+                    {
+                        "name": "_NStrm",
+                        "type": "int",
+                        "description": "number of input streams."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "istrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn >[_NStrm],"
+                    },
+                    {
+                        "name": "e_istrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn > ostrms[_NStrm], hls::stream< bool > &e_ostr"
+                    },
+                    {
+                        "name": "ostrms",
+                        "direction": "",
+                        "type": "hls::stream< _TIn >[_NStrm],"
+                    },
+                    {
+                        "name": "e_ostrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &e_ost"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::common::utils_hw::streamToAxi",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::common::utils_hw::streamToAxi",
+                "display_name": "streamToAxi",
+                "brief": "Write elements in burst to AXI master port.",
+                "target_domain": "",
+                "header_file_name": [
+                    "stream_to_axi.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_BurstLen",
+                        "type": "int",
+                        "description": "length of a burst, default is 32."
+                    },
+                    {
+                        "name": "_WAxi",
+                        "type": "int",
+                        "description": "width of axi port."
+                    },
+                    {
+                        "name": "_WStrm",
+                        "type": "int",
+                        "description": "width of input stream."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "wbuf",
+                        "direction": "",
+                        "type": "ap_uint< _WAxi > *"
+                    },
+                    {
+                        "name": "istrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< _WStrm > > &"
+                    },
+                    {
+                        "name": "e_istrm",
+                        "direction": "",
+                        "type": ""
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "char* xf::common::utils_sw::clErrorToString",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "char* xf::common::utils_sw::clErrorToString",
+                "display_name": "clErrorToString",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "logger.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/xf_utils_sw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        }
+    ],
+    "target_domain": ""
+}

@@ -37,7 +37,7 @@ struct StaticRom {
 
     StaticRom() {
 #pragma HLS inline
-#pragma HLS resource variable = data core = ROM_2P
+#pragma HLS bind_storage variable = data type = ROM_2P
     }
 
     /**

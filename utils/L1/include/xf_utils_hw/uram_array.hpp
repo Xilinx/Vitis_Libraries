@@ -88,7 +88,7 @@ class UramArray {
    public:
     UramArray() {
 #pragma HLS inline
-#pragma HLS resource variable = blocks core = RAM_2P_URAM
+#pragma HLS bind_storage variable = blocks type = RAM_2P impl = URAM
 #pragma HLS array_partition variable = blocks complete dim = 1
 #pragma HLS array_partition variable = blocks complete dim = 2
 #pragma HLS array_partition variable = _index complete dim = 1

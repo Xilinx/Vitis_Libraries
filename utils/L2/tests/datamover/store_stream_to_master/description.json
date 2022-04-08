@@ -3,7 +3,7 @@
     "name": "Xilinx Store Stream to Master Kernel Test", 
     "description": "", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "vck190", 
         "u200", 
         "aws-vu9p-f1"
@@ -11,7 +11,7 @@
     "default_target": "hw_emu",
     "default_device": "xilinx_vck190_base_202110_1",
     "default_HOST_ARCH": "aarch64",
-    "platform_blacklist": [], 
+    "platform_blocklist": [], 
     "platform_properties": {}, 
     "launch": [
         {

@@ -58,30 +58,30 @@ class cache {
 #pragma HLS array_partition variable = onChipAddr block factor = 1 dim = 2
 
         if (validRamType == 0) {
-#pragma HLS resource variable = valid core = RAM_S2P_LUTRAM
+#pragma HLS bind_storage variable = valid type = RAM_S2P impl = LUTRAM
         } else if (validRamType == 2) {
-#pragma HLS resource variable = valid core = RAM_S2P_BRAM
+#pragma HLS bind_storage variable = valid type = RAM_S2P impl = BRAM
         } else {
-#pragma HLS resource variable = valid core = RAM_S2P_URAM
+#pragma HLS bind_storage variable = valid type = RAM_S2P impl = URAM
         }
 
         if (addrRamType == 0) {
-#pragma HLS resource variable = onChipAddr core = RAM_S2P_LUTRAM
+#pragma HLS bind_storage variable = onChipAddr type = RAM_S2P impl = LUTRAM
         } else if (addrRamType == 2) {
-#pragma HLS resource variable = onChipAddr core = RAM_S2P_BRAM
+#pragma HLS bind_storage variable = onChipAddr type = RAM_S2P impl = BRAM
         } else {
-#pragma HLS resource variable = onChipAddr core = RAM_S2P_URAM
+#pragma HLS bind_storage variable = onChipAddr type = RAM_S2P impl = URAM
         }
 
         if (dataRamType == 0) {
-#pragma HLS resource variable = onChipRam0 core = RAM_S2P_LUTRAM
-#pragma HLS resource variable = onChipRam1 core = RAM_S2P_LUTRAM
+#pragma HLS bind_storage variable = onChipRam0 type = RAM_S2P impl = LUTRAM
+#pragma HLS bind_storage variable = onChipRam1 type = RAM_S2P impl = LUTRAM
         } else if (dataRamType == 2) {
-#pragma HLS resource variable = onChipRam0 core = RAM_S2P_BRAM
-#pragma HLS resource variable = onChipRam1 core = RAM_S2P_BRAM
+#pragma HLS bind_storage variable = onChipRam0 type = RAM_S2P impl = BRAM
+#pragma HLS bind_storage variable = onChipRam1 type = RAM_S2P impl = BRAM
         } else {
-#pragma HLS resource variable = onChipRam0 core = RAM_S2P_URAM
-#pragma HLS resource variable = onChipRam1 core = RAM_S2P_URAM
+#pragma HLS bind_storage variable = onChipRam0 type = RAM_S2P impl = URAM
+#pragma HLS bind_storage variable = onChipRam1 type = RAM_S2P impl = URAM
         }
 
 #ifndef __SYNTHESIS__

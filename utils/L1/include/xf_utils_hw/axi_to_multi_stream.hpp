@@ -197,7 +197,7 @@ void read_to_vec_stream(ap_uint<_WAxi>* rbuf,
     ap_uint<_WAxi> dat_ram[_NT][_BurstLen]; // local ram depth equals the burst length
     int cnt_alltype_fnl;
     bool is_onetype_fnl[3];
-#pragma HLS RESOURCE variable = dat_ram core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = dat_ram type = RAM_2P impl = BRAM
 
 #pragma HLS ARRAY_PARTITION variable = off_ali complete
 #pragma HLS ARRAY_PARTITION variable = len_vec complete
@@ -356,7 +356,7 @@ void axiToMultiStream(ap_uint<_WAxi>* rbuf,
     const int NONBLOCK_DEPTH = (256);
 
     hls::stream<ap_uint<_WAxi> > vec_strm[3];
-#pragma HLS RESOURCE variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = vec_strm depth = NONBLOCK_DEPTH
 #pragma HLS ARRAY_PARTITION variable = vec_strm complete
 

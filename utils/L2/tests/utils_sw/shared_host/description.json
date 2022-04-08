@@ -4,15 +4,15 @@
     "flow": "vitis", 
     "gui": true, 
     "platform_type": "", 
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3", 
-        "xilinx_u200_xdma_201830_2", 
-        "xilinx_u250_xdma_201830_2", 
-        "xilinx_u50_gen3x16_xdma_201920_3", 
+    "platform_allowlist": [
+        "u280", 
+        "u200", 
+        "u250", 
+        "u50", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ], 
     "platform_properties": {
@@ -24,7 +24,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }
         }, 
@@ -36,7 +36,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }
         }

@@ -33,7 +33,7 @@ void dut(hls::stream<ap_axiu<ROM_WIDTH, 0, 0, 0> >& os,
     const ap_uint<ROM_WIDTH> in[] = {
 #include "init_file.inc"
     };
-#pragma HLS resource variable = in core = ROM_2P
+#pragma HLS bind_storage variable = in type = ROM_2P
     xf::datamover::StaticRom<ROM_WIDTH, ROM_DEPTH> srom;
     srom.data = in;
     srom.toStream(os, sz);

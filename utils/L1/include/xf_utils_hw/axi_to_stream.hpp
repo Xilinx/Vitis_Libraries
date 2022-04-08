@@ -421,7 +421,7 @@ void axiToStream(ap_uint<_WAxi>* rbuf, const int num, hls::stream<_TStrm>& ostrm
     static const int scal_char = _WAxi / 8;
 
     hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS RESOURCE variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = vec_strm depth = fifo_depth
 
     details::read_to_vec<_WAxi, _BurstLen>(rbuf, num, scal_vec, vec_strm);
@@ -446,7 +446,7 @@ void axiToCharStream(ap_uint<_WAxi>* rbuf,
     static const int scal_char = _WAxi / 8;
 
     hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS RESOURCE variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = vec_strm depth = fifo_depth
 
     details::read_to_vec<_WAxi, _BurstLen>(rbuf, len, scal_char, offset, vec_strm);
@@ -464,7 +464,7 @@ void axiToStream(ap_uint<_WAxi>* rbuf, const int num, hls::stream<_TStrm>& ostrm
     static const int scal_char = _WAxi / 8;
 
     hls::stream<ap_uint<_WAxi> > vec_strm;
-#pragma HLS RESOURCE variable = vec_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = vec_strm type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = vec_strm depth = fifo_depth
 
     details::read_to_vec<_WAxi, _BurstLen>(rbuf, num, scal_vec, vec_strm);

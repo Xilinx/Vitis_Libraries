@@ -75,17 +75,17 @@ void top_func(ap_uint<AXI_WIDTH> rbuf[BUF_DEPTH],
         // const int NONBLOCK_DEPTH = 256;
         const int NONBLOCK_DEPTH = 8;
 
-#pragma HLS RESOURCE variable = ostrm0 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ostrm0 type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = ostrm0 depth = NONBLOCK_DEPTH
-#pragma HLS RESOURCE variable = e_ostrm0 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e_ostrm0 type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = e_ostrm0 depth = NONBLOCK_DEPTH
-#pragma HLS RESOURCE variable = ostrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ostrm1 type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = ostrm1 depth = NONBLOCK_DEPTH
-#pragma HLS RESOURCE variable = e_ostrm1 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e_ostrm1 type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = e_ostrm1 depth = NONBLOCK_DEPTH
-#pragma HLS RESOURCE variable = ostrm2 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = ostrm2 type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = ostrm2 depth = NONBLOCK_DEPTH
-#pragma HLS RESOURCE variable = e_ostrm2 core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = e_ostrm2 type = FIFO impl = LUTRAM
 #pragma HLS STREAM variable = e_ostrm2 depth = NONBLOCK_DEPTH
 
         xf::common::utils_hw::axiToMultiStream<BURST_LENTH, AXI_WIDTH, DT0, DT1, DT2>(

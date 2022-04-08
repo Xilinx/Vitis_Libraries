@@ -38,7 +38,7 @@ struct PreloadableBram {
    public:
     PreloadableBram() {
 #pragma HLS inline
-#pragma HLS resource variable = data core = RAM_2P_BRAM
+#pragma HLS bind_storage variable = data type = RAM_2P impl = BRAM
     }
 
     /**
@@ -171,7 +171,7 @@ struct PreloadableUram {
    public:
     PreloadableUram() {
 #pragma HLS inline
-#pragma HLS resource variable = data core = RAM_2P_URAM
+#pragma HLS bind_storage variable = data type = RAM_2P impl = BRAM
     }
 
     /**
