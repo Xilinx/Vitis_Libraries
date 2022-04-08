@@ -25,18 +25,22 @@ DEBUG := no
 #'estimate' for estimate report generation
 #'system' for system report generation
 ifneq ($(REPORT), no)
-LDCLFLAGS += --report estimate
-LDCLFLAGS += --report system
+VPP_LDFLAGS += --report estimate
+VPP_LDFLAGS += --report system
 endif
+
+CXXFLAGS += $(EXTRA_CXXFLAGS)
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
+VPP_LDFLAGS += -R 2
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-LDCLFLAGS += --profile_kernel data:all:all:all
+VPP_LDFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
-LDCLFLAGS += --dk protocol:all:all:all
+VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
 #Check environment setup
@@ -74,17 +78,17 @@ endif
 #Checks for g++
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
-ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
+ifneq ($(shell expr $(shell g++ -dumpversion) \>= 8), 1)
 ifndef XILINX_VIVADO
-$(error [ERROR]: g++ version older. Please use 5.0 or above)
+$(error [ERROR]: g++ version too old. Please use 8.0 or above)
 else
-CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-8.3.0/bin/g++
 ifeq ($(LD_LIBRARY_PATH),)
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-8.3.0/lib64
 else
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64:$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-8.3.0/lib64:$(LD_LIBRARY_PATH)
 endif
-$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
+$(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
 endif
 else ifeq ($(HOST_ARCH), aarch64)
@@ -117,10 +121,18 @@ ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 endif
 
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
+ifeq ($(HOST_ARCH), x86)
 ifeq (,$(LD_LIBRARY_PATH))
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib
 else
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
+endif
+else # aarch64
+ifeq (,$(LD_LIBRARY_PATH))
+LD_LIBRARY_PATH := $(SYSROOT)/usr/lib 
+else
+LD_LIBRARY_PATH := $(SYSROOT)/usr/lib:$(LD_LIBRARY_PATH) 
+endif
 endif
 
 # check target
@@ -199,3 +211,8 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u280_xdma_201920_3/'))
+ifeq ($(TARGET), hw)
+VPP_LDFLAGS += --advanced.param compiler.userPreSysLinkOverlayTcl=preSysLink.tcl
+endif
+endif

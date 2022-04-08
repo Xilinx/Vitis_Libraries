@@ -1,0 +1,423 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::hpc::mlp::xfhpcCreate",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcCreate",
+                "display_name": "xfhpcCreate",
+                "brief": "This function initializes the XFHPC library and creates a handle for the specific engine. It must be called prior to any other XFHPC library calls.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "xclbin",
+                        "direction": "",
+                        "type": "const char *"
+                    },
+                    {
+                        "name": "kernelNumber",
+                        "direction": "",
+                        "type": "unsigned int=1,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcMalloc",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcMalloc",
+                "display_name": "xfhpcMalloc",
+                "brief": "This function allocates memory for host row-major format matrix on the FPGA device.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcSetMatrix",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcSetMatrix",
+                "display_name": "xfhpcSetMatrix",
+                "brief": "This function copies a matrix in host memory to FPGA device memory. xfhpcMallocRestricted() need to be called prior to this function.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcGetMatrix",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcGetMatrix",
+                "display_name": "xfhpcGetMatrix",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcFree",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcFree",
+                "display_name": "xfhpcFree",
+                "brief": "This function frees memory in FPGA device.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcFreeInstr",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcFreeInstr",
+                "display_name": "xfhpcFreeInstr",
+                "brief": "This function frees instrution.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcDestroy",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcDestroy",
+                "display_name": "xfhpcDestroy",
+                "brief": "This function releases handle used by the XFHPC library.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelNumber",
+                        "direction": "",
+                        "type": "unsigned int=1,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcFcn",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcFcn",
+                "display_name": "xfhpcFcn",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcExecute",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcExecute",
+                "display_name": "xfhpcExecute",
+                "brief": "This function starts the kernel and wait until it finishes.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcExecuteAsync",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcExecuteAsync",
+                "display_name": "xfhpcExecuteAsync",
+                "brief": "This asynchronous function starts all kernels and wait until them finish.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "numKernels",
+                        "direction": "",
+                        "type": "unsigned int=1,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcGetByAddress",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcGetByAddress",
+                "display_name": "xfhpcGetByAddress",
+                "brief": "This function copies a matrix in FPGA device memory to host memory by its address in device memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "p_bufSize",
+                        "direction": "",
+                        "type": "unsigned long long"
+                    },
+                    {
+                        "name": "offset",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcGetByPointer",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcGetByPointer",
+                "display_name": "xfhpcGetByPointer",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::hpc::mlp::xfhpcFcnByAddress",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::mlp::xfhpcFcnByAddress",
+                "display_name": "xfhpcFcnByAddress",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "mlp_wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/mlp"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        }
+    ],
+    "target_domain": ""
+}

@@ -72,19 +72,25 @@ endif
 endif
 
 #Checks for g++
+VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
-ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
-ifndef XILINX_VIVADO
-$(error [ERROR]: g++ version older. Please use 5.0 or above)
+ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
+CXX_VER := 8.3.0
 else
-CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
-ifeq ($(LD_LIBRARY_PATH),)
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64
-else
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/lib64:$(LD_LIBRARY_PATH)
+CXX_VER := 6.2.0
 endif
-$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
+ifneq ($(shell expr $(shell echo "__GNUG__" | g++ -E -x c++ - | tail -1) \>= $(CXX_VER)), 1)
+ifndef XILINX_VIVADO
+$(error [ERROR]: g++ version too old. Please use $(CXX_VER) or above)
+else
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/bin/g++
+ifeq ($(LD_LIBRARY_PATH),)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/lib64
+else
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/lib64:$(LD_LIBRARY_PATH)
+endif
+$(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
 endif
 else ifeq ($(HOST_ARCH), aarch64)
@@ -93,13 +99,21 @@ else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
 
-#Check OS and setting env
+# for centos and redhat
 OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
 OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
 
-ifeq ($(OSDIST), centos)
+ifneq ($(findstring centos,$(OSDIST)),)
 ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
-CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+endif
+endif
+else ifneq ($(findstring redhat,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+endif
 endif
 endif
 
@@ -209,3 +223,8 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u280_xdma_201920_3/'))
+ifeq ($(TARGET), hw)
+VPP_LDFLAGS += --advanced.param compiler.userPreSysLinkOverlayTcl=preSysLink.tcl
+endif
+endif

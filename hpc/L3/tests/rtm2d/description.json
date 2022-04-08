@@ -3,11 +3,12 @@
     "name": "Xilinx RTM Test", 
     "description": "Xilinx RTM Test", 
     "flow": "vitis", 
+    "runtime": "XRT", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ], 
     "platform_properties": {

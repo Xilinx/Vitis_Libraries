@@ -1,0 +1,166 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::hpc::cg::control",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::cg::control",
+                "display_name": "control",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "control.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/cgSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "t_InstrBytes",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "t_NumTasks",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "t_TkWidth",
+                        "type": "uint32_t"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::hpc::rtm::forward",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::rtm::forward",
+                "display_name": "forward",
+                "brief": "forward function is composed by multiple forward streaming modules",
+                "target_domain": "",
+                "header_file_name": [
+                    "rtmforward.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/rtm3d"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_NumFSMs",
+                        "type": "int"
+                    },
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_InType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_UpbType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_RTM",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_Domain",
+                        "type": "typename"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_sel",
+                        "direction": "",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "p_domain",
+                        "direction": "",
+                        "type": "const t_Domain &"
+                    },
+                    {
+                        "name": "p_sm",
+                        "direction": "",
+                        "type": "t_RTM[t_NumFSMs],"
+                    },
+                    {
+                        "name": "p_t",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_src",
+                        "direction": "",
+                        "type": "const t_DataType *"
+                    },
+                    {
+                        "name": "p_v2dt2",
+                        "direction": "",
+                        "type": "const t_InType *"
+                    },
+                    {
+                        "name": "p_pi0",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_pi1",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_po0",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_po1",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_ppi0",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_ppi1",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_ppo0",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_ppo1",
+                        "direction": "",
+                        "type": "t_InType *"
+                    },
+                    {
+                        "name": "p_upb",
+                        "direction": "",
+                        "type": "t_UpbType *p_up"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}

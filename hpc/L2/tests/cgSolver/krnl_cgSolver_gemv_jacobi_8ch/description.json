@@ -4,18 +4,18 @@
     "description": "Xilinx HPC CG Test, GEMV, Jacobi, 8-channel", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280",
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         ""
                     ]
                 }
@@ -30,7 +30,7 @@
         "u280": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         ""
                     ]
                 }

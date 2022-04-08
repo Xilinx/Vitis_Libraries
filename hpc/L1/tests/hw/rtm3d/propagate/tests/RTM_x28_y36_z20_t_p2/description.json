@@ -3,10 +3,10 @@
     "description": "", 
     "flow": "hls", 
     "name": "Xilinx HPC_RTM.propagate.RTM_x28_y36_z20_t_p2", 
-    "part_blacklist": [], 
-    "part_whitelist": [], 
-    "platform_blacklist": [], 
-    "platform_whitelist": [
+    "part_blocklist": [], 
+    "part_allowlist": [], 
+    "platform_blocklist": [], 
+    "platform_allowlist": [
         "u280", 
         "aws-vu9p-f1", 
         "vck190"
@@ -42,8 +42,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ]
     }, 
     "top": {

@@ -4,17 +4,17 @@
     "description": "Xilinx HPC Test", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ], 
     "platform_properties": {
         "u280": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u280.cfg"
                     ]
                 }
@@ -108,7 +108,12 @@
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240
                 }, 
-                "max_time_min": 640
+                "max_time_min": {
+		    "vitis_hw_build": 1200,
+		    "vitis_hw_emu": 1200,
+		    "vitis_sw_emu": 640,
+		    "vitis_hw_run": 640
+		}
             }
         ], 
         "targets": [
