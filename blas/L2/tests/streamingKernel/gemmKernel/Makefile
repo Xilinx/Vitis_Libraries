@@ -1,4 +1,4 @@
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,26 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.3
+# vitis makefile-generator v2.0.6
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86 >"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86 >"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86 >"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/>"
+	$(ECHO) "  make host TARGET=<hw/hw_emu/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -61,22 +61,25 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u250_gen3x16_xdma_3_1_202020_1
+PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 endif
 
-# ###dddd################# Checking if PLATFORM in whitelist ############################
+# #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  u250
-PLATFORM_BLOCKLIST +=  vck
+PLATFORM_BLOCKLIST +=  vck aws-vu9p-f1
 
 include ./utils.mk
-
-TEMP_DIR := _x_temp.$(TARGET).$(XPLATFORM)
-TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XPLATFORM)
-BUILD_DIR := build_dir.$(TARGET).$(XPLATFORM)
-BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XPLATFORM)
+TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
+BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
+include ./params.mk
 
 EXE_FILE_DEPS :=
 BINARY_CONTAINERS_DEPS :=
@@ -105,6 +108,10 @@ ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
 
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
+endif
+
 #Inclue Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L2/src/streamingKernel/sw/host/gemm_stream.cpp $(XFLIB_DIR)/L2/src/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw/xf_blas/helpers/utils -I $(XFLIB_DIR)/L2/include/streamingKernel/ -I $(XFLIB_DIR)/L2/include/streamingKernel/sw/host -I $(XFLIB_DIR)/L2/include/streamingKernel/sw/compiler -I $(XFLIB_DIR)/L2/include/streamingKernel/sw -I $(XFLIB_DIR)/L2/include/xcl2 -I $(XFLIB_DIR)/L2/include/streamingKernel/sw/host/ -I $(XFLIB_DIR)/L1/include/hw
@@ -122,16 +129,29 @@ endif
 ########################## Kernel compiler global settings ##########################
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw/xf_blas -I $(XFLIB_DIR)/L1/include/hw/xf_blas/gemm -I $(XFLIB_DIR)/L1/include/hw/xf_blas/helpers/utils -I $(XFLIB_DIR)/L2/include/streamingKernel/ -I $(XFLIB_DIR)/L2/include/streamingKernel/hw/xf_blas/gemmStreamKernel/ -I $(XFLIB_DIR)/L2/include/streamingKernel/hw/xf_blas -I $(XFLIB_DIR)/L1/include/hw
 
+######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_LDFLAGS_gemmKernel += --config $(CUR_DIR)/conn_u250.ini
-endif
 VPP_FLAGS_gemmStreamKernel += --kernel_frequency 300
 VPP_FLAGS_gemmStreamKernel += --hls.clock 300000000:gemmStreamKernel
 VPP_FLAGS_gemmTimerKernel += --kernel_frequency 300
 VPP_FLAGS_gemmTimerKernel += --hls.clock 300000000:gemmTimerKernel
 VPP_FLAGS_gemmLoadStoreKernel += --kernel_frequency 300
 VPP_FLAGS_gemmLoadStoreKernel += --hls.clock 300000000:gemmLoadStoreKernel
+ifneq ($(HOST_ARCH), x86)
+VPP_LDFLAGS_gemmKernel += --clock.defaultFreqHz 300000000
+else
+VPP_LDFLAGS_gemmKernel += --kernel_frequency 300
+endif
+VPP_LDFLAGS_gemmKernel_temp := --config $(CUR_DIR)/conn_u250.ini
+VPP_LDFLAGS_gemmKernel += $(VPP_LDFLAGS_gemmKernel_temp)
 
+else 
+VPP_FLAGS_gemmStreamKernel += --kernel_frequency 300
+VPP_FLAGS_gemmStreamKernel += --hls.clock 300000000:gemmStreamKernel
+VPP_FLAGS_gemmTimerKernel += --kernel_frequency 300
+VPP_FLAGS_gemmTimerKernel += --hls.clock 300000000:gemmTimerKernel
+VPP_FLAGS_gemmLoadStoreKernel += --kernel_frequency 300
+VPP_FLAGS_gemmLoadStoreKernel += --hls.clock 300000000:gemmLoadStoreKernel
 ifneq ($(HOST_ARCH), x86)
 VPP_LDFLAGS_gemmKernel += --clock.defaultFreqHz 300000000
 else
@@ -140,17 +160,11 @@ endif
 VPP_LDFLAGS_gemmKernel_temp := --config opts.ini
 VPP_LDFLAGS_gemmKernel += $(VPP_LDFLAGS_gemmKernel_temp)
 
-########################## binary container global settings ##########################
-BINARY_CONTAINER_gemmKernel_OBJS += $(TEMP_DIR)/gemmStreamKernel.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_gemmKernel_OBJS)
-BINARY_CONTAINER_gemmKernel_OBJS += $(TEMP_DIR)/gemmTimerKernel.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_gemmKernel_OBJS)
-BINARY_CONTAINER_gemmKernel_OBJS += $(TEMP_DIR)/gemmLoadStoreKernel.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_gemmKernel_OBJS)
+endif
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/gemmKernel.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/gemmKernel_pkg.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/gemmKernel_pkg.$(LINK_TARGET_FMT)
 BINARY_CONTAINERS_PKG += $(BUILD_DIR)/gemmKernel.xclbin
 endif
 
@@ -158,18 +172,22 @@ endif
 $(TEMP_DIR)/gemmStreamKernel.xo: $(XFLIB_DIR)/L2/src/streamingKernel/hw/gemmStreamKernel.cpp 
 	$(ECHO) "Compiling Kernel: gemmStreamKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_gemmStreamKernel) $(VPP_FLAGS) -k gemmStreamKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_gemmStreamKernel) $(VPP_FLAGS) -k gemmStreamKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_gemmKernel_OBJS += $(TEMP_DIR)/gemmStreamKernel.xo
 $(TEMP_DIR)/gemmTimerKernel.xo: $(XFLIB_DIR)/L2/src/streamingKernel/hw/gemmTimerKernel.cpp 
 	$(ECHO) "Compiling Kernel: gemmTimerKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_gemmTimerKernel) $(VPP_FLAGS) -k gemmTimerKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_gemmTimerKernel) $(VPP_FLAGS) -k gemmTimerKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_gemmKernel_OBJS += $(TEMP_DIR)/gemmTimerKernel.xo
 $(TEMP_DIR)/gemmLoadStoreKernel.xo: $(XFLIB_DIR)/L2/src/streamingKernel/hw/gemmLoadStore.cpp 
 	$(ECHO) "Compiling Kernel: gemmLoadStoreKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_gemmLoadStoreKernel) $(VPP_FLAGS) -k gemmLoadStoreKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_gemmLoadStoreKernel) $(VPP_FLAGS) -k gemmLoadStoreKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_gemmKernel_OBJS += $(TEMP_DIR)/gemmLoadStoreKernel.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_gemmKernel_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/gemmKernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_gemmKernel) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/gemmKernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_gemmKernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 ifeq ($(HOST_ARCH), x86)
@@ -188,7 +206,7 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(XPLATFORM)))
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
 K_IMAGE := $(SYSROOT)/../../uImage
 else
 K_IMAGE := $(SYSROOT)/../../Image
@@ -226,75 +244,89 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
+vck190_dfx_hw := false
 $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-	$(VPP) -t $(TARGET) --platform $(PLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
+vck190_dfx_hw := true
+endif
+endif
+ifeq ($(vck190_dfx_hw), false)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	@echo "### ***** sd_card generation done! ***** ###"
+endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
-
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
-ifneq (,$(filter x86sim aiesim, $(TARGET)))
-RUN_DEPS += $(AIE_CONTAINER)
-else
-RUN_DEPS += $(AIE_CONTAINER) $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
-endif
 
-run: check_device pre_build $(RUN_DEPS)
-#x86sim
-ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=./Work 
-	
-endif
-#aiesim
-ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=./Work --profile 
-	
-endif
-#hw_emu and sw_emu
-ifneq (,$(filter sw_emu hw_emu, $(TARGET)))
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+all: check_device pre_build check_vpp check_platform mkflag $(RUN_DEPS)
+run: all
+#hw_emu
+ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	
+	make check
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
+	make check
+endif
+endif
+#sw_emu
+ifneq (,$(filter sw_emu, $(TARGET)))
+ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	make check
+else
+	@echo $(RUN_DEPS)
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	make check
 endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
 	$(EXE_FILE) $(HOST_ARGS)
-	
+	make check
+endif
+else ifeq ($(HOST_ARCH), x86)
+	$(EXE_FILE) $(HOST_ARGS)
+	make check
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
 endif
 
 ############################## Setting Targets ##############################
-
--include params.mk
-
 .PHONY: pre_build
 pre_build:
-	LD_LIBRARY_PATH=$$XILINX_HLS/lnx64/tools/fpo_v7_0:$$LD_LIBRARY_PATH \
-	make data_gen
+	LD_LIBRARY_PATH=$$XILINX_HLS/lnx64/tools/fpo_v7_0:$$LD_LIBRARY_PATH make data_gen
 
-.PHONY: all clean cleanall emconfig
+.PHONY: clean cleanall emconfig
 emconfig: $(EMCONFIG)
-ifeq ($(HOST_ARCH), x86)
-all: pre_build check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-else
-all: pre_build check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-endif
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
@@ -310,10 +342,6 @@ else
 xclbin: pre_build check_vpp check_sysroot $(BINARY_CONTAINERS) 
 endif
 
-.PHONY: x86sim
-x86sim: $(AIE_CONTAINER)
-	$(X86SIMULATOR) --pkg-dir=./Work
-
 ############################## Cleaning Rules ##############################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
@@ -326,8 +354,7 @@ cleank:
 	-$(RMDIR) _x_temp.* 
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
 
 clean: cleanh

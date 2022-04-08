@@ -2,21 +2,22 @@
     "name": "Xilinx XF_BLAS.gemm_benchmark", 
     "description": "", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250"
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": [
+        "aws-vu9p-f1"
+    ], 
     "platform_type": "pcie", 
     "gui": false, 
     "platform_properties": {
         "u250": {
             "host": {
-                "compiler": {
-                }
+                "compiler": {}
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -45,8 +46,7 @@
                 "LIB_DIR/L3/benchmarks/gemm", 
                 "LIB_DIR/L3/benchmarks"
             ], 
-            "symbols": [
-            ]
+            "symbols": []
         }, 
         "linker": {
             "options": "-luuid -lxrt_coreutil"
@@ -78,6 +78,7 @@
             ]
         }
     ], 
+    "config_make": "params.makefile",
     "testinfo": {
         "disable": false, 
         "jobs": [

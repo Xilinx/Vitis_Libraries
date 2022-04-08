@@ -1,0 +1,907 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::blas::buildConfigDict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::buildConfigDict",
+                "display_name": "buildConfigDict",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "helper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::getPaddedSize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::getPaddedSize",
+                "display_name": "getPaddedSize",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "helper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::getTypeSize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::getTypeSize",
+                "display_name": "getTypeSize",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "helper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasCreate",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasCreate",
+                "display_name": "xfblasCreate",
+                "brief": "This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "xclbin",
+                        "direction": "",
+                        "type": "const char *"
+                    },
+                    {
+                        "name": "configFile",
+                        "direction": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "engineName",
+                        "direction": "",
+                        "type": "xfblasEngine_t"
+                    },
+                    {
+                        "name": "kernelNumber",
+                        "direction": "",
+                        "type": "unsigned int=1,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasMalloc",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasMalloc",
+                "display_name": "xfblasMalloc",
+                "brief": "This function allocates memory on the FPGA device.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "devPtr",
+                        "direction": "",
+                        "type": "short **"
+                    },
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasMallocRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasMallocRestricted",
+                "display_name": "xfblasMallocRestricted",
+                "brief": "This function allocates memory for host row-major format matrix on the FPGA device.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasMallocManaged",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasMallocManaged",
+                "display_name": "xfblasMallocManaged",
+                "brief": "This function allocates memory on the FPGA device, rewrites the leading dimension size after padding.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "devPtr",
+                        "direction": "",
+                        "type": "short **"
+                    },
+                    {
+                        "name": "paddedLda",
+                        "direction": "",
+                        "type": "int *"
+                    },
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasSetMatrix",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasSetMatrix",
+                "display_name": "xfblasSetMatrix",
+                "brief": "This function copies a matrix in host memory to FPGA device memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "unsigned int kernelIndex=0, unsigned int deviceIndex=0"
+                    },
+                    {
+                        "name": "d_A",
+                        "direction": "",
+                        "type": "unsigned int kernelIndex=0, unsigned int deviceIndex=0"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasSetMatrixRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasSetMatrixRestricted",
+                "display_name": "xfblasSetMatrixRestricted",
+                "brief": "This function copies a matrix in host memory to FPGA device memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasSetVectorRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasSetVectorRestricted",
+                "display_name": "xfblasSetVectorRestricted",
+                "brief": "This function copies a vector in host memory to FPGA device memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "x",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "=0"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "=0"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasDeviceSynchronize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasDeviceSynchronize",
+                "display_name": "xfblasDeviceSynchronize",
+                "brief": "This function will synchronize all the device memory to host memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGetMatrix",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetMatrix",
+                "display_name": "xfblasGetMatrix",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "d_A",
+                        "direction": "",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGetMatrixRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetMatrixRestricted",
+                "display_name": "xfblasGetMatrixRestricted",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGetVectorRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetVectorRestricted",
+                "display_name": "xfblasGetVectorRestricted",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "x",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "=0"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "=0"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasFree",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasFree",
+                "display_name": "xfblasFree",
+                "brief": "This function frees memory in FPGA device.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasFreeInstr",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasFreeInstr",
+                "display_name": "xfblasFreeInstr",
+                "brief": "This function frees instrution.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasDestroy",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasDestroy",
+                "display_name": "xfblasDestroy",
+                "brief": "This function releases handle used by the XFBLAS library.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelNumber",
+                        "direction": "",
+                        "type": "unsigned int=1,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGemm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGemm",
+                "display_name": "xfblasGemm",
+                "brief": "This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + beta*C.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "transa",
+                        "direction": "",
+                        "type": "xfblasOperation_t"
+                    },
+                    {
+                        "name": "transb",
+                        "direction": "",
+                        "type": "xfblasOperation_t"
+                    },
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "i"
+                    },
+                    {
+                        "name": "k",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "alpha",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "B",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "ldb",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "beta",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "C",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "ldc",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "dex=0"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "dex=0"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGemmByAddress",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGemmByAddress",
+                "display_name": "xfblasGemmByAddress",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGetByPointer",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetByPointer",
+                "display_name": "xfblasGetByPointer",
+                "brief": "This function copies a matrix in FPGA device memory to host memory by pointer.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasGetByAddress",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetByAddress",
+                "display_name": "xfblasGetByAddress",
+                "brief": "This function copies a matrix in FPGA device memory to host memory by its address in device memory.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "p_bufSize",
+                        "direction": "",
+                        "type": "unsigned long long"
+                    },
+                    {
+                        "name": "offset",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasExecute",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasExecute",
+                "display_name": "xfblasExecute",
+                "brief": "This function starts the kernel and wait until it finishes.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "",
+                        "type": "unsigned int=0,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::xfblasExecuteAsync",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasExecuteAsync",
+                "display_name": "xfblasExecuteAsync",
+                "brief": "This asynchronous function starts all kernels and wait until them finish.",
+                "target_domain": "",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "numKernels",
+                        "direction": "",
+                        "type": "unsigned int=1,"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "",
+                        "type": "unsigned int"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}

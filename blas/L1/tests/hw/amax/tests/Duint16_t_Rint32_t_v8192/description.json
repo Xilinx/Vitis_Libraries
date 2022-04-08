@@ -3,10 +3,10 @@
     "description": "", 
     "flow": "hls", 
     "name": "Xilinx XF_BLAS.amax_Duint16_t_Rint32_t_v8192", 
-    "part_blacklist": [], 
-    "part_whitelist": [], 
-    "platform_blacklist": [], 
-    "platform_whitelist": [
+    "part_blocklist": [], 
+    "part_allowlist": [], 
+    "platform_blocklist": [], 
+    "platform_allowlist": [
         "u280", 
         "u200", 
         "aws-vu9p-f1", 
@@ -36,17 +36,17 @@
                 "env": "", 
                 "index": 0, 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
-                    "hls_vivado_syn": 300, 
+                    "vivado_syn": 300, 
                     "hls_csim": 60, 
                     "hls_cosim": 300, 
-                    "hls_vivado_impl": 300, 
+                    "vivado_impl": 300, 
                     "hls_csynth": 60
                 }
             }
@@ -55,8 +55,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ]
     }, 
     "top": {

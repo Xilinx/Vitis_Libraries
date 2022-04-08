@@ -1,0 +1,655 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::blas::amax",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::amax",
+                "display_name": "amax",
+                "brief": "amax function that returns the position of the vector element that has the maximum magnitude.",
+                "target_domain": "",
+                "header_file_name": [
+                    "amax.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_result",
+                        "direction": "",
+                        "type": "t_IndexType &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::amin",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::amin",
+                "display_name": "amin",
+                "brief": "amin function that returns the position of the vector element that has the minimum magnitude.",
+                "target_domain": "",
+                "header_file_name": [
+                    "amin.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_result",
+                        "direction": "",
+                        "type": "t_IndexType &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::asum",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::asum",
+                "display_name": "asum",
+                "brief": "asum function that returns the sum of the magnitude of vector elements.",
+                "target_domain": "",
+                "header_file_name": [
+                    "asum.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_sum",
+                        "direction": "",
+                        "type": "t_DataType &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::axpy",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::axpy",
+                "display_name": "axpy",
+                "brief": "axpy function that compute Y = alpha*X + Y.",
+                "target_domain": "",
+                "header_file_name": [
+                    "axpy.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "const t_DataType p_alpha, hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_r",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::copy",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::copy",
+                "display_name": "copy",
+                "brief": "copy function that compute Y = X",
+                "target_domain": "",
+                "header_file_name": [
+                    "copy.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "number of parallelly processed entries in the packed input vector stream"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::dot",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::dot",
+                "display_name": "dot",
+                "brief": "dot function that returns the dot product of vector x and y.",
+                "target_domain": "",
+                "header_file_name": [
+                    "dot.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_res",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &p_y, t_DataType &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::gbmv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gbmv",
+                "display_name": "gbmv",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "gbmv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_MaxRows",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_MacType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::gemm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gemm",
+                "display_name": "gemm",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "gemm.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_KBufferDim",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::gemv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gemv",
+                "display_name": "gemv",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "gemv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_MacDataType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::nrm2",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::nrm2",
+                "display_name": "nrm2",
+                "brief": "nrm2 function that returns the Euclidean norm of the vector x.",
+                "target_domain": "",
+                "header_file_name": [
+                    "nrm2.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_res",
+                        "direction": "",
+                        "type": "t_DataType &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::scal",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::scal",
+                "display_name": "scal",
+                "brief": "scal function that compute X = alpha * X",
+                "target_domain": "",
+                "header_file_name": [
+                    "scal.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "number of parallelly processed entries in the packed input vector stream"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "t_DataType p_alpha, hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_res",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::swap",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::swap",
+                "display_name": "swap",
+                "brief": "swap function that swap vector x and y",
+                "target_domain": "",
+                "header_file_name": [
+                    "swap.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "number of parallelly processed entries in the packed input vector stream"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &Res,"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_xRes",
+                        "direction": "",
+                        "type": "Re"
+                    },
+                    {
+                        "name": "p_yRes",
+                        "direction": "",
+                        "type": "Re"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::symv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::symv",
+                "display_name": "symv",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "symv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::blas::trmv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::trmv",
+                "display_name": "trmv",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "trmv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "t_MacType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        }
+    ],
+    "target_domain": ""
+}

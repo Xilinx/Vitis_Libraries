@@ -2,14 +2,15 @@
     "gui": true, 
     "exclude": "README.md", 
     "name": "Xilinx XF_BLAS Gemm 1CU Level 2 Gui Test", 
-    "description": "", 
+    "description": "Test case for general matrix multiplication (C=A*B+X), 1CU build", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250"
     ], 
-    "platform_blacklist": [
-        "vck"
+    "platform_blocklist": [
+        "vck", 
+        "aws-vu9p-f1"
     ], 
     "platform_properties": {
         "u250": {
@@ -89,14 +90,14 @@
     }, 
     "containers": [
         {
-            "name": "blas",
-            "ldclflags": "--config PROJECT/conn_u250.cfg --config PROJECT/opts.cfg",
-            "frequency": 200,
+            "name": "blas", 
+            "ldclflags": "--config PROJECT/conn_u250.cfg --config PROJECT/opts.cfg", 
+            "frequency": 200, 
             "accelerators": [
                 {
                     "name": "blasKernel", 
                     "location": "LIB_DIR/L2/src/memKernel/hw/kernel.cpp", 
-                    "frequency": 200,
+                    "frequency": 200, 
                     "num_compute_units": 0
                 }
             ]
