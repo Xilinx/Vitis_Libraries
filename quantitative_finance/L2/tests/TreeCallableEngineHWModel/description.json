@@ -4,12 +4,12 @@
     "description": "Tree callable fixed-rate bond pricing engine with Hull-White model uses trinomial tree based on 1D lattice method to calculate the pricing result.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
@@ -21,7 +21,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -49,7 +49,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

@@ -1,0 +1,25 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::fintech::ContextErrorCallback",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::fintech::ContextErrorCallback",
+                "display_name": "ContextErrorCallback",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "xf_fintech_internal.hpp"
+                ],
+                "search_paths": [
+                    "L3/include"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        }
+    ],
+    "target_domain": ""
+}

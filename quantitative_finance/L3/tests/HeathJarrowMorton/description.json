@@ -6,12 +6,12 @@
     ], 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "host": {
@@ -49,7 +49,7 @@
                     "name": "hjm_kernel"
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 200.0, 
             "name": "hjm_kernel"
         }
     ], 
@@ -94,11 +94,7 @@
     "launch": [
         {
             "name": "generic launch for all flows", 
-            "cmd_args": "-x BUILD/hjm_kernel.xclbin -f u250 -d ../../data.csv -p 100"
-        }, 
-        {
-            "name": "generic launch for all flows for U50 card", 
-            "cmd_args": "-x BUILD/hjm_kernel.xclbin -f u50 -d ../../data.csv -p 100"
+            "cmd_args": "-x BUILD/hjm_kernel.xclbin -f u250 -d data.csv -p 100"
         }
     ]
 }

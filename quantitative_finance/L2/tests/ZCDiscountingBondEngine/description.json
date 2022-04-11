@@ -4,12 +4,12 @@
     "description": "A zero-coupon bond is a bond which is purchased at a price below the face value of the bond. It does not pay coupon during the contract period, and repays the face value at the time of maturity.", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
@@ -21,7 +21,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -49,7 +49,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

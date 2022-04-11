@@ -5,19 +5,19 @@
     ], 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u50", 
         "u200"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u200": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200.cfg"
                     ]
                 }
@@ -26,7 +26,7 @@
         "u250": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }
@@ -73,6 +73,7 @@
         "category": "canary"
     }, 
     "host": {
+        "host_exe":"host.exe",
         "compiler": {
             "sources": [
                 "LIB_DIR/ext/xcl2/xcl2.cpp", 

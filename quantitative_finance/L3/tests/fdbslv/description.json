@@ -5,12 +5,12 @@
     ], 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "data": [
@@ -93,30 +93,21 @@
             ]
         }
     }, 
-    "platform_properties": {
-        "u250": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u250 card", 
-                    "cmd_args": "BUILD/fd_bs_lv_kernel.xclbin ../../data/case0 u250"
-                }
-            ]
-        }, 
-        "u200": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u200 card", 
-                    "cmd_args": "BUILD/fd_bs_lv_kernel.xclbin ../../data/case0 u200"
-                }
-            ]
-        }, 
-        "u50": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u50 card", 
-                    "cmd_args": "BUILD/fd_bs_lv_kernel.xclbin ../../data/case0 u50"
-                }
-            ]
+    "launch": [
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u250",
+            "cmd_args": "BUILD/fd_bs_lv_kernel.xclbin data/case0 u250"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u200",
+            "cmd_args": "BUILD/fd_bs_lv_kernel.xclbin data/case0 u200"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u50",
+            "cmd_args": "BUILD/fd_bs_lv_kernel.xclbin data/case0 u50"
         }
-    }
+    ]
 }

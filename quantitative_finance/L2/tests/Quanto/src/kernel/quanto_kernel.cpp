@@ -30,11 +30,10 @@
 #include "xf_fintech/cf_bsm.hpp"
 
 /// @brief Specific implementation of this kernel
-///
 #define DT float
 #define DT_EQ_INT uint32_t
 #define NUM_KERNELS 2
-#define BUS_WIDTH (NUM_KERNELS*sizeof(DT)*8)
+#define BUS_WIDTH (NUM_KERNELS * sizeof(DT) * 8)
 
 // Create a type which contains as many streams as we have kernels and a stream
 // thereof

@@ -3,11 +3,11 @@
     "description": "L2 Finite Difference Black Scholes with Local Volatility Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc", 
         "u50"
     ], 

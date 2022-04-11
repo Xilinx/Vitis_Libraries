@@ -25,7 +25,7 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "pentadiag_top.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/xf_fintech -std=c++11"
+add_files "pentadiag_top.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/xf_fintech"
 add_files -tb "main.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/xf_fintech"
 set_top pentadiag_top
 

@@ -4,12 +4,12 @@
         "L2 Quadrature and HCF engine"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u50", 
         "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": [], 
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -41,6 +41,7 @@
         "category": "canary"
     }, 
     "host": {
+        "host_exe": "host.exe",
         "compiler": {
             "sources": [
                 "LIB_DIR/ext/xcl2/xcl2.cpp", 

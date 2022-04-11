@@ -1,15 +1,15 @@
 {
-    "gui": "false", 
+    "gui": false, 
     "name": "Xilinx Heath Jarrow Morton Model", 
     "description": "Heath Jarrow Morton Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "launch": [
@@ -54,7 +54,7 @@
                     "name": "hjm_kernel"
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 200.0, 
             "name": "hjm_kernel"
         }
     ], 

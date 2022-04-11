@@ -5,19 +5,19 @@
     ], 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u50", 
         "u200"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u200": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config LIB_DIR/L2/tests/GarmanKohlhagenEngine/conn_u200.cfg"
                     ]
                 }
@@ -26,7 +26,7 @@
         "u250": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config LIB_DIR/L2/tests/GarmanKohlhagenEngine/conn_u250.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config LIB_DIR/L2/tests/GarmanKohlhagenEngine/conn_u50.cfg"
                     ]
                 }
@@ -119,30 +119,21 @@
             ]
         }
     }, 
-    "platform_properties": {
-        "u250": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u250 card", 
-                    "cmd_args": "BUILD/gk_kernel.xclbin u250"
-                }
-            ]
-        }, 
-        "u50": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u50 card", 
-                    "cmd_args": "BUILD/gk_kernel.xclbin u50"
-                }
-            ]
-        }, 
-        "u200": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u200 card", 
-                    "cmd_args": "BUILD/gk_kernel.xclbin u200"
-                }
-            ]
+    "launch": [
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u250",
+            "cmd_args": "BUILD/gk_kernel.xclbin u250"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u200",
+            "cmd_args": "BUILD/gk_kernel.xclbin u200"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u50",
+            "cmd_args": "BUILD/gk_kernel.xclbin u50"
         }
-    }
+    ]
 }

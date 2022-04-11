@@ -1,16 +1,17 @@
 {
+    "gui": false, 
     "name": "Xilinx Population Markov Chain Monte Carlo Model", 
     "description": [
         "Population Markov Chain Monte Carlo Model using L3 framework"
     ], 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "host": {
@@ -90,30 +91,22 @@
             ]
         }
     }, 
-    "platform_properties": {
-        "u250": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u250 card", 
-                    "cmd_args": "BUILD/hjm_kernel.xclbin u250"
-                }
-            ]
-        }, 
-        "u200": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u200 card", 
-                    "cmd_args": "BUILD/hjm_kernel.xclbin u200"
-                }
-            ]
-        }, 
-        "u50": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u50 card", 
-                    "cmd_args": "BUILD/hjm_kernel.xclbin u50"
-                }
-            ]
+    "launch": [
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u250",
+            "cmd_args": "BUILD/mcmc_kernel.xclbin u250"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u200",
+            "cmd_args": "BUILD/mcmc_kernel.xclbin u200"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u50",
+            "cmd_args": "BUILD/mcmc_kernel.xclbin u50"
         }
-    }
+    ]
+       
 }

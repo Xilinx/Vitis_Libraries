@@ -5,12 +5,12 @@
     ], 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "host": {
@@ -91,30 +91,21 @@
             ]
         }
     }, 
-    "platform_properties": {
-        "u250": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u250 card", 
-                    "cmd_args": "-f BUILD/lmmCapKernel.xclbin -d u250 -l ../../liborRates.csv -v ../../capletVolas.csv"
-                }
-            ]
-        }, 
-        "u200": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u200 card", 
-                    "cmd_args": "-f BUILD/lmmCapKernel.xclbin -d u200 -l ../../liborRates.csv -v ../../capletVolas.csv"
-                }
-            ]
-        }, 
-        "u50": {
-            "launch": [
-                {
-                    "name": "generic launch for all flows for u50 card", 
-                    "cmd_args": "-f BUILD/lmmCapKernel.xclbin -d u50 -l ../../liborRates.csv -v ../../capletVolas.csv"
-                }
-            ]
+    "launch": [
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u250",
+            "cmd_args": "-f BUILD/lmmCapKernel.xclbin -d u250 -l liborRates.csv -v capletVolas.csv"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u200",
+            "cmd_args": "-f BUILD/lmmCapKernel.xclbin -d u200 -l liborRates.csv -v capletVolas.csv"
+        },
+        {
+            "name": "generic launch for all flows", 
+            "platform": "u50",
+            "cmd_args": "-f BUILD/lmmCapKernel.xclbin -d u50 -l liborRates.csv -v capletVolas.csv"
         }
-    }
+    ]
 }
