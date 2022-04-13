@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,13 +48,13 @@ namespace r2comb {
 using namespace xf::dsp::aie::fft::dit_1ch;
 
 template <typename TT_TWIDDLE>
-inline constexpr TT_TWIDDLE null_tw(){};
+INLINE_DECL constexpr TT_TWIDDLE null_tw(){};
 template <>
-inline constexpr cint16 null_tw<cint16>() {
+INLINE_DECL constexpr cint16 null_tw<cint16>() {
     return {0, 0};
 };
 template <>
-inline constexpr cfloat null_tw<cfloat>() {
+INLINE_DECL constexpr cfloat null_tw<cfloat>() {
     return {0.0, 0.0};
 };
 
@@ -64,8 +64,10 @@ constexpr std::array<TT_TWIDDLE, ((TP_POINT_SIZE / 2) >> TP_PARALLEL_POWER)> fnG
     constexpr int kTwiddleTableSize = (TP_POINT_SIZE / 2) >> TP_PARALLEL_POWER;
     std::array<TT_TWIDDLE, kTwiddleTableSize> twiddles = {kzero};
     constexpr TT_TWIDDLE* twiddle_master = fnGetR2TwiddleMasterBase<TT_TWIDDLE>();
-    int idx = ((kR2MasterTableSize >> TP_PARALLEL_POWER) * TP_INDEX);
-    int stride = (2 * kR2MasterTableSize / TP_POINT_SIZE);
+    // int idx = ((kR2MasterTableSize>>TP_PARALLEL_POWER) * TP_INDEX);
+    // int stride =  (2*kR2MasterTableSize/TP_POINT_SIZE);
+    int idx = (2 * kR2MasterTableSize / TP_POINT_SIZE) * TP_INDEX;
+    int stride = (2 * kR2MasterTableSize / TP_POINT_SIZE) << TP_PARALLEL_POWER;
     for (int i = 0; i < kTwiddleTableSize; i++) {
         twiddles[i] = twiddle_master[idx];
         idx += stride;
@@ -82,7 +84,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX>
-__attribute__((noinline)) void
+NOINLINE_DECL void
 fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, TP_INDEX>::
     fft_r2comb_main(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow) {
     alignas(32) static constexpr std::array<TT_TWIDDLE, ((TP_POINT_SIZE / 2) >> TP_PARALLEL_POWER)> twiddles =
@@ -100,10 +102,10 @@ fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_WINDOW
     // perform the R2 stage here.
     TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
     TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
-    const int n = (TP_POINT_SIZE >> TP_PARALLEL_POWER);
+    constexpr int n = (TP_POINT_SIZE >> TP_PARALLEL_POWER);
     unsigned shift = TP_SHIFT + 15;
 
-    for (int i = 0; i < TP_WINDOW_VSIZE; i += TP_POINT_SIZE) {
+    for (int i = 0; i < TP_WINDOW_VSIZE; i += n) {
         r2comb_dit<TT_DATA, TT_TWIDDLE>(xbuff + i, (TT_TWIDDLE*)(&twiddles[0]), n, 0 /* r  */, TP_SHIFT + 15, ybuff + i,
                                         inv);
     }

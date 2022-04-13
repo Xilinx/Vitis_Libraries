@@ -3,7 +3,7 @@
     "description": "",
     "gui": "false",
     "flow": "versal",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "vck190"
     ],
     "data": ["PROJECT/data/"],
@@ -37,7 +37,7 @@
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
                 "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "perl LIB_DIR/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --untile --inFile ./logs/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) ",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) P_DIM_A $(P_DIM_A) P_DIM_AB $(P_DIM_AB) P_DIM_B $(P_DIM_B) P_SHIFT $(P_SHIFT) P_ROUND_MODE $(P_ROUND_MODE) P_DIM_A_LEADING $(P_DIM_A_LEADING) P_DIM_B_LEADING $(P_DIM_B_LEADING) P_DIM_OUT_LEADING $(P_DIM_OUT_LEADING) P_ADD_TILING_A $(P_ADD_TILING_A) P_ADD_TILING_B $(P_ADD_TILING_B) P_ADD_DETILING_OUT $(P_ADD_DETILING_OUT) P_INPUT_WINDOW_VSIZE_A $(P_INPUT_WINDOW_VSIZE_A) P_INPUT_WINDOW_VSIZE_B $(P_INPUT_WINDOW_VSIZE_B) P_CASC_LEN $(P_CASC_LEN) STIM_TYPE_A $(STIM_TYPE_A) STIM_TYPE_B $(STIM_TYPE_B) NITER $(NITER)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) ./aiesimulator_output matMult_impl1",
 		        "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_mtx_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)",
@@ -52,22 +52,18 @@
                 "grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt",
                 "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "perl LIB_DIR/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --untile --inFile ./logs/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) ",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)"
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)"
                 ]
         }
     ],
     "launch": [
         {
             "name": "aiesim-launch",
-            "target": "aiesim",
-            "pkg-dir": "$(WORK_DIR)",
-            "input-dir": "./"
+            "target": "aiesim"
         },
         {
             "name": "x86sim-launch",
-            "target": "x86sim",
-            "pkg-dir": "$(WORK_DIR)",
-            "input-dir": "./"
+            "target": "x86sim"
         }
     ],
     "aiecompiler": {
@@ -82,7 +78,7 @@
                 "./"
             ],
             "customized_params": {
-                "params" : "--dataflow -v --device=$(DEVICE_FILE) $($(TAG)_TARGET_COMPILE_ARGS) --test-iterations=$(NITER_$(TAG)) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params" : "--dataflow -v $($(TAG)_TARGET_COMPILE_ARGS) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "matrix_mult",
@@ -96,23 +92,14 @@
                     "UUT_INPUT_WINDOW_VSIZE":"$(INPUT_WINDOW_VSIZE)",
                     "REF_INPUT_WINDOW_VSIZE": "$$(( $(UUT_INPUT_WINDOW_VSIZE) * $(NITER_UUT) / $(NITER_REF)))",
                     "DATA_TYPE":"cint16",
-                    "COEFF_TYPE":"int16",
-                    "COEFF_SIZE":"2",
-                    "FIR_LEN":"199",
                     "SHIFT":"20",
                     "ROUND_MODE":"0",
                     "CASC_LEN":"1",
                     "P_CASC_LEN":"1",
-                    "DUAL_IP":"0",
-                    "USE_COEFF_RELOAD":"0",
-                    "SYMMETRY_FACTOR": "2",
-                    "INTERPOLATE_FACTOR":"1",
-                    "DECIMATE_FACTOR": "1",
-                    "NUM_OUTPUTS": "1",
-                    "DIFF_TOLERANCE": "0.0025",
+                    "DIFF_TOLERANCE": "0",
+                    "CC_TOLERANCE": "0",
                     "DATA_SEED": "1",
                     "DATA_STIM_TYPE": "0",
-                    "STIM_TYPE":"0",
                     "STIM_TYPE_A":"0",
                     "STIM_TYPE_B":"0",
                     "STACKSIZE_VAL":"2048",
@@ -134,28 +121,17 @@
                     "P_DIM_A_LEADING":"$(ROW_MAJOR)",
                     "P_DIM_B_LEADING":"$(COL_MAJOR)",
                     "P_DIM_OUT_LEADING":"$(ROW_MAJOR)",
-                    "DEVICE_FILE":"4x4",
-                    "COEFF_STIM_TYPE":"0",
-                    "UUT_OUT_DIR":"./aiesimulator_output",
-                    "REF_OUT_DIR_x86": "./aiesimulator_ref_output",
                     "UUT_SIM_FILE":"./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "UUT_SIM_FILE2":"./data/uut_output_2.txt",
                     "REF_SIM_FILE2": "./data/ref_output_2.txt",
-                    "UUT_OUT_FILE":  "$(UUT_OUT_DIR)/$(UUT_SIM_FILE)",
-                    "REF_OUT_FILE": "$(REF_OUT_DIR_X86)/$(REF_SIM_FILE)",
-                    "UUT_OUT_FILE2":  "$(UUT_OUT_DIR)/$(UUT_SIM_FILE2)",
-                    "REF_OUT_FILE2": "$(REF_OUT_DIR_X86)/$(REF_SIM_FILE2)",
-                    "COEFF_FILE": "data/coeff.txt",
-                    "LOC_COEFF_FILE":"./data/coeff.txt",
                     "LOC_INPUT_FILE_A":"./data/inputA.txt",
                     "LOC_INPUT_FILE_B":"./data/inputB.txt",
                     "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(T_DATA_A)_$(T_DATA_B)_$(STIM_TYPE_A)_$(STIM_TYPE_B)_$(P_SHIFT)_$(P_ROUND_MODE)_$(P_DIM_A)_$(P_DIM_AB)_$(P_DIM_B)_$(P_INPUT_WINDOW_VSIZE_A)_$(P_INPUT_WINDOW_VSIZE_B)_$(P_ADD_TILING_A)_$(P_ADD_TILING_B)_$(P_ADD_DETILING_OUT)_$(P_DIM_A_LEADING)_$(P_DIM_B_LEADING)_$(P_DIM_OUT_LEADING)",
                     "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_FILE": "$(STATUS_LOG_FILE)",
-                    "DIFF_OUT_FILE": "diff_output.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:noodle.optim.olbb=20 -Xchess=main:backend.mist2.pnll=\"off\" ",
+                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  -Xchess=main:backend.mist2.pnll=\"off\" ",
                     "REF_TARGET_COMPILE_ARGS":"",
                     "UUT_WORK_DIR":"./Work",
                     "REF_WORK_DIR":"./Work",
@@ -172,9 +148,10 @@
             "accelerators": [
                 {
                     "location": "PROJECT/test.cpp",
+                    "files": ["LIB_DIR/L1/src/aie/matrix_mult.cpp", "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp","LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"],
                     "pl-freq": 1000,
                     "workdir": "./Work",
-                    "options": "--use-phy-shim=false",
+                    "options": "",
                     "name": "libadf.a"
                 }
             ]

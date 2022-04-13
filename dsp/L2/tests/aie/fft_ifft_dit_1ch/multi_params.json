@@ -94,7 +94,55 @@
             "POINT_SIZE":"1024",
             "FFT_NIFFT":"0",
             "SHIFT":"0",
+            "STIM_TYPE":"0",
+            "CC_TOLERANCE":"0.0025",
+            "DIFF_TOLERANCE":"0.0025"
+        },
+        "test_12_fft_ifft_dit_1ch": {
+            "DATA_TYPE":"cint32",
+            "TWIDDLE_TYPE":"cint16",
+            "POINT_SIZE":"1024",
+            "FFT_NIFFT":"0",
+            "API_IO":"1",
+            "PARALLEL_POWER":"1",
+            "SHIFT":"12",
             "STIM_TYPE":"0"
+        },
+        "test_13_fft_8k": {
+            "DATA_TYPE":"cint16",
+            "TWIDDLE_TYPE":"cint16",
+            "POINT_SIZE":"8192",
+            "API_IO":"1",
+            "PARALLEL_POWER":"1",
+            "SHIFT":"13",
+            "NITER":"4"
+        },
+        "test_14_fft_16k": {
+            "DATA_TYPE":"cint16",
+            "TWIDDLE_TYPE":"cint16",
+            "POINT_SIZE":"16384",
+            "API_IO":"1",
+            "PARALLEL_POWER":"2",
+            "SHIFT":"14",
+            "NITER":"4"
+        },
+        "test_15_fft_32k": {
+            "DATA_TYPE":"cint16",
+            "TWIDDLE_TYPE":"cint16",
+            "POINT_SIZE":"32768",
+            "API_IO":"1",
+            "PARALLEL_POWER":"3",
+            "SHIFT":"15",
+            "NITER":"4"
+        },
+        "test_16_fft_64k": {
+            "DATA_TYPE":"cint16",
+            "TWIDDLE_TYPE":"cint16",
+            "POINT_SIZE":"65536",
+            "API_IO":"1",
+            "PARALLEL_POWER":"4",
+            "SHIFT":"16",
+            "NITER":"2"
         }
     }
 }

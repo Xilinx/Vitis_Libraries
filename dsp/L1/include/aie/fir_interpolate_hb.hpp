@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,11 +65,11 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_UPSHIFT_CT = 0>
+          unsigned int TP_UPSHIFT_CT = 0,
+          unsigned int TP_API = 0>
 class kernelFilterClass {
    private:
     // Parameter value defensive and legality checks
-    static_assert(TP_FIR_LEN <= FIR_LEN_MAX, "ERROR: Max supported FIR length exceeded. ");
     static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,
                   "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
                   "below minimum required value. ");
@@ -88,7 +88,10 @@ class kernelFilterClass {
     static_assert(TP_UPSHIFT_CT == 0 || fnUpshiftCTSupport<TT_DATA, TT_COEFF>() == SUPPORTED,
                   "ERROR: Unsupported data/coeff type combination. Upshift CT is only available for 16-bit integer "
                   "combinations.");
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     // There are additional defensive checks after architectural constants have been calculated.
+
     static constexpr unsigned int m_kWinAccessByteSize =
         16; // 16 Bytes. The memory data path is min 128-bits wide for vector operations
     static constexpr unsigned int m_kColumns = fnNumSymColsIntHb<TT_DATA, TT_COEFF>();
@@ -184,15 +187,14 @@ class kernelFilterClass {
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
 
     // Lower polyphase taps internal storage. Initialised to zeros.
-    TT_COEFF chess_storage(% chess_alignof(v16int16))
-        m_internalTapsFSA[CEIL((TP_FIR_LEN + 1) / 4 + 1, m_kCoeffLoadSize)]; // Filter taps/coefficients
-    TT_COEFF chess_storage(% chess_alignof(v16int16)) m_phaseTwoTap[kMaxColumns] = {
+    alignas(32) TT_COEFF m_internalTaps[CEIL((TP_FIR_LEN + 1) / 4 + 1, m_kCoeffLoadSize)]; // Filter taps/coefficients
+    alignas(32) TT_COEFF m_phaseTwoTap[kMaxColumns] = {
         nullElem<TT_COEFF>()}; // note, the array is initializeed, causing extra instructions during initialiation.
     int16 m_ctShift;           // Upshift Center tap
 
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_oldInTaps[CEIL(
-        (TP_FIR_LEN + 1) / 4 + 1, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
-    bool m_coeffnEq;                                  // Are coefficients sets equal?
+    alignas(32) TT_COEFF m_oldInTaps[CEIL((TP_FIR_LEN + 1) / 4 + 1,
+                                          m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
+    bool m_coeffnEq;                                          // Are coefficients sets equal?
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
@@ -212,9 +214,9 @@ class kernelFilterClass {
     static unsigned int get_m_kArch() { return m_kArchZigZag == kArch2BuffZigZag ? kArch2BuffZigZag : m_kArch; };
 
     // Constructors
-    kernelFilterClass() : m_oldInTaps{}, m_internalTapsFSA{} {}
+    kernelFilterClass() : m_oldInTaps{}, m_internalTaps{} {}
 
-    kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) : m_internalTapsFSA{} { firReload(taps); };
+    kernelFilterClass(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) : m_internalTaps{} { firReload(taps); };
 
     void firReload(const TT_COEFF* taps) {
         TT_COEFF* tapsPtr = (TT_COEFF*)taps;
@@ -225,9 +227,9 @@ class kernelFilterClass {
         // Coefficients are pre-arranged, so that
         for (int i = 0; i < CEIL(((TP_FIR_RANGE_LEN + 1) / 4), kMaxColumns); i++) {
             if (i < ((TP_FIR_RANGE_LEN + 1) / 4)) {
-                m_internalTapsFSA[i] = taps[fnFirRangeOffsetSym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION>() / 2 + i];
+                m_internalTaps[i] = taps[fnFirRangeOffsetSym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION>() / 2 + i];
             } else {
-                m_internalTapsFSA[i] = nullElem<TT_COEFF>();
+                m_internalTaps[i] = nullElem<TT_COEFF>();
             }
         }
         if (TP_UPSHIFT_CT == 0) {
@@ -275,7 +277,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_UPSHIFT_CT = 0>
+          unsigned int TP_UPSHIFT_CT = 0,
+          unsigned int TP_API = 0>
 class fir_interpolate_hb : public kernelFilterClass<TT_DATA,
                                                     TT_COEFF,
                                                     TP_FIR_LEN,
@@ -290,7 +293,8 @@ class fir_interpolate_hb : public kernelFilterClass<TT_DATA,
                                                     DUAL_IP_SINGLE,
                                                     USE_COEFF_RELOAD_FALSE,
                                                     TP_NUM_OUTPUTS,
-                                                    TP_UPSHIFT_CT>
+                                                    TP_UPSHIFT_CT,
+                                                    USE_WINDOW_API>
 
 {
    private:
@@ -311,12 +315,13 @@ class fir_interpolate_hb : public kernelFilterClass<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
                             TP_NUM_OUTPUTS,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* restrict outWindow);
+    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -342,21 +347,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_FALSE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT> {
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -375,14 +382,15 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
                             2,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -408,21 +416,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT> {
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API> {
    private:
    public:
     fir_interpolate_hb()
@@ -440,7 +450,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -473,21 +484,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_TRUE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT> {
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API> {
    private:
    public:
     fir_interpolate_hb()
@@ -505,7 +518,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
                             2,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -540,21 +554,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -575,7 +591,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -606,21 +623,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_FALSE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -641,7 +660,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
                             2,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -676,21 +696,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -711,7 +733,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -745,21 +768,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_TRUE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_LEN,
-                                                                   0,
-                                                                   1,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -780,7 +805,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
                             2,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -820,21 +846,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -855,14 +883,15 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload, dual output
@@ -890,21 +919,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_FALSE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -925,15 +956,16 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
                             2,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, no reload, single output
@@ -961,21 +993,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -996,7 +1030,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1006,7 +1041,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, no reload, dual output
@@ -1034,21 +1069,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_FALSE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1069,7 +1106,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
                             2,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1079,8 +1117,8 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, reload, single output
@@ -1108,21 +1146,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1143,14 +1183,15 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, reload, dual output
@@ -1178,21 +1219,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_TRUE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1213,15 +1256,16 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
                             2,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, reload, single output
@@ -1249,21 +1293,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT> {
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1282,7 +1328,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1292,7 +1339,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, reload, dual output
@@ -1320,21 +1367,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_TRUE,
                          2,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_FALSE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   2,
-                                                                   TP_UPSHIFT_CT> {
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1353,7 +1402,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
                             2,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1363,8 +1413,8 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -1393,21 +1443,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1428,7 +1480,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1463,21 +1516,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1498,7 +1553,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1535,21 +1591,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1570,7 +1628,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1607,21 +1666,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_FALSE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1642,7 +1703,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1681,21 +1743,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1716,7 +1780,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1752,21 +1817,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_FALSE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_FALSE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1787,7 +1854,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
                             1,
-                            TP_UPSHIFT_CT>(taps) {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1825,21 +1893,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_SINGLE,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_SINGLE,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1860,7 +1930,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1897,21 +1968,23 @@ class fir_interpolate_hb<TT_DATA,
                          DUAL_IP_DUAL,
                          USE_COEFF_RELOAD_TRUE,
                          1,
-                         TP_UPSHIFT_CT> : public kernelFilterClass<TT_DATA,
-                                                                   TT_COEFF,
-                                                                   TP_FIR_LEN,
-                                                                   TP_SHIFT,
-                                                                   TP_RND,
-                                                                   TP_INPUT_WINDOW_VSIZE,
-                                                                   CASC_IN_TRUE,
-                                                                   CASC_OUT_TRUE,
-                                                                   TP_FIR_RANGE_LEN,
-                                                                   TP_KERNEL_POSITION,
-                                                                   TP_CASC_LEN,
-                                                                   DUAL_IP_DUAL,
-                                                                   USE_COEFF_RELOAD_TRUE,
-                                                                   1,
-                                                                   TP_UPSHIFT_CT>
+                         TP_UPSHIFT_CT,
+                         USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_WINDOW_API>
 
 {
    private:
@@ -1932,7 +2005,8 @@ class fir_interpolate_hb<TT_DATA,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
                             1,
-                            TP_UPSHIFT_CT>() {}
+                            TP_UPSHIFT_CT,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
@@ -1944,6 +2018,1675 @@ class fir_interpolate_hb<TT_DATA,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
 };
+
+// ----------------------------------------------------------------------------
+// ---------------------------------- STREAM ----------------------------------
+// ----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Static coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         1,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_FALSE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, output_stream<TT_DATA>* outStream);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Static coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         1,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_FALSE,
+                         2,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            2,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, output_stream<TT_DATA>* outStream, output_stream<TT_DATA>* outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Reloadable coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         1,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_TRUE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream<TT_DATA>* outStream,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Reloadable coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         1,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_TRUE,
+                         2,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    1,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            2,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Static coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_FALSE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream<TT_DATA>* outStream);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Static coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_FALSE,
+                         2,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            2,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - First Kernel. Static coefficients.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         TP_CASC_LEN,
+                         DUAL_IP_SINGLE,
+                         USE_COEFF_RELOAD_FALSE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - First Kernel. Static coefficients. Dual Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         TP_CASC_LEN,
+                         DUAL_IP_DUAL,
+                         USE_COEFF_RELOAD_FALSE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Middle Kernel. Static coefficients. Single Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         DUAL_IP_SINGLE,
+                         USE_COEFF_RELOAD_FALSE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream_cacc48* outCascade);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Middle Kernel. Static coefficients. Dual Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         DUAL_IP_DUAL,
+                         USE_COEFF_RELOAD_FALSE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_FALSE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Reloadable coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_TRUE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream<TT_DATA>* outStream);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Reloadable coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_FALSE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         TP_DUAL_IP,
+                         USE_COEFF_RELOAD_TRUE,
+                         2,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_FALSE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    TP_DUAL_IP,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    2,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            2,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - First Kernel. Reloadable coefficients. Single Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         TP_CASC_LEN,
+                         DUAL_IP_SINGLE,
+                         USE_COEFF_RELOAD_TRUE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_SINGLE,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream_cacc48* outCascade,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - First Kernel. Reloadable coefficients. Dual Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         0,
+                         TP_CASC_LEN,
+                         DUAL_IP_DUAL,
+                         USE_COEFF_RELOAD_TRUE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_FALSE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    0,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            0,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Middle Kernel. Reloadable coefficients. Single Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         0,
+                         USE_COEFF_RELOAD_TRUE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    0,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            0,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream_cacc48* outCascade);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Middle Kernel. Reloadable coefficients. Dual Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT>
+class fir_interpolate_hb<TT_DATA,
+                         TT_COEFF,
+                         TP_FIR_LEN,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE,
+                         CASC_OUT_TRUE,
+                         TP_FIR_RANGE_LEN,
+                         TP_KERNEL_POSITION,
+                         TP_CASC_LEN,
+                         DUAL_IP_DUAL,
+                         USE_COEFF_RELOAD_TRUE,
+                         1,
+                         TP_UPSHIFT_CT,
+                         USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                    TT_COEFF,
+                                                                    TP_FIR_LEN,
+                                                                    TP_SHIFT,
+                                                                    TP_RND,
+                                                                    TP_INPUT_WINDOW_VSIZE,
+                                                                    CASC_IN_TRUE,
+                                                                    CASC_OUT_TRUE,
+                                                                    TP_FIR_RANGE_LEN,
+                                                                    TP_KERNEL_POSITION,
+                                                                    TP_CASC_LEN,
+                                                                    DUAL_IP_DUAL,
+                                                                    USE_COEFF_RELOAD_TRUE,
+                                                                    1,
+                                                                    TP_UPSHIFT_CT,
+                                                                    USE_STREAM_API> {
+   public:
+    // Constructor
+    fir_interpolate_hb()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            TP_UPSHIFT_CT,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow);
+};
+
+/*
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Static coefficients. Dual Output. Dual Input
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, 1, USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT,
+USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, 1, USE_COEFF_RELOAD_FALSE, 1,
+TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, 1, USE_COEFF_RELOAD_FALSE, 1,
+TP_UPSHIFT_CT, USE_STREAM_API>(taps)
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                output_stream<TT_DATA> *outStream);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Static coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 2,
+TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 2,
+TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 2,
+TP_UPSHIFT_CT, USE_STREAM_API>(taps)
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                output_stream<TT_DATA> *outStream,
+                output_stream<TT_DATA>*  outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Reloadable coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 1,
+TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 1,
+TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 1,
+TP_UPSHIFT_CT, USE_STREAM_API>()
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                output_stream<TT_DATA> *outStream,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN+1)/4+1]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Single kernel specialization. No cascade ports. Reloadable coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 2,
+TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 2,
+TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_FALSE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, 0, 1, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 2,
+TP_UPSHIFT_CT, USE_STREAM_API>()
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                output_stream<TT_DATA> *outStream,
+                output_stream<TT_DATA>*  outStream2,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN+1)/4+1]);
+};
+
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Static coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>(taps)
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48 *inCascade,
+                output_stream<TT_DATA> *outStream);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Static coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 2, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 2, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 2, TP_UPSHIFT_CT, USE_STREAM_API>(taps)
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48 *inCascade,
+                output_stream<TT_DATA> *outStream,
+                output_stream<TT_DATA> *outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - First Kernel. Static coefficients.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, 0, TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE,
+1, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_FALSE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>(taps)
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                output_stream_cacc48 *outCascade);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Middle Kernel. Static coefficients.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, TP_UPSHIFT_CT, USE_STREAM_API>(taps)
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {   printf("chosen this kernel");
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48 *inCascade,
+                output_stream_cacc48 *outCascade);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Reloadable coefficients. Single Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN ,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>()
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48 *inCascade,
+                output_stream<TT_DATA> *outStream);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Final Kernel. Reloadable coefficients. Dual Output
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN ,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 2, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 2, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 2, TP_UPSHIFT_CT, USE_STREAM_API>()
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48 *inCascade,
+                output_stream<TT_DATA> *outStream,
+                output_stream<TT_DATA> *outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - First Kernel. Reloadable coefficients.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_FALSE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, 0, TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 1,
+TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_FALSE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, 0, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_FALSE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, 0, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>()
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                output_stream_cacc48 *outCascade,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN+1)/4+1]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Cascaded Kernels - Middle Kernel. Reloadable coefficients.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_UPSHIFT_CT
+          >
+class fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>:
+public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                         CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>
+{
+public:
+    // Constructor
+    fir_interpolate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, TP_UPSHIFT_CT, USE_STREAM_API>()
+    {
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_interpolate_hb::filter);
+    }
+
+    // FIR
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48 *inCascade,
+                output_stream_cacc48 *outCascade);
+};*/
 }
 }
 }

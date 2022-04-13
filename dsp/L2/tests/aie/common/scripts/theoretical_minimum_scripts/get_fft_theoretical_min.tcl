@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,8 @@ set pointSize           [lindex $argv 3]
 set cascLen             [lindex $argv 4]
 set outStatus           [lindex $argv 5]
 set uutKernel           [lindex $argv 6]
+set parPow              [lindex $argv 7]
+set api                 [lindex $argv 8]
 
 # ------------------------------------------------
 # --- Compute Data Type and Twiddle Type Sizes ---
@@ -29,18 +31,30 @@ set uutKernel           [lindex $argv 6]
 set dataTypeSize 8
 if { ($dataType=="cfloat") || ($dataType=="cint32") } {
     set dataTypeSize 4
-} 
+}
 
 set twiddleTypeSize 8
 if { ($twiddleType=="cfloat") || ($twiddleType=="cint32") } {
     set twiddleTypeSize 4
-} 
+}
+set samplesPerOp 8
+if {  ($dataType=="cint32") } {
+    set samplesPerOp 4
+}
 
 # ------------------------------
 # --- Calculate theoreticals ---
 # ------------------------------
 # Theoretical Minimum Cycle Count
-set minTheoryCycleCount         [expr {$windowSize * int(log($pointSize)/log(2)) / $dataTypeSize / $twiddleTypeSize}]
+set parFactor                   [expr {2**$parPow}]
+set kernelWindow                [expr {$windowSize / $parFactor}]
+set cyclesPerWindow             [expr {$kernelWindow / $samplesPerOp }]
+set ranks                       [expr {ceil(int(log($pointSize)/log(2)+1))}]
+set ranksPerKernel              [expr {int($ranks-$parPow)/$cascLen}]
+if {$ranksPerKernel * $cascLen != $ranks - $parFactor} {
+  incr $ranksPerKernel
+}
+set minTheoryCycleCount         [expr {$cyclesPerWindow * $ranksPerKernel}]
 
 # Max theoretical throughput in MSa per second
 set throughputTheoryMax         [expr {1000 * $windowSize / $minTheoryCycleCount}]
@@ -48,6 +62,11 @@ set throughputTheoryMax         [expr {1000 * $windowSize / $minTheoryCycleCount
 # ----------------------
 # --- Display Result ---
 # ----------------------
+#puts "parFactor          :  $parFactor"
+#puts "kernelWindow       :  $kernelWindow"
+#puts "cyclesPerWindow    :  $cyclesPerWindow"
+#puts "ranks              :  $ranks"
+#puts "ranksPerKernel     :  $ranksPerKernel"
 puts "cycleCountTheoryMin:  $minTheoryCycleCount"
 puts "throughputTheoryMax:  $throughputTheoryMax MSa/s"
 
@@ -59,16 +78,3 @@ puts $outFile "    cycleCountTheoryMin:  $minTheoryCycleCount"
 puts $outFile "    throughputTheoryMax:  $throughputTheoryMax MSa/s"
 close $outFile
 
-
-# ------------------------------
-# --- Depracated Calculation ---
-# ------------------------------
-# set firLength [ expr $numBatches * int(log($pointSize/2)/log(2)) / 2 ]
-# # set up some constants
-# set kAieMacsPerCycle            [expr {128 / $dataTypeSize / $twiddleTypeSize}]
-# set effectiveFirLength          [expr {($firLength / $cascLen)}]
-# if { $effectiveFirLength == 0 } { 
-#     set effectiveFirLength 1
-# }
-# # Min cycle count (no overhead)
-# set minTheoryCycleCount         [expr {($windowSize / $kAieMacsPerCycle) * $effectiveFirLength}]

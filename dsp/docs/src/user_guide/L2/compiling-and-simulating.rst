@@ -1,5 +1,5 @@
 ..
-   Copyright 2021 Xilinx, Inc.
+   Copyright 2022 Xilinx, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,14 +13,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-
-.. _2_COMPILING_AND_SIMULATING:
+.. _COMPILING_AND_SIMULATING:
 
 *******************************************
 Compiling and Simulating Using the Makefile
 *******************************************
 
 A Makefile is included with each library element. It is located in the `L2/tests/aie/<library_element>` directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs. Alternatively, these defaults may be overridden by arguments to the make command as described below.
+
+In addition, example design(s) located in: `L2/examples/<example_design>` contain a Makefile that offers similar functionality.
+Example design(s) are not parametrizable.
 
 Prerequisites:
 
@@ -44,7 +46,7 @@ To overwrite the default parameters, add desired parameters as arguments to the 
 
         make run DATA_TYPE=cint16 SHIFT=16
 
-For list of all the configurable parameters, see the :ref:`2_CONFIGURATION_PARAMETERS`.
+For list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
 
 List of all Makefile targets:
 
@@ -107,12 +109,12 @@ Although it is recommended that only L2 (graphs) library elements are instantiat
 
 An example of how a library element may be configured by a parent graph is provided in the `L2/examples/fir_129t_sym` folder. The example graph, test.h, in the `L2/examples/fir_129t_sym` folder instantiates the fir_sr_sym graph configured to be a 129-tap filter. This example exposes the ports such that the parent graph can be used to replace an existing 129-tap symmetric filter point solution design.
 
-.. _2_CONFIGURATION_PARAMETERS:
+.. _CONFIGURATION_PARAMETERS:
 
 L2 Library Element Configuration Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _2_CONFIGURATION_PARAMETERS_FILTERS:
+.. _CONFIGURATION_PARAMETERS_FILTERS:
 
 L2 FIR configuration parameters
 -------------------------------
@@ -151,10 +153,10 @@ The list below consists of configurable parameters for FIR library elements with
 | DECIMATE_FACTOR        |    unsigned    |    1           | Decimation factor,                   |
 |                        |                |                | see note below                       |
 +------------------------+----------------+----------------+--------------------------------------+
-| DUAL_IP                |    unsigned    |    0           | Dual inputs used in symmetric FIRs,  |
+| DUAL_IP                |    unsigned    |    0           | Dual inputs used in FIRs,            |
 |                        |                |                | see note below                       |
 +------------------------+----------------+----------------+--------------------------------------+
-| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+| NUM_OUTPUTS            |    unsigned    |    1           | Number of output ports.              |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 | USE_COEFF_RELOAD       |    unsigned    |    0           | Use 2 sets of reloadable             |
@@ -167,6 +169,19 @@ The list below consists of configurable parameters for FIR library elements with
 |                        |                |                | 0 - window                           |
 |                        |                |                |                                      |
 |                        |                |                | 1 - stream                           |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+|                        |                |                | Defaults to 1.                       |
+|                        |                |                | see note below                       |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+|                        |                |                | output sample with reference model,  |
+|                        |                |                | e.g. 0.0025 for floats and cfloats.  |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 | GEN_INPUT_DATA         |    bool        |    true        | Generate input data samples.         |
@@ -227,13 +242,32 @@ The list below consists of configurable parameters for FIR library elements with
 |                        |                |                | Only used when GEN_COEFF_DATA=false. |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
+| USE_CHAIN              |    unsigned    |    0           | Connect 2 FIRs back-to-back.         |
+|                        |                |                |                                      |
+|                        |                |                | 0 - connect single FIR               |
+|                        |                |                |                                      |
+|                        |                |                | 1 - connect second FIR back-to-back. |
+|                        |                |                | In/Out interfaces must be            |
+|                        |                |                | compatible.                          |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| USE_CUSTOM_CONSTRAINT  |    unsigned    |    0           | Overwrite default or non-existent.   |
+|                        |                |                |                                      |
+|                        |                |                | 0 - no action                        |
+|                        |                |                |                                      |
+|                        |                |                | 1 - use Graph's access functions     |
+|                        |                |                | to set a location and                |
+|                        |                |                | overwrite a fifo_depth constraint.   |
+|                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 .. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., parameter `INTERPOLATE_FACTOR` is only supported by interpolation filters and will be ignored by other library elements.
 
 
-.. _2_CONFIGURATION_PARAMETERS_FFT:
+.. _CONFIGURATION_PARAMETERS_FFT:
 
 L2 FFT configuration parameters
 -------------------------------
@@ -270,7 +304,23 @@ For the FFT/iFFT library element the list of configurable parameters and default
 | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
 |                        |                |                | feature.                             |
 +------------------------+----------------+----------------+--------------------------------------+
+| API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+|                        |                |                |                                      |
+|                        |                |                | 0 - window                           |
+|                        |                |                |                                      |
+|                        |                |                | 1 - stream                           |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| PARALLEL_POWER         |    unsigned    |   0            | Parallelism, controlling             |
+|                        |                |                | Super Sample Rate operation.         |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
 | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+|                        |                |                | output sample with reference model,  |
+|                        |                |                | e.g. 0.0025 for floats and cfloats.  |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 | GEN_INPUT_DATA         |    bool        |    true        | Generate random input data samples.  |
@@ -303,7 +353,7 @@ For the FFT/iFFT library element the list of configurable parameters and default
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 
-.. _2_CONFIGURATION_PARAMETERS_GEMM:
+.. _CONFIGURATION_PARAMETERS_GEMM:
 
 L2 Matrix Multiply Configuration Parameters
 -------------------------------------------
@@ -366,6 +416,11 @@ For the Matrix Multiply (GeMM) library element the list of configurable paramete
 | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
+| DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+|                        |                |                | output sample with reference model,  |
+|                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
 | STIM_TYPE_A            |    unsigned    |    0           | Supported types:                     |
 |                        |                |                |                                      |
 |                        |                |                | 0 - random                           |
@@ -400,7 +455,7 @@ For the Matrix Multiply (GeMM) library element the list of configurable paramete
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 
-.. _2_CONFIGURATION_PARAMETERS_WIDGETS:
+.. _CONFIGURATION_PARAMETERS_WIDGETS:
 
 L2 Widgets Configuration Parameters
 -----------------------------------
@@ -444,6 +499,26 @@ For the Widgets library elements the list of configurable parameters and default
 | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
+| DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+|                        |                |                | output sample with reference model,  |
+|                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
+|                        |                |                |                                      |
+|                        |                |                | 0 - random                           |
+|                        |                |                |                                      |
+|                        |                |                | 3 - impulse                          |
+|                        |                |                |                                      |
+|                        |                |                | 4 - all ones                         |
+|                        |                |                |                                      |
+|                        |                |                | 5 - incrementing pattern             |
+|                        |                |                |                                      |
+|                        |                |                | 6 - sym incrementing pattern         |
+|                        |                |                |                                      |
+|                        |                |                | 8 - sine wave                        |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
 
 
 *Table 19*: L2 Widget Real to Complex Configuration Parameters
@@ -462,12 +537,32 @@ For the Widgets library elements the list of configurable parameters and default
 | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
+| DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+|                        |                |                | output sample with reference model,  |
+|                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
+|                        |                |                |                                      |
+|                        |                |                | 0 - random                           |
+|                        |                |                |                                      |
+|                        |                |                | 3 - impulse                          |
+|                        |                |                |                                      |
+|                        |                |                | 4 - all ones                         |
+|                        |                |                |                                      |
+|                        |                |                | 5 - incrementing pattern             |
+|                        |                |                |                                      |
+|                        |                |                | 6 - sym incrementing pattern         |
+|                        |                |                |                                      |
+|                        |                |                | 8 - sine wave                        |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
 
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 
-.. _2_CONFIGURATION_PARAMETERS_DDS_MIXER:
+.. _CONFIGURATION_PARAMETERS_DDS_MIXER:
 
 L2 DDS/Mixer Configuration Parameters
 -------------------------------------
@@ -482,7 +577,7 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
 | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
-| INPUT_WINDOW_VSIZE     |    unsigned    |    256         | Input/Output window size.            |
+| WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 | MIXER_MODE             |    unsigned    |    2           | The mode of operation of the         |
@@ -497,9 +592,42 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
 |                        |                |                | mixer, for symmetrical carrier       |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
-| TP_API                 |    unsigned    |    0           | 0 = window,                          |
+| P_API                  |    unsigned    |    0           | 0 = window,                          |
 |                        |                |                |                                      |
 |                        |                |                | 1 = stream                           |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+|                        |                |                | Defaults to 1.                       |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+|                        |                |                | output sample with reference model,  |
+|                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DDS_PHASE_INC          |    unsigned    | 0xD6555555     | DDS Phase Increment.                 |
+|                        |                |                |                                      |
++------------------------+----------------+----------------+--------------------------------------+
+| DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
+|                        |                |                |                                      |
+|                        |                |                | 0 - random                           |
+|                        |                |                |                                      |
+|                        |                |                | 3 - impulse                          |
+|                        |                |                |                                      |
+|                        |                |                | 4 - all ones                         |
+|                        |                |                |                                      |
+|                        |                |                | 5 - incrementing pattern             |
+|                        |                |                |                                      |
+|                        |                |                | 6 - sym incrementing pattern         |
+|                        |                |                |                                      |
+|                        |                |                | 8 - sine wave                        |
 |                        |                |                |                                      |
 +------------------------+----------------+----------------+--------------------------------------+
 

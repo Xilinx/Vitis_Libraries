@@ -2,14 +2,14 @@
     "name": "Xilinx 2D Float Real Impulse", 
     "description": "HLS case", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
     "project": "prj_2dfft_impulse_test2", 
     "solution": "solution1", 
     "clock": "3.33", 
@@ -54,17 +54,17 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 40960, 
+                    "vivado_syn": 40960, 
                     "hls_csim": 10240, 
                     "hls_cosim": 40960, 
-                    "hls_vivado_impl": 40960, 
+                    "vivado_impl": 40960, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
-                    "hls_vivado_syn": 470, 
+                    "vivado_syn": 470, 
                     "hls_csim": 60, 
                     "hls_cosim": 470, 
-                    "hls_vivado_impl": 470, 
+                    "vivado_impl": 470, 
                     "hls_csynth": 300
                 }
             }
@@ -73,8 +73,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "canary"
     }

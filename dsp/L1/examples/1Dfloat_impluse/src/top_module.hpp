@@ -18,4 +18,4 @@
 #include "data_path.hpp"
 #include <hls_stream.h>
 
-void fft_top(T_in p_inData[SSR][FFT_LEN / SSR], T_out p_outData[SSR][FFT_LEN / SSR]);
+void fft_top(hls::stream<T_in> p_inData[SSR], hls::stream<T_out> p_outData[SSR]);

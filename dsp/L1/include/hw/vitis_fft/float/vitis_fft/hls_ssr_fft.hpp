@@ -3280,10 +3280,42 @@ void stream2Array(hls::stream<T_out> strmIn[t_R], T_out arrayOut[t_R][t_L / t_R]
         }
     }
 }
+/**
+ * @brief top of stream-based SSR FFT (float data type)
+ *
+ * @tparam ssr_fft_param_struct SSR FFT parameter structure that can be redefined by users. The default parameters can
+ * be described as:\n
+ *
+ * enum scaling_mode_enum { SSR_FFT_NO_SCALING, SSR_FFT_GROW_TO_MAX_WIDTH, SSR_FFT_SCALE };\n
+ * enum fft_output_order_enum { SSR_FFT_NATURAL, SSR_FFT_DIGIT_REVERSED_TRANSPOSED };\n
+ * enum transform_direction_enum { FORWARD_TRANSFORM, REVERSE_TRANSFORM };\n
+ * enum butterfly_rnd_mode_enum { TRN, CONVERGENT_RND };\n
+ * enum DataTypeEnum { COMPLEX, REAL, IMAG };\n
+ * struct ssr_fft_default_params {\n
+ *     static const int N = 1024;\n
+ *     static const int R = 4;\n
+ *     static const scaling_mode_enum scaling_mode = SSR_FFT_NO_SCALING;\n
+ *     static const fft_output_order_enum output_data_order = SSR_FFT_NATURAL;\n
+ *     static const int twiddle_table_word_length = 18;\n
+ *     static const int twiddle_table_intger_part_length = 2;\n
+ *     static const int default_t_instanceID = HLS_SSR_FFT_DEFAULT_INSTANCE_ID;\n
+ *     static const transform_direction_enum transform_direction = FORWARD_TRANSFORM;\n
+ *     static const butterfly_rnd_mode_enum butterfly_rnd_mode = TRN;\n
+ * };\n
+ * @tparam T_in type of input data
+ *
+ * @param fftInStrm input SSR FFT points, partitioned with ssr_fft_param_struct::R
+ * @param fftOutStrm output SSR FFT results, partitioned with ssr_fft_param_struct::R
+ */
 template <typename ssr_fft_param_struct, typename T_in>
-void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R],
-         typename FFTIOTypes<ssr_fft_param_struct, T_in>::T_outType
-             p_fftOutData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
+void fft(hls::stream<T_in> fftInStrm[ssr_fft_param_struct::R],
+         hls::stream<typename FFTOutputTraits<ssr_fft_param_struct::N,
+                                              ssr_fft_param_struct::R,
+                                              ssr_fft_param_struct::scaling_mode,
+                                              ssr_fft_param_struct::transform_direction,
+                                              ssr_fft_param_struct::butterfly_rnd_mode,
+                                              typename FFTInputTraits<T_in>::T_castedType>::T_FFTOutType>
+             fftOutStrm[ssr_fft_param_struct::R]) {
     enum { FIFO_SIZE = ssr_fft_param_struct::N / ssr_fft_param_struct::R };
     //#pragma HLS INLINE
     //#pragma HLS DATAFLOW  disable_start_propagation
@@ -3310,13 +3342,6 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
     assert((t_R) == (ssrFFTPow<2, ssrFFTLog2<t_R>::val>::val)); // radix should be power of 2 always
     assert((t_L) == (ssrFFTPow<2, ssrFFTLog2<t_L>::val>::val)); // Length of FFt should be power of 2 always
 #endif
-    hls::stream<T_in> fftInStrm[t_R];
-#pragma HLS stream variable = fftInStrm depth = FIFO_SIZE
-    hls::stream<typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
-                                         casted_type>::T_FFTOutType>
-        fftOutStrm[t_R];
-#pragma HLS stream variable = fftOutStrm depth = FIFO_SIZE
-    array2Stream<t_L, t_R, T_in>(p_fftInData, fftInStrm);
     FFTWrapper<(((ssrFFTLog2<t_L>::val) % (ssrFFTLog2<t_R>::val)) > 0), (t_L) < ((t_R * t_R)), default_t_instanceID>
         ssr_fft_wrapper_obj;
     // The 1st template arguments select : if the FFT is forked , if it is then a different architecture is required
@@ -3326,14 +3351,45 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
                            tp_output_data_order, T_complexExpTableType, T_fftTwiddleType, T_in,
                            typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
                                                     casted_type>::T_FFTOutType>(fftInStrm, fftOutStrm);
-    stream2Array<t_L, t_R, typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
-                                                    casted_type>::T_FFTOutType>(fftOutStrm, p_fftOutData);
 }
 
+/**
+ * @brief top of stream-based SSR FFT (float data type)
+ *
+ * @tparam ssr_fft_param_struct SSR FFT parameter structure that can be redefined by users. The default parameters can
+ * be described as:\n
+ *
+ * enum scaling_mode_enum { SSR_FFT_NO_SCALING, SSR_FFT_GROW_TO_MAX_WIDTH, SSR_FFT_SCALE };\n
+ * enum fft_output_order_enum { SSR_FFT_NATURAL, SSR_FFT_DIGIT_REVERSED_TRANSPOSED };\n
+ * enum transform_direction_enum { FORWARD_TRANSFORM, REVERSE_TRANSFORM };\n
+ * enum butterfly_rnd_mode_enum { TRN, CONVERGENT_RND };\n
+ * enum DataTypeEnum { COMPLEX, REAL, IMAG };\n
+ * struct ssr_fft_default_params {\n
+ *     static const int N = 1024;\n
+ *     static const int R = 4;\n
+ *     static const scaling_mode_enum scaling_mode = SSR_FFT_NO_SCALING;\n
+ *     static const fft_output_order_enum output_data_order = SSR_FFT_NATURAL;\n
+ *     static const int twiddle_table_word_length = 18;\n
+ *     static const int twiddle_table_intger_part_length = 2;\n
+ *     static const int default_t_instanceID = HLS_SSR_FFT_DEFAULT_INSTANCE_ID;\n
+ *     static const transform_direction_enum transform_direction = FORWARD_TRANSFORM;\n
+ *     static const butterfly_rnd_mode_enum butterfly_rnd_mode = TRN;\n
+ * };\n
+ * @tparam t_instanceID SSR FFT INSTANCE ID
+ * @tparam T_in type of input data
+ *
+ * @param fftInStrm input SSR FFT points, partitioned with ssr_fft_param_struct::R
+ * @param fftOutStrm output SSR FFT results, partitioned with ssr_fft_param_struct::R
+ */
 template <typename ssr_fft_param_struct, int t_instanceID, typename T_in>
-void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R],
-         typename FFTIOTypes<ssr_fft_param_struct, T_in>::T_outType
-             p_fftOutData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
+void fft(hls::stream<T_in> fftInStrm[ssr_fft_param_struct::R],
+         hls::stream<typename FFTOutputTraits<ssr_fft_param_struct::N,
+                                              ssr_fft_param_struct::R,
+                                              ssr_fft_param_struct::scaling_mode,
+                                              ssr_fft_param_struct::transform_direction,
+                                              ssr_fft_param_struct::butterfly_rnd_mode,
+                                              typename FFTInputTraits<T_in>::T_castedType>::T_FFTOutType>
+             fftOutStrm[ssr_fft_param_struct::R]) {
     enum { FIFO_SIZE = ssr_fft_param_struct::N / ssr_fft_param_struct::R };
     //#pragma HLS INLINE
     //#pragma HLS DATAFLOW disable_start_propagation
@@ -3359,13 +3415,6 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
     assert((t_R) == (ssrFFTPow<2, ssrFFTLog2<t_R>::val>::val)); // radix should be power of 2 always
     assert((t_L) == (ssrFFTPow<2, ssrFFTLog2<t_L>::val>::val)); // Length of FFt should be power of 2 always
 #endif
-    hls::stream<T_in> fftInStrm[t_R];
-#pragma HLS stream variable = fftInStrm depth = FIFO_SIZE
-    hls::stream<typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
-                                         casted_type>::T_FFTOutType>
-        fftOutStrm[t_R];
-#pragma HLS stream variable = fftOutStrm depth = FIFO_SIZE
-    array2Stream<t_L, t_R, T_in>(p_fftInData, fftInStrm);
     FFTWrapper<(((ssrFFTLog2<t_L>::val) % (ssrFFTLog2<t_R>::val)) > 0), (t_L) < ((t_R * t_R)), t_instanceID>
         ssr_fft_wrapper_obj;
     // The 1st template arguments select : if the FFT is forked , if it is then a different architecture is required
@@ -3375,8 +3424,6 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
                            tp_output_data_order, T_complexExpTableType, T_fftTwiddleType, T_in,
                            typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
                                                     casted_type>::T_FFTOutType>(fftInStrm, fftOutStrm);
-    stream2Array<t_L, t_R, typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
-                                                    casted_type>::T_FFTOutType>(fftOutStrm, p_fftOutData);
 }
 
 template <typename ssr_fft_param_struct, typename T_in>

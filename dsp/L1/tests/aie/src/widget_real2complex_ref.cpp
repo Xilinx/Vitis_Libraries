@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ void widget_real2complex_ref<int32, cint32, TP_WINDOW_VSIZE>::convertData(input_
                                                                           output_window<cint32>* outWindow0) {
     int32 d_in;
     cint32 d_out;
+    d_out.imag = 0;
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data
@@ -61,6 +62,7 @@ void widget_real2complex_ref<float, cfloat, TP_WINDOW_VSIZE>::convertData(input_
                                                                           output_window<cfloat>* outWindow0) {
     float d_in;
     cfloat d_out;
+    d_out.imag = 0.0;
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
         d_in = window_readincr(inWindow0); // read input data

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,8 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1>
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = 0>
 class kernelFilterClass {
    private:
 // Parameter value defensive and legality checks
@@ -169,12 +170,11 @@ class kernelFilterClass {
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    TT_COEFF chess_storage(% chess_alignof(v8cint16))
-        m_internalTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
+    alignas(32) TT_COEFF m_internalTaps[CEIL((TP_FIR_RANGE_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
 
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_oldInTaps[CEIL(
-        (TP_FIR_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
-    bool m_coeffnEq;                                            // Are coefficients sets equal?
+    alignas(32) TT_COEFF m_oldInTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor,
+                                          m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
+    bool m_coeffnEq;                                          // Are coefficients sets equal?
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
@@ -238,7 +238,7 @@ class kernelFilterClass {
 
     void firReload(TT_COEFF* taps) {
         TT_COEFF* tapsPtr = (TT_COEFF*)taps;
-        TT_COEFF* restrict m_internalTapsPtr = (TT_COEFF*)m_internalTaps;
+        TT_COEFF* __restrict m_internalTapsPtr = (TT_COEFF*)m_internalTaps;
 
         // Since the intrinsics can have columns, any values in memory beyond the end of the taps array could
         // contaminate the calculation.
@@ -308,7 +308,8 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1>
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = 0>
 class fir_decimate_sym : public kernelFilterClass<TT_DATA,
                                                   TT_COEFF,
                                                   TP_FIR_LEN,
@@ -323,7 +324,8 @@ class fir_decimate_sym : public kernelFilterClass<TT_DATA,
                                                   1,
                                                   DUAL_IP_SINGLE,
                                                   USE_COEFF_RELOAD_FALSE,
-                                                  TP_NUM_OUTPUTS> {
+                                                  TP_NUM_OUTPUTS,
+                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -342,13 +344,14 @@ class fir_decimate_sym : public kernelFilterClass<TT_DATA,
                             1,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            1,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* restrict outWindow);
+    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Standalone kernel specialization with no cascade ports, a single input, no reload, dual output
@@ -373,21 +376,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_FALSE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -406,15 +411,16 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
-                            2>(taps) {}
+                            2,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Single kernel specialization. No cascade ports, single input, with reload coefficients. single output
@@ -439,21 +445,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -472,7 +480,8 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            1,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -505,21 +514,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_TRUE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -538,7 +549,8 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
-                            2>() {}
+                            2,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -572,21 +584,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -605,7 +619,8 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            1,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -638,21 +653,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_FALSE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -671,7 +688,8 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
-                            2>(taps) {}
+                            2,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -706,21 +724,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -739,7 +759,8 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            1,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -774,21 +795,23 @@ class fir_decimate_sym<TT_DATA,
                        1,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_TRUE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_LEN,
-                                                     0,
-                                                     1,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -807,7 +830,8 @@ class fir_decimate_sym<TT_DATA,
                             1,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
-                            2>() {}
+                            2,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -847,21 +871,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -880,7 +906,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            1,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -888,7 +915,7 @@ class fir_decimate_sym<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload, dual output
@@ -916,21 +943,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_FALSE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -949,7 +978,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
-                            2>(taps) {}
+                            2,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -957,8 +987,8 @@ class fir_decimate_sym<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, no reload, single output
@@ -986,21 +1016,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1019,7 +1051,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            1,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1028,7 +1061,7 @@ class fir_decimate_sym<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, no reload, dual output
@@ -1056,21 +1089,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_FALSE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1089,7 +1124,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
-                            2>(taps) {}
+                            2,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1098,8 +1134,8 @@ class fir_decimate_sym<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, with reload, single
@@ -1128,21 +1164,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1161,7 +1199,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            1,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1169,7 +1208,7 @@ class fir_decimate_sym<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, with reload, dual
@@ -1198,21 +1237,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_TRUE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1231,7 +1272,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
-                            2>() {}
+                            2,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1239,8 +1281,8 @@ class fir_decimate_sym<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, with reload, single
@@ -1269,21 +1311,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       1,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  1,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1302,7 +1346,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            1,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1311,7 +1356,7 @@ class fir_decimate_sym<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow);
+                output_window<TT_DATA>* __restrict outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, with reload, dual output
@@ -1339,21 +1384,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_TRUE,
-                       2> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_FALSE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     2> {
+                       2,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  2,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1372,7 +1419,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
-                            2>() {}
+                            2,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1381,8 +1429,8 @@ class fir_decimate_sym<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2);
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -1396,7 +1444,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1411,21 +1460,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1444,7 +1495,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1465,7 +1517,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1480,21 +1533,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1513,7 +1568,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1535,7 +1591,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1550,21 +1607,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1583,7 +1642,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1605,7 +1665,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1620,21 +1681,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_FALSE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1653,7 +1716,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1677,7 +1741,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1692,21 +1757,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1725,7 +1792,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1747,7 +1815,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1762,21 +1831,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_FALSE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_FALSE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1795,7 +1866,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_FALSE,
-                            1>(taps) {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1818,7 +1890,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1833,21 +1906,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_SINGLE,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_SINGLE,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1866,7 +1941,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_SINGLE,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1888,7 +1964,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
 class fir_decimate_sym<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -1903,21 +1980,23 @@ class fir_decimate_sym<TT_DATA,
                        TP_CASC_LEN,
                        DUAL_IP_DUAL,
                        USE_COEFF_RELOAD_TRUE,
-                       1> : public kernelFilterClass<TT_DATA,
-                                                     TT_COEFF,
-                                                     TP_FIR_LEN,
-                                                     TP_DECIMATE_FACTOR,
-                                                     TP_SHIFT,
-                                                     TP_RND,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     CASC_IN_TRUE,
-                                                     CASC_OUT_TRUE,
-                                                     TP_FIR_RANGE_LEN,
-                                                     TP_KERNEL_POSITION,
-                                                     TP_CASC_LEN,
-                                                     DUAL_IP_DUAL,
-                                                     USE_COEFF_RELOAD_TRUE,
-                                                     1> {
+                       TP_NUM_OUTPUTS,
+                       USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_WINDOW_API> {
    private:
    public:
     // Constructor
@@ -1936,7 +2015,8 @@ class fir_decimate_sym<TT_DATA,
                             TP_CASC_LEN,
                             DUAL_IP_DUAL,
                             USE_COEFF_RELOAD_TRUE,
-                            1>() {}
+                            TP_NUM_OUTPUTS,
+                            USE_WINDOW_API>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
@@ -1944,6 +2024,1169 @@ class fir_decimate_sym<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_window<TT_DATA>* inWindowReverse,
+                input_stream_cacc48* inCascade,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow);
+};
+
+/////////////////////////////////////////////////////////////////////////
+//////////// stream
+
+// Standalone kernel specialization with no cascade ports, a single input, no reload, single output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_LEN,
+                       0,
+                       1,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_FALSE,
+                       1,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  1,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, output_stream<TT_DATA>* restrict outStream);
+};
+
+// Standalone kernel specialization with no cascade ports, a single input, no reload, dual output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_LEN,
+                       0,
+                       1,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_FALSE,
+                       2,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  2,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            2,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream<TT_DATA>* restrict outStream,
+                output_stream<TT_DATA>* restrict outStream2);
+};
+
+// Single kernel specialization. No cascade ports, single input, with reload coefficients. single output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_LEN,
+                       0,
+                       1,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_TRUE,
+                       1,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  1,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream<TT_DATA>* outStream,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
+};
+
+// Single kernel specialization. No cascade ports, single input, with reload coefficients. dual output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_LEN,
+                       0,
+                       1,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_TRUE,
+                       2,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_LEN,
+                                                                  0,
+                                                                  1,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  2,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_LEN,
+                            0,
+                            1,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            2,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload, single
+// output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_FALSE,
+                       1,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  1,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* restrict outStream);
+};
+
+// Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload, dual output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_FALSE,
+                       2,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  2,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE,
+                            2,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* restrict outStrean,
+                output_stream<TT_DATA>* restrict outStream2);
+};
+
+// Partially specialized classes for cascaded interface (final kernel in cascade), single input, with reload, single
+// output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_TRUE,
+                       1,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  1,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* restrict outStream);
+};
+
+// Partially specialized classes for cascaded interface (final kernel in cascade), single input, with reload, dual
+// output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DUAL_IP>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_FALSE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       TP_DUAL_IP,
+                       USE_COEFF_RELOAD_TRUE,
+                       2,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_FALSE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  TP_DUAL_IP,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  2,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE,
+                            2,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* restrict outStream,
+                output_stream<TT_DATA>* restrict outStream2);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interface (First kernel in cascade), single/dual input, no reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_SINGLE,
+                       USE_COEFF_RELOAD_FALSE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_FALSE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interface (First kernel in cascade), single/dual input, no reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_DUAL,
+                       USE_COEFF_RELOAD_FALSE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_FALSE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow);
+};
+
+// Partially specialized classes for cascaded interface (First kernel in cascade), single input, with reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_SINGLE,
+                       USE_COEFF_RELOAD_TRUE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_TRUE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream_cacc48* outCascade,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
+};
+// Partially specialized classes for cascaded interface (First kernel in cascade), dual input, with reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_FALSE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_DUAL,
+                       USE_COEFF_RELOAD_TRUE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_FALSE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_FALSE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_TRUE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow,
+                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interface (middle kernels in cascade), single input, no reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_SINGLE,
+                       USE_COEFF_RELOAD_FALSE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_FALSE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream_cacc48* outCascade);
+};
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interface (middle kernels in cascade), dual input, no reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_DUAL,
+                       USE_COEFF_RELOAD_FALSE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_FALSE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_FALSE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream_cacc48* outCascade,
+                output_window<TT_DATA>* broadcastWindow);
+};
+
+// Partially specialized classes for cascaded interface (middle kernels in cascade), single input, with reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_SINGLE,
+                       USE_COEFF_RELOAD_TRUE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_SINGLE,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_SINGLE,
+                            USE_COEFF_RELOAD_TRUE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream_cacc48* outCascade);
+};
+
+// Partially specialized classes for cascaded interface (middle kernels in cascade), single input, with reload
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS>
+class fir_decimate_sym<TT_DATA,
+                       TT_COEFF,
+                       TP_FIR_LEN,
+                       TP_DECIMATE_FACTOR,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_INPUT_WINDOW_VSIZE,
+                       CASC_IN_TRUE,
+                       CASC_OUT_TRUE,
+                       TP_FIR_RANGE_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_LEN,
+                       DUAL_IP_DUAL,
+                       USE_COEFF_RELOAD_TRUE,
+                       TP_NUM_OUTPUTS,
+                       USE_STREAM_API> : public kernelFilterClass<TT_DATA,
+                                                                  TT_COEFF,
+                                                                  TP_FIR_LEN,
+                                                                  TP_DECIMATE_FACTOR,
+                                                                  TP_SHIFT,
+                                                                  TP_RND,
+                                                                  TP_INPUT_WINDOW_VSIZE,
+                                                                  CASC_IN_TRUE,
+                                                                  CASC_OUT_TRUE,
+                                                                  TP_FIR_RANGE_LEN,
+                                                                  TP_KERNEL_POSITION,
+                                                                  TP_CASC_LEN,
+                                                                  DUAL_IP_DUAL,
+                                                                  USE_COEFF_RELOAD_TRUE,
+                                                                  TP_NUM_OUTPUTS,
+                                                                  USE_STREAM_API> {
+   private:
+   public:
+    // Constructor
+    fir_decimate_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_DECIMATE_FACTOR,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_TRUE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_TRUE,
+                            TP_NUM_OUTPUTS,
+                            USE_STREAM_API>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_sym::filter); }
+
+    // FIR
+    void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);

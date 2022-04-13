@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,14 @@
 #define NUM_ITER 1
 #endif
 
+#ifndef PORT_API
+#define PORT_API 0
+#endif
+
+#ifndef UUT_SSR
+#define UUT_SSR 1
+#endif
+
 #ifndef CASC_LEN
 #define CASC_LEN 1
 #endif
@@ -65,6 +73,26 @@
 
 #ifndef COEFF_SEED
 #define COEFF_SEED 0xC0FFEE
+#endif
+
+// Force reference model to ignore SSR and only use array length 1
+#ifdef USING_UUT
+#define P_SSR UUT_SSR
+#else
+#define P_SSR 1
+#endif
+
+#ifndef USING_UUT
+#undef PORT_API
+#undef NUM_OUTPUTS
+#undef DUAL_IP
+#define PORT_API 0
+#define NUM_OUTPUTS 1
+#define DUAL_IP 0
+#endif
+
+#ifndef DUAL_IP
+#define DUAL_IP 0
 #endif
 
 // END OF UUT CONFIGURATION

@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -73,12 +73,11 @@ puts "dataTypeSize: $dataTypeSize"
 # ------------------------------
 # Widget Api Cast
 if {$uutKernel=="widget_api_cast"} {
-    puts "we are here"
     if {($inApi==0) && ($outApi==0)} {
         set minTheoryCycleCount     [expr {$windowSize / (32/$dataTypeSize) / $numOutputClones}]
     } elseif {($inApi==1) && ($outApi==0)} {
         set minTheoryCycleCount     [expr {$windowSize / (4/$dataTypeSize) / $numInputs}]
-    } elseif {($inApi==0) && ($outApi==1)} {    
+    } elseif {($inApi==0) && ($outApi==1)} {
         set minTheoryCycleCount     [expr {$windowSize / (4/$dataTypeSize) / $numOutputClones}]
     } else {
         set minTheoryCycleCount     [expr {$windowSize / (4/$dataTypeSize) / min($numOutputClones, $numInputs)}]
@@ -110,19 +109,3 @@ set outFile [open $outStatus a]
 puts $outFile "    cycleCountTheoryMin:  $minTheoryCycleCount"
 puts $outFile "    throughputTheoryMax:  $throughputTheoryMax MSa/s"
 close $outFile
-
-
-# ------------------------------
-# --- Depracated Calculation ---
-# ------------------------------
-# # set up some constants
-# set kAieMacsPerCycle            [expr {128 / $dataTypeSize / 4}]
-# set effectiveFirLength          1
-# if { $effectiveFirLength == 0 } { 
-#     set effectiveFirLength 1
-# }
-# # Min cycle count (no overhead)
-# set minTheoryCycleCount         [expr {($windowSize / $kAieMacsPerCycle) * $effectiveFirLength}]
-
-# # Max theoretical throughput in MSa per second
-# set throughputTheoryMax  [expr {1000 * $windowSize / $minTheoryCycleCount}]

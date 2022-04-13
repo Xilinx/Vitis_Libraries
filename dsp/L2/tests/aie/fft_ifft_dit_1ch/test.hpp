@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,9 +34,11 @@ fft_ifft_dit_1ch graph class.
 #define UUT_GRAPH fft_ifft_dit_1ch_graph
 #endif
 
-#include QUOTE(UUT_GRAPH.hpp)
+// location constraints for POINT_SIZE=65536
+#define LOC_XBASE 1
+#define LOC_YBASE 0
 
-#include "widget_api_cast_graph.hpp"
+#include QUOTE(UUT_GRAPH.hpp)
 
 using namespace adf;
 
@@ -48,8 +50,8 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    port<input> in[(1 + API_IO) << PARALLEL_POWER];
-    port<output> out[(1 + API_IO) << PARALLEL_POWER];
+    std::array<input_plio, ((1 + API_IO) << PARALLEL_POWER)> in;
+    std::array<output_plio, ((1 + API_IO) << PARALLEL_POWER)> out;
 
     // Constructor
     test_graph() {
@@ -75,6 +77,9 @@ class test_graph : public graph {
         printf("TWIDDLE type         = ");
         printf(QUOTE(TWIDDLE_TYPE));
         printf("\n");
+        printf("PARAMETERS OF TEST:\n-------------------\n");
+        printf("STIM_TYPE            = %d \n", STIM_TYPE);
+        printf("NITER                = %d \n", NITER);
 
         printf("========================\n");
 
@@ -82,16 +87,65 @@ class test_graph : public graph {
         xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
                                               DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER>
             fftGraph;
-        if (API_IO == 1) {                                    // dual streams for input
-            for (int i = 0; i < (2 << PARALLEL_POWER); i++) { // 2? 2 streams per subframe FFT
-                connect<stream>(in[i], fftGraph.in[i]);   // window<(WINDOW_VSIZE*sizeof(DATA_TYPE)>>PARALLEL_POWER)>
-                connect<stream>(fftGraph.out[i], out[i]); // avoiding multiple drivers by being outside the loop
-            }
-        } else { // native single window input to FFT
+        for (int i = 0; i < ((1 + API_IO) << PARALLEL_POWER); i++) {
+            std::string filenameOut = QUOTE(OUTPUT_FILE);
+            std::string filenameIn = QUOTE(INPUT_FILE);
+
+            // Insert SSR index into filename before extension (.txt), e.g. input_X_Y.txt
+            // where X is ssr index (used even when there is only one port) and Y is for dual stream format (not used in
+            // FFT)
+            filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
+            filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
+
             // Make connections
-            // Size of window in Bytes.
-            connect<>(in[0], fftGraph.in[0]);
-            connect<>(fftGraph.out[0], out[0]);
+            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_32_bits, filenameIn);
+            connect<>(in[i].out[0], fftGraph.in[i]);
+
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            connect<>(fftGraph.out[i], out[i].in[0]);
+
+// apply location constraints for TP_POINT_SIZE=64k
+#ifdef USING_UUT
+#if (POINT_SIZE == 65536)
+            for (int lane = 0; lane < 16; lane++) {
+                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 4);
+            }
+            for (int lane = 0; lane < 8; lane++) {
+                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 3);
+                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 3);
+            }
+            for (int lane = 0; lane < 4; lane++) {
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 2);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 2);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 24, LOC_YBASE + CASC_LEN + 2);
+            }
+            for (int lane = 0; lane < 2; lane++) {
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 12, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 20, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 24, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 28, LOC_YBASE + CASC_LEN + 1);
+            }
+#endif //(POINT_SIZE == 65536)
+#endif // USING_UUT
         }
     };
 };

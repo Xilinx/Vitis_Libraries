@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,8 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    port<input> in;
-    port<output> out;
+    std::array<input_plio, 1> in;
+    std::array<output_plio, 1> out;
 
     // Constructor
     test_graph() {
@@ -66,8 +66,15 @@ class test_graph : public graph {
         dsplib::widget::real2complex::UUT_GRAPH<DATA_TYPE, DATA_OUT_TYPE, WINDOW_VSIZE> widgetGraph;
 
         // Make connections
-        connect<>(in, widgetGraph.in);
-        connect<>(widgetGraph.out, out);
+        std::string filenameIn = QUOTE(INPUT_FILE);
+        filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(0) + "_0"));
+        in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_32_bits, filenameIn);
+        connect<>(in[0].out[0], widgetGraph.in);
+
+        std::string filenameOut = QUOTE(OUTPUT_FILE);
+        filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(0) + "_0"));
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        connect<>(widgetGraph.out, out[0].in[0]);
 
 #ifdef USING_UUT
 #define CASC_LEN 1

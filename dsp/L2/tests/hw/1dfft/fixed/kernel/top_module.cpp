@@ -20,10 +20,10 @@
 extern "C" void fft1DKernel(ap_uint<512> p_inData[FFT_LEN * N_FFT / SSR],
                             ap_uint<512> p_outData[FFT_LEN * N_FFT / SSR],
                             int n_frames) {
-#pragma HLS interface m_axi port p_inData = gmem0 offset = slave
+#pragma HLS interface m_axi port = p_inData bundle = gmem0 offset = slave
 #pragma HLS interface s_axilite port = p_inData bundle = control
 
-#pragma HLS interface m_axi port p_outData = gmem0 offset = slave
+#pragma HLS interface m_axi port = p_outData bundle = gmem0 offset = slave
 #pragma HLS interface s_axilite port = p_outData bundle = control
 
 #pragma HLS interface s_axilite port = n_frames bundle = control

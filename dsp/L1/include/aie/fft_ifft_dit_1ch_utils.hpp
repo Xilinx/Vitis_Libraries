@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,13 @@
 #ifndef _DSPLIB_FFT_IFFT_DIT_1CH_UTILS_HPP_
 #define _DSPLIB_FFT_IFFT_DIT_1CH_UTILS_HPP_
 
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
+
 /*
 FFT (1 channel DIT) Utilities
 This file contains sets of overloaded, templatized and specialized templatized functions for use
@@ -29,10 +36,6 @@ because they are purely for kernel use, not graph level compilation.
 
 #include "aie_api/aie_adf.hpp"
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-
 // Pragma unroll complains if you try to unroll(0);
 // It's safe to just unroll(1) in this circumstance.
 #define GUARD_ZERO(x) ((x) > 0 ? (x) : 1)
@@ -42,89 +45,6 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace dit_1ch {
-template <typename T_D, typename T_TW>
-struct T_acc {};
-template <>
-struct T_acc<int16, cint16> {
-    v8cacc48 valUpper = null_v8cacc48();
-    v8cacc48 valLower = null_v8cacc48();
-};
-template <>
-struct T_acc<cint16, cint16> {
-    v8cacc48 valUpper = null_v8cacc48();
-    v8cacc48 valLower = null_v8cacc48();
-};
-template <>
-struct T_acc<int32, cint16> {
-    v4cacc80 valUpper = null_v4cacc80();
-    v4cacc80 valLower = null_v4cacc80();
-};
-template <>
-struct T_acc<int32, cint32> {
-    v4cacc80 valUpper = null_v4cacc80();
-    v4cacc80 valLower = null_v4cacc80();
-};
-template <>
-struct T_acc<cint32, cint16> {
-    v4cacc80 valUpper = null_v4cacc80();
-    v4cacc80 valLower = null_v4cacc80();
-};
-template <>
-struct T_acc<cint32, cint32> {
-    v2cacc80 valUpper = null_v2cacc80();
-    v2cacc80 valLower = null_v2cacc80();
-};
-template <>
-struct T_acc<float, cfloat> {
-    v4cfloat valUpper = null_v4cfloat();
-    v4cfloat valLower = null_v4cfloat();
-};
-template <>
-struct T_acc<cfloat, cfloat> {
-    v4cfloat valUpper = null_v4cfloat();
-    v4cfloat valLower = null_v4cfloat();
-};
-
-template <typename T_D>
-struct T_dXreg {};
-template <>
-struct T_dXreg<cint16> {
-    v8cint16 val;
-};
-template <>
-struct T_dXreg<cint32> {
-    v8cint32 val;
-};
-template <>
-struct T_dXreg<cfloat> {
-    v8cfloat val;
-};
-
-template <typename T_D>
-struct T_dYreg {};
-template <>
-struct T_dYreg<cint16> {
-    v16cint16 val;
-};
-template <>
-struct T_dYreg<cint32> {
-    v8cint32 val;
-};
-template <>
-struct T_dYreg<cfloat> {
-    v8cfloat val;
-};
-
-template <typename T_TW>
-struct T_twreg {};
-template <>
-struct T_twreg<cint16> {
-    v8cint16 val;
-};
-template <>
-struct T_twreg<cfloat> {
-    v8cfloat val;
-};
 
 template <typename T_D>
 T_D INLINE_DECL unitVector(){};
@@ -197,18 +117,20 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
 
     auto it_stage = fft.begin_stage(x, tw1, tw2, dummytw);
     auto it_out0 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y);
+    auto it_out1 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y + 2 * n / kStageRadix);
+    const int block_size = n / (kStageRadix * FFT::out_vector_size);
 
-    for (int j = 0; j < n / (kStageRadix * FFT::out_vector_size); ++j)
-        chess_prepare_for_pipelining chess_loop_range(1, ) {
-            const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+    for (int j = 0; j < block_size; ++j) chess_prepare_for_pipelining chess_loop_range(1, ) {
+            auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+
             *it_out0 = out[0];
-            it_out0 += kIndexStep;
+            it_out0 += block_size;
             *it_out0 = out[1];
-            it_out0 += kIndexStep;
-            *it_out0 = out[2];
-            it_out0 += kIndexStep;
-            *it_out0 = out[3];
-            it_out0 += -(3 * kIndexStep) + 1;
+            it_out0 += -block_size + 1;
+            *it_out1 = out[2];
+            it_out1 += block_size;
+            *it_out1 = out[3];
+            it_out1 += -block_size + 1;
         }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 #include "matrix_mult_tiler.hpp"
 #include "matrix_mult_tiler_common.hpp"
 
-#include "debug_utils.h"
+//#define _DSPLIB_MATRIX_MULT_TILER_HPP_DEBUG_
 
 #ifndef ROW_MAJOR
 #define ROW_MAJOR 0
@@ -143,9 +143,10 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
     // printf("Offsets: lo : %0X, hi: %0X\n", offsets.lo, offsets.hi);
     const unsigned loadsPerVector = vectorSize / loadSize;
 
-    const unsigned columnsPerVector = (leadingDim == ROW_MAJOR)
-                                          ? (vectorSize / M <= inCol) ? loadSize * (loadsPerVector) / M : inCol
-                                          : (loadSize >= M) ? (loadsPerVector) : (loadsPerVector) / (M / loadSize);
+    const unsigned columnsPerVector =
+        (leadingDim == ROW_MAJOR)
+            ? (vectorSize / M <= inCol) ? loadSize * (loadsPerVector) / M : inCol
+            : (loadSize >= inCol) ? inCol : (loadSize >= M) ? (loadsPerVector) : (loadsPerVector) / (M / loadSize);
     const unsigned rowsPerVector =
         (leadingDim == ROW_MAJOR) ? (vectorSize / M <= inCol) ? M : vectorSize / inCol : (loadSize >= M) ? loadSize : M;
     const unsigned colElementDist = (leadingDim == ROW_MAJOR) ? 1 : inRow;
@@ -269,7 +270,7 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
 namespace aie = ::aie;
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 void tilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::tile(input_window<T_D>* inWindow,
-                                                                 output_window<T_D>* restrict outWindow) {
+                                                                 output_window<T_D>* __restrict outWindow) {
     // printf("Going to tile matrix\n");
     doTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow->ptr, (T_D*)outWindow->ptr);
 };

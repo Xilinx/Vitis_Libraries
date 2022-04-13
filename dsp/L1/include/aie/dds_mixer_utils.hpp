@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ namespace dds_mixer {
 
 template <typename TT_DATA, typename PortType>
 template <unsigned int VECTOR_LEN>
-auto inline T_IFbase<TT_DATA, PortType>::port_readincr(PortType* in) {
+auto INLINE_DECL T_IFbase<TT_DATA, PortType>::port_readincr(PortType* in) {
     // check which IO API we should use
     if
         constexpr(std::is_same_v<PortType, input_window<TT_DATA> >) { // todo - check if we should use is_convertable or
@@ -53,7 +53,7 @@ auto inline T_IFbase<TT_DATA, PortType>::port_readincr(PortType* in) {
 // this should also work for cascade
 template <typename TT_DATA, typename PortType>
 template <typename OutDType>
-void inline T_IFbase<TT_DATA, PortType>::port_writeincr(PortType* out, OutDType data) {
+void INLINE_DECL T_IFbase<TT_DATA, PortType>::port_writeincr(PortType* out, OutDType data) {
     // check which IO API we should use
     if
         constexpr(std::is_same_v<PortType, output_window<TT_DATA> >) { // todo - check if we should use is_convertable

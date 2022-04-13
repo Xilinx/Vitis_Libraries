@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 DDS reference model
 */
 
+//#define _DSPLIB_DDS_MIXER_REF_DEBUG_
+
 #include <adf.h>
 #include <limits>
 namespace xf {
@@ -27,6 +29,24 @@ namespace aie {
 namespace mixer {
 namespace dds_mixer {
 
+// This mimics the uut function ddsMulVecScalarLanes.
+template <typename T_DATA>
+constexpr unsigned int fnDDSLanes() {
+    return 0;
+}; // default is error trap
+template <>
+constexpr unsigned int fnDDSLanes<cint16>() {
+    return 8;
+};
+template <>
+constexpr unsigned int fnDDSLanes<cint32>() {
+    return 4;
+};
+template <>
+constexpr unsigned int fnDDSLanes<cfloat>() {
+    return 4;
+};
+
 //-----------------------------------------------------------------------------------------------------
 // dds_mixer_ref class
 template <typename TT_DATA, // type of data input and output
@@ -34,20 +54,15 @@ template <typename TT_DATA, // type of data input and output
           unsigned int TP_MIXER_MODE>
 class dds_mixer_ref {
    private:
+    typedef typename std::conditional<std::is_same<TT_DATA, cint32>::value, cint16, TT_DATA>::type T_DDS_TYPE;
+    static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA>();
     unsigned int m_samplePhaseInc;
-
-    unsigned int phase_update_accum = 0; // used to accumulate over multiple input windows
+    unsigned int m_phaseAccum = 0; // used to accumulate over multiple input windows
+    T_DDS_TYPE phRotref[kNumLanes];
 
    public:
     // Constructor
-    dds_mixer_ref(uint32_t phaseInc) {
-        printf("======================================\n");
-        printf("== DDS_MIXER_REF.HPP  MIXER MODE = 2  \n");
-        printf("======================================\n");
-
-        m_samplePhaseInc = phaseInc;
-    }
-
+    dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset = 0);
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer_ref::ddsMix); }
     // DDS
@@ -56,24 +71,20 @@ class dds_mixer_ref {
 
 //===========================================================
 // SPECIALIZATION for mixer_mode = 1
-//===============
+//===========================================================
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE>
 class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1> {
    private:
+    typedef typename std::conditional<std::is_same<TT_DATA, cint32>::value, cint16, TT_DATA>::type T_DDS_TYPE;
+    static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA>();
     unsigned int m_samplePhaseInc;
-
-    unsigned int phase_update_accum = 0; // used to accumulate over multiple input windows
+    unsigned int m_phaseAccum = 0; // used to accumulate over multiple input windows
+    T_DDS_TYPE phRotref[kNumLanes];
 
    public:
     // Constructor
-    dds_mixer_ref(uint32_t phaseInc) {
-        printf("======================================\n");
-        printf("== DDS_MIXER_REF.HPP  MIXER MODE = 1  \n");
-        printf("======================================\n");
-
-        m_samplePhaseInc = phaseInc;
-    }
+    dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset = 0);
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer_ref::ddsMix); }
@@ -83,24 +94,20 @@ class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1> {
 
 //===========================================================
 // SPECIALIZATION for mixer_mode = 0
-//===============
+//===========================================================
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE>
 class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0> {
    private:
+    typedef typename std::conditional<std::is_same<TT_DATA, cint32>::value, cint16, TT_DATA>::type T_DDS_TYPE;
+    static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA>();
     unsigned int m_samplePhaseInc;
-
-    unsigned int phase_update_accum = 0; // used to accumulate over multiple input windows
+    unsigned int m_phaseAccum = 0; // used to accumulate over multiple input windows
+    T_DDS_TYPE phRotref[kNumLanes];
 
    public:
     // Constructor
-    dds_mixer_ref(uint32_t phaseInc) {
-        printf("======================================\n");
-        printf("== DDS_MIXER_REF.HPP  MIXER MODE = 0  \n");
-        printf("======================================\n");
-
-        m_samplePhaseInc = phaseInc;
-    }
+    dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset = 0);
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer_ref::ddsMix); }

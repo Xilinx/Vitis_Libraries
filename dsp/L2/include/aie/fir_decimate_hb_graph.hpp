@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,11 @@
 
 #include <adf.h>
 #include <vector>
+#include "graph_utils.hpp"
 #include "fir_decimate_hb.hpp"
-
+#include "widget_api_cast.hpp"
 using namespace adf;
-
+using namespace xf::dsp::aie::widget::api_cast;
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -52,19 +53,22 @@ template <int dim,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_USE_COEFF_RELOAD = 0>
+          unsigned int TP_USE_COEFF_RELOAD = 0,
+          unsigned int TP_API = 0>
 class create_casc_kernel_recur {
    private:
     static constexpr unsigned int kDualIpEn =
-        0; // cascaded kernels do not support dual inputs, unless input interface is a stream
+        (TP_API == USE_STREAM_API)
+            ? TP_DUAL_IP
+            : 0; // cascaded kernels do not support dual inputs, unless input interface is a stream
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
         firKernels[dim - 1] = kernel::create_object<
             fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, true, true,
                             fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, dim - 1>(), dim - 1, TP_CASC_LEN, kDualIpEn,
-                            USE_COEFF_RELOAD_FALSE, 1> >(taps);
+                            USE_COEFF_RELOAD_FALSE, 1, TP_API> >(taps);
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE>::create(firKernels, taps);
+                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE, TP_API>::create(firKernels, taps);
     }
 };
 
@@ -77,7 +81,8 @@ template <int dim,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 class create_casc_kernel_recur<dim,
                                TT_DATA,
                                TT_COEFF,
@@ -87,18 +92,21 @@ class create_casc_kernel_recur<dim,
                                TP_INPUT_WINDOW_VSIZE,
                                TP_CASC_LEN,
                                TP_DUAL_IP,
-                               USE_COEFF_RELOAD_TRUE> {
+                               USE_COEFF_RELOAD_TRUE,
+                               TP_API> {
    private:
     static constexpr unsigned int kDualIpEn =
-        0; // cascaded kernels do not support dual inputs, unless input interface is a stream
+        (TP_API == USE_STREAM_API)
+            ? TP_DUAL_IP
+            : 0; // cascaded kernels do not support dual inputs, unless input interface is a stream
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
         firKernels[dim - 1] = kernel::create_object<
             fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, true, true,
                             fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, dim - 1>(), dim - 1, TP_CASC_LEN, kDualIpEn,
-                            USE_COEFF_RELOAD_TRUE, 1> >();
+                            USE_COEFF_RELOAD_TRUE, 1, TP_API> >();
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_TRUE>::create(firKernels);
+                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_TRUE, TP_API>::create(firKernels);
     }
 };
 
@@ -110,7 +118,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 class create_casc_kernel_recur<1,
                                TT_DATA,
                                TT_COEFF,
@@ -120,12 +129,14 @@ class create_casc_kernel_recur<1,
                                TP_INPUT_WINDOW_VSIZE,
                                TP_CASC_LEN,
                                TP_DUAL_IP,
-                               USE_COEFF_RELOAD_FALSE> {
+                               USE_COEFF_RELOAD_FALSE,
+                               TP_API> {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[0] = kernel::create_object<fir_decimate_hb<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-            fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>(), 0, TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE, 1> >(taps);
+        firKernels[0] = kernel::create_object<
+            fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
+                            fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>(), 0, TP_CASC_LEN, TP_DUAL_IP,
+                            USE_COEFF_RELOAD_FALSE, 1, TP_API> >(taps);
     }
 };
 
@@ -137,7 +148,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 class create_casc_kernel_recur<1,
                                TT_DATA,
                                TT_COEFF,
@@ -147,12 +159,14 @@ class create_casc_kernel_recur<1,
                                TP_INPUT_WINDOW_VSIZE,
                                TP_CASC_LEN,
                                TP_DUAL_IP,
-                               USE_COEFF_RELOAD_TRUE> {
+                               USE_COEFF_RELOAD_TRUE,
+                               TP_API> {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[0] = kernel::create_object<fir_decimate_hb<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-            fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>(), 0, TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_TRUE, 1> >();
+        firKernels[0] = kernel::create_object<
+            fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
+                            fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>(), 0, TP_CASC_LEN, TP_DUAL_IP,
+                            USE_COEFF_RELOAD_TRUE, 1, TP_API> >();
     }
 };
 
@@ -167,19 +181,22 @@ template <int dim,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0,
-          unsigned int TP_NUM_OUTPUTS = 1>
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = 0>
 class create_casc_kernel {
    private:
     static constexpr unsigned int kDualIpEn =
-        0; // cascaded kernels do not support dual inputs, unless input interface is a stream
+        (TP_API == USE_STREAM_API)
+            ? TP_DUAL_IP
+            : 0; // cascaded kernels do not support dual inputs, unless input interface is a stream
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
         firKernels[dim - 1] = kernel::create_object<
             fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, true, false,
                             fnFirRangeRemSym<TP_FIR_LEN, TP_CASC_LEN, dim - 1>(), dim - 1, TP_CASC_LEN, kDualIpEn,
-                            USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS> >(taps);
+                            USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_API> >(taps);
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE>::create(firKernels, taps);
+                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE, TP_API>::create(firKernels, taps);
     }
 };
 
@@ -193,7 +210,8 @@ template <int dim,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_API>
 class create_casc_kernel<dim,
                          TT_DATA,
                          TT_COEFF,
@@ -204,18 +222,21 @@ class create_casc_kernel<dim,
                          TP_CASC_LEN,
                          TP_DUAL_IP,
                          USE_COEFF_RELOAD_TRUE,
-                         TP_NUM_OUTPUTS> {
+                         TP_NUM_OUTPUTS,
+                         TP_API> {
    private:
     static constexpr unsigned int kDualIpEn =
-        0; // cascaded kernels do not support dual inputs, unless input interface is a stream
+        (TP_API == USE_STREAM_API)
+            ? TP_DUAL_IP
+            : 0; // cascaded kernels do not support dual inputs, unless input interface is a stream
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
         firKernels[dim - 1] = kernel::create_object<
             fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, true, false,
                             fnFirRangeRemSym<TP_FIR_LEN, TP_CASC_LEN, dim - 1>(), dim - 1, TP_CASC_LEN, kDualIpEn,
-                            USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS> >();
+                            USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_API> >();
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_TRUE>::create(firKernels);
+                                 TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_TRUE, TP_API>::create(firKernels);
     }
 };
 
@@ -227,7 +248,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_API>
 class create_casc_kernel<1,
                          TT_DATA,
                          TT_COEFF,
@@ -238,7 +260,8 @@ class create_casc_kernel<1,
                          1,
                          TP_DUAL_IP,
                          USE_COEFF_RELOAD_FALSE,
-                         TP_NUM_OUTPUTS> {
+                         TP_NUM_OUTPUTS,
+                         TP_API> {
    public:
     static constexpr unsigned int dim = 1;
     static constexpr unsigned int TP_CASC_LEN = 1;
@@ -246,7 +269,7 @@ class create_casc_kernel<1,
         firKernels[dim - 1] = kernel::create_object<
             fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, false,
                             fnFirRangeRemSym<TP_FIR_LEN, TP_CASC_LEN, dim - 1>(), dim - 1, TP_CASC_LEN, TP_DUAL_IP,
-                            USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS> >(taps);
+                            USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_API> >(taps);
     }
 };
 
@@ -258,7 +281,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_API>
 class create_casc_kernel<1,
                          TT_DATA,
                          TT_COEFF,
@@ -269,7 +293,8 @@ class create_casc_kernel<1,
                          1,
                          TP_DUAL_IP,
                          USE_COEFF_RELOAD_TRUE,
-                         TP_NUM_OUTPUTS> {
+                         TP_NUM_OUTPUTS,
+                         TP_API> {
    public:
     static constexpr unsigned int dim = 1;
     static constexpr unsigned int TP_CASC_LEN = 1;
@@ -277,12 +302,13 @@ class create_casc_kernel<1,
         firKernels[dim - 1] = kernel::create_object<
             fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, false,
                             fnFirRangeRemSym<TP_FIR_LEN, TP_CASC_LEN, dim - 1>(), dim - 1, TP_CASC_LEN, TP_DUAL_IP,
-                            USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS> >();
+                            USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_API> >();
     }
 };
 /**
   * @endcond
   */
+
 /**
  * @brief fir_decimate_hb is a Halfband Decimation FIR filter
  *
@@ -324,17 +350,40 @@ class create_casc_kernel<1,
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
  *         TP_CASC_LEN must be in the range 1 (default) to 9.
- * @tparam TP_DUAL_IP is an implementation trade-off between performance and data
- *         bank resource. \n When set to 0, the FIR performance may be limited
- *         by load contention. \n When set to 1, two ram banks are used for input.
+ * @tparam TP_DUAL_IP allows 2 input ports to be connected to FIR, increasing available throughput. \n
+ *         Depending on TP_API, additional input ports functionality differs.
+ *         If TP_API is set to use windows, then \n
+ *         TP_DUAL_IP is an implementation trade-off between performance and data
+ *         bank resource. \n
+ *         When TP_DUAL_IP is set to 0, the FIR performance may be limited by load contention. \n
+ *         When TP_DUAL_IP is set to 1, two ram banks are used for input. \n
+ *         If TP_API is set to use streams, then: \n
+ *         When TP_DUAL_IP is set to 0, single stream will be connected as FIRs input. \n
+ *         When TP_DUAL_IP is set to 1, two stream inputs will be connected. \n
+ *         In such case data should be organized in 128-bit interleaved pattern, e.g.: \n
+ *         - samples 0-3 to be sent over stream0 for cint16 data type, \n
+ *         - samples 4-7 to be sent over stream1 for cint16 data type. \n
  * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
  *         reloading should be used.   \n When defining the parameter:
  *         - 0 = static coefficients, defined in filter constructor
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
  *         Note: when used, optional port: ``` port<input> coeff; ``` will be added to the FIR. \n
- * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
+ * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
+ *         This can be 1 or 2. It is set to 1 by default. \n
+ *         Depending on TP_API, additional output ports functionality differs.
+ *         For Windows API, additional output provides flexibility in connecting
+ *         FIR output with multiple destinations.
+ *         Additional output ``out2`` is an exact copy of the data of the output port ``out``. \n
+ *
+ *         With Stream API, the additional output port increases the FIR's throughput. \n
+ *         Data is sent in a 128-bit interleaved pattern, e.g. : \n
+ *         - samples 0-3 is sent over stream0 for cint16 data type, \n
+ *         - samples 4-7 is sent over stream1 for cint16 data type. \n
+ *
  *         Note: when used, optional port: ``` port<output> out2; ``` will be added to the FIR. \n
+ * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
+ *         The values supported are 0 (window API) or 1 (stream API).
  **/
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -345,13 +394,134 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1>
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = 0>
 class fir_decimate_hb_graph : public graph {
+   private:
+    static constexpr unsigned int kMaxTapsPerKernel = 1024;
+
+    static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
+
+    // Limit FIR length per kernel. Longer FIRs may exceed Program Memory and/or system memory combined with window
+    // buffers may exceed Memory Module size
+    static_assert(TP_FIR_LEN / TP_CASC_LEN <= kMaxTapsPerKernel,
+                  "ERROR: Requested FIR length and Cascade length exceeds supported number of taps per kernel. Please "
+                  "increase the cascade legnth to accomodate the FIR design.");
+
+    // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contibutes to system memory
+    // exceeding Memory Module size.
+    static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN <= kMaxTapsPerKernel,
+                  "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
+                  "length or disable coefficient reload.");
+
+    static constexpr unsigned int kMemoryModuleSize = 32768;
+    static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
+    // Requested Input Window buffer exceeds memory module size
+    static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
+                  "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
+                  "Module size of 32kB");
+
+    void create_connections() {
+        // make input connections
+
+        if
+            constexpr(TP_API == USE_WINDOW_API) {
+                connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+                               fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in, m_firKernels[0].in[0]);
+                for (int i = 1; i < TP_CASC_LEN; i++) {
+                    single_buffer(m_firKernels[i].in[0]);
+                    connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
+                                   fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
+                        async(m_firKernels[i - 1].out[1]), async(m_firKernels[i].in[0]));
+                }
+                if
+                    constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
+                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in2,
+                                                                                               m_firKernels[0].in[1]);
+                    }
+            }
+        else {
+            if
+                constexpr(TP_DUAL_IP == DUAL_IP_SINGLE) {
+                    connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+                                   fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in, m_firKernels[0].in[0]);
+                    for (int i = 1; i < TP_CASC_LEN; i++) {
+                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in,
+                                                                                               m_firKernels[i].in[0]);
+                    }
+                }
+            else if
+                constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
+                    kernel m_inWidgetKernel;
+
+                    m_inWidgetKernel = kernel::create_object<
+                        widget_api_cast<TT_DATA, USE_STREAM_API, USE_WINDOW_API, 2, TP_INPUT_WINDOW_VSIZE, 1, 0> >();
+                    connect<stream>(in, m_inWidgetKernel.in[0]);
+                    connect<stream>(in2, m_inWidgetKernel.in[1]);
+                    connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+                                   fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(m_inWidgetKernel.out[0],
+                                                                                           m_firKernels[0].in[0]);
+                    source(m_inWidgetKernel) = "widget_api_cast.cpp";
+                    headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
+                    runtime<ratio>(m_inWidgetKernel) = 0.8;
+
+                    for (int i = 1; i < TP_CASC_LEN; i++) {
+                        single_buffer(m_firKernels[i].in[0]);
+                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
+                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
+                            async(m_firKernels[i - 1].out[1]), async(m_firKernels[i].in[0]));
+                    }
+                }
+        }
+
+        // conditional RTP connection
+        int rtpPortPos = (TP_DUAL_IP == DUAL_IP_DUAL & TP_API == USE_WINDOW_API) ? 2 : 1;
+        if
+            constexpr(TP_USE_COEFF_RELOAD == 1) { connect<parameter>(coeff, async(m_firKernels[0].in[rtpPortPos])); }
+        if (TP_API == 0) {
+            // make cascade connections
+            for (int i = 1; i < TP_CASC_LEN; i++) {
+                connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
+            }
+        } else {
+            for (int i = 1; i < TP_CASC_LEN; i++) {
+                connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
+            }
+        }
+        // make output connections
+        if (TP_API == 0) {
+            connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
+                m_firKernels[TP_CASC_LEN - 1].out[0], out);
+        } else {
+            connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[0], out);
+        }
+
+        if
+            constexpr(TP_NUM_OUTPUTS == 2) {
+                if (TP_API == 0) {
+                    connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
+                        m_firKernels[TP_CASC_LEN - 1].out[1], out2);
+                } else {
+                    connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[1], out2);
+                }
+            }
+
+        for (int i = 0; i < TP_CASC_LEN; i++) {
+            // Specify mapping constraints
+            runtime<ratio>(m_firKernels[i]) = 0.8;
+            // Source files
+            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
+        }
+    }
+
+    kernel m_firKernels[TP_CASC_LEN];
+
    public:
     /**
-     * The input data to the function. This input is a window API of
-     * samples of TT_DATA type. The number of samples in the window is
-     * described by TP_INPUT_WINDOW_VSIZE.
+     * The input data to the function. This input is either a window API of
+     * samples of TT_DATA type or stream API (depending on TP_API).
      * Note: Margin is added internally to the graph, when connecting input port
      * with kernel port. Therefore, margin should not be added when connecting
      * graph to a higher level design unit.
@@ -359,37 +529,57 @@ class fir_decimate_hb_graph : public graph {
      * multiple of 32 bytes.
      **/
     port<input> in;
+
     /**
-     * A window API of TP_INPUT_WINDOW_VSIZE/2 samples of TT_DATA type.
+     * The output data from the function. This output is either a window API of
+     * samples of TT_DATA type or stream API (depending on TP_API).
+     * Number of output samples is determined by interpolation & decimation factors (if present).
      **/
     port<output> out;
+
     /**
-      * @cond NOCOMMENTS
-      */
-    kernel m_firKernels[TP_CASC_LEN];
+     * The conditional input data to the function.
+     * This input is (generated when TP_DUAL_IP == 1) either a window API of
+     * samples of TT_DATA type or stream API (depending on TP_API).
+     *
+     **/
+    port_conditional<input, (TP_DUAL_IP == 1)> in2;
+
     /**
-      * @endcond
-      */
+     * The conditional coefficient data to the function.
+     * This port is (generated when TP_USE_COEFF_RELOAD == 1) an array of coefficients of TT_COEFF type.
+     *
+     **/
+    port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> coeff;
+
+    /**
+     * The output data from the function.
+     * This output is (generated when TP_NUM_OUTPUTS == 2) either a window API of
+     * samples of TT_DATA type or stream API (depending on TP_API).
+     * Number of output samples is determined by interpolation & decimation factors (if present).
+     **/
+    port_conditional<output, (TP_NUM_OUTPUTS == 2)> out2;
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
      **/
-
     kernel* getKernels() { return m_firKernels; };
+
+    /**
+    * @brief Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
+    **/
     unsigned int getKernelArchs() {
         constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
         return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD,
-                               TP_NUM_OUTPUTS>::get_m_kArch();
+                               firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
+                               TP_API>::get_m_kArch();
     };
 
-    static_assert(TP_CASC_LEN < 9, "ERROR: Unsupported Cascade length");
-
     /**
-     * @brief This is the constructor function for the halfband decimator FIR graph.
+     * @brief This is the constructor function for the FIR graph with static coefficients.
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF. \n
      *                   The taps array must be supplied in a compressed form for
      *                   this halfband application, i.e.  \n
@@ -404,594 +594,22 @@ class fir_decimate_hb_graph : public graph {
     fir_decimate_hb_graph(const std::vector<TT_COEFF>& taps) {
         // create kernels
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE, 1>::create(m_firKernels, taps);
+                           TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS,
+                           TP_API>::create(m_firKernels, taps);
+        create_connections();
+    }
 
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    };
-}; // end of main class declaration
-
-/**
- * @cond NOCOMMENTS
- */
-
-// Specialization for multikernel, single input and no reloads, dual output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_SINGLE,
-                            USE_COEFF_RELOAD_FALSE,
-                            2> : public graph {
-   public:
-    port<input> in;
-    port<output> out;
     /**
-      * @endcond
-      */
-    /**
-     * A window API of TP_INPUT_WINDOW_VSIZE/2 samples of TT_DATA type.
+         * @brief This is the constructor function for the FIR graph with reloadable coefficients.
      **/
-    port<output> out2;
-    /**
-      * @cond NOCOMMENTS
-      */
-    kernel m_firKernels[TP_CASC_LEN];
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_SINGLE, USE_COEFF_RELOAD_FALSE, 2>::get_m_kArch();
-    };
-
-    static_assert(TP_CASC_LEN < 9, "ERROR: Unsupported Cascade length");
-
-    fir_decimate_hb_graph(const std::vector<TT_COEFF>& taps) {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_SINGLE, USE_COEFF_RELOAD_FALSE, 2>::create(m_firKernels, taps);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[1], out2);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    };
-}; // end of main class declaration
-
-// Specialization for multikernel, dual input and no reloads single output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_FALSE,
-                            1> : public graph {
-   public:
-    port<input> in;
-    /**
-      * @endcond
-      */
-    /**
-     * A second input window API of TP_INPUT_WINDOW_VSIZE samples of TT_DATA type. This window should be a clone of the
-     *first input window,
-     * holding the same data, but in a different RAM banks so as to eliminate wait states through read contentions.
-     **/
-    port<input> in2;
-    /**
-      * @cond NOCOMMENTS
-      */
-    port<output> out;
-    kernel m_firKernels[TP_CASC_LEN];
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 1>::get_m_kArch();
-    };
-
-    static_assert(TP_CASC_LEN < 9, "ERROR: Unsupported Cascade length");
-
-    fir_decimate_hb_graph(const std::vector<TT_COEFF>& taps) {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 1>::create(m_firKernels, taps);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in2, m_firKernels[0].in[1]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    };
-}; // end of main class declaration
-
-// Specialization for multikernel, dual input and no reloads dual output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_FALSE,
-                            2> : public graph {
-   public:
-    port<input> in;
-    port<input> in2;
-    port<output> out;
-    port<output> out2;
-
-    kernel m_firKernels[TP_CASC_LEN];
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 2>::get_m_kArch();
-    };
-
-    static_assert(TP_CASC_LEN < 9, "ERROR: Unsupported Cascade length");
-
-    fir_decimate_hb_graph(const std::vector<TT_COEFF>& taps) {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 2>::create(m_firKernels, taps);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in2, m_firKernels[0].in[1]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[1], out2);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    };
-}; // end of main class declaration
-
-// Specialized template for multi-kernel design for single input and reloadable coefficients. single output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_SINGLE,
-                            USE_COEFF_RELOAD_TRUE,
-                            1> : public graph {
-   public:
-    port<input> in;
-    port<output> out;
-    /**
-     * @endcond
-     */
-    /**
-     * A Run-time Parameter API containing the set of coefficient values. A change to these values will be detected and
-     *will cause a
-     * reload of the coefficients within the kernel or kernels to be used on the next data window.
-     * This port is present only when TP_USE_COEFF_RELOAD is set to 1.
-     **/
-    port<input> coeff;
-    /**
-     * @cond NOCOMMENTS
-     */
-
-    kernel m_firKernels[TP_CASC_LEN];
-
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_SINGLE, USE_COEFF_RELOAD_TRUE, 1>::get_m_kArch();
-    };
-
-    // constructor
     fir_decimate_hb_graph() {
         // create kernels
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_SINGLE, USE_COEFF_RELOAD_TRUE, 1>::create(m_firKernels);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make RTP connection
-        connect<parameter>(coeff, async(m_firKernels[0].in[1]));
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
+                           TP_CASC_LEN, TP_DUAL_IP, USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS,
+                           TP_API>::create(m_firKernels);
+        create_connections();
     }
 };
-
-// Specialized template for multi-kernel design for single input and reloadable coefficients. dual output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_SINGLE,
-                            USE_COEFF_RELOAD_TRUE,
-                            2> : public graph {
-   public:
-    port<input> in;
-    port<output> out;
-    port<output> out2;
-    port<input> coeff;
-
-    kernel m_firKernels[TP_CASC_LEN];
-
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_SINGLE, USE_COEFF_RELOAD_TRUE, 2>::get_m_kArch();
-    };
-
-    // constructor
-    fir_decimate_hb_graph() {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_SINGLE, USE_COEFF_RELOAD_TRUE, 2>::create(m_firKernels);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make RTP connection
-        connect<parameter>(coeff, async(m_firKernels[0].in[1]));
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[1], out2);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    }
-};
-
-// Specialized template for multi-kernel design with dual input and reloadable coefficients. single output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_TRUE,
-                            1> : public graph {
-   public:
-    port<input> in;
-    port<input> in2;
-    port<output> out;
-    port<input> coeff;
-
-    kernel m_firKernels[TP_CASC_LEN];
-
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 1>::get_m_kArch();
-    };
-
-    // constructor
-    fir_decimate_hb_graph() {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 1>::create(m_firKernels);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in2, m_firKernels[0].in[1]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make RTP connection
-        connect<parameter>(coeff, async(m_firKernels[0].in[2]));
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    }
-};
-
-// Specialized template for multi-kernel design with dual input and reloadable coefficients. dual output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN>
-class fir_decimate_hb_graph<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_TRUE,
-                            2> : public graph {
-   public:
-    port<input> in;
-    port<input> in2;
-    port<output> out;
-    port<output> out2;
-    port<input> coeff;
-
-    kernel m_firKernels[TP_CASC_LEN];
-
-    // Access function for AIE synthesizer
-    kernel* getKernels() { return m_firKernels; };
-    unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
-        // return the architecture for first kernel in the design (only one for single kernel designs).
-        // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
-        // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 2>::get_m_kArch();
-    };
-
-    // constructor
-    fir_decimate_hb_graph() {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                           TP_CASC_LEN, DUAL_IP_DUAL, USE_COEFF_RELOAD_TRUE, 2>::create(m_firKernels);
-
-        // make input connections
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in, m_firKernels[0].in[0]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-            in2, m_firKernels[0].in[1]);
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            single_buffer(m_firKernels[i].in[0]);
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]),
-                                                                                   async(m_firKernels[i].in[0]));
-        }
-
-        // make cascade connections
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[1]);
-        }
-
-        // make RTP connection
-        connect<parameter>(coeff, async(m_firKernels[0].in[2]));
-
-        // make output connections
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[0], out);
-        connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA)> >(
-            m_firKernels[TP_CASC_LEN - 1].out[1], out2);
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_decimate_hb.cpp";
-        }
-    }
-};
-/**
- * @endcond
- */
 }
 }
 }

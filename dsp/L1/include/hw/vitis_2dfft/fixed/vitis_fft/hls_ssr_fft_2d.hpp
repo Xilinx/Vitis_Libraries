@@ -45,10 +45,10 @@ namespace fft {
  * @tparam t_memWidth number of complex<float>==64bits streaming into the kernel in parallel
  * @tparam t_numRows number of rows in complex 2-d input matrix
  * @tparam t_numCols number of columns in complex 2-d input matrix
- * @param t_ssrFFTParamsRowProc gives parameters for 1-d fft kernel used on rows
- * @param t_ssrFFTParamsColProc gives parameters for 1-d fft kernel used on columns
- * @param t_colInstanceIDOffset, uniquefy row vs col kernel,  significantly different
- * @param t_rowInstanceIDOffset, uniquefy row vs col kernel,  significantly different
+ * @tparam t_ssrFFTParamsRowProc gives parameters for 1-d fft kernel used on rows
+ * @tparam t_ssrFFTParamsColProc gives parameters for 1-d fft kernel used on columns
+ * @tparam t_colInstanceIDOffset, uniquefy row vs col kernel,  significantly different
+ * @tparam t_rowInstanceIDOffset, uniquefy row vs col kernel,  significantly different
  * @tparam T_elemType data type of the individual matrix elements
  *
  */
@@ -280,6 +280,23 @@ struct FFT2d<t_memWidth,
     }
 };
 
+/**
+ * @brief Top of 2D FFT kernel (fixed data type), provides DFT/Inverse DFT of 2D data
+ *
+ * @tparam t_memWidth Number of streaming into the kernel in parallel
+ * @tparam t_numRows Number of rows in complex 2-d input matrix
+ * @tparam t_numCols Number of columns in complex 2-d input matrix
+ * @tparam t_numKernels Number of 1D Kernels used row/column wise
+ * @tparam t_ssrFFTParamsRowProc Gives parameters for 1-d fft kernel used on rows
+ * @tparam t_ssrFFTParamsColProc Gives parameters for 1-d fft kernel used on columns
+ * @tparam t_rowInstanceIDOffset The row instance ID offset
+ * @tparam t_colInstanceIDOffset The column instance ID offset
+ * @tparam T_elemType Data type of the individual matrix elements
+ *
+ * @param p_memWideStreamIn 2D FFT input stream
+ * @param p_memWideStreamOut 2D FFT output stream
+ *
+ */
 template <unsigned int t_memWidth,
           unsigned int t_numRows,
           unsigned int t_numCols,

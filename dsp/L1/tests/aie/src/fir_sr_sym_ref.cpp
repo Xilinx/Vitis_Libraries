@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,78 +84,6 @@ void fir_sr_sym_ref<TT_DATA,
     }
 };
 
-// Specialization for static coeffs and dual outputs
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_API>
-void fir_sr_sym_ref<TT_DATA,
-                    TT_COEFF,
-                    TP_FIR_LEN,
-                    TP_SHIFT,
-                    TP_RND,
-                    TP_INPUT_WINDOW_VSIZE,
-                    USE_COEFF_RELOAD_FALSE,
-                    2,
-                    TP_API>::filter(input_window<TT_DATA>* inWindow,
-                                    output_window<TT_DATA>* outWindow,
-                                    output_window<TT_DATA>* outWindow2) {
-    const unsigned int shift = TP_SHIFT;
-    T_accRef<TT_DATA> accum;
-    TT_DATA d_in[TP_FIR_LEN];
-    TT_DATA accumSrs;
-    int phase = 0;
-
-    printf("Ref model params:\n");
-    printf("TP_FIR_LEN = %lu\n", TP_FIR_LEN);
-    printf("TP_SHIFT = %lu\n", TP_SHIFT);
-    printf("TP_RND = %d\n", TP_RND);
-    printf("TP_WINDOW_SIZE = %d\n", TP_INPUT_WINDOW_VSIZE);
-    const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
-
-    for (int i = 0; i < TP_FIR_LEN; i++) {
-        printf("Ref Coeffs[%d]: %d \n", i, m_internalTaps[i]); // only real coeffs!
-    }
-
-    // Each iteration of this loop calculates a single output sample from this FIR.
-    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
-        accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // Accumulation
-        for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
-            // Note the coefficient index reversal. See note in constructor.
-            multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], m_internalTaps[TP_FIR_LEN - 1 - j]);
-        }
-        // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - 1);
-        // printf("Decremented input window\n");
-
-        roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
-        accumSrs = castAcc(accum);
-
-        if (TP_API == 0) {
-            window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-            window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
-        } else {
-            // To max HW performance, data is interleaved with 128-bit data blocks.
-            static constexpr unsigned streamBitWidth = 128;
-            static constexpr unsigned streamByteWidth = streamBitWidth / 8;
-            int outPhase = (phase++ * sizeof(TT_DATA)) % (2 * streamByteWidth);
-            if (outPhase < streamByteWidth) {
-                window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-            } else {
-                window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
-            }
-        }
-        // printf("Wrote to and incremented output window\n");
-    }
-};
-
 // REF FIR function - using coefficient reload, single output
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
@@ -164,6 +92,7 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
 void fir_sr_sym_ref<TT_DATA,
                     TT_COEFF,
@@ -172,7 +101,7 @@ void fir_sr_sym_ref<TT_DATA,
                     TP_RND,
                     TP_INPUT_WINDOW_VSIZE,
                     USE_COEFF_RELOAD_TRUE,
-                    1,
+                    TP_NUM_OUTPUTS,
                     TP_API>::filter(input_window<TT_DATA>* inWindow,
                                     output_window<TT_DATA>* outWindow,
                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
@@ -210,78 +139,6 @@ void fir_sr_sym_ref<TT_DATA,
         saturateAcc(accum);
         accumSrs = castAcc(accum);
         window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-    }
-};
-
-// Specialization for reload coeffs and dual output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_API>
-void fir_sr_sym_ref<TT_DATA,
-                    TT_COEFF,
-                    TP_FIR_LEN,
-                    TP_SHIFT,
-                    TP_RND,
-                    TP_INPUT_WINDOW_VSIZE,
-                    USE_COEFF_RELOAD_TRUE,
-                    2,
-                    TP_API>::filter(input_window<TT_DATA>* inWindow,
-                                    output_window<TT_DATA>* outWindow,
-                                    output_window<TT_DATA>* outWindow2,
-                                    const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
-    const unsigned int shift = TP_SHIFT;
-    T_accRef<TT_DATA> accum;
-    TT_DATA d_in[TP_FIR_LEN];
-    TT_DATA accumSrs;
-    firReload(inTaps); // loads inTaps into m_internalTaps
-    int phase = 0;
-
-    printf("Ref model params:\n");
-    printf("TP_FIR_LEN = %lu\n", TP_FIR_LEN);
-    printf("TP_SHIFT = %lu\n", TP_SHIFT);
-    printf("TP_RND = %d\n", TP_RND);
-    printf("TP_WINDOW_SIZE = %d\n", TP_INPUT_WINDOW_VSIZE);
-    const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
-
-    for (int i = 0; i < TP_FIR_LEN; i++) {
-        printf("Ref Coeffs[%d]: %d \n", i, m_internalTaps[i]); // only real coeffs!
-    }
-
-    // Each iteration of this loop calculates a single output sample from this FIR.
-    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
-        accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // Accumulation
-        for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
-            // Note the coefficient index reversal. See note in constructor.
-            multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], m_internalTaps[TP_FIR_LEN - 1 - j]);
-        }
-        // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - 1);
-
-        roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
-        accumSrs = castAcc(accum);
-
-        if (TP_API == 0) {
-            window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-            window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
-        } else {
-            // To max HW performance, data is interleaved with 128-bit data blocks.
-            static constexpr unsigned streamBitWidth = 128;
-            static constexpr unsigned streamByteWidth = streamBitWidth / 8;
-            int outPhase = (phase++ * sizeof(TT_DATA)) % (2 * streamByteWidth);
-            if (outPhase < streamByteWidth) {
-                window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-            } else {
-                window_writeincr((output_window<TT_DATA>*)outWindow2, accumSrs);
-            }
-        }
     }
 };
 }

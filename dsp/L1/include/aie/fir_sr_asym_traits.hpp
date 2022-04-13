@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,133 +39,182 @@ static constexpr unsigned int kBuffSize128Byte = 128; // 1024-bit buffer size in
 static constexpr unsigned int kBuffSize64Byte = 64;   // 512-bit buffer size in Bytes
 static constexpr unsigned int kBuffSize32Byte = 32;   // 256-bit buffer size in Bytes
 
-// align to 256b for FIR cascade splitting - also should be a multiple of lanes/columns
-template <typename TT_DATA>
-inline constexpr unsigned int fnFirRangeRound() {
-    return ((258 / 8) / sizeof(TT_DATA));
+//
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnNumLanesStream() {
+    return fnNumLanes384<T_D, T_C>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<int32, int16>() {
+    return fnNumLanes<int32, int16>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<cint32, int16>() {
+    return fnNumLanes<cint32, int16>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<cint32, int32>() {
+    return fnNumLanes<cint32, int32>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<cint32, cint16>() {
+    return fnNumLanes<cint32, cint16>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<float, float>() {
+    return fnNumLanes<float, float>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, float>() {
+    return fnNumLanes<cfloat, float>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, cfloat>() {
+    return fnNumLanes<cfloat, cfloat>();
+};
+
+//
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnNumColsStream() {
+    return fnNumCols384<T_D, T_C>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<int32, int16>() {
+    return fnNumCols<int32, int16>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<cint32, int16>() {
+    return fnNumCols<cint32, int16>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<cint32, int32>() {
+    return fnNumCols<cint32, int32>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<cint32, cint16>() {
+    return fnNumCols<cint32, cint16>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<float, float>() {
+    return fnNumCols<float, float>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<cfloat, float>() {
+    return fnNumCols<cfloat, float>();
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsStream<cfloat, cfloat>() {
+    return fnNumCols<cfloat, cfloat>();
+};
+
+//
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
+    return 128;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<int32, int16>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cint32, int16>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cint32, int32>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cint32, cint16>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<float, float>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, float>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
+    return 256;
+};
+
+// align to num cols coeffs for FIR cascade splitting for optimal mac efficiency
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnStreamFirRangeRound() {
+    return fnNumColsStream<T_D, T_C>();
 }
 
 // Calculate ASYM FIR range for cascaded kernel
-template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, unsigned int TP_API>
-inline constexpr unsigned int fnFirRangeAsym() {
+template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnFirRangeAsym() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     // make sure there's no runt filters ( lengths < 4)
-    // make each cascade rounded to fnFirRangeRound and only last in the chain possibly odd
-    // Limited to stream architectures for now
-    return fnFirRange<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnFirRangeRound<TT_DATA>()) : 1)>();
+    // make Stream architectures rounded to fnStreamFirRangeRound and only last in the chain possibly odd
+    // TODO: make Window architectures rounded to fnNumColumnsSrAsym
+    return fnFirRange<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnStreamFirRangeRound<TT_DATA, TT_COEFF>()) : 1)>();
 }
-template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, unsigned int TP_API>
-inline constexpr unsigned int fnFirRangeRemAsym() {
+template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnFirRangeRemAsym() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     // this is for last in the cascade
-    return fnFirRangeRem<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnFirRangeRound<TT_DATA>()) : 1)>();
+    return fnFirRangeRem<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnStreamFirRangeRound<TT_DATA, TT_COEFF>()) : 1)>();
 }
 
 // Calculate ASYM FIR range offset for cascaded kernel
-template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, unsigned int TP_API>
-inline constexpr unsigned int fnFirRangeOffsetAsym() {
+template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnFirRangeOffsetAsym() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
-    return fnFirRangeOffset<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnFirRangeRound<TT_DATA>()) : 1)>();
+    return fnFirRangeOffset<TP_FL, TP_CL, TP_KP, ((TP_API == 1) ? (fnStreamFirRangeRound<TT_DATA, TT_COEFF>()) : 1)>();
 }
 
-// function to return the number of lanes for a type combo
-template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnNumLanesSrAsym() {
-    return 0; // effectively an error trap, but adding an error message to a constexpr return results in a warning.
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<int16, int16>() {
-    return 16;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cint16, int16>() {
-    return 8;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cint16, cint16>() {
-    return 8;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<int32, int16>() {
-    return 8;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<int32, int32>() {
-    return 8;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cint32, int16>() {
-    return 4;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cint32, cint16>() {
-    return 4;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cint32, int32>() {
-    return 4;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cint32, cint32>() {
-    return 2;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<float, float>() {
-    return 8;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cfloat, float>() {
-    return 4;
-};
-template <>
-inline constexpr unsigned int fnNumLanesSrAsym<cfloat, cfloat>() {
-    return 4;
+// function to return the number of lanes for a type combo, for a given IO API type
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnNumLanesSrAsym() {
+    return (TP_API == 0 ? fnNumLanes<TT_DATA, TT_COEFF>() : fnNumLanesStream<TT_DATA, TT_COEFF>());
 };
 
 // function to return the number of columns for a type combo for the intrinsics used for this single rate asym FIR
-template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnNumColumnsSrAsym() {
-    return sizeof(TT_COEFF) == 2 ? 2 : 1;
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnNumColumnsSrAsym() {
+    return (TP_API == 0 ? fnNumCols<TT_DATA, TT_COEFF>() : fnNumCols384<TT_DATA, TT_COEFF>());
 };
-// specialize for any exceptions like this:
-// template<> inline constexpr unsigned int fnNumColumnsDecHb< int16,  int16, K_ARCH_1BUFF>() { return 2;};
 
-template <typename TT_DATA>
-inline constexpr unsigned int fnDataLoadsInRegSrAsym() {
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnDataLoadsInRegSrAsym() {
     // To fill a full 1024-bit input vector register using a 256-bit upd_w command it takes 4 load operations.
     // Always return 4, the exception (handled by explicit template instantiation)
     // would be needed it a different command was used (e.g. upd_v, upd_x).
-    return 4;
+    return (TP_API == 0 ? 4 : 1024 / fnStreamReadWidth<TT_DATA, TT_COEFF>());
 }
 
 // Parameter to constant resolution functions
-template <typename TT_DATA>
-inline constexpr unsigned int fnDataLoadVsizeSrAsym() {
-    return (kUpdWSize / sizeof(TT_DATA));
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnDataLoadVsizeSrAsym() {
+    return (TP_API == 0 ? (256 / 8 / sizeof(TT_DATA)) : fnStreamReadWidth<TT_DATA, TT_COEFF>() / 8 / sizeof(TT_DATA));
 }
 
 // Helper function to define max ZigZag Coefficient array
 template <typename TT_COEFF>
-inline constexpr unsigned int fnZigZagMaxCoeffByteSize() {
+INLINE_DECL constexpr unsigned int fnZigZagMaxCoeffByteSize() {
     return 256;
 }
 
 // function to return the number of samples in an output vector for a type combo
-template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnVOutSizeSrAsym() {
-    return fnNumLanesSrAsym<TT_DATA, TT_COEFF>();
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnVOutSizeSrAsym() {
+    return fnNumLanesSrAsym<TT_DATA, TT_COEFF, TP_API>();
 };
 
 // Support for stream interface for a give data/coeff type combination
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
-inline constexpr unsigned int fnTypeStreamSupport() {
+INLINE_DECL constexpr unsigned int fnTypeStreamSupport() {
     return SUPPORTED;
 };
 // Exclude cint32/cint32 combo.
-template <>
-inline constexpr unsigned int fnTypeStreamSupport<cint32, cint32, 1>() {
-    return NOT_SUPPORTED;
-};
+// template<> INLINE_DECL constexpr unsigned int fnTypeStreamSupport< cint32,  cint32, 1>(){  return NOT_SUPPORTED;};
 }
 }
 }

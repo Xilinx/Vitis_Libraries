@@ -1,12 +1,44 @@
 {
     "daily": {
-        "test_0_fir_9t_asym_3d": {
+        "test_0_fir_9t_df3": {
             "DATA_TYPE":"cint16",
             "COEFF_TYPE":"int16",
             "FIR_LEN":"9",
             "DECIMATE_FACTOR":"3",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"384"
+        },
+        "test_1_fir_32t_df2_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"32",
+            "DECIMATE_FACTOR":"2",
+            "CASC_LEN":"2",
+            "SHIFT":"16",
+            "DUAL_IP":"1",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"25600"
+        },
+        "test_2_fir_2048t_casc8": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"2048",
+            "DECIMATE_FACTOR":"2",
+            "CASC_LEN":"8",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"512"
+        },
+        "test_3_fir_custom_constraints": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"24",
+            "DECIMATE_FACTOR":"2",
+            "CASC_LEN":"2",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"3072",
+            "DUAL_IP":"1",
+            "PORT_API":"1",
+            "USE_CUSTOM_CONSTRAINT":"1"
         }
     }
 }

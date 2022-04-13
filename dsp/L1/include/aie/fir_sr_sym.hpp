@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ template <typename TT_DATA,
 class kernelFilterClass {
    private:
     // Parameter value defensive and legality checks
-    static_assert(TP_FIR_LEN <= FIR_LEN_MAX, "ERROR: Max supported FIR length exceeded. ");
     static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,
                   "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
                   "below minimum required value. ");
@@ -76,6 +75,8 @@ class kernelFilterClass {
     static_assert(fnTypeCheckDataCoeffFltInt<TT_DATA, TT_COEFF>() != 0,
                   "ERROR: a mix of float and integer types of TT_DATA and TT_COEFF is not supported.");
     static_assert(TP_NUM_OUTPUTS > 0 && TP_NUM_OUTPUTS <= 2, "ERROR: only single or dual outputs are supported.");
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     // There are additional defensive checks after architectural constants have been calculated.
 
     static constexpr unsigned int m_kDataLoadVsize = fnDataLoadVsizeSrSym<TT_DATA>(); // ie. upd_w loads a v4 of cint16
@@ -167,16 +168,15 @@ class kernelFilterClass {
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    TT_COEFF chess_storage(% chess_alignof(v16int16))
-        m_internalTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
+    alignas(32) TT_COEFF m_internalTaps[CEIL((TP_FIR_RANGE_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     void filterKernel1buff(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     void filterKernel2buff(T_inputIF<TP_CASC_IN, TT_DATA> inInterface, T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_oldInTaps[CEIL(
-        (TP_FIR_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
-    bool m_coeffnEq;                                            // Are coefficients sets equal?
+    alignas(32) TT_COEFF m_oldInTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor,
+                                          m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
+    bool m_coeffnEq;                                          // Are coefficients sets equal?
 
    public:
     // Access function for AIE Synthesizer

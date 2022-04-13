@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,8 +59,8 @@
 #define OUTPUT_FILE "data/output.txt"
 #endif
 
-#ifndef NUM_ITER
-#define NUM_ITER 1
+#ifndef NITER
+#define NITER 1
 #endif
 
 #ifndef DUAL_IP
@@ -71,12 +71,42 @@
 #define PORT_API 0
 #endif
 
-#define INPUT_SAMPLES INPUT_WINDOW_VSIZE* NUM_ITER
+#ifndef UUT_SSR
+#define UUT_SSR 1
+#endif
+
+#define INPUT_SAMPLES INPUT_WINDOW_VSIZE* NITER
 #define INPUT_MARGIN(x, y) CEIL(x, (32 / sizeof(y)))
-#define OUTPUT_SAMPLES INPUT_WINDOW_VSIZE* NUM_ITER
+#define OUTPUT_SAMPLES INPUT_WINDOW_VSIZE* NITER
 
 #ifndef COEFF_SEED
 #define COEFF_SEED 0xC0FFEE
+#endif
+
+// Force reference model to ignore SSR and only use array length 1
+#ifdef USING_UUT
+#define P_SSR UUT_SSR
+#else
+#define P_SSR 1
+#endif
+
+#ifndef USING_UUT
+#undef PORT_API
+#undef NUM_OUTPUTS
+#undef DUAL_IP
+#define PORT_API 0
+#define NUM_OUTPUTS 1
+#define DUAL_IP 0
+#endif
+
+#ifndef STIM_TYPE
+#define STIM_TYPE 0
+#endif
+// Specifically interleaved dual streams
+#if (DUAL_IP == 1 && PORT_API == 1)
+#define DUAL_INPUT_SAMPLES 1
+#else
+#define DUAL_INPUT_SAMPLES 0
 #endif
 
 // END OF UUT CONFIGURATION

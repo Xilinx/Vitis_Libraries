@@ -1,0 +1,1202 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::dsp::aie::blas::matrix_mult::matrix_mult_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::blas::matrix_mult::matrix_mult_graph",
+                "display_name": "matrix_mult_graph",
+                "brief": "performs a GEneral Matrix Multiply (GEMM), taking two input matrices of configurable dimensions and data type.",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_mult_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA_A",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input of Matrix A to the gemm function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_DATA_B",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input of Matrix B to the gemm function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TP_DIM_A",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A."
+                    },
+                    {
+                        "name": "TP_DIM_AB",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of elements along the common dimension of Matrix A (columns) and Matrix B (rows)."
+                    },
+                    {
+                        "name": "TP_DIM_B",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of elements along the unique dimension (columns) of Matrix B."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of product terms before each output. TP_SHIFT must be in the range 0 to 61."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_DIM_A_LEADING",
+                        "type": "unsigned int",
+                        "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be transposed to become a ROW_MAJOR matrix."
+                    },
+                    {
+                        "name": "TP_DIM_B_LEADING",
+                        "type": "unsigned int",
+                        "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1."
+                    },
+                    {
+                        "name": "TP_DIM_OUT_LEADING",
+                        "type": "unsigned int",
+                        "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1."
+                    },
+                    {
+                        "name": "TP_ADD_TILING_A",
+                        "type": "unsigned int",
+                        "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position."
+                    },
+                    {
+                        "name": "TP_ADD_TILING_B",
+                        "type": "unsigned int",
+                        "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position."
+                    },
+                    {
+                        "name": "TP_ADD_DETILING_OUT",
+                        "type": "unsigned int",
+                        "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position."
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE_A",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to Matrix A."
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE_B",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to Matrix B."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE Tiles to split the GEMM operation into."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "inA",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::blas::matrix_mult::matrix_mult_graph< TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_ADD_TILING_A, TP_ADD_TILING_B, TP_ADD_DETILING_OUT, TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B, TP_CASC_LEN >::inA[TP_CASC_LEN]"
+                    },
+                    {
+                        "name": "inB",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::blas::matrix_mult::matrix_mult_graph< TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_ADD_TILING_A, TP_ADD_TILING_B, TP_ADD_DETILING_OUT, TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B, TP_CASC_LEN >::inB[TP_CASC_LEN]"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::blas::matrix_mult::matrix_mult_graph< TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_ADD_TILING_A, TP_ADD_TILING_B, TP_ADD_DETILING_OUT, TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B, TP_CASC_LEN >::out"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph",
+                "display_name": "fft_ifft_dit_1ch_graph",
+                "brief": "fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.",
+                "target_domain": "",
+                "header_file_name": [
+                    "fft_ifft_dit_1ch_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the transform function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_TWIDDLE",
+                        "type": "typename",
+                        "description": "describes the type of twiddle factors of the transform."
+                    },
+                    {
+                        "name": "TP_POINT_SIZE",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of samples in the transform."
+                    },
+                    {
+                        "name": "TP_FFT_NIFFT",
+                        "type": "unsigned int",
+                        "description": "selects whether the transform to perform is an FFT (1) or IFFT (0)."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "selects the power of 2 to scale the result by prior to output."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "selects the number of kernels the FFT will be divided over in series to improve throughput"
+                    },
+                    {
+                        "name": "TP_DYN_PT_SIZE",
+                        "type": "unsigned int",
+                        "description": "selects whether (1) or not (0) to use run-time point size determination."
+                    },
+                    {
+                        "name": "TP_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of samples to be processed in each call to the function."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer to select window (0) or stream (1) interfaces. When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample from or two the next stream. Two streams mimimum are used. In this example, even samples are read from input stream[0] and odd samples from input stream[1]."
+                    },
+                    {
+                        "name": "TP_PARALLEL_POWER",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer to describe N where 2^N is the numbers of subframe processors to use, so as to achieve higher throughput."
+                    },
+                    {
+                        "name": "TP_INDEX",
+                        "type": "unsigned int",
+                        "description": null
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port_array<input, 2 * kParallel_factor> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_INDEX >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port_array<output, 2 * kParallel_factor> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_INDEX >::out"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph",
+                "display_name": "fir_decimate_asym_graph",
+                "brief": "fir_decimate_asym is an Asymmetric Decimation FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_decimate_asym_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter. TP_FIR_LEN must be in the range 4 to 240 and must be an integer multiple of the TP_DECIMATE_FACTOR value."
+                    },
+                    {
+                        "name": "TP_DECIMATE_FACTOR",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the decimation factor of the filter, the ratio of input to output samples. TP_DECIMATE_FACTOR must be in the range 2 up to 7, however max supported decimation rate depends on the data type."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 stream inputs to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_DUAL_IP == 1)> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional<output, (TP_NUM_OUTPUTS == 2)> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph",
+                "display_name": "fir_decimate_hb_graph",
+                "brief": "fir_decimate_hb is a Halfband Decimation FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_decimate_hb_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter. TP_FIR_LEN must be in the range 4 to 240 inclusive and must satisfy (TP_FIR_LEN +1)/4 = N where N is a positive integer."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 input ports to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports over which the output is sent."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_DUAL_IP == 1)> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional<output, (TP_NUM_OUTPUTS == 2)> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph",
+                "display_name": "fir_decimate_sym_graph",
+                "brief": "fir_decimate_sym is a Symmetrical Decimation FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_decimate_sym_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter. TP_FIR_LEN must be in the range 4 to 240 and must be an integer multiple of the TP_DECIMATE_FACTOR value."
+                    },
+                    {
+                        "name": "TP_DECIMATE_FACTOR",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the decimation factor of the filter, the ratio of input to output samples. TP_DECIMATE_FACTOR must be in the range 2 to 3. For larger factors, use the fir_decimate_asym library element."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 input ports to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports over which the output is sent."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_DUAL_IP == 1)> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional<output, (TP_NUM_OUTPUTS == 2)> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph",
+                "display_name": "fir_interpolate_asym_graph",
+                "brief": "fir_interpolate_asym is an Asymmetric Interpolation FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_interpolate_asym_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter."
+                    },
+                    {
+                        "name": "TP_INTERPOLATE_FACTOR",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the interpolation factor of the filter. TP_INTERPOLATE_FACTOR must be in the range 1 to 16."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 stream inputs to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports over which the output is sent."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_DUAL_IP == 1)> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional<output, (TP_NUM_OUTPUTS == 2)> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph",
+                "display_name": "fir_interpolate_hb_graph",
+                "brief": "fir_interpolate_hb is a Halfband Interpolation FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_interpolate_hb_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter. TP_FIR_LEN must be in the range 4 to 240 inclusive and must satisfy (TP_FIR_LEN +1)/4 = N where N is a positive integer."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 input ports to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports over which the output is sent."
+                    },
+                    {
+                        "name": "TP_UPSHIFT_CT",
+                        "type": "unsigned int",
+                        "description": "upshift unit center tap."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_DUAL_IP == 1)> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional<output, (TP_NUM_OUTPUTS == 2)> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::resampler::fir_resampler_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::resampler::fir_resampler_graph",
+                "display_name": "fir_resampler_graph",
+                "brief": "fir_resampler is a generic asymmetric FIR filter that can do fractional and integer interpolation and decimation.",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_resampler_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter."
+                    },
+                    {
+                        "name": "TP_INTERPOLATE_FACTOR",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the interpolation factor of the filter. TP_INTERPOLATE_FACTOR must be in the range 3 to 16."
+                    },
+                    {
+                        "name": "TP_DECIMATE_FACTOR",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the decimation factor of the filter. TP_DECIMATE_FACTOR must be in the range 2 to 16. The decimation factor should be less that the interpolation factor and should not be divisible factor of the interpolation factor."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports over which the output is sent."
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 stream inputs to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port_array<input, 1> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port_array<output, 1> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional_array<input, (TP_DUAL_IP == 1), 1> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), 1> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), 1> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph",
+                "display_name": "fir_sr_asym_graph",
+                "brief": "fir_sr_asym is a Asymmetric Single Rate FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_sr_asym_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples to process in one simulation iteration of the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports to broadcast the output to."
+                    },
+                    {
+                        "name": "TP_DUAL_IP",
+                        "type": "unsigned int",
+                        "description": "allows 2 stream inputs to be connected to FIR, increasing available throughput."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    },
+                    {
+                        "name": "TP_SSR",
+                        "type": "unsigned int",
+                        "description": "specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::out"
+                    },
+                    {
+                        "name": "in2",
+                        "direction": "input",
+                        "type": "port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::in2"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::out2"
+                    },
+                    {
+                        "name": "casc_in",
+                        "direction": "output",
+                        "type": "port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::casc_in"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph",
+                "display_name": "fir_sr_sym_graph",
+                "brief": "fir_sr_sym is a Symmetrical Single Rate FIR filter",
+                "target_domain": "",
+                "header_file_name": [
+                    "fir_sr_sym_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_COEFF",
+                        "type": "typename",
+                        "description": "describes the type of individual coefficients of the filter taps."
+                    },
+                    {
+                        "name": "TP_FIR_LEN",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of taps in the filter."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used for input to the filter function."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_USE_COEFF_RELOAD",
+                        "type": "unsigned int",
+                        "description": "allows the user to select if runtime coefficient reloading should be used."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUTS",
+                        "type": "unsigned int",
+                        "description": "sets the number of ports to broadcast the output to."
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the output interface should be window-based or stream-based."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::out"
+                    },
+                    {
+                        "name": "coeff",
+                        "direction": "input",
+                        "type": "port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::coeff"
+                    },
+                    {
+                        "name": "out2",
+                        "direction": "output",
+                        "type": "port_conditional<output, (TP_NUM_OUTPUTS == 2)> xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API >::out2"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph",
+                "display_name": "dds_mixer_graph",
+                "brief": "operates in 3 modes:",
+                "target_domain": "",
+                "header_file_name": [
+                    "dds_mixer_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the"
+                    },
+                    {
+                        "name": "TP_INPUT_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the input/output window API or number of samples to process per iteration."
+                    },
+                    {
+                        "name": "TP_MIXER_MODE",
+                        "type": "unsigned int",
+                        "description": "describes the mode of operation of the"
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "specifies if the input/output interface should be window-based or stream-based."
+                    },
+                    {
+                        "name": "TP_SSR",
+                        "type": "unsigned int",
+                        "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel."
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::widget::api_cast::widget_api_cast_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::widget::api_cast::widget_api_cast_graph",
+                "display_name": "widget_api_cast_graph",
+                "brief": "widget_api_cast is a design to change the interface between connected components. This component is able to change the stream interface to window interface and vice-versa. In addition, multiple input stream ports may be defined, as well as multiple copies of the window output.",
+                "target_domain": "",
+                "header_file_name": [
+                    "widget_api_cast_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TP_IN_API",
+                        "type": "unsigned int",
+                        "description": "defines the input interface type. 0 = Window, 1 = Stream"
+                    },
+                    {
+                        "name": "TP_OUT_API",
+                        "type": "unsigned int",
+                        "description": "defines the output interface type. 0 = Window, 1 = Stream"
+                    },
+                    {
+                        "name": "TP_NUM_INPUTS",
+                        "type": "unsigned int",
+                        "description": "describes the number of input stream interfaces to be processed. When 2 inputs are configured, whe data will be read sequentially from each."
+                    },
+                    {
+                        "name": "TP_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used if either input or output is a window. Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE."
+                    },
+                    {
+                        "name": "TP_NUM_OUTPUT_CLONES",
+                        "type": "unsigned int",
+                        "description": "sets the number of output ports to write the input data to. Note that while input data from multiple ports is independent, data out is not."
+                    },
+                    {
+                        "name": "TP_PATTERN",
+                        "type": "unsigned int",
+                        "description": "sets the interleave or deinterleave pattern for configurations using dual streams, since streams are not considered clones for input nor for output. The patterns supported are: 0 (default) : 128bits are taken from each input, concatenated to 256b and output to window. or one 256b window read is split into upper and lower 128b cunks for output. 1 : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa. 2 : kSplit. The window is split into 2 halves with each half going to a stream."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::widget::api_cast::widget_api_cast_graph< TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN >::in[TP_NUM_INPUTS]"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::widget::api_cast::widget_api_cast_graph< TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN >::out[TP_NUM_OUTPUT_CLONES]"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::widget::real2complex::widget_real2complex_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::widget::real2complex::widget_real2complex_graph",
+                "display_name": "widget_real2complex_graph",
+                "brief": "widget_real2complex is utility to convert real data to complex or vice versa",
+                "target_domain": "",
+                "header_file_name": [
+                    "widget_real2complex_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to the function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TT_OUT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples output from the function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TP_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the window API used if either input or output is a window. Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port<input> xf::dsp::aie::widget::real2complex::widget_real2complex_graph< TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port<output> xf::dsp::aie::widget::real2complex::widget_real2complex_graph< TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE >::out"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}

@@ -114,4 +114,13 @@ void cast_to_double(complex_wrapper<T> inData[DIM1][DIM2], complex_wrapper<float
     }
 }
 
+template <int R, int L, typename DT>
+void convert2Array(hls::stream<DT> strm[R], DT arr[R][L / R]) {
+    for (int i = 0; i < (L / R); i++) {
+        for (int j = 0; j < R; j++) {
+            arr[j][i] = strm[j].read();
+        }
+    }
+}
+
 #endif // DSP_UTILITIES_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,8 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    port<input> in[NUM_INPUTS];
-    port<output> out[NUM_OUTPUT_CLONES];
+    std::array<input_plio, NUM_INPUTS> in;
+    std::array<output_plio, NUM_OUTPUT_CLONES> out;
 
     // Constructor
     test_graph() {
@@ -56,8 +56,28 @@ class test_graph : public graph {
         printf("Data type         = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
-        printf("IN_API            = %d \n", IN_API);
-        printf("OUT_API           = %d \n", OUT_API);
+        switch (IN_API) {
+            case 0:
+                printf("Input API           = window\n");
+                break;
+            case 1:
+                printf("Input API           = stream\n");
+                break;
+            default:
+                printf("Input API unrecognised = %d\n", IN_API);
+                break;
+        };
+        switch (OUT_API) {
+            case 0:
+                printf("Output API          = window\n");
+                break;
+            case 1:
+                printf("Output API          = stream\n");
+                break;
+            default:
+                printf("Output API unrecognised = %d\n", OUT_API);
+                break;
+        };
         printf("NUM_INPUTS        = %d \n", NUM_INPUTS);
         printf("WINDOW_VSIZE      = %d \n", WINDOW_VSIZE);
         printf("NUM_OUTPUT_CLONES = %d \n", NUM_OUTPUT_CLONES);
@@ -71,10 +91,16 @@ class test_graph : public graph {
 
         // Make connections
         for (int i = 0; i < NUM_INPUTS; i++) {
-            connect<>(in[i], widgetGraph.in[i]);
+            std::string filenameIn = QUOTE(INPUT_FILE);
+            filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
+            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_32_bits, filenameIn);
+            connect<>(in[i].out[0], widgetGraph.in[i]);
         }
         for (int i = 0; i < NUM_OUTPUT_CLONES; i++) {
-            connect<>(widgetGraph.out[i], out[i]);
+            std::string filenameOut = QUOTE(OUTPUT_FILE);
+            filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            connect<>(widgetGraph.out[i], out[i].in[0]);
         }
 
 #ifdef USING_UUT
@@ -83,18 +109,11 @@ class test_graph : public graph {
         // the windows then share banks and contention occurs.
         location<kernel>(*widgetGraph.getKernels()) = tile(1, 1);
 #endif
-
-#ifdef USING_UUT
-#define CASC_LEN 1
-// Report out for AIE Synthesizer QoR harvest
-// Nothing to report
-#endif
-        printf("========================\n");
     };
 };
 }
 }
 }
-};
+}; // end of namespace
 
 #endif // _DSPLIB_TEST_HPP_

@@ -1,5 +1,5 @@
 ..
-   Copyright 2021 Xilinx, Inc.
+   Copyright 2022 Xilinx, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _4_API_REFERENCE:
+.. _API_REFERENCE:
 
 **********************
 API Reference Overview
@@ -30,10 +30,11 @@ This section describes the interface to each library element, i.e., configuratio
 - `fir_decimate_hb_graph <../../rst/class_xf_dsp_aie_fir_decimate_hb_fir_decimate_hb_graph.html>`_
 - `fir_interpolate_hb_graph <../../rst/class_xf_dsp_aie_fir_interpolate_hb_fir_interpolate_hb_graph.html>`_
 - `fir_decimate_asym_graph <../../rst/class_xf_dsp_aie_fir_decimate_asym_fir_decimate_asym_graph.html>`_
-- `fir_interpolate_fract_asym_graph <../../rst/class_xf_dsp_aie_fir_interpolate_fract_asym_fir_interpolate_fract_asym_graph.html>`_
+- `fir_interpolate_fract_asym_graph <../../rst/class_xf_dsp_aie_fir_interpolate_fract_asym_fir_interpolate_fract_asym_graph.html>`_ Note: superseded by fir_resampler
 - `fir_decimate_sym_graph <../../rst/class_xf_dsp_aie_fir_decimate_sym_fir_decimate_sym_graph.html>`_
+- `fir_resampler_graph <../../rst/class_xf_dsp_aie_fir_resampler_fir_resampler_graph.html>`_
 - `matrix_mult_graph <../../rst/class_xf_dsp_aie_blas_matrix_mult_matrix_mult_graph.html>`_
-- `fft_ifft_dit_1ch_graph <../../rst/class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_base_graph.html>`_
+- `FFT Graphs <../../rst/group_fft_graphs.html>`_
 - `widget_api_cast_graph <../../rst/class_xf_dsp_aie_widget_api_cast_widget_api_cast_graph.html>`_
 - `widget_real2complex_graph <../../rst/class_xf_dsp_aie_widget_real2complex_widget_real2complex_graph.html>`_
 - `dds_mixer_graph <../../rst/class_xf_dsp_aie_mixer_dds_mixer_dds_mixer_graph.html>`_

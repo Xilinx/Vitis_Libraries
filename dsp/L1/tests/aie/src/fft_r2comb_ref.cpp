@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,12 +81,15 @@ void fft_r2comb_ref<TT_DATA,
     cint64 sam1, sam2, sam2rot;
     int64 presat;
     unsigned int inIndex[kRadix];
+    unsigned int outIndex[kRadix];
     cint32 tw;                     // necessary to accommodate 0,-32768 when conjugated
     const unsigned int shift = 15; // just to compensate for binary point in cint16 twiddles
     const unsigned int round_const = (1 << (shift + TP_SHIFT - 1));
     for (int op = 0; op < loopSize; op++) {
-        inIndex[0] = op;
-        inIndex[1] = op + loopSize;
+        inIndex[0] = 2 * op;
+        inIndex[1] = 2 * op + 1;
+        outIndex[0] = op;
+        outIndex[1] = op + loopSize;
         tw.real = (int32)twiddles[op].real;
         tw.imag = inv ? -(int32)twiddles[op].imag : (int32)twiddles[op].imag;
         sam1.real = (int64)samplesA[inIndex[0]].real << shift;
@@ -96,13 +99,13 @@ void fft_r2comb_ref<TT_DATA,
         sam2rot.real = (int64)sam2.real * (int64)tw.real - (int64)sam2.imag * (int64)tw.imag;
         sam2rot.imag = (int64)sam2.real * (int64)tw.imag + (int64)sam2.imag * (int64)tw.real;
         presat = ((int64)sam1.real + (int64)sam2rot.real + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[inIndex[0]].real = saturate<TT_BASE_DATA>(presat);
+        samplesB[outIndex[0]].real = saturate<TT_BASE_DATA>(presat);
         presat = ((int64)sam1.imag + (int64)sam2rot.imag + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[inIndex[0]].imag = saturate<TT_BASE_DATA>(presat);
+        samplesB[outIndex[0]].imag = saturate<TT_BASE_DATA>(presat);
         presat = ((int64)sam1.real - (int64)sam2rot.real + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[inIndex[1]].real = saturate<TT_BASE_DATA>(presat);
+        samplesB[outIndex[1]].real = saturate<TT_BASE_DATA>(presat);
         presat = ((int64)sam1.imag - (int64)sam2rot.imag + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[inIndex[1]].imag = saturate<TT_BASE_DATA>(presat);
+        samplesB[outIndex[1]].imag = saturate<TT_BASE_DATA>(presat);
     }
 }
 
@@ -137,8 +140,8 @@ void fft_r2comb_ref<TT_DATA,
     unsigned int temp1, temp2, twIndex;
     for (int op = 0; op < loopSize;
          op++) { // Note that the order if inputs differs from UUT. Ref is Cooley-Tukey, UUT is Stockham
-        inIndex[0] = op;
-        inIndex[1] = op + loopSize;
+        inIndex[0] = 2 * op;
+        inIndex[1] = 2 * op + 1;
         outIndex[0] = op;
         outIndex[1] = op + loopSize;
         tw.real = twiddles[op].real;
@@ -173,13 +176,17 @@ void fft_r2comb_ref<TT_DATA,
                     TP_WINDOW_VSIZE,
                     TP_PARALLEL_POWER>::fft_r2comb_ref_main(input_window<TT_DATA>* inWindow,
                                                             output_window<TT_DATA>* outWindow) {
+    constexpr int n = (TP_POINT_SIZE >> TP_PARALLEL_POWER);
     TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
     TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
     bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
-    if
-        constexpr(is_cfloat<TT_DATA>()) { r2StageFloat(xbuff, obuff, twiddles, TP_POINT_SIZE, inv); }
-    else {
-        r2StageInt(xbuff, obuff, twiddles, TP_POINT_SIZE, inv); // only called for the first stage so stage is implied
+    for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE; frameStart += n) {
+        if
+            constexpr(is_cfloat<TT_DATA>()) { r2StageFloat(xbuff + frameStart, obuff + frameStart, twiddles, n, inv); }
+        else {
+            r2StageInt(xbuff + frameStart, obuff + frameStart, twiddles, n,
+                       inv); // only called for the first stage so stage is implied
+        }
     }
 };
 }

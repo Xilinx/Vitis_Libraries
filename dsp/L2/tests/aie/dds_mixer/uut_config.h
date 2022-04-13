@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,54 +23,39 @@
 #ifndef DATA_TYPE
 #define DATA_TYPE cint16
 #endif
-#ifndef COEFF_TYPE
-#define COEFF_TYPE int16
-#endif
-#ifndef FIR_LEN
-#define FIR_LEN 32
-#endif
-#ifndef SHIFT
-#define SHIFT 16
-#endif
-#ifndef ROUND_MODE
-#define ROUND_MODE 0
-#endif
 #ifndef INPUT_WINDOW_VSIZE
 #define INPUT_WINDOW_VSIZE 256
 #endif
+#ifndef MIXER_MODE
+#define MIXER_MODE 2
+#endif
+#ifndef P_API
+#define P_API 0 // window
+#endif
+#ifndef UUT_SSR
+#define UUT_SSR 1
+#endif
+#ifndef DDS_PHASE_INC
+#define DDS_PHASE_INC 0xD6555555
+#endif
+#ifndef INITIAL_DDS_OFFSET
+#define INITIAL_DDS_OFFSET 0
+#endif
+
 #ifndef INPUT_FILE
 #define INPUT_FILE "data/input.txt"
-#endif
-#ifndef INPUT_FILE2
-#define INPUT_FILE "data/input2.txt"
 #endif
 #ifndef OUTPUT_FILE
 #define OUTPUT_FILE "data/output.txt"
 #endif
 
-#ifndef NUM_ITER
-#define NUM_ITER 1
+#ifndef NITER
+#define NITER 16
 #endif
 
-#ifndef USE_COEFF_RELOAD
-#define USE_COEFF_RELOAD 0
-#endif
-
-#define INPUT_SAMPLES INPUT_WINDOW_VSIZE* NUM_ITER
+#define INPUT_SAMPLES INPUT_WINDOW_VSIZE* NITER
 #define INPUT_MARGIN(x, y) CEIL(x, (32 / sizeof(y)))
-#define OUTPUT_SAMPLES INPUT_WINDOW_VSIZE* NUM_ITER
-
-#ifndef COEFF_SEED
-#define COEFF_SEED 0xC0FFEE
-#endif
-
-#ifndef MIXER_MODE
-#define MIXER_MODE 2
-#endif
-
-#ifndef P_API
-#define P_API 0 // window
-#endif
+#define OUTPUT_SAMPLES INPUT_WINDOW_VSIZE* NITER
 
 // END OF UUT CONFIGURATION
 //------------------------------------------------------------------------------

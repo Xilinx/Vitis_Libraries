@@ -7,6 +7,74 @@
             "DECIMATE_FACTOR":"3",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"384"
+        },
+        "test_1_fir_6t_cint16_cint16": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"6",
+            "SHIFT":"16",
+            "DECIMATE_FACTOR":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"480"
+        },
+        "test_2_fir_6t_int32_int32": {
+            "DATA_TYPE":"int32",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"6",
+            "SHIFT":"16",
+            "DECIMATE_FACTOR":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"480"
+        },
+        "test_3_fir_6t_cint32_cint16": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"6",
+            "SHIFT":"16",
+            "DECIMATE_FACTOR":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"480"
+        },
+        "test_4_fir_6t_cint32_int32": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"6",
+            "SHIFT":"16",
+            "DECIMATE_FACTOR":"2",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"480"
+        },
+        "test_5_fir_11t_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"12",
+            "DECIMATE_FACTOR":"3",
+            "SHIFT":"16",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"480"
+        },
+        "test_6_fir_1023t": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"1024",
+            "SHIFT":"20",
+            "DECIMATE_FACTOR":"2",
+            "DUAL_IP":"1",
+            "CASC_LEN":"4",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"512"
+        },
+        "test_7_fir_9t_sym_3d_reload": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"9",
+            "DECIMATE_FACTOR":"3",
+            "SHIFT":"15",
+            "USE_COEFF_RELOAD":"1",
+            "INPUT_WINDOW_VSIZE":"384"
         }
     }
 }

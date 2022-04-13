@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1284,18 +1284,17 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE>
-__attribute__((noinline)) void
-fft_ifft_dit_1ch<TT_DATA,
-                 TT_OUT_DATA,
-                 TT_TWIDDLE,
-                 TP_POINT_SIZE,
-                 TP_FFT_NIFFT,
-                 TP_SHIFT,
-                 TP_START_RANK,
-                 TP_END_RANK,
-                 TP_DYN_PT_SIZE,
-                 TP_WINDOW_VSIZE>::fftMain(input_window<TT_DATA>* __restrict inWindow,
-                                           output_window<TT_OUT_DATA>* __restrict outWindow) {
+NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
+                                    TT_OUT_DATA,
+                                    TT_TWIDDLE,
+                                    TP_POINT_SIZE,
+                                    TP_FFT_NIFFT,
+                                    TP_SHIFT,
+                                    TP_START_RANK,
+                                    TP_END_RANK,
+                                    TP_DYN_PT_SIZE,
+                                    TP_WINDOW_VSIZE>::fftMain(input_window<TT_DATA>* __restrict inWindow,
+                                                              output_window<TT_OUT_DATA>* __restrict outWindow) {
     m_fftKernel.kernelFFT(inWindow, outWindow);
 };
 }

@@ -1,5 +1,5 @@
-# Copyright 2019-2021 Xilinx, Inc.
 #
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.4
+#
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -34,7 +34,7 @@ help::
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/x86sim/aiesim/>"
+	$(ECHO) "  make host TARGET=<hw/hw_emu/x86sim/aiesim/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -65,7 +65,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202120_1
+PLATFORM := xilinx_vck190_base_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -76,6 +76,9 @@ include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
 BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
@@ -130,7 +133,7 @@ AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/tests/aie/src
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/include/aie
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/tests/aie/common/inc
 AIE_CXXFLAGS += -I $(CUR_DIR)
-AIE_CXXFLAGS += --dataflow --device=4x4 -Xchess=llvm.xargs=-std=c++2a -Xchess=main:backend.mist2.xargs=+NOdra -Xchess=main:noodle.optim.olbb=20 -Xchess=main:backend.mist2.pnll=off --test-iterations=16 -Xpreproc="-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1"
+AIE_CXXFLAGS += --dataflow -Xchess=llvm.xargs=-std=c++2a -Xchess=main:backend.mist2.xargs=+NOdra  -Xchess=main:backend.mist2.pnll=off --test-iterations=16 -Xpreproc="-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1"
 $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
@@ -141,6 +144,10 @@ CXXFLAGS += -D SW_EMU_TEST
 endif
 ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
+endif
+
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
 #Inclue Required Host Source Files
@@ -171,16 +178,10 @@ VPP_FLAGS_mm2s +=
 VPP_FLAGS_bmm2s +=  
 VPP_FLAGS_s2mm +=  
 
-BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/mm2s.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
-BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/bmm2s.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
-BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/s2mm.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.$(LINK_TARGET_FMT)
 BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
 endif
 
@@ -188,21 +189,25 @@ endif
 $(TEMP_DIR)/mm2s.xo: $(XFLIB_DIR)/../utils/L2/src/sw/datamover/mm2s.cpp 
 	$(ECHO) "Compiling Kernel: mm2s"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_mm2s) $(VPP_FLAGS) -k mm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_mm2s) $(VPP_FLAGS) -k mm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/mm2s.xo
 $(TEMP_DIR)/bmm2s.xo: $(XFLIB_DIR)/../utils/L2/src/sw/datamover/bmm2s.cpp 
 	$(ECHO) "Compiling Kernel: bmm2s"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_bmm2s) $(VPP_FLAGS) -k bmm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_bmm2s) $(VPP_FLAGS) -k bmm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/bmm2s.xo
 $(TEMP_DIR)/s2mm.xo: $(XFLIB_DIR)/../utils/L2/src/sw/datamover/s2mm.cpp 
 	$(ECHO) "Compiling Kernel: s2mm"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_s2mm) $(VPP_FLAGS) -k s2mm -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_s2mm) $(VPP_FLAGS) -k s2mm -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/s2mm.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(CUR_DIR)//test.cpp 
+$(AIE_CONTAINER): $(CUR_DIR)//test.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_untiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_tiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -263,12 +268,23 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
+vck190_dfx_hw := false
 $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
+ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	@echo "### ***** sd_card generation done! ***** ###"
+vck190_dfx_hw := true
+endif
+endif
+ifeq ($(vck190_dfx_hw), false)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
@@ -280,7 +296,14 @@ else
 RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 endif
-run: check_device  $(RUN_DEPS)
+
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+all: check_device  check_vpp check_platform mkflag $(RUN_DEPS)
+run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
 	$(X86SIMULATOR) --pkg-dir=./Work 
@@ -319,7 +342,17 @@ endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(HOST_ARGS)
+	
+endif
+else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -329,13 +362,8 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: all clean cleanall emconfig
+.PHONY: clean cleanall emconfig
 emconfig: $(EMCONFIG)
-ifeq ($(HOST_ARCH), x86)
-all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-else
-all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-endif
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
@@ -362,13 +390,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) 
 
 clean: cleanh

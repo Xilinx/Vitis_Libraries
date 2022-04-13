@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,9 +56,10 @@ class fft_r2comb_ref {
     fft_r2comb_ref(unsigned int inIdx) {
         kIndex = inIdx;
         const TT_TWIDDLE* twiddle_master = fnGetR2TwiddleMasterBase<TT_TWIDDLE>();
-        int idx = ((kR2MasterTableSize >> TP_PARALLEL_POWER) * kIndex);
-        int stride;
-        stride = (2 * kR2MasterTableSize / TP_POINT_SIZE);
+        //    int idx = ((kR2MasterTableSize>>TP_PARALLEL_POWER) * kIndex);
+        //    int stride =  (2*kR2MasterTableSize/TP_POINT_SIZE);
+        int idx = 2 * kR2MasterTableSize / TP_POINT_SIZE * kIndex;
+        int stride = (2 * kR2MasterTableSize / TP_POINT_SIZE) << TP_PARALLEL_POWER;
         for (int i = 0; i<(TP_POINT_SIZE / 2)>> TP_PARALLEL_POWER; i++) {
             twiddles[i] = twiddle_master[idx];
             idx += stride;

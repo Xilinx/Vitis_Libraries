@@ -4,19 +4,19 @@
     "description": "", 
     "flow": "vitis", 
     "platform_type": "", 
-    "platform_whitelist": [
-        "xilinx_u250_xdma_201830_2", 
+    "platform_allowlist": [
+        "u250", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u250": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/hls_pre.cfg"
                     ]
                 }
@@ -38,7 +38,7 @@
         "aws-vu9p-f1": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/hls_pre.cfg"
                     ]
                 }
@@ -173,7 +173,8 @@
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw_build"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

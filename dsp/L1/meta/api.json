@@ -1,0 +1,332 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::dsp::fft::fft",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::fft::fft",
+                "display_name": "fft",
+                "brief": "top of stream-based SSR FFT (fixed data type)",
+                "target_domain": "",
+                "header_file_name": [
+                    "hls_ssr_fft.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/vitis_fft/fixed/vitis_fft"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "ssr_fft_param_struct",
+                        "type": "typename",
+                        "description": "SSR FFT parameter structure that can be redefined by users"
+                    },
+                    {
+                        "name": "T_in",
+                        "type": "typename",
+                        "description": "type of input data"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "fftInStrm",
+                        "direction": "",
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                    },
+                    {
+                        "name": "fftOutStrm",
+                        "direction": "",
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::fft::fft",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::fft::fft",
+                "display_name": "fft",
+                "brief": "top of stream-based SSR FFT (fixed data type)",
+                "target_domain": "",
+                "header_file_name": [
+                    "hls_ssr_fft.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/vitis_fft/fixed/vitis_fft"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "ssr_fft_param_struct",
+                        "type": "typename",
+                        "description": "SSR FFT parameter structure that can be redefined by users"
+                    },
+                    {
+                        "name": "t_instanceID",
+                        "type": "int",
+                        "description": "SSR FFT INSTANCE ID"
+                    },
+                    {
+                        "name": "T_in",
+                        "type": "typename",
+                        "description": "type of input data"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "fftInStrm",
+                        "direction": "",
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                    },
+                    {
+                        "name": "fftOutStrm",
+                        "direction": "",
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::fft::fft",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::fft::fft",
+                "display_name": "fft",
+                "brief": "top of stream-based SSR FFT (float data type)",
+                "target_domain": "",
+                "header_file_name": [
+                    "hls_ssr_fft.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/vitis_fft/float/vitis_fft"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "ssr_fft_param_struct",
+                        "type": "typename",
+                        "description": "SSR FFT parameter structure that can be redefined by users"
+                    },
+                    {
+                        "name": "T_in",
+                        "type": "typename",
+                        "description": "type of input data"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "fftInStrm",
+                        "direction": "",
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                    },
+                    {
+                        "name": "fftOutStrm",
+                        "direction": "",
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::fft::fft",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::fft::fft",
+                "display_name": "fft",
+                "brief": "top of stream-based SSR FFT (float data type)",
+                "target_domain": "",
+                "header_file_name": [
+                    "hls_ssr_fft.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/vitis_fft/float/vitis_fft"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "ssr_fft_param_struct",
+                        "type": "typename",
+                        "description": "SSR FFT parameter structure that can be redefined by users"
+                    },
+                    {
+                        "name": "t_instanceID",
+                        "type": "int",
+                        "description": "SSR FFT INSTANCE ID"
+                    },
+                    {
+                        "name": "T_in",
+                        "type": "typename",
+                        "description": "type of input data"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "fftInStrm",
+                        "direction": "",
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                    },
+                    {
+                        "name": "fftOutStrm",
+                        "direction": "",
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::fft::fft2d",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::fft::fft2d",
+                "display_name": "fft2d",
+                "brief": "Top of 2D FFT kernel (fixed data type), provides DFT/Inverse DFT of 2D data.",
+                "target_domain": "",
+                "header_file_name": [
+                    "hls_ssr_fft_2d.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/vitis_2dfft/fixed/vitis_fft"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_memWidth",
+                        "type": "unsigned int",
+                        "description": "Number of streaming into the kernel in parallel"
+                    },
+                    {
+                        "name": "t_numRows",
+                        "type": "unsigned int",
+                        "description": "Number of rows in complex 2-d input matrix"
+                    },
+                    {
+                        "name": "t_numCols",
+                        "type": "unsigned int",
+                        "description": "Number of columns in complex 2-d input matrix"
+                    },
+                    {
+                        "name": "t_numKernels",
+                        "type": "unsigned int",
+                        "description": "Number of 1D Kernels used row/column wise"
+                    },
+                    {
+                        "name": "t_ssrFFTParamsRowProc",
+                        "type": "typename",
+                        "description": "Gives parameters for 1-d fft kernel used on rows"
+                    },
+                    {
+                        "name": "t_ssrFFTParamsColProc",
+                        "type": "typename",
+                        "description": "Gives parameters for 1-d fft kernel used on columns"
+                    },
+                    {
+                        "name": "t_rowInstanceIDOffset",
+                        "type": "unsigned int",
+                        "description": "The row instance ID offset"
+                    },
+                    {
+                        "name": "t_colInstanceIDOffset",
+                        "type": "unsigned int",
+                        "description": "The column instance ID offset"
+                    },
+                    {
+                        "name": "T_elemType",
+                        "type": "typename",
+                        "description": "Data type of the individual matrix elements"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_memWideStreamIn",
+                        "direction": "",
+                        "type": "typename WideTypeDefs< t_memWidth, T_elemType >::WideIFStreamType &"
+                    },
+                    {
+                        "name": "p_memWideStreamOut",
+                        "direction": "",
+                        "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::dsp::fft::fft2d",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::fft::fft2d",
+                "display_name": "fft2d",
+                "brief": "Top of 2D FFT kernel (float data type), provides DFT/Inverse DFT of 2D data.",
+                "target_domain": "",
+                "header_file_name": [
+                    "hls_ssr_fft_2d.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/vitis_2dfft/float/vitis_fft"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_memWidth",
+                        "type": "unsigned int",
+                        "description": "Number of streaming into the kernel in parallel"
+                    },
+                    {
+                        "name": "t_numRows",
+                        "type": "unsigned int",
+                        "description": "Number of rows in complex 2-d input matrix"
+                    },
+                    {
+                        "name": "t_numCols",
+                        "type": "unsigned int",
+                        "description": "Number of columns in complex 2-d input matrix"
+                    },
+                    {
+                        "name": "t_numKernels",
+                        "type": "unsigned int",
+                        "description": "Number of 1D Kernels used row/column wise"
+                    },
+                    {
+                        "name": "t_ssrFFTParamsRowProc",
+                        "type": "typename",
+                        "description": "Gives parameters for 1-d fft kernel used on rows"
+                    },
+                    {
+                        "name": "t_ssrFFTParamsColProc",
+                        "type": "typename",
+                        "description": "Gives parameters for 1-d fft kernel used on columns"
+                    },
+                    {
+                        "name": "t_rowInstanceIDOffset",
+                        "type": "unsigned int",
+                        "description": "The row instance ID offset"
+                    },
+                    {
+                        "name": "t_colInstanceIDOffset",
+                        "type": "unsigned int",
+                        "description": "The column instance ID offset"
+                    },
+                    {
+                        "name": "T_elemType",
+                        "type": "typename",
+                        "description": "Data type of the individual matrix elements"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_memWideStreamIn",
+                        "direction": "",
+                        "type": "typename WideTypeDefs< t_memWidth, T_elemType >::WideIFStreamType &"
+                    },
+                    {
+                        "name": "p_memWideStreamOut",
+                        "direction": "",
+                        "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}

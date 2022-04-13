@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace matrix_mult {
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 class tilerKernelClass {
    public:
-    void tile(input_window<T_D>* inWindow, output_window<T_D>* restrict outWindow);
+    void tile(input_window<T_D>* inWindow, output_window<T_D>* __restrict outWindow);
 
     static void registerKernelClass() { REGISTER_FUNCTION(tilerKernelClass::tile); }
 };
@@ -36,7 +36,7 @@ class tilerKernelClass {
   @brief Entry point from another kernel (using this as a function, instead of a subgraph.)
 */
 // template<unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D >
-// static void doTile(T_D* restrict inPtr, T_D* outPtr);
+// static void doTile(T_D* __restrict inPtr, T_D* outPtr);
 }
 }
 }

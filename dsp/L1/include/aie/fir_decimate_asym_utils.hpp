@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,105 +43,13 @@ namespace decimate_asym {
 #endif
 
 template <typename T_D, typename T_C>
-struct T_accDecAsym {};
-template <>
-struct T_accDecAsym<int16, int16> : T_acc384<int16, int16> {
-    using T_acc384<int16, int16>::operator=;
-};
-template <>
-struct T_accDecAsym<cint16, int16> : T_acc384<cint16, int16> {
-    using T_acc384<cint16, int16>::operator=;
-};
-template <>
-struct T_accDecAsym<cint16, cint16> : T_acc384<cint16, cint16> {
-    using T_acc384<cint16, cint16>::operator=;
-};
-template <>
-struct T_accDecAsym<int32, int16> : T_acc384<int32, int16> {
-    using T_acc384<int32, int16>::operator=;
-};
-template <>
-struct T_accDecAsym<int32, int32> : T_acc384<int32, int32> {
-    using T_acc384<int32, int32>::operator=;
-};
-template <>
-struct T_accDecAsym<cint32, int16> : T_acc384<cint32, int16> {
-    using T_acc384<cint32, int16>::operator=;
-};
-template <>
-struct T_accDecAsym<cint32, int32> : T_acc384<cint32, int32> {
-    using T_acc384<cint32, int32>::operator=;
-};
-template <>
-struct T_accDecAsym<cint32, cint16> : T_acc384<cint32, cint16> {
-    using T_acc384<cint32, cint16>::operator=;
-};
-template <>
-struct T_accDecAsym<cint32, cint32> : T_acc384<cint32, cint32> {
-    using T_acc384<cint32, cint32>::operator=;
-};
-template <>
-struct T_accDecAsym<float, float> : T_acc384<float, float> {
-    using T_acc384<float, float>::operator=;
-};
-template <>
-struct T_accDecAsym<cfloat, float> : T_acc384<cfloat, float> {
-    using T_acc384<cfloat, float>::operator=;
-};
-template <>
-struct T_accDecAsym<cfloat, cfloat> : T_acc384<cfloat, cfloat> {
-    using T_acc384<cfloat, cfloat>::operator=;
+struct T_accDecAsym : T_acc384<T_D, T_C> {
+    using T_acc384<T_D, T_C>::operator=;
 };
 
 template <typename T_D, typename T_C>
-struct T_outValDecAsym {};
-template <>
-struct T_outValDecAsym<int16, int16> : T_outVal384<int16, int16> {
-    using T_outVal384<int16, int16>::operator=;
-};
-template <>
-struct T_outValDecAsym<cint16, int16> : T_outVal384<cint16, int16> {
-    using T_outVal384<cint16, int16>::operator=;
-};
-template <>
-struct T_outValDecAsym<cint16, cint16> : T_outVal384<cint16, cint16> {
-    using T_outVal384<cint16, cint16>::operator=;
-};
-template <>
-struct T_outValDecAsym<int32, int16> : T_outVal384<int32, int16> {
-    using T_outVal384<int32, int16>::operator=;
-};
-template <>
-struct T_outValDecAsym<int32, int32> : T_outVal384<int32, int32> {
-    using T_outVal384<int32, int32>::operator=;
-};
-template <>
-struct T_outValDecAsym<cint32, int16> : T_outVal384<cint32, int16> {
-    using T_outVal384<cint32, int16>::operator=;
-};
-template <>
-struct T_outValDecAsym<cint32, int32> : T_outVal384<cint32, int32> {
-    using T_outVal384<cint32, int32>::operator=;
-};
-template <>
-struct T_outValDecAsym<cint32, cint16> : T_outVal384<cint32, cint16> {
-    using T_outVal384<cint32, cint16>::operator=;
-};
-template <>
-struct T_outValDecAsym<cint32, cint32> : T_outVal384<cint32, cint32> {
-    using T_outVal384<cint32, cint32>::operator=;
-};
-template <>
-struct T_outValDecAsym<float, float> : T_outVal384<float, float> {
-    using T_outVal384<float, float>::operator=;
-};
-template <>
-struct T_outValDecAsym<cfloat, float> : T_outVal384<cfloat, float> {
-    using T_outVal384<cfloat, float>::operator=;
-};
-template <>
-struct T_outValDecAsym<cfloat, cfloat> : T_outVal384<cfloat, cfloat> {
-    using T_outVal384<cfloat, cfloat>::operator=;
+struct T_outValDecAsym : T_outVal384<T_D, T_C> {
+    using T_outVal384<T_D, T_C>::operator=;
 };
 
 //---------------------------------------------------------------------------------------------------
@@ -149,14 +57,17 @@ struct T_outValDecAsym<cfloat, cfloat> : T_outVal384<cfloat, cfloat> {
 
 // Overloaded shift and saturate calls to allow null operation for float types
 template <typename TT_DATA, typename TT_COEFF>
-inline T_outVal384<TT_DATA, TT_COEFF> shiftAndSaturateDecAsym(const T_acc384<TT_DATA, TT_COEFF> acc, const int shift) {
+INLINE_DECL T_outVal384<TT_DATA, TT_COEFF> shiftAndSaturateDecAsym(const T_acc384<TT_DATA, TT_COEFF> acc,
+                                                                   const int shift) {
     // generic 384-bit wide acc shift and saturate
     return shiftAndSaturate(acc, shift);
 };
 
 //
 template <typename TT_DATA, unsigned int T_SIZE>
-inline void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int splice, input_window<TT_DATA>* inWindow) {
+INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff,
+                               const unsigned int splice,
+                               input_window<TT_DATA>* inWindow) {
     using buf_type = typename T_buff_1024b<TT_DATA>::v_type;
     if
         constexpr(T_SIZE == 256) {
@@ -177,17 +88,19 @@ inline void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int splice
 
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA>
-inline T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
-                                   unsigned int xstart,
-                                   const unsigned int xOffsets,
-                                   const unsigned int xstartUpper) {
+INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
+                                        unsigned int xstart,
+                                        const unsigned int xOffsets,
+                                        const unsigned int xstartUpper) {
     using buf_type = typename T_buff_512b<TT_DATA>::v_type;
     buf_type chess_storage(X_BUFFER) tmp;
+    const unsigned int two_columns = (xOffsets & 0xF0000) == 0 ? 1 : 0; // extract columns
+
     T_buff_512b<TT_DATA> retVal;
-    const unsigned int sel = 0xFF00;
+    const unsigned int sel = two_columns == 1 ? 0xFFF0 : 0xFF00;
     const unsigned int xoffsets = xOffsets;
     const unsigned int xoffsets_hi = 0;
-    const unsigned int yoffsets = 0;
+    const unsigned int yoffsets = xOffsets;
     const unsigned int yoffsets_hi = xOffsets;
     retVal.val = select16(sel, xbuff.val, xstart, xoffsets, xoffsets_hi, xstartUpper, yoffsets, yoffsets_hi);
     return retVal;
@@ -195,10 +108,10 @@ inline T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
 
 //-----------------------------------------------------------------------------------------------------
 template <>
-inline T_buff_512b<int32> select(T_buff_1024b<int32> xbuff,
-                                 unsigned int xstart,
-                                 const unsigned int xOffsets,
-                                 const unsigned int xstartUpper) {
+INLINE_DECL T_buff_512b<int32> select(T_buff_1024b<int32> xbuff,
+                                      unsigned int xstart,
+                                      const unsigned int xOffsets,
+                                      const unsigned int xstartUpper) {
     // xstartUpper = xstart + m_kLanes/2 * TP_DECIMATE_FACTOR; //upper half of lanes
     const unsigned int lanes = 2 * (xstartUpper - xstart) / ((0xF00 & xOffsets) >> 8); // extract lanes
     T_buff_512b<int32> retVal;
@@ -213,19 +126,19 @@ inline T_buff_512b<int32> select(T_buff_1024b<int32> xbuff,
 }
 
 template <>
-inline T_buff_512b<int16> select(T_buff_1024b<int16> xbuff,
-                                 unsigned int xstart,
-                                 const unsigned int xOffsets,
-                                 const unsigned int xstartUpper) {
+INLINE_DECL T_buff_512b<int16> select(T_buff_1024b<int16> xbuff,
+                                      unsigned int xstart,
+                                      const unsigned int xOffsets,
+                                      const unsigned int xstartUpper) {
     T_buff_512b<int16> retVal;
     // select32 if int16/int16 was supported
     return retVal;
 }
 template <>
-inline T_buff_512b<cint32> select(T_buff_1024b<cint32> xbuff,
-                                  unsigned int xstart,
-                                  const unsigned int xOffsets,
-                                  const unsigned int xstartUpper) {
+INLINE_DECL T_buff_512b<cint32> select(T_buff_1024b<cint32> xbuff,
+                                       unsigned int xstart,
+                                       const unsigned int xOffsets,
+                                       const unsigned int xstartUpper) {
     T_buff_512b<cint32> retVal;
     const unsigned int sel = 0xF0;
     const unsigned int xoffsets = xOffsets;
@@ -234,10 +147,10 @@ inline T_buff_512b<cint32> select(T_buff_1024b<cint32> xbuff,
     return retVal;
 }
 template <>
-inline T_buff_512b<float> select(T_buff_1024b<float> xbuff,
-                                 unsigned int xstart,
-                                 const unsigned int xOffsets,
-                                 const unsigned int xstartUpper) {
+INLINE_DECL T_buff_512b<float> select(T_buff_1024b<float> xbuff,
+                                      unsigned int xstart,
+                                      const unsigned int xOffsets,
+                                      const unsigned int xstartUpper) {
     T_buff_512b<float> retVal;
     const unsigned int sel = 0xFF00;
     const unsigned int xoffsets = xOffsets;
@@ -248,10 +161,10 @@ inline T_buff_512b<float> select(T_buff_1024b<float> xbuff,
     return retVal;
 }
 template <>
-inline T_buff_512b<cfloat> select(T_buff_1024b<cfloat> xbuff,
-                                  unsigned int xstart,
-                                  const unsigned int xOffsets,
-                                  const unsigned int xstartUpper) {
+INLINE_DECL T_buff_512b<cfloat> select(T_buff_1024b<cfloat> xbuff,
+                                       unsigned int xstart,
+                                       const unsigned int xOffsets,
+                                       const unsigned int xstartUpper) {
     T_buff_512b<cfloat> retVal;
     const unsigned int sel = 0xC;
     const unsigned int xoffsets = xOffsets;
@@ -263,7 +176,7 @@ inline T_buff_512b<cfloat> select(T_buff_1024b<cfloat> xbuff,
 // overloaded mul/mac calls
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DFX, unsigned int TP_DECIMATE_FACTOR>
-inline T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym1Buff(T_buff_1024b<TT_DATA> xbuff,
+INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym(T_buff_1024b<TT_DATA> xbuff,
                                                        unsigned int xstart,
                                                        T_buff_256b<TT_COEFF> zbuff,
                                                        unsigned int zstart,
@@ -307,7 +220,7 @@ inline T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym1Buff(T_buff_1024b<TT_DATA> xbu
 }
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DFX, unsigned int TP_DECIMATE_FACTOR>
-inline T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym1Buff(T_accDecAsym<TT_DATA, TT_COEFF> acc,
+INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_COEFF> acc,
                                                        T_buff_1024b<TT_DATA> xbuff,
                                                        unsigned int xstart,
                                                        T_buff_256b<TT_COEFF> zbuff,
@@ -338,8 +251,12 @@ inline T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym1Buff(T_accDecAsym<TT_DATA, TT_
             constexpr unsigned int CoeffStep = 1;
             constexpr unsigned int DataStepX = 1;
             constexpr unsigned int DataStepY = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(); // 4 for 4 column intrinsics
-
+            // TODO: apply chess_copy() to force the tmp buffer to be loop variant and hence prevent dumping all tmp's
+            // on stack pre-loop.
             tmp = select(xbuff, xstart, xoffsets, xstartUpper).val;
+            /*vPrintf("tmp ", tmp);
+            vPrintf("xbuff", xbuff.val);
+            printf("xstart : %d \t xstartUpper %d \n", xstart, xstartUpper);*/
             retVal.val = ::aie::sliding_mul_ops<
                 fnNumLanesDecAsym<TT_DATA, TT_COEFF>(), fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
                 DataStepY, TT_COEFF, TT_DATA,
@@ -350,8 +267,12 @@ inline T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym1Buff(T_accDecAsym<TT_DATA, TT_
 }
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DFX, unsigned int TP_DECIMATE_FACTOR>
-inline T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym1Buff(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_DFX,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_DUAL_IP>
+INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
                                                            T_accDecAsym<TT_DATA, TT_COEFF> acc,
                                                            T_buff_1024b<TT_DATA> xbuff,
                                                            unsigned int xstart,
@@ -359,12 +280,16 @@ inline T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym1Buff(T_inputIF<CASC_IN_FAL
                                                            unsigned int zstart,
                                                            const unsigned int decimateOffsets,
                                                            const unsigned int xstartUpper) {
-    return mulDecAsym1Buff<TT_DATA, TT_COEFF, TP_DFX, TP_DECIMATE_FACTOR>(xbuff, xstart, zbuff, zstart, decimateOffsets,
-                                                                          xstartUpper);
+    return mulDecAsym<TT_DATA, TT_COEFF, TP_DFX, TP_DECIMATE_FACTOR>(xbuff, xstart, zbuff, zstart, decimateOffsets,
+                                                                     xstartUpper);
 };
 
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DFX, unsigned int TP_DECIMATE_FACTOR>
-inline T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym1Buff(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_DFX,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_DUAL_IP>
+INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                                                            T_accDecAsym<TT_DATA, TT_COEFF> acc,
                                                            T_buff_1024b<TT_DATA> xbuff,
                                                            unsigned int xstart,
@@ -372,8 +297,8 @@ inline T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym1Buff(T_inputIF<CASC_IN_TRU
                                                            unsigned int zstart,
                                                            const unsigned int decimateOffsets,
                                                            const unsigned int xstartUpper) {
-    return macDecAsym1Buff<TT_DATA, TT_COEFF, TP_DFX, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart,
-                                                                          decimateOffsets, xstartUpper);
+    return macDecAsym<TT_DATA, TT_COEFF, TP_DFX, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart, decimateOffsets,
+                                                                     xstartUpper);
 };
 }
 }

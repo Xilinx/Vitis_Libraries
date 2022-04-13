@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,31 +20,9 @@ reference model graph
 #include <stdio.h>
 #include "test.hpp"
 
-simulation::platform<1, 1> platform(QUOTE(INPUT_FILE), QUOTE(OUTPUT_FILE));
-
 xf::dsp::aie::testcase::test_graph widgetTestHarness;
 
-// Connect platform to uut
-connect<> net_in0(platform.src[0], widgetTestHarness.in);
-
-connect<> net_out0(widgetTestHarness.out, platform.sink[0]);
-
 int main(void) {
-    printf("\n");
-    printf("========================\n");
-    printf("UUT: ");
-    printf(QUOTE(UUT_GRAPH));
-    printf("\n");
-    printf("========================\n");
-    printf("Number of samples   = %d \n", WINDOW_VSIZE);
-    printf("Data type       = ");
-    printf(QUOTE(DATA_TYPE));
-    printf("\n");
-    printf("Data out type       = ");
-    printf(QUOTE(DATA_OUT_TYPE));
-    printf("\n");
-    printf("\n");
-
     widgetTestHarness.init();
     widgetTestHarness.run(NITER);
     widgetTestHarness.end();

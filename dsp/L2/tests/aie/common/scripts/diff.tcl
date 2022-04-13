@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,9 +39,16 @@ if { $::argc >= 4} {
     # Default tolerenace
     set tolerance         0.001
 }
+
 if { $::argc >= 5} {
+    set cc_tolerance         [lindex $argv 4]
+} else {
+    # Default tolerenace
+    set cc_tolerance         0.001
+}
+if { $::argc >= 6} {
     # any entry sets absolute tolerance mode on
-    set toleranceMode               [lindex $argv 4]
+    set toleranceMode               [lindex $argv 5]
     puts  "toleranceMode = $toleranceMode"
         if {($toleranceMode == "abs")|| ($toleranceMode == "ABS") } {
             set toleranceMode  abs
@@ -62,9 +69,11 @@ if { $::argc >= 5} {
 
 # global variable to track max difference
 set maxDiffVal 0
+set sampleNum 0
 proc isSame {a b tolerance toleranceMode} {
     variable maxDiffVal
-    
+    variable sampleNum
+
     if {(($a == 0.0) && ($toleranceMode != "abs"))} {
     # Avoid division by 0
         if {$b == 0.0} {
@@ -80,7 +89,7 @@ proc isSame {a b tolerance toleranceMode} {
             # Percentage tolerance
         set diffVal [expr {abs(((double(($a-$b))) / double($a)))}]
         }
-        if {($maxDiffVal < $diffVal)} { 
+        if {($maxDiffVal < $diffVal)} {
             set maxDiffVal $diffVal
         }
         if {$diffVal <= $tolerance} {
@@ -89,6 +98,7 @@ proc isSame {a b tolerance toleranceMode} {
             set res 0
         }
     }
+    incr sampleNum
     return $res
 }
 
@@ -117,45 +127,61 @@ if {$fexist2} {
 }
 
 # Compare line by line, until EoF.
-while {$fexist1 && $fexist2 && [gets $inFile1 line1] != -1} {
-    incr lineNo
-    if {[gets $inFile2 line2] != -1} {
-        set valList1 [split $line1 " "]
-        set valList2 [split $line2 " "]
-        set indexList2 0
-        set printLines 0
-        foreach val1  $valList1 {
-            # Assume that each files have same number of arguments
-            # skip empty spaces at the end of the line
-            if {($val1!="")} {
-                if {[isSame $val1  [lindex $valList2 $indexList2] $tolerance $toleranceMode] } {
-                    # Good, move on
-                    incr fileMatchesFound
-                } else {
-                    # Bad, set out flag to print out diff lines to diff file.
-                    set printLines 1
-                    # and set the comparison result
-                    set fileMismatch 1
-                    incr fileDiffsFound
+
+#
+while {$fexist1 && $fexist2  && [gets $inFile1 line1] != -1} {
+        incr lineNo
+        if {[gets $inFile2 line2] != -1} {
+            set valList1 [split $line1 " "]
+            set valList2 [split $line2 " "]
+            set indexList2 0
+            set printLines 0
+            foreach val1  $valList1 {
+                # Assume that each files have same number of arguments
+                # skip empty spaces at the end of the line
+                if {($val1!="")} {
+                    if {[isSame $val1  [lindex $valList2 $indexList2] $tolerance $toleranceMode] } {
+                        # Good, move on
+                        incr fileMatchesFound
+                    } else {
+                        # Bad, set out flag to print out diff lines to diff file.
+                        set printLines 1
+                        # and set the comparison result
+                        set fileMismatch 1
+                        incr fileDiffsFound
+                    }
                 }
+                incr indexList2
             }
-            incr indexList2
+                    if {$printLines == 1} {
+                set outFile [open $fileNameOut a]
+                # Write to file
+                puts $outFile "Line no: $lineNo:     $line1"
+                puts $outFile "Line no: $lineNo:     $line2"
+                close $outFile
+            }
+        } else {
+            set fileLengthMismatch 1
         }
-        if {$printLines == 1} {
-            set outFile [open $fileNameOut a]
-            # Write to file
-            puts $outFile "Line no: $lineNo:     $line1"
-            puts $outFile "Line no: $lineNo:     $line2"
-            close $outFile
-        }
-
-    } else {
-        # Eof reached on file2,
-        set fileLengthMismatch 1
-        break
-    }
+} 
+if  {[gets $inFile2 line2] != -1} {
+    set fileLengthMismatch 1
 }
-
+ 
+# Deal with catastrophic cancellations for floats
+set fileAllSamples  [expr ($fileDiffsFound + $fileMatchesFound)]
+if {$fileAllSamples == 0.0} {
+    # Avoid division by 0
+    set fileErrRatio 1
+} else {
+    set fileErrRatio  [expr {(double($fileDiffsFound) / double($fileAllSamples))}]
+}
+if {$fileErrRatio > $cc_tolerance} {
+    set fileMismatch 1
+} else {
+    set fileMismatch 0
+}
+puts $fileMismatch
 
 if {!$fexist1} {
     # File not found
@@ -171,6 +197,13 @@ if {!$fexist1} {
     # Write to file
     puts $outFile "error: File not found: $fileName2 "
     close $outFile
+} elseif {$fileLengthMismatch != 0} {
+    # Empty file
+    puts "error: File length mismatch."
+    set outFile [open $fileNameOut a]
+    # Write to file
+    puts $outFile "error: File length mismatch. "
+    close $outFile
 } elseif {$lineNo == 0} {
     # Empty file
     puts "error: File empty: $fileName1"
@@ -178,23 +211,14 @@ if {!$fexist1} {
     # Write to file
     puts $outFile "error: File empty: $fileName1"
     close $outFile
-} elseif {$fileLengthMismatch != 0} {
-    # Empty file
-    puts "error: File length mismatch. Insufficient data in: $fileName2"
-    set outFile [open $fileNameOut a]
-    # Write to file
-    puts $outFile "error: File length mismatch. Insufficient data in: $fileName2"
-    close $outFile
 } elseif {$fileMismatch != 0} {
     # Diffs are showing mismatches
     puts "error: Compared files differ. Differences found: $fileDiffsFound. Max Difference: $maxDiffVal"
 } else {
     # Good. Put a phrase to a file, which mimics the diff command behaviour.
     set outFile [open $fileNameOut a]
-    puts $outFile "Files are identical."
+    puts $outFile "Files are identical, i.e. compared data samples are within defined tolerance bounds. "
     close $outFile
-    puts "INFO: Compared files match."
+    puts "INFO: Compared files match, i.e. compared data samples are within defined tolerance bounds. "
 }
-
-
-
+exit 0

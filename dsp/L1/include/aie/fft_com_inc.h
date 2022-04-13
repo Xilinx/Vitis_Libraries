@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -324,5 +324,8 @@
 #define INLINE_DECL inline
 #endif
 #endif // ifndef INLINE_DECL
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
 
 #endif /* __FFT_COM_INC_H__ */

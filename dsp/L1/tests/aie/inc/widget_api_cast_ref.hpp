@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ Widget API Cast reference model
 #include "fir_ref_utils.hpp"
 #include "widget_api_cast_traits.hpp"
 
-#define _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
+//#define _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
 
 namespace xf {
 namespace dsp {

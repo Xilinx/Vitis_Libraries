@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,9 @@
 
 #include <adf.h>
 #include <vector>
+#include "graph_utils.hpp"
 
-#include "fir_interpolate_fract_asym.hpp"
+#include "fir_resampler.hpp"
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -32,7 +33,13 @@ namespace fir {
 namespace interpolate_fract_asym {
 
 using namespace adf;
+using namespace resampler;
 
+void deprecation_warning() {
+    printf(
+        "\nWARNING: The FIR fractional interpolator library element has been superseded by the FIR resampler. Please "
+        "use the resampler. This library element will be deprecated and removed in the 2022.2 release timeframe.\n");
+}
 //---------------------------------------------------------------------------------------------------
 // create_casc_kernel_recur
 // Where the FIR function is split over multiple processors to increase throughput, recursion
@@ -58,7 +65,7 @@ template <int dim,
 class create_casc_kernel_recur {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[dim - 1] = kernel::create_object<fir_interpolate_fract_asym<
+        firKernels[dim - 1] = kernel::create_object<fir_resampler<
             TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
             TP_INPUT_WINDOW_VSIZE, true, true,
             fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(), dim - 1,
@@ -66,6 +73,7 @@ class create_casc_kernel_recur {
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
                                  TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN,
                                  TP_USE_COEFF_RELOAD>::create(firKernels, taps);
+        printf("Created %d\n", dim);
     }
 };
 // Recursive kernel creation, static coefficients
@@ -91,11 +99,11 @@ class create_casc_kernel_recur<1,
                                USE_COEFF_RELOAD_FALSE> {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[0] = kernel::create_object<fir_interpolate_fract_asym<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, false, true,
-            fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>(), 0,
-            TP_CASC_LEN, USE_COEFF_RELOAD_FALSE, 1> >(taps);
+        firKernels[0] = kernel::create_object<
+            fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                          TP_INPUT_WINDOW_VSIZE, false, true,
+                          fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>(),
+                          0, TP_CASC_LEN, USE_COEFF_RELOAD_FALSE, 1> >(taps);
     }
 };
 // Recursive kernel creation, reloadable coefficients
@@ -122,7 +130,7 @@ class create_casc_kernel_recur<dim,
                                USE_COEFF_RELOAD_TRUE> {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[dim - 1] = kernel::create_object<fir_interpolate_fract_asym<
+        firKernels[dim - 1] = kernel::create_object<fir_resampler<
             TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
             TP_INPUT_WINDOW_VSIZE, true, true,
             fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(), dim - 1,
@@ -155,11 +163,11 @@ class create_casc_kernel_recur<1,
                                USE_COEFF_RELOAD_TRUE> {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[0] = kernel::create_object<fir_interpolate_fract_asym<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, false, true,
-            fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>(), 0,
-            TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 1> >();
+        firKernels[0] = kernel::create_object<
+            fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                          TP_INPUT_WINDOW_VSIZE, false, true,
+                          fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>(),
+                          0, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 1> >();
     }
 };
 // Kernel creation, static coefficients
@@ -178,7 +186,7 @@ template <int dim,
 class create_casc_kernel {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[dim - 1] = kernel::create_object<fir_interpolate_fract_asym<
+        firKernels[dim - 1] = kernel::create_object<fir_resampler<
             TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
             TP_INPUT_WINDOW_VSIZE, true, false,
             fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
@@ -214,7 +222,7 @@ class create_casc_kernel<dim,
                          TP_NUM_OUTPUTS> {
    public:
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[dim - 1] = kernel::create_object<fir_interpolate_fract_asym<
+        firKernels[dim - 1] = kernel::create_object<fir_resampler<
             TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
             TP_INPUT_WINDOW_VSIZE, true, false,
             fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
@@ -250,7 +258,7 @@ class create_casc_kernel<1,
     static constexpr unsigned int dim = 1;
     static constexpr unsigned int TP_CASC_LEN = 1;
     static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[dim - 1] = kernel::create_object<fir_interpolate_fract_asym<
+        firKernels[dim - 1] = kernel::create_object<fir_resampler<
             TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
             TP_INPUT_WINDOW_VSIZE, false, false,
             fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
@@ -283,7 +291,7 @@ class create_casc_kernel<1,
     static constexpr unsigned int dim = 1;
     static constexpr unsigned int TP_CASC_LEN = 1;
     static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[dim - 1] = kernel::create_object<fir_interpolate_fract_asym<
+        firKernels[dim - 1] = kernel::create_object<fir_resampler<
             TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
             TP_INPUT_WINDOW_VSIZE, false, false,
             fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
@@ -295,7 +303,7 @@ class create_casc_kernel<1,
   */
 
 /**
- * @brief fir_interpolate_fract_asym is an Asymmetric Fractional Interpolation FIR filter
+ * @brief fir_resampler is an Asymmetric Fractional Interpolation FIR filter
  *
  * These are the templates to configure the Asymmetric Fractional Interpolation FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
@@ -404,9 +412,9 @@ class fir_interpolate_fract_asym_graph : public graph {
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
-                                          TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS>::get_m_kArch();
+        return fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                             TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, TP_USE_COEFF_RELOAD,
+                             TP_NUM_OUTPUTS>::get_m_kArch();
     };
 
     // constructor
@@ -415,6 +423,7 @@ class fir_interpolate_fract_asym_graph : public graph {
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
      **/
     fir_interpolate_fract_asym_graph(const std::vector<TT_COEFF>& taps) {
+        deprecation_warning();
         // create kernels
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
                            TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN>::create(m_firKernels, taps);
@@ -443,7 +452,7 @@ class fir_interpolate_fract_asym_graph : public graph {
             // Specify mapping constraints
             runtime<ratio>(m_firKernels[i]) = 0.8;
             // Source files
-            source(m_firKernels[i]) = "fir_interpolate_fract_asym.cpp";
+            source(m_firKernels[i]) = "fir_resampler.cpp";
         }
     }
 };
@@ -500,12 +509,13 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
-                                          TP_CASC_LEN, USE_COEFF_RELOAD_FALSE, 2>::get_m_kArch();
+        return fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                             TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, USE_COEFF_RELOAD_FALSE,
+                             2>::get_m_kArch();
     };
 
     fir_interpolate_fract_asym_graph(const std::vector<TT_COEFF>& taps) {
+        deprecation_warning();
         // create kernels
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
                            TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, USE_COEFF_RELOAD_FALSE,
@@ -537,7 +547,7 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
             // Specify mapping constraints
             runtime<ratio>(m_firKernels[i]) = 0.8;
             // Source files
-            source(m_firKernels[i]) = "fir_interpolate_fract_asym.cpp";
+            source(m_firKernels[i]) = "fir_resampler.cpp";
         }
     }
 };
@@ -569,7 +579,6 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
     port<input> coeff;
 
     kernel m_firKernels[TP_CASC_LEN];
-    kernel m_firReloadKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
     unsigned int getKernelArchs() {
@@ -580,13 +589,14 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
-                                          TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 1>::get_m_kArch();
+        return fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                             TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE,
+                             1>::get_m_kArch();
     };
 
     // constructor
     fir_interpolate_fract_asym_graph() {
+        deprecation_warning();
         // create kernels
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
                            TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE,
@@ -609,9 +619,7 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
         }
 
         // coefficient connections between reload kernels
-        connect<parameter>(async(coeff), async(m_firKernels[0].in[1])); // async because otherwise m_firReloadKernels[0]
-                                                                        // will block after 1 call waiting for the next
-                                                                        // update from PS.
+        connect<parameter>(async(coeff), async(m_firKernels[0].in[1]));
 
         // make output connections
         connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
@@ -621,7 +629,7 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
             // Specify mapping constraints
             runtime<ratio>(m_firKernels[i]) = 0.8;
             // Source files
-            source(m_firKernels[i]) = "fir_interpolate_fract_asym.cpp";
+            source(m_firKernels[i]) = "fir_resampler.cpp";
         }
     }
 };
@@ -654,7 +662,6 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
     port<input> coeff;
 
     kernel m_firKernels[TP_CASC_LEN];
-    kernel m_firReloadKernels[TP_CASC_LEN];
     // Access function for AIE synthesizer
     kernel* getKernels() { return m_firKernels; };
     unsigned int getKernelArchs() {
@@ -665,13 +672,14 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return fir_interpolate_fract_asym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                          TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0,
-                                          TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 2>::get_m_kArch();
+        return fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                             TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE,
+                             2>::get_m_kArch();
     };
 
     // constructor
     fir_interpolate_fract_asym_graph() {
+        deprecation_warning();
         // create kernels
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
                            TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE,
@@ -694,9 +702,7 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
         }
 
         // coefficient connections between reload kernels
-        connect<parameter>(async(coeff), async(m_firKernels[0].in[1])); // async because otherwise m_firReloadKernels[0]
-                                                                        // will block after 1 call waiting for the next
-                                                                        // update from PS.
+        connect<parameter>(async(coeff), async(m_firKernels[0].in[1]));
 
         // make output connections
         connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
@@ -708,7 +714,7 @@ class fir_interpolate_fract_asym_graph<TT_DATA,
             // Specify mapping constraints
             runtime<ratio>(m_firKernels[i]) = 0.8;
             // Source files
-            source(m_firKernels[i]) = "fir_interpolate_fract_asym.cpp";
+            source(m_firKernels[i]) = "fir_resampler.cpp";
         }
     }
 };

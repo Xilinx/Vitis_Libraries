@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -241,8 +241,8 @@ using outType_t = typename outType<T_D_A, T_D_B>::type;
 
 template <bool T_CASC_IN, typename T_D_A, typename T_D_B>
 struct T_inputIF {
-    input_window<T_D_A>* restrict inWindowA;
-    input_window<T_D_B>* restrict inWindowB;
+    input_window<T_D_A>* __restrict inWindowA;
+    input_window<T_D_B>* __restrict inWindowB;
     typename std::conditional<T_CASC_IN == CASC_IN_FALSE, no_port, input_stream<accType_t<T_D_A, T_D_B> > >::type*
         inCascade;
 };
@@ -252,7 +252,7 @@ template <bool T_CASC_OUT, typename T_D_A, typename T_D_B>
 struct T_outputIF {
     typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE,
                               output_window<outType_t<T_D_A, T_D_B> >,
-                              output_stream<accType_t<T_D_A, T_D_B> > >::type* restrict outWindow;
+                              output_stream<accType_t<T_D_A, T_D_B> > >::type* __restrict outWindow;
 };
 
 // TODO: Move this into a common dsp::aie namespace.
@@ -260,31 +260,31 @@ struct T_outputIF {
 enum { enumUnknownType = 0, enumInt16, enumCint16, enumInt32, enumCint32, enumFloat, enumCfloat };
 // function to return an enumeration of the data or coefficient type
 template <typename TT_INPUT>
-inline constexpr unsigned int fnEnumType() {
+INLINE_DECL constexpr unsigned int fnEnumType() {
     return enumUnknownType;
 }; // returns 0 as default. This can be trapped as an error;
 template <>
-inline constexpr unsigned int fnEnumType<int16>() {
+INLINE_DECL constexpr unsigned int fnEnumType<int16>() {
     return enumInt16;
 };
 template <>
-inline constexpr unsigned int fnEnumType<cint16>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cint16>() {
     return enumCint16;
 };
 template <>
-inline constexpr unsigned int fnEnumType<int32>() {
+INLINE_DECL constexpr unsigned int fnEnumType<int32>() {
     return enumInt32;
 };
 template <>
-inline constexpr unsigned int fnEnumType<cint32>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cint32>() {
     return enumCint32;
 };
 template <>
-inline constexpr unsigned int fnEnumType<float>() {
+INLINE_DECL constexpr unsigned int fnEnumType<float>() {
     return enumFloat;
 };
 template <>
-inline constexpr unsigned int fnEnumType<cfloat>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cfloat>() {
     return enumCfloat;
 };
 
@@ -347,7 +347,7 @@ class kernelMatMultClass {
     //    "ERROR: Other memory storage options are currently unavailable. Please transpose input/output matrices to
     //    achieve desired alignment.");
 
-    // Not sure exactly - other restrictions will hit first
+    // Not sure exactly - other __restrictions will hit first
     static const int TP_DIM_MIN = 4;
     // Parameter value defensive and legality checks
     static_assert(TP_DIM_A_RANGE* TP_DIM_AB_RANGE* TP_DIM_B_RANGE >= TP_DIM_MIN,
@@ -366,6 +366,12 @@ class kernelMatMultClass {
     static_assert(((TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB) * (TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB) * sizeof(TT_OUT)) <=
                       32768,
                   "ERROR: Output matrix must fit within a data memory bank of 32kB.");
+    static_assert(!(std::is_same<TT_DATA_A, cfloat>::value || std::is_same<TT_DATA_A, float>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0"); // only necessary to
+                                                                                                  // check TT_DATA_A as
+                                                                                                  // TT_DATA_B will also
+                                                                                                  // be float or integer
+                                                                                                  // to match TT_DATA_A.
 
     static constexpr unsigned int m_kArch = 0; // no other arch right now
 
@@ -386,7 +392,7 @@ class kernelMatMultClass {
         unsigned int Btile;
     };
 
-    static inline constexpr tilingStruct getTilingScheme() {
+    static INLINE_DECL constexpr tilingStruct getTilingScheme() {
         using A = TT_DATA_A;
         using B = TT_DATA_B;
         // needs to be compatible with c++14 -> so just use plain ifs
@@ -438,8 +444,17 @@ class kernelMatMultClass {
             return {4, 2, 2};
         }
     };
-
+    // Putting this into a function so that the static assert error message includes the value of the tiling scheme.
+    template <unsigned Atile, unsigned ABtile, unsigned Btile>
+    static bool constexpr tilingSchemeMultiples() {
+        static_assert(TP_DIM_A % Atile == 0, "Error: TP_DIM_A is not a multiple of the tiling scheme.");
+        static_assert(TP_DIM_B % Btile == 0, "Error: TP_DIM_B is not a multiple of the tiling scheme.");
+        static_assert(TP_DIM_AB % ABtile == 0, "Error: TP_DIM_AB is not a multiple of the tiling scheme.");
+        return (TP_DIM_A % Atile == 0) && (TP_DIM_B % Btile == 0) && (TP_DIM_AB % ABtile == 0);
+    }
     static constexpr tilingStruct tilingScheme = getTilingScheme();
+    static_assert(tilingSchemeMultiples<tilingScheme.Atile, tilingScheme.ABtile, tilingScheme.Btile>(),
+                  "Error: Dimensions are not multiples of tiling scheme.");
     // Constructor
     kernelMatMultClass(){};
 
@@ -522,7 +537,7 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
     // FIR
     void matMult(input_window<TT_DATA_A>* inWindowA,
                  input_window<TT_DATA_B>* inWindowB,
-                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* restrict outWindow);
+                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -612,7 +627,7 @@ class matrix_mult<TT_DATA_A,
     void matMult(input_window<TT_DATA_A>* inWindowA,
                  input_window<TT_DATA_B>* inWindowB,
                  input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* restrict outWindow);
+                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------

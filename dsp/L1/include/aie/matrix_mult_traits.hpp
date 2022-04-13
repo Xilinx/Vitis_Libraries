@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,13 @@
  */
 #ifndef _DSPLIB_MATRIX_MULT_TRAITS_HPP_
 #define _DSPLIB_MATRIX_MULT_TRAITS_HPP_
+
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
 
 namespace xf {
 namespace dsp {
@@ -35,106 +42,106 @@ unsigned int fnAccRegsMatMult() {
     return 0;
 }; // default error trap
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int16, int16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cint16, int16>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint16, int16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cint16, cint16>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint16, cint16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<int32, int16>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int32, int16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<int32, int32>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int32, int32>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cint32, int16>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, int16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cint32, cint16>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, cint16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cint32, int32>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, int32>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cint32, cint32>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, cint32>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<float, float>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<float, float>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cfloat, float>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cfloat, float>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnAccRegsMatMult<cfloat, cfloat>() {
+INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cfloat, cfloat>() {
     return 4;
 };
 
 // function to return the number of lanes for a type combo
 // The default is effectively an error trap, but adding an error message to a constexpr return results in a warning.
 template <typename TT_DATA_A, typename TT_DATA_B>
-inline constexpr unsigned int fnNumLanesMatMult() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int16, int16>() {
     return 16;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cint16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint16, int16>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cint16, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint16, cint16>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<int32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int32, int16>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<int32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int32, int32>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cint32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, int16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cint32, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, cint16>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cint32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, int32>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cint32, cint32>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, cint32>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<float, float>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<float, float>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cfloat, float>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cfloat, float>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanesMatMult<cfloat, cfloat>() {
+INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cfloat, cfloat>() {
     return 4;
 };
 
@@ -142,7 +149,7 @@ inline constexpr unsigned int fnNumLanesMatMult<cfloat, cfloat>() {
 // A full implementation of this would entail prime factor decomposition, but here
 // The maximum integer size is 16, so a simpler brute force method will do.
 template <typename TT_DATA_A, typename TT_DATA_B, unsigned int TP_FACTOR>
-inline constexpr unsigned int fnLCMMatMult() {
+INLINE_DECL constexpr unsigned int fnLCMMatMult() {
     return ((fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 2)
                 ? ((TP_FACTOR % 2 == 0) ? TP_FACTOR : (TP_FACTOR * 2))
                 : (fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 4)
@@ -157,7 +164,7 @@ inline constexpr unsigned int fnLCMMatMult() {
 
 // function to return the number of samples in an output vector for a type combo
 template <typename TT_DATA_A, typename TT_DATA_B>
-inline constexpr unsigned int fnVOutSizeMatMult() {
+INLINE_DECL constexpr unsigned int fnVOutSizeMatMult() {
     return fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>();
 };
 }

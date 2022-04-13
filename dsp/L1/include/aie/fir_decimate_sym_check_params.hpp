@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 static_assert(TP_DECIMATE_FACTOR <= fnMaxDecimateFactor<TT_DATA, TT_COEFF>(),
               "ERROR: Max Decimate factor exxceeded. High Decimate factors do not take advantage from symmetrical "
               "implementation. Use fir_decimate_asym instead.");
-static_assert(TP_FIR_LEN <= FIR_LEN_MAX, "ERROR: Max supported FIR length exceeded. ");
 static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,
               "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
               "below minimum required value. ");
@@ -46,4 +45,6 @@ static_assert(fnTypeCheckDataCoeffFltInt<TT_DATA, TT_COEFF>() != 0,
               "ERROR: a mix of float and integer types of TT_DATA and TT_COEFF is not supported.");
 static_assert(fnFirDecSymMultiColumn<TT_DATA, TT_COEFF>() != 0,
               "ERROR: The combination of TT_DATA and TT_COEFF is currently unsupported.");
+static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
+              "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
 #endif // _DSPLIB_FIR_DECIMATE_SYM_CHECK_PARAMS_HPP_

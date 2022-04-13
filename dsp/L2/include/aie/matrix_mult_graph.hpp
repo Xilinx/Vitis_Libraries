@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include <adf.h>
 #include <vector>
+#include "graph_utils.hpp"
 
 #include "matrix_mult.hpp"
 #include "matrix_mult_untiler.hpp"
@@ -36,14 +37,6 @@ namespace blas {
 namespace matrix_mult {
 
 using namespace adf;
-//// Kernel creation, static coefficients
-// template <int dim, typename TT_DATA_A, typename TT_DATA_B, unsigned int ...Args >
-// class create_casc_kernel<2, TT_DATA_A, TT_DATA_B, Args... > {
-//    public:
-//    static void create(kernel (&matMultKernels)[TP_CASC_LEN]) {
-//        matMultKernels[0] = kernel::create_object<matrix_mult<TT_DATA_A, TT_DATA_B, Args...>>();
-//    }
-//}
 
 /**
   * @endcond
@@ -179,7 +172,9 @@ class matrix_mult_graph : public graph {
 
     // Empty type for a fallback to avoid redundant instantiations from the compiler in x86
     struct no_kernel {};
-
+    // TODO: Have the first or last kernel take the remainder. ie DIM_AB=15 and CASC =2; should be one kernel of 8 and
+    // one kernel of 6, where we round by tilingScheme.ABtile.
+    static_assert(TP_DIM_AB % TP_CASC_LEN == 0, "TP_DIM_AB needs to be a multiple of TP_CASC_LEN");
     template <bool cascIn, bool cascOut>
     using matMultCasc = matrix_mult<TT_DATA_A,
                                     TT_DATA_B,
@@ -303,147 +298,6 @@ class matrix_mult_graph : public graph {
         source(untiler) = "matrix_mult_untiler.cpp";
     }
 };
-/**
-  * @cond NOCOMMENTS
-  */
-
-// Specialized template for Cascade length of 1
-template <typename TT_DATA_A,
-          typename TT_DATA_B,
-          unsigned int TP_DIM_A,
-          unsigned int TP_DIM_AB,
-          unsigned int TP_DIM_B,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_DIM_A_LEADING,
-          unsigned int TP_DIM_B_LEADING,
-          unsigned int TP_DIM_OUT_LEADING,
-          unsigned int TP_ADD_TILING_A,
-          unsigned int TP_ADD_TILING_B,
-          unsigned int TP_ADD_DETILING_OUT,
-          unsigned int TP_INPUT_WINDOW_VSIZE_A,
-          unsigned int TP_INPUT_WINDOW_VSIZE_B>
-class matrix_mult_graph<TT_DATA_A,
-                        TT_DATA_B,
-                        TP_DIM_A,
-                        TP_DIM_AB,
-                        TP_DIM_B,
-                        TP_SHIFT,
-                        TP_RND,
-                        TP_DIM_A_LEADING,
-                        TP_DIM_B_LEADING,
-                        TP_DIM_OUT_LEADING,
-                        TP_ADD_TILING_A,
-                        TP_ADD_TILING_B,
-                        TP_ADD_DETILING_OUT,
-                        TP_INPUT_WINDOW_VSIZE_A,
-                        TP_INPUT_WINDOW_VSIZE_B,
-                        1> : public graph {
-   public:
-    port<input> inA[1];
-    port<input> inB[1];
-    port<output> out;
-
-    kernel m_matMult;
-    kernel untiler;
-    kernel tilerA;
-    kernel tilerB;
-    // Access function for AIE synthesizer. Note, m_matMult is a public member anyway.
-    kernel* getKernels() { return &m_matMult; };
-    // individual matrix mult kernels don't need to know casc_len or add_tiling.
-    using MatMult = matrix_mult<TT_DATA_A,
-                                TT_DATA_B,
-                                TP_DIM_A,
-                                TP_DIM_AB,
-                                TP_DIM_B,
-                                TP_SHIFT,
-                                TP_RND,
-                                TP_DIM_A_LEADING,
-                                TP_DIM_B_LEADING,
-                                TP_DIM_OUT_LEADING,
-                                TP_INPUT_WINDOW_VSIZE_A,
-                                TP_INPUT_WINDOW_VSIZE_B>;
-
-    // Todo structured binding instead (C++17)
-    // AIE_API tiling scheme in use - single configuration for each data type.
-    static constexpr typename MatMult::tilingStruct tilingScheme = MatMult::getTilingScheme();
-
-    using TilerClassA = tilerKernelClass<tilingScheme.Atile,
-                                         tilingScheme.ABtile,
-                                         TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB,
-                                         TP_DIM_AB,
-                                         TP_DIM_A_LEADING,
-                                         TT_DATA_A>;
-    using TilerClassB = tilerKernelClass<tilingScheme.ABtile,
-                                         tilingScheme.Btile,
-                                         TP_DIM_AB,
-                                         TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB,
-                                         TP_DIM_B_LEADING,
-                                         TT_DATA_B>;
-    using DetilerClassOut = untilerKernelClass<tilingScheme.Atile,
-                                               tilingScheme.Btile,
-                                               TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB,
-                                               TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB,
-                                               TP_DIM_OUT_LEADING,
-                                               outType_t<TT_DATA_A, TT_DATA_B> >;
-
-    static constexpr bool isRedundantTilerA = ((TP_DIM_AB <= tilingScheme.ABtile) && (TP_DIM_A_LEADING == ROW_MAJOR));
-    static constexpr bool isRedundantTilerB =
-        ((TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB <= tilingScheme.Btile) && (TP_DIM_B_LEADING == ROW_MAJOR));
-    static constexpr bool isRedundantTilerOut =
-        ((TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
-
-    using TileAConditional = ConditionalWidget<isRedundantTilerA ? 0 : TP_ADD_TILING_A,
-                                               TP_INPUT_WINDOW_VSIZE_A * sizeof(TT_DATA_A),
-                                               TilerClassA>;
-    using TileBConditional = ConditionalWidget<isRedundantTilerB ? 0 : TP_ADD_TILING_B,
-                                               TP_INPUT_WINDOW_VSIZE_B * sizeof(TT_DATA_B),
-                                               TilerClassB>;
-    using DetileOutConditional = ConditionalWidget<isRedundantTilerOut ? 0 : TP_ADD_DETILING_OUT,
-                                                   TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B /
-                                                       TP_DIM_AB * sizeof(outType_t<TT_DATA_A, TT_DATA_B>),
-                                                   DetilerClassOut>;
-    // constructor
-    matrix_mult_graph() {
-        if (isRedundantTilerA && TP_ADD_TILING_A == 1) {
-            printf(
-                "WARNING: TP_ADD_TILING_A is true, but P_DIM_AB is small enough that tiling is not nessecary for this "
-                "configuration. TP_ADD_TILING_A will be ignored. \n");
-        }
-        if (isRedundantTilerB && TP_ADD_TILING_B == 1) {
-            printf(
-                "WARNING: TP_ADD_TILING_B is true, but P_DIM_B is small enough that tiling is not nessecary for this "
-                "configuration. TP_ADD_TILING_B will be ignored. \n");
-        }
-        if (isRedundantTilerOut && TP_ADD_DETILING_OUT == 1) {
-            printf(
-                "WARNING: TP_ADD_DETILING_OUT is true, but P_DIM_B is small enough that detiling is not nessecary for "
-                "this configuration. TP_ADD_DETILING_OUT will be ignored. \n");
-        }
-        printf("\n");
-
-        m_matMult = kernel::create_object<MatMult>();
-
-        tilerA = TileAConditional::create(inA[0], m_matMult.in[0]);
-        tilerB = TileBConditional::create(inB[0], m_matMult.in[1]);
-        untiler = DetileOutConditional::create(m_matMult.out[0], out);
-
-        // Specify mapping constraints - overriden in parent graph
-        runtime<ratio>(m_matMult) = 0.8;
-        runtime<ratio>(tilerA) = 0.4;
-        runtime<ratio>(tilerB) = 0.4;
-        runtime<ratio>(untiler) = 0.4;
-        // Source files
-        source(tilerA) = "matrix_mult_tiler.cpp";
-        source(tilerB) = "matrix_mult_tiler.cpp";
-        source(untiler) = "matrix_mult_untiler.cpp";
-        source(m_matMult) = "matrix_mult.cpp";
-    }
-};
-
-/**
-  * @endcond
-  */
 }
 }
 }

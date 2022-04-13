@@ -4,12 +4,12 @@
     "description": "", 
     "flow": "vitis", 
     "platform_type": "", 
-    "platform_whitelist": [
-        "xilinx_u250_xdma_201830_2", 
+    "platform_allowlist": [
+        "u250", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
@@ -159,7 +159,8 @@
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw_build"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

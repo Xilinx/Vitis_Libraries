@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ constexpr loHi getUnTileShuffleOffsetsInt16(unsigned M, unsigned N, unsigned vec
     return ret;
 }
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
-static void doUnTile(T_D* restrict inPtr, T_D* outPtr) {
+static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     constexpr unsigned minGranularity = (128 / 8) / sizeof(T_D);
     constexpr unsigned loadSize = (N >= minGranularity) ? N : minGranularity;
     constexpr unsigned minVBuffSizeforType = (512 / 8) / sizeof(T_D);
@@ -242,7 +242,7 @@ static void doUnTile(T_D* restrict inPtr, T_D* outPtr) {
 namespace aie = ::aie;
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 void untilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::unTile(input_window<T_D>* inWindow,
-                                                                     output_window<T_D>* restrict outWindow) {
+                                                                     output_window<T_D>* __restrict outWindow) {
     // printf("Going to untile\n");
     doUnTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow->ptr, (T_D*)outWindow->ptr);
 };

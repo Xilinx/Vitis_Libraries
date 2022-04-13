@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,8 +23,9 @@ set cascLen             [lindex $argv 4]
 set interpolateFactor   [lindex $argv 5]
 set decimateFactor      [lindex $argv 6]
 set symmetryFactor      [lindex $argv 7]
-set outStatus           [lindex $argv 8]
-set uutKernel           [lindex $argv 9]
+set ssr                 [lindex $argv 8]
+set outStatus           [lindex $argv 9]
+set uutKernel           [lindex $argv 10]
 
 # ----------------------------------------------
 # --- Compute Data Type and Coeff Type Sizes ---
@@ -77,19 +78,46 @@ if { $uutKernel == "fir_sr_sym" } {
     }
 }
 
+set oddSym 0
+if { ( $symmetryFactor == 2 ) && ( $firLength % 2 == 1 ) } {
+    # adjustment to ceil properly when dividing by symFactor
+    set oddSym 1
+}
+
+
 # ------------------------------
 # --- Calculate theoreticals ---
 # ------------------------------
 # set up some constants
-set kAieMacsPerCycle            [expr {128 / $dataTypeSize / $coeffTypeSize}]
-set effectiveFirLength          [expr {(($firLength * $interpolateFactor) / ($cascLen * $symmetryFactor * $decimateFactor)) + $hbCenterTap}]
-if { $effectiveFirLength == 0 } { 
-    set effectiveFirLength 1
+set kAieMacsPerCyclePerKernel   [expr {128 / $dataTypeSize / $coeffTypeSize}]
+set numKernels                  [expr {$ssr * $ssr * $cascLen}]
+set kAieMacsPerCycle            [expr { $kAieMacsPerCyclePerKernel * $numKernels}] ;
+
+set numberOfOutputs [expr ($windowSize * $interpolateFactor) / $decimateFactor ] ;
+
+# output double because it's likely that numOutputs will turn this back into an int for totalMacs.
+# We have fractions here when halfband interpolator is used - for a fir len of 15 you have 2.5 macs/output .
+set numberOfMacsPerOutput [expr { double( ( $firLength + $oddSym / ($symmetryFactor * $hbFactor) ) + $hbCenterTap) /  double($interpolateFactor) }]
+
+if { $numberOfMacsPerOutput == 0 } {
+    set numberOfMacsPerOutput 1
 }
+
+# force it back to int any fractional macs (unlikely) rounded up
+set totalMacs [expr { int(ceil($numberOfOutputs * $numberOfMacsPerOutput)) }]
+
+set minTheoryCycleCount [expr { $totalMacs / $kAieMacsPerCycle }]
+
+if { $minTheoryCycleCount == 0 } {
+    set minTheoryCycleCount 1
+}
+
 # Min cycle count (no overhead)
-set minTheoryCycleCount         [expr {($windowSize / $interpolateFactor / $kAieMacsPerCycle / $hbFactor) * $effectiveFirLength}]
 # Max theoretical throughput in MSa per second
-set throughputTheoryMax  [expr {1000 * $windowSize / $minTheoryCycleCount}]
+set clk_rate 1000000000; #1Ghz - although might change with overclocking to 1.2GHz
+set megaCyclesPerSecond [expr {$clk_rate / 1000000}]
+set throughputTheoryMax  [expr { ($megaCyclesPerSecond * $windowSize) / $minTheoryCycleCount}]
+
 
 # ----------------------
 # --- Display Result ---

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ the Real to Complex Widget library element.
 
 #include <adf.h>
 #include <vector>
+#include "graph_utils.hpp"
 #include <tuple>
 
 #include "widget_real2complex.hpp"
@@ -96,7 +97,7 @@ class widget_real2complex_graph : public graph {
     kernel* getKernels() { return &m_kernel; };
 
     /**
-     * @brief This is the constructor function for the Widget API Cast graph.
+     * @brief This is the constructor function for the Widget Real2Complex graph.
      **/
     widget_real2complex_graph() {
         m_kernel = kernel::create_object<widget_real2complex<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE> >();

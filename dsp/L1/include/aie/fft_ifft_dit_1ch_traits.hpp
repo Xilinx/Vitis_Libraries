@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,13 @@
  */
 #ifndef _DSPLIB_fft_ifft_dit_1ch_TRAITS_HPP_
 #define _DSPLIB_fft_ifft_dit_1ch_TRAITS_HPP_
+
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
 
 /*
 FFT traits.
@@ -96,104 +103,104 @@ struct T_outputIF<cfloat> {
 //---------------------------------------
 // Configuration Defensive check functions
 template <typename TT_DATA>
-inline constexpr bool fnCheckDataType() {
+INLINE_DECL constexpr bool fnCheckDataType() {
     return false;
 };
 template <>
-inline constexpr bool fnCheckDataType<cint16>() {
+INLINE_DECL constexpr bool fnCheckDataType<cint16>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataType<cint32>() {
+INLINE_DECL constexpr bool fnCheckDataType<cint32>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataType<cfloat>() {
+INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
 
 template <typename TT_IN_DATA, typename TT_OUT_DATA>
-inline constexpr bool fnCheckDataIOType() {
+INLINE_DECL constexpr bool fnCheckDataIOType() {
     return false;
 };
 template <>
-inline constexpr bool fnCheckDataIOType<cint16, cint16>() {
+INLINE_DECL constexpr bool fnCheckDataIOType<cint16, cint16>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataIOType<cint16, cint32>() {
+INLINE_DECL constexpr bool fnCheckDataIOType<cint16, cint32>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataIOType<cint32, cint16>() {
+INLINE_DECL constexpr bool fnCheckDataIOType<cint32, cint16>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataIOType<cint32, cint32>() {
+INLINE_DECL constexpr bool fnCheckDataIOType<cint32, cint32>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataIOType<cfloat, cfloat>() {
+INLINE_DECL constexpr bool fnCheckDataIOType<cfloat, cfloat>() {
     return true;
 };
 
 template <typename TT_TWIDDLE>
-inline constexpr bool fnCheckTwiddleType() {
+INLINE_DECL constexpr bool fnCheckTwiddleType() {
     return false;
 };
 template <>
-inline constexpr bool fnCheckTwiddleType<cint16>() {
+INLINE_DECL constexpr bool fnCheckTwiddleType<cint16>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckTwiddleType<cfloat>() {
+INLINE_DECL constexpr bool fnCheckTwiddleType<cfloat>() {
     return true;
 };
 
 template <typename TT_DATA, typename TT_TWIDDLE>
-inline constexpr bool fnCheckDataTwiddleType() {
+INLINE_DECL constexpr bool fnCheckDataTwiddleType() {
     return false;
 };
 template <>
-inline constexpr bool fnCheckDataTwiddleType<cint16, cint16>() {
+INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint16, cint16>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataTwiddleType<cint32, cint16>() {
+INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint32, cint16>() {
     return true;
 };
 template <>
-inline constexpr bool fnCheckDataTwiddleType<cfloat, cfloat>() {
+INLINE_DECL constexpr bool fnCheckDataTwiddleType<cfloat, cfloat>() {
     return true;
 };
 
 template <unsigned int TP_POINT_SIZE>
-inline constexpr bool fnCheckPointSize() {
+INLINE_DECL constexpr bool fnCheckPointSize() {
     return (TP_POINT_SIZE == 16 || TP_POINT_SIZE == 32 || TP_POINT_SIZE == 64 || TP_POINT_SIZE == 128 ||
             TP_POINT_SIZE == 256 || TP_POINT_SIZE == 512 || TP_POINT_SIZE == 1024 || TP_POINT_SIZE == 2048 ||
             TP_POINT_SIZE == 4096);
 };
 
 template <unsigned int TP_SHIFT>
-inline constexpr bool fnCheckShift() {
+INLINE_DECL constexpr bool fnCheckShift() {
     return (TP_SHIFT >= 0) && (TP_SHIFT <= 60);
 };
 
 template <typename TT_DATA, unsigned int TP_SHIFT>
-inline constexpr bool fnCheckShiftFloat() {
+INLINE_DECL constexpr bool fnCheckShiftFloat() {
     return !(std::is_same<TT_DATA, cfloat>::value) || // This check traps shift != 0 when data = cfloat
            (TP_SHIFT == 0);
 };
 
 template <typename TT_DATA, unsigned int RANKS, unsigned int TP_CASC_LEN>
-inline constexpr bool fnCheckCascLen() {
+INLINE_DECL constexpr bool fnCheckCascLen() {
     // equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
     return (TP_CASC_LEN > 0) &&
            (std::is_same<TT_DATA, cfloat>::value ? (TP_CASC_LEN <= RANKS) : (TP_CASC_LEN <= (RANKS + 1) / 2));
 }
 
 template <typename TT_DATA, unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN>
-inline constexpr bool fnCheckCascLen2() {
+INLINE_DECL constexpr bool fnCheckCascLen2() {
     return true;
     // The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
     // all cascade configurations possible will not run into the issue of buffer overwrite involved.
@@ -206,7 +213,7 @@ inline constexpr bool fnCheckCascLen2() {
 // Functions
 
 template <typename TT_DATA, typename TT_TWIDDLE, unsigned int TP_POINT_SIZE>
-inline constexpr int fnHeapSize() {
+INLINE_DECL constexpr int fnHeapSize() {
     int retVal = 0;
     int buffsize = 0;
     // cfloat twiddles are cfloat size and cam not use half table trick.
@@ -291,91 +298,91 @@ inline constexpr int fnHeapSize() {
 // To reduce Data Memory required, the input window can be re-used as a temporary buffer of samples,
 // but only when the internal type size is the same as the input type size
 template <typename TT_DATA>
-inline constexpr bool fnUsePingPongIntBuffer() {
+INLINE_DECL constexpr bool fnUsePingPongIntBuffer() {
     return false;
 }; // only cint16 requires second internal buffer
 template <>
-inline constexpr bool fnUsePingPongIntBuffer<cint16>() {
+INLINE_DECL constexpr bool fnUsePingPongIntBuffer<cint16>() {
     return true;
 };
 
 template <unsigned int TP_POINT_SIZE>
-inline constexpr int fnPointSizePower() {
+INLINE_DECL constexpr int fnPointSizePower() {
     return 0;
 };
 template <>
-inline constexpr int fnPointSizePower<16>() {
+INLINE_DECL constexpr int fnPointSizePower<16>() {
     return 4;
 }
 template <>
-inline constexpr int fnPointSizePower<32>() {
+INLINE_DECL constexpr int fnPointSizePower<32>() {
     return 5;
 }
 template <>
-inline constexpr int fnPointSizePower<64>() {
+INLINE_DECL constexpr int fnPointSizePower<64>() {
     return 6;
 }
 template <>
-inline constexpr int fnPointSizePower<128>() {
+INLINE_DECL constexpr int fnPointSizePower<128>() {
     return 7;
 }
 template <>
-inline constexpr int fnPointSizePower<256>() {
+INLINE_DECL constexpr int fnPointSizePower<256>() {
     return 8;
 }
 template <>
-inline constexpr int fnPointSizePower<512>() {
+INLINE_DECL constexpr int fnPointSizePower<512>() {
     return 9;
 }
 template <>
-inline constexpr int fnPointSizePower<1024>() {
+INLINE_DECL constexpr int fnPointSizePower<1024>() {
     return 10;
 }
 template <>
-inline constexpr int fnPointSizePower<2048>() {
+INLINE_DECL constexpr int fnPointSizePower<2048>() {
     return 11;
 }
 template <>
-inline constexpr int fnPointSizePower<4096>() {
+INLINE_DECL constexpr int fnPointSizePower<4096>() {
     return 12;
 }
 
 template <unsigned int TP_POINT_SIZE>
-inline constexpr int fnOddPower() {
+INLINE_DECL constexpr int fnOddPower() {
     return 0;
 };
 template <>
-inline constexpr int fnOddPower<32>() {
+INLINE_DECL constexpr int fnOddPower<32>() {
     return 1;
 }
 template <>
-inline constexpr int fnOddPower<128>() {
+INLINE_DECL constexpr int fnOddPower<128>() {
     return 1;
 }
 template <>
-inline constexpr int fnOddPower<512>() {
+INLINE_DECL constexpr int fnOddPower<512>() {
     return 1;
 }
 template <>
-inline constexpr int fnOddPower<2048>() {
+INLINE_DECL constexpr int fnOddPower<2048>() {
     return 1;
 }
 
 template <int T_X, int T_Y>
-inline constexpr int fnCeil() {
+INLINE_DECL constexpr int fnCeil() {
     return ((T_X + T_Y - 1) / T_Y) * T_Y;
 };
 
 //----------------------------------------------------------------------
 // nullElem
 template <typename T_RDATA>
-inline T_RDATA nullElem() {
+INLINE_DECL T_RDATA nullElem() {
     return 0;
 };
 
 // Null cint16_t element
 template <>
-inline cint16_t nullElem() {
+INLINE_DECL cint16_t nullElem() {
     cint16_t d;
     d.real = 0;
     d.imag = 0;
@@ -384,7 +391,7 @@ inline cint16_t nullElem() {
 
 // Null cint32 element
 template <>
-inline cint32 nullElem() {
+INLINE_DECL cint32 nullElem() {
     cint32 d;
     d.real = 0;
     d.imag = 0;
@@ -393,13 +400,13 @@ inline cint32 nullElem() {
 
 // Null float element
 template <>
-inline float nullElem() {
+INLINE_DECL float nullElem() {
     return 0.0;
 };
 
 // Null cint32 element
 template <>
-inline cfloat nullElem() {
+INLINE_DECL cfloat nullElem() {
     cfloat retVal;
 
     retVal.real = 0.0;

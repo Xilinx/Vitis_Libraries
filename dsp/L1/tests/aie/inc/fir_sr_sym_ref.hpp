@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,44 +64,6 @@ class fir_sr_sym_ref {
     void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
 };
 
-// Specialization - no coefficient reload, dual outputs
-template <typename TT_DATA,  // type of data input and output
-          typename TT_COEFF, // type of coefficients           (e.g. int16, cint32)
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_API>
-class fir_sr_sym_ref<TT_DATA,
-                     TT_COEFF,
-                     TP_FIR_LEN,
-                     TP_SHIFT,
-                     TP_RND,
-                     TP_INPUT_WINDOW_VSIZE,
-                     0 /*USE_COEFF_RELOAD_FALSE*/,
-                     2,
-                     TP_API> {
-   private:
-    // This array holds the coefficient values for the reference model.
-    // Strictly speaking the alignment is not required when targetting
-    // the x86 or scalar processors.
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTaps[TP_FIR_LEN];
-
-   public:
-    // Constructor
-    fir_sr_sym_ref(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 2]) {
-        for (int i = 0; i < (TP_FIR_LEN + 1) / 2; i++) {
-            m_internalTaps[i] = taps[i];
-            m_internalTaps[TP_FIR_LEN - 1 - i] = taps[i];
-        }
-    }
-
-    // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym_ref::filter); }
-    // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow, output_window<TT_DATA>* outWindow2);
-};
-
 //-----------------------------------------------------------------------------------------------------
 // Specialization using coefficient reload and single output
 template <typename TT_DATA,  // type of data input and output
@@ -110,6 +72,7 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
 class fir_sr_sym_ref<TT_DATA,
                      TT_COEFF,
@@ -117,8 +80,8 @@ class fir_sr_sym_ref<TT_DATA,
                      TP_SHIFT,
                      TP_RND,
                      TP_INPUT_WINDOW_VSIZE,
-                     1 /*USE_COEFF_RELOAD_TRUE*/,
                      1,
+                     TP_NUM_OUTPUTS,
                      TP_API> {
    private:
     // This array holds the coefficient values for the reference model.
@@ -143,50 +106,6 @@ class fir_sr_sym_ref<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]);
-};
-
-// Specialization using coefficient reload and dual output
-template <typename TT_DATA,  // type of data input and output
-          typename TT_COEFF, // type of coefficients           (e.g. int16, cint32)
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_API>
-class fir_sr_sym_ref<TT_DATA,
-                     TT_COEFF,
-                     TP_FIR_LEN,
-                     TP_SHIFT,
-                     TP_RND,
-                     TP_INPUT_WINDOW_VSIZE,
-                     1 /*USE_COEFF_RELOAD_TRUE*/,
-                     2,
-                     TP_API> {
-   private:
-    // This array holds the coefficient values for the reference model.
-    // Strictly speaking the alignment is not required when targetting
-    // the x86 or scalar processors.
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTaps[TP_FIR_LEN];
-
-   public:
-    // Constructor
-    fir_sr_sym_ref() {}
-
-    void firReload(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 2]) {
-        for (int i = 0; i < (TP_FIR_LEN + 1) / 2; i++) {
-            m_internalTaps[i] = taps[i];
-            m_internalTaps[TP_FIR_LEN - 1 - i] = taps[i];
-        }
-    }
-
-    // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym_ref::filter); }
-
-    // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]);
 };
 }

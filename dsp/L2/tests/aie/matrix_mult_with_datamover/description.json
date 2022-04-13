@@ -3,7 +3,7 @@
     "description": "",
     "gui": "true",
     "flow": "versal",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "vck190"
     ],
     "data": ["PROJECT/data/"],
@@ -29,21 +29,15 @@
     "launch": [
         {
             "name": "hwemu-launch",
-            "target": "hw_emu",
-            "pkg-dir": "$(WORK_DIR)",
-            "input-dir": "./"
+            "target": "hw_emu"
         },
         {
             "name": "aiesim-launch",
-            "target": "aiesim",
-            "pkg-dir": "$(WORK_DIR)",
-            "input-dir": "./"
+            "target": "aiesim"
         },
         {
             "name": "x86sim-launch",
-            "target": "x86sim",
-            "pkg-dir": "$(WORK_DIR)",
-            "input-dir": "./"
+            "target": "x86sim"
         }
     ],
     "host": {
@@ -93,7 +87,7 @@
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
             ],
-            "clflags":["--dataflow --device=4x4 -Xchess=llvm.xargs=-std=c++2a -Xchess=main:backend.mist2.xargs=+NOdra -Xchess=main:noodle.optim.olbb=20 -Xchess=main:backend.mist2.pnll=off --test-iterations=16 -Xpreproc=\"-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1\""]
+            "clflags":["--dataflow -Xchess=llvm.xargs=-std=c++2a -Xchess=main:backend.mist2.xargs=+NOdra  -Xchess=main:backend.mist2.pnll=off --test-iterations=16 -Xpreproc=\"-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1\""]
         }
     },
     "aiecontainers": [
@@ -101,15 +95,16 @@
             "accelerators": [
                 {
                     "location": "PROJECT/test.cpp",
+                    "files": ["LIB_DIR/L1/src/aie/matrix_mult.cpp", "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp","LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"],
                     "pl-freq": 1000,
                     "workdir": "./Work",
-                    "options": "--use-phy-shim=false",
+                    "options": "",
                     "name": "libadf.a",
-                     "aie_kernel_files": [   
-                         "LIB_DIR/L1/src/aie/matrix_mult.cpp",   
-                         "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp",     
-                         "LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"    
-                     ]  
+                     "aie_kernel_files": [
+                         "LIB_DIR/L1/src/aie/matrix_mult.cpp",
+                         "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp",
+                         "LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"
+                     ]
                 }
             ]
         }

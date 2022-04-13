@@ -34,6 +34,34 @@
             "FIR_LEN":"55",
             "SHIFT":"13",
             "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_5_fir_11t_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"11",
+            "SHIFT":"16",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_6_fir_1023t": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"1023",
+            "SHIFT":"20",
+            "DUAL_IP":"1",
+            "CASC_LEN":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_7_fir_15t_sym_hb_2d_reload": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"15",
+            "SHIFT":"16",
+            "USE_COEFF_RELOAD":"1",
+            "INPUT_WINDOW_VSIZE":"256"
         }
     }
 }

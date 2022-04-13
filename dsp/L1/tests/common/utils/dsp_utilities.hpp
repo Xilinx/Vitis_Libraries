@@ -54,6 +54,7 @@ double snr(float signal[DIM1][DIM2], float noisy_signal[DIM1][DIM2]) {
 
     return snr;
 }
+
 template <int DIM1, int DIM2>
 double snr(std::complex<double> signal[DIM1][DIM2], std::complex<double> noisy_signal[DIM1][DIM2]) {
     // SNR = 10 log10 (  mean(singal^2)/ mean(noise^2)   )
@@ -90,6 +91,7 @@ double snr(std::complex<float> signal[DIM1][DIM2], std::complex<float> noisy_sig
 
     return snr;
 }
+
 template <int DIM1, int DIM2, typename T>
 void cast_to_double(std::complex<T> inData[DIM1][DIM2], std::complex<double> outData[DIM1][DIM2]) {
     for (int i = 0; i < DIM1; ++i) {
@@ -110,6 +112,15 @@ void cast_to_double(std::complex<T> inData[DIM1][DIM2], std::complex<float> outD
             float temp_i = inData[i][j].imag();
             outData[i][j].real(temp_r);
             outData[i][j].imag(temp_i);
+        }
+    }
+}
+
+template <int R, int L, typename DT>
+void convert2Array(hls::stream<DT> strm[R], DT arr[R][L / R]) {
+    for (int i = 0; i < (L / R); i++) {
+        for (int j = 0; j < R; j++) {
+            arr[j][i] = strm[j].read();
         }
     }
 }

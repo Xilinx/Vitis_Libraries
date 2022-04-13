@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,13 @@
 #ifndef _DSPLIB_DDS_MIXER_TRAITS_HPP_
 #define _DSPLIB_DDS_MIXER_TRAITS_HPP_
 
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
+
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,
@@ -28,16 +35,32 @@ namespace aie {
 namespace mixer {
 namespace dds_mixer {
 
+template <typename TT_DATA>
+constexpr int ddsMulVecScalarLanes() {
+    return 0;
+} // effectively an error trap
+template <>
+constexpr int ddsMulVecScalarLanes<cint16>() {
+    return 8;
+};
+template <>
+constexpr int ddsMulVecScalarLanes<cint32>() {
+    return 4;
+};
+template <>
+constexpr int ddsMulVecScalarLanes<cfloat>() {
+    return 4;
+};
 /**
 Base IO_API interface struct for shared functions across specialisations
 */
 template <typename TT_DATA, typename PortType>
 struct T_IFbase {
     template <unsigned int VECTOR_LEN>
-    auto static inline port_readincr(PortType* in);
+    auto static INLINE_DECL port_readincr(PortType* in);
 
     template <typename OutDType>
-    void static inline port_writeincr(PortType* out, OutDType data);
+    void static INLINE_DECL port_writeincr(PortType* out, OutDType data);
 };
 // mode 0 - no inputs, dds_only
 template <typename TT_DATA, typename InPortType, unsigned int numMixerIn>
@@ -67,21 +90,30 @@ struct T_inputIF<TT_DATA, InPortType, 2> : T_IFbase<TT_DATA, InPortType> {
 
 // mode 0,1,2 - single output (stream or window)
 template <typename TT_DATA, typename OutPortType>
-struct T_outputIF : T_IFbase<TT_DATA, OutPortType> {
+struct T_outputIF : T_IFbase<TT_DATA, OutPortType> { // inheritance
+
     OutPortType* __restrict outPort;
     T_outputIF(){};
     T_outputIF(OutPortType* _outPort) { outPort = _outPort; }
 };
 
 // Functions to support defensive checks
-enum { enumUnknownType = 0, enumCint16 };
+enum { enumUnknownType = 0, enumCint16, enumCint32, enumCfloat };
 template <typename TT_DATA>
-inline constexpr unsigned int fnEnumType() {
+INLINE_DECL constexpr unsigned int fnEnumType() {
     return enumUnknownType;
 }; // returns 0 as default. This can be trapped as an error;
 template <>
-inline constexpr unsigned int fnEnumType<cint16>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cint16>() {
     return enumCint16;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnEnumType<cint32>() {
+    return enumCint32;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnEnumType<cfloat>() {
+    return enumCfloat;
 };
 
 enum IO_API { WINDOW = 0, STREAM };

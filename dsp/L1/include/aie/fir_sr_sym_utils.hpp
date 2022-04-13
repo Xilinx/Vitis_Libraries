@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,10 @@
  */
 #ifndef _DSPLIB_FIR_SR_SYM_UTILS_HPP_
 #define _DSPLIB_FIR_SR_SYM_UTILS_HPP_
+
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
 
 /*
 Single Rate Symmetrical FIR Utilities
@@ -151,7 +155,7 @@ struct T_outValSym<cfloat, cfloat> : T_outVal<cfloat, cfloat> {
 // second set of intrinsics, to cover 2 smaller xbuff and ybuff buffers
 //-----------------------------------------------------------------------------------------------------
 // DATA = int16, COEFF = int16
-inline T_accSym<int16, int16> mulSrSym(
+INLINE_DECL T_accSym<int16, int16> mulSrSym(
     v32int16 xbuff, unsigned int xstart, v32int16 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
@@ -170,13 +174,13 @@ inline T_accSym<int16, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<int16, int16> macSrSym(T_accSym<int16, int16> acc,
-                                       v32int16 xbuff,
-                                       unsigned int xstart,
-                                       v32int16 ybuff,
-                                       unsigned int ystart,
-                                       v16int16 zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<int16, int16> macSrSym(T_accSym<int16, int16> acc,
+                                            v32int16 xbuff,
+                                            unsigned int xstart,
+                                            v32int16 ybuff,
+                                            unsigned int ystart,
+                                            v16int16 zbuff,
+                                            unsigned int zstart) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
     const unsigned int xoffsets_hi = 0x07060504;
@@ -195,7 +199,7 @@ inline T_accSym<int16, int16> macSrSym(T_accSym<int16, int16> acc,
 }
 
 // DATA = cint16, COEFF = int16
-inline T_accSym<cint16, int16> mulSrSym(
+INLINE_DECL T_accSym<cint16, int16> mulSrSym(
     v16cint16 xbuff, unsigned int xstart, v16cint16 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -207,13 +211,13 @@ inline T_accSym<cint16, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint16, int16> macSrSym(T_accSym<cint16, int16> acc,
-                                        v16cint16 xbuff,
-                                        unsigned int xstart,
-                                        v16cint16 ybuff,
-                                        unsigned int ystart,
-                                        v16int16 zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cint16, int16> macSrSym(T_accSym<cint16, int16> acc,
+                                             v16cint16 xbuff,
+                                             unsigned int xstart,
+                                             v16cint16 ybuff,
+                                             unsigned int ystart,
+                                             v16int16 zbuff,
+                                             unsigned int zstart) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -225,7 +229,7 @@ inline T_accSym<cint16, int16> macSrSym(T_accSym<cint16, int16> acc,
 }
 
 // DATA = cint16, COEFF = cint16
-inline T_accSym<cint16, cint16> mulSrSym(
+INLINE_DECL T_accSym<cint16, cint16> mulSrSym(
     v16cint16 xbuff, unsigned int xstart, v16cint16 ybuff, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
     T_accSym<cint16, cint16> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -235,13 +239,13 @@ inline T_accSym<cint16, cint16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint16, cint16> macSrSym(T_accSym<cint16, cint16> acc,
-                                         v16cint16 xbuff,
-                                         unsigned int xstart,
-                                         v16cint16 ybuff,
-                                         unsigned int ystart,
-                                         v8cint16 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint16, cint16> macSrSym(T_accSym<cint16, cint16> acc,
+                                              v16cint16 xbuff,
+                                              unsigned int xstart,
+                                              v16cint16 ybuff,
+                                              unsigned int ystart,
+                                              v8cint16 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint16, cint16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -251,7 +255,7 @@ inline T_accSym<cint16, cint16> macSrSym(T_accSym<cint16, cint16> acc,
 }
 
 // DATA = int32, COEFF = int16
-inline T_accSym<int32, int16> mulSrSym(
+INLINE_DECL T_accSym<int32, int16> mulSrSym(
     v16int32 xbuff, unsigned int xstart, v16int32 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<int32, int16> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -263,13 +267,13 @@ inline T_accSym<int32, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<int32, int16> macSrSym(T_accSym<int32, int16> acc,
-                                       v16int32 xbuff,
-                                       unsigned int xstart,
-                                       v16int32 ybuff,
-                                       unsigned int ystart,
-                                       v16int16 zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<int32, int16> macSrSym(T_accSym<int32, int16> acc,
+                                            v16int32 xbuff,
+                                            unsigned int xstart,
+                                            v16int32 ybuff,
+                                            unsigned int ystart,
+                                            v16int16 zbuff,
+                                            unsigned int zstart) {
     T_accSym<int32, int16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -281,7 +285,7 @@ inline T_accSym<int32, int16> macSrSym(T_accSym<int32, int16> acc,
 }
 
 // DATA = int32,  COEFF = int32>
-inline T_accSym<int32, int32> mulSrSym(
+INLINE_DECL T_accSym<int32, int32> mulSrSym(
     v16int32 xbuff, unsigned int xstart, v16int32 ybuff, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
     T_accSym<int32, int32> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -291,13 +295,13 @@ inline T_accSym<int32, int32> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<int32, int32> macSrSym(T_accSym<int32, int32> acc,
-                                       v16int32 xbuff,
-                                       unsigned int xstart,
-                                       v16int32 ybuff,
-                                       unsigned int ystart,
-                                       v8int32 zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<int32, int32> macSrSym(T_accSym<int32, int32> acc,
+                                            v16int32 xbuff,
+                                            unsigned int xstart,
+                                            v16int32 ybuff,
+                                            unsigned int ystart,
+                                            v8int32 zbuff,
+                                            unsigned int zstart) {
     T_accSym<int32, int32> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -307,7 +311,7 @@ inline T_accSym<int32, int32> macSrSym(T_accSym<int32, int32> acc,
 }
 
 // DATA = cint32, COEFF =  int16>
-inline T_accSym<cint32, int16> mulSrSym(
+INLINE_DECL T_accSym<cint32, int16> mulSrSym(
     v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -319,13 +323,13 @@ inline T_accSym<cint32, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, int16> macSrSym(T_accSym<cint32, int16> acc,
-                                        v8cint32 xbuff,
-                                        unsigned int xstart,
-                                        v8cint32 ybuff,
-                                        unsigned int ystart,
-                                        v16int16 zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, int16> macSrSym(T_accSym<cint32, int16> acc,
+                                             v8cint32 xbuff,
+                                             unsigned int xstart,
+                                             v8cint32 ybuff,
+                                             unsigned int ystart,
+                                             v16int16 zbuff,
+                                             unsigned int zstart) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -337,7 +341,7 @@ inline T_accSym<cint32, int16> macSrSym(T_accSym<cint32, int16> acc,
 }
 
 // DATA = cint32, COEFF =  int32>
-inline T_accSym<cint32, int32> mulSrSym(
+INLINE_DECL T_accSym<cint32, int32> mulSrSym(
     v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
     T_accSym<cint32, int32> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -347,13 +351,13 @@ inline T_accSym<cint32, int32> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, int32> macSrSym(T_accSym<cint32, int32> acc,
-                                        v8cint32 xbuff,
-                                        unsigned int xstart,
-                                        v8cint32 ybuff,
-                                        unsigned int ystart,
-                                        v8int32 zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, int32> macSrSym(T_accSym<cint32, int32> acc,
+                                             v8cint32 xbuff,
+                                             unsigned int xstart,
+                                             v8cint32 ybuff,
+                                             unsigned int ystart,
+                                             v8int32 zbuff,
+                                             unsigned int zstart) {
     T_accSym<cint32, int32> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -363,7 +367,7 @@ inline T_accSym<cint32, int32> macSrSym(T_accSym<cint32, int32> acc,
 }
 
 // DATA = cint32, COEFF =  cint16>
-inline T_accSym<cint32, cint16> mulSrSym(
+INLINE_DECL T_accSym<cint32, cint16> mulSrSym(
     v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
     T_accSym<cint32, cint16> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -373,13 +377,13 @@ inline T_accSym<cint32, cint16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, cint16> macSrSym(T_accSym<cint32, cint16> acc,
-                                         v8cint32 xbuff,
-                                         unsigned int xstart,
-                                         v8cint32 ybuff,
-                                         unsigned int ystart,
-                                         v8cint16 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, cint16> macSrSym(T_accSym<cint32, cint16> acc,
+                                              v8cint32 xbuff,
+                                              unsigned int xstart,
+                                              v8cint32 ybuff,
+                                              unsigned int ystart,
+                                              v8cint16 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint32, cint16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -389,12 +393,12 @@ inline T_accSym<cint32, cint16> macSrSym(T_accSym<cint32, cint16> acc,
 }
 
 // DATA = cint32, COEFF =  cint32>
-inline T_accSym<cint32, cint32> mulSrSym(v8cint32 xbuff,
-                                         const unsigned int xstart,
-                                         v8cint32 ybuff,
-                                         unsigned int ystart,
-                                         v4cint32 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, cint32> mulSrSym(v8cint32 xbuff,
+                                              const unsigned int xstart,
+                                              v8cint32 ybuff,
+                                              unsigned int ystart,
+                                              v4cint32 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint32, cint32> retVal;
     const unsigned int xoffsets = 0x10;
     const unsigned int zoffsets = 0x0000;
@@ -404,13 +408,13 @@ inline T_accSym<cint32, cint32> mulSrSym(v8cint32 xbuff,
     return retVal;
 }
 
-inline T_accSym<cint32, cint32> macSrSym(T_accSym<cint32, cint32> acc,
-                                         v8cint32 xbuff,
-                                         unsigned int xstart,
-                                         v8cint32 ybuff,
-                                         unsigned int ystart,
-                                         v4cint32 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, cint32> macSrSym(T_accSym<cint32, cint32> acc,
+                                              v8cint32 xbuff,
+                                              unsigned int xstart,
+                                              v8cint32 ybuff,
+                                              unsigned int ystart,
+                                              v4cint32 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint32, cint32> retVal;
     const unsigned int xoffsets = 0x10;
     const unsigned int zoffsets = 0x0000;
@@ -421,7 +425,7 @@ inline T_accSym<cint32, cint32> macSrSym(T_accSym<cint32, cint32> acc,
 }
 
 // DATA = float,  COEFF = float>
-inline T_accSym<float, float> mulSrSym(
+INLINE_DECL T_accSym<float, float> mulSrSym(
     v16float xbuff, unsigned int xstart, v16float ybuff, unsigned int ystart, v8float zbuff, unsigned int zstart) {
     T_accSym<float, float> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -432,13 +436,13 @@ inline T_accSym<float, float> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<float, float> macSrSym(T_accSym<float, float> acc,
-                                       v16float xbuff,
-                                       unsigned int xstart,
-                                       v16float ybuff,
-                                       unsigned int ystart,
-                                       v8float zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<float, float> macSrSym(T_accSym<float, float> acc,
+                                            v16float xbuff,
+                                            unsigned int xstart,
+                                            v16float ybuff,
+                                            unsigned int ystart,
+                                            v8float zbuff,
+                                            unsigned int zstart) {
     T_accSym<float, float> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -449,7 +453,7 @@ inline T_accSym<float, float> macSrSym(T_accSym<float, float> acc,
 }
 
 // DATA = cfloat, COEFF =  float>
-inline T_accSym<cfloat, float> mulSrSym(
+INLINE_DECL T_accSym<cfloat, float> mulSrSym(
     v8cfloat xbuff, unsigned int xstart, v8cfloat ybuff, unsigned int ystart, v8float zbuff, unsigned int zstart) {
     T_accSym<cfloat, float> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -460,13 +464,13 @@ inline T_accSym<cfloat, float> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cfloat, float> macSrSym(T_accSym<cfloat, float> acc,
-                                        v8cfloat xbuff,
-                                        unsigned int xstart,
-                                        v8cfloat ybuff,
-                                        unsigned int ystart,
-                                        v8float zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cfloat, float> macSrSym(T_accSym<cfloat, float> acc,
+                                             v8cfloat xbuff,
+                                             unsigned int xstart,
+                                             v8cfloat ybuff,
+                                             unsigned int ystart,
+                                             v8float zbuff,
+                                             unsigned int zstart) {
     T_accSym<cfloat, float> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -477,7 +481,7 @@ inline T_accSym<cfloat, float> macSrSym(T_accSym<cfloat, float> acc,
 }
 
 // DATA = cfloat, COEFF =  cfloat>
-inline T_accSym<cfloat, cfloat> mulSrSym(
+INLINE_DECL T_accSym<cfloat, cfloat> mulSrSym(
     v8cfloat xbuff, unsigned int xstart, v8cfloat ybuff, unsigned int ystart, v4cfloat zbuff, unsigned int zstart) {
     T_accSym<cfloat, cfloat> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -488,13 +492,13 @@ inline T_accSym<cfloat, cfloat> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cfloat, cfloat> macSrSym(T_accSym<cfloat, cfloat> acc,
-                                         v8cfloat xbuff,
-                                         unsigned int xstart,
-                                         v8cfloat ybuff,
-                                         unsigned int ystart,
-                                         v4cfloat zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cfloat, cfloat> macSrSym(T_accSym<cfloat, cfloat> acc,
+                                              v8cfloat xbuff,
+                                              unsigned int xstart,
+                                              v8cfloat ybuff,
+                                              unsigned int ystart,
+                                              v4cfloat zbuff,
+                                              unsigned int zstart) {
     T_accSym<cfloat, cfloat> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -510,7 +514,7 @@ inline T_accSym<cfloat, cfloat> macSrSym(T_accSym<cfloat, cfloat> acc,
 // second set of intrinsics, to cover 2 smaller xbuff and ybuff buffers
 //-----------------------------------------------------------------------------------------------------
 // DATA = int16, COEFF = int16
-inline T_accSym<int16, int16> mulSrSym(
+INLINE_DECL T_accSym<int16, int16> mulSrSym(
     v64int16 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
@@ -529,12 +533,12 @@ inline T_accSym<int16, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<int16, int16> macSrSym(T_accSym<int16, int16> acc,
-                                       v64int16 xbuff,
-                                       unsigned int xstart,
-                                       unsigned int ystart,
-                                       v16int16 zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<int16, int16> macSrSym(T_accSym<int16, int16> acc,
+                                            v64int16 xbuff,
+                                            unsigned int xstart,
+                                            unsigned int ystart,
+                                            v16int16 zbuff,
+                                            unsigned int zstart) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
     const unsigned int xoffsets_hi = 0x07060504;
@@ -553,7 +557,7 @@ inline T_accSym<int16, int16> macSrSym(T_accSym<int16, int16> acc,
 }
 
 // DATA = cint16, COEFF = int16
-inline T_accSym<cint16, int16> mulSrSym(
+INLINE_DECL T_accSym<cint16, int16> mulSrSym(
     v32cint16 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -565,12 +569,12 @@ inline T_accSym<cint16, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint16, int16> macSrSym(T_accSym<cint16, int16> acc,
-                                        v32cint16 xbuff,
-                                        unsigned int xstart,
-                                        unsigned int ystart,
-                                        v16int16 zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cint16, int16> macSrSym(T_accSym<cint16, int16> acc,
+                                             v32cint16 xbuff,
+                                             unsigned int xstart,
+                                             unsigned int ystart,
+                                             v16int16 zbuff,
+                                             unsigned int zstart) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -582,7 +586,7 @@ inline T_accSym<cint16, int16> macSrSym(T_accSym<cint16, int16> acc,
 }
 
 // DATA = cint16, COEFF = cint16
-inline T_accSym<cint16, cint16> mulSrSym(
+INLINE_DECL T_accSym<cint16, cint16> mulSrSym(
     v32cint16 xbuff, unsigned int xstart, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
     T_accSym<cint16, cint16> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -592,12 +596,12 @@ inline T_accSym<cint16, cint16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint16, cint16> macSrSym(T_accSym<cint16, cint16> acc,
-                                         v32cint16 xbuff,
-                                         unsigned int xstart,
-                                         unsigned int ystart,
-                                         v8cint16 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint16, cint16> macSrSym(T_accSym<cint16, cint16> acc,
+                                              v32cint16 xbuff,
+                                              unsigned int xstart,
+                                              unsigned int ystart,
+                                              v8cint16 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint16, cint16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -607,7 +611,7 @@ inline T_accSym<cint16, cint16> macSrSym(T_accSym<cint16, cint16> acc,
 }
 
 // DATA = int32, COEFF = int16
-inline T_accSym<int32, int16> mulSrSym(
+INLINE_DECL T_accSym<int32, int16> mulSrSym(
     v32int32 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<int32, int16> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -619,12 +623,12 @@ inline T_accSym<int32, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<int32, int16> macSrSym(T_accSym<int32, int16> acc,
-                                       v32int32 xbuff,
-                                       unsigned int xstart,
-                                       unsigned int ystart,
-                                       v16int16 zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<int32, int16> macSrSym(T_accSym<int32, int16> acc,
+                                            v32int32 xbuff,
+                                            unsigned int xstart,
+                                            unsigned int ystart,
+                                            v16int16 zbuff,
+                                            unsigned int zstart) {
     T_accSym<int32, int16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -636,7 +640,7 @@ inline T_accSym<int32, int16> macSrSym(T_accSym<int32, int16> acc,
 }
 
 // DATA = int32,  COEFF = int32>
-inline T_accSym<int32, int32> mulSrSym(
+INLINE_DECL T_accSym<int32, int32> mulSrSym(
     v32int32 xbuff, unsigned int xstart, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
     T_accSym<int32, int32> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -646,12 +650,12 @@ inline T_accSym<int32, int32> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<int32, int32> macSrSym(T_accSym<int32, int32> acc,
-                                       v32int32 xbuff,
-                                       unsigned int xstart,
-                                       unsigned int ystart,
-                                       v8int32 zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<int32, int32> macSrSym(T_accSym<int32, int32> acc,
+                                            v32int32 xbuff,
+                                            unsigned int xstart,
+                                            unsigned int ystart,
+                                            v8int32 zbuff,
+                                            unsigned int zstart) {
     T_accSym<int32, int32> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -661,7 +665,7 @@ inline T_accSym<int32, int32> macSrSym(T_accSym<int32, int32> acc,
 }
 
 // DATA = cint32, COEFF =  int16>
-inline T_accSym<cint32, int16> mulSrSym(
+INLINE_DECL T_accSym<cint32, int16> mulSrSym(
     v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -673,12 +677,12 @@ inline T_accSym<cint32, int16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, int16> macSrSym(T_accSym<cint32, int16> acc,
-                                        v16cint32 xbuff,
-                                        unsigned int xstart,
-                                        unsigned int ystart,
-                                        v16int16 zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, int16> macSrSym(T_accSym<cint32, int16> acc,
+                                             v16cint32 xbuff,
+                                             unsigned int xstart,
+                                             unsigned int ystart,
+                                             v16int16 zbuff,
+                                             unsigned int zstart) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -690,7 +694,7 @@ inline T_accSym<cint32, int16> macSrSym(T_accSym<cint32, int16> acc,
 }
 
 // DATA = cint32, COEFF =  int32>
-inline T_accSym<cint32, int32> mulSrSym(
+INLINE_DECL T_accSym<cint32, int32> mulSrSym(
     v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
     T_accSym<cint32, int32> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -700,12 +704,12 @@ inline T_accSym<cint32, int32> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, int32> macSrSym(T_accSym<cint32, int32> acc,
-                                        v16cint32 xbuff,
-                                        unsigned int xstart,
-                                        unsigned int ystart,
-                                        v8int32 zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, int32> macSrSym(T_accSym<cint32, int32> acc,
+                                             v16cint32 xbuff,
+                                             unsigned int xstart,
+                                             unsigned int ystart,
+                                             v8int32 zbuff,
+                                             unsigned int zstart) {
     T_accSym<cint32, int32> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -715,7 +719,7 @@ inline T_accSym<cint32, int32> macSrSym(T_accSym<cint32, int32> acc,
 }
 
 // DATA = cint32, COEFF =  cint16>
-inline T_accSym<cint32, cint16> mulSrSym(
+INLINE_DECL T_accSym<cint32, cint16> mulSrSym(
     v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
     T_accSym<cint32, cint16> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -725,12 +729,12 @@ inline T_accSym<cint32, cint16> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, cint16> macSrSym(T_accSym<cint32, cint16> acc,
-                                         v16cint32 xbuff,
-                                         unsigned int xstart,
-                                         unsigned int ystart,
-                                         v8cint16 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, cint16> macSrSym(T_accSym<cint32, cint16> acc,
+                                              v16cint32 xbuff,
+                                              unsigned int xstart,
+                                              unsigned int ystart,
+                                              v8cint16 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint32, cint16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -740,7 +744,7 @@ inline T_accSym<cint32, cint16> macSrSym(T_accSym<cint32, cint16> acc,
 }
 
 // DATA = cint32, COEFF =  cint32>
-inline T_accSym<cint32, cint32> mulSrSym(
+INLINE_DECL T_accSym<cint32, cint32> mulSrSym(
     v16cint32 xbuff, const unsigned int xstart, unsigned int ystart, v4cint32 zbuff, unsigned int zstart) {
     T_accSym<cint32, cint32> retVal;
     const unsigned int xoffsets = 0x10;
@@ -751,12 +755,12 @@ inline T_accSym<cint32, cint32> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cint32, cint32> macSrSym(T_accSym<cint32, cint32> acc,
-                                         v16cint32 xbuff,
-                                         unsigned int xstart,
-                                         unsigned int ystart,
-                                         v4cint32 zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cint32, cint32> macSrSym(T_accSym<cint32, cint32> acc,
+                                              v16cint32 xbuff,
+                                              unsigned int xstart,
+                                              unsigned int ystart,
+                                              v4cint32 zbuff,
+                                              unsigned int zstart) {
     T_accSym<cint32, cint32> retVal;
     const unsigned int xoffsets = 0x10;
     const unsigned int zoffsets = 0x0000;
@@ -767,7 +771,7 @@ inline T_accSym<cint32, cint32> macSrSym(T_accSym<cint32, cint32> acc,
 }
 
 // DATA = float,  COEFF = float>
-inline T_accSym<float, float> mulSrSym(
+INLINE_DECL T_accSym<float, float> mulSrSym(
     v32float xbuff, unsigned int xstart, unsigned int ystart, v8float zbuff, unsigned int zstart) {
     T_accSym<float, float> retVal;
     const unsigned int xoffsets = 0x76543210;
@@ -778,12 +782,12 @@ inline T_accSym<float, float> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<float, float> macSrSym(T_accSym<float, float> acc,
-                                       v32float xbuff,
-                                       unsigned int xstart,
-                                       unsigned int ystart,
-                                       v8float zbuff,
-                                       unsigned int zstart) {
+INLINE_DECL T_accSym<float, float> macSrSym(T_accSym<float, float> acc,
+                                            v32float xbuff,
+                                            unsigned int xstart,
+                                            unsigned int ystart,
+                                            v8float zbuff,
+                                            unsigned int zstart) {
     T_accSym<float, float> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -794,7 +798,7 @@ inline T_accSym<float, float> macSrSym(T_accSym<float, float> acc,
 }
 
 // DATA = cfloat, COEFF =  float>
-inline T_accSym<cfloat, float> mulSrSym(
+INLINE_DECL T_accSym<cfloat, float> mulSrSym(
     v16cfloat xbuff, unsigned int xstart, unsigned int ystart, v8float zbuff, unsigned int zstart) {
     T_accSym<cfloat, float> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -805,12 +809,12 @@ inline T_accSym<cfloat, float> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cfloat, float> macSrSym(T_accSym<cfloat, float> acc,
-                                        v16cfloat xbuff,
-                                        unsigned int xstart,
-                                        unsigned int ystart,
-                                        v8float zbuff,
-                                        unsigned int zstart) {
+INLINE_DECL T_accSym<cfloat, float> macSrSym(T_accSym<cfloat, float> acc,
+                                             v16cfloat xbuff,
+                                             unsigned int xstart,
+                                             unsigned int ystart,
+                                             v8float zbuff,
+                                             unsigned int zstart) {
     T_accSym<cfloat, float> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -821,7 +825,7 @@ inline T_accSym<cfloat, float> macSrSym(T_accSym<cfloat, float> acc,
 }
 
 // DATA = cfloat, COEFF =  cfloat>
-inline T_accSym<cfloat, cfloat> mulSrSym(
+INLINE_DECL T_accSym<cfloat, cfloat> mulSrSym(
     v16cfloat xbuff, unsigned int xstart, unsigned int ystart, v4cfloat zbuff, unsigned int zstart) {
     T_accSym<cfloat, cfloat> retVal;
     const unsigned int xoffsets = 0x3210;
@@ -832,12 +836,12 @@ inline T_accSym<cfloat, cfloat> mulSrSym(
     return retVal;
 }
 
-inline T_accSym<cfloat, cfloat> macSrSym(T_accSym<cfloat, cfloat> acc,
-                                         v16cfloat xbuff,
-                                         unsigned int xstart,
-                                         unsigned int ystart,
-                                         v4cfloat zbuff,
-                                         unsigned int zstart) {
+INLINE_DECL T_accSym<cfloat, cfloat> macSrSym(T_accSym<cfloat, cfloat> acc,
+                                              v16cfloat xbuff,
+                                              unsigned int xstart,
+                                              unsigned int ystart,
+                                              v4cfloat zbuff,
+                                              unsigned int zstart) {
     T_accSym<cfloat, cfloat> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -854,146 +858,146 @@ inline T_accSym<cfloat, cfloat> macSrSym(T_accSym<cfloat, cfloat> acc,
 //-----------------------------------------------------------------------------------------------------
 // DATA = int16, COEFF = int16
 template <unsigned int T_Variant = 0>
-inline T_accSym<int16, int16> macSrSymCT(T_accSym<int16, int16> acc,
-                                         v32int16 xbuff,
-                                         unsigned int xstart,
-                                         v32int16 ybuff,
-                                         unsigned int ystart,
-                                         v16int16 zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT(T_accSym<int16, int16> acc,
+                                              v32int16 xbuff,
+                                              unsigned int xstart,
+                                              v32int16 ybuff,
+                                              unsigned int ystart,
+                                              v16int16 zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint16, int16> macSrSymCT(T_accSym<cint16, int16> acc,
-                                          v16cint16 xbuff,
-                                          unsigned int xstart,
-                                          v16cint16 ybuff,
-                                          unsigned int ystart,
-                                          v16int16 zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT(T_accSym<cint16, int16> acc,
+                                               v16cint16 xbuff,
+                                               unsigned int xstart,
+                                               v16cint16 ybuff,
+                                               unsigned int ystart,
+                                               v16int16 zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint16, cint16> macSrSymCT(T_accSym<cint16, cint16> acc,
-                                           v16cint16 xbuff,
-                                           unsigned int xstart,
-                                           v16cint16 ybuff,
-                                           unsigned int ystart,
-                                           v8cint16 zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint16, cint16> macSrSymCT(T_accSym<cint16, cint16> acc,
+                                                v16cint16 xbuff,
+                                                unsigned int xstart,
+                                                v16cint16 ybuff,
+                                                unsigned int ystart,
+                                                v8cint16 zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<int32, int16> macSrSymCT(T_accSym<int32, int16> acc,
-                                         v16int32 xbuff,
-                                         unsigned int xstart,
-                                         v16int32 ybuff,
-                                         unsigned int ystart,
-                                         v16int16 zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT(T_accSym<int32, int16> acc,
+                                              v16int32 xbuff,
+                                              unsigned int xstart,
+                                              v16int32 ybuff,
+                                              unsigned int ystart,
+                                              v16int16 zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<int32, int32> macSrSymCT(T_accSym<int32, int32> acc,
-                                         v16int32 xbuff,
-                                         unsigned int xstart,
-                                         v16int32 ybuff,
-                                         unsigned int ystart,
-                                         v8int32 zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<int32, int32> macSrSymCT(T_accSym<int32, int32> acc,
+                                              v16int32 xbuff,
+                                              unsigned int xstart,
+                                              v16int32 ybuff,
+                                              unsigned int ystart,
+                                              v8int32 zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, int16> macSrSymCT(T_accSym<cint32, int16> acc,
-                                          v8cint32 xbuff,
-                                          unsigned int xstart,
-                                          v8cint32 ybuff,
-                                          unsigned int ystart,
-                                          v16int16 zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT(T_accSym<cint32, int16> acc,
+                                               v8cint32 xbuff,
+                                               unsigned int xstart,
+                                               v8cint32 ybuff,
+                                               unsigned int ystart,
+                                               v16int16 zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, int32> macSrSymCT(T_accSym<cint32, int32> acc,
-                                          v8cint32 xbuff,
-                                          unsigned int xstart,
-                                          v8cint32 ybuff,
-                                          unsigned int ystart,
-                                          v8int32 zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, int32> macSrSymCT(T_accSym<cint32, int32> acc,
+                                               v8cint32 xbuff,
+                                               unsigned int xstart,
+                                               v8cint32 ybuff,
+                                               unsigned int ystart,
+                                               v8int32 zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, cint16> macSrSymCT(T_accSym<cint32, cint16> acc,
-                                           v8cint32 xbuff,
-                                           unsigned int xstart,
-                                           v8cint32 ybuff,
-                                           unsigned int ystart,
-                                           v8cint16 zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, cint16> macSrSymCT(T_accSym<cint32, cint16> acc,
+                                                v8cint32 xbuff,
+                                                unsigned int xstart,
+                                                v8cint32 ybuff,
+                                                unsigned int ystart,
+                                                v8cint16 zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, cint32> macSrSymCT(T_accSym<cint32, cint32> acc,
-                                           v8cint32 xbuff,
-                                           unsigned int xstart,
-                                           v8cint32 ybuff,
-                                           unsigned int ystart,
-                                           v4cint32 zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, cint32> macSrSymCT(T_accSym<cint32, cint32> acc,
+                                                v8cint32 xbuff,
+                                                unsigned int xstart,
+                                                v8cint32 ybuff,
+                                                unsigned int ystart,
+                                                v4cint32 zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<float, float> macSrSymCT(T_accSym<float, float> acc,
-                                         v16float xbuff,
-                                         unsigned int xstart,
-                                         v16float ybuff,
-                                         unsigned int ystart,
-                                         v8float zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<float, float> macSrSymCT(T_accSym<float, float> acc,
+                                              v16float xbuff,
+                                              unsigned int xstart,
+                                              v16float ybuff,
+                                              unsigned int ystart,
+                                              v8float zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cfloat, float> macSrSymCT(T_accSym<cfloat, float> acc,
-                                          v8cfloat xbuff,
-                                          unsigned int xstart,
-                                          v8cfloat ybuff,
-                                          unsigned int ystart,
-                                          v8float zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cfloat, float> macSrSymCT(T_accSym<cfloat, float> acc,
+                                               v8cfloat xbuff,
+                                               unsigned int xstart,
+                                               v8cfloat ybuff,
+                                               unsigned int ystart,
+                                               v8float zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cfloat, cfloat> macSrSymCT(T_accSym<cfloat, cfloat> acc,
-                                           v8cfloat xbuff,
-                                           unsigned int xstart,
-                                           v8cfloat ybuff,
-                                           unsigned int ystart,
-                                           v4cfloat zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cfloat, cfloat> macSrSymCT(T_accSym<cfloat, cfloat> acc,
+                                                v8cfloat xbuff,
+                                                unsigned int xstart,
+                                                v8cfloat ybuff,
+                                                unsigned int ystart,
+                                                v4cfloat zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
@@ -1002,14 +1006,14 @@ inline T_accSym<cfloat, cfloat> macSrSymCT(T_accSym<cfloat, cfloat> acc,
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int16, int16> acc,
-                                                                v32int16 xbuff,
-                                                                unsigned int xstart,
-                                                                v32int16 ybuff,
-                                                                unsigned int ystart,
-                                                                v16int16 zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int16, int16> acc,
+                                                                     v32int16 xbuff,
+                                                                     unsigned int xstart,
+                                                                     v32int16 ybuff,
+                                                                     unsigned int ystart,
+                                                                     v16int16 zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
     const unsigned int xoffsets_hi = 0x07060504;
@@ -1027,14 +1031,14 @@ inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int16, 
 
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int16, int16> acc,
-                                                                 v32int16 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v32int16 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int16, int16> acc,
+                                                                      v32int16 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v32int16 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
     const unsigned int xoffsets_hi = 0x07060504;
@@ -1066,14 +1070,14 @@ inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int16,
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int16, int16> acc,
-                                                                 v32int16 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v32int16 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int16, int16> acc,
+                                                                      v32int16 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v32int16 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     // no mac16_sym_ct...
     // perform a mac16 on xbuff, followed by mac16 on ybuff with prefabricated coeff register.
     // On top of that, swap xbuff for ybuff for FIR lengths: 32n + 3.
@@ -1116,14 +1120,14 @@ inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int16,
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, int16> acc,
-                                                                 v16cint16 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16cint16 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, int16> acc,
+                                                                      v16cint16 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16cint16 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -1142,14 +1146,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16
 
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -1174,14 +1178,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     // xbuff has enough data for 1 column, but not enough data for second column.
     // ybuff has the data needed for both columns, so swap xbuff and ybuff and save on reloading xbuff.
     T_accSym<cint16, int16> retVal;
@@ -1212,14 +1216,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_4_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_4_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -1244,14 +1248,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_4_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_5_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_5_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     // xbuff has enough data for 1 column, but not enough data for second column.
     // ybuff has the data needed for both columns, so swap xbuff and ybuff and save on reloading xbuff.
     T_accSym<cint16, int16> retVal;
@@ -1281,14 +1285,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_5_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_6_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_6_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -1313,14 +1317,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_6_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_7_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_7_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     // xbuff has enough data for 1 column, but not enough data for second column.
     // ybuff has the data needed for both columns, so swap xbuff and ybuff and save on reloading xbuff.
     T_accSym<cint16, int16> retVal;
@@ -1350,14 +1354,14 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_7_SAMPLES>(T_accSym<cint1
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<cint16, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, cint16> acc,
-                                                                  v16cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16cint16 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v8cint16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, cint16> acc,
+                                                                       v16cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16cint16 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v8cint16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, cint16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -1379,14 +1383,14 @@ inline T_accSym<cint16, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint1
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int16> acc,
-                                                                v16int32 xbuff,
-                                                                unsigned int xstart,
-                                                                v16int32 ybuff,
-                                                                unsigned int ystart,
-                                                                v16int16 zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int16> acc,
+                                                                     v16int32 xbuff,
+                                                                     unsigned int xstart,
+                                                                     v16int32 ybuff,
+                                                                     unsigned int ystart,
+                                                                     v16int16 zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<int32, int16> retVal;
 
     const unsigned int xoffsets = 0x76543210;
@@ -1409,14 +1413,14 @@ inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, 
 }
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int32, int16> acc,
-                                                                 v16int32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int32 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int32, int16> acc,
+                                                                      v16int32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int32 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<int32, int16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -1439,14 +1443,14 @@ inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int32,
 }
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int32, int16> acc,
-                                                                 v16int32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int32 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int32, int16> acc,
+                                                                      v16int32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int32 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<int32, int16> retVal;
 
     const unsigned int xoffsets = 0x76543210;
@@ -1475,14 +1479,14 @@ inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int32,
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<int32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int32> acc,
-                                                                v16int32 xbuff,
-                                                                unsigned int xstart,
-                                                                v16int32 ybuff,
-                                                                unsigned int ystart,
-                                                                v8int32 zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int32> acc,
+                                                                     v16int32 xbuff,
+                                                                     unsigned int xstart,
+                                                                     v16int32 ybuff,
+                                                                     unsigned int ystart,
+                                                                     v8int32 zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<int32, int32> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -1504,14 +1508,14 @@ inline T_accSym<int32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, 
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int16> acc,
-                                                                 v8cint32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v8cint32 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int16> acc,
+                                                                      v8cint32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v8cint32 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -1528,14 +1532,14 @@ inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32
 }
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint32, int16> acc,
-                                                                  v8cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cint32 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint32, int16> acc,
+                                                                       v8cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cint32 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -1556,14 +1560,14 @@ inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint3
 }
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint32, int16> acc,
-                                                                  v8cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cint32 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint32, int16> acc,
+                                                                       v8cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cint32 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, int16> retVal;
 
     const unsigned int xoffsets = 0x3210;
@@ -1589,14 +1593,14 @@ inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint3
 // DATA = cint32, COEFF =  int32>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cint32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int32> acc,
-                                                                 v8cint32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v8cint32 ybuff,
-                                                                 unsigned int ystart,
-                                                                 v8int32 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int32> acc,
+                                                                      v8cint32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v8cint32 ybuff,
+                                                                      unsigned int ystart,
+                                                                      v8int32 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cint32, int32> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -1617,14 +1621,14 @@ inline T_accSym<cint32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32
 // DATA = cint32, COEFF =  cint16>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cint32, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint16> acc,
-                                                                  v8cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cint32 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v8cint16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint16> acc,
+                                                                       v8cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cint32 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v8cint16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, cint16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -1645,14 +1649,14 @@ inline T_accSym<cint32, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint3
 // DATA = cint32, COEFF =  cint32>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cint32, cint32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint32> acc,
-                                                                  v8cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cint32 ybuff,
-                                                                  unsigned int ystart,
-                                                                  v4cint32 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, cint32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint32> acc,
+                                                                       v8cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cint32 ybuff,
+                                                                       unsigned int ystart,
+                                                                       v4cint32 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, cint32> retVal;
     const unsigned int xoffsets = 0x10;
     const unsigned int zoffsets = 0x0000;
@@ -1674,14 +1678,14 @@ inline T_accSym<cint32, cint32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint3
 // DATA = float,  COEFF = float>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<float, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<float, float> acc,
-                                                                v16float xbuff,
-                                                                unsigned int xstart,
-                                                                v16float ybuff,
-                                                                unsigned int ystart,
-                                                                v8float zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<float, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<float, float> acc,
+                                                                     v16float xbuff,
+                                                                     unsigned int xstart,
+                                                                     v16float ybuff,
+                                                                     unsigned int ystart,
+                                                                     v8float zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<float, float> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -1702,14 +1706,14 @@ inline T_accSym<float, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<float, 
 // DATA = cfloat, COEFF =  float>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cfloat, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, float> acc,
-                                                                 v8cfloat xbuff,
-                                                                 unsigned int xstart,
-                                                                 v8cfloat ybuff,
-                                                                 unsigned int ystart,
-                                                                 v8float zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cfloat, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, float> acc,
+                                                                      v8cfloat xbuff,
+                                                                      unsigned int xstart,
+                                                                      v8cfloat ybuff,
+                                                                      unsigned int ystart,
+                                                                      v8float zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cfloat, float> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -1730,14 +1734,14 @@ inline T_accSym<cfloat, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat
 // DATA = cfloat, COEFF =  cfloat>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, cfloat> acc,
-                                                                  v8cfloat xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cfloat ybuff,
-                                                                  unsigned int ystart,
-                                                                  v4cfloat zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, cfloat> acc,
+                                                                       v8cfloat xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cfloat ybuff,
+                                                                       unsigned int ystart,
+                                                                       v4cfloat zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cfloat, cfloat> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -1760,122 +1764,122 @@ inline T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloa
 //-----------------------------------------------------------------------------------------------------
 // DATA = int16, COEFF = int16
 template <unsigned int T_Variant = 0>
-inline T_accSym<int16, int16> macSrSymCT(T_accSym<int16, int16> acc,
-                                         v64int16 xbuff,
-                                         unsigned int xstart,
-                                         v16int16 zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT(T_accSym<int16, int16> acc,
+                                              v64int16 xbuff,
+                                              unsigned int xstart,
+                                              v16int16 zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint16, int16> macSrSymCT(T_accSym<cint16, int16> acc,
-                                          v32cint16 xbuff,
-                                          unsigned int xstart,
-                                          v16int16 zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT(T_accSym<cint16, int16> acc,
+                                               v32cint16 xbuff,
+                                               unsigned int xstart,
+                                               v16int16 zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint16, cint16> macSrSymCT(T_accSym<cint16, cint16> acc,
-                                           v32cint16 xbuff,
-                                           unsigned int xstart,
-                                           v8cint16 zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint16, cint16> macSrSymCT(T_accSym<cint16, cint16> acc,
+                                                v32cint16 xbuff,
+                                                unsigned int xstart,
+                                                v8cint16 zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<int32, int16> macSrSymCT(T_accSym<int32, int16> acc,
-                                         v32int32 xbuff,
-                                         unsigned int xstart,
-                                         v16int16 zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT(T_accSym<int32, int16> acc,
+                                              v32int32 xbuff,
+                                              unsigned int xstart,
+                                              v16int16 zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<int32, int32> macSrSymCT(T_accSym<int32, int32> acc,
-                                         v32int32 xbuff,
-                                         unsigned int xstart,
-                                         v8int32 zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<int32, int32> macSrSymCT(T_accSym<int32, int32> acc,
+                                              v32int32 xbuff,
+                                              unsigned int xstart,
+                                              v8int32 zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, int16> macSrSymCT(T_accSym<cint32, int16> acc,
-                                          v16cint32 xbuff,
-                                          unsigned int xstart,
-                                          v16int16 zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT(T_accSym<cint32, int16> acc,
+                                               v16cint32 xbuff,
+                                               unsigned int xstart,
+                                               v16int16 zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, int32> macSrSymCT(T_accSym<cint32, int32> acc,
-                                          v16cint32 xbuff,
-                                          unsigned int xstart,
-                                          v8int32 zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, int32> macSrSymCT(T_accSym<cint32, int32> acc,
+                                               v16cint32 xbuff,
+                                               unsigned int xstart,
+                                               v8int32 zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, cint16> macSrSymCT(T_accSym<cint32, cint16> acc,
-                                           v16cint32 xbuff,
-                                           unsigned int xstart,
-                                           v8cint16 zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, cint16> macSrSymCT(T_accSym<cint32, cint16> acc,
+                                                v16cint32 xbuff,
+                                                unsigned int xstart,
+                                                v8cint16 zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cint32, cint32> macSrSymCT(T_accSym<cint32, cint32> acc,
-                                           v16cint32 xbuff,
-                                           unsigned int xstart,
-                                           v4cint32 zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cint32, cint32> macSrSymCT(T_accSym<cint32, cint32> acc,
+                                                v16cint32 xbuff,
+                                                unsigned int xstart,
+                                                v4cint32 zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<float, float> macSrSymCT(T_accSym<float, float> acc,
-                                         v32float xbuff,
-                                         unsigned int xstart,
-                                         v8float zbuff,
-                                         unsigned int zstart,
-                                         unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<float, float> macSrSymCT(T_accSym<float, float> acc,
+                                              v32float xbuff,
+                                              unsigned int xstart,
+                                              v8float zbuff,
+                                              unsigned int zstart,
+                                              unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cfloat, float> macSrSymCT(T_accSym<cfloat, float> acc,
-                                          v16cfloat xbuff,
-                                          unsigned int xstart,
-                                          v8float zbuff,
-                                          unsigned int zstart,
-                                          unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cfloat, float> macSrSymCT(T_accSym<cfloat, float> acc,
+                                               v16cfloat xbuff,
+                                               unsigned int xstart,
+                                               v8float zbuff,
+                                               unsigned int zstart,
+                                               unsigned int xbuffSwap = 0) {
     return acc;
 }
 
 template <unsigned int T_Variant = 0>
-inline T_accSym<cfloat, cfloat> macSrSymCT(T_accSym<cfloat, cfloat> acc,
-                                           v16cfloat xbuff,
-                                           unsigned int xstart,
-                                           v4cfloat zbuff,
-                                           unsigned int zstart,
-                                           unsigned int xbuffSwap = 0) {
+INLINE_DECL T_accSym<cfloat, cfloat> macSrSymCT(T_accSym<cfloat, cfloat> acc,
+                                                v16cfloat xbuff,
+                                                unsigned int xstart,
+                                                v4cfloat zbuff,
+                                                unsigned int zstart,
+                                                unsigned int xbuffSwap = 0) {
     return acc;
 }
 
@@ -1884,12 +1888,12 @@ inline T_accSym<cfloat, cfloat> macSrSymCT(T_accSym<cfloat, cfloat> acc,
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int16, int16> acc,
-                                                                v64int16 xbuff,
-                                                                unsigned int xstart,
-                                                                v16int16 zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int16, int16> acc,
+                                                                     v64int16 xbuff,
+                                                                     unsigned int xstart,
+                                                                     v16int16 zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
     const unsigned int xoffsets_hi = 0x07060504;
@@ -1907,12 +1911,12 @@ inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int16, 
 
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int16, int16> acc,
-                                                                 v64int16 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int16, int16> acc,
+                                                                      v64int16 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<int16, int16> retVal;
     const unsigned int xoffsets = 0x03020100;
     const unsigned int xoffsets_hi = 0x07060504;
@@ -1932,12 +1936,12 @@ inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int16,
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int16, int16> acc,
-                                                                 v64int16 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int16, int16> acc,
+                                                                      v64int16 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     // no mac16_sym_ct...
     // perform a mac16 on xbuff, followed by mac16 on ybuff with prefabricated coeff register.
     // On top of that, swap xbuff for ybuff for FIR lengths: 32n + 3.
@@ -1969,12 +1973,12 @@ inline T_accSym<int16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int16,
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, int16> acc,
-                                                                 v32cint16 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, int16> acc,
+                                                                      v32cint16 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -1986,12 +1990,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16
 
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -2003,12 +2007,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     // xbuff has enough data for 1 column, but not enough data for second column.
     // ybuff has the data needed for both columns, so swap xbuff and ybuff and save on reloading xbuff.
     T_accSym<cint16, int16> retVal;
@@ -2027,12 +2031,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint1
 }
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_4_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_4_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -2044,12 +2048,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_4_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_5_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_5_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     // xbuff has enough data for 1 column, but not enough data for second column.
     // ybuff has the data needed for both columns, so swap xbuff and ybuff and save on reloading xbuff.
     T_accSym<cint16, int16> retVal;
@@ -2067,12 +2071,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_5_SAMPLES>(T_accSym<cint1
 }
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_6_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_6_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int xstep = 1;
@@ -2084,12 +2088,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_6_SAMPLES>(T_accSym<cint1
 
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_7_SAMPLES>(T_accSym<cint16, int16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_7_SAMPLES>(T_accSym<cint16, int16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     // xbuff has enough data for 1 column, but not enough data for second column.
     // ybuff has the data needed for both columns, so swap xbuff and ybuff and save on reloading xbuff.
     T_accSym<cint16, int16> retVal;
@@ -2107,12 +2111,12 @@ inline T_accSym<cint16, int16> macSrSymCT<K_CT_OP_WITH_7_SAMPLES>(T_accSym<cint1
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<cint16, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, cint16> acc,
-                                                                  v32cint16 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cint16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint16, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint16, cint16> acc,
+                                                                       v32cint16 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cint16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint16, cint16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -2125,12 +2129,12 @@ inline T_accSym<cint16, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint1
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int16> acc,
-                                                                v32int32 xbuff,
-                                                                unsigned int xstart,
-                                                                v16int16 zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int16> acc,
+                                                                     v32int32 xbuff,
+                                                                     unsigned int xstart,
+                                                                     v16int16 zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<int32, int16> retVal;
 
     const unsigned int xoffsets = 0x76543210;
@@ -2143,12 +2147,12 @@ inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, 
 }
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int32, int16> acc,
-                                                                 v32int32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int32, int16> acc,
+                                                                      v32int32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<int32, int16> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -2160,12 +2164,12 @@ inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<int32,
 }
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int32, int16> acc,
-                                                                 v32int32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int32, int16> acc,
+                                                                      v32int32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<int32, int16> retVal;
 
     const unsigned int xoffsets = 0x76543210;
@@ -2183,12 +2187,12 @@ inline T_accSym<int32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<int32,
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<int32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int32> acc,
-                                                                v32int32 xbuff,
-                                                                unsigned int xstart,
-                                                                v8int32 zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<int32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, int32> acc,
+                                                                     v32int32 xbuff,
+                                                                     unsigned int xstart,
+                                                                     v8int32 zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<int32, int32> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -2202,12 +2206,12 @@ inline T_accSym<int32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<int32, 
 // ---------------------------------------------------------------------------------------------------------------------
 // Variant K_CT_OP_WITH_1_SAMPLE
 template <>
-inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int16> acc,
-                                                                 v16cint32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v16int16 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int16> acc,
+                                                                      v16cint32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v16int16 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -2219,12 +2223,12 @@ inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32
 }
 // Variant K_CT_OP_WITH_2_SAMPLES
 template <>
-inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint32, int16> acc,
-                                                                  v16cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint32, int16> acc,
+                                                                       v16cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, int16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -2236,12 +2240,12 @@ inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_2_SAMPLES>(T_accSym<cint3
 }
 // Variant K_CT_OP_WITH_3_SAMPLES
 template <>
-inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint32, int16> acc,
-                                                                  v16cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v16int16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint32, int16> acc,
+                                                                       v16cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v16int16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, int16> retVal;
 
     const unsigned int xoffsets = 0x3210;
@@ -2258,12 +2262,12 @@ inline T_accSym<cint32, int16> macSrSymCT<K_CT_OP_WITH_3_SAMPLES>(T_accSym<cint3
 // DATA = cint32, COEFF =  int32>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cint32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int32> acc,
-                                                                 v16cint32 xbuff,
-                                                                 unsigned int xstart,
-                                                                 v8int32 zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, int32> acc,
+                                                                      v16cint32 xbuff,
+                                                                      unsigned int xstart,
+                                                                      v8int32 zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cint32, int32> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -2276,12 +2280,12 @@ inline T_accSym<cint32, int32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32
 // DATA = cint32, COEFF =  cint16>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cint32, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint16> acc,
-                                                                  v16cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v8cint16 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint16> acc,
+                                                                       v16cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v8cint16 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, cint16> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -2294,12 +2298,12 @@ inline T_accSym<cint32, cint16> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint3
 // DATA = cint32, COEFF =  cint32>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cint32, cint32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint32> acc,
-                                                                  v16cint32 xbuff,
-                                                                  unsigned int xstart,
-                                                                  v4cint32 zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cint32, cint32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint32, cint32> acc,
+                                                                       v16cint32 xbuff,
+                                                                       unsigned int xstart,
+                                                                       v4cint32 zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cint32, cint32> retVal;
     const unsigned int xoffsets = 0x10;
     const unsigned int zoffsets = 0x0000;
@@ -2313,12 +2317,12 @@ inline T_accSym<cint32, cint32> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cint3
 // DATA = float,  COEFF = float>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<float, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<float, float> acc,
-                                                                v32float xbuff,
-                                                                unsigned int xstart,
-                                                                v8float zbuff,
-                                                                unsigned int zstart,
-                                                                unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<float, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<float, float> acc,
+                                                                     v32float xbuff,
+                                                                     unsigned int xstart,
+                                                                     v8float zbuff,
+                                                                     unsigned int zstart,
+                                                                     unsigned int xbuffSwap) {
     T_accSym<float, float> retVal;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int zoffsets = 0x00000000;
@@ -2331,12 +2335,12 @@ inline T_accSym<float, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<float, 
 // DATA = cfloat, COEFF =  float>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cfloat, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, float> acc,
-                                                                 v16cfloat xbuff,
-                                                                 unsigned int xstart,
-                                                                 v8float zbuff,
-                                                                 unsigned int zstart,
-                                                                 unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cfloat, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, float> acc,
+                                                                      v16cfloat xbuff,
+                                                                      unsigned int xstart,
+                                                                      v8float zbuff,
+                                                                      unsigned int zstart,
+                                                                      unsigned int xbuffSwap) {
     T_accSym<cfloat, float> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -2349,12 +2353,12 @@ inline T_accSym<cfloat, float> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat
 // DATA = cfloat, COEFF =  cfloat>
 // ---------------------------------------------------------------------------------------------------------------------
 template <>
-inline T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, cfloat> acc,
-                                                                  v16cfloat xbuff,
-                                                                  unsigned int xstart,
-                                                                  v4cfloat zbuff,
-                                                                  unsigned int zstart,
-                                                                  unsigned int xbuffSwap) {
+INLINE_DECL T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloat, cfloat> acc,
+                                                                       v16cfloat xbuff,
+                                                                       unsigned int xstart,
+                                                                       v4cfloat zbuff,
+                                                                       unsigned int zstart,
+                                                                       unsigned int xbuffSwap) {
     T_accSym<cfloat, cfloat> retVal;
     const unsigned int xoffsets = 0x3210;
     const unsigned int zoffsets = 0x0000;
@@ -2367,26 +2371,26 @@ inline T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<cfloa
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
 template <typename TT_DATA, typename TT_COEFF>
-inline T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
-                                                T_accSym<TT_DATA, TT_COEFF> acc,
-                                                T_buff_512b<TT_DATA> xbuff,
-                                                unsigned int xstart,
-                                                T_buff_512b<TT_DATA> ybuff,
-                                                unsigned int ystart,
-                                                T_buff_256b<TT_COEFF> zbuff,
-                                                unsigned int zstart) {
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
+                                                     T_accSym<TT_DATA, TT_COEFF> acc,
+                                                     T_buff_512b<TT_DATA> xbuff,
+                                                     unsigned int xstart,
+                                                     T_buff_512b<TT_DATA> ybuff,
+                                                     unsigned int ystart,
+                                                     T_buff_256b<TT_COEFF> zbuff,
+                                                     unsigned int zstart) {
     return mulSrSym(xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
 };
 
 template <typename TT_DATA, typename TT_COEFF>
-inline T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
-                                                T_accSym<TT_DATA, TT_COEFF> acc,
-                                                T_buff_512b<TT_DATA> xbuff,
-                                                unsigned int xstart,
-                                                T_buff_512b<TT_DATA> ybuff,
-                                                unsigned int ystart,
-                                                T_buff_256b<TT_COEFF> zbuff,
-                                                unsigned int zstart) {
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
+                                                     T_accSym<TT_DATA, TT_COEFF> acc,
+                                                     T_buff_512b<TT_DATA> xbuff,
+                                                     unsigned int xstart,
+                                                     T_buff_512b<TT_DATA> ybuff,
+                                                     unsigned int ystart,
+                                                     T_buff_256b<TT_COEFF> zbuff,
+                                                     unsigned int zstart) {
     return macSrSym(acc, xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
 };
 
@@ -2394,28 +2398,28 @@ inline T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA>
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
 template <typename TT_DATA, typename TT_COEFF>
-inline T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
-                                                T_accSym<TT_DATA, TT_COEFF> acc,
-                                                T_buff_1024b<TT_DATA> xbuff,
-                                                unsigned int xstart,
-                                                unsigned int ystart,
-                                                T_buff_256b<TT_COEFF> zbuff,
-                                                unsigned int zstart) {
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
+                                                     T_accSym<TT_DATA, TT_COEFF> acc,
+                                                     T_buff_1024b<TT_DATA> xbuff,
+                                                     unsigned int xstart,
+                                                     unsigned int ystart,
+                                                     T_buff_256b<TT_COEFF> zbuff,
+                                                     unsigned int zstart) {
     return mulSrSym(xbuff.val, xstart, ystart, zbuff.val, zstart);
 };
 
 template <typename TT_DATA, typename TT_COEFF>
-inline T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
-                                                T_accSym<TT_DATA, TT_COEFF> acc,
-                                                T_buff_1024b<TT_DATA> xbuff,
-                                                unsigned int xstart,
-                                                unsigned int ystart,
-                                                T_buff_256b<TT_COEFF> zbuff,
-                                                unsigned int zstart) {
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
+                                                     T_accSym<TT_DATA, TT_COEFF> acc,
+                                                     T_buff_1024b<TT_DATA> xbuff,
+                                                     unsigned int xstart,
+                                                     unsigned int ystart,
+                                                     T_buff_256b<TT_COEFF> zbuff,
+                                                     unsigned int zstart) {
     return macSrSym(acc, xbuff.val, xstart, ystart, zbuff.val, zstart);
 };
 
-inline constexpr unsigned int fnCTColumnsLeft(unsigned int firLen, unsigned int columns) {
+INLINE_DECL constexpr unsigned int fnCTColumnsLeft(unsigned int firLen, unsigned int columns) {
     // Returns number of columns left to process in the centre tap operation.
     return (firLen % (2 * columns) + 1) / 2;
 };

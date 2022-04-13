@@ -1,5 +1,5 @@
 ..
-   Copyright 2021 Xilinx, Inc.
+   Copyright 2022 Xilinx, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,6 +21,28 @@ Release Note
 .. toctree::
    :hidden:
    :maxdepth: 1
+
+2022.1
+------
+
+The below features have been added to the library in this release.
+
+*  **DDS / Mixer**
+
+The DDS/ Mixer library element now has extended type support. It now supports cfloat and cint32 for TT_DATA when configured as a mixer. When configured as a DDS, cfloat is now supported for TT_DATA.
+Additionally, the DDS/Mixer now supports Super Sample Rate operation for higher throughput.
+
+*  **FFT/iFFT**
+
+FFT point size support has been extended to 65536.
+Performance has been improved approximately 10% for cases using PARALLEL_POWER>1 which were previously supported.
+
+*  **FIR Filters**
+
+All FIR library elements now support streaming interfaces as well as window interfaces.
+The single rate asymmetric FIR variant now support Super Sample Rate operation for higher throughput.
+The FIR resampler library element has been added which performs fractional decimation. This supersedes the existing FIR interpolate fractional library unit.
+All FIR variants now support a larger maximum value for FIR_LEN, up to 8k depending on variant, data/coefficient type and API choice.
 
 2021.2
 ------

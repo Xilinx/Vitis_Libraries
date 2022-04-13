@@ -19,17 +19,22 @@
 #include <iostream>
 
 int main(int argc, char** argv) {
-    T_in inData[SSR][FFT_LEN / SSR];
-    T_out outData[SSR][FFT_LEN / SSR];
+    hls::stream<T_in> inData[SSR];
+    hls::stream<T_out> outData[SSR];
+    T_in inDataArr[SSR][FFT_LEN / SSR];
+    T_out outDataArr[SSR][FFT_LEN / SSR];
     for (int r = 0; r < SSR; ++r) {
         for (int t = 0; t < FFT_LEN / SSR; ++t) {
-            if (r == 0 && t == 0)
-                inData[r][t] = 1;
-            else
-                inData[r][t] = 0;
+            if (r == 0 && t == 0) {
+                inData[r].write(T_in(1));
+                inDataArr[r][t] = 1;
+            } else {
+                inData[r].write(T_in(0));
+                inDataArr[r][t] = 0;
+            }
         }
     }
-    for (int t = 0; t < 4; ++t) {
+    for (int t = 0; t < 1; ++t) {
         // Added Dummy loop iterations
         // to make II measurable in cosim
         fft_top(inData, outData);
@@ -37,14 +42,16 @@ int main(int argc, char** argv) {
     int errs = 0;
     for (int r = 0; r < SSR; ++r) {
         for (int t = 0; t < FFT_LEN / SSR; ++t) {
-            if (outData[r][t].real() != 1 || outData[r][t].imag() != 0) errs++;
+            T_out tmp = outData[r].read();
+            outDataArr[r][t] = tmp;
+            if (tmp.real() != 1 || tmp.imag() != 0) errs++;
         }
     }
     std::cout << "===============================================================" << std::endl;
     std::cout << "--Input Impulse:" << std::endl;
     for (int r = 0; r < SSR; ++r) {
         for (int t = 0; t < FFT_LEN / SSR; ++t) {
-            std::cout << inData[r][t] << std::endl;
+            std::cout << inDataArr[r][t] << std::endl;
         }
     }
     std::cout << "===============================================================" << std::endl;
@@ -53,7 +60,7 @@ int main(int argc, char** argv) {
     std::cout << "--Output Step fuction:" << std::endl;
     for (int r = 0; r < SSR; ++r) {
         for (int t = 0; t < FFT_LEN / SSR; ++t) {
-            std::cout << outData[r][t] << std::endl;
+            std::cout << outDataArr[r][t] << std::endl;
         }
     }
     std::cout << "===============================================================" << std::endl;

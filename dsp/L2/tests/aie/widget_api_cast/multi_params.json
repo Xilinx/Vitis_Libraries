@@ -15,6 +15,15 @@
             "NUM_INPUTS":"1",
             "NUM_OUTPUT_CLONES":"2",
             "WINDOW_VSIZE":"256"
+        },
+        "test_2_widget_api_cast": {
+            "DATA_TYPE":"cint16",
+            "IN_API":"1",
+            "OUT_API":"0",
+            "NUM_INPUTS":"2",
+            "PATTERN":"1",
+            "NUM_OUTPUT_CLONES":"2",
+            "WINDOW_VSIZE":"256"
         }
     }
 }

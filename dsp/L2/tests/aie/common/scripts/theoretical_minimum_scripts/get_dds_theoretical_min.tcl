@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,8 +18,9 @@
 set dataType            [lindex $argv 0]
 set mixerMode           [lindex $argv 1]
 set windowSize          [lindex $argv 2]
-set outStatus           [lindex $argv 3]
-set uutKernel           [lindex $argv 4]
+set ssr                 [lindex $argv 3]
+set outStatus           [lindex $argv 4]
+set uutKernel           [lindex $argv 5]
 
 # ------------------------------------
 # --- Compute Data Type Type Sizes ---
@@ -52,8 +53,9 @@ if { $mixerMode == 0 } {
     set mulsPerOutputV 4
 }
 
+set num_aie $ssr
 # set up some constants
-set kAieMacsPerCycle            [expr {128 / $dataTypeSize / $dataTypeSize}]
+set kAieMacsPerCycle            [expr {(128 * $num_aie) / $dataTypeSize / $dataTypeSize}]
 set effectiveFirLength          [expr {($mulsPerOutputV)}]
 if { $effectiveFirLength == 0 } { 
     set effectiveFirLength 1

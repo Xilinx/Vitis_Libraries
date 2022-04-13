@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,5 +25,6 @@ $PATHTOSCRIPTS/get_num_me.sh $WORK_DIR 1                        >> $STATUS_FILE;
 echo -n "    DATA_MEMORY: "                                     >> $STATUS_FILE;\
 $PATHTOSCRIPTS/get_data_memory.sh $WORK_DIR dummy               >> $STATUS_FILE;\
 echo -n "    PROGRAM_MEMORY: "                                  >> $STATUS_FILE;\
-max_prgmem=`ls $WORK_DIR/aie/*_*/Release/*_*.map|xargs grep -A 10 "Section summary for memory 'PM':"|grep "Total"`;\
+# Get the isolated (\b) numbers (\d) before "  total" using perl-like regex
+max_prgmem=`ls $WORK_DIR/aie/*_*/Release/*_*.map|xargs grep -A 10 "Section summary for memory 'PM':"| grep -Po "\b\d+\b(?=\s+Total)"`;\
 echo $max_prgmem                                                >> $STATUS_FILE;\

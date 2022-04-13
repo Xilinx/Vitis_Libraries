@@ -25,13 +25,12 @@
 #include "utils/dsp_utilities.hpp"
 #include "utils/sorting.hpp"
 
-void fft_top(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R], T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
+void fft_top(hls::stream<T_SSR_FFT_IN> inD[SSR_FFT_R], hls::stream<T_SSR_FFT_OUT> outD[SSR_FFT_R]) {
 #pragma HLS TOP
     xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 
-void fft_top_c(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R],
-               T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
+void fft_top_c(hls::stream<T_SSR_FFT_IN> inD[SSR_FFT_R], hls::stream<T_SSR_FFT_OUT> outD[SSR_FFT_R]) {
     xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 
@@ -42,8 +41,9 @@ int main(int argc, char** argv) {
      *  complex<double> ssr fft call
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
-    T_ComplexDouble din[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    T_ComplexDouble dout_temp[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
+    hls::stream<T_ComplexDouble> din[SSR_FFT_R];
+    hls::stream<T_ComplexDouble> dout_temp[SSR_FFT_R];
+    T_ComplexDouble dout_temp_arr[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     T_ComplexDouble dout[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -52,8 +52,9 @@ int main(int argc, char** argv) {
      *  complex<ap_fixed> ssr fft call that will synthesize to RTL for implementation
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
-    T_SSR_FFT_IN din_fix[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    T_SSR_FFT_OUT dout_fix_temp[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
+    hls::stream<T_SSR_FFT_IN> din_fix[SSR_FFT_R];
+    hls::stream<T_SSR_FFT_OUT> dout_fix_temp[SSR_FFT_R];
+    T_SSR_FFT_OUT dout_fix_temp_arr[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     T_SSR_FFT_OUT dout_fix[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -62,8 +63,9 @@ int main(int argc, char** argv) {
      *  complex<ap_fixed> ssr fft call that is NOT SYNTHESIZED creates a bit true output for comparison after COSIM
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
-    T_SSR_FFT_IN din_fix_c[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    T_SSR_FFT_OUT dout_fix_c_temp[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
+    hls::stream<T_SSR_FFT_IN> din_fix_c[SSR_FFT_R];
+    hls::stream<T_SSR_FFT_OUT> dout_fix_c_temp[SSR_FFT_R];
+    T_SSR_FFT_OUT dout_fix_c_temp_arr[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     T_SSR_FFT_OUT dout_fix_c[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -110,9 +112,12 @@ int main(int argc, char** argv) {
     // verification
     for (int i = 0; i < SSR_FFT_L / SSR_FFT_R; i++) {
         for (int j = 0; j < SSR_FFT_R; j++) {
-            din[j][i] = din_file[i * (SSR_FFT_R) + j];
-            din_fix[j][i] = din_file[i * (SSR_FFT_R) + j];
-            din_fix_c[j][i] = din_file[i * (SSR_FFT_R) + j];
+            din[j].write(T_ComplexDouble(din_file[i * (SSR_FFT_R) + j]));
+            T_SSR_FFT_IN tmp_in;
+            tmp_in.real() = din_file[i * (SSR_FFT_R) + j].real();
+            tmp_in.imag() = din_file[i * (SSR_FFT_R) + j].imag();
+            din_fix[j].write(tmp_in);
+            din_fix_c[j].write(tmp_in);
             golden_output[j][i] = golden_output_file[i * (SSR_FFT_R) + j];
         }
     }
@@ -134,14 +139,16 @@ int main(int argc, char** argv) {
          * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          */
         fft<ssr_fft_params>(din, dout_temp);
-        fftOutputReorderSimulationModelOnly<SSR_FFT_R, SSR_FFT_L>(dout_temp, dout);
+        convert2Array<SSR_FFT_R, SSR_FFT_L>(dout_temp, dout_temp_arr);
+        fftOutputReorderSimulationModelOnly<SSR_FFT_R, SSR_FFT_L>(dout_temp_arr, dout);
         /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          * CAll SSR FFT with complex ap_fixed type : This the actual model that will be synthesized, to generate RTL
          * for implementation
          * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          */
         fft_top(din_fix, dout_fix_temp);
-        fftOutputReorderSimulationModelOnly<SSR_FFT_R, SSR_FFT_L>(dout_fix_temp, dout_fix);
+        convert2Array<SSR_FFT_R, SSR_FFT_L>(dout_fix_temp, dout_fix_temp_arr);
+        fftOutputReorderSimulationModelOnly<SSR_FFT_R, SSR_FFT_L>(dout_fix_temp_arr, dout_fix);
         /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          * CAll SSR FFT with complex ap_fixed type : This function wraps the same C++ model that is wrapped in for
          * synthesis, this function is not synthesized it is only used to compare the final RTL ouput and the C++
@@ -151,7 +158,8 @@ int main(int argc, char** argv) {
          * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          */
         fft_top_c(din_fix_c, dout_fix_c_temp);
-        fftOutputReorderSimulationModelOnly<SSR_FFT_R, SSR_FFT_L>(dout_fix_c_temp, dout_fix_c);
+        convert2Array<SSR_FFT_R, SSR_FFT_L>(dout_fix_c_temp, dout_fix_c_temp_arr);
+        fftOutputReorderSimulationModelOnly<SSR_FFT_R, SSR_FFT_L>(dout_fix_c_temp_arr, dout_fix_c);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

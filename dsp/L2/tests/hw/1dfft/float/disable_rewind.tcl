@@ -1,1 +1,1 @@
-config_compile -disable_auto_rewind
+config_compile -enable_auto_rewind=false

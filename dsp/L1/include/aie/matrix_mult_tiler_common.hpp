@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,13 @@
 #endif
 #include "aie_api/aie_adf.hpp"
 
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -43,26 +50,26 @@ struct loHi {
 
 // We might need to take a const reference to offsets to avoid implicit copy.
 template <typename T_D, unsigned Elems>
-inline aie::vector<T_D, Elems> doShuffle(aie::vector<T_D, Elems> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<T_D, Elems> doShuffle(aie::vector<T_D, Elems> data, const unsigned start, const loHi offsets) {
     // static_assert(false, "Unsupported vectorSize / type combo");#
     printf("\nERROR: shouldn't be here\n");
     return data;
 }
 template <>
-inline aie::vector<cint32, 8> doShuffle(aie::vector<cint32, 8> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<cint32, 8> doShuffle(aie::vector<cint32, 8> data, const unsigned start, const loHi offsets) {
     // don't need offsets hi
     return shuffle8(data, start, offsets.lo);
 }
 template <>
-inline aie::vector<int32, 16> doShuffle(aie::vector<int32, 16> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<int32, 16> doShuffle(aie::vector<int32, 16> data, const unsigned start, const loHi offsets) {
     return shuffle16(data, start, offsets.lo, offsets.hi);
 }
 template <>
-inline aie::vector<cint16, 16> doShuffle(aie::vector<cint16, 16> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<cint16, 16> doShuffle(aie::vector<cint16, 16> data, const unsigned start, const loHi offsets) {
     return shuffle16(data, start, offsets.lo, offsets.hi);
 }
 template <>
-inline aie::vector<int16, 32> doShuffle(aie::vector<int16, 32> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<int16, 32> doShuffle(aie::vector<int16, 32> data, const unsigned start, const loHi offsets) {
     // we don't use square permutes (no usecase for it right now - thankfully)
     // This only works for N=4
     return shuffle32(data, start, offsets.lo, offsets.hi, offsets.square);
@@ -74,13 +81,13 @@ inline aie::vector<int16, 32> doShuffle(aie::vector<int16, 32> data, const unsig
     // Basically If N=2; result = ((offsets.lo/hi & 0x0F0F0F0F) | 0x30303030)
 }
 template <>
-inline aie::vector<float, 16> doShuffle(aie::vector<float, 16> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<float, 16> doShuffle(aie::vector<float, 16> data, const unsigned start, const loHi offsets) {
     // we don't use square permutes (no usecase for it right now - thankfully)
     // This only works for N=4
     return fpshuffle16(data, start, offsets.lo, offsets.hi);
 }
 template <>
-inline aie::vector<cfloat, 8> doShuffle(aie::vector<cfloat, 8> data, const unsigned start, const loHi offsets) {
+INLINE_DECL aie::vector<cfloat, 8> doShuffle(aie::vector<cfloat, 8> data, const unsigned start, const loHi offsets) {
     // we don't use square permutes (no usecase for it right now - thankfully)
     // This only works for N=4
     return fpshuffle8(data, start, offsets.lo);

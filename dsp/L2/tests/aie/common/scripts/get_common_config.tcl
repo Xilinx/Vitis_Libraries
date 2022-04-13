@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,13 +19,15 @@ set fileDir             [lindex $argv 1]
 # ---------------------------
 # --- Grep Status Results ---
 # ---------------------------
-set aieCompileLogFile "${fileDir}logs/AIECompiler.log"
-set aieSimLogFile "${fileDir}logs/aiesimulator.log"
+set aieCompileLogFile "${fileDir}AIECompiler.log"
+set aieSimLogFile "${fileDir}aiesimulator.log"
 set diffFile "${fileDir}logs/diff.txt"
 set compPhrase "compilation complete"
 set simPhrase "simulation finished"
 set funcPhrase "identical"
 if {[catch {exec grep -i $funcPhrase -c $diffFile}]} {
+    # default simulation and compilation to fail if functional fail
+    # we grep later to find out if they did pass the specific stage or not
     set functional 0
     set simulation 0
     set compilation 0
@@ -35,14 +37,18 @@ if {[catch {exec grep -i $funcPhrase -c $diffFile}]} {
     set compilation 1
 }
 if {[catch {exec grep -i $simPhrase -c $aieSimLogFile}]} {
-    set simulation [expr max($simulation, 0)]
+    #nothing to do - if functional pass assume simulation passed otherwise will default to fail. 
+    set simulation $simulation
 } else {
-    set simulation [expr max($simulation, 1)]
+    # simulation completed fine
+    set simulation 1
 }
 if {[catch {exec grep -i $compPhrase -c $aieCompileLogFile}]} {
-    set compilation [expr max($compilation, 0)]
+    #nothing to do - if functional pass assume compilation passed otherwise will default to fail. 
+    set compilation $compilation
 } else {
-    set compilation [expr max($compilation, 1)]
+    # compliation completed fine
+    set compilation 1
 }
 
 

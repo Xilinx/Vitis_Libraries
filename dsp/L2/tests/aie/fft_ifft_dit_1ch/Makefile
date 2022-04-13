@@ -1,5 +1,5 @@
-# Copyright 2019-2021 Xilinx, Inc.
 #
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.4
+#
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -34,7 +34,7 @@ help::
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<x86sim/aiesim/>"
+	$(ECHO) "  make host TARGET=<x86sim/aiesim/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -65,7 +65,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202120_1
+PLATFORM := xilinx_vck190_base_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -76,6 +76,9 @@ include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
 BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
@@ -119,52 +122,36 @@ REF_KERNEL ?= fft_ifft_dit_1ch_ref
 UUT_GRAPH ?= fft_ifft_dit_1ch_graph
 REF_GRAPH ?= fft_ifft_dit_1ch_ref_graph
 NITER ?= 4
-NITER_UUT ?= $(NITER)
-NITER_REF ?= $(NITER)
 DATA_TYPE ?= cint16
 TWIDDLE_TYPE ?= cint16
-TWIDDLE_SIZE ?= 4
 POINT_SIZE ?= 1024
 DYN_PT_SIZE ?= 0
 FFT_NIFFT ?= 1
 SHIFT ?= 17
 CASC_LEN ?= 1
 WINDOW_VSIZE ?= $(POINT_SIZE)
+API_IO ?= 0
+PARALLEL_POWER ?= 0
 INPUT_WINDOW_VSIZE ?= $(WINDOW_VSIZE)
-UUT_INPUT_WINDOW_VSIZE ?= $(INPUT_WINDOW_VSIZE)
-REF_INPUT_WINDOW_VSIZE ?= $(INPUT_WINDOW_VSIZE)
-DIFF_TOLERANCE ?= 0.01
+DIFF_TOLERANCE ?= 0
+CC_TOLERANCE ?= 0
 DATA_SEED ?= 1
 STIM_TYPE ?= 0
-HEAPSIZE_VAL ?= 8000
 STACKSIZE_VAL ?= 600
-DEVICE_FILE ?= 4x4
-UUT_OUT_DIR ?= ./aiesimulator_output
-REF_OUT_DIR_x86 ?= ./aiesimulator_ref_output
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
-UUT_SIM_FILE2 ?= ./data/uut_output_2.txt
-REF_SIM_FILE2 ?= ./data/ref_output_2.txt
-UUT_OUT_FILE ?= $(UUT_OUT_DIR)/$(UUT_SIM_FILE)
-REF_OUT_FILE ?= $(REF_OUT_DIR_X86)/$(REF_SIM_FILE)
-UUT_OUT_FILE2 ?= $(UUT_OUT_DIR)/$(UUT_SIM_FILE2)
-REF_OUT_FILE2 ?= $(REF_OUT_DIR_X86)/$(REF_SIM_FILE2)
-INPUT_FILE ?= data/input.txt
-COEFF_FILE ?= data/coeff.txt
-LOC_COEFF_FILE ?= ./data/coeff.txt
-LOC_INPUT_FILE ?= ./data/input.txt
-UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(WINDOW_VSIZE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(DYN_PT_SIZE)_$(SHIFT)_$(CASC_LEN)
+INPUT_FILE ?= ./data/input.txt
+UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(DYN_PT_SIZE)_$(WINDOW_VSIZE)_$(API_IO)_$(PARALLEL_POWER)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-DIFF_OUT_FILE ?= diff_output.txt
-UUT_TARGET_COMPILE_ARGS ?= -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.mist2.xargs="+NOdra" -Xchess=main:backend.mist2.pnll="off" -heapsize=$(HEAPSIZE_VAL) -stacksize=$(STACKSIZE_VAL)
+UUT_TARGET_COMPILE_ARGS ?= -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.mist2.xargs="+NOdra" -Xchess=main:backend.mist2.pnll="off" -stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
-PREPROC_ARGS ?= -DINPUT_FILE=$(LOC_INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DTWIDDLE_TYPE=$(TWIDDLE_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DFFT_NIFFT=$(FFT_NIFFT) -DSHIFT=$(SHIFT) -DCASC_LEN=$(CASC_LEN) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DSTIM_TYPE=$(STIM_TYPE)
-REF_PREPROC_ARGS ?= -DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)  -DINPUT_WINDOW_VSIZE=$(REF_INPUT_WINDOW_VSIZE) -DNITER=$(NITER_REF)
-UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS)  -DINPUT_WINDOW_VSIZE=$(UUT_INPUT_WINDOW_VSIZE) -DNITER=$(NITER_UUT) -DUSING_UUT=1
+PREPROC_ARGS ?= -DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DTWIDDLE_TYPE=$(TWIDDLE_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DFFT_NIFFT=$(FFT_NIFFT) -DSHIFT=$(SHIFT) -DCASC_LEN=$(CASC_LEN) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DAPI_IO=$(API_IO) -DPARALLEL_POWER=$(PARALLEL_POWER) -DSTIM_TYPE=$(STIM_TYPE)  -DINPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) -DNITER=$(NITER)
+REF_PREPROC_ARGS ?= -DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
+UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1
 
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim hw_emu, $(TARGET)),)
@@ -182,7 +169,7 @@ AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/tests/aie/src
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/include/aie
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/tests/aie/common/inc
 AIE_CXXFLAGS += -I $(CUR_DIR)
-AIE_CXXFLAGS += --dataflow -v --device=$(DEVICE_FILE) $($(TAG)_TARGET_COMPILE_ARGS) --test-iterations=$(NITER_$(TAG)) -workdir=$($(TAG)_WORK_DIR) -Xpreproc="$($(TAG)_PREPROC_ARGS)"
+AIE_CXXFLAGS += --dataflow -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc="$($(TAG)_PREPROC_ARGS)"
 $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
@@ -193,6 +180,10 @@ CXXFLAGS += -D SW_EMU_TEST
 endif
 ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
+endif
+
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
 #Inclue Required Host Source Files
@@ -216,7 +207,7 @@ endif
 ######################### binary container global settings ##########################
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(XFLIB_DIR)/L2/tests/aie/fft_ifft_dit_1ch/test.cpp 
+$(AIE_CONTAINER): $(XFLIB_DIR)/L2/tests/aie/fft_ifft_dit_1ch/test.cpp $(XFLIB_DIR)/L1/src/aie/fft_r2comb.cpp $(XFLIB_DIR)/L1/src/aie/fft_ifft_dit_1ch.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -277,12 +268,23 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
+vck190_dfx_hw := false
 $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
+ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	@echo "### ***** sd_card generation done! ***** ###"
+vck190_dfx_hw := true
+endif
+endif
+ifeq ($(vck190_dfx_hw), false)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
@@ -294,25 +296,27 @@ else
 RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 endif
-run: check_device pre_build $(RUN_DEPS)
+
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+all: check_device pre_build check_vpp check_platform mkflag $(RUN_DEPS)
+run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=./Work 
+	$(X86SIMULATOR) --pkg-dir=./Work --stop-on-deadlock
 	mkdir -p logs
-	grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt
-	grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
+	make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) INPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) NITER=$(NITER) SEED=$(DATA_SEED) STIM_TYPE=$(STIM_TYPE) POINT_SIZE=$(POINT_SIZE) DYN_PT_SIZE=$(DYN_PT_SIZE) DATA_TYPE=$(DATA_TYPE) API_IO=$(API_IO) PARALLEL_POWER=$(PARALLEL_POWER) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
 	$(AIESIMULATOR) --pkg-dir=./Work --profile 
 	mkdir -p logs
-	grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt
-	grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) CASC_LEN $(CASC_LEN) DYN_PT_SIZE $(DYN_PT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output fftMain $(NITER_UUT)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)
+	make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) INPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) NITER=$(NITER) SEED=$(DATA_SEED) STIM_TYPE=$(STIM_TYPE) POINT_SIZE=$(POINT_SIZE) DYN_PT_SIZE=$(DYN_PT_SIZE) DATA_TYPE=$(DATA_TYPE) API_IO=$(API_IO) PARALLEL_POWER=$(PARALLEL_POWER) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)
+	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output fftMain $(NITER)
+	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(PARALLEL_POWER) $(API_IO)
 	$(XFLIB_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(XFLIB_DIR)/L2/tests/aie/common/scripts
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
@@ -344,7 +348,17 @@ endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(HOST_ARGS)
+	
+endif
+else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -355,17 +369,10 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE)
-	TARGET=x86sim UUT_KERNEL=fft_ifft_dit_1ch_ref UUT_SIM_FILE=./data/ref_output.txt make x86sim TARGET=x86sim TAG=REF
-	make cleanall
+	make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) INPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) NITER=$(NITER) SEED=$(DATA_SEED) STIM_TYPE=$(STIM_TYPE) POINT_SIZE=$(POINT_SIZE) DYN_PT_SIZE=$(DYN_PT_SIZE) DATA_TYPE=$(DATA_TYPE) API_IO=$(API_IO) PARALLEL_POWER=$(PARALLEL_POWER)
 
-.PHONY: all clean cleanall emconfig
+.PHONY: clean cleanall emconfig
 emconfig: $(EMCONFIG)
-ifeq ($(HOST_ARCH), x86)
-all: pre_build check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-else
-all: pre_build check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-endif
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
@@ -392,13 +399,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) 
 
 clean: cleanh

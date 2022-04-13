@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <adf.h>
 #include <vector>
+#include "graph_utils.hpp"
 #include "fft_ifft_dit_1ch.hpp"
 #include "fft_r2comb.hpp"
 #include "widget_api_cast.hpp"
@@ -50,7 +51,7 @@ namespace dit_1ch {
  */
 
 //---------start of recursive kernel creation code.
-// Recursive kernel creation, static coefficients
+// Recursive kernel creatio for cascaded fft kernels
 template <int dim,
           typename TT_DATA,
           typename TT_INT_DATA,
@@ -77,7 +78,7 @@ class create_casc_kernel_recur {
                                  TP_WINDOW_VSIZE>::create(fftKernels);
     }
 };
-// Recursive fft kernel creation, static coefficients
+// Recursive fft kernel creation
 template <typename TT_DATA,
           typename TT_INT_DATA,
           typename TT_TWIDDLE,
@@ -109,7 +110,7 @@ class create_casc_kernel_recur<1,
                              TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE> >();
     }
 };
-// fft Kernel creation, entry to recursion, also end of cascade. For integer types
+// fft Kernel creation, entry to recursion, also end of cascade.
 template <int dim,
           typename TT_DATA, // type for I/O
           typename TT_TWIDDLE,
@@ -162,7 +163,7 @@ class create_casc_kernel {
                                  TP_WINDOW_VSIZE>::create(fftKernels);
     }
 };
-// fft Kernel creation, entry to recursion, also end of cascade. For integer types - for single kernel
+// fft Kernel creation, entry to recursion, also end of cascade.
 template <typename TT_DATA, // type for I/O
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -279,8 +280,8 @@ class create_combOutWidget_kernels {
    public:
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
     static void create(kernel (&m_combOutKernel)[kParallel_factor]) {
-        m_combOutKernel[TP_INDEX] =
-            kernel::create_object<widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSplit> >();
+        m_combOutKernel[TP_INDEX] = kernel::create_object<
+            widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv> >();
         create_combOutWidget_kernels<TT_DATA, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, (TP_INDEX - 1)>::create(
             m_combOutKernel);
     }
@@ -291,8 +292,8 @@ class create_combOutWidget_kernels<TT_DATA, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, 
    public:
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
     static void create(kernel (&m_combOutKernel)[kParallel_factor]) {
-        m_combOutKernel[0] =
-            kernel::create_object<widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSplit> >();
+        m_combOutKernel[0] = kernel::create_object<
+            widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv> >();
     }
 };
 
@@ -302,54 +303,9 @@ class create_combOutWidget_kernels<TT_DATA, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, 
   * @endcond
   */
 
-//--------------------------------------------------------------------------------------------------
-// fft_dit_1ch template
-//--------------------------------------------------------------------------------------------------
 /**
- * @brief fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT
- *
- * These are the templates to configure the single-channel decimation-in-time class.
- * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the transform function. This is a typename and must be one
- *         of the following: \n
- *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
- *         It must be one of the following: cint16, cint32, cfloat
- *         and must also satisfy the following rules:
- *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
- *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
- *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
- * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of point
- *         size of the transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive. \n When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
- *         point size possible.
- * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
- * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
- * @tparam TP_CASC_LEN selects the number of kernels the FFT will be divided over in series
- *         to improve throughput
- * @tparam TP_DYN_PT_SIZE selects whether (1) or not (0) to use run-time point size determination. \n
- *         When set, each frame of data must be preceeded, in the window, by a 256 bit header. \n
- *         The output frame will also be preceeded by a 256 bit vector which is a copy of the input
- *         vector, but for the top byte, which is 0 to indicate a legal frame or 1 to indicate an illegal
- *         frame. \n
- *         The lowest significance byte of the input header field describes forward (non-zero) or
- *         inverse(0) direction. \n
- *         The second least significant byte  8 bits of this field describe the Radix 2 power of the following
- *         frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512. \n Any value below 4 or
- *         greater than log2(TP_POINT_SIZE) is considered illegal. \n When this occurs the top byte of the
- *         output header will be set to 1 and the output samples will be set to 0 for a frame of TP_POINT_SIZE
- * @tparam TP_WINDOW_VSIZE is an unsigned integer which describes the number of samples in the input window. \n
- *         By default, TP_WINDOW_SIZE is set ot match TP_POINT_SIZE. \n
- *         TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case
- *         multiple FFT iterations will be performed on a given input window, resulting in multiple
- *         iterations of output samples, reducing the numer of times the kernel needs to be triggered to
- *         process a given number of input data samples. \n
- *         As a result, the overheads inferred during kernel triggering are reduced and overall performance
- *         is increased.
- * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
- * @tparam TP_PARALLEL_POWER is an unsigned integer to describe how many subframe processors to use. \n
- *         The default is 1. This may be set to 4 or 16 to increase throughput.
-  **/
+ * @cond NOCOMMENTS
+ */
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -358,8 +314,6 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DYN_PT_SIZE = 0, // backwards compatible default
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE>
-/**
- **/
 class fft_ifft_dit_1ch_base_graph : public graph {
    public:
     // declare FFT Kernel array
@@ -384,9 +338,6 @@ class fft_ifft_dit_1ch_base_graph : public graph {
     parameter fft_buf128;
 #endif // USE_GRAPH_SCOPE
 
-    /**
-     * @brief This is the constructor function for the Single channel DIT FFT graph.
-     **/
     // Constructor
     fft_ifft_dit_1ch_base_graph() {
         typedef
@@ -570,17 +521,8 @@ class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_D
                                                                             TP_DYN_PT_SIZE,
                                                                             TP_WINDOW_VSIZE> {
    public:
-    // This is the default, for windowed ports.
-    /**
-   * The input data to the function. This input is a window API of
-   * samples of TT_DATA type. The number of samples in the window is
-   * described by TP_POINT_SIZE.
-   **/
-    port<input> in[1];
-    /**
-   * A window API of TP_POINT_SIZE samples of TT_DATA type.
-   **/
-    port<output> out[1];
+    port_array<input, 1> in;
+    port_array<output, 1> out;
 
     // Constructor
     fft_ifft_dit_1ch_baseports_graph() {
@@ -621,8 +563,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     /**
    * I/O is two parallel streams each TT_DATA type.
    **/
-    port<input> in[2];
-    port<output> out[2];
+    port_array<input, 2> in;
+    port_array<output, 2> out;
 
     kernel m_inWidgetKernel =
         kernel::create_object<widget_api_cast<TT_DATA,
@@ -639,7 +581,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                               1,
                                               TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA),
                                               2,
-                                              kSplit> >();
+                                              kSampleIntlv> >();
 
     // Constructor
     fft_ifft_dit_1ch_baseports_graph() {
@@ -669,10 +611,6 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
 #endif // USE_GRAPH_SCOPE
     };
 };
-
-/**
- * @cond NOCOMMENTS
- */
 
 //------------------------------------------------
 // inheritance - used because only cint16 requires two internal buffers for sample storage
@@ -768,6 +706,86 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
 #endif // USE_GRAPH_SCOPE
 };
 
+/**
+  * @endcond
+  */
+
+/**
+ * @defgroup fft_graphs FFT Graph
+ *
+ * The FFT graph is offered as a template class that is available with 2 template specializations,
+ * that offer varied features and interfaces:
+ * - window interface (TP_API == 0) or
+ * - stream interface (TP_API == 1).
+ *
+ */
+
+//--------------------------------------------------------------------------------------------------
+// fft_dit_1ch template
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup fft_graphs
+ *
+ * @brief fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.
+ *
+ * This class definition is only used with stream interfaces (TP_API == 1).
+ * Stream interface FFT graph is offered with a dual input stream configuration,
+ * which interleaves data samples betwwen the streams.
+ * Stream interface FFT implementation is capable of supporting parallel computation (TP_PARALLEL_POWER > 0).
+ * Dynamic point size, with a header embedded in the data stream, is not supported when TP_API==1.
+ *
+ * These are the templates to configure the single-channel decimation-in-time class.
+ * @tparam TT_DATA describes the type of individual data samples input to and
+ *         output from the transform function. This is a typename and must be one
+ *         of the following: \n
+ *         int16, cint16, int32, cint32, float, cfloat.
+ * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
+ *         It must be one of the following: cint16, cint32, cfloat
+ *         and must also satisfy the following rules:
+ *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
+ *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
+ *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
+ * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
+ *         the transform. \n This must be 2^N where N is an integer in the range
+ *         4 to 16 inclusive. \n When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
+ *         point size possible.
+ * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
+ * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
+ * @tparam TP_CASC_LEN selects the number of kernels the FFT will be divided over in series
+ *         to improve throughput
+ * @tparam TP_DYN_PT_SIZE selects whether (1) or not (0) to use run-time point size determination. \n
+ *         When set, each window of data must be preceeded, in the window, by a 256 bit header. \n
+ *         The output frame will also be preceeded by a 256 bit vector which is a copy of the input
+ *         vector, but for the top byte, which is 0 to indicate a legal frame or 1 to indicate an illegal
+ *         frame. \n
+ *         The lowest significance byte of the input header field describes forward (non-zero) or
+ *         inverse(0) direction. \n
+ *         The second least significant byte  8 bits of this field describe the Radix 2 power of the following
+ *         frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512. \n Any value below 4 or
+ *         greater than log2(TP_POINT_SIZE) is considered illegal. \n When this occurs the top byte of the
+ *         output header will be set to 1 and the output samples will be set to 0 for a frame of TP_POINT_SIZE
+ * @tparam TP_WINDOW_VSIZE is an unsigned integer which describes the number of samples to be processed in each call
+ *         to the function. \n
+ *         By default, TP_WINDOW_SIZE is set to match TP_POINT_SIZE. \n
+ *         TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case
+ *         multiple FFT iterations will be performed on a given input window, resulting in multiple
+ *         iterations of output samples, reducing the numer of times the kernel needs to be triggered to
+ *         process a given number of input data samples. \n
+ *         As a result, the overheads inferred during kernel triggering are reduced and overall performance
+ *         is increased.
+ * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
+ *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
+ *         from or two the next stream. Two streams mimimum are used. In this example, even samples are
+ *         read from input stream[0] and odd samples from input stream[1].
+ * @tparam TP_PARALLEL_POWER is an unsigned integer to describe N where 2^N is the numbers of subframe processors
+ *         to use, so as to achieve higher throughput. \n
+ *         The default is 0. With TP_PARALLEL_POWER set to 2, 4 subframe processors will be used, each of which
+ *         takes 2 streams in for a total of 8 streams input and output. Sample[p] must be written to stream[p modulus
+ *q]
+ *         where q is the number of streams.
+ * @tparam TP_INDEX
+ *
+  **/
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -777,12 +795,15 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE = 0,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_API = 0,
-          unsigned int TP_PARALLEL_POWER = 0>
+          unsigned int TP_PARALLEL_POWER = 0,
+          unsigned int TP_INDEX = 0>
 class fft_ifft_dit_1ch_graph : public graph {
    public:
     static_assert(TP_API == kStreamAPI, "Error: Only Stream interface is supported for parallel FFT");
     static_assert(TP_PARALLEL_POWER >= 1 && TP_PARALLEL_POWER < 9,
                   "Error: TP_PARALLEL_POWER is out of supported range");
+    static_assert(TP_PARALLEL_POWER == 0 || TP_DYN_PT_SIZE == 0,
+                  "Error: dynamic point size with parallel FFT implementation is not supported.");
 
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
     static constexpr int kWindowSize = TP_WINDOW_VSIZE >> TP_PARALLEL_POWER;
@@ -791,15 +812,44 @@ class fft_ifft_dit_1ch_graph : public graph {
     static constexpr int kR2Shift = TP_SHIFT > 0 ? 1 : 0;
     static constexpr int kFFTsubShift = TP_SHIFT > 0 ? TP_SHIFT - 1 : 0;
 
-    port<input> in[2 * kParallel_factor]; // 2 streams per lane
-    port<output> out[2 * kParallel_factor];
+    /**
+     * The input data to the function.
+     * I/O  is two parallel streams each TT_DATA type.
+     **/
+
+    port_array<input, 2 * kParallel_factor> in;
+
+    /**
+     * The output data from the function.
+     * I/O  is two parallel streams each TT_DATA type.
+     **/
+    port_array<output, 2 * kParallel_factor> out;
 
     parameter r2comb_tw_lut;
 
+    /**
+     * FFT recursive decomposition. Widget kernel
+     * Widgets are used to reorder data as per FFT algorithm requirements.
+     **/
     kernel m_combInKernel[kParallel_factor];
+
+    /**
+     * FFT recursive decomposition. R2Combiner kernel
+     * R2combiner kernels connect 2 subframe processors with next stage's r2combiner kernels
+     **/
     kernel m_r2Comb[kParallel_factor];
+
+    /**
+     * FFT recursive decomposition. Widget kernel
+     * Widgets are used to reorder data as per FFT algorithm requirements.
+     **/
     kernel m_combOutKernel[kParallel_factor];
 
+    /**
+     * FFT recursive decomposition. Subframe0
+     * FFT is split into 2 subframe processors with a stage of r2cominers connecting subframe processors.
+     * This is a recursive call with decrementing TP_PARALLEL_POWER template parameter.
+     **/
     fft_ifft_dit_1ch_graph<TT_DATA,
                            TT_TWIDDLE,
                            (TP_POINT_SIZE >> 1),
@@ -809,9 +859,32 @@ class fft_ifft_dit_1ch_graph : public graph {
                            TP_DYN_PT_SIZE,
                            (TP_WINDOW_VSIZE >> 1),
                            kStreamAPI,
-                           kNextParallelPower>
-        FFTsubframe[2]; // fractal or recursive decomposition
+                           kNextParallelPower,
+                           TP_INDEX>
+        FFTsubframe0;
 
+    /**
+     * FFT recursive decomposition. Subframe1.
+     * FFT is split into 2 subframe processors with a stage of r2cominers connecting subframe processors.
+     * This is a recursive call with decrementing TP_PARALLEL_POWER template parameter.
+     **/
+    fft_ifft_dit_1ch_graph<TT_DATA,
+                           TT_TWIDDLE,
+                           (TP_POINT_SIZE >> 1),
+                           TP_FFT_NIFFT,
+                           kFFTsubShift,
+                           TP_CASC_LEN,
+                           TP_DYN_PT_SIZE,
+                           (TP_WINDOW_VSIZE >> 1),
+                           kStreamAPI,
+                           kNextParallelPower,
+                           TP_INDEX + kParallel_factor / 2>
+        FFTsubframe1;
+
+    /**
+     * @brief This is the constructor function for the Single channel DIT FFT graph.
+     * No arguments required
+     **/
     fft_ifft_dit_1ch_graph() {
         // create kernels and subgraphs
         create_combInWidget_kernels<TT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1>::create(
@@ -822,10 +895,10 @@ class fft_ifft_dit_1ch_graph : public graph {
             m_combOutKernel);
         // make connections
         for (int i = 0; i < kParallel_factor; i++) {
-            connect<stream>(in[2 * i], FFTsubframe[0].in[i]);     // stream connection
-            connect<stream>(in[2 * i + 1], FFTsubframe[1].in[i]); // stream connection
-            connect<stream>(FFTsubframe[0].out[i], m_combInKernel[i].in[0]);
-            connect<stream>(FFTsubframe[1].out[i], m_combInKernel[i].in[1]);
+            connect<stream>(in[2 * i], FFTsubframe0.in[i]);     // stream connection
+            connect<stream>(in[2 * i + 1], FFTsubframe1.in[i]); // stream connection
+            connect<stream>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
+            connect<stream>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
             connect<window<kWindowSize * sizeof(TT_DATA)> >(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
             connect<window<kWindowSize * sizeof(TT_DATA)> >(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
             connect<stream>(m_combOutKernel[i].out[0], out[i]);
@@ -850,13 +923,26 @@ class fft_ifft_dit_1ch_graph : public graph {
 #endif // USE_EXPLICIT_HEAP
 #endif // USE_GRAPH_SCOPE
             // As yet, the r2comb memory has not been moved to use graph scope.
-            heap_size(m_r2Comb[i]) = sizeof(TT_TWIDDLE) * (TP_POINT_SIZE >> (TP_PARALLEL_POWER + 1)) + 100;
+            // heap_size(m_r2Comb[i])= sizeof(TT_TWIDDLE) * (TP_POINT_SIZE>>(TP_PARALLEL_POWER+1)) + 100;
         }
     };
 
 }; // class
 
-// specialization for trivial mapping, i.e. single (monolithic) FFT, window API
+//--------------------------------------------------------------------------------------------------
+// fft_dit_1ch template specialization
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup fft_graphs
+ *
+ * @brief fft_dit_1ch template specialization for single (monolithic) FFT, window API
+ *
+ * Window interface FFT graph is offered with a single input windowed, ping-pong buffer.
+ * Window interface FFT implementation does not support parallel computation (TP_PARALLEL_POWER = 0 only).
+ * However, dynamic point size is available (TP_DYN_PT_SIZE = 1), which allows a window buffer size to be an integer
+ * multiple of the FFT's point size ( TP_WINDOW_VSIZE = N * TP_POINT_SIZE).
+ * Feature offers performance improvements, particularly with small FFT graphs.
+**/
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -864,7 +950,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_INDEX>
 class fft_ifft_dit_1ch_graph<TT_DATA,
                              TT_TWIDDLE,
                              TP_POINT_SIZE,
@@ -874,10 +961,24 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_DYN_PT_SIZE,
                              TP_WINDOW_VSIZE,
                              kWindowAPI,
-                             0> : public graph {
+                             0,
+                             TP_INDEX> : public graph {
    public:
-    port<input> in[1];
-    port<output> out[1];
+    /**
+     * The input data to the function. This input is a window API of
+     * samples of TT_DATA type. The number of samples in the window is
+     * described by TP_POINT_SIZE.
+     **/
+    port_array<input, 1> in;
+
+    /**
+     * A window API of TP_POINT_SIZE samples of TT_DATA type.
+     **/
+    port_array<output, 1> out;
+
+    /**
+     * Monolithic FFT block.
+     **/
     fft_ifft_dit_1ch_mono_graph<TT_DATA,
                                 TT_TWIDDLE,
                                 TP_POINT_SIZE,
@@ -888,14 +989,33 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_WINDOW_VSIZE,
                                 kWindowAPI>
         FFTwinproc;
+
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+     **/
     kernel* getKernels() { return FFTwinproc.m_fftKernels; };
 
+    /**
+     * @brief This is the constructor function for the Single channel DIT FFT graph.
+     * No arguments required
+     **/
     fft_ifft_dit_1ch_graph() {
         connect<>(in[0], FFTwinproc.in[0]);
         connect<>(FFTwinproc.out[0], out[0]);
     };
 };
-// specialization for single FFT, stream API
+
+//--------------------------------------------------------------------------------------------------
+// fft_dit_1ch template specialization
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup fft_graphs
+ *
+ * @brief fft_dit_1ch template specialization for single FFT, stream API.
+ * This FFT block is the last call (specialization TP_PARALLEL_POWER = 0 )
+ * of a recursive SSR FFT call, i.e.
+ * this is the last subframe processor called when TP_PARALLEL_POWER >= 1.
+**/
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -903,7 +1023,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_INDEX>
 class fft_ifft_dit_1ch_graph<TT_DATA,
                              TT_TWIDDLE,
                              TP_POINT_SIZE,
@@ -913,10 +1034,26 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_DYN_PT_SIZE,
                              TP_WINDOW_VSIZE,
                              kStreamAPI,
-                             0> : public graph {
+                             0,
+                             TP_INDEX> : public graph {
    public:
-    port<input> in[2]; // dual streams
-    port<output> out[2];
+    static_assert(TP_DYN_PT_SIZE == 0, "Error, Dynamic point size for streaming IP is not supported.");
+
+    /**
+     * The input data to the function.
+     * I/O  is two parallel streams each TT_DATA type.
+     **/
+    port_array<input, 2> in; // dual streams
+
+    /**
+     * The output data from the function.
+     * I/O  is two parallel streams each TT_DATA type.
+     **/
+    port_array<output, 2> out;
+
+    /**
+     * Monolithic FFT block.
+     **/
     fft_ifft_dit_1ch_mono_graph<TT_DATA,
                                 TT_TWIDDLE,
                                 TP_POINT_SIZE,
@@ -927,6 +1064,11 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_WINDOW_VSIZE,
                                 kStreamAPI>
         FFTstrproc;
+
+    /**
+     * @brief This is the constructor function for the Single channel DIT FFT graph.
+     * No arguments required
+     **/
     fft_ifft_dit_1ch_graph() {
         connect<>(in[0], FFTstrproc.in[0]);
         connect<>(in[1], FFTstrproc.in[1]);
@@ -934,10 +1076,6 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
         connect<>(FFTstrproc.out[1], out[1]);
     };
 };
-
-/**
-  * @endcond
-  */
 
 } // namespace dit_1ch
 } // namespace fft

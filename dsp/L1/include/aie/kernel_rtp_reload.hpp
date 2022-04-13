@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,13 @@
 
 #ifndef _DSPLIB_KERNEL_RTP_RELOAD_HPP_
 #define _DSPLIB_KERNEL_RTP_RELOAD_HPP_
+
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
 
 // This file holds sets of templated types and overloaded (or template specialized) functions
 // for use by multiple kernels.
@@ -36,12 +43,12 @@ namespace fir {
 
 // Double buffer reload. Copies contents of one buffer into 2 destination buffers.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
-                         TT_COEFF (&cascTaps)[TP_FIR_LEN],
-                         TT_COEFF (&outTaps)[TP_FIR_LEN]) {
+INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
+                              TT_COEFF (&cascTaps)[TP_FIR_LEN],
+                              TT_COEFF (&outTaps)[TP_FIR_LEN]) {
     T_buff_128b<TT_COEFF>* inTapsPtr = (T_buff_128b<TT_COEFF>*)inTaps;
-    T_buff_128b<TT_COEFF>* restrict cascTapsPtr = (T_buff_128b<TT_COEFF>*)cascTaps;
-    T_buff_128b<TT_COEFF>* restrict outTapsPtr = (T_buff_128b<TT_COEFF>*)outTaps;
+    T_buff_128b<TT_COEFF>* __restrict cascTapsPtr = (T_buff_128b<TT_COEFF>*)cascTaps;
+    T_buff_128b<TT_COEFF>* __restrict outTapsPtr = (T_buff_128b<TT_COEFF>*)outTaps;
     T_buff_128b<TT_COEFF> c_xbuff;
     const int samplesPer256Buff = 128 / 8 / sizeof(TT_COEFF);
 
@@ -56,8 +63,8 @@ inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
         outTapsPtr++;
     }
     TT_COEFF* inRemPtr = (TT_COEFF*)inTapsPtr;
-    TT_COEFF* restrict cascRemPtr = (TT_COEFF*)cascTapsPtr;
-    TT_COEFF* restrict outRemPtr = (TT_COEFF*)outTapsPtr;
+    TT_COEFF* __restrict cascRemPtr = (TT_COEFF*)cascTapsPtr;
+    TT_COEFF* __restrict outRemPtr = (TT_COEFF*)outTapsPtr;
     for (int i = 0; i < TP_FIR_LEN % samplesPer256Buff; i++) {
         // copy remainder sample by sample
         *cascRemPtr++ = *inRemPtr;
@@ -68,9 +75,9 @@ inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
 // Buffer reload. Copies contents of one buffer into a destination buffer.
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* outTaps) {
+INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* outTaps) {
     T_buff_256b<TT_COEFF>* inTapsPtr = (T_buff_256b<TT_COEFF>*)inTaps;
-    T_buff_256b<TT_COEFF>* restrict outTapsPtr = (T_buff_256b<TT_COEFF>*)outTaps;
+    T_buff_256b<TT_COEFF>* __restrict outTapsPtr = (T_buff_256b<TT_COEFF>*)outTaps;
     T_buff_256b<TT_COEFF> buff256;
     const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
 
@@ -87,9 +94,11 @@ inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* outTaps
 // output.
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* outTaps, output_stream_cacc48* outCascade) {
+INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
+                              TT_COEFF* outTaps,
+                              output_stream_cacc48* outCascade) {
     T_buff_256b<int>* inTapsPtr = (T_buff_256b<int>*)inTaps;
-    T_buff_256b<int>* restrict outTapsPtr = (T_buff_256b<int>*)outTaps;
+    T_buff_256b<int>* __restrict outTapsPtr = (T_buff_256b<int>*)outTaps;
     T_buff_256b<int> buff256;
     const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
 
@@ -108,8 +117,8 @@ inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* outTaps
 // cascade output.
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps, output_stream_cacc48* outCascade) {
-    T_buff_256b<int32>* restrict outTapsPtr = (T_buff_256b<int32>*)outTaps;
+INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps, output_stream_cacc48* outCascade) {
+    T_buff_256b<int32>* __restrict outTapsPtr = (T_buff_256b<int32>*)outTaps;
     T_buff_256b<int32> buff256; //
     const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
 
@@ -126,8 +135,8 @@ inline void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps, outp
 // Buffer reload. Copies contents read from cascade input into a destination buffer.
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps) {
-    T_buff_256b<int32>* restrict outTapsPtr = (T_buff_256b<int32>*)outTaps;
+INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps) {
+    T_buff_256b<int32>* __restrict outTapsPtr = (T_buff_256b<int32>*)outTaps;
     T_buff_256b<int32> buff256; //
     const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
 
@@ -142,64 +151,65 @@ inline void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps) {
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
-                         TT_COEFF* outTaps,
-                         T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
+INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
+                              TT_COEFF* outTaps,
+                              T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
     bufferReload(inTaps, outTaps, outInterface.outCascade);
 }
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
-                         TT_COEFF* outTaps,
-                         T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
+INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
+                              TT_COEFF* outTaps,
+                              T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
     bufferReload(inTaps, outTaps);
 }
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DUAL_IP = 0>
-inline void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
-                         TT_COEFF* outTaps,
-                         T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
+INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
+                              TT_COEFF* outTaps,
+                              T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
     bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.inCascade, outTaps, outInterface.outCascade);
 }
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DUAL_IP = 0>
-inline void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
-                         TT_COEFF* outTaps,
-                         T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
+INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
+                              TT_COEFF* outTaps,
+                              T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
     bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.inCascade, outTaps);
 }
 
 // sendRtpTrigger
 template <typename TT_DATA>
-inline void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
+INLINE_DECL void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
     // Nothing to do here.
 }
 
 // sendRtpTrigger - send a vector over cascade. Non-zero when argument it set to true.
 template <typename TT_DATA>
-inline void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
+INLINE_DECL void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
     T_buff_256b<int32> buff = null_buff_256b<int32>();
     if (updateRtp) {
+        chess_memory_fence(); // Make sure buffer update is not pipelined before receiving updateRtp information
         buff.val = upd_elem(buff.val, 0, 1); // set element 0 to 1.
     }
 
     put_mcd(buff.val);
 }
 
-inline bool getRtpTrigger() {
+INLINE_DECL bool getRtpTrigger() {
     T_buff_512b<int32> buff = null_buff_512b<int32>();
     T_buff_512b<int32> nullBuff = null_buff_512b<int32>();
-    buff.val = upd_w(buff.val, 0, get_scd_v8int32());
+    buff.val = upd_w(null_buff_512b<int32>().val, 0, get_scd_v8int32());
     bool ret = ne16(buff.val, nullBuff.val);
     // return true when buffers not equal;
     return ret;
 }
 
 // getCompMask
-inline constexpr unsigned int getCompMask(const unsigned int size) {
+INLINE_DECL constexpr unsigned int getCompMask(const unsigned int size) {
     unsigned int mask = 0;
 
     for (int i = 0; i < size; i++) {
@@ -210,7 +220,7 @@ inline constexpr unsigned int getCompMask(const unsigned int size) {
 
 // Not equal
 template <typename TT_DATA>
-inline int nEq(T_buff_512b<TT_DATA> xbuff, T_buff_512b<TT_DATA> ybuff, unsigned int mask) {
+INLINE_DECL int nEq(T_buff_512b<TT_DATA> xbuff, T_buff_512b<TT_DATA> ybuff, unsigned int mask) {
     // cast as int16 and comare as int16s
     T_buff_512b<int16> xbuffInt;
     T_buff_512b<int16> ybuffInt;
@@ -222,15 +232,15 @@ inline int nEq(T_buff_512b<TT_DATA> xbuff, T_buff_512b<TT_DATA> ybuff, unsigned 
     return ret;
 }
 template <>
-inline int nEq(T_buff_512b<int16> xbuff, T_buff_512b<int16> ybuff, unsigned int mask) {
+INLINE_DECL int nEq(T_buff_512b<int16> xbuff, T_buff_512b<int16> ybuff, unsigned int mask) {
     unsigned int ret = mask & ne32(xbuff.val, ybuff.val);
     return ret;
 }
 // RTP comparison. Compares in 512-bit chunks
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-inline bool rtpCompare(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* oldTaps) {
+INLINE_DECL bool rtpCompare(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* oldTaps) {
     T_buff_512b<TT_COEFF>* internalTapsRaw = (T_buff_512b<TT_COEFF>*)inTaps;
-    T_buff_512b<TT_COEFF>* restrict comp_ybuff = (T_buff_512b<TT_COEFF>*)oldTaps;
+    T_buff_512b<TT_COEFF>* __restrict comp_ybuff = (T_buff_512b<TT_COEFF>*)oldTaps;
 
     T_buff_512b<TT_COEFF> c_xbuff = null_buff_512b<TT_COEFF>();
     T_buff_512b<TT_COEFF> c_ybuff = null_buff_512b<TT_COEFF>();

@@ -25,13 +25,12 @@
 #include "utils/dsp_utilities.hpp"
 #include "utils/sorting.hpp"
 
-void fft_top(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R], T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
+void fft_top(hls::stream<T_SSR_FFT_IN> inD[SSR_FFT_R], hls::stream<T_SSR_FFT_OUT> outD[SSR_FFT_R]) {
 #pragma HLS TOP
     xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 
-void fft_top_c(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R],
-               T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
+void fft_top_c(hls::stream<T_SSR_FFT_IN> inD[SSR_FFT_R], hls::stream<T_SSR_FFT_OUT> outD[SSR_FFT_R]) {
     xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 
@@ -42,8 +41,9 @@ int main(int argc, char** argv) {
      *  complex<double> ssr fft call
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
-    std::complex<T_innerDB> din[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    std::complex<T_innerDB> dout[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
+    hls::stream<std::complex<T_innerDB> > din[SSR_FFT_R];
+    hls::stream<std::complex<T_innerDB> > dout[SSR_FFT_R];
+    std::complex<T_innerDB> dout_arr[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,8 +51,9 @@ int main(int argc, char** argv) {
      *  complex<ap_fixed> ssr fft call that will synthesize to RTL for implementation
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
-    T_SSR_FFT_IN din_fix[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    T_SSR_FFT_OUT dout_fix[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
+    hls::stream<T_SSR_FFT_IN> din_fix[SSR_FFT_R];
+    hls::stream<T_SSR_FFT_OUT> dout_fix[SSR_FFT_R];
+    T_SSR_FFT_OUT dout_fix_arr[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -60,8 +61,9 @@ int main(int argc, char** argv) {
      *  complex<ap_fixed> ssr fft call that is NOT SYNTHESIZED creates a bit true output for comparison after COSIM
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
-    T_SSR_FFT_IN din_fix_c[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    T_SSR_FFT_OUT dout_fix_c[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
+    hls::stream<T_SSR_FFT_IN> din_fix_c[SSR_FFT_R];
+    hls::stream<T_SSR_FFT_OUT> dout_fix_c[SSR_FFT_R];
+    T_SSR_FFT_OUT dout_fix_c_arr[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     /// dine_file 1-Dimensional array that will be used to store stimulus input data read from the file, stimulus
@@ -107,9 +109,9 @@ int main(int argc, char** argv) {
     // verification
     for (int i = 0; i < SSR_FFT_L / SSR_FFT_R; i++) {
         for (int j = 0; j < SSR_FFT_R; j++) {
-            din[j][i] = din_file[i * (SSR_FFT_R) + j];
-            din_fix[j][i] = din_file[i * (SSR_FFT_R) + j];
-            din_fix_c[j][i] = din_file[i * (SSR_FFT_R) + j];
+            din[j].write(din_file[i * (SSR_FFT_R) + j]);
+            din_fix[j].write(din_file[i * (SSR_FFT_R) + j]);
+            din_fix_c[j].write(din_file[i * (SSR_FFT_R) + j]);
             golden_output[j][i] = golden_output_file[i * (SSR_FFT_R) + j];
         }
     }
@@ -131,12 +133,14 @@ int main(int argc, char** argv) {
          * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          */
         fft<ssr_fft_params>(din, dout);
+        convert2Array<SSR_FFT_R, SSR_FFT_L>(dout, dout_arr);
         /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          * CAll SSR FFT with complex ap_fixed type : This the actual model that will be synthesized, to generate RTL
          * for implementation
          * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          */
         fft_top(din_fix, dout_fix);
+        convert2Array<SSR_FFT_R, SSR_FFT_L>(dout_fix, dout_fix_arr);
         /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          * CAll SSR FFT with complex ap_fixed type : This function wraps the same C++ model that is wrapped in for
          * synthesis, this function is not synthesized it is only used to compare the final RTL ouput and the C++
@@ -146,13 +150,14 @@ int main(int argc, char** argv) {
          * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          */
         fft_top_c(din_fix_c, dout_fix_c);
+        convert2Array<SSR_FFT_R, SSR_FFT_L>(dout_fix_c, dout_fix_c_arr);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // Verify if the ssr fft double precision model is functionally correct by comparing its output with
     // double precision Octave model output, it functionally verifies SSR FFT model independent of the
     // fact that if fixed point data-path bit-widths are appropriate in case of fixed point ssr fft
-    double snrDBs_ssr_vs_octave = snr<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(golden_output, dout);
+    double snrDBs_ssr_vs_octave = snr<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(golden_output, dout_arr);
     print_phase_header();
     std::cout << get_section_header()
               << "Comparing C++  SSR FFT double precision model vs. Octave double precision model:\n";
@@ -174,7 +179,7 @@ int main(int argc, char** argv) {
         p_fftOutDataTemp[SSR_FFT_L]; // 1-D array used for conversion of fft_top output from 2-D 1-D
     for (int a1 = 0; a1 < (SSR_FFT_L / SSR_FFT_R); a1++) {
         for (int a2 = 0; a2 < SSR_FFT_R; a2++) {
-            p_fftOutDataTemp[a1 * SSR_FFT_R + a2] = dout[a2][a1]; /// convert it to one day array for verification
+            p_fftOutDataTemp[a1 * SSR_FFT_R + a2] = dout_arr[a2][a1]; /// convert it to one day array for verification
         }
     }
 
@@ -215,7 +220,7 @@ int main(int argc, char** argv) {
     // double precision Octave model output, It verifies if the data-path choice is good enough
     // like the scaling mode, input, output and twiddle bit-width are sufficient for given ssr fft
     std::complex<T_innerDB> fix_fft_out[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R];
-    cast_to_double<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(dout_fix, fix_fft_out);
+    cast_to_double<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(dout_fix_arr, fix_fft_out);
     double snrDBs_ssr_fix_vs_octave = snr<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(golden_output, fix_fft_out);
 
     print_phase_header();
@@ -235,7 +240,7 @@ int main(int argc, char** argv) {
     std::cout << get_section_header() << "Comparing SSR FFT fixed point output with golden Octave model output: \n";
     for (int a1 = 0; a1 < (SSR_FFT_L / SSR_FFT_R); a1++) {
         for (int a2 = 0; a2 < SSR_FFT_R; a2++) {
-            p_fftOutDataTemp[a1 * SSR_FFT_R + a2] = dout_fix[a2][a1]; // convert to 1d array and also cast
+            p_fftOutDataTemp[a1 * SSR_FFT_R + a2] = dout_fix_arr[a2][a1]; // convert to 1d array and also cast
         }
     }
 
@@ -268,7 +273,7 @@ int main(int argc, char** argv) {
     print_phase_header();
     std::cout << get_section_header() << "Verification Messages\n";
     std::cout << get_section_header() << "Comparing SSR FFT fixed point model with SSR FFT double precision model: \n";
-    double snrDBs_fix_point_vs_floating_model = snr<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(dout, fix_fft_out);
+    double snrDBs_fix_point_vs_floating_model = snr<SSR_FFT_R, SSR_FFT_L / SSR_FFT_R>(dout_arr, fix_fft_out);
     std::cout << "The SNR( SSR FFT fixed vs. SSR FFT double precision) is  :"
               << "     " << snrDBs_fix_point_vs_floating_model << " db \n\n";
     print_phase_footer();
@@ -286,11 +291,11 @@ int main(int argc, char** argv) {
     int rtl_verif_flag = 0;
     for (int lt = 0; lt < SSR_FFT_L / SSR_FFT_R; lt++) {
         for (int rad = 0; rad < SSR_FFT_R; rad++) {
-            if ((dout_fix[rad][lt].real() != dout_fix_c[rad][lt].real()) ||
-                (dout_fix[rad][lt].imag() != dout_fix_c[rad][lt].imag())) {
+            if ((dout_fix_arr[rad][lt].real() != dout_fix_c_arr[rad][lt].real()) ||
+                (dout_fix_arr[rad][lt].imag() != dout_fix_c_arr[rad][lt].imag())) {
                 rtl_verif_flag++;
-                std::cout << "Expected Output : " << dout_fix_c[rad][lt] << "\n";
-                std::cout << "RTL      Output : " << dout_fix[rad][lt] << "\n";
+                std::cout << "Expected Output : " << dout_fix_c_arr[rad][lt] << "\n";
+                std::cout << "RTL      Output : " << dout_fix_arr[rad][lt] << "\n";
                 std::cout << "Indices : l:r" << lt << ": " << rad << std::endl;
             }
         }

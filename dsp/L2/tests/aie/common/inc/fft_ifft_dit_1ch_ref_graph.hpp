@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,8 +113,9 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
         m_inWidget = kernel::create_object<
             widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2,
                                 TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA), 1, kSampleIntlv> >();
-        m_outWidget = kernel::create_object<widget_api_cast_ref<
-            TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA), 2, kSplit> >();
+        m_outWidget = kernel::create_object<
+            widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1,
+                                TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA), 2, kSampleIntlv> >();
 
         // Make connections
         connect<stream>(in[0], m_inWidget.in[0]);
@@ -160,6 +161,8 @@ template <typename TT_DATA,
           unsigned int TP_PARALLEL_POWER = 1>
 class fft_ifft_dit_1ch_ref_graph : public graph {
    public:
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     static_assert(TP_API == kStreamAPI, "Error: Only Stream interface is supported for parallel FFT");
     static_assert(TP_PARALLEL_POWER >= 1 && TP_PARALLEL_POWER < 9,
                   "Error: TP_PARALLEL_POWER is out of supported range");
@@ -193,12 +196,12 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
     fft_ifft_dit_1ch_ref_graph() {
         for (int i = 0; i < kParallel_factor; i++) {
             m_combInKernel[i] = kernel::create_object<
-                widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, kWindowSize, 1, kSplit> >();
+                widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, kWindowSize, 1, kSampleIntlv> >();
             m_r2Comb[i] =
                 kernel::create_object<fft_r2comb_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift,
                                                      TP_DYN_PT_SIZE, kWindowSize, TP_PARALLEL_POWER> >(i);
             m_combOutKernel[i] = kernel::create_object<
-                widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, kWindowSize, 2, kSplit> >();
+                widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, kWindowSize, 2, kSampleIntlv> >();
         }
         // make connections
         for (int i = 0; i < kParallel_factor; i++) {
@@ -247,6 +250,8 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  kWindowAPI,
                                  0> : public graph {
    public:
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     port<input> in[1];
     port<output> out[1];
     fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
@@ -286,6 +291,8 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  kStreamAPI,
                                  0> : public graph {
    public:
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     port<input> in[2]; // dual streams
     port<output> out[2];
     fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,

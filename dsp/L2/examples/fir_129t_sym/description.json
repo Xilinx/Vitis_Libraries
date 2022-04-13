@@ -1,0 +1,94 @@
+{
+    "name": "Xilinx DSPLIB example fir sr sym ",
+    "description": "",
+    "gui": "false",
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        }
+    },
+    "post_launch": [
+        {
+            "target": "aiesim",
+            "launch_cmd": [
+                "grep -ve '[XT]' ./aiesimulator_output/data/output.txt > ./data/uut_output.txt",
+                "diff -bc -s ./data/uut_output.txt ./data/fir_out_ref.txt "
+                ]
+        },
+        {
+            "target": "x86sim",
+            "launch_cmd": [
+                "grep -ve '[XT]' ./x86simulator_output/data/output.txt > ./data/uut_output.txt",
+                "diff -bc -s ./data/uut_output.txt ./data/fir_out_ref.txt "
+                ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim"
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L2/include/aie",
+                "./"
+            ],
+            "clflags":["--dataflow -Xchess=llvm.xargs=-std=c++2a "]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/examples/fir_129t_sym/test.cpp",
+                    "pl-freq": 1000,
+                    "workdir": "./Work",
+                    "options": "",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": {
+                    "vitis_aie_x86sim": 60,
+                    "vitis_aie_sim": 200
+                }
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    }
+}

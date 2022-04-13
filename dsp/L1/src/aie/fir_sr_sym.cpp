@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,21 +57,21 @@ template <typename TT_DATA,
           unsigned int TP_API
 
           >
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS,
-                              TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API>(inInterface,
                                                                                                  outInterface);
 
@@ -94,22 +94,22 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS,
-                              TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
-                                                    const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]) {
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
+                                                         const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]) {
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API>(inInterface,
                                                                                                  outInterface);
 
@@ -139,21 +139,21 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS,
-                              TP_API>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API>(inInterface,
                                                                                                  outInterface);
 
@@ -183,21 +183,21 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS,
-                              TP_API>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                        T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                             T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     windowAcquire(inInterface);
     // chess_memory_fence();
 
@@ -229,25 +229,25 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS,
-                              TP_API>::filterKernel1buff(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API>::filterKernel1buff(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
 
-    T_buff_256b<TT_COEFF>* restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
+    T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0, coe1; // register for coeff values.
     // T_buff_1024b<TT_DATA>           sbuff = null_buff_1024b<TT_DATA>();
     T_buff_1024b<TT_DATA> sbuff;
@@ -262,7 +262,7 @@ inline void kernelFilterClass<TT_DATA,
     unsigned int xstart = 0;
     unsigned int ystart = 0;
 
-    input_window<TT_DATA>* restrict inWindow = inInterface.inWindow;
+    input_window<TT_DATA>* __restrict inWindow = inInterface.inWindow;
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit.
@@ -327,7 +327,7 @@ inline void kernelFilterClass<TT_DATA,
                 writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
 
                 outVal = shiftAndSaturate(acc, TP_SHIFT);
-                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase % 2);
             }
         }
 };
@@ -350,25 +350,25 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API>
-inline void kernelFilterClass<TT_DATA,
-                              TT_COEFF,
-                              TP_FIR_LEN,
-                              TP_SHIFT,
-                              TP_RND,
-                              TP_INPUT_WINDOW_VSIZE,
-                              TP_CASC_IN,
-                              TP_CASC_OUT,
-                              TP_FIR_RANGE_LEN,
-                              TP_KERNEL_POSITION,
-                              TP_CASC_LEN,
-                              TP_USE_COEFF_RELOAD,
-                              TP_NUM_OUTPUTS,
-                              TP_API>::filterKernel2buff(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
-                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API>::filterKernel2buff(T_inputIF<TP_CASC_IN, TT_DATA> inInterface,
+                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     set_rnd(TP_RND);
     set_sat();
 
-    T_buff_256b<TT_COEFF>* restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
+    T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0; // register for coeff values.
     T_buff_512b<TT_DATA> sbuff = null_buff_512b<TT_DATA>();
     // T_buff_512b<TT_DATA>            sbuff;
@@ -385,9 +385,11 @@ inline void kernelFilterClass<TT_DATA,
     unsigned int sDataBuffSwap = 0;
     unsigned int dataLoadPhase = 0;
 
+    TT_COEFF* m_internalTapsCopy = m_internalTaps;
+
     input_window<TT_DATA> temp_w;
-    input_window<TT_DATA>* restrict inWindow = inInterface.inWindow;
-    input_window<TT_DATA>* restrict cpWindow;
+    input_window<TT_DATA>* __restrict inWindow = inInterface.inWindow;
+    input_window<TT_DATA>* __restrict cpWindow;
     cpWindow = &temp_w;
     window_copy(cpWindow, inWindow);
 
@@ -404,7 +406,8 @@ inline void kernelFilterClass<TT_DATA,
     for (unsigned i = 0; i < m_kLsize; i++)
         // Allow optimizations in the kernel compilation for this loop
         chess_prepare_for_pipelining chess_loop_range(m_kLsize, m_kLsize) {
-            coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps);
+            m_internalTapsCopy = chess_copy(m_internalTapsCopy);
+            coeff = ((T_buff_256b<TT_COEFF>*)m_internalTapsCopy);
             coe0 = *coeff++;
 
             sNumDataLoads = 0;
@@ -588,7 +591,8 @@ inline void kernelFilterClass<TT_DATA,
             writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
 
             outVal = shiftAndSaturate(acc, TP_SHIFT);
-            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++);
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase % 2);
+            dataLoadPhase++;
             window_decr(inWindow,
                         (m_kDataLoadVsize * (kUpdWToUpdVRatio * sNumDataLoads + sVDataLoads) / kUpdWToUpdVRatio -
                          m_kVOutSize)); // return read pointer to start of next chunk of window.

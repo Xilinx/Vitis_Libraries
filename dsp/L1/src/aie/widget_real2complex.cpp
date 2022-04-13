@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,12 +158,10 @@ INLINE_DECL void kernelClass<cfloat, float, TP_WINDOW_VSIZE>::kernelClassMain(co
 template <typename TT_DATA,
           typename TT_OUT_DATA,
           unsigned int TP_WINDOW_VSIZE>
-__attribute__((noinline))   //This function is the hook for QoR profiling, so must be identifiable after compilation.
-void widget_real2complex<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::convertData
-                (input_window<TT_DATA>* __restrict inWindow0,
-                 output_window<TT_OUT_DATA>* __restrict outWindow0
-                )
-    {
+NOINLINE_DECL // This function is the hook for QoR profiling, so must be identifiable after compilation.
+    void
+    widget_real2complex<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::convertData(
+        input_window<TT_DATA>* __restrict inWindow0, output_window<TT_OUT_DATA>* __restrict outWindow0) {
     TT_DATA* inPtr = (TT_DATA*)inWindow0->ptr;
     TT_OUT_DATA* outPtr = (TT_OUT_DATA*)outWindow0->ptr;
     this->kernelClassMain(inPtr, outPtr);

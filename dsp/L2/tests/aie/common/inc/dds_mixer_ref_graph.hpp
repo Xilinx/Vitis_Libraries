@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,32 +32,38 @@ namespace mixer {
 namespace dds_mixer {
 using namespace adf;
 
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API = 0>
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API = 0,
+          unsigned int TP_SSR = 1 // ignored
+          >
 
 class dds_mixer_ref_graph : public graph {
    public:
-    port<input> in1;
-    port<input> in2;
-    port<output> out;
+    std::array<port<input>, 1> in1;
+    std::array<port<input>, 1> in2;
+    std::array<port<output>, 1> out;
 
     // DDS Kernel
     kernel m_ddsKernel;
 
     // Constructor
-    dds_mixer_ref_graph(uint32_t phaseInc) {
+    dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
         printf("========================\n");
         printf("== DDS_MIXER_REF Graph  \n");
         printf("========================\n");
 
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
-        m_ddsKernel = kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE> >(phaseInc);
+        m_ddsKernel = kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE> >(
+            phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(in1, m_ddsKernel.in[0]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(in2, m_ddsKernel.in[1]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_ddsKernel.out[0], out);
+        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(in1[0], m_ddsKernel.in[0]);
+        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(in2[0], m_ddsKernel.in[1]);
+        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_ddsKernel.out[0], out[0]);
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 
@@ -70,31 +76,32 @@ class dds_mixer_ref_graph : public graph {
 // SPECIALIZATION for TP_MIXER_MODE = 1  (dds plus single input mixer configuration)
 //--------------------------------------------------------------------------------------------------
 
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API, unsigned int TP_SSR>
 
-class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, TP_API> : public graph {
+class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, TP_API, TP_SSR> : public graph {
    public:
-    port<input> in1;
-    port<output> out;
+    std::array<port<input>, 1> in1;
+    std::array<port<output>, 1> out;
 
     // DDS Kernel
     kernel m_ddsKernel;
 
     // Constructor
-    dds_mixer_ref_graph(uint32_t phaseInc) {
+    dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
         printf("======================================\n");
         printf("== DDS_MIXER_REF Graph MIXER MODE = 1 \n");
         printf("======================================\n");
 
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
-        m_ddsKernel = kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1> >(phaseInc);
+        m_ddsKernel =
+            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1> >(phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(in1, m_ddsKernel.in[0]);
+        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(in1[0], m_ddsKernel.in[0]);
         //     connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA)> >(in2, m_ddsKernel.in[1]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_ddsKernel.out[0], out);
+        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_ddsKernel.out[0], out[0]);
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 
@@ -107,30 +114,31 @@ class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, TP_API> : public gr
 // SPECIALIZATION for TP_MIXER_MODE = 0  (dds only configuration)
 //--------------------------------------------------------------------------------------------------
 
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API>
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_API, unsigned int TP_SSR>
 
-class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, TP_API> : public graph {
+class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, TP_API, TP_SSR> : public graph {
    public:
-    port<output> out;
+    std::array<port<output>, 1> out;
 
     // DDS Kernel
     kernel m_ddsKernel;
 
     // Constructor
-    dds_mixer_ref_graph(uint32_t phaseInc) {
+    dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
         printf("======================================\n");
         printf("== DDS_MIXER_REF Graph MIXER MODE = 0 \n");
         printf("======================================\n");
 
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
-        m_ddsKernel = kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0> >(phaseInc);
+        m_ddsKernel =
+            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0> >(phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
         //    connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA)> >(in1, m_ddsKernel.in[0]);
         //     connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA)> >(in2, m_ddsKernel.in[1]);
-        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_ddsKernel.out[0], out);
+        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_ddsKernel.out[0], out[0]);
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 

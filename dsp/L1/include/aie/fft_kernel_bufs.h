@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,27 @@
 
 #include "fft_com_inc.h"
 
+#ifdef __X86SIM__
 // Inter-rank temporary storage buffers
+alignas(32) thread_local cint32_t fft_16_tmp1[FFT16_SIZE];
+alignas(32) thread_local cint32_t fft_16_tmp2[FFT16_SIZE];
+alignas(32) thread_local cint32_t fft_32_tmp1[FFT32_SIZE];
+alignas(32) thread_local cint32_t fft_32_tmp2[FFT32_SIZE];
+alignas(32) thread_local cint32_t fft_64_tmp1[FFT64_SIZE];
+alignas(32) thread_local cint32_t fft_64_tmp2[FFT64_SIZE];
+alignas(32) thread_local cint32_t fft_128_tmp1[FFT128_SIZE];
+alignas(32) thread_local cint32_t fft_128_tmp2[FFT128_SIZE];
+alignas(32) thread_local cint32_t fft_256_tmp1[FFT256_SIZE];
+alignas(32) thread_local cint32_t fft_256_tmp2[FFT256_SIZE];
+alignas(32) thread_local cint32_t fft_512_tmp1[FFT512_SIZE];
+alignas(32) thread_local cint32_t fft_512_tmp2[FFT512_SIZE];
+alignas(32) thread_local cint32_t fft_1024_tmp1[FFT1024_SIZE];
+alignas(32) thread_local cint32_t fft_1024_tmp2[FFT1024_SIZE];
+alignas(32) thread_local cint32_t fft_2048_tmp1[FFT2048_SIZE];
+alignas(32) thread_local cint32_t fft_2048_tmp2[FFT2048_SIZE];
+alignas(32) thread_local cint32_t fft_4096_tmp1[FFT4096_SIZE];
+alignas(32) thread_local cint32_t fft_4096_tmp2[FFT4096_SIZE];
+#else
 alignas(32) cint32_t fft_16_tmp1[FFT16_SIZE];
 alignas(32) cint32_t fft_16_tmp2[FFT16_SIZE];
 alignas(32) cint32_t fft_32_tmp1[FFT32_SIZE];
@@ -36,6 +56,7 @@ alignas(32) cint32_t fft_2048_tmp1[FFT2048_SIZE];
 alignas(32) cint32_t fft_2048_tmp2[FFT2048_SIZE];
 alignas(32) cint32_t fft_4096_tmp1[FFT4096_SIZE];
 alignas(32) cint32_t fft_4096_tmp2[FFT4096_SIZE];
+#endif
 
 /* Twiddles come from the files fft_twiddle_lut_dit*.h
 //Twiddle tables

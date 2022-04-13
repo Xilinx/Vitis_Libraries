@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,6 +34,7 @@ set dyn_pt_size 0
 set max_pt_size_pwr 10
 set tt_data "cint16" ;# sensible default of complex data
 set tp_api 0 ;#  for high throughput fft (planned)
+set using_plio_class 0 ;# default (backwards compatible)
 if { $::argc > 2} {
     set filename [lindex $argv 0]
     set fileDirpath [file dirname $filename]
@@ -56,6 +57,9 @@ if { $::argc > 2} {
     }
     if {[llength $argv] > 8 } {
         set tp_api [lindex $argv 8]
+    }
+    if {[llength $argv] > 9 } {
+        set using_plio_class [lindex $argv 9]
     }
 
 } else {
@@ -90,29 +94,53 @@ proc randInt32 {seed} {
 file mkdir $fileDirpath
 set output_file [open $filename w]
 set headRand [srand $seed]
-set blank_entry "0 0"
 #ensure that a sim stall doesn't occur because of insufficient data (yes that would be a bug)
 set overkill 1
 set padding 0
 set pt_size_pwr $max_pt_size_pwr+1
 set iters 1
 set samples $window_vsize
+#ADF::PLIO class expects data in 32-bits per text line, which for cint32 & cfloat is half a sample per line.
+if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat")} {
+    set samples [expr ($samples) * 2]
+}
 for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
+    #ADF::PLIO expects data in 32-bits per text line
+    set parts 1
+    if {$using_plio_class == 0} {
+        if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "cint32" || $tt_data eq "cfloat"} {
+            set parts 2
+        }
+    } else { #PLIO
+        if {$tt_data eq "cint16" || $tt_data eq "int16" } {
+            set parts 2
+        }
+    }
     if {$dyn_pt_size == 1} {
         set headRand [randInt16 $headRand]
-        #use fields of the random number to choose FFT_NIFFT and PT_SIZE_PWR. Choose a legal size
+        # use fields of the random number to choose FFT_NIFFT and PT_SIZE_PWR. Choose a legal size
         set fft_nifft [expr (($headRand >> 14) % 2)]
-#        set pt_size_pwr [expr (($headRand % ($max_pt_size_pwr-4))+4)]
         set pt_size_pwr [expr ($pt_size_pwr - 1)]
         if {$pt_size_pwr < 5} {
             set pt_size_pwr $max_pt_size_pwr
         }
+        # Header size = 256-bit, i.e. 4 cint32/cfloat or 8 cint16
         set header_size 4
         if {$tt_data eq "cint16"} {
             set header_size 8
         }
+        if {$parts == 2} {
+        set blank_entry "0 0"
         puts $output_file "$fft_nifft 0"
         puts $output_file "$pt_size_pwr 0"
+        } else {
+        set blank_entry "0 \n0"
+        puts $output_file "$fft_nifft"
+        puts $output_file "0"
+        puts $output_file "$pt_size_pwr"
+        puts $output_file "0"
+        }
+
         # pad. This loops starts at 2 because 2 samples have already been written
         for {set i 2} {$i < $header_size} {incr i} {
             puts $output_file $blank_entry
@@ -123,12 +151,13 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
             set padding [expr ((1 << $max_pt_size_pwr) - $samples)]
         }
         set iters [expr (($window_vsize-$header_size)/($samples+$padding))]
+        #ADF::PLIO class expects data in 32-bits per text line, which for cint32 & cfloat is half a sample per line.
+        if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat")} {
+            set samples [expr ($samples) * 2]
+            set padding [expr ($padding) * 2]
+        }
     }
-    #real has 1, complex has 2. int16 is an exception since 32 bits are read
-    set parts 1
-    if {$tt_data eq "cint16" || $tt_data eq "cint32" || $tt_data eq "cfloat" || $tt_data eq "int16"} {
-        set parts 2
-    }
+
     for {set winSplice 0} {$winSplice < $iters} {incr winSplice} {
         for {set sample_idx 0} {$sample_idx < [expr ($samples)]} {incr sample_idx} {
             for {set comp 0} {$comp < $parts} {incr comp} {
@@ -138,7 +167,7 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
                 } elseif { ($stim_type == 3 && $sample_nr != 0) || $stim_type == 9 } {
                     set nextRand 0
                 } elseif { ($stim_type == 5) } {
-                    set nextRand [expr $nextRand+1]
+                    set nextRand [expr ($nextRand+1)]
                 } elseif { ($stim_type == 8) } {
                     if {$comp eq 0} {
                         if {$sample_idx % 8 == 0 } {
@@ -174,36 +203,17 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
                     puts $output_file "$nextRand "
                 }
             }
-
-
-#            if { $stim_type == 4 || ($stim_type == 9 && $sample_nr%2 == 1)} {
-#                set nextRand 1
-#            } elseif { ($stim_type == 3) || ($stim_type == 9)} {
-#                set nextRand 0
-#            } elseif { ($stim_type == 5) } {
-#                set nextRand $nextRand
-#            } elseif { ($stim_type == 8) } {
-#                if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
-#                    set nextRand 0
-#                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
-#                    set nextRand 5793
-#                }  elseif {$sample_idx % 8 == 2 } {
-#                    set nextRand 8192
-#                }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
-#                    set nextRand -5793
-#                }  else {
-#                    set nextRand -8192
-#                }
-#            } else {
-#                set nextRand [randInt16 $nextRand]
-#            }
-#            puts $output_file $nextRand
         }
         #padding is only non-zero for dynamic point size, so no need to clause with dyn_pt_size
         for {set sample_idx 0} {$sample_idx < [expr ($padding)]} {incr sample_idx} {
             set padsample -1
-            puts -nonewline $output_file "$padsample "
-            puts $output_file $padsample
+            for {set comp 0} {$comp < $parts} {incr comp} {
+                if {$comp eq 0 && $parts eq 2} {
+                    puts -nonewline $output_file "$padsample "
+                } else {
+                    puts $output_file $padsample
+                }
+            }
         }
     }
 }

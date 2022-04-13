@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,8 @@
 
 #include <adf.h>
 #include <vector>
-#include "fir_interpolate_fract_asym_ref.hpp"
+#include "fir_resampler_ref.hpp"
+#include "widget_api_cast_ref.hpp"
 #include "fir_ref_utils.hpp"
 
 namespace xf {
@@ -26,7 +27,8 @@ namespace aie {
 namespace fir {
 namespace interpolate_fract_asym {
 using namespace adf;
-
+using namespace resampler;
+using namespace xf::dsp::aie::widget::api_cast;
 // default, but specialization for static coeffs and single output
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -55,8 +57,8 @@ class fir_interpolate_fract_asym_ref_graph : public graph {
 
         // Create FIR class
         m_firKernel = kernel::create_object<
-            fir_interpolate_fract_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                           TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, 1> >(taps);
+            fir_resampler_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT,
+                              TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, 1> >(taps);
 
         // Make connections
         // Size of window in Bytes.
@@ -70,7 +72,7 @@ class fir_interpolate_fract_asym_ref_graph : public graph {
         runtime<ratio>(m_firKernel) = 0.4;
 
         // Source files
-        source(m_firKernel) = "fir_interpolate_fract_asym_ref.cpp";
+        source(m_firKernel) = "fir_resampler_ref.cpp";
     };
 };
 
@@ -99,6 +101,7 @@ class fir_interpolate_fract_asym_ref_graph<TT_DATA,
     port<input> in;
     port<output> out;
     port<output> out2;
+    kernel m_widgetKernelOut;
 
     // FIR Kernel
     kernel m_firKernel;
@@ -111,24 +114,33 @@ class fir_interpolate_fract_asym_ref_graph<TT_DATA,
 
         // Create FIR class
         m_firKernel = kernel::create_object<
-            fir_interpolate_fract_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                           TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, 2> >(taps);
+            fir_resampler_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT,
+                              TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, 2> >(taps);
+        m_widgetKernelOut = kernel::create_object<
+            widget_api_cast_ref<TT_DATA, USE_WINDOW_API, USE_WINDOW_API, 1,
+                                TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR, 2> >();
 
         // Make connections
         // Size of window in Bytes.
         connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
                        fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>() *
                            sizeof(TT_DATA)> >(in, m_firKernel.in[0]);
-        connect<window<((TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE) / TP_DECIMATE_FACTOR) * sizeof(TT_DATA)> >(
-            m_firKernel.out[0], out);
-        connect<window<((TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE) / TP_DECIMATE_FACTOR) * sizeof(TT_DATA)> >(
-            m_firKernel.out[1], out2);
+
+        // Broadcast to two outputs with widget.
+        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
+            m_firKernel.out[0], m_widgetKernelOut.in[0]);
+        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
+            m_widgetKernelOut.out[0], out);
+        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
+            m_widgetKernelOut.out[1], out2);
 
         // Specify mapping constraints
-        runtime<ratio>(m_firKernel) = 0.4;
+        runtime<ratio>(m_firKernel) = 0.9;
+        runtime<ratio>(m_widgetKernelOut) = 0.9;
 
         // Source files
-        source(m_firKernel) = "fir_interpolate_fract_asym_ref.cpp";
+        source(m_firKernel) = "fir_resampler_ref.cpp";
+        source(m_widgetKernelOut) = "widget_api_cast_ref.cpp";
     };
 };
 
@@ -169,8 +181,8 @@ class fir_interpolate_fract_asym_ref_graph<TT_DATA,
 
         // Create FIR class
         m_firKernel = kernel::create_object<
-            fir_interpolate_fract_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                           TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, 1> >();
+            fir_resampler_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT,
+                              TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, 1> >();
 
         // Make connections
         // Size of window in Bytes.
@@ -185,7 +197,7 @@ class fir_interpolate_fract_asym_ref_graph<TT_DATA,
         runtime<ratio>(m_firKernel) = 0.4;
 
         // Source files
-        source(m_firKernel) = "fir_interpolate_fract_asym_ref.cpp";
+        source(m_firKernel) = "fir_resampler_ref.cpp";
     };
 };
 
@@ -215,6 +227,7 @@ class fir_interpolate_fract_asym_ref_graph<TT_DATA,
     port<output> out;
     port<output> out2;
     port<input> coeff;
+    kernel m_widgetKernelOut;
 
     // FIR Kernel
     kernel m_firKernel;
@@ -227,25 +240,35 @@ class fir_interpolate_fract_asym_ref_graph<TT_DATA,
 
         // Create FIR class
         m_firKernel = kernel::create_object<
-            fir_interpolate_fract_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                           TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, 2> >();
+            fir_resampler_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT,
+                              TP_RND, TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, 2> >();
+        m_widgetKernelOut = kernel::create_object<
+            widget_api_cast_ref<TT_DATA, USE_WINDOW_API, USE_WINDOW_API, 1,
+                                TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR, 2> >();
 
         // Make connections
         // Size of window in Bytes.
         connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
                        fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>() *
                            sizeof(TT_DATA)> >(in, m_firKernel.in[0]);
-        connect<window<((TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE) / TP_DECIMATE_FACTOR) * sizeof(TT_DATA)> >(
-            m_firKernel.out[0], out);
-        connect<window<((TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE) / TP_DECIMATE_FACTOR) * sizeof(TT_DATA)> >(
-            m_firKernel.out[1], out2);
+
+        // Broadcast to two outputs with widget.
+        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
+            m_firKernel.out[0], m_widgetKernelOut.in[0]);
+        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
+            m_widgetKernelOut.out[0], out);
+        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
+            m_widgetKernelOut.out[1], out2);
+
         connect<parameter>(coeff, async(m_firKernel.in[1]));
 
         // Specify mapping constraints
-        runtime<ratio>(m_firKernel) = 0.4;
+        runtime<ratio>(m_firKernel) = 0.9;
+        runtime<ratio>(m_widgetKernelOut) = 0.9;
 
         // Source files
-        source(m_firKernel) = "fir_interpolate_fract_asym_ref.cpp";
+        source(m_firKernel) = "fir_resampler_ref.cpp";
+        source(m_widgetKernelOut) = "widget_api_cast_ref.cpp";
     };
 };
 }

@@ -3335,7 +3335,7 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
          typename FFTIOTypes<ssr_fft_param_struct, T_in>::T_outType
              p_fftOutData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
     enum { FIFO_SIZE = ssr_fft_param_struct::N / ssr_fft_param_struct::R };
-    //#pragma HLS INLINE
+#pragma HLS INLINE
     //#pragma HLS DATAFLOW disable_start_propagation
 
     static const int t_L = ssr_fft_param_struct::N;

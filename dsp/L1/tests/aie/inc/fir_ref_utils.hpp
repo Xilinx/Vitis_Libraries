@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,9 @@ functions for use by the reference model classes.
 
 #define DUAL_IP_SINGLE 0
 #define DUAL_IP_DUAL 1
+
+#define USE_WINDOW_API 0
+#define USE_STREAM_API 1
 
 #define USE_COEFF_RELOAD_FALSE 0
 #define USE_COEFF_RELOAD_TRUE 1

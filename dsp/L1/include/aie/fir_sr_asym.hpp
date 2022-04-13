@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ compilation.
 #include "fir_utils.hpp"
 #include "fir_sr_asym_traits.hpp"
 #include <vector>
+//#include "kernel_api_utils.hpp"
 
 //#define _DSPLIB_FIR_SR_ASYM_HPP_DEBUG_
 
@@ -71,11 +72,11 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          int TP_MODIFY_MARGIN_OFFSET = 0>
 class kernelFilterClass {
    private:
     // Parameter value defensive and legality checks
-    static_assert(TP_FIR_LEN <= FIR_LEN_MAX, "ERROR: Max supported FIR length exceeded. ");
     static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,
                   "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
                   "below minimum required value. ");
@@ -92,31 +93,35 @@ class kernelFilterClass {
     static_assert(fnTypeStreamSupport<TT_DATA, TT_COEFF, TP_API>() != 0,
                   "ERROR: Unsupported API interface for requested TT_DATA and TT_COEFF type combination.");
     static_assert(TP_NUM_OUTPUTS > 0 && TP_NUM_OUTPUTS <= 2, "ERROR: only single or dual outputs are supported.");
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     // There are additional defensive checks after architectural constants have been calculated.
 
     static constexpr unsigned int m_kColumns =
-        fnNumColumnsSrAsym<TT_DATA, TT_COEFF>(); // number of mult-adds per lane for main intrinsic
-    static constexpr unsigned int m_kLanes = fnNumLanesSrAsym<TT_DATA, TT_COEFF>(); // number of operations in parallel
-                                                                                    // of this type combinations that
-                                                                                    // the vector processor can do.
-    static constexpr unsigned int m_kVOutSize =
-        fnVOutSizeSrAsym<TT_DATA, TT_COEFF>(); // This differs from m_kLanes for cint32/cint32
+        fnNumColumnsSrAsym<TT_DATA, TT_COEFF, TP_API>(); // number of mult-adds per lane for main intrinsic
+    static constexpr unsigned int m_kLanes =
+        fnNumLanesSrAsym<TT_DATA, TT_COEFF, TP_API>(); // number of operations in parallel of this type combinations
+                                                       // that the vector processor can do.
+    static constexpr unsigned int m_kVOutSize = fnVOutSizeSrAsym<TT_DATA, TT_COEFF, TP_API>();
     static constexpr unsigned int m_kFirLenCeilCols = CEIL(TP_FIR_RANGE_LEN, m_kColumns);
     static constexpr unsigned int m_kDataLoadsInReg =
-        fnDataLoadsInRegSrAsym<TT_DATA>(); // 4;  //ratio of sbuff to load size.
+        fnDataLoadsInRegSrAsym<TT_DATA, TT_COEFF, TP_API>(); // 4;  //ratio of sbuff to load size.
+    static constexpr unsigned int m_kStreamReadWidth = fnStreamReadWidth<TT_DATA, TT_COEFF>(); //
     static constexpr unsigned int m_kDataLoadVsize =
-        fnDataLoadVsizeSrAsym<TT_DATA>(); // 16;  //ie. upd_w loads a v4 of cint16
+        fnDataLoadVsizeSrAsym<TT_DATA, TT_COEFF, TP_API>(); // 16;  //ie. upd_w loads a v4 of cint16
     static constexpr unsigned int m_kSamplesInBuff = m_kDataLoadsInReg * m_kDataLoadVsize;
     static constexpr unsigned int m_kFirRangeOffset =
-        fnFirRangeOffsetAsym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TP_API>(); // FIR Cascade Offset for
-                                                                                              // this kernel position
-    static constexpr unsigned int m_kFirRangeLastOffset =
-        fnFirRangeOffsetAsym<TP_FIR_LEN, TP_CASC_LEN, TP_CASC_LEN - 1, TT_DATA, TP_API>(); // FIR Cascade Offset for
-                                                                                           // this kernel position
-    static constexpr unsigned int m_kFirMargin = fnFirMargin<TP_FIR_LEN, TT_DATA>();       // FIR Margin.
+        fnFirRangeOffsetAsym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API>(); // FIR Cascade
+                                                                                                        // Offset for
+                                                                                                        // this kernel
+                                                                                                        // position
+
+    static constexpr unsigned int m_kFirMargin = fnFirMargin<TP_FIR_LEN, TT_DATA>(); // FIR Margin.
     static constexpr unsigned int m_kFirMarginOffset =
         fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    static constexpr unsigned int m_kFirInitOffset = m_kFirRangeOffset + m_kFirMarginOffset;
+    static constexpr unsigned int m_kFirMarginRangeOffset =
+        m_kFirMarginOffset + m_kFirRangeOffset; // FIR Margin Offset.
+    static constexpr unsigned int m_kFirInitOffset = m_kFirMarginRangeOffset + TP_MODIFY_MARGIN_OFFSET;
     static constexpr unsigned int m_kDataBuffXOffset =
         m_kFirInitOffset % (16 / sizeof(TT_DATA)); // Remainder of m_kFirInitOffset divided by 128bit
     static constexpr unsigned int m_kArchFirLen =
@@ -156,6 +161,17 @@ class kernelFilterClass {
         m_kVOutSize; // 8 times for cint32/cint32; 4 times for other data/coeff types
     static constexpr unsigned int m_kStrInitDataNeeded = m_kFirInitOffset + TP_FIR_RANGE_LEN + m_kVOutSize - 1;
 
+    static constexpr int streamRptFactor = m_kSamplesInBuff / m_kVOutSize;
+    static constexpr int marginLoadsMappedToBuff = (m_kFirMargin % m_kSamplesInBuff) / m_kDataLoadVsize;
+    static constexpr int streamDataOffsetWithinBuff = (m_kFirInitOffset) % m_kSamplesInBuff;
+    static constexpr int streamInitNullAccs = ((TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset) / m_kVOutSize);
+    static constexpr int streamInitAccs = (CEIL(streamInitNullAccs, streamRptFactor) - streamInitNullAccs);
+
+    // Note, both of these are non-static, so all kernels update this variable in their own class instance separately -
+    // so all kernels do initial stuff.
+    alignas(32) int delay[(1024 / 8) / sizeof(int)] = {0}; // 1024b buffer to retain margin data between calls
+    int doInit = (TP_CASC_LEN == 1 || streamInitNullAccs == 0) ? 0 : 1;
+
     // Additional defensive checks
     static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0,
                   "ERROR: TP_INPUT_WINDOW_VSIZE must be an integer multiple of the number of lanes for this data type");
@@ -170,7 +186,21 @@ class kernelFilterClass {
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    TT_COEFF chess_storage(% chess_alignof(v16int16)) m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)];
+    alignas(32) TT_COEFF m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)];
+
+    static constexpr kernelPositionState m_kKernelPosEnum = getKernelPositionState(TP_KERNEL_POSITION, TP_CASC_LEN);
+    static_assert(m_kKernelPosEnum != error_kernel, "Error with TP_KERNEL_POSITION and TP_CASC_LEN");
+    // CASC_OUT can now be true for the last kernel, but we don't need to have the windowBroadcast port
+    // (The windowBroadcast port is just there to spoof an input window connection for downstream kernels)
+    static constexpr bool m_kHasCascOutputForCascadeChain =
+        (((TP_CASC_OUT == true) && m_kKernelPosEnum == last_kernel_in_chain)) ? false : true;
+
+    // CASC_IN can now be true for the first kernel, but we don't have the initial windowBroadcast section to send input
+    // data down the cascade
+    // So this bool is used to skip over the windowBroadcast function and null acc reads (normally used for cascade skew
+    // alignment).
+    static constexpr bool m_kHasCascInputFromCascadeChain =
+        (((TP_CASC_IN == true) && m_kKernelPosEnum == first_kernel_in_chain)) ? false : true;
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
@@ -184,7 +214,7 @@ class kernelFilterClass {
     void filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
-    TT_COEFF chess_storage(% chess_alignof(v8cint16))
+    alignas(32) TT_COEFF
         m_oldInTaps[CEIL(TP_FIR_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool m_coeffnEq;                                     // Are coefficients sets equal?
 
@@ -210,7 +240,8 @@ class kernelFilterClass {
         for (int i = 0; i < TP_FIR_RANGE_LEN; i++) {
             m_internalTaps[i] =
                 taps[TP_FIR_LEN - 1 -
-                     fnFirRangeOffsetAsym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TP_API>() - i];
+                     fnFirRangeOffsetAsym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API>() -
+                     i];
         }
     };
 
@@ -241,7 +272,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          int TP_MODIFY_MARGIN_OFFSET = 0>
 class fir_sr_asym : public kernelFilterClass<TT_DATA,
                                              TT_COEFF,
                                              TP_FIR_LEN,
@@ -256,25 +288,27 @@ class fir_sr_asym : public kernelFilterClass<TT_DATA,
                                              TP_USE_COEFF_RELOAD,
                                              TP_NUM_OUTPUTS,
                                              TP_DUAL_IP,
-                                             TP_API> {
+                                             TP_API,
+                                             TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            TP_CASC_IN,
-                            TP_CASC_OUT,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            TP_USE_COEFF_RELOAD,
-                            TP_NUM_OUTPUTS,
-                            TP_DUAL_IP,
-                            TP_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    TP_CASC_IN,
+                                                    TP_CASC_OUT,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_USE_COEFF_RELOAD,
+                                                    TP_NUM_OUTPUTS,
+                                                    TP_DUAL_IP,
+                                                    TP_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -290,7 +324,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -306,39 +341,42 @@ class fir_sr_asym<TT_DATA,
                   0,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             false,
-                                                             false,
-                                                             TP_FIR_RANGE_LEN,
-                                                             0,
-                                                             1,
-                                                             0,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      false,
+                                                                      false,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      0,
+                                                                      1,
+                                                                      0,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            false,
-                            false,
-                            TP_FIR_RANGE_LEN,
-                            0,
-                            1,
-                            0,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    false,
+                                                    false,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    0,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -357,7 +395,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -373,46 +412,49 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* restrict inWindow,
-                output_window<TT_DATA>* restrict outWindow,
+    void filter(input_window<TT_DATA>* __restrict inWindow,
+                output_window<TT_DATA>* __restrict outWindow,
                 const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 };
 
@@ -425,7 +467,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -441,47 +484,50 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* restrict inWindow,
-                output_window<TT_DATA>* restrict outWindow,
-                output_window<TT_DATA>* restrict outWindow2,
+    void filter(input_window<TT_DATA>* __restrict inWindow,
+                output_window<TT_DATA>* __restrict outWindow,
+                output_window<TT_DATA>* __restrict outWindow2,
                 const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 };
 
@@ -495,7 +541,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -511,39 +558,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -561,7 +611,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -577,39 +628,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -631,7 +685,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -647,47 +702,58 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_KERNEL_POSITION == TP_CASC_LEN - 1) { REGISTER_FUNCTION(fir_sr_asym::filterWithoutBroadcast); }
+        else {
+            REGISTER_FUNCTION(fir_sr_asym::filter);
+        }
+    }
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
+    // couldn't specialise class for TP_KERNEL_POSITION based on another non-type template argument (TP_CASC_LEN)
+    void filterWithoutBroadcast(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -700,7 +766,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -716,48 +783,63 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                REGISTER_FUNCTION(fir_sr_asym::filterWithoutBroadcast);
+            }
+        else {
+            REGISTER_FUNCTION(fir_sr_asym::filter);
+        }
+    }
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
+
+    void filterWithoutBroadcast(input_window<TT_DATA>* inWindow,
+                                input_stream_cacc48* inCascade,
+                                output_stream_cacc48* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -770,7 +852,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -786,39 +869,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -836,7 +922,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -852,39 +939,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -906,7 +996,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -922,48 +1013,62 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                REGISTER_FUNCTION(fir_sr_asym::filterWithoutBroadcast);
+            }
+        else {
+            REGISTER_FUNCTION(fir_sr_asym::filter);
+        }
+    }
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow,
                 const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+    void filterWithoutBroadcast(input_window<TT_DATA>* inWindow,
+                                output_stream_cacc48* outCascade,
+                                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -976,7 +1081,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -992,48 +1098,63 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_WINDOW_API> {
+                  USE_WINDOW_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_WINDOW_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_WINDOW_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                REGISTER_FUNCTION(fir_sr_asym::filterWithoutBroadcast);
+            }
+        else {
+            REGISTER_FUNCTION(fir_sr_asym::filter);
+        }
+    }
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
+
+    void filterWithoutBroadcast(input_window<TT_DATA>* inWindow,
+                                input_stream_cacc48* inCascade,
+                                output_stream_cacc48* outCascade);
 };
 
 // ----------------------------------------------------------------------------
@@ -1050,7 +1171,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1066,39 +1188,42 @@ class fir_sr_asym<TT_DATA,
                   0,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             false,
-                                                             false,
-                                                             TP_FIR_RANGE_LEN,
-                                                             0,
-                                                             1,
-                                                             0,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      false,
+                                                                      false,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      0,
+                                                                      1,
+                                                                      0,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            false,
-                            false,
-                            TP_FIR_RANGE_LEN,
-                            0,
-                            1,
-                            0,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    false,
+                                                    false,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    0,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1113,7 +1238,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1129,39 +1255,42 @@ class fir_sr_asym<TT_DATA,
                   0,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             false,
-                                                             false,
-                                                             TP_FIR_RANGE_LEN,
-                                                             0,
-                                                             1,
-                                                             0,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      false,
+                                                                      false,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      0,
+                                                                      1,
+                                                                      0,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            false,
-                            false,
-                            TP_FIR_RANGE_LEN,
-                            0,
-                            1,
-                            0,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    false,
+                                                    false,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    0,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1180,7 +1309,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1196,39 +1326,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1248,7 +1381,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1264,39 +1398,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1318,7 +1455,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1334,39 +1472,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1384,7 +1525,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1400,39 +1542,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1454,7 +1599,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1470,39 +1616,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1521,7 +1670,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1537,39 +1687,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1588,7 +1741,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1604,39 +1758,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1654,7 +1811,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1670,39 +1828,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   2,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             2,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      2,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1724,7 +1885,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1740,39 +1902,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1793,7 +1958,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1809,39 +1975,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_SINGLE,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_SINGLE,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_SINGLE,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_SINGLE,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1864,7 +2033,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1880,39 +2050,42 @@ class fir_sr_asym<TT_DATA,
                   0,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             false,
-                                                             false,
-                                                             TP_FIR_RANGE_LEN,
-                                                             0,
-                                                             1,
-                                                             0,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      false,
+                                                                      false,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      0,
+                                                                      1,
+                                                                      0,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            false,
-                            false,
-                            TP_FIR_RANGE_LEN,
-                            0,
-                            1,
-                            0,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    false,
+                                                    false,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    0,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1927,7 +2100,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1943,39 +2117,42 @@ class fir_sr_asym<TT_DATA,
                   0,
                   2,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             false,
-                                                             false,
-                                                             TP_FIR_RANGE_LEN,
-                                                             0,
-                                                             1,
-                                                             0,
-                                                             2,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      false,
+                                                                      false,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      0,
+                                                                      1,
+                                                                      0,
+                                                                      2,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            false,
-                            false,
-                            TP_FIR_RANGE_LEN,
-                            0,
-                            1,
-                            0,
-                            2,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    false,
+                                                    false,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    0,
+                                                    2,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -1997,7 +2174,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2013,39 +2191,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2066,7 +2247,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2082,39 +2264,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   2,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             2,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      2,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2137,7 +2322,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2153,39 +2339,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2206,7 +2395,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2222,39 +2412,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   2,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             2,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      2,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            2,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2277,7 +2470,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2293,39 +2487,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2344,7 +2541,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2360,39 +2558,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_FALSE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_FALSE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_FALSE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>(taps) {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2414,7 +2615,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2430,39 +2632,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2483,7 +2688,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2499,39 +2705,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   2,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_FALSE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             2,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_FALSE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      2,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2554,7 +2763,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2570,39 +2780,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_FALSE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_FALSE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_FALSE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
@@ -2624,7 +2837,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -2640,39 +2854,42 @@ class fir_sr_asym<TT_DATA,
                   USE_COEFF_RELOAD_TRUE,
                   1,
                   DUAL_IP_DUAL,
-                  USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                             TT_COEFF,
-                                                             TP_FIR_LEN,
-                                                             TP_SHIFT,
-                                                             TP_RND,
-                                                             TP_INPUT_WINDOW_VSIZE,
-                                                             CASC_IN_TRUE,
-                                                             CASC_OUT_TRUE,
-                                                             TP_FIR_RANGE_LEN,
-                                                             TP_KERNEL_POSITION,
-                                                             TP_CASC_LEN,
-                                                             USE_COEFF_RELOAD_TRUE,
-                                                             1,
-                                                             DUAL_IP_DUAL,
-                                                             USE_STREAM_API> {
+                  USE_STREAM_API,
+                  TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                      TT_COEFF,
+                                                                      TP_FIR_LEN,
+                                                                      TP_SHIFT,
+                                                                      TP_RND,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      CASC_IN_TRUE,
+                                                                      CASC_OUT_TRUE,
+                                                                      TP_FIR_RANGE_LEN,
+                                                                      TP_KERNEL_POSITION,
+                                                                      TP_CASC_LEN,
+                                                                      USE_COEFF_RELOAD_TRUE,
+                                                                      1,
+                                                                      DUAL_IP_DUAL,
+                                                                      USE_STREAM_API,
+                                                                      TP_MODIFY_MARGIN_OFFSET> {
    public:
     // Constructor
-    fir_sr_asym()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            DUAL_IP_DUAL,
-                            USE_STREAM_API>() {}
+    using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET>;
+    fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }

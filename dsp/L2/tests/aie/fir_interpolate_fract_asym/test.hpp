@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,34 @@ namespace xf {
 namespace dsp {
 namespace aie {
 namespace testcase {
+namespace dsplib = xf::dsp::aie;
+
+template <unsigned int ssr, unsigned int dual, typename plioType>
+void createPLIOFileConnections(std::array<plioType, ssr*(dual + 1)>& plioPorts, std::string filename) {
+    for (unsigned int ssrIdx = 0; ssrIdx < ssr; ++ssrIdx) {
+        for (unsigned int dualIdx = 0; dualIdx < (dual + 1); ++dualIdx) {
+            std::string filenameInternal = filename;
+
+#if (NUM_OUTPUTS == 2 && PORT_API == 0)
+            if (dual == 1 && dualIdx == 1) {
+                filenameInternal.insert(filenameInternal.length() - 4, ("_clone"));
+            } else {
+#ifdef USING_UUT
+                // Insert SSR index and dual stream index into filename before extension (.txt)
+                filenameInternal.insert(filenameInternal.length() - 4,
+                                        ("_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx)));
+#endif
+            }
+#elif defined(USING_UUT)
+            // Insert SSR index and dual stream index into filename before extension (.txt)
+            filenameInternal.insert(filenameInternal.length() - 4,
+                                    ("_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx)));
+#endif
+            plioPorts[ssrIdx * (dual + 1) + dualIdx] =
+                plioType::create("PLIO_" + filenameInternal, adf::plio_32_bits, filenameInternal);
+        }
+    }
+}
 
 class test_graph : public graph {
    private:
@@ -49,12 +77,17 @@ class test_graph : public graph {
     COEFF_TYPE taps[FIR_LEN];
 
    public:
-    port<input> in;
-    port<output> out;
-#if (NUM_OUTPUTS == 2)
-    port<output> out2;
+#ifndef P_SSR
+    static constexpr int P_SSR = 1; // until SSR is supported
 #endif
-#if (USE_COEFF_RELOAD == 1) // Single kernel, reloadable coefficients
+#ifdef USING_UUT
+    static constexpr int DUAL_INPUT_SAMPLES = (PORT_API == 1) && (DUAL_IP == 1) ? 1 : 0;
+#else
+    static constexpr int DUAL_INPUT_SAMPLES = 0;
+#endif
+    std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in; // 0? dual_ip - not supported by sr_sym
+    std::array<output_plio, P_SSR * NUM_OUTPUTS> out;          // NUM_OUTPUTS forces to 1 for ref
+#if (USE_COEFF_RELOAD == 1)                                    // Single kernel, reloadable coefficients
     port<input> coeff;
 #endif
 
@@ -128,8 +161,12 @@ class test_graph : public graph {
 #endif
 
         // Make connections
+        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(
+            in, QUOTE(INPUT_FILE)); // fir_sr_sym does not support dual input
+        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE));
+
         // Size of window in Bytes.
-        connect<>(in, firGraph.in);
+        connect<>(in[0].out[0], firGraph.in);
 #if (USE_CHAIN == 1 && NUM_OUTPUTS == 1)
         // Chained connections mutually explusive with multiple outputs.
         dsplib::fir::interpolate_fract_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, INTERPOLATE_FACTOR,
@@ -137,11 +174,11 @@ class test_graph : public graph {
                                                        INPUT_SAMPLES * INTERPOLATE_FACTOR, CASC_LEN>
             firGraph2(m_taps_v);
         connect<>(firGraph.out, firGraph2.in);
-        connect<>(firGraph2.out, out);
+        connect<>(firGraph2.out, out[0].in[0]);
 #else
-        connect<>(firGraph.out, out);
+        connect<>(firGraph.out, out[0].in[0]);
 #if (NUM_OUTPUTS == 2)
-        connect<>(firGraph.out2, out2);
+        connect<>(firGraph.out2, out[1].in[0]);
 #endif
 #endif
 #if (USE_COEFF_RELOAD == 1)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,13 @@
 #ifndef _DSPLIB_FIR_UTILS_HPP_
 #define _DSPLIB_FIR_UTILS_HPP_
 
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
+
 /* This file exists to hold utility functions for kernels in general, not specific
    to one library element. Also, the functions in this file do not use vector types
    or intrinsics so are fit for use by aiecompiler and kernel constructors.
@@ -29,7 +36,9 @@
 #ifndef FIR_LEN_MAX
 #define FIR_LEN_MAX 240
 #endif
-#define FIR_LEN_MIN 4
+// Realistically this FIR_RANGE_LEN_MIN, which for cfloats should be 2; but we always pad up to at least numCols so
+// lower is fine.
+#define FIR_LEN_MIN 1
 #define SHIFT_MAX 62
 #define SHIFT_MIN 0
 #define ROUND_MAX 7
@@ -37,8 +46,6 @@
 #define INTERPOLATE_FACTOR_MAX 16
 #define INTERPOLATE_FACTOR_MIN 1
 
-#define FRACT_INTERPOLATE_FACTOR_MAX 15
-#define FRACT_INTERPOLATE_FACTOR_MIN 3
 #define DECIMATE_FACTOR_MAX 7
 #define DECIMATE_FACTOR_MIN 2
 
@@ -69,393 +76,433 @@
 #define MIXER_MODE_1 1
 #define MIXER_MODE_2 2
 
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
+
 namespace xf {
 namespace dsp {
 namespace aie {
 
 // function to return the size of the acc,
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnAccSize() {
+INLINE_DECL constexpr unsigned int fnAccSize() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnAccSize<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnAccSize<int16, int16>() {
     return 48;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cint16, int16>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cint16, int16>() {
     return 48;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cint16, cint16>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cint16, cint16>() {
     return 48;
 };
 template <>
-inline constexpr unsigned int fnAccSize<int32, int16>() {
+INLINE_DECL constexpr unsigned int fnAccSize<int32, int16>() {
     return 80;
 };
 template <>
-inline constexpr unsigned int fnAccSize<int32, int32>() {
+INLINE_DECL constexpr unsigned int fnAccSize<int32, int32>() {
     return 80;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cint32, int16>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cint32, int16>() {
     return 80;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cint32, cint16>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cint32, cint16>() {
     return 80;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cint32, int32>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cint32, int32>() {
     return 80;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cint32, cint32>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cint32, cint32>() {
     return 80;
 };
 template <>
-inline constexpr unsigned int fnAccSize<float, float>() {
+INLINE_DECL constexpr unsigned int fnAccSize<float, float>() {
     return 32;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cfloat, float>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cfloat, float>() {
     return 32;
 };
 template <>
-inline constexpr unsigned int fnAccSize<cfloat, cfloat>() {
+INLINE_DECL constexpr unsigned int fnAccSize<cfloat, cfloat>() {
     return 32;
 };
 
 // function to return the number of 768-bit acc's lanes for a type combo
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnNumLanes() {
+INLINE_DECL constexpr unsigned int fnNumLanes() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnNumLanes<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<int16, int16>() {
     return 16;
 }; // 16x2
 template <>
-inline constexpr unsigned int fnNumLanes<cint16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cint16, int16>() {
     return 8;
 }; // 8x2
 template <>
-inline constexpr unsigned int fnNumLanes<cint16, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cint16, cint16>() {
     return 8;
 }; // 8x1
 template <>
-inline constexpr unsigned int fnNumLanes<int32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<int32, int16>() {
     return 8;
 }; // 8x2
 template <>
-inline constexpr unsigned int fnNumLanes<int32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<int32, int32>() {
     return 8;
 }; // 8x1
 template <>
-inline constexpr unsigned int fnNumLanes<cint32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cint32, int16>() {
     return 4;
 }; // 4x2
 template <>
-inline constexpr unsigned int fnNumLanes<cint32, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cint32, cint16>() {
     return 4;
 }; // 4x1
 template <>
-inline constexpr unsigned int fnNumLanes<cint32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cint32, int32>() {
     return 4;
 }; // 4x1
 template <>
-inline constexpr unsigned int fnNumLanes<cint32, cint32>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cint32, cint32>() {
     return 2;
 }; // 2x1
 template <>
-inline constexpr unsigned int fnNumLanes<float, float>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<float, float>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanes<cfloat, float>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cfloat, float>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanes<cfloat, cfloat>() {
+INLINE_DECL constexpr unsigned int fnNumLanes<cfloat, cfloat>() {
     return 4;
 };
 
 // function to return the number of 384-bit acc's lanes for a type combo
-// 80-bit accs (for 32-bit input types) are always 768-bit
+// 80-bit accs (for 32-bit input types) are always 768-bit, apart from cint32/cint32 which offers a short, 384-bit acc
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnNumLanes384() {
+INLINE_DECL constexpr unsigned int fnNumLanes384() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnNumLanes384<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<int16, int16>() {
     return 8;
 }; // 8x4
 template <>
-inline constexpr unsigned int fnNumLanes384<cint16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cint16, int16>() {
     return 4;
 }; // 4x4
 template <>
-inline constexpr unsigned int fnNumLanes384<cint16, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cint16, cint16>() {
     return 4;
 }; // 4x2
 template <>
-inline constexpr unsigned int fnNumLanes384<int32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<int32, int16>() {
     return 8;
 }; // 8x2 - 80-bit
 template <>
-inline constexpr unsigned int fnNumLanes384<int32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<int32, int32>() {
     return 4;
 }; // 4x2
 template <>
-inline constexpr unsigned int fnNumLanes384<cint32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cint32, int16>() {
     return 4;
 }; // 4x2
 template <>
-inline constexpr unsigned int fnNumLanes384<cint32, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cint32, cint16>() {
     return 4;
 }; // 4x1
 template <>
-inline constexpr unsigned int fnNumLanes384<cint32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cint32, int32>() {
     return 4;
 }; // 4x1 or 2x2
 template <>
-inline constexpr unsigned int fnNumLanes384<cint32, cint32>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cint32, cint32>() {
     return 2;
 }; // 2x1
 template <>
-inline constexpr unsigned int fnNumLanes384<float, float>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<float, float>() {
     return 8;
 };
 template <>
-inline constexpr unsigned int fnNumLanes384<cfloat, float>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cfloat, float>() {
     return 4;
 };
 template <>
-inline constexpr unsigned int fnNumLanes384<cfloat, cfloat>() {
+INLINE_DECL constexpr unsigned int fnNumLanes384<cfloat, cfloat>() {
     return 4;
 };
 
 // function to return the number of columns for a tall-narrow atomic intrinsic for a type combo
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnNumCols() {
+INLINE_DECL constexpr unsigned int fnNumCols() {
     return sizeof(TT_COEFF) == 2 ? 2 : 1;
 };
 
 // function to return the number of columns for a short-wide atomic intrinsic for a type combo
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnNumCols384() {
+INLINE_DECL constexpr unsigned int fnNumCols384() {
     return 2 * (sizeof(TT_COEFF) == 2 ? 2 : 1);
 };
 template <>
-inline constexpr unsigned int fnNumCols384<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<int16, int16>() {
     return 4;
 }; // 8x4
 template <>
-inline constexpr unsigned int fnNumCols384<cint16, int16>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cint16, int16>() {
     return 4;
 }; // 4x4
 template <>
-inline constexpr unsigned int fnNumCols384<cint16, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cint16, cint16>() {
     return 2;
 }; // 4x2
 template <>
-inline constexpr unsigned int fnNumCols384<int32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<int32, int16>() {
     return 2;
 }; // 8x2 - 80-bit
 template <>
-inline constexpr unsigned int fnNumCols384<int32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<int32, int32>() {
     return 2;
 }; // 4x2 or 8x1
 template <>
-inline constexpr unsigned int fnNumCols384<cint32, int16>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cint32, int16>() {
     return 2;
 }; // 4x2
 template <>
-inline constexpr unsigned int fnNumCols384<cint32, cint16>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cint32, cint16>() {
     return 1;
 }; // 4x1
 template <>
-inline constexpr unsigned int fnNumCols384<cint32, int32>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cint32, int32>() {
     return 1;
 }; // 4x1 or 2x2
 template <>
-inline constexpr unsigned int fnNumCols384<cint32, cint32>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cint32, cint32>() {
     return 1;
 }; // 2x1
 template <>
-inline constexpr unsigned int fnNumCols384<float, float>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<float, float>() {
     return 1;
 };
 template <>
-inline constexpr unsigned int fnNumCols384<cfloat, float>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cfloat, float>() {
     return 1;
 };
 template <>
-inline constexpr unsigned int fnNumCols384<cfloat, cfloat>() {
+INLINE_DECL constexpr unsigned int fnNumCols384<cfloat, cfloat>() {
     return 1;
 };
 
+// Define Data Width read from stream. Data types operating on long, 768-bit accs require 256-bits of input data.
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
+    return 128;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<int32, int16>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cint32, int16>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cint32, int32>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cint32, cint16>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<float, float>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, float>() {
+    return 256;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
+    return 256;
+};
+
 namespace fir {
-// Hardware constants and functions.
-static constexpr unsigned int kAIEYRegSizeInBytes = 128; // The size of a Y register in bytes
 
 // Functions to support defensive checks
 enum { enumUnknownType = 0, enumInt16, enumCint16, enumInt32, enumCint32, enumFloat, enumCfloat };
 // function to return an enumeration of the data or coefficient type
 template <typename TT_INPUT>
-inline constexpr unsigned int fnEnumType() {
+INLINE_DECL constexpr unsigned int fnEnumType() {
     return enumUnknownType;
 }; // returns 0 as default. This can be trapped as an error;
 template <>
-inline constexpr unsigned int fnEnumType<int16>() {
+INLINE_DECL constexpr unsigned int fnEnumType<int16>() {
     return enumInt16;
 };
 template <>
-inline constexpr unsigned int fnEnumType<cint16>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cint16>() {
     return enumCint16;
 };
 template <>
-inline constexpr unsigned int fnEnumType<int32>() {
+INLINE_DECL constexpr unsigned int fnEnumType<int32>() {
     return enumInt32;
 };
 template <>
-inline constexpr unsigned int fnEnumType<cint32>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cint32>() {
     return enumCint32;
 };
 template <>
-inline constexpr unsigned int fnEnumType<float>() {
+INLINE_DECL constexpr unsigned int fnEnumType<float>() {
     return enumFloat;
 };
 template <>
-inline constexpr unsigned int fnEnumType<cfloat>() {
+INLINE_DECL constexpr unsigned int fnEnumType<cfloat>() {
     return enumCfloat;
 };
 
 // Function to trap illegal precision of DATA vs COEFF
 // This defaults to legal which would be fail-unsafe if not used in conjunction with fnEnumType trap
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnTypeCheckDataCoeffSize() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffSize() {
     return 1;
 }; // default here is a legal combo
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffSize<int16, int32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffSize<int16, int32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffSize<int16, cint32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffSize<int16, cint32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffSize<cint16, int32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffSize<cint16, int32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffSize<cint16, cint32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffSize<cint16, cint32>() {
     return 0;
 };
 
 // Function to trap illegal real DATA vs complex COEFF
 // This defaults to legal which would be fail-unsage is not used in conjunction with functions above.
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnTypeCheckDataCoeffCmplx() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffCmplx() {
     return 1;
 }; // default here is a legal combo
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffCmplx<int16, cint16>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffCmplx<int16, cint16>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffCmplx<int32, cint32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffCmplx<int32, cint32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffCmplx<int32, cint16>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffCmplx<int32, cint16>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffCmplx<float, cfloat>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffCmplx<float, cfloat>() {
     return 0;
 };
 
 // Function to trap illegal combo of real and float types
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt() {
     return 1;
 }; // default here is a legal combo
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<int16, float>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<int16, float>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<int16, cfloat>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<int16, cfloat>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint16, float>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint16, float>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint16, cfloat>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint16, cfloat>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<int32, float>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<int32, float>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<int32, cfloat>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<int32, cfloat>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint32, float>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint32, float>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint32, cfloat>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cint32, cfloat>() {
     return 0;
 };
 
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, int16>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, int16>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, int16>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, int16>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, cint16>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, cint16>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, cint16>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, cint16>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, int32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, int32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, int32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, int32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, cint32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<float, cint32>() {
     return 0;
 };
 template <>
-inline constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, cint32>() {
+INLINE_DECL constexpr unsigned int fnTypeCheckDataCoeffFltInt<cfloat, cint32>() {
     return 0;
 };
 
 // Function to trap illegal  types
 template <typename TT_DATA, typename TT_COEFF>
-inline constexpr unsigned int fnUnsupportedTypeCombo() {
+INLINE_DECL constexpr unsigned int fnUnsupportedTypeCombo() {
     return 1;
 }; // default here is a legal combo
 template <>
-inline constexpr unsigned int fnUnsupportedTypeCombo<int16, int16>() {
+INLINE_DECL constexpr unsigned int fnUnsupportedTypeCombo<int16, int16>() {
     return 0;
 };
 
@@ -465,29 +512,29 @@ struct T_inputIF {};
 template <typename T_D>
 struct T_inputIF<CASC_IN_FALSE, T_D, 0> {
     input_window<T_D>* inWindow;
-    input_stream<T_D>* restrict inStream;
-    input_stream<T_D>* restrict inStream2;
+    input_stream<T_D>* __restrict inStream;
+    input_stream<T_D>* __restrict inStream2;
 };
 template <typename T_D>
 struct T_inputIF<CASC_IN_TRUE, T_D, 0> {
     input_window<T_D>* inWindow;
-    input_stream<T_D>* restrict inStream;
-    input_stream<T_D>* restrict inStream2;
+    input_stream<T_D>* __restrict inStream;
+    input_stream<T_D>* __restrict inStream2;
     input_stream_cacc48* inCascade;
 };
 template <typename T_D>
 struct T_inputIF<CASC_IN_FALSE, T_D, 1> {
     input_window<T_D>* inWindow;
     input_window<T_D>* inWindowReverse;
-    input_stream<T_D>* restrict inStream;
-    input_stream<T_D>* restrict inStream2;
+    input_stream<T_D>* __restrict inStream;
+    input_stream<T_D>* __restrict inStream2;
 };
 template <typename T_D>
 struct T_inputIF<CASC_IN_TRUE, T_D, 1> {
     input_window<T_D>* inWindow;
     input_window<T_D>* inWindowReverse;
-    input_stream<T_D>* restrict inStream;
-    input_stream<T_D>* restrict inStream2;
+    input_stream<T_D>* __restrict inStream;
+    input_stream<T_D>* __restrict inStream2;
     input_stream_cacc48* inCascade;
 };
 
@@ -496,105 +543,59 @@ template <bool T_CASC_IN, typename T_D>
 struct T_outputIF {};
 template <typename T_D>
 struct T_outputIF<CASC_OUT_FALSE, T_D> {
-    output_window<T_D>* restrict outWindow;
-    output_window<T_D>* restrict outWindow2;
-    output_stream<T_D>* restrict outStream;
-    output_stream<T_D>* restrict outStream2;
+    output_window<T_D>* __restrict outWindow;
+    output_window<T_D>* __restrict outWindow2;
+    output_stream<T_D>* __restrict outStream;
+    output_stream<T_D>* __restrict outStream2;
 };
 template <typename T_D>
 struct T_outputIF<CASC_OUT_TRUE, T_D> {
     output_stream_cacc48* outCascade;
-    output_window<T_D>* broadcastWindow;
+    output_window<T_D>* broadcastWindow; // broadcastWindow can just be ignored when it's the last kernel
 };
 
-// // IF input type
-// template<bool T_CASC_IN, typename T_D, unsigned int T_DUAL_IP = 0> struct T_inputIF   {};
-// template<> struct T_inputIF<CASC_IN_FALSE, int16,  0>  {input_window<int16 >  * inWindow;};
-// template<> struct T_inputIF<CASC_IN_FALSE, int32,  0>  {input_window<int32 >  * inWindow;};
-// template<> struct T_inputIF<CASC_IN_FALSE, cint16, 0>  {input_window<cint16>  * inWindow;};
-// template<> struct T_inputIF<CASC_IN_FALSE, cint32, 0>  {input_window<cint32>  * inWindow;};
-// template<> struct T_inputIF<CASC_IN_FALSE, float,  0>  {input_window<float >  * inWindow;};
-// template<> struct T_inputIF<CASC_IN_FALSE, cfloat, 0>  {input_window<cfloat>  * inWindow;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  int16,  0>  {input_window<int16 >  * inWindow;
-// input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  int32,  0>  {input_window<int32 >  * inWindow;
-// input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  cint16, 0>  {input_window<cint16>  * inWindow;
-// input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  cint32, 0>  {input_window<cint32>  * inWindow;
-// input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  float,  0>  {input_window<float >  * inWindow;
-// input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  cfloat, 0>  {input_window<cfloat>  * inWindow;
-// input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_FALSE, int16,  1>  {input_window<int16 >  * inWindow; input_window<int16 >  *
-// inWindowReverse;};
-// template<> struct T_inputIF<CASC_IN_FALSE, int32,  1>  {input_window<int32 >  * inWindow; input_window<int32 >  *
-// inWindowReverse;};
-// template<> struct T_inputIF<CASC_IN_FALSE, cint16, 1>  {input_window<cint16>  * inWindow; input_window<cint16>  *
-// inWindowReverse;};
-// template<> struct T_inputIF<CASC_IN_FALSE, cint32, 1>  {input_window<cint32>  * inWindow; input_window<cint32>  *
-// inWindowReverse;};
-// template<> struct T_inputIF<CASC_IN_FALSE, float,  1>  {input_window<float >  * inWindow; input_window<float >  *
-// inWindowReverse;};
-// template<> struct T_inputIF<CASC_IN_FALSE, cfloat, 1>  {input_window<cfloat>  * inWindow; input_window<cfloat>  *
-// inWindowReverse;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  int16,  1>  {input_window<int16 >  * inWindow; input_window<int16 >  *
-// inWindowReverse; input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  int32,  1>  {input_window<int32 >  * inWindow; input_window<int32 >  *
-// inWindowReverse; input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  cint16, 1>  {input_window<cint16>  * inWindow; input_window<cint16>  *
-// inWindowReverse; input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  cint32, 1>  {input_window<cint32>  * inWindow; input_window<cint32>  *
-// inWindowReverse; input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  float,  1>  {input_window<float >  * inWindow; input_window<float >  *
-// inWindowReverse; input_stream_cacc48 * inCascade;};
-// template<> struct T_inputIF<CASC_IN_TRUE,  cfloat, 1>  {input_window<cfloat>  * inWindow; input_window<cfloat>  *
-// inWindowReverse; input_stream_cacc48 * inCascade;};
+// Handy enum for if conditions
+enum kernelPositionState {
+    middle_kernel_in_chain = 0,
+    first_kernel_in_chain,
+    last_kernel_in_chain,
+    only_kernel,
+    error_kernel
+};
 
-// // IF output type
-// template<bool T_CASC_IN, typename T_D> struct T_outputIF   {};
-// template<> struct T_outputIF<CASC_OUT_FALSE, int16 >  {output_window<int16 > * restrict outWindow;
-// output_window<int16 > * restrict outWindow2; output_stream<int16 > * restrict outStream; output_stream<int16 > *
-// restrict outStream2;};
-// template<> struct T_outputIF<CASC_OUT_FALSE, int32 >  {output_window<int32 > * restrict outWindow;
-// output_window<int32 > * restrict outWindow2; output_stream<int32 > * restrict outStream; output_stream<int32 > *
-// restrict outStream2;};
-// template<> struct T_outputIF<CASC_OUT_FALSE, cint16>  {output_window<cint16> * restrict outWindow;
-// output_window<cint16> * restrict outWindow2; output_stream<cint16> * restrict outStream; output_stream<cint16> *
-// restrict outStream2;};
-// template<> struct T_outputIF<CASC_OUT_FALSE, cint32>  {output_window<cint32> * restrict outWindow;
-// output_window<cint32> * restrict outWindow2; output_stream<cint32> * restrict outStream; output_stream<cint32> *
-// restrict outStream2;};
-// template<> struct T_outputIF<CASC_OUT_FALSE, float >  {output_window<float > * restrict outWindow;
-// output_window<float > * restrict outWindow2; output_stream<float > * restrict outStream; output_stream<float > *
-// restrict outStream2;};
-// template<> struct T_outputIF<CASC_OUT_FALSE, cfloat>  {output_window<cfloat> * restrict outWindow;
-// output_window<cfloat> * restrict outWindow2; output_stream<cfloat> * restrict outStream; output_stream<cfloat> *
-// restrict outStream2;};
-// template<> struct T_outputIF<CASC_OUT_TRUE, int16 >   {output_stream_cacc48   * outCascade; output_window<int16 >  *
-// broadcastWindow;};
-// template<> struct T_outputIF<CASC_OUT_TRUE, int32 >   {output_stream_cacc48   * outCascade; output_window<int32 >  *
-// broadcastWindow;};
-// template<> struct T_outputIF<CASC_OUT_TRUE, cint16>   {output_stream_cacc48   * outCascade; output_window<cint16>  *
-// broadcastWindow;};
-// template<> struct T_outputIF<CASC_OUT_TRUE, cint32>   {output_stream_cacc48   * outCascade; output_window<cint32>  *
-// broadcastWindow;};
-// template<> struct T_outputIF<CASC_OUT_TRUE, float >   {output_stream_cacc48   * outCascade; output_window<float >  *
-// broadcastWindow;};
-// template<> struct T_outputIF<CASC_OUT_TRUE, cfloat>   {output_stream_cacc48   * outCascade; output_window<cfloat>  *
-// broadcastWindow;};
-
+// Generate enum defined above for a given kernelPosition and cascade length. Return error_kernel for invalid configs,
+// which should have a static assert.
+constexpr kernelPositionState getKernelPositionState(unsigned int kernelPosition, unsigned int casc_length) {
+    if (casc_length == 1) {
+        if (kernelPosition == 0) return kernelPositionState::only_kernel;
+        if (kernelPosition > 0) return kernelPositionState::error_kernel;
+    } else if (casc_length > 1) {
+        if (kernelPosition == casc_length - 1) {
+            return kernelPositionState::last_kernel_in_chain;
+        } else if (kernelPosition == 0) {
+            return kernelPositionState::first_kernel_in_chain;
+        } else if (kernelPosition < casc_length) {
+            return kernelPositionState::middle_kernel_in_chain;
+        } else {
+            // kernelPosiiton is greater than cascadeLength
+            return kernelPositionState::error_kernel;
+        }
+    } else {
+        return kernelPositionState::error_kernel;
+    }
+    // anything else is an error
+    return kernelPositionState::error_kernel;
+};
 //----------------------------------------------------------------------
 // nullElem
 template <typename T_RDATA>
-inline T_RDATA nullElem() {
+INLINE_DECL T_RDATA nullElem() {
     return 0;
 };
 
 // Null cint16_t element
 template <>
-inline cint16_t nullElem() {
+INLINE_DECL cint16_t nullElem() {
     cint16_t d;
     d.real = 0;
     d.imag = 0;
@@ -603,7 +604,7 @@ inline cint16_t nullElem() {
 
 // Null cint32 element
 template <>
-inline cint32 nullElem() {
+INLINE_DECL cint32 nullElem() {
     cint32 d;
     d.real = 0;
     d.imag = 0;
@@ -612,13 +613,13 @@ inline cint32 nullElem() {
 
 // Null float element
 template <>
-inline float nullElem() {
+INLINE_DECL float nullElem() {
     return 0.0;
 };
 
 // Null cint32 element
 template <>
-inline cfloat nullElem() {
+INLINE_DECL cfloat nullElem() {
     cfloat retVal;
 
     retVal.real = 0.0;
@@ -628,24 +629,24 @@ inline cfloat nullElem() {
 
 // function to return Margin length.
 template <size_t TP_FIR_LEN, typename TT_DATA>
-inline constexpr unsigned int fnFirMargin() {
+INLINE_DECL constexpr unsigned int fnFirMargin() {
     return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
 };
 
 // Truncation. This function rounds x down to the next multiple of y (which may be x)
-inline constexpr int fnTrunc(unsigned int x, unsigned int y) {
+INLINE_DECL constexpr int fnTrunc(unsigned int x, unsigned int y) {
     return TRUNC(x, y);
 };
 
 // Calculate FIR range for cascaded kernel
 template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, int TP_Rnd = 1>
-inline constexpr int fnFirRange() {
+INLINE_DECL constexpr int fnFirRange() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     return ((fnTrunc(TP_FL, TP_Rnd * TP_CL) / TP_CL) +
             ((TP_FL - fnTrunc(TP_FL, TP_Rnd * TP_CL)) >= TP_Rnd * (TP_KP + 1) ? TP_Rnd : 0));
 }
 template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, int TP_Rnd = 1>
-inline constexpr int fnFirRangeRem() {
+INLINE_DECL constexpr int fnFirRangeRem() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     // this is for last in the cascade
     return ((fnTrunc(TP_FL, TP_Rnd * TP_CL) / TP_CL) + ((TP_FL - fnTrunc(TP_FL, TP_Rnd * TP_CL)) % TP_Rnd));
@@ -653,7 +654,7 @@ inline constexpr int fnFirRangeRem() {
 
 // Calculate FIR range offset for cascaded kernel
 template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, int TP_Rnd = 1, int TP_Sym = 1>
-inline constexpr int fnFirRangeOffset() {
+INLINE_DECL constexpr int fnFirRangeOffset() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     return (TP_KP * (fnTrunc(TP_FL, TP_Rnd * TP_CL) / TP_CL) +
             ((TP_FL - fnTrunc(TP_FL, TP_Rnd * TP_CL)) >= TP_Rnd * TP_KP
@@ -664,13 +665,13 @@ inline constexpr int fnFirRangeOffset() {
 
 //
 template <typename T_D>
-inline T_D formatUpshiftCt(T_D inVal) {
+INLINE_DECL T_D formatUpshiftCt(T_D inVal) {
     // Do nothing for types other than 16-bit integers
     return inVal;
 }
 
 template <>
-inline int16 formatUpshiftCt(int16 inVal) {
+INLINE_DECL int16 formatUpshiftCt(int16 inVal) {
     const unsigned int kMaxUpshiftVal = 16;
     int16 retVal;
     // Make sure value is within UCT supported range (0 - 16).
@@ -678,7 +679,7 @@ inline int16 formatUpshiftCt(int16 inVal) {
     return retVal;
 }
 template <>
-inline cint16 formatUpshiftCt(cint16 inVal) {
+INLINE_DECL cint16 formatUpshiftCt(cint16 inVal) {
     const unsigned int kMaxUpshiftVal = 16;
     cint16 retVal;
     // Make sure value is within UCT supported range (0 - 16).
@@ -688,13 +689,13 @@ inline cint16 formatUpshiftCt(cint16 inVal) {
 }
 
 template <typename T_D>
-inline int16 getUpshiftCt(T_D inVal) {
+INLINE_DECL int16 getUpshiftCt(T_D inVal) {
     // Do nothing for types other than 16-bit integers
     return 0;
 }
 
 template <>
-inline int16 getUpshiftCt(int16 inVal) {
+INLINE_DECL int16 getUpshiftCt(int16 inVal) {
     const unsigned int kMaxUpshiftVal = 16;
     int16 retVal;
     // Make sure value is within UCT supported range (0 - 16).
@@ -702,7 +703,7 @@ inline int16 getUpshiftCt(int16 inVal) {
     return retVal;
 }
 template <>
-inline int16 getUpshiftCt(cint16 inVal) {
+INLINE_DECL int16 getUpshiftCt(cint16 inVal) {
     const unsigned int kMaxUpshiftVal = 16;
     int16 retVal;
     // Make sure value is within UCT supported range (0 - 16).
