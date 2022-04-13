@@ -1,0 +1,1028 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::genomics::computePipeline",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::computePipeline",
+                "display_name": "computePipeline",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::computePE",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::computePE",
+                "display_name": "computePE",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::computePEWrap",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::computePEWrap",
+                "display_name": "computePEWrap",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::computeEngine",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::computeEngine",
+                "display_name": "computeEngine",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::accEngine",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::accEngine",
+                "display_name": "accEngine",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::accBusEngine",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::accBusEngine",
+                "display_name": "accBusEngine",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "PU_NUM",
+                        "type": "unsigned int",
+			"description": "number of process engines in grid"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::dispatcher",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::dispatcher",
+                "display_name": "dispatcher",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "PU_NUM",
+                        "type": "unsigned int",
+			"description": "number of process engines in grid"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::computePairhmm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::computePairhmm",
+                "display_name": "computePairhmm",
+                "brief": "PairHMM module to compute the likelihood.",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "PU_NUM",
+                        "type": "unsigned int",
+                        "description": "number of process engines in grid"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "input_data",
+                        "direction": "",
+                        "type": "ap_uint< 512 > *"
+                    },
+                    {
+                        "name": "numRead",
+                        "direction": "",
+                        "type": "short"
+                    },
+                    {
+                        "name": "numHap",
+                        "direction": "",
+                        "type": "short"
+                    },
+                    {
+                        "name": "iterNum",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "output_data",
+                        "direction": "",
+                        "type": "float *"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::genomics::pmm_core",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::pmm_core",
+                "display_name": "pmm_core",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "phmmmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "PU_NUM",
+                        "type": "unsigned int",
+			"description": "number of process engines in grid"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::write_data_ch_blk",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::write_data_ch_blk",
+                "display_name": "write_data_ch_blk",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::read_data_ch_blk",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::read_data_ch_blk",
+                "display_name": "read_data_ch_blk",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::write_addr_ch_blk",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::write_addr_ch_blk",
+                "display_name": "write_addr_ch_blk",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::read_addr_ch_nblk",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::read_addr_ch_nblk",
+                "display_name": "read_addr_ch_nblk",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::write_ctrl_ch_nblk",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::write_ctrl_ch_nblk",
+                "display_name": "write_ctrl_ch_nblk",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::read_ctrl_ch_nblk",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::read_ctrl_ch_nblk",
+                "display_name": "read_ctrl_ch_nblk",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::vector_uin16_sel",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::vector_uin16_sel",
+                "display_name": "vector_uin16_sel",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::cnt_table_lookup",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::cnt_table_lookup",
+                "display_name": "cnt_table_lookup",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::intv_init",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::intv_init",
+                "display_name": "intv_init",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::bwt_occ4_fpga",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::bwt_occ4_fpga",
+                "display_name": "bwt_occ4_fpga",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::bwt_extend_fpga_addr",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::bwt_extend_fpga_addr",
+                "display_name": "bwt_extend_fpga_addr",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::bwt_extend_fpga_data",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::bwt_extend_fpga_data",
+                "display_name": "bwt_extend_fpga_data",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::addr_to_data",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::addr_to_data",
+                "display_name": "addr_to_data",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::enqueue_addr",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::enqueue_addr",
+                "display_name": "enqueue_addr",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::dequeue_data",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::dequeue_data",
+                "display_name": "dequeue_data",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::bwt_extend_fpga_opt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::bwt_extend_fpga_opt",
+                "display_name": "bwt_extend_fpga_opt",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::input_dup",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::input_dup",
+                "display_name": "input_dup",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::forward_extension",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::forward_extension",
+                "display_name": "forward_extension",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::backward_extension",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::backward_extension",
+                "display_name": "backward_extension",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::long_smem_forward_extension",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::long_smem_forward_extension",
+                "display_name": "long_smem_forward_extension",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::long_smem_backward_extension",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::long_smem_backward_extension",
+                "display_name": "long_smem_backward_extension",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::all_like_forward_extension",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::all_like_forward_extension",
+                "display_name": "all_like_forward_extension",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::output_stream",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::output_stream",
+                "display_name": "output_stream",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::smem_flow",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::smem_flow",
+                "display_name": "smem_flow",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::bwt_manager",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::bwt_manager",
+                "display_name": "bwt_manager",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::ddr_streaming",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::ddr_streaming",
+                "display_name": "ddr_streaming",
+                "brief": "SMEM module handles SMEM operation and also I/O.",
+                "target_domain": "",
+                "header_file_name": [
+                    "smemmodules.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "bwt_primary",
+                        "direction": "",
+                        "type": "bwtint_t"
+                    },
+                    {
+                        "name": "L2",
+                        "direction": "",
+                        "type": "bwtint_t[5],"
+                    },
+                    {
+                        "name": "seq",
+                        "direction": "",
+                        "type": "byte_t *_len,"
+                    },
+                    {
+                        "name": "seq_len",
+                        "direction": "",
+                        "type": "smem_t *mem, uint_t *mem_num, int batch_size, data_bundle *bwt, bwtint_t bwt_si"
+                    },
+                    {
+                        "name": "mem",
+                        "direction": "",
+                        "type": "s_num,"
+                    },
+                    {
+                        "name": "mem_num",
+                        "direction": "",
+                        "type": "int batch_size, data_bundle *bwt, bwtint_t bwt_s"
+                    },
+                    {
+                        "name": "batch_size",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "bwt",
+                        "direction": "",
+                        "type": "data_bundle *"
+                    },
+                    {
+                        "name": "bwt_size",
+                        "direction": "",
+                        "type": "_s"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::genomics::initPE",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::initPE",
+                "display_name": "initPE",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::updatePE",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::updatePE",
+                "display_name": "updatePE",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::executePE",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::executePE",
+                "display_name": "executePE",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::executeFirstPE",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::executeFirstPE",
+                "display_name": "executeFirstPE",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::swCoreB",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::swCoreB",
+                "display_name": "swCoreB",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "FACTOR",
+                        "type": "int",
+                        "description": "number of process engines"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::swSystolicBlocking",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::swSystolicBlocking",
+                "display_name": "swSystolicBlocking",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::sw",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::sw",
+                "display_name": "sw",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::downReadStream",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::downReadStream",
+                "display_name": "downReadStream",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "DATAWIDTH",
+                        "type": "int",
+                        "description": "input data width"
+                    },
+                    {
+                        "name": "READSIZE",
+                        "type": "int",
+                        "description": "input data size"
+                    },
+                    {
+                        "name": "FACTOR",
+                        "type": "int",
+                        "description": "number of process engines"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::downRefStream",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::downRefStream",
+                "display_name": "downRefStream",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "DATAWIDTH",
+                        "type": "int",
+                        "description": "input data width"
+                    },
+                    {
+                        "name": "REFSIZE",
+                        "type": "int",
+                        "description": "input reference data size"
+
+                    },
+                    {
+                        "name": "FACTOR",
+                        "type": "int",
+                        "description": "number of process engines"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::genomics::swInt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::genomics::swInt",
+                "display_name": "swInt",
+                "brief": "Smithwaterman module computes the max score.",
+                "target_domain": "",
+                "header_file_name": [
+                    "swmaxscore_compute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "DATAWIDTH",
+                        "type": "int",
+                        "description": "input data width"
+                    },
+                    {
+                        "name": "FACTOR",
+                        "type": "int",
+                        "description": "number of process engines"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "inRefStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< DATAWIDTH > > &"
+                    },
+                    {
+                        "name": "refprocessDone",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "inReadStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< DATAWIDTH > > &"
+                    },
+                    {
+                        "name": "readprocessDone",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}

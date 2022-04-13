@@ -1,0 +1,117 @@
+{
+    "name": "Xilinx Pairwise Hidden Markov Model Test (pairhmm)", 
+    "description": [
+        "Xilinx PairHMM is an hardware accelerated algorithm used as part of genomic pipelines"
+    ], 
+    "flow": "vitis", 
+    "launch": [
+        {
+            "cmd_args": "BUILD/pairhmm.xclbin --syn 10", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "platform_blocklist": [
+        "zc", 
+        "u50"
+    ], 
+    "platform_allowlist": [
+        "u200",
+        "u250"
+    ],
+    "config_make" : "./config.mk",
+    "host": {
+        "host_exe": "xil_pairhmm", 
+        "compiler": {
+            "sources": [
+                "./src/host.cpp", 
+                "$(wildcard LIB_DIR/common/libs/pairhmm/*.cpp)", 
+                "$(wildcard LIB_DIR/common/libs/xcl2/*.cpp)" 
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/libs/pairhmm",
+                "LIB_DIR/common/libs/xcl2"
+            ], 
+            "symbols": [
+                "SLR0_PE_NUM=16",
+                "SLR1_PE_NUM=16",
+                "SLR2_PE_NUM=16",
+                "FPGA",
+                "DIE_NUM=3"
+            ]
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                 "LIB_DIR/L2/include",
+                 "LIB_DIR/L1/include/hw",
+                 "LIB_DIR/common/libs/pairhmm",
+                 "LIB_DIR/L2/src"
+            ],
+            "symbols": [
+                "SLR_PE_NUM=16",
+                "FPGA"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "name": "pairhmm", 
+            "accelerators": [
+                {
+                    "name": "pairhmm", 
+                    "location": "LIB_DIR/L2/src/pairhmm.cpp"
+                } 
+            ]
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 600, 
+                    "vitis_hw_emu": 600, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }, 
+    "platform_properties": {
+        "vck190": {
+            "host": {
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include"
+                    ], 
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            }
+        }
+    }
+}

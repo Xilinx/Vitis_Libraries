@@ -1,0 +1,62 @@
+{
+    "name": "Xilinx PairHMM HLS Test", 
+    "description": "Test Design to validate PairHMM module", 
+    "flow": "hls", 
+    "platform_allowlist": [
+        "u200" 
+    ], 
+    "platform_blocklist": [
+        "vck190" 
+    ], 
+    "part_allowlist": [], 
+    "part_blocklist": [],
+    "project": "pairHMM_test", 
+    "solution": "sol1", 
+    "clock": "3.3", 
+    "topfunction": "pairhmmComputeEngine", 
+    "top": {
+        "source": [
+            "${CUR_DIR}/src/pairhmm_test.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${CUR_DIR}/src/ -DPE_COUNT=8 -DFPGA" 
+    }, 
+    "testbench": {
+        "source": [
+            "${CUR_DIR}/src/pairhmm_test.cpp"   
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${CUR_DIR}/src/ -DPE_COUNT=8 -DFPGA" 
+    }, 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vivado_syn": 16384, 
+                    "hls_csim": 10240, 
+                    "hls_cosim": 16384, 
+                    "vivado_impl": 32768, 
+                    "hls_csynth": 10240
+                }, 
+                "max_time_min": {
+                    "vivado_syn": 300, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 480, 
+                    "vivado_impl": 300, 
+                    "hls_csynth": 60
+                }
+            }
+        ], 
+        "targets": [
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "vivado_syn", 
+            "vivado_impl"
+        ], 
+        "category": "canary"
+    }
+}
