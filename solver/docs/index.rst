@@ -56,6 +56,7 @@ Currently this includes the following operations for dense matrix
    :caption: User Guide
    :maxdepth: 2
 
+   guide_L1/L1.rst
    guide_L2/L2.rst
 
 .. toctree::

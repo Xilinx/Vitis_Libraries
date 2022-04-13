@@ -148,42 +148,36 @@ static bool run_hw(const int S, int seed, int dataAM = 16, int dataAN = 16) {
     auto dataU_bp = xgesvdj::create_bufpool(vpp::output);
     auto dataV_bp = xgesvdj::create_bufpool(vpp::output);
 
-    // dbg_vpp_acc = 3;
-
-    // sending input
-
     xgesvdj::send_while([&]() -> bool {
         xgesvdj::set_handle(s);
 
         // dynamically allocate and prepare data
-        xgesvdj::user_buf(dataA_bp, dataA, in_size);
-        xgesvdj::user_buf(sigma_bp, sigma, out_size_sigma);
-        xgesvdj::user_buf(dataU_bp, dataU, out_size_U);
-        xgesvdj::user_buf(dataV_bp, dataV, out_size_V);
+        double* dataA = (double*)xgesvdj::alloc_buf(dataA_bp, in_size);
+        double* sigma = (double*)xgesvdj::alloc_buf(sigma_bp, out_size_sigma);
+        double* dataU = (double*)xgesvdj::alloc_buf(dataU_bp, out_size_U);
+        double* dataV = (double*)xgesvdj::alloc_buf(dataV_bp, out_size_V);
 
-        // send the job to a CU
-        gettimeofday(&kernel_start_time, 0);
+        // iterate over all clustered transactions
         xgesvdj::compute(dataA, sigma, dataU, dataV, dataAN);
-        // user exit condition
         if (++s == S) return 0;
         return 1;
     });
     // receiving output
     bool verify = verify_result;
-    xgesvdj::receive_all_in_order([&]() {});
-    xgesvdj::join();
-    gettimeofday(&end_time, 0);
-    bool ok = 1;
-    if (verify) {
-        // let's check the result
-        ok = user_check_result(dataAM, dataAN, in_size, out_size_V, dataU, dataV, sigma, dataA);
-        if (!ok) { // stop verify after first detected error
-            verify = false;
-            exit(1);
+    bool ok = true;
+    xgesvdj::receive_all_in_order([&]() {
+        int r = xgesvdj::get_handle();
+        double* sigma = (double*)xgesvdj::get_buf(sigma_bp);
+        double* dataU = (double*)xgesvdj::get_buf(dataU_bp);
+        double* dataV = (double*)xgesvdj::get_buf(dataV_bp);
+        if (verify) {
+            // let's check the result
+            double* dataA = (double*)xgesvdj::get_buf(dataA_bp);
+            ok = user_check_result(dataAM, dataAN, in_size, out_size_V, dataU, dataV, sigma, dataA);
         }
-    }
-    std::cout << "Kernel time " << tvdiff(&kernel_start_time, &end_time) / 1000.0 << "ms" << std::endl;
-    std::cout << "Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
+    });
+    xgesvdj::join();
+
     return !ok;
 }
 

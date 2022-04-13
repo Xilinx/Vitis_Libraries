@@ -3,14 +3,14 @@
     "description": "Singular Value Decomposition for general matrix",
     "flow": "vitis",
     "platform_type": "",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50",
         "u250",
         "u200",
         "aws-vu9p-f1",
         "vck190"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
@@ -24,7 +24,7 @@
             },
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -40,7 +40,7 @@
             },
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200.cfg"
                     ]
                 }
@@ -56,7 +56,7 @@
             },
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }
@@ -76,7 +76,12 @@
                     ],
                     "options": "--sysroot=$(SYSROOT)"
                 }
-            }
+            },
+            "containers": [
+                {
+                    "frequency": 200
+                }
+            ]
         }
     },
     "launch": [
@@ -113,7 +118,7 @@
             "accelerators": [
                 {
                     "location": "kernel_gesvj.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "clflags": " -D KERNEL_NAME=kernel_gesvj_0",
                     "name": "kernel_gesvj_0",
                     "num_compute_units": 1,
@@ -143,7 +148,7 @@
                     ]
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "kernel_gesvj"
         }
     ],

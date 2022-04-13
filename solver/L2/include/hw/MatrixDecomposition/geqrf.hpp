@@ -255,7 +255,7 @@ loop_col:
  * @tparam T data type (support float and double)
  * @tparam NRMAX maximum number of rows of input matrix
  * @tparam NCMAX maximum number of columns of input matrix
- * @tparam NCU number of computation unit
+ * @tparam NCU number of computation unit, NCU = n will be n times faster than NCU = 1, and cost n times resource.
  * @param[in] m number of rows of matrix A
  * @param[in] n number of cols of matrix A
  * @param[in,out] A input matrix of size \f$m \times lda\f$, and overwritten by the output triangular R matrix and

@@ -1,46 +1,85 @@
 {
-    "gui": false, 
-    "name": "Xilinx GESVDJ SC", 
-    "description": "Symmetric Matrix Jacobi based Singular Value Decomposition", 
-    "flow": "vitis", 
-    "platform_type": "", 
-    "platform_whitelist": [
-        "u250", 
+    "gui": false,
+    "name": "Xilinx GESVDJ SC",
+    "description": "Symmetric Matrix Jacobi based Singular Value Decomposition",
+    "flow": "vitis",
+    "platform_type": "",
+    "platform_allowlist": [
+        "u250",
         "u200"
-    ], 
-    "platform_blacklist": [
+    ],
+    "platform_blocklist": [
         "xilinx_u250_xdma_201830_2",
         "xilinx_u200_xdma_201830_2",
-        "zc"
-    ], 
+        "zc",
+        "aws-vu9p-f1"
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "host/main.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/ext/MatrixGen",
+                "LIB_DIR/../utils/L1/include",
+                "kernel",
+                "host"
+            ]
+        },
+        "linker":{
+            "options": "-L $(XILINX_HLS)/lnx64/lib/csim -lhlsmc++-GCC46 -L $(XILINX_HLS)/lnx64/tools/fpo_v7_0 -lIp_floating_point_v7_0_bitacc_cmodel -lgmp -Wl,-rpath=$(XILINX_HLS)/lnx64/lib/csim:$(XILINX_HLS)/lnx64/tools/fpo_v7_0"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/ext/MatrixGen",
+                "LIB_DIR/L2/include"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/gesvdj.cpp",
+                    "frequency": 300.0,
+                    "name": "kernel_gesvdj_0"
+                }
+            ],
+            "frequency": 300.0,
+            "name": "kernel_gesvdj"
+        }
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 470, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "canary"
     }
 }

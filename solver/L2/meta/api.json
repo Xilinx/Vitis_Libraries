@@ -1,0 +1,892 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::solver::geqrf",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::geqrf",
+                "display_name": "geqrf",
+                "brief": "This function computes QR decomposition of matrix",
+                "target_domain": "",
+                "header_file_name": [
+                    "geqrf.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NRMAX",
+                        "type": "int",
+                        "description": "maximum number of rows of input matrix"
+                    },
+                    {
+                        "name": "NCMAX",
+                        "type": "int",
+                        "description": "maximum number of columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "it lda,"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "T *ta"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "T *ta"
+                    },
+                    {
+                        "name": "tau",
+                        "direction": "",
+                        "type": "T *ta"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::gesvdj_2D",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gesvdj_2D",
+                "display_name": "gesvdj_2D",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "gesvdj.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "diagSize",
+                        "type": "int"
+                    },
+                    {
+                        "name": "UN",
+                        "type": "int"
+                    },
+                    {
+                        "name": "NMAXUN",
+                        "type": "int"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::gesvdj",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gesvdj",
+                "display_name": "gesvdj",
+                "brief": "Symmetric Matrix Jacobi based Singular Value Decomposition (GESVDJ) .",
+                "target_domain": "",
+                "header_file_name": [
+                    "gesvdj.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)."
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "int m, T *"
+                    },
+                    {
+                        "name": "S",
+                        "direction": "",
+                        "type": "int lda, T *"
+                    },
+                    {
+                        "name": "U",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "V",
+                        "direction": "",
+                        "type": "int ldu, T *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int ldv, int &info"
+                    },
+                    {
+                        "name": "ldu",
+                        "direction": "",
+                        "type": "int ldv, int &info"
+                    },
+                    {
+                        "name": "ldv",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::gesvj",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gesvj",
+                "display_name": "gesvj",
+                "brief": "This function implements singular value decomposition of matrix A using one-sided Jacobi algorihtm.",
+                "target_domain": "",
+                "header_file_name": [
+                    "gesvj.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "the data type of gesvj"
+                    },
+                    {
+                        "name": "NRMAX",
+                        "type": "int",
+                        "description": "maximum number of rows of input matrix"
+                    },
+                    {
+                        "name": "NCMAX",
+                        "type": "int",
+                        "description": "maximum number of columns of input matrix"
+                    },
+                    {
+                        "name": "MCU",
+                        "type": "int",
+                        "description": "number of computation unit of M"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit of N"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "i"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "S",
+                        "direction": "",
+                        "type": "T *U, T *"
+                    },
+                    {
+                        "name": "U",
+                        "direction": "",
+                        "type": "T *V"
+                    },
+                    {
+                        "name": "V",
+                        "direction": "",
+                        "type": "T *"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::getrf",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::getrf",
+                "display_name": "getrf",
+                "brief": "This function computes the LU decomposition (with partial pivoting) of matrix",
+                "target_domain": "",
+                "header_file_name": [
+                    "getrf.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "i"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "pivot",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "fo"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::getrf_nopivot",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::getrf_nopivot",
+                "display_name": "getrf_nopivot",
+                "brief": "This function computes the LU decomposition (without pivoting) of matrix",
+                "target_domain": "",
+                "header_file_name": [
+                    "getrf_nopivot.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/cols of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "i"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "fo"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::potrf",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::potrf",
+                "display_name": "potrf",
+                "brief": "This function computes the Cholesky decomposition of matrix",
+                "target_domain": "",
+                "header_file_name": [
+                    "potrf.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/MatrixDecomposition"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::gelinearsolver",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gelinearsolver",
+                "display_name": "gelinearsolver",
+                "brief": "This function solves a system of linear equation with general *matrix along with multiple right-hand side vector",
+                "target_domain": "",
+                "header_file_name": [
+                    "gelinearsolver.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/LinearSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "i"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "b",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "B",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "ldb",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "fo"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::gematrixinverse",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gematrixinverse",
+                "display_name": "gematrixinverse",
+                "brief": "This function computes the inverse matrix of",
+                "target_domain": "",
+                "header_file_name": [
+                    "gematrixinverse.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/LinearSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::gtsv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gtsv",
+                "display_name": "gtsv",
+                "brief": "Tri-diagonal linear solver. Compute solution to linear system with a tridiagonal matrix. Parallel Cyclic Reduction method.",
+                "target_domain": "",
+                "header_file_name": [
+                    "gtsv_pcr.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/LinearSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "unsigned int"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "T",
+                        "direction": "",
+                        "type": "unsigned int n,"
+                    },
+                    {
+                        "name": "NMAX",
+                        "direction": "",
+                        "type": "*rhs"
+                    },
+                    {
+                        "name": "NCU",
+                        "direction": "",
+                        "type": "*rhs"
+                    },
+                    {
+                        "name": "matDiagLow",
+                        "direction": "",
+                        "type": "*rhs"
+                    },
+                    {
+                        "name": "matDiag",
+                        "direction": "",
+                        "type": "*rhs"
+                    },
+                    {
+                        "name": "matDiagUp",
+                        "direction": "",
+                        "type": "*rhs"
+                    },
+                    {
+                        "name": "rhs",
+                        "direction": "",
+                        "type": "*"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::polinearsolver",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::polinearsolver",
+                "display_name": "polinearsolver",
+                "brief": "This function solves a system of linear equation with symmetric positive definite (SPD) matrix along with multiple right-hand side vector",
+                "target_domain": "",
+                "header_file_name": [
+                    "polinearsolver.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/LinearSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "n",
+                        "direction": "",
+                        "type": "i"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "b",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "B",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "ldb",
+                        "direction": "",
+                        "type": "fo"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "fo"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::pomatrixinverse",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::pomatrixinverse",
+                "display_name": "pomatrixinverse",
+                "brief": "This function computes the inverse matrix of",
+                "target_domain": "",
+                "header_file_name": [
+                    "pomatrixinverse.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/LinearSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::trtrs",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::trtrs",
+                "display_name": "trtrs",
+                "brief": "This function solves a system of linear equation with triangular coefficient matrix along with multiple right-hand side vector",
+                "target_domain": "",
+                "header_file_name": [
+                    "trtrs.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/LinearSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)"
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "m",
+                        "direction": "",
+                        "type": "char uplo, int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "b",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "B",
+                        "direction": "",
+                        "type": "int &info"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int &info"
+                    },
+                    {
+                        "name": "ldb",
+                        "direction": "",
+                        "type": "int &info"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::syevj",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::syevj",
+                "display_name": "syevj",
+                "brief": "Symmetric Matrix Jacobi based Eigenvalue Decomposition (SYEVJ) .",
+                "target_domain": "",
+                "header_file_name": [
+                    "syevj.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/hw/EigenSolver"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename",
+                        "description": "data type (support float and double)."
+                    },
+                    {
+                        "name": "NMAX",
+                        "type": "int",
+                        "description": "maximum number of rows/columns of input matrix"
+                    },
+                    {
+                        "name": "NCU",
+                        "type": "int",
+                        "description": "number of computation unit"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "",
+                        "type": "int m, T *"
+                    },
+                    {
+                        "name": "S",
+                        "direction": "",
+                        "type": "int lda, T *"
+                    },
+                    {
+                        "name": "U",
+                        "direction": "",
+                        "type": "T *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "",
+                        "type": "int ldu, int &info"
+                    },
+                    {
+                        "name": "ldu",
+                        "direction": "",
+                        "type": "int"
+                    },
+                    {
+                        "name": "info",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}
