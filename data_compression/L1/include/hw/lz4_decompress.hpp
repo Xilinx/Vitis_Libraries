@@ -124,6 +124,7 @@ void lz4HeaderProcessing(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
 
         ap_uint<32> compressedSize = inputWindow >> (inputIdx * 8);
         inputIdx += 4;
+        bool storedBlkFlg = (compressedSize.range(31, 31) == 1) ? true : false;
 
         uint32_t tmp = compressedSize;
         tmp >>= 24;
@@ -149,7 +150,7 @@ void lz4HeaderProcessing(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
 
         blockInfo.compressedSize = compressedSize;
 
-        if (compressedSize == blockSizeInBytes) {
+        if (storedBlkFlg) {
             blockInfo.storedBlock = 1;
         } else {
             blockInfo.storedBlock = 0;
@@ -366,8 +367,10 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
             offsetStream << 0;
             next_state = READ_LITERAL;
         }
+
+        ap_uint<2> numItr = (input_size <= PARALLEL_BYTES) ? 1 : 2;
         // Pre-read two data from the stream (two based on the READ_TOKEN)
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < numItr; i++) {
 #pragma HLS PIPELINE II = 1
             inValue = inStream.read();
             input_window.range(((i + 1) * c_parallelBit) - 1, i * c_parallelBit) = inValue;
@@ -479,6 +482,8 @@ inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& in
             }
         }
     }
+
+    if (!blockInfoStream.empty()) dt_lz4BlockInfo bInfo = blockInfoStream.read();
 
     // signalling end of transaction
     litlenStream << 0;

@@ -5,7 +5,10 @@
     ], 
     "flow": "vitis",
     "default_device": "u200",
-    "platform_whitelist": [
+    "platform_blocklist": [
+        "xilinx_vck190_base_202210_1"
+    ],
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 

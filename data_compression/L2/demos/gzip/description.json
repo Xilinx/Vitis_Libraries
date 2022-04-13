@@ -19,11 +19,12 @@
     ], 
     "config_make": "./config.mk", 
     "default_device": "u200",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc", 
-        "u50"
+        "u50",
+        "xilinx_vck190_base_202210_1"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "vck190", 
@@ -50,7 +51,8 @@
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/thirdParty/zlib-1.2.7",
-                "LIB_DIR/common/libs/compress/"
+                "LIB_DIR/common/libs/compress/",
+                "LIB_DIR/L2/tests/src"
             ], 
             "symbols": [
                 "GZIP_MULTICORE_COMPRESS", 

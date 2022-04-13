@@ -266,12 +266,14 @@ size_t gzipXrtHost::compressEngineSeq(
         buffer_cSize.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
     }
 
-    uint32_t compSize = 0;
     uint32_t compSizeCntr = 0;
-    auto index = 0;
 
     if (this->is_freeRunKernel()) {
+#ifdef FILE_WRITE
+        auto index = 0;
+#endif
 #ifdef PERF_DM
+        uint32_t compSize = 0;
         for (long unsigned i = 0; i < 2 * blckNum; i += 2) {
             compSize = h_compressSize[i];
             compSizeCntr += compSize;

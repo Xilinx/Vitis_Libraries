@@ -5,13 +5,13 @@
     ],
     "flow": "vitis",
     "default_device": "u200",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc",
         "vck",
         "u50",
         "u280"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "u250"
     ],
@@ -23,8 +23,21 @@
     ],
     "post_launch": [
         {
+            "target": "sw_emu",
             "launch_cmd": [
                 "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            ]
+        },
+        {
+            "target": "hw_emu",
+            "launch_cmd": [
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            ]
+        },
+        {
+            "target": "hw",
+            "launch_cmd": [
+                "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
             ]
         }
     ],

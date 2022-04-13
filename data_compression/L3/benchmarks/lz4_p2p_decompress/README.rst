@@ -47,8 +47,8 @@ This application is present in ``L3/benchmarks/lz4_p2p_decompress`` directory. F
 
 The binary host file generated is named as "**xil_lz4**" and it is present in ``./build`` directory.
 
-1. To execute single file for decompression   : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<decompress.xclbin> -c <file_name>``
-2. To execute multiple files for decompression        : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress.xclbin -l <files.list>``
+1. To execute single file for decompression   : ``./build/xil_lz4 -dx ./build/xclbin_<xsa_name>_<TARGET mode>/<decompress.xclbin> -d <file_name>``
+2. To execute multiple files for decompression        : ``./build/xil_lz4 -dx ./build/xclbin_<xsa_name>_<TARGET mode>/decompress.xclbin -l <files.list>``
      - ``<files.list>``: Contains various file names with current path
 
 The usage of the generated executable is as follows:

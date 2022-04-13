@@ -11,10 +11,10 @@
         }
     ], 
     "default_device": "u200",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 

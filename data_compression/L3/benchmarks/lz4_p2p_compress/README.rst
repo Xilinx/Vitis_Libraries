@@ -48,8 +48,8 @@ This application is present in ``L3/benchmarks/lz4_p2p_compress`` directory. Fol
 
 The binary host file generated is named as "**xil_lz4**" and it is present in ``./build`` directory.
 
-1. To execute single file for compression   : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress.xclbin> -c <file_name>``
-2. To execute multiple files for compression        : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -l <files.list>``
+1. To execute single file for compression   : ``./build/xil_lz4 -cx ./build/xclbin_<xsa_name>_<TARGET mode>/<compress.xclbin> -c <file_name>``
+2. To execute multiple files for compression        : ``./build/xil_lz4 -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -l <files.list>``
 
      - ``<files.list>``: Contains various file names with current path
 

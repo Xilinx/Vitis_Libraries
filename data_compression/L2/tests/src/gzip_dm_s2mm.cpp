@@ -31,11 +31,11 @@ void streamDataK2dmSync(hls::stream<ap_uint<STREAMDWIDTH> >& out,
                         hls::stream<bool>& bytEos,
                         uint32_t readBlockSize,
                         hls::stream<uint32_t>& dataSize,
-                        hls::stream<ap_axiu<STREAMDWIDTH, 0, 0, 0> >& dmOutStream,
+                        hls::stream<ap_axiu<STREAMDWIDTH, TUSER_DWIDTH, 0, 0> >& dmOutStream,
                         uint32_t already_done,
                         hls::stream<bool>& dcStatusStream) {
     // read data from decompression kernel output to global memory output
-    ap_axiu<STREAMDWIDTH, 0, 0, 0> dataout;
+    ap_axiu<STREAMDWIDTH, TUSER_DWIDTH, 0, 0> dataout;
     const uint8_t wordWidth = STREAMDWIDTH / 8;
     uint32_t outSize = 0;
     bool last = false;
@@ -87,7 +87,7 @@ void gzipS2MM(uintMemWidth_t* out,
               uint32_t* encoded_size,
               uint32_t cur_status,
               uint32_t readBlockSize,
-              hls::stream<ap_axiu<OUTPUT_BYTES * 8, 0, 0, 0> >& outAxiStream,
+              hls::stream<ap_axiu<OUTPUT_BYTES * 8, TUSER_DWIDTH, 0, 0> >& outAxiStream,
               hls::stream<bool>& dcStatusStream) {
     hls::stream<uintMemWidth_t> outHlsStream("outputStream");
     hls::stream<bool> outHlsStream_eos("outputStreamSize");
@@ -113,9 +113,10 @@ void xilGzipS2MM(uintMemWidth_t* out,
                  uint32_t* encoded_size,
                  uint32_t* status_flag,
                  uint32_t read_block_size,
-                 hls::stream<ap_axiu<OUTPUT_BYTES * 8, 0, 0, 0> >& inStream) {
-#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem0 max_read_burst_length = \
-    2 max_write_burst_length = 64 num_read_outstanding = 1 num_write_outstanding = 8
+                 hls::stream<ap_axiu<OUTPUT_BYTES * 8, TUSER_DWIDTH, 0, 0> >& inStream) {
+    const int c_gmem0_width = OUTPUT_BYTES * 8;
+#pragma HLS INTERFACE m_axi port = out max_widen_bitwidth = c_gmem0_width offset = slave bundle = \
+    gmem0 max_read_burst_length = 2 max_write_burst_length = 64 num_read_outstanding = 1 num_write_outstanding = 8
 #pragma HLS INTERFACE m_axi port = encoded_size offset = slave bundle = gmem0
 #pragma HLS INTERFACE m_axi port = status_flag offset = slave bundle = gmem0
 #pragma HLS interface axis port = inStream

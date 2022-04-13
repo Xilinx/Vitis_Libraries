@@ -5,12 +5,12 @@
     ],
     "flow": "vitis",
     "default_device": "u50",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u200",
         "u250",
         "vck"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50",
         "u280"
     ],

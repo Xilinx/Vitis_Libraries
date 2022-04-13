@@ -405,7 +405,6 @@ uint64_t lz4OCLHost::compressEngineStreamSeq(uint8_t* in, uint8_t* out, size_t i
 // Core Decompress Engine API including kernel header processing
 uint64_t lz4OCLHost::decompressEngineSeq(uint8_t* in, uint8_t* out, size_t input_size) {
     size_t host_buffer_size = input_size * m_maxCR;
-    uint32_t max_num_blks = (host_buffer_size) / (m_BlockSizeInKb * 1024);
     h_buf_in.resize(host_buffer_size);
     h_buf_out.resize(host_buffer_size);
     h_decSize.resize(host_buffer_size);

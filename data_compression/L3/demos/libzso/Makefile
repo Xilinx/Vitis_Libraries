@@ -384,7 +384,7 @@ $(EXE_FILE): $(HOST_OBJ_FILES)
 
 all: host xclbin
 
-host: $(EXE_FILE)
+host: lib $(EXE_FILE)
 
 xclbin: $(XCLBIN_FILE)
 

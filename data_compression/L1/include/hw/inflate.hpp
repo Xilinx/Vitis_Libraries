@@ -423,6 +423,110 @@ void kStreamReadZlibDecomp(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& in,
     outEos << 1; // Terminate condition
 }
 
+template <int NUM_CORE, int STREAM_WIDTH>
+void kStreamDistributor(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& in,
+                        hls::stream<ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> > out[NUM_CORE]) {
+    /**
+     * @brief kStreamDistributor Read 64-bit wide data from internal streams output by compression modules
+     *                              and write to output axi stream.
+     *
+     * @param inKStream     input kernel stream
+     * @param readStream    internal stream to be read for processing
+     * @param input_size    input data size
+     *
+     */
+    const int c_outWidth = STREAM_WIDTH + STREAM_WIDTH / 8;
+    const int c_eosWidth = STREAM_WIDTH / 8;
+
+    for (auto i = 0; i < NUM_CORE; i++) {
+        bool last = false;
+        while (last == false) {
+#pragma HLS PIPELINE II = 1
+            ap_uint<c_outWidth> data;
+            ap_axiu<STREAM_WIDTH, 0, 0, 0> tmp = in.read();
+            data.range(c_eosWidth - 1, 0) = 0;
+            data.range(c_outWidth - 1, c_eosWidth) = tmp.data;
+
+            out[i] << data;
+            last = tmp.last;
+        }
+        ap_uint<c_outWidth> data;
+        data.range(c_eosWidth - 1, 0) = 1;
+        data.range(c_outWidth - 1, c_eosWidth) = 0;
+        out[i] << data; // Terminate condition
+    }
+}
+
+template <int NUM_CORE>
+void axi2HlsDistributor(hls::stream<ap_axiu<64, 0, 0, 0> >& in, hls::stream<ap_uint<72> > out[NUM_CORE]) {
+    for (auto i = 0; i < NUM_CORE; i++) {
+        bool last = false;
+        ap_axiu<64, 0, 0, 0> tmp;
+        ap_uint<8> kp = 0;
+        ap_uint<8> cntr = 0;
+        ap_uint<72> tmpVal = 0;
+        while (last == false) {
+#pragma HLS PIPELINE II = 1
+            tmp = in.read();
+            tmpVal.range(71, 8) = tmp.data;
+            kp = tmp.keep;
+            tmpVal.range(7, 0) = tmp.keep;
+            if (kp == 0xFF)
+                tmpVal.range(7, 0) = 8;
+            else
+                break;
+            out[i] << tmpVal;
+            last = tmp.last;
+        }
+        if (kp != 0xFF) {
+            while (kp) {
+                cntr += (kp & 0x1);
+                kp >>= 1;
+            }
+            tmpVal.range(7, 0) = cntr;
+            out[i] << tmpVal;
+        }
+        out[i] << 0; // Terminate condition
+    }
+}
+
+template <int STREAM_WIDTH, int NUM_CORE>
+void hls2AxiMerger(hls::stream<ap_axiu<64, 0, 0, 0> >& outKStream, hls::stream<ap_uint<72> > outDataStream[NUM_CORE]) {
+    for (auto i = 0; i < NUM_CORE; i++) {
+        ap_uint<8> strb = 0;
+        ap_uint<64> data;
+        ap_uint<72> tmp;
+        ap_axiu<64, 0, 0, 0> t1;
+
+        tmp = outDataStream[i].read();
+
+        strb = tmp.range(7, 0);
+        t1.data = tmp.range(71, 8);
+        t1.strb = strb;
+        t1.keep = strb;
+        t1.last = 0;
+        if (strb == 0) {
+            t1.last = 1;
+            outKStream << t1;
+        }
+        while (strb != 0) {
+#pragma HLS PIPELINE II = 1
+            tmp = outDataStream[i].read();
+
+            strb = tmp.range(7, 0);
+            if (strb == 0) {
+                t1.last = 1;
+            }
+            outKStream << t1;
+
+            t1.data = tmp.range(71, 8);
+            t1.strb = strb;
+            t1.keep = strb;
+            t1.last = 0;
+        }
+    }
+}
+
 template <int STREAM_WIDTH>
 void kStreamWriteZlibDecomp(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& outKStream,
                             hls::stream<ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> >& outDataStream) {
@@ -509,6 +613,101 @@ AXI2HLS:
     }
 }
 
+template <int NUM_CORE, int STREAM_WIDTH, int TUSER_WIDTH>
+void hls2AXIWithTUSERMergerMulti(hls::stream<ap_axiu<STREAM_WIDTH, TUSER_WIDTH, 0, 0> >& outAxi,
+                                 hls::stream<ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> > inData[NUM_CORE],
+                                 hls::stream<bool> inError[NUM_CORE]) {
+    for (auto i = 0; i < NUM_CORE; i++) {
+        ap_uint<STREAM_WIDTH / 8> strb = 0;
+        ap_uint<STREAM_WIDTH> data;
+        ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> tmp;
+        ap_axiu<STREAM_WIDTH, TUSER_WIDTH, 0, 0> t1;
+        ap_uint<TUSER_WIDTH - 1> fileSize = 0;
+
+        tmp = inData[i].read();
+        strb = tmp.range((STREAM_WIDTH / 8) - 1, 0);
+        t1.data = tmp.range(STREAM_WIDTH + (STREAM_WIDTH / 8) - 1, STREAM_WIDTH / 8);
+        t1.strb = strb;
+        t1.keep = strb;
+        t1.last = 0;
+        t1.user = 0;
+        if (strb == 0) {
+            t1.last = 1;
+            outAxi << t1;
+        }
+    AXI2HLS:
+        while (strb != 0) {
+#pragma HLS PIPELINE II = 1
+        FILESIZE:
+            for (ap_uint<4> i = 0; i < (STREAM_WIDTH / 8); i++) {
+#pragma HLS UNROLL
+                fileSize += (strb & 0x1);
+                strb >>= 1;
+            }
+            tmp = inData[i].read();
+            strb = tmp.range((STREAM_WIDTH / 8) - 1, 0);
+            if (strb == 0) {
+                t1.last = 1;
+                t1.user.range(TUSER_WIDTH - 1, 1) = fileSize;
+                t1.user.range(0, 0) = inError[i].read();
+            }
+            outAxi << t1;
+            t1.data = tmp.range(STREAM_WIDTH + (STREAM_WIDTH / 8) - 1, STREAM_WIDTH / 8);
+            t1.strb = strb;
+            t1.keep = strb;
+            t1.last = 0;
+        }
+    }
+}
+
+template <int STREAM_WIDTH, int TUSER_WIDTH, int NUM_CORE>
+void hls2AXIWithTUSERMerger(hls::stream<ap_axiu<STREAM_WIDTH, TUSER_WIDTH, 0, 0> >& outAxi,
+                            hls::stream<ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> >& inData,
+                            hls::stream<ap_uint<32> > fileChkSum[NUM_CORE],
+                            hls::stream<ap_uint<32> >& calcChkSum) {
+    for (auto i = 0; i < NUM_CORE; i++) {
+        ap_uint<STREAM_WIDTH / 8> strb = 0;
+        ap_uint<STREAM_WIDTH> data;
+        ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> tmp;
+        ap_axiu<STREAM_WIDTH, TUSER_WIDTH, 0, 0> t1;
+        ap_uint<TUSER_WIDTH - 1> fileSize = 0;
+
+        tmp = inData.read();
+        strb = tmp.range((STREAM_WIDTH / 8) - 1, 0);
+        t1.data = tmp.range(STREAM_WIDTH + (STREAM_WIDTH / 8) - 1, STREAM_WIDTH / 8);
+        t1.strb = strb;
+        t1.keep = strb;
+        t1.last = 0;
+        t1.user = 0;
+        if (strb == 0) {
+            t1.last = 1;
+            outAxi << t1;
+        }
+    AXI2HLS:
+        while (strb != 0) {
+#pragma HLS PIPELINE II = 1
+        FILESIZE:
+            for (ap_uint<4> i = 0; i < (STREAM_WIDTH / 8); i++) {
+#pragma HLS UNROLL
+                fileSize += (strb & 0x1);
+                strb >>= 1;
+            }
+            tmp = inData.read();
+            strb = tmp.range((STREAM_WIDTH / 8) - 1, 0);
+            if (strb == 0) {
+                t1.last = 1;
+                t1.user.range(TUSER_WIDTH - 1, 1) = fileSize;
+                t1.user.range(0, 0) = fileChkSum[i].read() != calcChkSum.read();
+            }
+            outAxi << t1;
+            t1.data = tmp.range(STREAM_WIDTH + (STREAM_WIDTH / 8) - 1, STREAM_WIDTH / 8);
+            t1.strb = strb;
+            t1.keep = strb;
+            t1.last = 0;
+        }
+    }
+}
+
 /**
  * @brief Splits input into data and strb
  *
@@ -542,6 +741,34 @@ splitter:
     }
     if (strb == 0) outStrb << 0;
 }
+template <int DATA_WIDTH, int NUMCORES>
+void dataStrbSplitter(hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> >& input,
+                      hls::stream<ap_uint<DATA_WIDTH * 8> >& outData,
+                      hls::stream<ap_uint<5> >& outStrb) {
+    for (int i = 0; i < NUMCORES; i++) {
+        ap_uint<DATA_WIDTH> strb = 0;
+    splitter:
+        while (1) {
+#pragma HLS PIPELINE II = 1
+            auto inVal = input.read();
+            auto data = inVal.range((DATA_WIDTH * 8) + DATA_WIDTH - 1, DATA_WIDTH);
+            strb = inVal.range(DATA_WIDTH - 1, 0);
+            auto strbVal = strb;
+            if (strb == 0) break;
+            outData << data;
+
+            ap_uint<5> size = 0;
+            for (ap_uint<4> i = 0; i < DATA_WIDTH; i++) {
+#pragma HLS UNROLL
+                size += (strbVal & 0x1);
+                strbVal >>= 1;
+            }
+            outStrb << size;
+        }
+        if (strb == 0) outStrb << 0;
+    }
+}
+
 /**
  * @brief Splits Data Stream into multiple
  *
@@ -562,6 +789,29 @@ void streamDistributor(hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> >& inp
         output1 << inVal;
         output2 << inVal;
     } while (strb != 0);
+}
+
+/**
+ * @brief Splits Data Stream into multiple
+ *
+ * @tparam DATA_WIDTH
+ * @param input input stream
+ * @param output1 output streams
+ * @param output2 output streams
+ */
+template <int DATA_WIDTH, int NUM_CORE>
+void streamMultiDistributor(hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> > input[NUM_CORE],
+                            hls::stream<ap_uint<(DATA_WIDTH * 8) + DATA_WIDTH> > output[2]) {
+    for (auto i = 0; i < NUM_CORE; i++) {
+        ap_uint<DATA_WIDTH> strb = 0;
+        do {
+#pragma HLS PIPELINE II = 1
+            auto inVal = input[i].read();
+            strb = inVal.range(DATA_WIDTH - 1, 0);
+            output[0] << inVal;
+            output[1] << inVal;
+        } while (strb != 0);
+    }
 }
 
 /**
@@ -699,7 +949,89 @@ void inflateWithChkSum(hls::stream<ap_uint<16> >& inStream,
     xf::compression::details::chckSumComparator(chckSum[0], chckSum[1], errorStrm);
 }
 
+template <int DECODER, int PARALLEL_BYTES, int FILE_FORMAT, int HISTORY_SIZE = (8 * 1024)>
+void zlibWithAdler(hls::stream<ap_uint<16> >& inStream,
+                   hls::stream<bool>& inEos,
+                   hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >& outStream,
+                   hls::stream<ap_uint<32> >& chckSum) {
+    const int c_parallelBit = PARALLEL_BYTES * 8;
+    const eHuffmanType c_decoderType = (eHuffmanType)DECODER;
+    const FileFormat c_fileformat = (FileFormat)FILE_FORMAT;
+
+    hls::stream<ap_uint<16> > bitunpackstreamLL("bitUnPackStreamLL");
+    hls::stream<ap_uint<c_parallelBit> > litStream("litStream");
+    hls::stream<ap_uint<9> > matchLenStream("matchLenStream");
+    hls::stream<ap_uint<9> > litLenStream("litLenStream");
+    hls::stream<ap_uint<16> > offsetStream("offsetStream");
+    hls::stream<ap_uint<10> > lzProcOutStream("lzProcOutStream");
+    hls::stream<ap_uint<27> > infoStream("infoStream");
+
+#pragma HLS STREAM variable = litStream depth = 32
+#pragma HLS STREAM variable = lzProcOutStream depth = 16
+#pragma HLS STREAM variable = bitunpackstreamLL depth = 256
+#pragma HLS STREAM variable = litLenStream depth = 64
+#pragma HLS STREAM variable = matchLenStream depth = 64
+#pragma HLS STREAM variable = offsetStream depth = 64
+#pragma HLS STREAM variable = infoStream depth = 4
+
+#pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = bitunpackstreamLL type = fifo impl = lutram
+#pragma HLS BIND_STORAGE variable = lzProcOutStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = litLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
+
+#pragma HLS dataflow
+
+    xf::compression::huffmanDecoderLL<c_decoderType, c_fileformat>(inStream, inEos, bitunpackstreamLL, chckSum);
+
+    xf::compression::details::lzProcessingUnitLL<ap_uint<9> >(bitunpackstreamLL, litLenStream, matchLenStream,
+                                                              offsetStream, lzProcOutStream);
+
+    xf::compression::details::lzPreProcessingUnitLL<ap_uint<9>, PARALLEL_BYTES, 16>(litLenStream, matchLenStream,
+                                                                                    offsetStream, infoStream);
+    xf::compression::details::lzLiteralUpsizerLL<PARALLEL_BYTES>(lzProcOutStream, litStream);
+    xf::compression::lzMultiByteDecompressLL<PARALLEL_BYTES, HISTORY_SIZE, 16, ap_uint<9>, ap_uint<16> >(
+        litStream, infoStream, outStream);
+}
+
 } // namespace details
+
+template <int NUM_CORE,
+          int DECODER,
+          int PARALLEL_BYTES,
+          int FILE_FORMAT,
+          bool LOW_LATENCY = false,
+          int HISTORY_SIZE = (32 * 1024)>
+void inflateMultiCores(hls::stream<ap_axiu<64, 0, 0, 0> >& inaxistream,
+                       hls::stream<ap_axiu<64, 0, 0, 0> >& outaxistream) {
+    constexpr int c_parallelBit = PARALLEL_BYTES * 8;
+
+    hls::stream<ap_uint<72> > axi2HlsStrm[NUM_CORE];
+    hls::stream<ap_uint<72> > inflateOut[NUM_CORE];
+    hls::stream<ap_uint<16> > hlsDownStrm[NUM_CORE];
+    hls::stream<bool> hlsEos[NUM_CORE];
+
+#pragma HLS STREAM variable = axi2HlsStrm depth = 4096
+#pragma HLS STREAM variable = inflateOut depth = 4096
+#pragma HLS STREAM variable = hlsDownStrm depth = 32
+#pragma HLS STREAM variable = hlsEos depth = 32
+
+#pragma HLS BIND_STORAGE variable = axi2HlsStrm type = FIFO impl = URAM
+#pragma HLS BIND_STORAGE variable = inflateOut type = fifo impl = URAM
+
+#pragma HLS dataflow disable_start_propagation
+    details::axi2HlsDistributor<NUM_CORE>(inaxistream, axi2HlsStrm);
+
+    for (auto i = 0; i < NUM_CORE; i++) {
+#pragma HLS UNROLL
+        details::bufferDownsizer<NUM_CORE, PARALLEL_BYTES>(axi2HlsStrm[i], hlsDownStrm[i], hlsEos[i]);
+        details::inflateMultiByteCore<DECODER, PARALLEL_BYTES, FILE_FORMAT, LOW_LATENCY, HISTORY_SIZE>(
+            hlsDownStrm[i], hlsEos[i], inflateOut[i]);
+    }
+
+    details::hls2AxiMerger<c_parallelBit, NUM_CORE>(outaxistream, inflateOut);
+}
 
 template <int DECODER, int PARALLEL_BYTES, int FILE_FORMAT, bool LOW_LATENCY = false, int HISTORY_SIZE = (32 * 1024)>
 void inflateMultiByte(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
@@ -714,7 +1046,6 @@ void inflateMultiByte(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
 #pragma HLS STREAM variable = axi2HlsStrm depth = 32
 #pragma HLS STREAM variable = axi2HlsEos depth = 32
 #pragma HLS STREAM variable = inflateOut depth = 32
-//#pragma HLS STREAM variable = inflateOut depth = 4096
 
 #pragma HLS BIND_STORAGE variable = axi2HlsStrm type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = axi2HlsEos type = FIFO impl = SRL
@@ -727,6 +1058,60 @@ void inflateMultiByte(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
         axi2HlsStrm, axi2HlsEos, inflateOut);
 
     details::kStreamWriteZlibDecomp<c_parallelBit>(outaxistream, inflateOut);
+}
+
+template <int NUM_CORE,
+          int DECODER,
+          int PARALLEL_BYTES,
+          int FILE_FORMAT,
+          int HISTORY_SIZE = (8 * 1024),
+          int TUSER_WIDTH = 32>
+void inflateMultiCoreChkSum(hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >& inaxistream,
+                            hls::stream<ap_axiu<PARALLEL_BYTES * 8, TUSER_WIDTH, 0, 0> >& outaxistream) {
+    const int c_parallelBit = PARALLEL_BYTES * 8;
+
+    hls::stream<ap_uint<c_parallelBit + PARALLEL_BYTES> > axi2HlsStrm[NUM_CORE];
+    hls::stream<ap_uint<16> > hlsDownStream[NUM_CORE];
+    hls::stream<bool> hlsEos[NUM_CORE];
+    hls::stream<ap_uint<c_parallelBit + PARALLEL_BYTES> > inflateStrm[NUM_CORE];
+    hls::stream<ap_uint<c_parallelBit + PARALLEL_BYTES> > inflateDist[2];
+    hls::stream<ap_uint<32> > chkSum[NUM_CORE + 1];
+    // hls::stream<bool> errorStrm;
+    hls::stream<ap_uint<(PARALLEL_BYTES * 8)> > lzData("lzData");
+    hls::stream<ap_uint<5> > lzStrb("lzStrb");
+
+#pragma HLS STREAM variable = axi2HlsStrm depth = 1024
+#pragma HLS STREAM variable = hlsDownStream depth = 32
+#pragma HLS STREAM variable = hlsEos depth = 32
+#pragma HLS STREAM variable = inflateStrm depth = 1024
+#pragma HLS STREAM variable = inflateDist depth = 8
+#pragma HLS STREAM variable = chkSum depth = 8
+// #pragma HLS STREAM variable = errorStrm depth = 8
+#pragma HLS STREAM variable = lzData depth = 8
+#pragma HLS STREAM variable = lzStrb depth = 8
+
+#pragma HLS BIND_STORAGE variable = axi2HlsStrm type = FIFO impl = BRAM
+#pragma HLS BIND_STORAGE variable = hlsDownStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = hlsEos type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = inflateStrm type = fifo impl = BRAM
+#pragma HLS BIND_STORAGE variable = inflateDist type = fifo impl = SRL
+
+#pragma HLS dataflow disable_start_propagation
+    details::kStreamDistributor<NUM_CORE, c_parallelBit>(inaxistream, axi2HlsStrm);
+
+    for (uint8_t i = 0; i < NUM_CORE; i++) {
+#pragma HLS UNROLL
+        details::simpleDownSizer<PARALLEL_BYTES, c_parallelBit, 16>(axi2HlsStrm[i], hlsDownStream[i], hlsEos[i]);
+        details::zlibWithAdler<DECODER, PARALLEL_BYTES, FILE_FORMAT, HISTORY_SIZE>(hlsDownStream[i], hlsEos[i],
+                                                                                   inflateStrm[i], chkSum[i]);
+    }
+
+    xf::compression::details::streamMultiDistributor<PARALLEL_BYTES, NUM_CORE>(inflateStrm, inflateDist);
+    xf::compression::details::dataStrbSplitter<PARALLEL_BYTES, NUM_CORE>(inflateDist[0], lzData, lzStrb);
+    xf::compression::details::adler32<PARALLEL_BYTES, NUM_CORE>(lzData, lzStrb, chkSum[NUM_CORE]);
+    //    xf::compression::details::chckSumComparatorMulti<NUM_CORE>(chkSum, chkSum[NUM_CORE], errorStrm);
+    details::hls2AXIWithTUSERMerger<c_parallelBit, TUSER_WIDTH, NUM_CORE>(outaxistream, inflateDist[1], chkSum,
+                                                                          chkSum[NUM_CORE]);
 }
 
 template <int DECODER, int PARALLEL_BYTES, int FILE_FORMAT, int HISTORY_SIZE = (32 * 1024), int TUSER_WIDTH = 32>

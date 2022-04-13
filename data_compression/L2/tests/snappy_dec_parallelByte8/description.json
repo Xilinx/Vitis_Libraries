@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx Snappy Decompress 4 Parallel Bytes", 
+    "name": "Xilinx Snappy Decompress 8 Parallel Bytes", 
     "description": [
-        "Xilinx Snappy MultiByte Decompress:4 parallel bytes processed at a time"
+        "Xilinx Snappy MultiByte Decompress:8 parallel bytes processed at a time"
     ], 
     "flow": "vitis", 
     "launch": [
@@ -18,10 +18,11 @@
         }
     ], 
     "default_device": "u200",
-    "platform_blacklist": [
-        "zc"
+    "platform_blocklist": [
+        "zc",
+        "xilinx_vck190_base_202210_1"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 

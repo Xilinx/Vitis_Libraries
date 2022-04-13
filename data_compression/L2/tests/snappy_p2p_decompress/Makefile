@@ -1,4 +1,4 @@
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.4
+# vitis makefile-generator v2.0.6
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -30,7 +30,7 @@ help::
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -66,12 +66,15 @@ endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  samsung_u2 samsung_U2 u200 u250 u50 vck190 aws-vu9p-f1
-PLATFORM_BLOCKLIST +=  zc
+PLATFORM_BLOCKLIST +=  zc xilinx_u50_gen3x16_xdma_5_202210_1 xilinx_vck190_base_202210_1
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
 BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
@@ -85,7 +88,7 @@ RUN_DEPS :=
 # get global setting
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -Wl,--as-needed -lOpenCL -lxrt_coreutil 
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0  -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
@@ -103,6 +106,10 @@ CXXFLAGS += -D SW_EMU_TEST
 endif
 ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
+endif
+
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
 #Inclue Required Host Source Files
@@ -146,14 +153,10 @@ VPP_FLAGS +=  -I $(CUR_DIR)/L2/tests/src/ -I $(XFLIB_DIR)/../security/L1/include
 VPP_LDFLAGS_decompress_streaming_temp := --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_decompress_streaming += $(VPP_LDFLAGS_decompress_streaming_temp)
 
-BINARY_CONTAINER_decompress_streaming_OBJS += $(TEMP_DIR)/xilSnappyDecompressStream.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_decompress_streaming_OBJS)
-BINARY_CONTAINER_decompress_streaming_OBJS += $(TEMP_DIR)/xilDecompDatamover.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_decompress_streaming_OBJS)
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress_streaming.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/decompress_streaming_pkg.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/decompress_streaming_pkg.$(LINK_TARGET_FMT)
 BINARY_CONTAINERS_PKG += $(BUILD_DIR)/decompress_streaming.xclbin
 endif
 
@@ -161,11 +164,14 @@ endif
 $(TEMP_DIR)/xilSnappyDecompressStream.xo: $(XFLIB_DIR)/L2/src/snappy_multibyte_decompress_stream.cpp 
 	$(ECHO) "Compiling Kernel: xilSnappyDecompressStream"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_xilSnappyDecompressStream) $(VPP_FLAGS) -k xilSnappyDecompressStream -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_xilSnappyDecompressStream) $(VPP_FLAGS) -k xilSnappyDecompressStream -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_decompress_streaming_OBJS += $(TEMP_DIR)/xilSnappyDecompressStream.xo
 $(TEMP_DIR)/xilDecompDatamover.xo: $(XFLIB_DIR)/L2/tests/src/block_decomp_multibyte_dm.cpp 
 	$(ECHO) "Compiling Kernel: xilDecompDatamover"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_xilDecompDatamover) $(VPP_FLAGS) -k xilDecompDatamover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_xilDecompDatamover) $(VPP_FLAGS) -k xilDecompDatamover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_decompress_streaming_OBJS += $(TEMP_DIR)/xilDecompDatamover.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_decompress_streaming_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/decompress_streaming $(VPP_LDFLAGS)  $(VPP_LDFLAGS_decompress_streaming) $(AIE_LDFLAGS)   -o $@ $^
@@ -225,12 +231,23 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
+vck190_dfx_hw := false
 $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
+ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	@echo "### ***** sd_card generation done! ***** ###"
+vck190_dfx_hw := true
+endif
+endif
+ifeq ($(vck190_dfx_hw), false)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
@@ -238,7 +255,14 @@ endif
 ############################## Setting Essential Checks and Building Rules ##############################
 RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
-run: check_device  $(RUN_DEPS)
+
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+all: check_device  check_vpp check_platform mkflag $(RUN_DEPS)
+run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
@@ -267,7 +291,17 @@ endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress_streaming.xclbin
+endif
+else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress_streaming.xclbin
 else
@@ -277,13 +311,8 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: all clean cleanall emconfig
+.PHONY: clean cleanall emconfig
 emconfig: $(EMCONFIG)
-ifeq ($(HOST_ARCH), x86)
-all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-else
-all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-endif
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
@@ -306,13 +335,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* $(CUR_DIR)/*.orig $(CUR_DIR)/data/*.orig 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) $(CUR_DIR)/*.orig $(CUR_DIR)/data/*.orig 
 
 clean: cleanh

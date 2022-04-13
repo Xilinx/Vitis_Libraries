@@ -25,8 +25,8 @@ compression.
 
 .. code-block:: bash
 
-   Tested Tool: 2021.1 
-   Tested XRT: 2021.1
+   Tested Tool: 2021.2 
+   Tested XRT: 2021.2
    Tested XSA: xilinx_u50_gen3x16_xdma_201920_3 
    Tested XSA: xilinx_u250_gen3x16_xdma_3_1_202020_1 
 
@@ -40,8 +40,8 @@ The host executable generated is named as "**xil_zlibc**" and it is generated in
 
 Following is the usage of the executable:
 
-1. To execute single file for compression 	          : ``./<build_directory>/xil_zlibc -cx ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <input file_name>``
-4. To validate multiple files (compress)              : ``./<build_directory>/xil_zlibc -cx ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -l <files.list>``
+1. To execute single file for compression 	          : ``./<build_directory>/xil_zlibc -xbin ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <input file_name> --sw_pipeline 2``
+4. To validate multiple files (compress)              : ``./<build_directory>/xil_zlibc -xbin ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -l <files.list> --sw_pipeline 2``
 
 	- ``<files.list>``: Contains various file names with current path
 

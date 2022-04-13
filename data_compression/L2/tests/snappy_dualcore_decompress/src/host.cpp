@@ -141,7 +141,6 @@ void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::str
     uint32_t input_size = getFileSize(inFile_dec);
     inFile_dec.close();
 
-    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     double len = input_size;
     int order = 0;
     while (len >= 1000) {
@@ -157,6 +156,7 @@ void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::str
     // Call SNAPPY decompression
     xlz->decompressFileFull(lz_decompress_in, lz_decompress_out, input_size, 0);
 #ifdef VERBOSE
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     std::cout << std::fixed << std::setprecision(2) << "\nFile Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
     std::cout << "\n";

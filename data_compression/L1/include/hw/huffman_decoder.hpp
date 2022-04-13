@@ -324,6 +324,9 @@ uint8_t huffmanBytegenLL(bitBufferTypeLL& _bitbuffer,
 
     const ap_uint<4> dext[32] = {0, 0, 0, 0, 1, 1, 2,  2,  3,  3,  4,  4,  5,  5,  6, 6,
                                  7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0};
+    bitBufferTypeLL buffer = _bitbuffer;
+    ap_uint<6> counter = bits_cntr;
+
 ByteGen:
     while (!huffDone && !done) {
 #pragma HLS PIPELINE II = 1
@@ -333,94 +336,103 @@ ByteGen:
             //#pragma HLS LOOP_FLATTEN
             for (ap_uint<5> i = 0; i < 15; i++) {
 #pragma HLS UNROLL
-                validCodeOffset[j].range(i, i) = (_bitbuffer.range(0, i) >= codeOffsets[j][i]) ? 1 : 0;
+                bool val = (buffer.range(0, i) >= codeOffsets[j][i]) ? 1 : 0;
+                if (val) {
+                    current_bits[j] = i + 1;
+                }
             }
         }
-        current_bits[0] = ap_uint<6>(32) - ap_uint<6>(__builtin_clz((unsigned int)(validCodeOffset[0])));
-        current_bits[1] = ap_uint<6>(32) - ap_uint<6>(__builtin_clz((unsigned int)(validCodeOffset[1])));
         for (ap_uint<2> i = 0; i < 2; i++) {
 #pragma HLS UNROLL
-            symbol[i][1] = bl1Codes[i][_bitbuffer.range(0, 0)];
-            symbol[i][2] = bl2Codes[i][_bitbuffer.range(0, 1)];
-            symbol[i][3] = bl3Codes[i][_bitbuffer.range(0, 2)];
-            symbol[i][4] = bl4Codes[i][_bitbuffer.range(0, 3)];
-            symbol[i][5] = bl5Codes[i][_bitbuffer.range(0, 4)];
-            symbol[i][6] = bl6Codes[i][_bitbuffer.range(0, 5)];
-            symbol[i][7] = bl7Codes[i][_bitbuffer.range(0, 6)];
-            symbol[i][8] = bl8Codes[i][_bitbuffer.range(0, 7)];
-            symbol[i][9] = bl9Codes[i][ap_uint<8>(_bitbuffer.range(0, 8))];
-            symbol[i][10] = bl10Codes[i][ap_uint<8>(_bitbuffer.range(0, 9))];
-            symbol[i][11] = bl11Codes[i][ap_uint<8>(_bitbuffer.range(0, 10))];
-            symbol[i][12] = bl12Codes[i][ap_uint<8>(_bitbuffer.range(0, 11))];
-            symbol[i][13] = bl13Codes[i][ap_uint<8>(_bitbuffer.range(0, 12))];
-            symbol[i][14] = bl14Codes[i][ap_uint<8>(_bitbuffer.range(0, 13))];
-            symbol[i][15] = bl15Codes[i][ap_uint<8>(_bitbuffer.range(0, 14))];
+            symbol[i][1] = bl1Codes[i][buffer.range(0, 0)];
+            symbol[i][2] = bl2Codes[i][buffer.range(0, 1)];
+            symbol[i][3] = bl3Codes[i][buffer.range(0, 2)];
+            symbol[i][4] = bl4Codes[i][buffer.range(0, 3)];
+            symbol[i][5] = bl5Codes[i][buffer.range(0, 4)];
+            symbol[i][6] = bl6Codes[i][buffer.range(0, 5)];
+            symbol[i][7] = bl7Codes[i][buffer.range(0, 6)];
+            symbol[i][8] = bl8Codes[i][buffer.range(0, 7)];
+            symbol[i][9] = bl9Codes[i][ap_uint<8>(buffer.range(0, 8))];
+            symbol[i][10] = bl10Codes[i][ap_uint<8>(buffer.range(0, 9))];
+            symbol[i][11] = bl11Codes[i][ap_uint<8>(buffer.range(0, 10))];
+            symbol[i][12] = bl12Codes[i][ap_uint<8>(buffer.range(0, 11))];
+            symbol[i][13] = bl13Codes[i][ap_uint<8>(buffer.range(0, 12))];
+            symbol[i][14] = bl14Codes[i][ap_uint<8>(buffer.range(0, 13))];
+            symbol[i][15] = bl15Codes[i][ap_uint<8>(buffer.range(0, 14))];
         }
 
-        lbitsCntr[1] = bits_cntr - current_bits[1];
-        lbitsCntr[0] = bits_cntr - current_bits[0];
+        lbitsCntr[1] = counter - current_bits[1];
+        lbitsCntr[0] = counter - current_bits[0];
         lsymbol[0] = symbol[0][current_bits[0]];
         lsymbol[1] = symbol[1][current_bits[1]];
-        lBitBuffer[0] = _bitbuffer >> current_bits[0];
-        lBitBuffer[1] = _bitbuffer >> current_bits[1];
+        lBitBuffer[0] = buffer >> current_bits[0];
+        lBitBuffer[1] = buffer >> current_bits[1];
 
         lextra = lext[val0]; // previous symbol
-        lval = (uint16_t)_bitbuffer & ((1 << lextra) - 1);
-        ebitsCntr[0] = bits_cntr - lextra;
-        lBitBuffer[2] = _bitbuffer >> lextra;
+        lval = (uint16_t)buffer & ((1 << lextra) - 1);
+        ebitsCntr[0] = counter - lextra;
+        lBitBuffer[2] = buffer >> lextra;
 
         dextra = dext[val1];
-        dval = (uint16_t)_bitbuffer & ((1 << dextra) - 1);
-        ebitsCntr[1] = bits_cntr - dextra;
-        lBitBuffer[3] = _bitbuffer >> dextra;
+        dval = (uint16_t)buffer & ((1 << dextra) - 1);
+        ebitsCntr[1] = counter - dextra;
+        lBitBuffer[3] = buffer >> dextra;
 
-        if (isExtra && isDistance) { // extra bits ml/distance
-            isExtra = false;
-            bits_cntr = ebitsCntr[0];
-            tmpVal.range(15, 0) = lval;
-            _bitbuffer = lBitBuffer[2];
-        } else if (isExtra && !isDistance) {
-            isExtra = false;
-            bits_cntr = ebitsCntr[1];
-            tmpVal.range(15, 0) = dval;
-            _bitbuffer = lBitBuffer[3];
-        } else if ((isDistance == false) && lsymbol[0] < 256) { // literal
-            tmpVal.range(7, 0) = (uint8_t)(lsymbol[0]);
-            tmpVal.range(15, 8) = 0xF0;
-            bits_cntr = lbitsCntr[0];
-            isExtra = false;
-            _bitbuffer = lBitBuffer[0];
-        } else if (lsymbol[0] == 256 && (isDistance == false)) {
-            huffDone = true;
-            ret = blockStatus::FINISH;
-            bits_cntr = lbitsCntr[0];
-            _bitbuffer = lBitBuffer[0];
-            tmpVal.range(15, 8) = ignoreValue; // invalid Value
-        } else if (isDistance == false) {      // match length
-            isDistance = true;
-            val0 = lsymbol[0];
-            isExtra = val0 < 9 ? false : true;
-            tmpVal.range(15, 0) = val0;
-            bits_cntr = lbitsCntr[0];
-            _bitbuffer = lBitBuffer[0];
-        } else { // distance
-            isDistance = false;
-            val1 = lsymbol[1];
-            isExtra = val1 < 4 ? false : true;
-            tmpVal.range(15, 0) = val1;
-            bits_cntr = lbitsCntr[1];
-            _bitbuffer = lBitBuffer[1];
+        if (isExtra) { // extra bits ml/distance
+            if (isDistance) {
+                isExtra = false;
+                counter = ebitsCntr[0];
+                tmpVal.range(15, 0) = lval;
+                buffer = lBitBuffer[2];
+            } else {
+                isExtra = false;
+                counter = ebitsCntr[1];
+                tmpVal.range(15, 0) = dval;
+                buffer = lBitBuffer[3];
+            }
+        } else {
+            if (isDistance == false) {
+                if (lsymbol[0] < 256) { // literal
+                    tmpVal.range(7, 0) = (uint8_t)(lsymbol[0]);
+                    tmpVal.range(15, 8) = 0xF0;
+                    counter = lbitsCntr[0];
+                    isExtra = false;
+                    buffer = lBitBuffer[0];
+                } else if (lsymbol[0] == 256) {
+                    huffDone = true;
+                    ret = blockStatus::FINISH;
+                    counter = lbitsCntr[0];
+                    buffer = lBitBuffer[0];
+                    tmpVal.range(15, 8) = ignoreValue; // invalid Value
+                } else {                               // match length
+                    isDistance = true;
+                    val0 = lsymbol[0];
+                    isExtra = val0 < 9 ? false : true;
+                    tmpVal.range(15, 0) = val0;
+                    counter = lbitsCntr[0];
+                    buffer = lBitBuffer[0];
+                }
+            } else { // distance
+                isDistance = false;
+                val1 = lsymbol[1];
+                isExtra = val1 < 4 ? false : true;
+                tmpVal.range(15, 0) = val1;
+                counter = lbitsCntr[1];
+                buffer = lBitBuffer[1];
+            }
         }
 
         outStream << tmpVal;
 
-        if (!(bits_cntr & 0xF0)) {
+        if (!(counter & 0xF0)) {
             uint16_t inValue = inStream.read();
             done = inEos.read();
-            _bitbuffer |= (bitBufferTypeLL)(inValue) << bits_cntr;
-            bits_cntr += (ap_uint<6>)16;
+            buffer |= (bitBufferTypeLL)(inValue) << counter;
+            counter += (ap_uint<6>)16;
         }
     }
+    bits_cntr = counter;
+    _bitbuffer = buffer;
     return ret;
 }
 
@@ -452,17 +464,17 @@ void byteGen(bitBufferTypeLL& _bitbuffer,
     bitBufferTypeLL bitbuffer[2];
     bool isExtra = false;
     ap_uint<3> extra = 0;
+    ap_uint<4> current_bits = 0;
 bytegen:
     while ((dynamic_curInSize < nlen + ndist) || (copy != 0)) {
 #pragma HLS PIPELINE II = 1
-        validCodeOffset.range(0, 0) = (_bitbuffer.range(0, 0) >= codeOffsets[0]) ? 1 : 0;
-        validCodeOffset.range(1, 1) = (_bitbuffer.range(0, 1) >= codeOffsets[1]) ? 1 : 0;
-        validCodeOffset.range(2, 2) = (_bitbuffer.range(0, 2) >= codeOffsets[2]) ? 1 : 0;
-        validCodeOffset.range(3, 3) = (_bitbuffer.range(0, 3) >= codeOffsets[3]) ? 1 : 0;
-        validCodeOffset.range(4, 4) = (_bitbuffer.range(0, 4) >= codeOffsets[4]) ? 1 : 0;
-        validCodeOffset.range(5, 5) = (_bitbuffer.range(0, 5) >= codeOffsets[5]) ? 1 : 0;
-        validCodeOffset.range(6, 6) = (_bitbuffer.range(0, 6) >= codeOffsets[6]) ? 1 : 0;
-        ap_uint<4> current_bits = 32 - __builtin_clz((unsigned int)(validCodeOffset));
+        for (ap_uint<5> i = 0; i < 7; i++) {
+#pragma HLS UNROLL
+            bool val = (_bitbuffer.range(0, i) >= codeOffsets[i]) ? 1 : 0;
+            if (val) {
+                current_bits = i + 1;
+            }
+        }
         symbol[1] = bl1Codes[_bitbuffer.range(0, 0)];
         symbol[2] = bl2Codes[_bitbuffer.range(0, 1)];
         symbol[3] = bl3Codes[_bitbuffer.range(0, 2)];
@@ -481,32 +493,33 @@ bytegen:
             copy += extra_copy;
             _bitbuffer = bitbuffer[1];
             bits_cntr -= extra;
-        } else if (copy != 0) {
-        } else if (current_val < 16) {
-            _bitbuffer = bitbuffer[0];
-            bits_cntr -= current_bits;
-            len = current_val;
-            copy = 1;
-        } else if (current_val == 16) {
-            copy = 3;                  // use 2 bits
-            _bitbuffer = bitbuffer[0]; // dump 2 bits
-            bits_cntr -= current_bits; // update bits_cntr
-            extra = 2;
-            isExtra = true;
-        } else if (current_val == 17) {
-            len = 0;
-            copy = 3; // use 3 bits
-            _bitbuffer = bitbuffer[0];
-            bits_cntr -= current_bits;
-            extra = 3;
-            isExtra = true;
-        } else {
-            len = 0;
-            copy = 11; // use 7 bits
-            _bitbuffer = bitbuffer[0];
-            bits_cntr -= current_bits;
-            extra = 7;
-            isExtra = true;
+        } else if (copy == 0) {
+            if (current_val < 16) {
+                _bitbuffer = bitbuffer[0];
+                bits_cntr -= current_bits;
+                len = current_val;
+                copy = 1;
+            } else if (current_val == 16) {
+                copy = 3;                  // use 2 bits
+                _bitbuffer = bitbuffer[0]; // dump 2 bits
+                bits_cntr -= current_bits; // update bits_cntr
+                extra = 2;
+                isExtra = true;
+            } else if (current_val == 17) {
+                len = 0;
+                copy = 3; // use 3 bits
+                _bitbuffer = bitbuffer[0];
+                bits_cntr -= current_bits;
+                extra = 3;
+                isExtra = true;
+            } else {
+                len = 0;
+                copy = 11; // use 7 bits
+                _bitbuffer = bitbuffer[0];
+                bits_cntr -= current_bits;
+                extra = 7;
+                isExtra = true;
+            }
         }
 
         if (copy != 0) {
@@ -1054,7 +1067,7 @@ huffmanDecoder_label0:
 
                 dyn_len_bits:
                     while (dynamic_curInSize < dynamic_ncode) {
-#pragma HLS PIPELINE II = 1
+#pragma HLS PIPELINE II = 2
                         if ((bits_cntr < 16) && (done == false)) {
                             uint16_t tmp_data = inStream.read();
                             bitbuffer += (bitBufferTypeLL)(tmp_data << bits_cntr);

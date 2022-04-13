@@ -2,7 +2,7 @@
 Xilinx ZSTD Decompression
 =========================================
 
-ZSTD example resides in ``L2/tests/zstd_decompress`` directory. 
+ZSTD example resides in ``L2/tests/zstd_32KB`` directory. 
 
 Follow build instructions to generate host executable and binary.
 
@@ -38,8 +38,8 @@ Performance Data
 
 Executable Usage:
 
-1. To execute single file for decompression           : ``./build/xil_zlib -dx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
-2. To decompress multiple files                       : ``./build/xil_zlib -dx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -l <files.list>``
+1. To execute single file for decompression           : ``./build/xil_zstd -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/xilZstdDecompressStream.xclbin -d <compressed file_name>``
+2. To decompress multiple files                       : ``./build/xil_zstd -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/xilZstdDecompressStream.xclbin -dfl <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 
@@ -51,5 +51,5 @@ The usage of the generated executable is as follows:
         --help,                 -h      Print Help Options   Default: [false]
         --decompress,           -d      Decompress
         --decompress_xclbin,    -dx     Decompress XCLBIN
-        --file_list,            -l      List of Input Files
+        --file_list,            -dfl    List of Input Files
 

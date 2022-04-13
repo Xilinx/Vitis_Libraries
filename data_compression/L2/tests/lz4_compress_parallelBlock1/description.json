@@ -12,16 +12,29 @@
     ], 
     "post_launch": [
         {
+            "target": "sw_emu",
             "launch_cmd": [
                 "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+            ]
+        },
+        {
+            "target": "hw_emu",
+            "launch_cmd": [
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+            ]
+        },
+        {
+            "target": "hw",
+            "launch_cmd": [
+                "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
             ]
         }
     ], 
     "default_device": "u200",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 

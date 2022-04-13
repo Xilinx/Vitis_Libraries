@@ -54,7 +54,7 @@ void xilGzipMM2S(uintMemWidth_t* in,
                  uint32_t inputSize,
                  uint32_t last,
                  hls::stream<ap_axiu<c_inStreamDwidth, 0, 0, 0> >& outStream) {
-    const int c_gmem0_width = c_inStreamDwidth;
+    const int c_gmem0_width = INPUT_BYTES * 8;
 #pragma HLS INTERFACE m_axi port = in max_widen_bitwidth = c_gmem0_width offset = slave bundle = \
     gmem0 max_read_burst_length = 64 max_write_burst_length = 2 num_read_outstanding = 8 num_write_outstanding = 1
 #pragma HLS interface axis port = outStream

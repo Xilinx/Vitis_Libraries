@@ -2,21 +2,14 @@
     "name": "Xilinx ZSTD compress HLS Test", 
     "description": "Test Design to validate ZSTD compression", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [],
-    "QoR_golden": {
-       "VV_LUT": "28819",
-       "VV_FF": "31834",
-       "VV_BRAM": "97", 
-       "VV_URAM": "14", 
-       "VV_AchievedClockPeriod": "3.295"
-    },
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [],
     "project": "zstd_compress", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -51,10 +44,10 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": 300
@@ -64,8 +57,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "canary"
     }

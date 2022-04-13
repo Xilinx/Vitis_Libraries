@@ -58,3 +58,9 @@ on-boarding.
 	:maxdepth: 1
 	
 	benchmark.rst
+
+.. toctree::
+	:caption: Compression Tutorial
+	:maxdepth: 1
+	
+	tutorial.rst

@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx LZ4 Decompress 4 Parallel Bytes", 
+    "name": "Xilinx LZ4 Decompress 8 Parallel Bytes", 
     "description": [
-        "Xilinx LZ4 Decompress Parallel Byte 4"
+        "Xilinx LZ4 Decompress Parallel Byte 8"
     ], 
     "flow": "vitis", 
     "launch": [
@@ -18,10 +18,11 @@
         }
     ], 
     "default_device": "u200",
-    "platform_blacklist": [
-        "zc"
+    "platform_blocklist": [
+        "zc",
+        "xilinx_vck190_base_202210_1"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 

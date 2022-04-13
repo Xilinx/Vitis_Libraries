@@ -39,6 +39,10 @@
 #define OUTPUT_BYTES MULTIPLE_BYTES
 #endif
 
+#ifndef TUSER_DWIDTH
+#define TUSER_DWIDTH 0
+#endif
+
 typedef ap_uint<OUTPUT_BYTES * 8> uintMemWidth_t;
 
 extern "C" {
@@ -57,6 +61,6 @@ void xilGzipS2MM(uintMemWidth_t* out,
                  uint32_t* encoded_size,
                  uint32_t* status_flag,
                  uint32_t read_block_size,
-                 hls::stream<ap_axiu<OUTPUT_BYTES * 8, 0, 0, 0> >& inStream);
+                 hls::stream<ap_axiu<OUTPUT_BYTES * 8, TUSER_DWIDTH, 0, 0> >& inStream);
 }
 #endif // _XFCOMPRESSION_GZIP_DM_S2MM_HPP_

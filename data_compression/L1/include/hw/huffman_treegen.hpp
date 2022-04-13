@@ -555,7 +555,6 @@ create_heap:
     for (uint16_t i = 0; i < num_symbols; ++i) {
 #pragma HLS PIPELINE II = 3
 #pragma HLS LOOP_TRIPCOUNT min = 19 avg = 286 max = 286
-#pragma HLS DEPENDENCE variable = frequency type = inter dependent = false
         Frequency<MAX_FREQ_DWIDTH> node_freq = 0;
         Frequency<MAX_FREQ_DWIDTH> intermediate_freq = frequency[tree_count];
         Frequency<MAX_FREQ_DWIDTH> symFreq = heap[in_count].frequency;
@@ -631,7 +630,6 @@ inline void createTreeStream(hls::stream<DSVectorStream_dt<Symbol<MAX_FREQ_DWIDT
 create_heap:
     for (uint16_t i = 0; i < num_symbols; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min = 19 avg = 286 max = 286
-#pragma HLS DEPENDENCE variable = frequency type = inter dependent = false
 #pragma HLS PIPELINE II = 3
         Frequency<MAX_FREQ_DWIDTH> node_freq = 0;
         Frequency<MAX_FREQ_DWIDTH> intermediate_freq = ((i - 1) == tree_count ? wTmp : frequency[tree_count]);
@@ -725,7 +723,6 @@ void computeBitLengthLL(ap_uint<SYMBOL_BITS>* parent,
 traverse_tree:
     for (int16_t i = num_symbols - 2; i >= 0;) {
 #pragma HLS LOOP_TRIPCOUNT min = 19 max = 301
-#pragma HLS DEPENDENCE variable = child_depth type = inter dependent = false
 #pragma HLS pipeline II = 1
         auto pIdx = parent[i];
         if (pIdx != prevParent) {
@@ -2172,19 +2169,22 @@ send_tree_outer:
 #pragma HLS PIPELINE II = 1
                 if (repCnt != 0) {
                     uint8_t lclCnt = 0;
+                    uint8_t tmp = repCnt;
+                    bool cond = (repCnt <= 3);
+                    repCnt = cond ? 0 : repCnt - 3;
                 write_rep_codes_blens:
                     for (uint8_t k = 0; k < 3; ++k) {
 #pragma HLS UNROLL
-                        if (repCnt > 0) {
+                        if (tmp > 0) {
                             outHufCode.data[k].code = temp.codeword;
                             outHufCode.data[k].bitlen = temp.bitlength;
-                            --repCnt;
+                            --tmp;
                             ++lclCnt;
                         }
                     }
                     outHufCode.strobe = lclCnt;
                     hfcodeStream << outHufCode;
-                    refCntFlag = (repCnt == 0);
+                    refCntFlag = (cond);
                 } else {
                     refCntFlag = true;
                     curlen = nextlen;

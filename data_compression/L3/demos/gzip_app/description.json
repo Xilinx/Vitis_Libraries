@@ -5,10 +5,10 @@
     ],
     "flow": "vitis",
     "default_device": "u250",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250"
     ],
     "launch": [
@@ -45,7 +45,8 @@
                 "LIB_DIR/L3/include",
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/thirdParty/zlib-1.2.7",
-                "LIB_DIR/common/libs/compress/"
+                "LIB_DIR/common/libs/compress/",
+                "LIB_DIR/L2/tests/src/"
             ],
             "options": "-O3 ",
             "symbols": [
@@ -114,7 +115,7 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 1000,
+                    "vitis_hw_build": 1500,
                     "vitis_hw_emu": 300,
                     "vitis_sw_emu": 25,
                     "vitis_hw_run": 10

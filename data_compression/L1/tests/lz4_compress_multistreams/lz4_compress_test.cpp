@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     data_t* source_out = new data_t[CONST_SIZE];
 
     uint32_t* compressedSize = new uint32_t[CONST_SIZE];
-    uint32_t bIdx;
+    uint32_t bIdx = 0;
     for (int i = 0; i < CONST_SIZE; i++) {
         source_in[i] = 0;
     }

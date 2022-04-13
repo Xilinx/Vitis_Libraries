@@ -1,0 +1,13 @@
+{
+    "spec_version": "0.1",
+      "xilinx_u200_xdma_201830_2": {
+        "vivado_impl": {
+             "vivado": {
+        "VV_LUT": "156", 
+        "VV_FF": "175", 
+        "VV_BRAM": "1", 
+        "VV_URAM": "0", 
+        "VV_AchievedClockPeriod": "2.058"                     }
+        } 
+    }
+}

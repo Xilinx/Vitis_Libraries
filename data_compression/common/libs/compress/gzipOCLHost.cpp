@@ -60,7 +60,7 @@ uint32_t gzipOCLHost::get_checksum(void) {
 }
 
 // OpenCL setup initialization
-int gzipOCLHost::init(const std::string& binaryFileName, uint8_t kidx) {
+int gzipOCLHost::init(const std::string& binaryFileName, uint8_t m_kidx) {
     // Error handling in OpenCL is performed using the cl_int specifier. OpenCL
     // functions either return or accept pointers to cl_int types to indicate if
     // an error occurred.
@@ -298,9 +298,8 @@ gzipOCLHost::gzipOCLHost(enum State flow,
         m_checksum = 1;
         m_isZlib = true;
     }
-    uint8_t kidx = deckerneltype;
     // OpenCL setup
-    int err = init(binaryFileName, kidx);
+    int err = init(binaryFileName, m_kidx);
     if (err) {
         std::cerr << "\nOpenCL Setup Failed" << std::endl;
         release();
@@ -636,11 +635,10 @@ uint64_t gzipOCLHost::decompressEngineSeq(
     cl::Buffer* buffer_status =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t), h_dcompressStatus.data());
 
-    uint8_t kidx = m_kidx;
     std::string cu_id = std::to_string((cu + 1));
 #ifndef FREE_RUNNING_KERNEL
     std::string decompress_kname =
-        stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + cu_id + "}";
+        stream_decompress_kernel_name[m_kidx] + ":{" + stream_decompress_kernel_name[m_kidx] + "_" + cu_id + "}";
     OCL_CHECK(err, cl::Kernel decompress_kernel(*m_program, decompress_kname.c_str(), &err));
 #endif
     std::string data_writer_kname = data_writer_kernel_name + ":{" + data_writer_kernel_name + "_" + cu_id + "}";
@@ -652,11 +650,18 @@ uint64_t gzipOCLHost::decompressEngineSeq(
     data_writer_kernel.setArg(0, *(buffer_dec_input));
     data_writer_kernel.setArg(1, inBufferSize);
     data_writer_kernel.setArg(2, isLast);
+#ifdef MULTICORE_DECOMPRESS
+    auto num_itr = xcl::is_emulation() ? 4 : 400000;
+    data_writer_kernel.setArg(3, num_itr);
+#endif
 
     data_reader_kernel.setArg(0, *(buffer_dec_zlib_output));
     data_reader_kernel.setArg(1, *(buffer_size));
     data_reader_kernel.setArg(2, *(buffer_status));
     data_reader_kernel.setArg(3, outBufferSize);
+#ifdef MULTICORE_DECOMPRESS
+    data_reader_kernel.setArg(4, num_itr);
+#endif
 
     uint32_t decmpSizeIdx = 0;
     h_dcompressStatus.data()[0] = 0;
@@ -734,7 +739,11 @@ uint64_t gzipOCLHost::decompressEngineSeq(
         // copy output decompressed data
         std::memcpy(out, dbuf_out.data(), decmpSizeIdx);
     }
+#ifdef MULTICORE_DECOMPRESS
+    float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 * num_itr / decompress_API_time_ns_1.count();
+#else
     float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
+#endif
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     // free the cl buffers
@@ -822,11 +831,10 @@ size_t gzipOCLHost::decompressEngine(uint8_t* in, uint8_t* out, size_t input_siz
         if (input_size < inBufferSize) inBufferSize = input_size;
         if ((max_outbuf_size < outBufferSize) && (max_outbuf_size != 0)) outBufferSize = max_outbuf_size;
 
-        uint8_t kidx = m_kidx;
         std::string cu_id = std::to_string((cu + 1));
 #ifndef FREE_RUNNING_KERNEL
         std::string decompress_kname =
-            stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + cu_id + "}";
+            stream_decompress_kernel_name[m_kidx] + ":{" + stream_decompress_kernel_name[m_kidx] + "_" + cu_id + "}";
         OCL_CHECK(err, cl::Kernel decompress_kernel(*m_program, decompress_kname.c_str(), &err));
 #endif
 
@@ -889,9 +897,8 @@ size_t gzipOCLHost::inflate_buffer(xlibData* strm,
         m_token = val;
     }
     if (m_decompressKernel == NULL) {
-        uint8_t kidx = m_kidx;
         std::string decompress_kname =
-            stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + m_token + "}";
+            stream_decompress_kernel_name[m_kidx] + ":{" + stream_decompress_kernel_name[m_kidx] + "_" + m_token + "}";
         OCL_CHECK(err, m_decompressKernel = new cl::Kernel(*m_program, decompress_kname.c_str(), &err));
         OCL_CHECK(err, err = m_dec_q->enqueueTask(*(m_decompressKernel), NULL, NULL));
     }
@@ -1099,10 +1106,9 @@ uint64_t gzipOCLHost::decompressEngineMMSeq(
     cl::Buffer* buffer_size =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), dbuf_outSize.data());
 
-    uint8_t kidx = m_kidx;
     std::string cu_id = std::to_string((cu + 1));
     std::string decompress_kname =
-        stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + cu_id + "}";
+        stream_decompress_kernel_name[m_kidx] + ":{" + stream_decompress_kernel_name[m_kidx] + "_" + cu_id + "}";
     OCL_CHECK(err, cl::Kernel decompress_kernel(*m_program, decompress_kname.c_str(), &err));
 
     decompress_kernel.setArg(0, *(buffer_dec_input));
@@ -1171,9 +1177,8 @@ size_t gzipOCLHost::inflate_buffer(uint8_t* in,
         token = val;
     }
     if (m_decompressKernel == NULL) {
-        uint8_t kidx = m_kidx;
         std::string decompress_kname =
-            stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + token + "}";
+            stream_decompress_kernel_name[m_kidx] + ":{" + stream_decompress_kernel_name[m_kidx] + "_" + token + "}";
         OCL_CHECK(err, m_decompressKernel = new cl::Kernel(*m_program, decompress_kname.c_str(), &err));
         OCL_CHECK(err, err = m_dec_q->enqueueTask(*(m_decompressKernel), NULL, NULL));
 
@@ -2058,12 +2063,13 @@ size_t gzipOCLHost::compressEngineSeq(
     }
     m_def_q->finish();
 
-    uint32_t compSize = 0;
     uint32_t compSizeCntr = 0;
-
+#ifdef FILE_WRITE
     auto index = 0;
+#endif
     if (this->is_freeRunKernel()) {
 #ifdef PERF_DM
+        uint32_t compSize = 0;
         for (long unsigned i = 0; i < 2 * blckNum; i += 2) {
             compSize = h_compressSize[i];
             compSizeCntr += compSize;

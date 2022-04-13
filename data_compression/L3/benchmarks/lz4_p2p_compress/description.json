@@ -5,13 +5,13 @@
     ],
     "flow": "vitis",
     "default_device": "samsung_u2",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u50",
         "u280",
         "zc",
         "vck"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "samsung_u2",
         "samsung_U2",
         "u200",

@@ -37,8 +37,8 @@ Average Compression Ratio	    2.68x (Silesia Benchmark)
 
 Executable Usage:
 
-1. To execute single file for decompression           : ``./build/xil_zlib -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <compressed file_name>``
-2. To decompress multiple files                       : ``./build/xil_zlib -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -cfl <files.list>``
+1. To execute single file for decompression           : ``./build/xil_zstd -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/xilZstdCompressStream.xclbin -c <compressed file_name>``
+2. To decompress multiple files                       : ``./build/xil_zstd -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/xilZstdCompressStream.xclbin -cfl <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 
@@ -47,8 +47,8 @@ The usage of the generated executable is as follows:
 .. code-block:: bash
  
    Usage: application.exe -[-h-d-sx-l]
-        --help,                 -h      Print Help Options   Default: [false]
-        --decompress,           -c      Decompress
-        --decompress_xclbin,    -cx     Decompress XCLBIN
-        --file_list,            -cfl    List of Input Files
+          --help,               -h      Print Help Options   Default: [false]
+          --Compress,           -c      Compress
+          --Compress_xclbin,    -cx     Compress XCLBIN
+          --file_list,          -cfl    List of Input Files
 

@@ -2,7 +2,7 @@
 Xlinx LZ4 Compression 
 ================================
 
-LZ4 Compress Streaming example resides in ``L2/tests/lz4_compress`` directory. 
+LZ4 Compress example resides in ``L2/tests/lz4_compress`` directory. 
 
 Follow build instructions to generate host executable and binary.
 

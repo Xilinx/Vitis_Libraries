@@ -6,13 +6,13 @@ LZ4 Compress Streaming example resides in ``L2/tests/lz4_dec_streaming_parallelB
 
 Follow build instructions to generate host executable and binary.
 
-The binary host file generated is named as **lz4** and it is present in ``./build`` directory.
+The binary host file generated is named as **xil_lz4_decompress_streaming** and it is present in ``./build`` directory.
 
 Executable Usage
 ----------------
 
-1. To execute single file for decompression             : ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress_streaming.xclbin -d <input file_name>``
-2. To execute multiple files for decompression    : ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress_streaming.xclbin -dfl <files.list>``
+1. To execute single file for decompression             : ``./build/xil_lz4_decompress_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress_streaming.xclbin -d <input file_name>``
+2. To execute multiple files for decompression    : ``./build/xil_lz4_decompress_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress_streaming.xclbin -dfl <files.list>``
 
     - ``<files.list>``: Contains various file names with current path
 

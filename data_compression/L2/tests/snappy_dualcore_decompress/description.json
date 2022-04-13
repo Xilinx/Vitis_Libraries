@@ -20,10 +20,11 @@
     ], 
     "config_make": "./config.mk", 
     "default_device": "u200",
-    "platform_blacklist": [
-        "zc"
+    "platform_blocklist": [
+        "zc",
+        "xilinx_vck190_base_202210_1"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 

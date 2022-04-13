@@ -2,12 +2,12 @@
     "name": "Xilinx Snappy Multibyte Decompress HLS Test", 
     "description": "Test Design to validate Snappy MultiByte Decompress module", 
     "flow": "hls",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "vck190", 
         "aws-vu9p-f1"
     ], 
-    "platform_blacklist": [],  
+    "platform_blocklist": [],  
     "project": "snappy_decompress_test", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -18,13 +18,7 @@
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
     },
-    "QoR_golden": {
-        "VV_LUT": "5453",
-        "VV_FF": "4883",
-        "VV_BRAM": "0",
-        "VV_URAM": "4",
-        "VV_AchievedClockPeriod": "3.263"
-    }, 
+
     "testbench": {
         "source": [
             "snappy_decompress_test.cpp"
@@ -44,17 +38,17 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
-                    "hls_vivado_syn": 300, 
+                    "vivado_syn": 300, 
                     "hls_csim": 60, 
                     "hls_cosim": 300, 
-                    "hls_vivado_impl": 300, 
+                    "vivado_impl": 300, 
                     "hls_csynth": 60
                 }
             }
@@ -63,8 +57,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "canary"
     }

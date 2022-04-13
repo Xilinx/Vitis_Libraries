@@ -140,7 +140,7 @@ uint64_t zstdOCLHost::xilDecompress(uint8_t* in, uint8_t* out, size_t input_size
 uint64_t zstdOCLHost::compressEngine(uint8_t* in, uint8_t* out, size_t input_size) {
     cl_int err;
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
-    auto c_inputSize = CMP_HOST_BUF_SIZE;
+    cl::size_type c_inputSize = CMP_HOST_BUF_SIZE;
 #ifdef FREE_RUNNING_KERNEL
     c_inputSize = input_size;
 #endif

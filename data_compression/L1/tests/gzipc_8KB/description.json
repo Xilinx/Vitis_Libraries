@@ -2,19 +2,12 @@
     "name": "Xilinx GZIP 8KB Compress Streaming HLS Test", 
     "description": "Test Design to validate Streaming GZIP 8KB compression", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [],
-     "QoR_golden": {
-          "VV_LUT": "55844", 
-          "VV_FF": "52503",
-          "VV_BRAM_18K": "202",
-          "VV_URAM": "48",
-          "VV_AchievedClockPeriod": "3.088"
-    },  
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [],
     "project": "gzip_compress_test", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -49,10 +42,10 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 30720, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 24576, 
+                    "vivado_impl": 24576, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": 300
@@ -62,8 +55,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "canary"
     }

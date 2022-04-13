@@ -22,7 +22,7 @@
 #include "zlib.h"
 #include "ap_int.h"
 
-auto constexpr HOST_BUFFER_SIZE = 2 * 1024 * 1024;
+cl::size_type constexpr HOST_BUFFER_SIZE = 2 * 1024 * 1024;
 
 void xilChecksumTop(std::string& compress_mod, bool checksum_type, std::string& compress_bin) {
     std::ifstream ifs;

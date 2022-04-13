@@ -6,10 +6,10 @@
     "config_make": "./config.mk", 
     "flow": "vitis", 
     "default_device": "samsung_u2",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "samsung_u2", 
         "samsung_U2", 
         "u200", 

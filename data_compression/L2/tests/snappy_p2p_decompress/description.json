@@ -18,10 +18,12 @@
         }
     ], 
     "default_device": "samsung_u2",
-    "platform_blacklist": [
-        "zc"
+    "platform_blocklist": [
+        "zc",
+        "xilinx_u50_gen3x16_xdma_5_202210_1",
+        "xilinx_vck190_base_202210_1"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "samsung_u2", 
         "samsung_U2", 
         "u200", 
@@ -140,7 +142,7 @@
                 "cmd": "", 
                 "max_memory_MB": {
                     "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 102400, 
+                    "vitis_hw_emu": 204800, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240
                 }, 

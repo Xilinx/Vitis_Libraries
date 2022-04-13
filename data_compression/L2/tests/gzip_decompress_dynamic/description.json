@@ -19,10 +19,11 @@
     ],
     "config_make": "./config.mk",
     "default_device": "u200",
-    "platform_blacklist": [
-        "zc"
+    "platform_blocklist": [
+        "zc",
+        "xilinx_vck190_base_202210_1"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "u250",
         "u50",
@@ -111,7 +112,7 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 470,
+                    "vitis_hw_build": 600,
                     "vitis_hw_emu": 300,
                     "vitis_sw_emu": 25,
                     "vitis_hw_run": 10

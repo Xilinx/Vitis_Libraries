@@ -5,12 +5,12 @@
     ],
     "flow": "vitis",
     "default_device": "u50_gen3x16_nodma",
-    "platform_blacklist": [
+    "platform_blocklist": [
         "vck",
         "u200",
         "u280"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50_gen3x16_nodma"
     ],
     "launch": [

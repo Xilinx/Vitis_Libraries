@@ -18,10 +18,11 @@
         }
     ], 
     "default_device": "samsung_u2",
-    "platform_blacklist": [
-        "zc"
+    "platform_blocklist": [
+        "zc",
+        "xilinx_vck190_base_202210_1"
     ], 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "samsung_u2", 
         "samsung_U2", 
         "u200", 
@@ -137,7 +138,7 @@
                 }, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 470, 
+                    "vitis_hw_emu": 600, 
                     "vitis_sw_emu": 25, 
                     "vitis_hw_run": 10
                 }
