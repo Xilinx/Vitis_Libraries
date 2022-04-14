@@ -1,0 +1,1132 @@
+﻿
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="benchmark, tree, engine" name="keywords" />
+<meta content="This is a benchmark based on tree structure using the Xilinx Vitis environment to compare with QuantLib, where the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian, and the Instrument supports multiple Instruments, including swaption, swap, capfloor, callablebond." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+	<!-- OneTrust Cookies Consent Notice start for xilinx.github.io -->
+<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="37701bd4-e5c0-4ee3-9329-e7475d0b13a7" ></script>
+<script type="text/javascript">
+function OptanonWrapper() { }
+</script>
+<!-- OneTrust Cookies Consent Notice end for xilinx.github.io -->
+		<!-- Google Tag Manager -->
+	<script type="text/plain" class="optanon-category-C0002">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5RHQV7');</script>
+	<!-- End Google Tag Manager -->
+	
+        <!-- Google Tag Manager -->
+        <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5RHQV7" height="0" width="0" style="display:none;visibility:hidden" class="optanon-category-C0002"></iframe></noscript>
+        <!-- End Google Tag Manager -->	
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../../_static/js/Searchbox.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/header-footer.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Benchmark of Singular Value Decomposition (SVD)" href="../../guide_L1/benchmarks/SVD.html" />
+    <link rel="prev" title="Benchmark of MCEuropeanEngine" href="MCEuropeanEngine.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+ <div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+
+    
+    
+
+    
+
+
+
+<div class="xf-content-height">
+    
+
+<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+    
+    <div class="header parbase aem-GridColumn aem-GridColumn--default--12"><noindex>
+	<header data-component="header" class="site-header">
+		<nav class="navbar navbar-default">
+			<div class="container-fluid main-nav">
+				<div class="row">
+					<div class="navbar-column col-xs-4 col-sm-5">
+						<ul class="nav navbar-nav hidden-xs">
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+								</li>
+							</ul>
+							
+						<ul class="nav navbar-nav hidden-sm hidden-md hidden-lg">
+							<li>
+									<button data-target="#header-container-0" data-function="toggle">Solutions</button>
+								</li>
+							<li>
+									<button data-target="#header-container-1" data-function="toggle">Products</button>
+								</li>
+							<li>
+									<button data-target="#header-container-2" data-function="toggle">Company</button>
+								</li>
+							</ul>
+							
+						<div id="header-container-0" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-1" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-2" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							</div>
+					<div class="logo-column col-xs-4 col-sm-2">
+						<div class="logo">
+							<a target="_blank" href="https://www.xilinx.com/">
+								<img src="https://github.com/Xilinx/Image-Collateral/blob/main/xilinx-header-logo.svg?raw=true" title="Xilinx Inc"/>
+							</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			</nav></header></noindex></div>
+		
+	
+</div>
+
+    
+</div>
+</div>
+
+<div class="calloutBanner parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><div class="callout-banner">
+    Xilinx is now a part of <a target="_blank" href="https://www.amd.com/en/corporate/xilinx-acquisition">AMD</a> |  <a target="_blank" href="https://www.amd.com/en/corporate/privacy">Learn More</a>
+</div>
+</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Quantitative Finance Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2021.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rel.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../models_and_methods.html">Pricing Models and Numerical Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L1/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../L2.html">L2 Kernel User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L3/L3.html">L3 Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmark.html">Benchmark</a></li>
+</ul>
+
+            
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vitis Quantitative Finance Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../benchmark.html">Benchmark</a> &raquo;</li>
+        
+      <li>Benchmark of TreeEngine</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="benchmark-of-treeengine">
+<h1>Benchmark of TreeEngine<a class="headerlink" href="#benchmark-of-treeengine" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This is a serial of benchmark based on tree structure using the Xilinx Vitis environment to compare with QuantLib, where the Instrument supports multiple instruments, including swaption, swap, capfloor, callablebond, the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian. It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.</p>
+<p>These examples reside in <code class="docutils literal notranslate"><span class="pre">L2/benchmarks/TreeEngine</span></code> directory. Take <cite>TreeSwaptionEngineHWMOdel</cite> as example, the tutorial bellow provides a step-by-step guide that covers commands for build and runging kernel.</p>
+</div>
+<div class="section" id="executable-usage">
+<h2>Executable Usage<a class="headerlink" href="#executable-usage" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>Work Directory(Step 1)</strong></li>
+</ul>
+<p>The steps for library download and environment setup can be found in <a class="reference internal" href="../../benchmark.html#l2-vitis-quantitative-finance"><span class="std std-ref">Vitis Quantitative_Finance Library</span></a>. For getting the design,</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L2/benchmarks/TreeEngine/TreeSwaptionEngineHWModel
+</pre>
+<ul class="simple">
+<li><strong>Build kernel(Step 2)</strong></li>
+</ul>
+<p>Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">source</span> /opt/xilinx/Vitis/2021.1/settings64.sh
+<span class="nb">source</span> /opt/xilinx/xrt/setenv.sh
+<span class="nb">export</span> <span class="nv">DEVICE</span><span class="o">=</span>/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
+<span class="nb">export</span> <span class="nv">TARGET</span><span class="o">=</span>hw
+make run
+</pre>
+<ul class="simple">
+<li><strong>Run kernel(Step 3)</strong></li>
+</ul>
+<p>To get the benchmark results, please run the following command.</p>
+<pre class="highlight literal-block">
+<span></span>./build_dir.hw.xilinx_u250_xdma_201830_2/host.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/scanTreeKernel.xclbin
+</pre>
+<p>Input Arguments:</p>
+<pre class="highlight literal-block">
+<span></span>Usage: test.exe    -<span class="o">[</span>-xclbin <span class="o">]</span>
+       -xclbin     TreeEngine binary<span class="p">;</span>
+</pre>
+<ul class="simple">
+<li><strong>Example output(Step 4)</strong></li>
+</ul>
+<pre class="highlight literal-block">
+<span></span>----------------------Tree Bermudan <span class="o">(</span>HW<span class="o">)</span> Engine-----------------
+<span class="nv">timestep</span><span class="o">=</span><span class="m">50</span>
+Found Platform
+Platform Name: Xilinx
+Found <span class="nv">Device</span><span class="o">=</span>xilinx_u250_xdma_201830_2
+INFO: Importing xclbin_xilinx_u250_xdma_201830_2_hw/scanTreeKernel.xclbin
+Loading: <span class="s1">&#39;xclbin_xilinx_u250_xdma_201830_2_hw/scanTreeKernel.xclbin&#39;</span>
+kernel has been created
+kernel start------
+kernel end------
+FPGA Execution time: <span class="m">0</span>.28ms
+<span class="nv">NPV</span><span class="o">=</span> <span class="m">13</span>.1903146433444 ,diff/NPV<span class="o">=</span> -1.30631162395178e-14
+</pre>
+</div>
+<div class="section" id="profiling">
+<h2>Profiling<a class="headerlink" href="#profiling" title="Permalink to this headline">¶</a></h2>
+<p>The application scenarios in this case is:</p>
+<span id="tab-treeengine-input-parameter"></span><table border="1" class="docutils" id="id1">
+<caption><span class="caption-number">Table 26 </span><span class="caption-text">Application Scenarios</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="7%" />
+<col width="6%" />
+<col width="3%" />
+<col width="4%" />
+<col width="13%" />
+<col width="7%" />
+<col width="6%" />
+<col width="12%" />
+<col width="13%" />
+<col width="7%" />
+<col width="13%" />
+<col width="5%" />
+<col width="4%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Instrument</td>
+<td>Model</td>
+<td>type</td>
+<td>index</td>
+<td>fixedRate</td>
+<td>timestep</td>
+<td>initSize</td>
+<td>a</td>
+<td>sigma</td>
+<td>flatRate</td>
+<td>x0</td>
+<td>nominal</td>
+<td>spread</td>
+</tr>
+<tr class="row-even"><td rowspan="6">Swaption</td>
+<td>HWModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.055228873373796609</td>
+<td>0.0061062754654949824</td>
+<td>0.04875825</td>
+<td>0.0</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-odd"><td>BKModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.043389447297063261</td>
+<td>0.12074597086680797</td>
+<td>0.04875825</td>
+<td>0.0</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-even"><td>CIRModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.043389447297063261</td>
+<td>0.068963597413997324</td>
+<td>0.04875825</td>
+<td>0.18580295883843218</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-odd"><td>ECIRModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.043389447297063261</td>
+<td>0.015974847434765481</td>
+<td>0.04875825</td>
+<td>0.50137133948380941</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-even"><td>VModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.16046325834281869</td>
+<td>0.0037370022855109613</td>
+<td>0.04875825</td>
+<td>0.0079988201434896891</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-odd"><td>G2Model</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.050055733653096922</td>
+<td>0.0094424342056787739</td>
+<td>0.04875825</td>
+<td>0.0</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-even"><td>Swap</td>
+<td>HWModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.055228873373796609</td>
+<td>0.0061062754654949824</td>
+<td>0.04875825</td>
+<td>0.0</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-odd"><td>CapFloor</td>
+<td>HWModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.049995924285639641</td>
+<td>50/100/1000</td>
+<td>12</td>
+<td>0.055228873373796609</td>
+<td>0.0061062754654949824</td>
+<td>0.04875825</td>
+<td>0.0</td>
+<td>1000.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-even"><td>Callable</td>
+<td>HWModel</td>
+<td>0</td>
+<td>1</td>
+<td>0.0465</td>
+<td>50/100/1000</td>
+<td>6</td>
+<td>0.03</td>
+<td>0.01</td>
+<td>0.055</td>
+<td>0.0</td>
+<td>100.0</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+<p>the benchmarks include 2 parts: TreeSwaptionEngine based on different Rate Model, different Instrument based on HullWhite Rate Model.
+Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2667 v3 &#64;3.200GHz, 8 cores per procssor and 2 threads per core.</p>
+<div class="section" id="treeswaptionengine">
+<h3>TreeSwaptionEngine<a class="headerlink" href="#treeswaptionengine" title="Permalink to this headline">¶</a></h3>
+<p>The performance of the TreeSwaptionEngine based on HullWhite and other different rate models are shown in the table below.</p>
+<span id="tab-treeswaptionengine-execution-time"></span><table border="1" class="docutils align-center" id="id2">
+<caption><span class="caption-number">Table 27 </span><span class="caption-text">Performance Comparison: TreeSwaptionEngine with different Rate Model</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="18%" />
+<col width="37%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td rowspan="2">Rate Model</td>
+<td rowspan="2">platform</td>
+<td colspan="4">Timesteps</td>
+</tr>
+<tr class="row-even"><td>50</td>
+<td>100</td>
+<td>500</td>
+<td>1000</td>
+</tr>
+<tr class="row-odd"><td rowspan="3">HWModel</td>
+<td>Baseline (ms)</td>
+<td>1.0</td>
+<td>4.8</td>
+<td>353.9</td>
+<td>2493.5</td>
+</tr>
+<tr class="row-even"><td>FinTech on U250 (ms)</td>
+<td>0.018</td>
+<td>0.042</td>
+<td>0.485</td>
+<td>1.650</td>
+</tr>
+<tr class="row-odd"><td>Accelaration Ratio</td>
+<td>55X</td>
+<td>114X</td>
+<td>729X</td>
+<td>1511X</td>
+</tr>
+<tr class="row-even"><td rowspan="3">BKModel</td>
+<td>Baseline (ms)</td>
+<td>1.9</td>
+<td>8.6</td>
+<td>438.2</td>
+<td>2813.1</td>
+</tr>
+<tr class="row-odd"><td>FinTech on U250 (ms)</td>
+<td>0.069</td>
+<td>0.156</td>
+<td>1.471</td>
+<td>4.601</td>
+</tr>
+<tr class="row-even"><td>Accelaration Ratio</td>
+<td>27X</td>
+<td>55X</td>
+<td>297X</td>
+<td>611X</td>
+</tr>
+<tr class="row-odd"><td rowspan="3">CIRModel</td>
+<td>Baseline (ms)</td>
+<td>0.5</td>
+<td>1.4</td>
+<td>26.2</td>
+<td>100.7</td>
+</tr>
+<tr class="row-even"><td>FinTech on U250 (ms)</td>
+<td>0.007</td>
+<td>0.014</td>
+<td>0.119</td>
+<td>0.361</td>
+</tr>
+<tr class="row-odd"><td>Accelaration Ratio</td>
+<td>71X</td>
+<td>100X</td>
+<td>223X</td>
+<td>278X</td>
+</tr>
+<tr class="row-even"><td rowspan="3">ECIRModel</td>
+<td>Baseline (ms)</td>
+<td>1.1</td>
+<td>5.5</td>
+<td>439.5</td>
+<td>3322.5</td>
+</tr>
+<tr class="row-odd"><td>FinTech on U250 (ms)</td>
+<td>0.058</td>
+<td>0.114</td>
+<td>0.997</td>
+<td>3.088</td>
+</tr>
+<tr class="row-even"><td>Accelaration Ratio</td>
+<td>19X</td>
+<td>48X</td>
+<td>440X</td>
+<td>1093X</td>
+</tr>
+<tr class="row-odd"><td rowspan="3">VModel</td>
+<td>Baseline (ms)</td>
+<td>0.5</td>
+<td>1.8</td>
+<td>40.1</td>
+<td>161.7</td>
+</tr>
+<tr class="row-even"><td>FinTech on U250 (ms)</td>
+<td>0.005</td>
+<td>0.010</td>
+<td>0.096</td>
+<td>0.322</td>
+</tr>
+<tr class="row-odd"><td>Accelaration Ratio</td>
+<td>100X</td>
+<td>180X</td>
+<td>417X</td>
+<td>502X</td>
+</tr>
+<tr class="row-even"><td rowspan="3">G2Model</td>
+<td>Baseline (ms)</td>
+<td>258.0</td>
+<td>2133.5</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>FinTech on U250 (ms)</td>
+<td>0.574</td>
+<td>4.496</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>Accelaration Ratio</td>
+<td>449X</td>
+<td>474X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="treeengine-based-on-hullwhite-rate-model">
+<h3>TreeEngine Based on HullWhite Rate Model<a class="headerlink" href="#treeengine-based-on-hullwhite-rate-model" title="Permalink to this headline">¶</a></h3>
+<p>The performance comparison of the diffferent TreeEngine Instruments based on the HullWhite rate model are shown in the table below.</p>
+<span id="tab-treeenginehwmodel-execution-time"></span><table border="1" class="docutils align-center" id="id3">
+<caption><span class="caption-number">Table 28 </span><span class="caption-text">Performance Comparison: Different TreeEngine Instruments with HullWhite Mode</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="18%" />
+<col width="37%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td rowspan="2">Instrument</td>
+<td rowspan="2">platform</td>
+<td colspan="4">Timesteps</td>
+</tr>
+<tr class="row-even"><td>50</td>
+<td>100</td>
+<td>500</td>
+<td>1000</td>
+</tr>
+<tr class="row-odd"><td rowspan="3">Swaption</td>
+<td>Baseline (ms)</td>
+<td>1.0</td>
+<td>4.8</td>
+<td>353.9</td>
+<td>2493.5</td>
+</tr>
+<tr class="row-even"><td>FinTech on U250 (ms)</td>
+<td>0.018</td>
+<td>0.042</td>
+<td>0.485</td>
+<td>1.650</td>
+</tr>
+<tr class="row-odd"><td>Accelaration Ratio</td>
+<td>55X</td>
+<td>114X</td>
+<td>729X</td>
+<td>1511X</td>
+</tr>
+<tr class="row-even"><td rowspan="3">Swap</td>
+<td>Baseline (ms)</td>
+<td>1.0</td>
+<td>4.3</td>
+<td>291.2</td>
+<td>2056.5</td>
+</tr>
+<tr class="row-odd"><td>FinTech on U250 (ms)</td>
+<td>0.014</td>
+<td>0.032</td>
+<td>0.361</td>
+<td>1.226</td>
+</tr>
+<tr class="row-even"><td>Accelaration Ratio</td>
+<td>71X</td>
+<td>134X</td>
+<td>806X</td>
+<td>1677X</td>
+</tr>
+<tr class="row-odd"><td rowspan="3">CapFloor</td>
+<td>Baseline (ms)</td>
+<td>0.7</td>
+<td>3.4</td>
+<td>217.6</td>
+<td>1581.3</td>
+</tr>
+<tr class="row-even"><td>FinTech on U250 (ms)</td>
+<td>0.014</td>
+<td>0.031</td>
+<td>0.344</td>
+<td>1.160</td>
+</tr>
+<tr class="row-odd"><td>Accelaration Ratio</td>
+<td>50X</td>
+<td>109X</td>
+<td>632X</td>
+<td>1363X</td>
+</tr>
+<tr class="row-even"><td rowspan="3">Callable</td>
+<td>Baseline (ms)</td>
+<td>1.4</td>
+<td>3.5</td>
+<td>155.2</td>
+<td>1142.1</td>
+</tr>
+<tr class="row-odd"><td>FinTech on U250 (ms)</td>
+<td>0.015</td>
+<td>0.033</td>
+<td>0.374</td>
+<td>1.260</td>
+</tr>
+<tr class="row-even"><td>Accelaration Ratio</td>
+<td>93X</td>
+<td>106X</td>
+<td>414X</td>
+<td>906X</td>
+</tr>
+</tbody>
+</table>
+<p>The resource utilization and performance of TreeEngine on U250 FPGA card are listed in the following tables.</p>
+<span id="tab-treeengine-resource"></span><table border="1" class="docutils align-center" id="id4">
+<caption><span class="caption-number">Table 29 </span><span class="caption-text">Resource utilization report of TreeEngine APIs on U250</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="32%" />
+<col width="7%" />
+<col width="9%" />
+<col width="8%" />
+<col width="9%" />
+<col width="10%" />
+<col width="9%" />
+<col width="14%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Engine</td>
+<td>PUs</td>
+<td>BRAM</td>
+<td>URAM</td>
+<td>DSP</td>
+<td>REG</td>
+<td>LUT</td>
+<td>FPGA Clock</td>
+</tr>
+<tr class="row-even"><td>treeSwaptionEngineHWModel</td>
+<td>16</td>
+<td>1136</td>
+<td>0</td>
+<td>6128</td>
+<td>1080922</td>
+<td>1051628</td>
+<td>198.3MHz</td>
+</tr>
+<tr class="row-odd"><td>treeSwaptionEngineBKModel</td>
+<td>12</td>
+<td>936</td>
+<td>0</td>
+<td>5128</td>
+<td>951861</td>
+<td>970889</td>
+<td>223.6MHz</td>
+</tr>
+<tr class="row-even"><td>treeSwaptionEngineCIRModel</td>
+<td>20</td>
+<td>1064</td>
+<td>0</td>
+<td>4896</td>
+<td>977294</td>
+<td>870446</td>
+<td>266.5MHz</td>
+</tr>
+<tr class="row-odd"><td>treeSwaptionEngineECIRModel</td>
+<td>12</td>
+<td>932</td>
+<td>0</td>
+<td>4456</td>
+<td>963209</td>
+<td>962656</td>
+<td>229.8MHz</td>
+</tr>
+<tr class="row-even"><td>treeSwaptionEngineVModel</td>
+<td>20</td>
+<td>1276</td>
+<td>0</td>
+<td>6636</td>
+<td>1166999</td>
+<td>1076988</td>
+<td>249.4MHz</td>
+</tr>
+<tr class="row-odd"><td>treeSwaptionEngineG2Model</td>
+<td>8</td>
+<td>308</td>
+<td>1088</td>
+<td>4112</td>
+<td>736199</td>
+<td>699702</td>
+<td>204.9MHz</td>
+</tr>
+<tr class="row-even"><td>treeSwapEngineHWModel</td>
+<td>16</td>
+<td>1056</td>
+<td>0</td>
+<td>5552</td>
+<td>1045252</td>
+<td>1024854</td>
+<td>252.9MHz</td>
+</tr>
+<tr class="row-odd"><td>treeCapFloorEngineHWModel</td>
+<td>16</td>
+<td>1036</td>
+<td>0</td>
+<td>5040</td>
+<td>981075</td>
+<td>1009950</td>
+<td>267.2MHz</td>
+</tr>
+<tr class="row-even"><td>treeCallableEngineHWModel</td>
+<td>16</td>
+<td>1056</td>
+<td>0</td>
+<td>4528</td>
+<td>961311</td>
+<td>983068</td>
+<td>242.0MHz</td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../guide_L1/benchmarks/SVD.html" class="btn btn-neutral float-right" title="Benchmark of Singular Value Decomposition (SVD)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="MCEuropeanEngine.html" class="btn btn-neutral float-left" title="Benchmark of MCEuropeanEngine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+														
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<div class="lang-select dropup hidden-md hidden-lg">
+		<button data-toggle="dropdown">
+			<span class="fas fa-globe" aria-hidden="true"></span>
+			<span>
+				
+					English
+				</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a target="_blank" href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+																	<div class="lang-select dropup hidden-xs hidden-sm">
+	<button data-toggle="dropdown">
+		<span class="fas fa-globe" aria-hidden="true"></span>
+		<span>
+			
+				English
+			</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+															</div>
+														</div>
+														<div class="col-md-pull-5 col-lg-pull-5 col-md-5 col-lg-5">
+															<span class="copyright">©2022 Advanced Micro Devices, Inc</span>
+														</div>
+
+													</div>
+													                    <div class="movethisrowtoleft row">
+                        <div class="col-xs-24">
+                            <ul class="sub-menu">
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/privacy">Privacy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/cookies">Cookie Policy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/trademarks">Trademarks</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/statement-human-trafficking-forced-labor.pdf">Statement on Forced Labor</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/competition">Fair and Open Competition</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf">UK Tax Strategy</a></li>
+								<li><a target="_blank" href="https://docs.xilinx.com/v/u/9x6YvZKuWyhJId7y7RQQKA">Inclusive Terminology</a></li>
+                                <li><a href="#cookiessettings" class="ot-sdk-show-settings">Cookies Settings</a></li>
+                            </ul>
+                        </div>
+                    </div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+<div class="backToTop parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><noindex>
+    <span data-component="backToTopButton" class="backToTopButton loaded">
+        <ul>
+            <li>
+                <a href="https://www.author.xilinx.com/xx/rebrand/amd/en-amd-xilinx-header-footer.html#top" class="btn top">
+                    <span class="fas fa-angle-up" aria-hidden="true"></span>
+                </a>
+            </li>
+        </ul>
+    </span>
+</noindex></div>
+			</div>
+		</div>
+
+
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>

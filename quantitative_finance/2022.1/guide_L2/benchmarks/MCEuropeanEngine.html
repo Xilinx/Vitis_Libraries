@@ -1,0 +1,774 @@
+﻿
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="benchmark, European, engine, option" name="keywords" />
+<meta content="This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+	<!-- OneTrust Cookies Consent Notice start for xilinx.github.io -->
+<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="37701bd4-e5c0-4ee3-9329-e7475d0b13a7" ></script>
+<script type="text/javascript">
+function OptanonWrapper() { }
+</script>
+<!-- OneTrust Cookies Consent Notice end for xilinx.github.io -->
+		<!-- Google Tag Manager -->
+	<script type="text/plain" class="optanon-category-C0002">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5RHQV7');</script>
+	<!-- End Google Tag Manager -->
+	
+        <!-- Google Tag Manager -->
+        <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5RHQV7" height="0" width="0" style="display:none;visibility:hidden" class="optanon-category-C0002"></iframe></noscript>
+        <!-- End Google Tag Manager -->	
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../../_static/js/Searchbox.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/header-footer.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Benchmark of TreeEngine" href="TreeEngine.html" />
+    <link rel="prev" title="Benchmark of MCAmericanEngineMultiKernel" href="MCAmericanEngine.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+ <div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+
+    
+    
+
+    
+
+
+
+<div class="xf-content-height">
+    
+
+<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+    
+    <div class="header parbase aem-GridColumn aem-GridColumn--default--12"><noindex>
+	<header data-component="header" class="site-header">
+		<nav class="navbar navbar-default">
+			<div class="container-fluid main-nav">
+				<div class="row">
+					<div class="navbar-column col-xs-4 col-sm-5">
+						<ul class="nav navbar-nav hidden-xs">
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+								</li>
+							</ul>
+							
+						<ul class="nav navbar-nav hidden-sm hidden-md hidden-lg">
+							<li>
+									<button data-target="#header-container-0" data-function="toggle">Solutions</button>
+								</li>
+							<li>
+									<button data-target="#header-container-1" data-function="toggle">Products</button>
+								</li>
+							<li>
+									<button data-target="#header-container-2" data-function="toggle">Company</button>
+								</li>
+							</ul>
+							
+						<div id="header-container-0" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-1" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-2" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							</div>
+					<div class="logo-column col-xs-4 col-sm-2">
+						<div class="logo">
+							<a target="_blank" href="https://www.xilinx.com/">
+								<img src="https://github.com/Xilinx/Image-Collateral/blob/main/xilinx-header-logo.svg?raw=true" title="Xilinx Inc"/>
+							</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			</nav></header></noindex></div>
+		
+	
+</div>
+
+    
+</div>
+</div>
+
+<div class="calloutBanner parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><div class="callout-banner">
+    Xilinx is now a part of <a target="_blank" href="https://www.amd.com/en/corporate/xilinx-acquisition">AMD</a> |  <a target="_blank" href="https://www.amd.com/en/corporate/privacy">Learn More</a>
+</div>
+</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Quantitative Finance Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2021.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rel.html">Release Note</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../models_and_methods.html">Pricing Models and Numerical Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L1/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../L2.html">L2 Kernel User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guide_L3/L3.html">L3 Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmark.html">Benchmark</a></li>
+</ul>
+
+            
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vitis Quantitative Finance Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../benchmark.html">Benchmark</a> &raquo;</li>
+        
+      <li>Benchmark of MCEuropeanEngine</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="benchmark-of-mceuropeanengine">
+<h1>Benchmark of MCEuropeanEngine<a class="headerlink" href="#benchmark-of-mceuropeanengine" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.</p>
+<p>This example resides in <code class="docutils literal notranslate"><span class="pre">L2/benchmarks/MCEuropeanEngine</span></code> directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.</p>
+</div>
+<div class="section" id="executable-usage">
+<h2>Executable Usage<a class="headerlink" href="#executable-usage" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>Work Directory(Step 1)</strong></li>
+</ul>
+<p>The steps for library download and environment setup can be found in <a class="reference internal" href="../../benchmark.html#l2-vitis-quantitative-finance"><span class="std std-ref">Vitis Quantitative_Finance Library</span></a>. For getting the design,</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L2/benchmarks/MCEuropeanEngine
+</pre>
+<ul class="simple">
+<li><strong>Build kernel(Step 2)</strong></li>
+</ul>
+<p>Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">source</span> /opt/xilinx/Vitis/2021.1/settings64.sh
+<span class="nb">source</span> /opt/xilinx/xrt/setenv.sh
+<span class="nb">export</span> <span class="nv">DEVICE</span><span class="o">=</span>/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
+<span class="nb">export</span> <span class="nv">TARGET</span><span class="o">=</span>hw
+make run
+</pre>
+<ul class="simple">
+<li><strong>Run kernel(Step 3)</strong></li>
+</ul>
+<p>To get the benchmark results, please run the following command.</p>
+<pre class="highlight literal-block">
+<span></span>./build_dir.hw.xilinx_u250_xdma_201830_2/test.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/kernel_mc.xclbin -rep <span class="m">1000</span>
+</pre>
+<p>Input Arguments:</p>
+<pre class="highlight literal-block">
+<span></span>Usage: test.exe    -<span class="o">[</span>-xclbin -rep<span class="o">]</span>
+       -xclbin     MCEuropeanEngine binary<span class="p">;</span>
+       -rep        repeat number<span class="p">;</span>
+</pre>
+<p>Note: Default num_rep(repeat number) is set in host code. For sw_emu, num_rep is cu_number*3; for hw_emu, num_rep is cu_number; for hw, the default value is 1, user could reset num_rep by paramter <code class="docutils literal notranslate"><span class="pre">rep</span></code>. As this case is a 4CU design, cu_number is 4.</p>
+<ul class="simple">
+<li><strong>Example output(Step 4)</strong></li>
+</ul>
+</div>
+<div class="section" id="profiling">
+<h2>Profiling<a class="headerlink" href="#profiling" title="Permalink to this headline">¶</a></h2>
+<p>The application scenario in this case is:</p>
+<span id="tab-mcee-input-parameter"></span><table border="1" class="docutils" id="id1">
+<caption><span class="caption-number">Table 22 </span><span class="caption-text">Application Scenario</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="35%" />
+<col width="65%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Option Type</td>
+<td>put</td>
+</tr>
+<tr class="row-even"><td>strike</td>
+<td>40</td>
+</tr>
+<tr class="row-odd"><td>underlying</td>
+<td>36</td>
+</tr>
+<tr class="row-even"><td>risk-free rate</td>
+<td>6%</td>
+</tr>
+<tr class="row-odd"><td>volatility</td>
+<td>20%</td>
+</tr>
+<tr class="row-even"><td>dividend yield</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>maturity</td>
+<td>1 year</td>
+</tr>
+<tr class="row-even"><td>tolerance</td>
+<td>0.02</td>
+</tr>
+<tr class="row-odd"><td>workload</td>
+<td>1 steps, 47000 paths</td>
+</tr>
+</tbody>
+</table>
+<p>The performance comparison of the MCEuropeanEngine is shown in the table below, where timesteps is 1, requiredSamples is 16383, and FPGA frequency is 250MHz. The execution time is the average of 1000 runs.
+Our cold run has 380X and warm run has 1521X compared to baseline.
+Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2690 v4 &#64;3.20GHz, 8 cores per processor and 2 threads per core.</p>
+<span id="tab-mcee-execution-time"></span><table border="1" class="docutils" id="id2">
+<caption><span class="caption-number">Table 23 </span><span class="caption-text">Timing_Performance</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="38%" />
+<col width="26%" />
+<col width="35%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td rowspan="2">Platform</td>
+<td colspan="2">Execution time</td>
+</tr>
+<tr class="row-even"><td>cold run</td>
+<td>warm run</td>
+</tr>
+<tr class="row-odd"><td>QuantLib 1.15 on CentOS</td>
+<td>20.155ms</td>
+<td>20.155ms</td>
+</tr>
+<tr class="row-even"><td>Runtime on U250</td>
+<td>0.053ms</td>
+<td>0.01325ms</td>
+</tr>
+<tr class="row-odd"><td>Accelaration Ratio</td>
+<td>380X</td>
+<td>1521X</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>What is cold run and warm run?</p>
+<ul class="last simple">
+<li>Cold run means to run one application on board 1 time.</li>
+<li>Warm run means to run the application multiple times on board. The E2E is calculated as the average time of multiple runs.</li>
+</ul>
+</div>
+<p>The resource utilization and performance of MCEuropeanEngine on U250 FPGA card is listed in the following tables (with Vivado 2021.1).
+There are 4CUs on Alveo U250 to pricing the option in parallel. Each CU have the same resource utilization.</p>
+<span id="tab-mcee-resource"></span><table border="1" class="docutils align-center" id="id3">
+<caption><span class="caption-number">Table 24 </span><span class="caption-text">Resource utilization report of European Option APIs on U250</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="18%" />
+<col width="39%" />
+<col width="10%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="8%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Implemetation</td>
+<td>Kernels</td>
+<td>LUT</td>
+<td>FF</td>
+<td>BRAM</td>
+<td>URAM</td>
+<td>DSP</td>
+</tr>
+<tr class="row-even"><td>4 CUs</td>
+<td>kernel_mc_0 (UN config:8)
+kernel_mc_1 (UN config:8)
+kernel_mc_2 (UN config:8)
+kernel_mc_3 (UN config:8)</td>
+<td>936288</td>
+<td>1504828</td>
+<td>196</td>
+<td>0</td>
+<td>6376</td>
+</tr>
+<tr class="row-odd"><td colspan="2">total resource of board</td>
+<td>1728000</td>
+<td>3456000</td>
+<td>2688</td>
+<td>1280</td>
+<td>12288</td>
+</tr>
+<tr class="row-even"><td colspan="2">utilization ratio (not include platform)</td>
+<td>54.18%</td>
+<td>43.54%</td>
+<td>7.29%</td>
+<td>0</td>
+<td>51.88%</td>
+</tr>
+</tbody>
+</table>
+<p><a class="reference internal" href="#tab-mcee-resource"><span class="std std-numref">Table 24</span></a> gives the resource utilization report of four MCEuropeanEngine CUs. Note that the resource statistics are under specific UN (Unroll Number) configurations. These UN configurations are the templated parameters of the corresponding API.</p>
+<p>The complete Vitis demo of MCEuropeanEngine is executed with a U250 card on Nimbix.
+The performance of this demo is listed in <a class="reference internal" href="#tab-mcee-performance"><span class="std std-numref">Table 25</span></a>. In this table, kernel execution time and end-to-end execution time (E2E) are calculated.</p>
+<span id="tab-mcee-performance"></span><table border="1" class="docutils align-center" id="id4">
+<caption><span class="caption-number">Table 25 </span><span class="caption-text">Performance of European Option on U250</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="29%" />
+<col width="22%" />
+<col width="24%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td rowspan="2">Engine</td>
+<td rowspan="2">Frequency</td>
+<td colspan="2">Execution Time (ms)</td>
+</tr>
+<tr class="row-even"><td>kernel</td>
+<td>E2E</td>
+</tr>
+<tr class="row-odd"><td>4 CUs</td>
+<td>250MHz</td>
+<td>7.1ms
+(1000 loop)</td>
+<td>53ms
+(1000 loop)</td>
+</tr>
+</tbody>
+</table>
+<p>Because only one output data is transferred from device to host for each CU, The kernel execution time doesn’t differentiate so much to E2E time.</p>
+<p>In order to maximize the resource utilization on FPGA, four MCEuropeaEngine CUs are placed on different SLRs on U250. Due to place and route on FPGA, the kernel runs at 250MHz finally.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p><strong>Analyzation of the execution time of MCEuropeanEngine</strong></p>
+<p class="last">There are 4 CUs. Each CU could execution one application at one time. When there are multiple applications, they are distributed on different CUs and could be executed at the same time. So the warm run time is 1/4 of the cold run.</p>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="TreeEngine.html" class="btn btn-neutral float-right" title="Benchmark of TreeEngine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="MCAmericanEngine.html" class="btn btn-neutral float-left" title="Benchmark of MCAmericanEngineMultiKernel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+														
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<div class="lang-select dropup hidden-md hidden-lg">
+		<button data-toggle="dropdown">
+			<span class="fas fa-globe" aria-hidden="true"></span>
+			<span>
+				
+					English
+				</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a target="_blank" href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+																	<div class="lang-select dropup hidden-xs hidden-sm">
+	<button data-toggle="dropdown">
+		<span class="fas fa-globe" aria-hidden="true"></span>
+		<span>
+			
+				English
+			</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+															</div>
+														</div>
+														<div class="col-md-pull-5 col-lg-pull-5 col-md-5 col-lg-5">
+															<span class="copyright">©2022 Advanced Micro Devices, Inc</span>
+														</div>
+
+													</div>
+													                    <div class="movethisrowtoleft row">
+                        <div class="col-xs-24">
+                            <ul class="sub-menu">
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/privacy">Privacy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/cookies">Cookie Policy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/trademarks">Trademarks</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/statement-human-trafficking-forced-labor.pdf">Statement on Forced Labor</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/competition">Fair and Open Competition</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf">UK Tax Strategy</a></li>
+								<li><a target="_blank" href="https://docs.xilinx.com/v/u/9x6YvZKuWyhJId7y7RQQKA">Inclusive Terminology</a></li>
+                                <li><a href="#cookiessettings" class="ot-sdk-show-settings">Cookies Settings</a></li>
+                            </ul>
+                        </div>
+                    </div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+<div class="backToTop parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><noindex>
+    <span data-component="backToTopButton" class="backToTopButton loaded">
+        <ul>
+            <li>
+                <a href="https://www.author.xilinx.com/xx/rebrand/amd/en-amd-xilinx-header-footer.html#top" class="btn top">
+                    <span class="fas fa-angle-up" aria-hidden="true"></span>
+                </a>
+            </li>
+        </ul>
+    </span>
+</noindex></div>
+			</div>
+		</div>
+
+
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>
