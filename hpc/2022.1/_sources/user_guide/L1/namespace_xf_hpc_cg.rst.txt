@@ -1,0 +1,66 @@
+.. index:: pair: namespace; cg
+.. _doxid-namespacexf_1_1hpc_1_1cg:
+.. _cid-xf::hpc::cg:
+
+namespace cg
+============
+
+.. toctree::
+	:hidden:
+
+	class_xf_hpc_cg_Task.rst
+	class_xf_hpc_cg_Token.rst
+
+
+
+
+
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a5a5301da5a1f1ea2bd7fdba70944053b:
+.. _cid-xf::hpc::cg::stamp_signal:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a12b167e0db46645617041374d8d2f43d:
+.. _cid-xf::hpc::cg::cgtimer:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a68edeec149d651d0c2d0dd4b8557b093:
+.. _cid-xf::hpc::cg::square:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1aa2e64a895062d479d87c5e5b157b6a1b:
+.. _cid-xf::hpc::cg::nrm2s:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1ac4c18c71bc14cb667a1a5e926264f9c4:
+.. _cid-xf::hpc::cg::update_gemv:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a5c69a3c2ba9a49bad8160cb81ad8fe8e:
+.. _cid-xf::hpc::cg::proc_update_pk:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a9f9f3a4a92f579486f6d537690abfca0:
+.. _cid-xf::hpc::cg::proc_update_pk-2:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a5e96018b0296b7ca600b5ec5b3394d14:
+.. _cid-xf::hpc::cg::update_pk:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1aea13e554120099b902cb7accd98a8b00:
+.. _cid-xf::hpc::cg::proc_update_rk:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a815a57bc59dbd93b2b3ebf10a2b83665:
+.. _cid-xf::hpc::cg::proc_update_rk-2:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a312c397da96e840b67c7eb7288094521:
+.. _cid-xf::hpc::cg::update_rk:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a48d019279ca126aebd118ba36f023469:
+.. _cid-xf::hpc::cg::proc_update_rk-3:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a9ab84e436ca0c18c3838f3c2c4c888ea:
+.. _cid-xf::hpc::cg::proc_update_rk-4:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a25f0b73fa989fc518052d0c0e9048304:
+.. _cid-xf::hpc::cg::update_rk-2:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1ac81f6f43824a87947be4ec8178f60d2f:
+.. _cid-xf::hpc::cg::proc_update_xk:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1ac1300cf99f1103eefb2c0feec7f8ecf8:
+.. _cid-xf::hpc::cg::proc_update_xk-2:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a4e80c3df17c05e6f792d8351b2dfd069:
+.. _cid-xf::hpc::cg::update_xk:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1ab229b49014f6112c4de3c3622bfa972e:
+.. _cid-xf::hpc::cg::proc_update_xr:
+.. _doxid-namespacexf_1_1hpc_1_1cg_1a63ebeebb08f98fdbd0dadc12a2c19c94:
+.. _cid-xf::hpc::cg::update_xr:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// classes
+
+	template <typename t_DataType>
+	class :ref:`Task<doxid-classxf_1_1hpc_1_1cg_1_1_task>` 
+
+	template <typename t_DataType>
+	class :ref:`Token<doxid-classxf_1_1hpc_1_1cg_1_1_token>` 
+
