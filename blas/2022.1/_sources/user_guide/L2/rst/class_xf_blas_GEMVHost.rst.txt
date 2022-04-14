@@ -1,0 +1,39 @@
+.. index:: pair: class; xf::blas::GEMVHost
+.. _doxid-classxf_1_1blas_1_1_g_e_m_v_host:
+.. _cid-xf::blas::gemvhost:
+
+class xf::blas::GEMVHost
+========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "gemv_host.hpp"
+
+
+
+
+.. _doxid-classxf_1_1blas_1_1_g_e_m_v_host_1acd65995b5090628d1600fe04bd313292:
+.. _cid-xf::blas::gemvhost::gemvhost:
+.. _doxid-classxf_1_1blas_1_1_g_e_m_v_host_1a5374e9c4c9bd059e1b5ff04f1990a9d8:
+.. _cid-xf::blas::gemvhost::~gemvhost:
+.. _doxid-classxf_1_1blas_1_1_g_e_m_v_host_1a31302fefff52fb815f679212e9be0c88:
+.. _cid-xf::blas::gemvhost::gemvhost-2:
+.. _doxid-classxf_1_1blas_1_1_g_e_m_v_host_1ae506344c2b531d66a712a461069f911e:
+.. _cid-xf::blas::gemvhost::gemvhost-3:
+.. _doxid-classxf_1_1blas_1_1_g_e_m_v_host_1aa194c61a582d90300548f77728ce4830:
+.. _cid-xf::blas::gemvhost::addgemvop:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	class GEMVHost: public :ref:`xf::blas::BLASHost<doxid-classxf_1_1blas_1_1_b_l_a_s_host>`
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: overview-inherited-code-block
+

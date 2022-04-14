@@ -1,0 +1,38 @@
+.. index:: pair: enum; xf::blas::OpType
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850b:
+.. _cid-xf::blas::optype:
+
+enum xf::blas::OpType
+=====================
+
+
+
+
+
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850ba1c4453df61dd5d081eaf4d8b09f9eacf:
+.. _cid-xf::blas::optype::opcontrol:
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850bac73de16c526568e3c5a1d2f4ef3cdc40:
+.. _cid-xf::blas::optype::opgemv:
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850ba7176caf4c46fb6c7176fd0cae682ff11:
+.. _cid-xf::blas::optype::opgemm:
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850ba05b8e74d51f6c0625f6238df372f6129:
+.. _cid-xf::blas::optype::optransp:
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850bab51b0a9cc82204b1b793264f8d808710:
+.. _cid-xf::blas::optype::opresult:
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850bacda3928e39144bf18dc0f66a8edc092b:
+.. _cid-xf::blas::optype::opfail:
+.. _doxid-namespacexf_1_1blas_1a29b525214523d0cecf8327b40d37850ba5084aab5438c52d70b1764c37809dc05:
+.. _cid-xf::blas::optype::opfcn:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// enum values
+
+	OpControl 
+	OpGemv 
+	OpGemm 
+	OpTransp 
+	OpResult 
+	OpFail 
+	OpFcn 
+
