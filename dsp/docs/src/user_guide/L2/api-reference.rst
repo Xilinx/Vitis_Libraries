@@ -19,8 +19,8 @@
 API Reference Overview
 **********************
 
-For all library elements, it is recommended to include an instance of the library element as a graph.
-The graph declarations may be found in xf_dsp/L2/include/aie/.
+For all library elements, the recommended manner to use an instance of each library unit is to include an instance of the library element as a sub-graph of your graph.
+The graph declarations may be found in L2/include/aie/.
 This section describes the interface to each library element, i.e., configuration parameters, constructor arguments, and ports.
 
 

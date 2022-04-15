@@ -294,10 +294,25 @@ Stream API uses the additional output port to increase the FIR's throughput. Ple
 
 .. note:: when used, port ``` port<output> out2;``` will be added to the FIR.
 
+.. _SSR_PORTS_EXPLANATION:
 
-**TP_SSR** sets the parallelism factor. SSR is Super Sample Rate. It is supported for only the single rate asymmetic FIR at present. This setting allows for higher throughput at the expense of more tiles or kernels. The input data must be split over multiple ports where each successive sample is sent to a different input port in a round-robin fashion, i.e. sample 0 goes to input port in[0], sample 1 to in[1], etc up to N-1 where N=TP_SSR, then sample N goes to in[0], sample N+1 goes to in[1] and so on. Output samples are output from the multiple output ports in the same fashion. Where DUAL_IP is also enabled, there will be 2\*SSR input ports. Ports 0 and N in this case should be considered as a dual stream. That is, allocate samples to ports 0 to N-1 in the round robin fashion above until each port has 128bits of data, then allocate the next samples in a round robin fashion to ports N through 2N-1 until these too have 128bits of data, then return to allocating samples to ports 0 through N-1, and repeat.
+**TP_SSR** sets the parallelism factor. SSR is Super Sample Rate. It is supported for only the single rate asymmetic FIR at present. This setting allows for higher throughput at the expense of more tiles or kernels. The input data must be split over multiple ports where each successive sample is sent to a different input port in a round-robin fashion, i.e. sample 0 goes to input port :code:`in[0]`, sample 1 to :code:`in[1]`, etc up to N-1 where N=TP_SSR, then sample N goes to :code:`in[0]`, sample N+1 goes to :code:`in[1]` and so on. Output samples are output from the multiple output ports in the same fashion. Where DUAL_IP is also enabled, there will be two sets of SSR input ports, :code:`in` and :code:`in2`. Allocate samples to ports 0 to N-1 of port :code:`in` in the round robin fashion above until each port has 128bits of data, then allocate the next samples in a round robin fashion to ports 0 through N-1 of port :code:`in2` until these too have 128bits of data, then return to allocating samples to ports 0 through N-1 of :code:`in`, and repeat.
 
-.. note:: TP_SSR is currently support only for fir_sr_asym.
+If we have a data stream like :code:`int32 x = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...`, then an SSR of 3 with dual ports would look something like this: 
+
+.. code-block::
+
+  in[0] = 0, 3, 6, 9, 24, 27, 30, 33, ... 
+  in[1] = 1, 4, 7, 10, 25, 28, 31, 34, ... 
+  in[2] = 2, 5, 8, 11, 26, 29, 32, 35, ... 
+  in2[0] = 12, 15, 18, 21, 36, 39, 42, 45, ... 
+  in2[1] = 13, 16, 19, 22, 37, 40, 43, 46, ... 
+  in2[2] = 14, 17, 20, 23, 38, 41, 44, 47, ... 
+
+
+.. note:: TP_SSR is currently supported only for fir_sr_asym.
+
+For more details, refer to :ref:`SSR_OPERATION`.
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -350,6 +365,8 @@ Window buffers are implemented using a ping-pong mechanism, where consumer kerne
 This approach maximizes performance, at the increased cost of memory storage.
 Window buffer is mapped into a single Memory Group in the area surrounding the kernel that accesses it.
 A Memory Group is 32 kB, and the maximum Window size should not exceed this limit.
+
+.. _SINGLE_BUFFER_CONSTRAINT:
 
 Single buffer constraint
 ////////////////////////
@@ -421,7 +438,7 @@ Each of these factors, if exceeded, will result in a compile time failure with s
 
 When using window-API for instance, the window buffer must fit into a 32kByte memory bank and since this includes the margin, it limits the maximum window size. Therefore, it also indirectly sets an upper limit on TP_FIR_LEN.
 
-In addition, the `single_buffer()` constraint is needed to implement window buffers of > 16kB. Please refer to: :ref: `SINGLE_BUFFER_CONSTRAINT` for more details.
+In addition, the `single_buffer()` constraint is needed to implement window buffers of > 16kB. Please refer to: :ref:`SINGLE_BUFFER_CONSTRAINT` for more details.
 
 As a guide, a single rate symmetric FIR can support up to:
 
@@ -440,14 +457,15 @@ However, the internal vector register is only 1024-bit wide, which greatly limit
 In addition, data registers storage capacity will be affected by decimation factors, when a Decimation FIR is used.
 As a result, number of taps each AIE kernel can process, limited by the capacity of the input vector register, depends on a variety of factors, like data type, coefficient type and decimation factor.
 
-To help find the number of FIR kernels required (or desired) to implement requested FIR length, please refer to helper functions: :ref: `_MINIUM_CASC_LEN`, :ref: `_OPTIMUM_CASC_LEN` described below.
+To help find the number of FIR kernels required (or desired) to implement requested FIR length, please refer to helper functions: :ref:`MINIUM_CASC_LEN`, :ref:`OPTIMUM_CASC_LEN` described below.
 
 .. _MINIUM_CASC_LEN:
 
 Minimum Cascade Length
 ----------------------
 
-To help find the mimimum supported TP_CASC_LEN value for a given configuration, the following utility functions have been created in file  `L1/include/aie/fir_common_traits.hpp`, where the corresponding FIR variant is in the name of the function. In the following functions, T_FIR_LEN is the desired TP_FIR_LEN, TP_API is 0 for window API and 1 for stream API, T_D is the TT_DATA desired. The return value is the minimum required TP_CASC_LEN for the FIR.
+To help find the minimum supported TP_CASC_LEN value for a given configuration, the following utility functions have been created in file  :code:`L1/include/aie/fir_common_traits.hpp`, where the corresponding FIR variant is in the name of the function. In the following functions TP_API is 0 for window API and 1 for stream API. The return value is the minimum required TP_CASC_LEN for the FIR.
+
 .. code-block::
 
   template<int TP_FIR_LEN, int TP_API, typename TT_DATA>
@@ -484,10 +502,12 @@ An example of use within your graph constructor follows for the single rate asym
   xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph<myDataType, myCoeffType, myFirLen, myShift, myRoundMode, myInputWindowSize,
                                           kMinLen, myCoeffReload, myNumOutputs, myDualIp, myPortApi, mySsr>;
 
+.. _OPTIMUM_CASC_LEN:
+
 Optimum Cascade Length
 ----------------------
 
-For FIR variants configured to use streaming interfaces, i.e. TP_API=1, the optimum TP_CASC_LEN for a given configuration of the other parameters is a complicated equation. Here, the optimum value of TP_CASC_LEN refers to the least number of kernels that the overall calculations can be divided, when the interface bandwidth limits the maximum performance. To aid in this determination, utility functions have been created for FIR variants in file fir_common_traits.hpp as follows, where the name of the FIR variant is in the name. In these functions, the parameter names are the same as for the configuration of the library element except for T_PORTS, where T_PORTS should be set to 1 for DUAL_IP=0 and NUM_OUTPUTS=1 or 2 when using DUAL_IP=1 and NUM_OUTPUTS=2.
+For FIR variants configured to use streaming interfaces, i.e. TP_API=1, the optimum TP_CASC_LEN for a given configuration of the other parameters is a complicated equation. Here, the optimum value of TP_CASC_LEN refers to the least number of kernels that the overall calculations can be divided, when the interface bandwidth limits the maximum performance. To aid in this determination, utility functions have been created for FIR variants in file :code:`fir_common_traits.hpp` as follows, where the name of the FIR variant is in the name. In these functions, the parameter names are the same as for the configuration of the library element except for T_PORTS, where T_PORTS should be set to 1 for DUAL_IP=0 and NUM_OUTPUTS=1 or 2 when using DUAL_IP=1 and NUM_OUTPUTS=2.
 
 .. code-block::
 
@@ -524,6 +544,8 @@ An example of use within your graph constructor follows from the single rate asy
 
   xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph<myDataType, myCoeffType, myFirLen, myShift, myRoundMode, myInputWindowSize,
                                           kOptLen, myCoeffReload, myNumOutputs, myDualIp, myPortApi, mySsr>;
+
+.. _SSR_OPERATION:
 
 Super Sample Rate Operation
 ---------------------------
@@ -564,7 +586,7 @@ Examples of this formula are given in Table 4.
 Super Sample Rate Sample to Port Mapping
 ////////////////////////////////////////
 
-When Super Sample Rate operation is used, data is input and output using multiple ports. These multiple ports on input or output act as one channel. The mapping of samples to ports is that each successive sample should be passed to a different port in a round-robin fashion, e.g. with TP_SSR set to 3, sample 0 should be sent to input port 0, sample 1 to input port 1, sample 2 to input port 2, sample 3 to input port 0 and so on.
+When Super Sample Rate operation is used, data is input and output using multiple ports. These multiple ports on input or output act as one channel. The mapping of samples to ports is that each successive sample should be passed to a different port in a round-robin fashion, e.g. with TP_SSR set to 3, sample 0 should be sent to input port 0, sample 1 to input port 1, sample 2 to input port 2, sample 3 to input port 0 and so on. For more details, refer to :ref:`TP_SSR <SSR_PORTS_EXPLANATION>`.
 
 .. _FIR_CONSTRAINTS:
 
@@ -578,7 +600,7 @@ Should it be necessary to apply constraints within the FIR instance to achieve s
 .. figure:: ./media/SSR_FIR_6_5in.png
 
 
-    *Figure 1:* **Internal structure of FIR with TP_SSR=2 and TP_CASC_LEN=2**
+    *Figure 1:* **Internal structure of FIR with TP_SSR=4 and TP_CASC_LEN=2**
 
 
 Each FIR variant has a variety of access methods to help assign a constraint on a kernel and/or a net, e.g.:

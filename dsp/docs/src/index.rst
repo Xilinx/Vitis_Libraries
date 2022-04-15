@@ -67,7 +67,7 @@ The library is organized into three types of AIE designs, namely:
 
 Please refer to :ref:`INTRODUCTION` for more information.
 
-Vitis |trade| AIE DSP Library provides a Super Sampler Rate FFT implementation targeting AIE, as well as various SSR Finite Impulse Response (FIR), SSR Direct Digital Synthesis (DDS), SSR General Matrix Multiply (GeMM) impementation. For a full list of available DSP functions, please refer to :ref:`DSP_LIB_FUNC`.
+Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, as well as various SSR Finite Impulse Response (FIR) filters, SSR Direct Digital Synthesis (DDS), General Matrix Multiply (GeMM) impementation. For a full list of available DSP functions, please refer to :ref:`DSP_LIB_FUNC`.
 
 
 .. toctree::

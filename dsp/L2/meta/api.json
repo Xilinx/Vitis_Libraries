@@ -266,7 +266,8 @@
                     },
                     {
                         "name": "TP_NUM_OUTPUTS",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "sets the number of ports over which the output is sent."
                     },
                     {
                         "name": "TP_DUAL_IP",
