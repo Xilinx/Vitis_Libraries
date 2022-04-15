@@ -20,6 +20,7 @@
    :maxdepth: 1
 
    overview.rst
+   tutorial.rst
    release.rst
    requirements.rst
    design_flows.rst

@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.5
+# vitis makefile-generator v2.0.6
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -70,6 +70,7 @@ check_device:
 	fi;
 
 #get HOST_ARCH by PLATFORM
+ifneq (,$(PLATFORM))
 HOST_ARCH_temp = $(shell platforminfo -p $(PLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
 ifeq ($(HOST_ARCH_temp), x86)
 HOST_ARCH := x86
@@ -77,6 +78,7 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+endif
 endif
 
 
@@ -122,17 +124,22 @@ endif
 
 #Checks for g++
 CXX := g++
-CXX_REQ := $(shell echo $(GCC_INTOOL) | cut -f 1 -d ".")
 ifeq ($(HOST_ARCH), x86)
-ifneq ($(shell expr $(shell echo "__GNUG__" | g++ -E -x c++ - | tail -1) \>= $(CXX_REQ)), 1)
+ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
+CXX_VER := 8.3.0
+else
+CXX_VER := 6.2.0
+endif
+CXX_V := $(shell echo $(CXX_VER) | awk -F. '{print tolower($$1)}')
+ifneq ($(shell expr $(shell echo "__GNUG__" | g++ -E -x c++ - | tail -1) \>= $(CXX_V)), 1)
 ifndef XILINX_VIVADO
-$(error [ERROR]: g++ version too old. Please use $(CXX_REQ) or above)
+$(error [ERROR]: g++ version too old. Please use $(CXX_VER) or above)
 else
-CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-$(GCC_INTOOL)/bin/g++
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/bin/g++
 ifeq ($(LD_LIBRARY_PATH),)
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(GCC_INTOOL)/lib64
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/lib64
 else
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(GCC_INTOOL)/lib64:$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/lib64:$(LD_LIBRARY_PATH)
 endif
 $(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
@@ -147,7 +154,14 @@ endif
 OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
 OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
 
-ifeq ($(OSDIST), centos)
+# for centos and redhat
+ifneq ($(findstring centos,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+endif
+endif
+else ifneq ($(findstring redhat,$(OSDIST)),)
 ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
 ifeq ($(HOST_ARCH), x86)
 XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
@@ -254,3 +268,10 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u280_xdma_201920_3/'))
+VPP_FLAGS += --advanced.param compiler.ignorePlatformCompatibilityCheck=true
+ifeq ($(TARGET), hw)
+VPP_LDFLAGS += --advanced.param compiler.userPreSysLinkOverlayTcl=preSysLink.tcl
+endif
+endif
