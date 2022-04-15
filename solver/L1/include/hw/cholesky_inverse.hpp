@@ -28,6 +28,7 @@
 #include "utils/std_complex_utils.h"
 #include "utils/x_matrix_utils.hpp"
 #include "hls_stream.h"
+#include <complex>
 
 #include "cholesky.hpp"
 #include "back_substitute.hpp"
@@ -147,6 +148,54 @@ struct choleskyInverseTraits<RowsColsA,
                                  RowsColsA,
                                  BACK_SUBSTITUTE_OUT,
                                  hls::x_complex<ap_fixed<W2, I2, Q2, O2, N2> > >
+        MATRIX_MULTIPLY_TRAITS;
+};
+
+// Further specialization for std::complex<ap_fixed>
+template <int RowsColsA,
+          int W1,
+          int I1,
+          ap_q_mode Q1,
+          ap_o_mode O1,
+          int N1,
+          int W2,
+          int I2,
+          ap_q_mode Q2,
+          ap_o_mode O2,
+          int N2>
+struct choleskyInverseTraits<RowsColsA,
+                             std::complex<ap_fixed<W1, I1, Q1, O1, N1> >,
+                             std::complex<ap_fixed<W2, I2, Q2, O2, N2> > > {
+    // Cholesky decomposition output precision
+    static const int CholeskyOutputW = W1;
+    static const int CholeskyOutputI = I1;
+    static const ap_q_mode CholeskyOutputQ = Q1;
+    static const ap_o_mode CholeskyOutputO = O1;
+    static const int CholeskyOutputN = N1;
+    typedef std::complex<ap_fixed<CholeskyOutputW, CholeskyOutputI, CholeskyOutputQ, CholeskyOutputO, CholeskyOutputN> >
+        CHOLESKY_OUT;
+    typedef choleskyTraits<false, RowsColsA, std::complex<ap_fixed<W1, I1, Q1, O1, N1> >, CHOLESKY_OUT> CHOLESKY_TRAITS;
+    // Back substitution output precision
+    static const int BackSubstitutionOutW = W2;
+    static const int BackSubstitutionOutI = I2;
+    static const ap_q_mode BackSubstitutionOutQ = Q2;
+    static const ap_o_mode BackSubstitutionOutO = O2;
+    static const int BackSubstitutionOutN = N2;
+    typedef std::complex<ap_fixed<BackSubstitutionOutW,
+                                  BackSubstitutionOutI,
+                                  BackSubstitutionOutQ,
+                                  BackSubstitutionOutO,
+                                  BackSubstitutionOutN> >
+        BACK_SUBSTITUTE_OUT;
+    typedef backSubstituteTraits<RowsColsA, CHOLESKY_OUT, BACK_SUBSTITUTE_OUT> BACK_SUBSTITUTE_TRAITS;
+    typedef matrixMultiplyTraits<NoTranspose,
+                                 ConjugateTranspose,
+                                 RowsColsA,
+                                 RowsColsA,
+                                 RowsColsA,
+                                 RowsColsA,
+                                 BACK_SUBSTITUTE_OUT,
+                                 std::complex<ap_fixed<W2, I2, Q2, O2, N2> > >
         MATRIX_MULTIPLY_TRAITS;
 };
 

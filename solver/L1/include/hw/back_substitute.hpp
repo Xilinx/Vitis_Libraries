@@ -99,6 +99,32 @@ struct backSubstituteTraits<RowsColsA,
     static const int INNER_II = 1;
     static const int DIAG_II = 1;
 };
+// Further specialization for std::complex<ap_fixed>
+template <int RowsColsA,
+          int W1,
+          int I1,
+          ap_q_mode Q1,
+          ap_o_mode O1,
+          int N1,
+          int W2,
+          int I2,
+          ap_q_mode Q2,
+          ap_o_mode O2,
+          int N2>
+struct backSubstituteTraits<RowsColsA,
+                            std::complex<ap_fixed<W1, I1, Q1, O1, N1> >,
+                            std::complex<ap_fixed<W2, I2, Q2, O2, N2> > > {
+    static const int W =
+        W1 + (W1 - I1) + (W1 - I1);      // Fractional growth is denominator fraction width + numerator full width
+    static const int I = I1 + (W1 - I1); // Integer growth is denominator int width + numerator fraction width
+    typedef std::complex<ap_fixed<W, I, AP_TRN, AP_WRAP, 0> > RECIP_T;
+    typedef std::complex<ap_fixed<(2 * W) + 1, (2 * I) + 1, AP_TRN, AP_WRAP, 0> > MULT_T;
+    typedef std::complex<ap_fixed<(2 * W) + 2, (2 * I) + 2, AP_TRN, AP_WRAP, 0> > ADD_T;
+    typedef std::complex<ap_fixed<(2 * W2) + 1, (2 * I2) + 1, AP_TRN, AP_WRAP, 0> > MULTNEG_T;
+    static const int ARCH = 1;
+    static const int INNER_II = 1;
+    static const int DIAG_II = 1;
+};
 
 // ===================================================================================================================
 // Helper functions
@@ -133,7 +159,7 @@ template <typename T>
 void back_substitute_recip(std::complex<T> x, std::complex<T>& one_over_x) {
     // #pragma HLS resource variable=recip core=FDiv
     T recip; // intermediate variable to allow directive to be applied
-    const std::complex<T> ONE = 1.0;
+    const std::complex<T> ONE(1.0);
     recip = ONE.real() / x.real();
     one_over_x.real(recip);
     one_over_x.imag(0.0);
@@ -153,6 +179,16 @@ void back_substitute_recip(hls::x_complex<ap_fixed<W1, I1, Q1, O1, N1> > x,
     ONE.imag() = 0;
     one_over_x.real() = ONE.real() / x.real(); // Infers a real-valued divider
     one_over_x.imag() = 0;
+}
+
+template <int W1, int I1, ap_q_mode Q1, ap_o_mode O1, int N1, int W2, int I2, ap_q_mode Q2, ap_o_mode O2, int N2>
+void back_substitute_recip(std::complex<ap_fixed<W1, I1, Q1, O1, N1> > x,
+                           std::complex<ap_fixed<W2, I2, Q2, O2, N2> >& one_over_x) {
+    std::complex<ap_fixed<W2, I2, Q2, O2, N2> > ONE; // Size to the output precision
+    ONE.real(1);
+    ONE.imag(0);
+    one_over_x.real(ONE.real() / x.real()); // Infers a real-valued divider
+    one_over_x.imag(0);
 }
 
 // ===================================================================================================================

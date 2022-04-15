@@ -52,6 +52,7 @@ DataType Supported
 * std::complex<float>
 * ap_fixed
 * x_complex<ap_fixed>
+* std::complex<ap_fixed>
 
 .. note::
    Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.

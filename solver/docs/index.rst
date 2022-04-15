@@ -51,6 +51,7 @@ Currently this includes the following operations for dense matrix
    :maxdepth: 2
 
    overview.rst
+   tutorial.rst
 
 .. toctree::
    :caption: User Guide

@@ -37,7 +37,7 @@
 #include "hls_x_complex.h"
 #include "utils/x_matrix_utils.hpp"
 #include "hls_stream.h"
-
+#include <complex>
 #include <assert.h>
 
 namespace xf {
@@ -157,6 +157,48 @@ struct matrixMultiplyTraits<TransposeFormA,
     typedef hls::x_complex<ap_fixed<W1, I1, AP_TRN, AP_WRAP, 0> > INPUT_T;
     typedef hls::x_complex<ap_fixed<W1 + W1, I1 + I1, AP_TRN, AP_WRAP, 0> > MULT_T;
     typedef hls::x_complex<
+        ap_fixed<W1 + W1 + BitWidth<ColsATrans>::Value, I1 + I1 + BitWidth<ColsATrans>::Value, AP_TRN, AP_WRAP, 0> >
+        ACCUM_T;
+    static const int ARCH = 0;
+    static const int INNER_II = 1;
+    static const int UNROLL_FACTOR = 1;
+};
+
+// Further specialization for std::complex<ap_fixed>
+template <class TransposeFormA,
+          class TransposeFormB,
+          int RowsA,
+          int ColsA,
+          int RowsB,
+          int ColsB,
+          int W1,
+          int I1,
+          ap_q_mode Q1,
+          ap_o_mode O1,
+          int N1,
+          int W2,
+          int I2,
+          ap_q_mode Q2,
+          ap_o_mode O2,
+          int N2>
+struct matrixMultiplyTraits<TransposeFormA,
+                            TransposeFormB,
+                            RowsA,
+                            ColsA,
+                            RowsB,
+                            ColsB,
+                            std::complex<ap_fixed<W1, I1, Q1, O1, N1> >,
+                            std::complex<ap_fixed<W2, I2, Q2, O2, N2> > > {
+    static const int RowsATrans = (TransposeFormA::TransposeType != 0 ? ColsA : RowsA);
+    static const int ColsATrans = (TransposeFormA::TransposeType != 0 ? RowsA : ColsA);
+    static const int RowsBTrans = (TransposeFormB::TransposeType != 0 ? ColsB : RowsB);
+    static const int ColsBTrans = (TransposeFormB::TransposeType != 0 ? RowsB : ColsB);
+    static const int B_UNROLL_DIM = (TransposeFormB::TransposeType != 0 ? 1 : 2);
+    static const int A_FULL_UNROLL_DIM = (TransposeFormA::TransposeType != 0 ? 1 : 2);
+    static const int B_FULL_UNROLL_DIM = (TransposeFormB::TransposeType != 0 ? 2 : 1);
+    typedef std::complex<ap_fixed<W1, I1, AP_TRN, AP_WRAP, 0> > INPUT_T;
+    typedef std::complex<ap_fixed<W1 + W1, I1 + I1, AP_TRN, AP_WRAP, 0> > MULT_T;
+    typedef std::complex<
         ap_fixed<W1 + W1 + BitWidth<ColsATrans>::Value, I1 + I1 + BitWidth<ColsATrans>::Value, AP_TRN, AP_WRAP, 0> >
         ACCUM_T;
     static const int ARCH = 0;
