@@ -207,6 +207,7 @@ MV = mv -f
 CP = cp -rf
 ECHO:= @echo
 ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u280_xdma_201920_3/'))
+VPP_FLAGS += --advanced.param compiler.ignorePlatformCompatibilityCheck=true
 ifeq ($(TARGET), hw)
 VPP_LDFLAGS += --advanced.param compiler.userPreSysLinkOverlayTcl=preSysLink.tcl
 endif
