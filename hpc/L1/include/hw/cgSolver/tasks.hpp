@@ -21,6 +21,12 @@ namespace xf {
 namespace hpc {
 namespace cg {
 
+/**
+ * @brief Basic CG components: Task
+ *
+ * @tparam t_DataType is the datatype
+ *
+ */
 template <typename t_DataType>
 class Task {
    public:

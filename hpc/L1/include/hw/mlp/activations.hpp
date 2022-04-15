@@ -55,6 +55,7 @@ t_DataType FcnScalePRelu(t_DataType x, int16_t p_PReluVal) {
 /** @brief relu (rectified linear unit) is a very common activation function in
  * deep neural network
  *
+ * @tparam t_DataType is data type
  * @param x is the input value
  */
 template <typename t_DataType>
@@ -67,6 +68,7 @@ t_DataType relu(t_DataType x) {
 
 /** @brief sigmoid function is a very common activation function in MLP
  *
+ * @tparam t_DataType is data type
  * @param x is the input value
  */
 template <typename t_DataType>
@@ -77,6 +79,7 @@ t_DataType sigmoid(t_DataType x) {
 
 /** @brief tansig function is used as an activation function in some MLPs
  *
+ * @tparam t_DataType is data type
  * @param x is the input value
  */
 template <typename t_DataType>

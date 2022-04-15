@@ -26,6 +26,12 @@ namespace xf {
 namespace hpc {
 namespace cg {
 
+/**
+ * @brief Basic CG components: Token
+ *
+ * @tparam t_DataType is the datatype
+ *
+ */
 template <typename t_DataType>
 class Token {
    public:

@@ -114,408 +114,6 @@
             }
         },
         {
-            "api_name": "xf::hpc::cg::stamp_signal",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::stamp_signal",
-                "display_name": "stamp_signal",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "cgtimer.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::cgTimer",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::cgTimer",
-                "display_name": "cgTimer",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "cgtimer.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::square",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::square",
-                "display_name": "square",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "nrm2s.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "unsigned int"
-                    },
-                    {
-                        "name": "t_IndexType",
-                        "type": "typename"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::nrm2s",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::nrm2s",
-                "display_name": "nrm2s",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "nrm2s.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_LogParEntries",
-                        "type": "unsigned int"
-                    },
-                    {
-                        "name": "t_IndexType",
-                        "type": "typename"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::update_gemv",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::update_gemv",
-                "display_name": "update_gemv",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_gemv.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    },
-                    {
-                        "name": "t_VecParEntries",
-                        "type": "int"
-                    },
-                    {
-                        "name": "t_NumPorts",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::proc_update_pk",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::proc_update_pk",
-                "display_name": "proc_update_pk",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_pk.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::update_pk",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::update_pk",
-                "display_name": "update_pk",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_pk.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    },
-                    {
-                        "name": "t_TkWidth",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::proc_update_rk",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::proc_update_rk",
-                "display_name": "proc_update_rk",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_rk.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::update_rk",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::update_rk",
-                "display_name": "update_rk",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_rk.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    },
-                    {
-                        "name": "t_TkWidth",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::proc_update_xk",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::proc_update_xk",
-                "display_name": "proc_update_xk",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_xk.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::update_xk",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::update_xk",
-                "display_name": "update_xk",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_xk.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    },
-                    {
-                        "name": "t_TkWidth",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::proc_update_xr",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::proc_update_xr",
-                "display_name": "proc_update_xr",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_xr.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::update_xr",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::update_xr",
-                "display_name": "update_xr",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "update_xr.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_ParEntries",
-                        "type": "int"
-                    },
-                    {
-                        "name": "t_TkWidth",
-                        "type": "int"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::mlp::FcnScalePRelu",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::mlp::FcnScalePRelu",
-                "display_name": "FcnScalePRelu",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "activations.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/mlp"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
             "api_name": "xf::hpc::mlp::relu",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
@@ -533,7 +131,8 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "is data type"
                     }
                 ],
                 "ports": [
@@ -563,7 +162,8 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "is data type"
                     }
                 ],
                 "ports": [
@@ -593,7 +193,8 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "is data type"
                     }
                 ],
                 "ports": [
@@ -603,6 +204,56 @@
                         "type": "t_DataType"
                     }
                 ]
+            }
+        },
+        {
+            "api_name": "xf::hpc::cg::Task",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::cg::Task",
+                "display_name": "Task",
+                "brief": "Basic CG components: Task",
+                "target_domain": "",
+                "header_file_name": [
+                    "tasks.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/cgSolver"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "is the datatype"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::hpc::cg::Token",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::hpc::cg::Token",
+                "display_name": "Token",
+                "brief": "Basic CG components: Token",
+                "target_domain": "",
+                "header_file_name": [
+                    "token.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/cgSolver"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "is the datatype"
+                    }
+                ],
+                "ports": []
             }
         }
     ],

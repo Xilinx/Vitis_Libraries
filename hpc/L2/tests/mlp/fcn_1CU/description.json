@@ -84,6 +84,7 @@
             ]
         }
     ], 
+    "config_make":"params.mk",
     "testinfo": {
         "disable": false, 
         "jobs": [

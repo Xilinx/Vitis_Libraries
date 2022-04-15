@@ -22,7 +22,7 @@
             "containers": [
                 {
                     "name": "cgSolver", 
-                    "frequency": 333, 
+                    "frequency": 300, 
                     "ldclflags": "--config PROJECT/conn_u280.cfg"
                 }
             ]

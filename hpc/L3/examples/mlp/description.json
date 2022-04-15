@@ -32,7 +32,7 @@
     ],
     "post_launch": [
     {
-        "launch_cmd": "make dump_config"
+        "launch_cmd": ["make dump_config"]
     }],
     "host": {
         "host_exe": "fcn_example.exe",
@@ -78,6 +78,7 @@
         }
         ]
     }],
+    "config_make": "params.makefile",
     "testinfo": {
         "disable": false,
         "jobs": [
