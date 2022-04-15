@@ -1,0 +1,1316 @@
+﻿
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vitis Database Library, GQE, kernel, api" name="keywords" />
+<meta content="The GQE kernel application programming interface reference." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+	<!-- OneTrust Cookies Consent Notice start for xilinx.github.io -->
+<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="37701bd4-e5c0-4ee3-9329-e7475d0b13a7" ></script>
+<script type="text/javascript">
+function OptanonWrapper() { }
+</script>
+<!-- OneTrust Cookies Consent Notice end for xilinx.github.io -->
+		<!-- Google Tag Manager -->
+	<script type="text/plain" class="optanon-category-C0002">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5RHQV7');</script>
+	<!-- End Google Tag Manager -->
+	
+        <!-- Google Tag Manager -->
+        <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5RHQV7" height="0" width="0" style="display:none;visibility:hidden" class="optanon-category-C0002"></iframe></noscript>
+        <!-- End Google Tag Manager -->	
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="../_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="../_static/js/gtm.js"></script>
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="../_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="../_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="../_static/js/linkid.js"></script>
+    <script type="text/javascript" src="../_static/js/Searchbox.min.js"></script>
+    <script type="text/javascript" src="../_static/js/header-footer.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="L3 GQE Overlay User Guide" href="L3.html" />
+    <link rel="prev" title="GQE Kernel APIs" href="kernel_api.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+ <div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+
+    
+    
+
+    
+
+
+
+<div class="xf-content-height">
+    
+
+<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+    
+    <div class="header parbase aem-GridColumn aem-GridColumn--default--12"><noindex>
+	<header data-component="header" class="site-header">
+		<nav class="navbar navbar-default">
+			<div class="container-fluid main-nav">
+				<div class="row">
+					<div class="navbar-column col-xs-4 col-sm-5">
+						<ul class="nav navbar-nav hidden-xs">
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+								</li>
+							</ul>
+							
+						<ul class="nav navbar-nav hidden-sm hidden-md hidden-lg">
+							<li>
+									<button data-target="#header-container-0" data-function="toggle">Solutions</button>
+								</li>
+							<li>
+									<button data-target="#header-container-1" data-function="toggle">Products</button>
+								</li>
+							<li>
+									<button data-target="#header-container-2" data-function="toggle">Company</button>
+								</li>
+							</ul>
+							
+						<div id="header-container-0" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-1" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-2" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							</div>
+					<div class="logo-column col-xs-4 col-sm-2">
+						<div class="logo">
+							<a target="_blank" href="https://www.xilinx.com/">
+								<img src="https://github.com/Xilinx/Image-Collateral/blob/main/xilinx-header-logo.svg?raw=true" title="Xilinx Inc"/>
+							</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			</nav></header></noindex></div>
+		
+	
+</div>
+
+    
+</div>
+</div>
+
+<div class="calloutBanner parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><div class="callout-banner">
+    Xilinx is now a part of <a target="_blank" href="https://www.amd.com/en/corporate/xilinx-acquisition">AMD</a> |  <a target="_blank" href="https://www.amd.com/en/corporate/privacy">Learn More</a>
+</div>
+</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Vitis Database Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2021.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Vitis Database Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design_flows.html">Design Flows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Vitis Database Library Tutorial</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guide/L1.html">L1 Module User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="L2.html">L2 GQE Kernel User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kernel_design.html">GQE Kernel Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_api.html">GQE Kernel APIs</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GQE Kernel Configuration APIs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-kernelcommand">class xf::database::gqe::KernelCommand</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#methods">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-xf-database-gqe-aggrcommand">class xf::database::gqe::AggrCommand</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="L3.html">L3 GQE Overlay User Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark Result</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/tpc_h.html">TPC-H Queries with GQE</a></li>
+</ul>
+
+            
+			
+				<h3>Versions</h3>
+				<ul>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				  <li><a href=""></a></li>
+				</ul>
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Vitis Database Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="L2.html">L2 GQE Kernel User Guide</a> &raquo;</li>
+        
+      <li>GQE Kernel Configuration APIs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gqe-kernel-configuration-apis">
+<span id="gqe-kernel-config-api"></span><h1>GQE Kernel Configuration APIs<a class="headerlink" href="#gqe-kernel-configuration-apis" title="Permalink to this headline">¶</a></h1>
+<p>These APIs are software APIs that can be used to genreate configuration bits for hardware kernels listed above.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="class-xf-database-gqe-kernelcommand">
+<span id="cid-xf-database-gqe-kernelcommand"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command"></span><span id="index-0"></span><h2>class xf::database::gqe::KernelCommand<a class="headerlink" href="#class-xf-database-gqe-kernelcommand" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_database/kernel_command.hpp&quot;</span>
+</pre>
+<div class="section" id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<p>Class for generating configuration bits of <code class="docutils literal notranslate"><span class="pre">gqePart</span></code> , <code class="docutils literal notranslate"><span class="pre">gqeJoin</span></code> and <code class="docutils literal notranslate"><span class="pre">gqeFilter</span></code> kernels.</p>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-kernelcommand-kernelcommand">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1afe90d3967f4c0bca9867bcd1e600b578"></span>
+</pre>
+</div>
+<div class="section" id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="kernelcommand">
+<span id="id1"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a259ec0c12ce818c3f5c8179c594c4e51"></span><h4>KernelCommand<a class="headerlink" href="#kernelcommand" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">KernelCommand</span> <span class="p">()</span>
+</pre>
+<p>constructor of <a class="reference internal" href="../rst_2/class_xf_database_gqe_KernelCommand.html#doxid-classxf-1-1database-1-1gqe-1-1-kernel-command"><span class="std std-ref">KernelCommand</span></a> class. The kernel command used buffer is allocated on host. Some default settings are provided.</p>
+</div>
+<div class="section" id="setbypasson">
+<span id="cid-xf-database-gqe-kernelcommand-setbypasson"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a78cceb78f811e61e5492f1716b79fcf3"></span><h4>setBypassOn<a class="headerlink" href="#setbypasson" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setBypassOn</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">trigger</span><span class="p">)</span>
+</pre>
+<p>set bypass on.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>trigger</td>
+<td>0 for off, 1 for on.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setjoinon">
+<span id="cid-xf-database-gqe-kernelcommand-setjoinon"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a3f5bd8012cd61c5c30c5b938e4c9bc2c"></span><h4>setJoinOn<a class="headerlink" href="#setjoinon" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setJoinOn</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">trigger</span><span class="p">)</span>
+</pre>
+<p>set join on.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>trigger</td>
+<td>0 for off, 1 for on.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setjointype">
+<span id="cid-xf-database-gqe-kernelcommand-setjointype"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a7461087b4137c9f9bcf079810aa8afc9"></span><h4>setJoinType<a class="headerlink" href="#setjointype" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setJoinType</span> <span class="p">(</span><span class="kt">int</span> <span class="n">join_type</span><span class="p">)</span>
+</pre>
+<p>set join type.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>join_type</td>
+<td>hash join type, 0 for INNER, 1 for SEMI, 2 for ANTI.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setjoinappendmode">
+<span id="cid-xf-database-gqe-kernelcommand-setjoinappendmode"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a8a9d1dc2af7323748bc834cff1c728cf"></span><h4>setJoinAppendMode<a class="headerlink" href="#setjoinappendmode" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setJoinAppendMode</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ap_mode</span><span class="p">)</span>
+</pre>
+<p>set join append mode.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>ap_mode</td>
+<td>append mode.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setbloomfilteron">
+<span id="cid-xf-database-gqe-kernelcommand-setbloomfilteron"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a5e0c4dd42a64c2da48d4888997ade4a2"></span><h4>setBloomfilterOn<a class="headerlink" href="#setbloomfilteron" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setBloomfilterOn</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">trigger</span><span class="p">)</span>
+</pre>
+<p>set bloom-filter on.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>bf_size</td>
+<td>size of bloom-filter in bits, we need 35 bits to represent a range between 1 to 16 Gbits.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setbloomfiltersize">
+<span id="cid-xf-database-gqe-kernelcommand-setbloomfiltersize"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1aeddc018fd50e7f637ad14adbcc46913b"></span><h4>setBloomfilterSize<a class="headerlink" href="#setbloomfiltersize" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setBloomfilterSize</span> <span class="p">(</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">36</span><span class="o">&gt;</span> <span class="n">bf_size</span><span class="p">)</span>
+</pre>
+<p>set bloom-filter size.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>bf_size</td>
+<td>size of bloom-filter in bits, we need 35 bits to represent a range between 1 to 16 Gbits.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setparton">
+<span id="cid-xf-database-gqe-kernelcommand-setparton"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1aaa4a1808351449f63bcda142e4182eb4"></span><h4>setPartOn<a class="headerlink" href="#setparton" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setPartOn</span> <span class="p">(</span><span class="kt">int</span> <span class="n">trigger</span><span class="p">)</span>
+</pre>
+<p>set partition on.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>trigger</td>
+<td>0 for off, 1 for on.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setlogpart">
+<span id="cid-xf-database-gqe-kernelcommand-setlogpart"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1ac6a852d0d012ed83be33d964ec58c923"></span><h4>setLogPart<a class="headerlink" href="#setlogpart" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setLogPart</span> <span class="p">(</span><span class="kt">int</span> <span class="n">log_part</span><span class="p">)</span>
+</pre>
+<p>set log of partition number.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>log_part</td>
+<td>log of partition number.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setaggron">
+<span id="cid-xf-database-gqe-kernelcommand-setaggron"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1aa76471f30aa595507c0772c54df3d16a"></span><h4>setAggrOn<a class="headerlink" href="#setaggron" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setAggrOn</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">trigger</span> <span class="o">=</span> <span class="nb">true</span><span class="p">)</span>
+</pre>
+<p>set aggregate on.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>trigger</td>
+<td>false for off, true for on.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setdualkeyon">
+<span id="cid-xf-database-gqe-kernelcommand-setdualkeyon"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a849ec791f588e0af574f5627e744f351"></span><h4>setDualKeyOn<a class="headerlink" href="#setdualkeyon" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setDualKeyOn</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">trigger</span> <span class="o">=</span> <span class="nb">true</span><span class="p">)</span>
+</pre>
+<p>set dual key on.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>trigger</td>
+<td>false for using 1 column as key, true for using two.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setjoinbuildprobe">
+<span id="cid-xf-database-gqe-kernelcommand-setjoinbuildprobe"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1aac2d33846f667ab618c949494f8f6647"></span><h4>setJoinBuildProbe<a class="headerlink" href="#setjoinbuildprobe" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setJoinBuildProbe</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">flag</span><span class="p">)</span>
+</pre>
+<p>set join build probe flag.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>flag</td>
+<td>0 for build, 1 for probe.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setbloomfilterbuildprobe">
+<span id="cid-xf-database-gqe-kernelcommand-setbloomfilterbuildprobe"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1ab2f20994d2b604c63a54d1934d258066"></span><h4>setBloomfilterBuildProbe<a class="headerlink" href="#setbloomfilterbuildprobe" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setBloomfilterBuildProbe</span> <span class="p">(</span><span class="kt">bool</span> <span class="n">flag</span><span class="p">)</span>
+</pre>
+<p>set bloom filter build probe flag.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>flag</td>
+<td>0 for build, 1 for probe.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setscancolenable">
+<span id="cid-xf-database-gqe-kernelcommand-setscancolenable"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1ac308230e200df9e70ed4f062be1651d6"></span><h4>setScanColEnable<a class="headerlink" href="#setscancolenable" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setScanColEnable</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">table_id</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span>
+    <span class="p">)</span>
+</pre>
+<p>enables input columns for gqeKernel.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>table_id</td>
+<td>0 for left table, 1 for right table.</td>
+</tr>
+<tr class="row-even"><td>index</td>
+<td>valid input column ids.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setwritecolenable">
+<span id="cid-xf-database-gqe-kernelcommand-setwritecolenable"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a9b5468d3362353f33d57d10e74521b1c"></span><h4>setWriteColEnable<a class="headerlink" href="#setwritecolenable" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setWriteColEnable</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">krn_type</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">table_id</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span>
+    <span class="p">)</span>
+</pre>
+<p>enables output columns for gqeKernel.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>krn_type</td>
+<td>0 for gqeJoin, 1 for gqePart, 2 for gqeFilter</td>
+</tr>
+<tr class="row-even"><td>table_id</td>
+<td>0 for left table, 1 for right table</td>
+</tr>
+<tr class="row-odd"><td>index</td>
+<td>output column ids</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setrowidvalidenable">
+<span id="cid-xf-database-gqe-kernelcommand-setrowidvalidenable"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1a25c901161b95d4244f08e6cd75e4d4b1"></span><h4>setRowIDValidEnable<a class="headerlink" href="#setrowidvalidenable" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setRowIDValidEnable</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">table_id</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">gen_rowID_en</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">valid_en</span>
+    <span class="p">)</span>
+</pre>
+<p>set gen_rowIDEnable and validEnable flag.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>table_id</td>
+<td>0 for left table, 1 for right table.</td>
+</tr>
+<tr class="row-even"><td>gen_rowID_en</td>
+<td>enable flag for using GQE to generate row IDs internally. 1 for enable, 0 for disable.</td>
+</tr>
+<tr class="row-odd"><td>valid_en</td>
+<td>enable flag for getting valid bits from off-chip memory or enabing every row internally. 1 for valid bits from off-chip memory, 0 for enabling every row.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setfilter">
+<span id="cid-xf-database-gqe-kernelcommand-setfilter"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1afee28b0f033b08cbafb81c0d9d2e6529"></span><h4>setFilter<a class="headerlink" href="#setfilter" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setFilter</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">table_id</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_string</span>
+    <span class="p">)</span>
+</pre>
+<p>set Filter string.</p>
+<p>The string uses <code class="docutils literal notranslate"><span class="pre">a</span></code> , <code class="docutils literal notranslate"><span class="pre">b</span></code> , <code class="docutils literal notranslate"><span class="pre">c</span></code> , <code class="docutils literal notranslate"><span class="pre">d</span></code> to refer to first to the fourth column, and supports comparison and logical operator like C++. Parentheses can be used to group logic, but notice that the underlying hardware module does not support comparing one column with multiple constant boundaries in OR relationship. Integral constants will be extracted from expression.</p>
+<p>For example, an expression could be <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">&lt;</span> <span class="pre">10</span> <span class="pre">&amp;&amp;</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">20)</span> <span class="pre">||</span> <span class="pre">(c</span> <span class="pre">&gt;=</span> <span class="pre">d)</span></code> .</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>table_id</td>
+<td>0 for left table, 1 for right table</td>
+</tr>
+<tr class="row-even"><td>filter_string</td>
+<td>filter expression string</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getconfigbits">
+<span id="cid-xf-database-gqe-kernelcommand-getconfigbits"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-kernel-command-1abbffdecca0f1bd6161fa2a782152b0b1"></span><h4>getConfigBits<a class="headerlink" href="#getconfigbits" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;*</span> <span class="n">getConfigBits</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>return config bit array.</p>
+</div>
+</div>
+</div>
+<div class="section" id="class-xf-database-gqe-aggrcommand">
+<span id="cid-xf-database-gqe-aggrcommand"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command"></span><span id="index-1"></span><h2>class xf::database::gqe::AggrCommand<a class="headerlink" href="#class-xf-database-gqe-aggrcommand" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_database/aggr_command.hpp&quot;</span>
+</pre>
+<div class="section" id="id2">
+<h3>Overview<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Class for generating configuration bits of <code class="docutils literal notranslate"><span class="pre">gqeAggr</span></code> kernel.</p>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-aggrcommand-setfilter">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1aa0036c48a5ba1e4c1446d886348e61ef"></span>
+</pre>
+</div>
+<div class="section" id="id3">
+<h3>Methods<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="aggrcommand">
+<span id="cid-xf-database-gqe-aggrcommand-aggrcommand"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1af9988a6525c0d91f98fbe70e7514e822"></span><h4>AggrCommand<a class="headerlink" href="#aggrcommand" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">AggrCommand</span> <span class="p">()</span>
+</pre>
+<p>construct of <a class="reference internal" href="../rst_2/class_xf_database_gqe_AggrCommand.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-command"><span class="std std-ref">AggrCommand</span></a> .</p>
+<p>The aggregate command used buffer is allocated on host. Some default settings are provided.</p>
+</div>
+<div class="section" id="scan">
+<span id="cid-xf-database-gqe-aggrcommand-scan"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1aa3652569ed2a682c6cc2aba73c7ab92e"></span><h4>Scan<a class="headerlink" href="#scan" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">Scan</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>scan valid cols and shuffle for evaluation 1.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>input valid column ids</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setevaluation">
+<span id="cid-xf-database-gqe-aggrcommand-setevaluation"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1ad467607a3f0d5b7c02e7b89ecbbc158e"></span><h4>setEvaluation<a class="headerlink" href="#setevaluation" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="setevaluation-overload-1">
+<h5>setEvaluation overload (1)<a class="headerlink" href="#setevaluation-overload-1" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setEvaluation</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">eval_id</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s0</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">post_div</span> <span class="o">=</span> <a class="reference internal" href="../rst_2/enum_xf_database_gqe_DIV_SCALE.html#doxid-namespacexf-1-1database-1-1gqe-1a3f6f95ebe9eaadfcfb19f268195eb1cba1fc63f01ed5c54d492fc8612179d3c93"><span class="std std-ref">nosf</span></a><span></span>
+    <span class="p">)</span>
+</pre>
+<p>set Evaluation string.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>eval_id</td>
+<td>most support two evaluations</td>
+</tr>
+<tr class="row-even"><td>s0</td>
+<td>evaluation string for special strm format (not support ‘/’)</td>
+</tr>
+<tr class="row-odd"><td>index</td>
+<td>evaluation constants for each strm, default 0</td>
+</tr>
+<tr class="row-even"><td>post_div</td>
+<td>post division alu operation, nosf for no division, sf10 for “a/10”, sf100 for “a/100”, sf1k for “a/1000”, sf10k for “a/10000” (a is result of evaluation expression)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setevaluation-overload-2">
+<span id="cid-xf-database-gqe-aggrcommand-setevaluation-2"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a4174b8963f797eb488527055f03db664"></span><h5>setEvaluation overload (2)<a class="headerlink" href="#setevaluation-overload-2" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setEvaluation</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">eval_id</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">eval_str</span>
+    <span class="p">)</span>
+</pre>
+<p>set Evaluation string.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>eval_id</td>
+<td>most two evaluations</td>
+</tr>
+<tr class="row-even"><td>eval_str</td>
+<td>evaluation expression string</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="cid-xf-database-gqe-aggrcommand-setfilter-2">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a152401419342f335102378c604004ee7"></span><span id="id4"></span><h4>setFilter<a class="headerlink" href="#cid-xf-database-gqe-aggrcommand-setfilter-2" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="setfilter-overload-1">
+<h5>setFilter overload (1)<a class="headerlink" href="#setfilter-overload-1" title="Permalink to this headline">¶</a></h5>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setFilter</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_string</span><span class="p">)</span>
+</pre>
+<p>set Filter string.</p>
+<p>The string uses <code class="docutils literal notranslate"><span class="pre">a</span></code> , <code class="docutils literal notranslate"><span class="pre">b</span></code> , <code class="docutils literal notranslate"><span class="pre">c</span></code> , <code class="docutils literal notranslate"><span class="pre">d</span></code> to refer to first to the fourth column, and supports comparison and logical operator like C++. Parentheses can be used to group logic, but notice that the underlying hardware module does not support comparing one column with multiple constant boundaries in OR relationship. Integral constants will be extracted from expression.</p>
+<p>For example, an expression could be <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">&lt;</span> <span class="pre">10</span> <span class="pre">&amp;&amp;</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">20)</span> <span class="pre">||</span> <span class="pre">(c</span> <span class="pre">&gt;=</span> <span class="pre">d)</span></code> .</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>filter_string</td>
+<td>filter expression string</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="setshuffle0">
+<span id="cid-xf-database-gqe-aggrcommand-setshuffle0"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1ac38b7bb0c454c2d4e657a9712c239176"></span><h4>setShuffle0<a class="headerlink" href="#setshuffle0" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setShuffle0</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set shuffle0 column ids.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>shuffle0 key list,move evaluation keys to first 4 locations</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setshuffle1">
+<span id="cid-xf-database-gqe-aggrcommand-setshuffle1"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a099ae03465cec174b4d69afed2768dbc"></span><h4>setShuffle1<a class="headerlink" href="#setshuffle1" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setShuffle1</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set shuffle1 column ids.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>shuffle1 key list,move filter keys to first 4 locations</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setshuffle2">
+<span id="cid-xf-database-gqe-aggrcommand-setshuffle2"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1ac0b2ab6402526280156a49b053d74ef9"></span><h4>setShuffle2<a class="headerlink" href="#setshuffle2" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setShuffle2</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set shuffle2 column ids.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>set column indexes of keys</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setshuffle3">
+<span id="cid-xf-database-gqe-aggrcommand-setshuffle3"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a279e2053192126cc437d9d43aea0bb2d"></span><h4>setShuffle3<a class="headerlink" href="#setshuffle3" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setShuffle3</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set shuffle3 column ids.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>set column indexes of payloads</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setgroupaggr">
+<span id="cid-xf-database-gqe-aggrcommand-setgroupaggr"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a716fca9c12196255415ec1e9145e5887"></span><h4>setGroupAggr<a class="headerlink" href="#setgroupaggr" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setGroupAggr</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">ind</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span> <span class="n">aggr_op</span>
+    <span class="p">)</span>
+</pre>
+<p>set Group Aggregation type of setting index</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>ind</td>
+<td>set index of column</td>
+</tr>
+<tr class="row-even"><td>aggr_op</td>
+<td>Aggregation type of setting index</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setgroupaggrs">
+<span id="cid-xf-database-gqe-aggrcommand-setgroupaggrs"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a6bfd80785e1392e3c98ac2617d688980"></span><h4>setGroupAggrs<a class="headerlink" href="#setgroupaggrs" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setGroupAggrs</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set Group Aggregation types</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>list of Aggregation types, starting from the first column, align with columns in shuffle3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setmerge">
+<span id="cid-xf-database-gqe-aggrcommand-setmerge"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a105f7ce5c426acde7022b5a67c5aafd7"></span><h4>setMerge<a class="headerlink" href="#setmerge" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setMerge</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">m_id</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">index</span>
+    <span class="p">)</span>
+</pre>
+<p>set Merge column index in setting round of merge</p>
+<p>merge flow : four list : key, count, aggr_l and aggr_h, each one has size 8 key is aligned with shuffle2, count, aggr_l and aggr_h are aligned with shuffle3 and setGroupAggr merge 0,1,2 merge key into the other three merge 3,4 merge count pld into other two</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>m_id</td>
+<td>round id of column merge</td>
+</tr>
+<tr class="row-even"><td>index</td>
+<td>merge colum list in current round</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="columnmerge">
+<span id="cid-xf-database-gqe-aggrcommand-columnmerge"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a78035399b71e83a3d045f606ac38c7b3"></span><h4>columnMerge<a class="headerlink" href="#columnmerge" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">columnMerge</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set Merge codes in each round of merge</p>
+<p>merge flow : four list : key, count, aggr_h, aggr_l (each one has size 8) key is aligned with shuffle2, count, aggr_h and aggr_l are aligned with shuffle3 and setGroupAggr merge 0,1,2 merge key into the other three merge 3,4 merge count pld into other two</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>coded merging indexes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setdirectaggrs">
+<span id="cid-xf-database-gqe-aggrcommand-setdirectaggrs"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1ad374e7c2733486643d42d5f6123f3e83"></span><h4>setDirectAggrs<a class="headerlink" href="#setdirectaggrs" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setDirectAggrs</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set demux direct aggregations</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>columns of using direct aggregations</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="setwritecol">
+<span id="cid-xf-database-gqe-aggrcommand-setwritecol"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1a976bfd3b51f7dd0732f67e24270faaf1"></span><h4>setWriteCol<a class="headerlink" href="#setwritecol" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">setWriteCol</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">index</span><span class="p">)</span>
+</pre>
+<p>set output column ids.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>index</td>
+<td>output column ids</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cid-xf-database-gqe-aggrcommand-getconfigbits">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1ae4995c00e1eb86bcb5050172f127f8e3"></span><span id="id5"></span><h4>getConfigBits<a class="headerlink" href="#cid-xf-database-gqe-aggrcommand-getconfigbits" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">W</span><span class="o">&gt;*</span> <span class="n">getConfigBits</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>return config bit array.</p>
+</div>
+<div class="section" id="getconfigoutbits">
+<span id="cid-xf-database-gqe-aggrcommand-getconfigoutbits"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggr-command-1ae079e60f2d4c995f72d56a85fda5d654"></span><h4>getConfigOutBits<a class="headerlink" href="#getconfigoutbits" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">W</span><span class="o">&gt;*</span> <span class="n">getConfigOutBits</span> <span class="p">()</span>
+</pre>
+<p>return config out bit array.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="L3.html" class="btn btn-neutral float-right" title="L3 GQE Overlay User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kernel_api.html" class="btn btn-neutral float-left" title="GQE Kernel APIs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+      <span class="lastupdated">
+        Last updated on April 13, 2022.
+      </span>
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+														
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<div class="lang-select dropup hidden-md hidden-lg">
+		<button data-toggle="dropdown">
+			<span class="fas fa-globe" aria-hidden="true"></span>
+			<span>
+				
+					English
+				</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a target="_blank" href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+																	<div class="lang-select dropup hidden-xs hidden-sm">
+	<button data-toggle="dropdown">
+		<span class="fas fa-globe" aria-hidden="true"></span>
+		<span>
+			
+				English
+			</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+															</div>
+														</div>
+														<div class="col-md-pull-5 col-lg-pull-5 col-md-5 col-lg-5">
+															<span class="copyright">©2022 Advanced Micro Devices, Inc</span>
+														</div>
+
+													</div>
+													                    <div class="movethisrowtoleft row">
+                        <div class="col-xs-24">
+                            <ul class="sub-menu">
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/privacy">Privacy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/cookies">Cookie Policy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/trademarks">Trademarks</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/statement-human-trafficking-forced-labor.pdf">Statement on Forced Labor</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/competition">Fair and Open Competition</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf">UK Tax Strategy</a></li>
+								<li><a target="_blank" href="https://docs.xilinx.com/v/u/9x6YvZKuWyhJId7y7RQQKA">Inclusive Terminology</a></li>
+                                <li><a href="#cookiessettings" class="ot-sdk-show-settings">Cookies Settings</a></li>
+                            </ul>
+                        </div>
+                    </div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+<div class="backToTop parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><noindex>
+    <span data-component="backToTopButton" class="backToTopButton loaded">
+        <ul>
+            <li>
+                <a href="https://www.author.xilinx.com/xx/rebrand/amd/en-amd-xilinx-header-footer.html#top" class="btn top">
+                    <span class="fas fa-angle-up" aria-hidden="true"></span>
+                </a>
+            </li>
+        </ul>
+    </span>
+</noindex></div>
+			</div>
+		</div>
+
+
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>
