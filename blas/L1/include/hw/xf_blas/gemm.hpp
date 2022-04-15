@@ -156,6 +156,22 @@ class Gemm<float, t_KBufferDim, t_ParEntriesM, t_ParEntriesN, float> {
     }
 };
 
+
+/**
+ * @brief gemm function that returns the result vector of the multiplication of two matrix
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_KBufferDim description to be added
+ * @tparam t_ParEntries the number of parallelly processed entries in the input vector
+ *
+ * @param p_m the number of rows of input matrix p_M
+ * @param p_n the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n %
+ * l_ParEntries == 0
+ * @param p_k description to be added
+ * @param p_A the input stream of packed Matrix entries
+ * @param p_B the input stream of packed Matrix entries
+ * @param p_C the output matrix
+ */
 template <typename t_DataType, unsigned int t_KBufferDim, unsigned int t_ParEntries>
 void gemm(const unsigned int p_m,
           const unsigned int p_n,

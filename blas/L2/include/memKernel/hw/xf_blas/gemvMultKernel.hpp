@@ -26,7 +26,7 @@ typedef BLAS_wideType::t_TypeInt BLAS_interface;
  *
  * @param p_m the row size of matrix A
  * @param p_n the col size of matrix A
- * @param p_A[0..f] the memory ports to vector A
+ * @param p_A0 the memory ports to vector A
  * @param p_pk the input memory address to vector pk
  * @param p_Apk the output memory address to vector Apk
  *

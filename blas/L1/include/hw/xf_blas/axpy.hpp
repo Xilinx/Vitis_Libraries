@@ -41,7 +41,7 @@ namespace blas {
  * @brief axpy function that compute Y = alpha*X + Y.
  *
  * @tparam t_DataType the data type of the vector entries
- * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
+ * @tparam t_ParEntries the number of parallelly processed entries in the input vector
  * @tparam t_IndexType the datatype of the index
  *
  * @param p_n the number of entries in the input vector p_x, p_n % t_ParEntries == 0

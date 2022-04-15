@@ -177,7 +177,8 @@
                     },
                     {
                         "name": "t_ParEntries",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
                         "name": "t_IndexType",
@@ -329,23 +330,28 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
                         "name": "t_ParEntries",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "the number of parallelly processed entries in the input vector"
                     },
                     {
                         "name": "t_MaxRows",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "the maximum size of buffers for output vector"
                     },
                     {
                         "name": "t_IndexType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     },
                     {
                         "name": "t_MacType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the datatype of the output stream"
                     }
                 ],
                 "ports": []
@@ -369,15 +375,18 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
                         "name": "t_KBufferDim",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": " "
                     },
                     {
                         "name": "t_ParEntries",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "the number of parallelly processed entries in the input vector"
                     }
                 ],
                 "ports": []
@@ -401,19 +410,18 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
                         "name": "t_LogParEntries",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
                         "name": "t_IndexType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_MacDataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
                 "ports": []
@@ -600,15 +608,18 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
                         "name": "t_LogParEntries",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
                         "name": "t_IndexType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
                 "ports": []
@@ -632,19 +643,19 @@
                 "parameters": [
                     {
                         "name": "t_DataType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
                         "name": "t_LogParEntries",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+
                     },
                     {
                         "name": "t_IndexType",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "t_MacType",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
                 "ports": []

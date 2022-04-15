@@ -1,0 +1,136 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "blasKernel",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "blasKernel",
+                "display_name": "blasKernel",
+                "brief": "blasKernel is the uniform top function for blas function kernels with interfaces to DDR/HBM memories",
+                "target_domain": "",
+                "header_file_name": [
+                    "kernel.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/memKernel/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "p_DdrRd",
+                        "direction": "",
+                        "type": "DdrIntType *"
+                    },
+                    {
+                        "name": "p_DdrWr",
+                        "direction": "",
+                        "type": "DdrIntType *"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "krnl_gemv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "krnl_gemv",
+                "display_name": "krnl_gemv",
+                "brief": "krnl_gemv kernel function to compute A * p",
+                "target_domain": "",
+                "header_file_name": [
+                    "gemvMultKernel.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/memKernel/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "p_A0",
+                        "direction": "",
+                        "type": "BLAS_interface *"
+                    },
+                    {
+                        "name": "p_pk",
+                        "direction": "",
+                        "type": "BLAS_interface *"
+                    },
+                    {
+                        "name": "p_Apk",
+                        "direction": "",
+                        "type": "BLAS_interface *"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::GemmKernel",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::GemmKernel",
+                "display_name": "GemmKernel",
+                "brief": "class, implement C = A*B+X t_aColMemWords defines number of memwords in the columns of one row of buffer_A. Due to the reusability, the height of buffer_A is only one memwords. For buffer_B, t_aColMemWords defines number of memwords in the rows of one column in buffer_B, t_bColMemWords defines number of memwords in the cols of one row in buffer_B. t_aRowMemWords and t_bColMemWords define the height and width of buffer_C in terms of memwords.",
+                "target_domain": "",
+                "header_file_name": [
+                    "gemmKernel.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/memKernel/hw/xf_blas"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "t_FloatType",
+                        "type": "typename",
+                        "description": "matrix A, B entry data type"
+                    },
+                    {
+                        "name": "t_XDataType",
+                        "type": "typename",
+                        "description": "matrix X entry data type"
+                    },
+                    {
+                        "name": "t_DdrWidth",
+                        "type": "unsigned int",
+                        "description": "number of matrix elements in one memory word"
+                    },
+                    {
+                        "name": "t_XDdrWidth",
+                        "type": "unsigned int",
+                        "description": "number of matrix X elements in one memory word"
+                    },
+                    {
+                        "name": "t_aColMemWords",
+                        "type": "unsigned int",
+                        "description": "number of memory words in one row of the matrix A buffer"
+                    },
+                    {
+                        "name": "t_aRowMemWords",
+                        "type": "unsigned int",
+                        "description": "number of memory words in one column of the matrix A buffer"
+                    },
+                    {
+                        "name": "t_bColMemWords",
+                        "type": "unsigned int",
+                        "description": "number of memory words in one row of the matrix B buffer"
+                    }
+                ],
+                "ports": []
+            }
+        }
+    ],
+    "target_domain": ""
+}
