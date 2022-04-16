@@ -1,0 +1,754 @@
+Library Element,DATA_TYPE,COEFF_TYPE,FIR_LEN,INTERPOLATE_FACTOR,DECIMATE_FACTOR,INPUT_WINDOW_VSIZE,CASC_LEN,DUAL_IP,PORT_API,USE_COEFF_RELOAD,UUT_SSR,cycleCountAvg,throughputAvg,initiationInterval,throughputInitIntAvg,NUM_BANKS,NUM_ME,DATA_MEMORY,PROGRAM_MEMORY
+fir_decimate_asym,cfloat,cfloat,21,1,3,384,1,0,0,0,1,5869,65 MSa/s,5931,64 MSa/s,6,1,18521,3870
+fir_decimate_asym,cint32,cint16,30,1,3,384,1,0,0,0,1,1122,342 MSa/s,1186,323 MSa/s,5,1,15116,2964
+fir_decimate_asym,cint32,cint16,21,1,3,384,1,0,0,0,1,834,460 MSa/s,902,425 MSa/s,5,1,14892,2168
+fir_decimate_asym,cint16,int16,99,1,3,384,5,0,0,0,1,359,1069 MSa/s,559,686 MSa/s,13,5,37612,1842 1574 1574 1614 1732
+fir_decimate_asym,cint16,int16,99,1,3,384,4,0,0,0,1,360,1066 MSa/s,567,677 MSa/s,11,4,30692,2392 1574 1574 1712
+fir_decimate_asym,cint16,int16,99,1,3,384,3,0,0,0,1,428,897 MSa/s,616,623 MSa/s,9,3,23868,2392 2120 2230
+fir_decimate_asym,cint16,int16,99,1,3,384,2,0,0,0,1,556,690 MSa/s,687,558 MSa/s,7,2,16948,2500 2342
+fir_decimate_asym,cint16,int16,99,1,3,384,1,0,0,1,1,1063,361 MSa/s,1163,330 MSa/s,8,1,10272,3210
+fir_decimate_asym,cint16,int16,99,1,3,384,1,0,0,0,1,930,412 MSa/s,1001,383 MSa/s,5,1,10092,2870
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,1,1,150,2560 MSa/s,390,984 MSa/s,8,1,8824,2694
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2182
+fir_decimate_asym,cint16,int16,9,1,3,192,1,0,0,0,1,94,2042 MSa/s,197,974 MSa/s,5,1,6764,2182
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,399,962 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2198
+fir_decimate_asym,cint16,int16,9,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2182
+fir_decimate_asym,cint16,int16,8,1,2,2560,1,1,1,0,1,1307,1958 MSa/s,1321,1937 MSa/s,1,1,4060,1668
+fir_decimate_asym,cint16,int16,64,1,2,2560,8,1,1,0,1,1342,1907 MSa/s,1366,1874 MSa/s,8,8,33964,1968 1950 2014 2046 2078 1998 2030 1688
+fir_decimate_asym,cint32,cint16,9,1,3,384,1,0,0,0,1,450,853 MSa/s,776,494 MSa/s,5,1,14604,1736
+fir_decimate_asym,cint16,int16,63,1,7,448,1,0,0,0,1,1123,398 MSa/s,1187,377 MSa/s,5,1,11532,3352
+fir_decimate_asym,cint32,cint16,99,1,3,384,1,0,0,0,1,3672,104 MSa/s,3755,102 MSa/s,5,1,17068,3790
+fir_decimate_asym,cint32,cint32,30,1,3,384,1,0,0,0,1,2144,179 MSa/s,2208,173 MSa/s,6,1,18572,2964
+fir_decimate_asym,int32,int32,99,1,3,384,1,0,0,0,1,1730,221 MSa/s,1801,213 MSa/s,5,1,12204,3652
+fir_decimate_asym,int32,int32,9,1,3,384,1,0,0,0,1,214,1794 MSa/s,390,984 MSa/s,5,1,10444,2686
+fir_decimate_asym,int32,int32,30,1,3,384,1,0,0,0,1,641,599 MSa/s,701,547 MSa/s,5,1,10764,2444
+fir_decimate_asym,int32,int32,21,1,3,384,1,0,0,0,1,482,796 MSa/s,544,705 MSa/s,5,1,10604,1840
+fir_decimate_asym,int32,int16,99,1,3,384,1,0,0,0,1,3748,102 MSa/s,3819,100 MSa/s,5,1,10092,4980
+fir_decimate_asym,int32,int16,9,1,3,384,1,0,0,0,1,238,1613 MSa/s,390,984 MSa/s,5,1,8812,2136
+fir_decimate_asym,int32,int16,30,1,3,384,1,0,0,0,1,1197,320 MSa/s,1261,304 MSa/s,5,1,9036,3758
+fir_decimate_asym,int32,int16,21,1,3,384,1,0,0,0,1,650,590 MSa/s,715,537 MSa/s,5,1,8972,2536
+fir_decimate_asym,float,float,99,1,3,384,1,0,0,0,1,6665,57 MSa/s,6736,57 MSa/s,5,1,12459,5768
+fir_decimate_asym,float,float,9,1,3,384,1,0,0,0,1,1012,379 MSa/s,1072,358 MSa/s,5,1,10699,2504
+fir_decimate_asym,float,float,30,1,3,384,1,0,0,0,1,2489,154 MSa/s,2549,150 MSa/s,5,1,11019,3398
+fir_decimate_asym,float,float,21,1,3,384,1,0,0,0,1,1570,244 MSa/s,1631,235 MSa/s,5,1,10859,3270
+fir_decimate_asym,cint32,int32,99,1,3,384,1,0,0,0,1,3672,104 MSa/s,3755,102 MSa/s,5,1,17068,3790
+fir_decimate_asym,cint32,int32,9,1,3,384,1,0,0,0,1,450,853 MSa/s,776,494 MSa/s,5,1,14604,1736
+fir_decimate_asym,cint32,int32,30,1,3,384,1,0,0,0,1,1122,342 MSa/s,1186,323 MSa/s,5,1,15116,2964
+fir_decimate_asym,cint32,int32,21,1,3,384,1,0,0,0,1,834,460 MSa/s,902,425 MSa/s,5,1,14892,2168
+fir_decimate_asym,cint32,int16,99,1,3,384,1,0,0,0,1,1793,214 MSa/s,1876,204 MSa/s,5,1,14956,3842
+fir_decimate_asym,cint32,int16,9,1,3,384,1,0,0,0,1,354,1084 MSa/s,775,495 MSa/s,5,1,12972,1680
+fir_decimate_asym,cint32,int16,30,1,3,384,1,0,0,0,1,673,570 MSa/s,772,497 MSa/s,5,1,13388,2526
+fir_decimate_asym,cint32,int16,21,1,3,384,1,0,0,0,1,545,704 MSa/s,777,494 MSa/s,5,1,13260,1944
+fir_decimate_asym,cint32,cint32,99,1,3,384,1,0,0,0,1,7192,53 MSa/s,7275,52 MSa/s,6,1,21292,3822
+fir_decimate_asym,cint32,cint32,21,1,3,384,1,0,0,0,1,1504,255 MSa/s,1566,245 MSa/s,6,1,18252,2644
+fir_decimate_asym,cint16,int16,63,1,3,384,1,0,0,1,1,759,505 MSa/s,854,449 MSa/s,8,1,9616,2754
+fir_decimate_asym,cint32,cint32,9,1,3,384,1,0,0,0,1,736,521 MSa/s,802,478 MSa/s,6,1,17772,1736
+fir_decimate_asym,cint16,int16,60,1,5,320,1,0,0,0,1,353,906 MSa/s,417,767 MSa/s,5,1,9484,2494
+fir_decimate_asym,cint16,int16,144,1,2,432,1,0,0,0,1,2140,201 MSa/s,2216,194 MSa/s,5,1,11180,3238
+fir_decimate_asym,cint16,int16,140,1,5,420,1,0,0,0,1,873,481 MSa/s,949,442 MSa/s,5,1,11564,3246
+fir_decimate_asym,cint16,int16,128,1,2,256,1,0,0,0,1,1154,221 MSa/s,1228,208 MSa/s,5,1,8844,3110
+fir_decimate_asym,cint16,int16,128,1,2,2560,16,1,1,0,1,1366,1874 MSa/s,1400,1828 MSa/s,16,16,71980,1968 1982 2014 2062 2110 2158 2190 1918 1934 1950 2014 2046 2078 1998 2030 1688
+fir_decimate_asym,cint16,int16,12,1,4,384,1,0,0,0,1,135,2844 MSa/s,389,987 MSa/s,5,1,9068,1888
+fir_decimate_asym,cint16,int16,12,1,3,384,1,0,0,1,1,203,1891 MSa/s,390,984 MSa/s,8,1,8832,2942
+fir_decimate_asym,cint16,int16,12,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2210
+fir_decimate_asym,cint16,int16,12,1,2,384,1,0,0,0,1,182,2109 MSa/s,390,984 MSa/s,5,1,8812,1890
+fir_decimate_asym,cint16,int16,12,1,3,384,1,0,0,0,1,150,2560 MSa/s,389,987 MSa/s,5,1,8812,2210
+fir_decimate_asym,cint16,cint16,99,1,3,384,1,0,0,0,1,1668,230 MSa/s,1739,220 MSa/s,5,1,12204,3632
+fir_decimate_asym,cint16,cint16,9,1,3,384,1,0,0,0,1,214,1794 MSa/s,390,984 MSa/s,5,1,10444,2686
+fir_decimate_asym,cint16,cint16,30,1,3,384,1,0,0,0,1,641,599 MSa/s,701,547 MSa/s,5,1,10764,2444
+fir_decimate_asym,cint16,cint16,21,1,3,384,1,0,0,0,1,420,914 MSa/s,482,796 MSa/s,5,1,10604,1952
+fir_decimate_asym,cfloat,float,99,1,3,384,1,0,0,0,1,19613,19 MSa/s,19696,19 MSa/s,5,1,17337,8136
+fir_decimate_asym,cfloat,float,9,1,3,384,1,0,0,0,1,2472,155 MSa/s,2537,151 MSa/s,5,1,14873,2946
+fir_decimate_asym,cfloat,float,30,1,3,384,1,0,0,0,1,9123,42 MSa/s,9187,41 MSa/s,5,1,15385,4534
+fir_decimate_asym,cfloat,float,21,1,3,384,1,0,0,0,1,6945,55 MSa/s,7014,54 MSa/s,5,1,15161,3290
+fir_decimate_asym,cfloat,cfloat,99,1,3,384,1,0,0,0,1,24526,15 MSa/s,24609,15 MSa/s,6,1,21561,9502
+fir_decimate_asym,cfloat,cfloat,9,1,3,384,1,0,0,0,1,3596,106 MSa/s,3661,104 MSa/s,6,1,18041,2698
+fir_decimate_asym,cfloat,cfloat,30,1,3,384,1,0,0,0,1,7947,48 MSa/s,8011,47 MSa/s,6,1,18841,4494
+fir_decimate_asym,cint16,int16,60,1,6,384,1,0,0,0,1,1408,272 MSa/s,1472,260 MSa/s,5,1,10508,3796
+fir_decimate_asym,cint16,int16,144,1,4,432,1,0,0,0,1,1114,387 MSa/s,1190,363 MSa/s,5,1,11340,3254
+fir_decimate_asym,cint16,int16,144,1,6,432,1,0,0,0,1,3504,123 MSa/s,3581,120 MSa/s,5,1,12076,4254
+fir_decimate_asym,cint16,int16,1024,1,2,256,4,0,0,0,1,2357,108 MSa/s,2722,94 MSa/s,15,4,60868,4168 3860 3876 4006
+fir_decimate_asym,cint16,int16,15,1,3,384,1,0,0,1,1,235,1634 MSa/s,392,979 MSa/s,8,1,8848,3178
+fir_decimate_asym,cint16,int16,60,1,4,512,1,0,0,0,1,673,760 MSa/s,737,694 MSa/s,5,1,11020,2494
+fir_decimate_asym,cint16,int16,15,1,3,384,1,0,0,0,1,182,2109 MSa/s,390,984 MSa/s,5,1,8812,2366
+fir_decimate_asym,cint16,int16,60,1,3,384,1,0,0,0,1,610,629 MSa/s,674,569 MSa/s,5,1,9484,2486
+fir_decimate_asym,cint16,int16,512,1,2,256,2,0,0,0,1,2240,114 MSa/s,2406,106 MSa/s,7,2,23284,4136 3958
+fir_decimate_asym,cint16,int16,4,1,2,2560,1,1,1,0,1,1303,1964 MSa/s,1317,1943 MSa/s,1,1,4060,1516
+fir_decimate_asym,cint16,int16,4096,1,2,256,16,0,0,0,1,3076,83 MSa/s,4624,55 MSa/s,98,16,613028,4120 3860 3876 3876 3876 3876 3876 3876 3876 3876 3876 3876 3876 3876 3876 3990
+fir_decimate_asym,cint16,int16,33,1,3,384,1,0,0,0,1,418,918 MSa/s,479,801 MSa/s,5,1,9196,2270
+fir_decimate_asym,cint16,int16,28,1,7,448,1,0,0,0,1,516,868 MSa/s,580,772 MSa/s,5,1,11084,2730
+fir_decimate_asym,cint16,int16,27,1,3,384,1,0,0,1,1,354,1084 MSa/s,476,806 MSa/s,8,1,9088,2276
+fir_decimate_asym,cint16,int16,27,1,3,384,1,0,0,0,1,354,1084 MSa/s,414,927 MSa/s,5,1,9036,2286
+fir_decimate_asym,cint16,int16,256,1,2,256,1,0,0,0,1,2178,117 MSa/s,2268,112 MSa/s,5,1,10636,4074
+fir_decimate_asym,cint16,int16,32,1,2,2560,4,1,1,0,1,1331,1923 MSa/s,1349,1897 MSa/s,4,4,16492,2096 1998 2030 1688
+fir_decimate_asym,cint16,int16,237,1,3,768,1,0,0,0,1,4129,186 MSa/s,4217,182 MSa/s,5,1,16044,3970
+fir_decimate_asym,cint16,int16,237,1,3,384,1,0,0,1,1,2322,165 MSa/s,2440,157 MSa/s,8,1,12424,4414
+fir_decimate_asym,cint16,int16,237,1,3,384,1,0,0,0,1,2081,184 MSa/s,2169,177 MSa/s,5,1,11948,3970
+fir_decimate_asym,cint16,int16,21,1,3,384,1,0,0,1,1,402,955 MSa/s,492,780 MSa/s,8,1,9000,2656
+fir_decimate_asym,cint16,int16,2048,1,2,256,8,0,0,0,1,2597,98 MSa/s,3231,79 MSa/s,36,8,185188,4168 3860 3876 3876 3876 3876 3876 4006
+fir_decimate_asym,cint16,int16,20,1,5,400,1,0,0,0,1,233,1716 MSa/s,406,985 MSa/s,5,1,9740,1664
+fir_decimate_asym,cint16,int16,18,1,3,384,1,0,0,1,1,338,1136 MSa/s,428,897 MSa/s,8,1,8984,2624
+fir_decimate_asym,cint16,int16,18,1,3,384,1,0,0,0,1,290,1324 MSa/s,391,982 MSa/s,5,1,8972,1736
+fir_decimate_asym,cint16,int16,24,1,6,384,1,0,0,0,1,468,820 MSa/s,529,725 MSa/s,5,1,9996,2158
+fir_decimate_asym,cint16,int16,16,1,2,2560,2,1,1,0,1,1321,1937 MSa/s,1337,1914 MSa/s,2,2,8140,2052 1688
+fir_decimate_hb,cint32,cint16,99,1,2,256,1,0,0,0,1,2219,115 MSa/s,2301,111 MSa/s,5,1,11430,3236
+fir_decimate_hb,cint16,int16,99,1,2,128,5,0,0,0,1,236,542 MSa/s,256,500 MSa/s,13,5,20698,2056 1752 1826 1826 1914
+fir_decimate_hb,cint16,int16,99,1,2,256,1,0,0,0,1,522,490 MSa/s,594,430 MSa/s,5,1,6886,2274
+fir_decimate_hb,cint16,int16,99,1,2,256,1,0,1,0,1,519,493 MSa/s,578,442 MSa/s,3,1,5870,2060
+fir_decimate_hb,cint16,int16,99,1,2,256,1,0,0,1,1,546,468 MSa/s,645,396 MSa/s,8,1,6930,3346
+fir_decimate_hb,cint32,cint16,7,1,2,256,1,0,0,0,1,166,1542 MSa/s,517,495 MSa/s,5,1,9638,1928
+fir_decimate_hb,cint32,cint16,15,1,2,256,1,0,0,0,1,515,497 MSa/s,578,442 MSa/s,5,1,9798,1780
+fir_decimate_hb,cint32,cint32,11,1,2,256,1,0,0,0,1,295,867 MSa/s,519,493 MSa/s,5,1,10758,1942
+fir_decimate_hb,cint32,cint16,239,1,2,256,1,0,0,0,1,5009,51 MSa/s,5126,49 MSa/s,5,1,14054,4344
+fir_decimate_hb,cint16,int16,99,1,2,128,4,0,0,0,1,232,551 MSa/s,251,509 MSa/s,11,4,16853,2056 1752 1752 1858
+fir_decimate_hb,cint32,cint16,11,1,2,256,1,0,0,0,1,450,568 MSa/s,520,492 MSa/s,5,1,9702,1804
+fir_decimate_hb,cint16,int16,99,1,2,128,3,0,0,0,1,251,509 MSa/s,269,475 MSa/s,9,3,13008,2260 1932 1988
+fir_decimate_hb,cint16,int16,7,1,2,512,1,0,0,0,1,102,5019 MSa/s,516,992 MSa/s,5,1,9062,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,7,1,2,64,1,0,0,0,1,51,1254 MSa/s,107,598 MSa/s,5,1,3686,1734
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,1,1,95,2694 MSa/s,261,980 MSa/s,8,1,6010,2302
+fir_decimate_hb,cint32,cint32,15,1,2,256,1,0,0,0,1,931,274 MSa/s,994,257 MSa/s,5,1,10918,1844
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,1,0,1,159,1610 MSa/s,261,980 MSa/s,3,1,4974,1564
+fir_decimate_hb,cint16,int16,99,1,2,128,2,0,0,0,1,231,554 MSa/s,257,498 MSa/s,7,2,9163,2378 2042
+fir_decimate_hb,cint32,cint32,23,1,2,128,1,0,0,0,1,643,199 MSa/s,705,181 MSa/s,5,1,7974,1886
+fir_decimate_hb,int32,int32,239,1,2,256,1,0,0,0,1,1422,180 MSa/s,1509,169 MSa/s,5,1,9062,3428
+fir_decimate_hb,cint32,cint32,7,1,2,256,1,0,0,0,1,228,1122 MSa/s,518,494 MSa/s,5,1,10694,1942
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,int32,int32,99,1,2,256,1,0,0,0,1,1193,214 MSa/s,1265,202 MSa/s,5,1,7590,2266
+fir_decimate_hb,int32,int32,7,1,2,256,1,0,0,0,1,101,2534 MSa/s,261,980 MSa/s,5,1,6502,1860
+fir_decimate_hb,int32,int32,27,1,2,256,1,0,0,0,1,482,531 MSa/s,543,471 MSa/s,5,1,6726,1752
+fir_decimate_hb,int32,int32,23,1,2,256,1,0,0,0,1,167,1532 MSa/s,261,980 MSa/s,5,1,6662,1998
+fir_decimate_hb,int32,int16,99,1,2,256,1,0,0,0,1,2789,91 MSa/s,2861,89 MSa/s,5,1,6886,3420
+fir_decimate_hb,int32,int16,7,1,2,256,1,0,0,0,1,85,3011 MSa/s,260,984 MSa/s,5,1,5990,2014
+fir_decimate_hb,int32,int16,239,1,2,256,1,0,0,0,1,6391,40 MSa/s,6479,39 MSa/s,5,1,8166,5960
+fir_decimate_hb,int32,int16,19,1,2,256,1,0,0,0,1,645,396 MSa/s,705,363 MSa/s,5,1,6118,2288
+fir_decimate_hb,int32,int16,15,1,2,256,1,0,0,0,1,102,2509 MSa/s,261,980 MSa/s,5,1,6054,1978
+fir_decimate_hb,float,float,99,1,2,256,1,0,0,0,1,5166,49 MSa/s,5236,48 MSa/s,5,1,7845,4846
+fir_decimate_hb,float,float,7,1,2,256,1,0,0,0,1,296,864 MSa/s,354,723 MSa/s,5,1,6757,2200
+fir_decimate_hb,float,float,239,1,2,256,1,0,0,0,1,13446,19 MSa/s,13534,18 MSa/s,5,1,9317,8700
+fir_decimate_hb,float,float,19,1,2,256,1,0,0,0,1,1107,231 MSa/s,1166,219 MSa/s,5,1,6917,2828
+fir_decimate_hb,float,float,15,1,2,256,1,0,0,0,1,787,325 MSa/s,845,302 MSa/s,5,1,6853,2306
+fir_decimate_hb,cint32,int32,99,1,2,256,1,0,0,0,1,2219,115 MSa/s,2301,111 MSa/s,5,1,11430,3236
+fir_decimate_hb,cint32,int32,7,1,2,256,1,0,0,0,1,166,1542 MSa/s,517,495 MSa/s,5,1,9638,1928
+fir_decimate_hb,cint32,int32,239,1,2,256,1,0,0,0,1,5009,51 MSa/s,5126,49 MSa/s,5,1,14054,4344
+fir_decimate_hb,cint32,int32,15,1,2,256,1,0,0,0,1,515,497 MSa/s,578,442 MSa/s,5,1,9798,1780
+fir_decimate_hb,cint32,int32,11,1,2,256,1,0,0,0,1,450,568 MSa/s,520,492 MSa/s,5,1,9702,1804
+fir_decimate_hb,cint32,int16,99,1,2,256,1,0,0,0,1,6179,41 MSa/s,6263,40 MSa/s,5,1,10726,3688
+fir_decimate_hb,cint32,int16,239,1,2,256,1,0,0,0,1,15176,16 MSa/s,15294,16 MSa/s,5,1,13158,6696
+fir_decimate_hb,cint32,int16,15,1,2,256,1,0,0,0,1,1637,156 MSa/s,1700,150 MSa/s,5,1,9254,2474
+fir_decimate_hb,cint32,int16,11,1,2,256,1,0,0,0,1,867,295 MSa/s,930,275 MSa/s,5,1,9190,2142
+fir_decimate_hb,cint32,cint32,99,1,2,256,1,0,0,0,1,4333,59 MSa/s,4415,57 MSa/s,5,1,12742,3290
+fir_decimate_hb,cint32,cint32,239,1,2,256,1,0,0,0,1,9854,25 MSa/s,9971,25 MSa/s,5,1,15846,4584
+fir_decimate_hb,cint16,int16,7,1,2,128,1,0,0,0,1,58,2206 MSa/s,132,969 MSa/s,5,1,4454,1816
+fir_decimate_hb,cint32,int16,7,1,2,256,1,0,0,0,1,132,1939 MSa/s,517,495 MSa/s,5,1,9126,2022
+fir_decimate_hb,cint16,int16,7,1,2,256,1,0,0,0,1,70,3657 MSa/s,260,984 MSa/s,5,1,5990,1858
+fir_decimate_hb,cint16,int16,15,1,2,128,2,1,0,0,1,143,895 MSa/s,169,757 MSa/s,8,2,9067,2184 1792
+fir_decimate_hb,cint16,int16,11,1,2,256,1,0,0,1,1,97,2639 MSa/s,261,980 MSa/s,8,1,6074,2334
+fir_decimate_hb,cint16,int16,11,1,2,256,1,0,1,0,1,160,1600 MSa/s,261,980 MSa/s,3,1,5038,1558
+fir_decimate_hb,cint16,int16,11,1,2,256,1,0,0,0,1,71,3605 MSa/s,260,984 MSa/s,5,1,6054,1884
+fir_decimate_hb,cint16,int16,11,1,2,256,1,0,0,0,1,71,3605 MSa/s,260,984 MSa/s,5,1,6054,1900
+fir_decimate_hb,cint16,int16,11,1,2,128,1,0,0,0,1,59,2169 MSa/s,135,948 MSa/s,5,1,4518,1858
+fir_decimate_hb,cint16,int16,1023,1,2,256,1,0,0,0,1,4951,51 MSa/s,5136,49 MSa/s,5,1,15686,4848
+fir_decimate_hb,cint16,cint16,99,1,2,256,1,0,0,0,1,1193,214 MSa/s,1265,202 MSa/s,5,1,7590,2266
+fir_decimate_hb,cint16,cint16,83,1,2,256,3,1,0,0,1,646,396 MSa/s,664,385 MSa/s,10,3,19824,2524 1792 1768
+fir_decimate_hb,cint16,cint16,7,1,2,256,1,0,0,0,1,101,2534 MSa/s,261,980 MSa/s,5,1,6502,1860
+fir_decimate_hb,cint16,cint16,71,1,2,256,1,0,0,0,1,585,437 MSa/s,662,386 MSa/s,7,1,8262,2368
+fir_decimate_hb,cint16,cint16,27,1,2,256,1,0,0,0,1,482,531 MSa/s,543,471 MSa/s,5,1,6726,1788
+fir_decimate_hb,cint16,cint16,239,1,2,256,1,0,0,0,1,1421,180 MSa/s,1508,169 MSa/s,5,1,9062,3412
+fir_decimate_hb,cint16,cint16,23,1,2,256,1,0,0,0,1,167,1532 MSa/s,261,980 MSa/s,5,1,6662,1998
+fir_decimate_hb,cfloat,float,99,1,2,256,1,0,0,0,1,11998,21 MSa/s,12080,21 MSa/s,5,1,11685,5428
+fir_decimate_hb,cfloat,float,7,1,2,256,1,0,0,0,1,557,459 MSa/s,617,414 MSa/s,5,1,9893,2248
+fir_decimate_hb,cfloat,float,239,1,2,256,1,0,0,0,1,24454,10 MSa/s,24572,10 MSa/s,5,1,14309,9388
+fir_decimate_hb,cfloat,float,15,1,2,256,1,0,0,0,1,2054,124 MSa/s,2116,120 MSa/s,5,1,10053,2760
+fir_decimate_hb,cfloat,float,11,1,2,256,1,0,0,0,1,1476,173 MSa/s,1537,166 MSa/s,5,1,9957,2344
+fir_decimate_hb,cfloat,cfloat,99,1,2,256,1,0,0,0,1,14088,18 MSa/s,14170,18 MSa/s,5,1,12997,6054
+fir_decimate_hb,cfloat,cfloat,7,1,2,256,1,0,0,0,1,757,338 MSa/s,817,313 MSa/s,5,1,10949,2618
+fir_decimate_hb,cfloat,cfloat,239,1,2,256,1,0,0,0,1,29141,8 MSa/s,29258,8 MSa/s,5,1,16101,10722
+fir_decimate_hb,cfloat,cfloat,15,1,2,256,1,0,0,0,1,2246,113 MSa/s,2308,110 MSa/s,5,1,11173,2938
+fir_decimate_hb,cfloat,cfloat,11,1,2,256,1,0,0,0,1,1671,153 MSa/s,1732,147 MSa/s,5,1,11013,2516
+fir_decimate_hb,cint16,int16,7,1,2,1024,1,0,0,0,1,166,6168 MSa/s,1029,995 MSa/s,5,1,15206,1858
+fir_decimate_hb,cint16,int16,15,1,2,256,1,0,0,0,1,102,2509 MSa/s,261,980 MSa/s,5,1,6054,1868
+fir_decimate_hb,cint16,int16,15,1,2,256,1,0,0,0,1,102,2509 MSa/s,261,980 MSa/s,5,1,6054,1868
+fir_decimate_hb,cint16,cint16,11,1,2,128,1,0,0,0,1,70,1828 MSa/s,132,969 MSa/s,5,1,5030,1884
+fir_decimate_hb,cint16,int16,15,1,2,256,1,0,0,1,1,129,1984 MSa/s,262,977 MSa/s,8,1,6082,2522
+fir_decimate_hb,cint16,int16,15,1,2,256,1,0,1,0,1,161,1590 MSa/s,261,980 MSa/s,3,1,5038,1620
+fir_decimate_hb,cint16,int16,55,1,2,256,1,1,0,0,1,172,1488 MSa/s,278,920 MSa/s,7,1,8902,2462
+fir_decimate_hb,cint16,int16,55,1,2,128,2,1,0,0,1,235,544 MSa/s,262,488 MSa/s,9,2,9931,2324 1940
+fir_decimate_hb,cint16,int16,5119,1,2,256,5,0,0,0,1,6256,40 MSa/s,6281,40 MSa/s,27,5,151002,4758 4538 4538 4538 4628
+fir_decimate_hb,cint16,int16,511,1,2,256,1,0,0,0,1,2429,105 MSa/s,2550,100 MSa/s,5,1,10822,4754
+fir_decimate_hb,cint16,int16,4095,1,2,256,4,0,0,0,1,5013,51 MSa/s,5038,50 MSa/s,18,4,100533,4758 4538 4538 4628
+fir_decimate_hb,cint16,int16,3071,1,2,256,3,0,0,0,1,5170,49 MSa/s,5191,49 MSa/s,13,3,73616,4782 4554 4628
+fir_decimate_hb,cint16,int16,27,1,2,256,1,0,0,1,1,228,1122 MSa/s,318,805 MSa/s,8,1,6218,2462
+fir_decimate_hb,cint16,int16,27,1,2,256,1,0,1,0,1,229,1117 MSa/s,280,914 MSa/s,3,1,5166,1736
+fir_decimate_hb,cint16,int16,27,1,2,256,1,0,0,0,1,201,1273 MSa/s,264,969 MSa/s,5,1,6182,1886
+fir_decimate_hb,cint16,int16,27,1,2,256,1,1,0,0,1,137,1868 MSa/s,262,977 MSa/s,7,1,8486,2238
+fir_decimate_hb,cint16,int16,2559,1,2,256,3,0,0,0,1,4810,53 MSa/s,4831,52 MSa/s,13,3,63600,4382 4074 4260
+fir_decimate_hb,cint16,int16,31,1,2,256,3,0,0,0,1,303,844 MSa/s,321,797 MSa/s,9,3,14224,1878 1706 1946
+fir_decimate_hb,cint16,int16,239,1,2,256,1,0,1,0,1,1135,225 MSa/s,1212,211 MSa/s,3,1,7150,3236
+fir_decimate_hb,cint16,int16,1535,1,2,256,2,0,0,0,1,3998,64 MSa/s,4026,63 MSa/s,7,2,32107,4238 4020
+fir_decimate_hb,cint16,int16,239,1,2,256,1,0,0,1,1,1169,218 MSa/s,1286,199 MSa/s,8,1,8290,3784
+fir_decimate_hb,cint16,int16,19,1,2,128,2,1,0,0,1,147,870 MSa/s,172,744 MSa/s,8,2,9227,2200 1802
+fir_decimate_hb,cint16,int16,19,1,2,256,1,0,0,0,1,103,2485 MSa/s,261,980 MSa/s,5,1,6118,1884
+fir_decimate_hb,cint16,int16,19,1,2,256,1,0,1,0,1,162,1580 MSa/s,261,980 MSa/s,3,1,5102,1636
+fir_decimate_hb,cint16,int16,19,1,2,256,1,0,0,1,1,130,1969 MSa/s,262,977 MSa/s,8,1,6146,2554
+fir_decimate_hb,cint16,int16,59,1,2,128,5,1,0,0,1,237,540 MSa/s,258,496 MSa/s,15,5,20954,2398 1922 1754 1754 1746
+fir_decimate_hb,cint16,int16,2047,1,2,256,2,0,0,0,1,5111,50 MSa/s,5137,49 MSa/s,10,2,39531,4782 4628
+fir_decimate_hb,cint16,int16,23,1,2,128,1,0,0,0,1,71,1802 MSa/s,132,969 MSa/s,5,1,4582,1864
+fir_decimate_hb,cint16,int16,23,1,2,256,1,0,0,0,1,103,2485 MSa/s,261,980 MSa/s,5,1,6118,1864
+fir_decimate_hb,cint16,int16,23,1,2,256,1,0,0,1,1,130,1969 MSa/s,262,977 MSa/s,8,1,6154,2496
+fir_decimate_hb,cint16,int16,239,1,2,256,1,0,0,0,1,1109,230 MSa/s,1196,214 MSa/s,5,1,8166,3482
+fir_decimate_sym,cint16,int16,99,1,3,384,2,0,0,0,1,953,402 MSa/s,978,392 MSa/s,7,2,13015,3132 2828
+fir_decimate_sym,cint16,int16,99,1,3,384,1,0,0,1,1,740,518 MSa/s,841,456 MSa/s,8,1,8152,3680
+fir_decimate_sym,cint16,int16,99,1,3,384,1,0,0,0,1,681,563 MSa/s,750,512 MSa/s,5,1,8076,4086
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,1,1,146,2630 MSa/s,389,987 MSa/s,8,1,7078,2460
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2172
+fir_decimate_sym,cint16,int16,9,1,3,192,1,0,0,0,1,77,2493 MSa/s,196,979 MSa/s,5,1,5002,2172
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2156
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,115,3339 MSa/s,388,989 MSa/s,5,1,7050,2156
+fir_decimate_sym,cint16,int16,99,1,3,384,3,0,0,0,1,940,408 MSa/s,957,401 MSa/s,9,3,17954,2798 2212 2526
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2172
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2156
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2172
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2172
+fir_decimate_sym,cint16,int16,8,1,2,256,1,0,0,0,1,69,3710 MSa/s,260,984 MSa/s,5,1,5961,1936
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,115,3339 MSa/s,388,989 MSa/s,5,1,7050,2156
+fir_decimate_sym,cint16,int16,9,1,3,384,1,0,0,0,1,117,3282 MSa/s,388,989 MSa/s,5,1,7050,2156
+fir_decimate_sym,cint32,int32,96,1,2,384,1,0,0,0,1,2884,133 MSa/s,2965,129 MSa/s,5,1,14604,3514
+fir_decimate_sym,cint32,cint16,24,1,2,384,1,0,0,0,1,906,423 MSa/s,972,395 MSa/s,5,1,13068,2638
+fir_decimate_sym,int32,int32,99,1,3,384,1,0,0,0,1,1033,371 MSa/s,1101,348 MSa/s,5,1,8876,3660
+fir_decimate_sym,int32,int32,9,1,3,384,1,0,0,0,1,147,2612 MSa/s,389,987 MSa/s,5,1,7595,2344
+fir_decimate_sym,int32,int32,30,1,3,384,1,0,0,0,1,752,510 MSa/s,812,472 MSa/s,5,1,7820,2514
+fir_decimate_sym,int32,int32,21,1,3,384,1,0,0,0,1,549,699 MSa/s,610,629 MSa/s,5,1,7756,2362
+fir_decimate_sym,cint32,int32,8,1,2,384,1,0,0,0,1,373,1029 MSa/s,775,495 MSa/s,5,1,12684,1916
+fir_decimate_sym,cint32,int32,30,1,2,384,1,0,0,0,1,1686,227 MSa/s,1754,218 MSa/s,5,1,13196,2792
+fir_decimate_sym,cint32,int32,24,1,2,384,1,0,0,0,1,906,423 MSa/s,972,395 MSa/s,5,1,13068,2632
+fir_decimate_sym,cint32,cint32,99,1,3,384,1,0,0,0,1,4673,82 MSa/s,4755,80 MSa/s,5,1,15340,3826
+fir_decimate_sym,cint32,cint32,9,1,3,384,1,0,0,0,1,493,778 MSa/s,776,494 MSa/s,5,1,12876,2304
+fir_decimate_sym,cint32,cint32,30,1,3,384,1,0,0,0,1,1241,309 MSa/s,1304,294 MSa/s,5,1,13388,3276
+fir_decimate_sym,cint32,cint32,21,1,3,384,1,0,0,0,1,1133,338 MSa/s,1194,321 MSa/s,5,1,13164,2934
+fir_decimate_sym,cint32,cint16,96,1,2,384,1,0,0,0,1,2884,133 MSa/s,2965,129 MSa/s,5,1,14604,3514
+fir_decimate_sym,cint32,cint16,8,1,2,384,1,0,0,0,1,372,1032 MSa/s,775,495 MSa/s,5,1,12684,1890
+fir_decimate_sym,cint32,cint16,30,1,2,384,1,0,0,0,1,1686,227 MSa/s,1754,218 MSa/s,5,1,13196,2798
+fir_decimate_sym,cint16,int16,99,1,3,384,4,0,0,0,1,912,421 MSa/s,931,412 MSa/s,11,4,22893,2654 2060 2056 2340
+fir_decimate_sym,cint16,int16,99,1,3,384,5,0,0,0,1,915,419 MSa/s,935,410 MSa/s,13,5,27864,2654 2060 1918 1922 2182
+fir_decimate_sym,cint16,int16,60,1,2,384,1,1,0,0,1,686,559 MSa/s,793,484 MSa/s,7,1,11660,3404
+fir_decimate_sym,cint16,int16,16,1,2,384,1,0,0,0,1,134,2865 MSa/s,388,989 MSa/s,5,1,7562,2098
+fir_decimate_sym,cint16,int16,15,1,3,384,1,0,0,1,1,284,1352 MSa/s,392,979 MSa/s,8,1,7086,2234
+fir_decimate_sym,cint16,int16,15,1,3,384,1,0,0,0,1,258,1488 MSa/s,389,987 MSa/s,5,1,7050,1976
+fir_decimate_sym,cint16,int16,128,1,2,256,1,0,0,0,1,742,345 MSa/s,814,314 MSa/s,5,1,7244,3354
+fir_decimate_sym,cint16,int16,12,1,3,384,1,0,0,0,1,118,3254 MSa/s,388,989 MSa/s,5,1,7050,2244
+fir_decimate_sym,cint16,int16,12,1,2,256,1,0,0,0,1,102,2509 MSa/s,260,984 MSa/s,5,1,6026,2088
+fir_decimate_sym,cint16,int16,12,1,3,384,1,0,0,0,1,118,3254 MSa/s,388,989 MSa/s,5,1,7050,2244
+fir_decimate_sym,cint16,int16,1024,1,2,256,2,0,0,0,1,2974,86 MSa/s,3001,85 MSa/s,7,2,26999,4440 4304
+fir_decimate_sym,cint16,int16,100,1,2,256,1,0,0,0,1,1374,186 MSa/s,1443,177 MSa/s,5,1,7052,3252
+fir_decimate_sym,cint16,cint16,99,1,3,384,1,0,0,0,1,1033,371 MSa/s,1101,348 MSa/s,5,1,8876,3676
+fir_decimate_sym,cint16,cint16,9,1,3,384,1,0,0,0,1,147,2612 MSa/s,389,987 MSa/s,5,1,7595,2348
+fir_decimate_sym,cint16,cint16,30,1,3,384,1,0,0,0,1,754,509 MSa/s,814,471 MSa/s,5,1,7820,2522
+fir_decimate_sym,cint16,cint16,21,1,3,384,1,0,0,0,1,549,699 MSa/s,610,629 MSa/s,5,1,7756,2366
+fir_decimate_sym,cint16,int16,60,1,3,384,1,0,0,0,1,505,760 MSa/s,569,674 MSa/s,5,1,7564,3076
+fir_decimate_sym,cint16,int16,18,1,3,384,1,0,0,0,1,259,1482 MSa/s,389,987 MSa/s,5,1,7147,2062
+fir_decimate_sym,cint16,int16,12,1,3,384,1,0,0,1,1,145,2648 MSa/s,389,987 MSa/s,8,1,7078,2512
+fir_decimate_sym,cint16,int16,2048,1,2,256,4,0,0,0,1,3526,72 MSa/s,3546,72 MSa/s,16,4,76493,4456 4184 4200 4320
+fir_decimate_sym,cint16,int16,60,1,2,384,1,0,0,0,1,1354,283 MSa/s,1418,270 MSa/s,5,1,8076,3044
+fir_decimate_sym,cint16,int16,18,1,3,384,1,0,0,1,1,285,1347 MSa/s,393,977 MSa/s,8,1,7159,2312
+fir_decimate_sym,cint16,int16,512,1,2,256,1,0,0,0,1,2714,94 MSa/s,2837,90 MSa/s,5,1,11468,4452
+fir_decimate_sym,cint16,int16,4096,1,2,256,8,0,0,0,1,5051,50 MSa/s,5081,50 MSa/s,42,8,231801,4452 4184 4200 4200 4200 4200 4200 4320
+fir_decimate_sym,cint16,int16,27,1,3,384,1,0,0,1,1,385,997 MSa/s,476,806 MSa/s,8,1,7240,2620
+fir_decimate_sym,cint16,int16,27,1,3,384,1,0,0,0,1,359,1069 MSa/s,420,914 MSa/s,5,1,7212,2356
+fir_decimate_sym,cint16,int16,28,1,2,256,1,0,0,0,1,605,423 MSa/s,665,384 MSa/s,5,1,6188,2338
+fir_decimate_sym,cint16,int16,256,1,2,256,1,0,0,0,1,1318,194 MSa/s,1409,181 MSa/s,5,1,8652,4424
+fir_decimate_sym,cint16,int16,24,1,2,256,1,0,0,0,1,259,988 MSa/s,318,805 MSa/s,5,1,6123,2080
+fir_decimate_sym,cint16,int16,240,1,2,256,1,0,0,0,1,1254,204 MSa/s,1343,190 MSa/s,5,1,8524,4328
+fir_decimate_sym,cint16,int16,237,1,3,768,1,0,0,0,1,2536,302 MSa/s,2625,292 MSa/s,5,1,13644,4652
+fir_decimate_sym,cint16,int16,237,1,3,384,1,0,0,1,1,1402,273 MSa/s,1522,252 MSa/s,8,1,9776,5028
+fir_decimate_sym,cint16,int16,237,1,3,384,1,0,0,0,1,1288,298 MSa/s,1377,278 MSa/s,5,1,9548,4652
+fir_decimate_sym,cint16,int16,26,1,2,256,1,0,0,0,1,356,719 MSa/s,416,615 MSa/s,5,1,6188,2398
+fir_interpolate_asym,cint32,cint32,16,2,1,5120,1,0,1,0,1,45476,112 MSa/s,45494,112 MSa/s,1,1,2966,2854
+fir_interpolate_asym,cint32,cint32,48,2,1,5120,2,0,1,0,1,78102,65 MSa/s,78129,65 MSa/s,2,2,7595,6168 4112
+fir_interpolate_asym,cint32,cint32,44,2,1,5120,2,0,1,0,1,75902,67 MSa/s,75929,67 MSa/s,2,2,7403,6456 3936
+fir_interpolate_asym,cint32,cint32,40,2,1,5120,2,0,1,0,1,73242,69 MSa/s,73269,69 MSa/s,2,2,7147,6686 3430
+fir_interpolate_asym,cint32,cint32,32,2,1,5120,2,0,1,0,1,46142,110 MSa/s,46169,110 MSa/s,2,2,6699,6846 2918
+fir_interpolate_asym,cint32,cint32,20,2,1,5120,1,0,1,0,1,74023,69 MSa/s,74042,69 MSa/s,1,1,3094,3606
+fir_interpolate_asym,cint32,cint32,12,2,1,5120,1,0,1,0,1,37476,136 MSa/s,37494,136 MSa/s,1,1,2838,2502
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10867,471 MSa/s,10887,470 MSa/s,1,1,2566,2082
+fir_interpolate_asym,cint32,cint16,64,2,1,5120,3,0,1,0,1,43282,118 MSa/s,43317,118 MSa/s,3,3,10204,6670 5242 3510
+fir_interpolate_asym,cint32,cint16,32,2,1,5120,2,0,1,0,1,26315,194 MSa/s,26342,194 MSa/s,2,2,5931,4838 3126
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10868,471 MSa/s,10887,470 MSa/s,1,1,2566,2102
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10868,471 MSa/s,10887,470 MSa/s,1,1,2566,2102
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10868,471 MSa/s,10887,470 MSa/s,1,1,2566,2102
+fir_interpolate_asym,cint32,cint32,58,2,1,5120,3,0,1,0,1,74228,68 MSa/s,74263,68 MSa/s,3,3,12108,10446 7034 3126
+fir_interpolate_asym,cint32,cint16,8,2,1,5120,1,0,1,0,1,23074,221 MSa/s,23092,221 MSa/s,1,1,2614,2374
+fir_interpolate_asym,cint32,cint32,64,2,1,5120,3,0,1,0,1,86403,59 MSa/s,86438,59 MSa/s,3,3,12508,9776 7044 3430
+fir_interpolate_asym,int32,int32,8,2,1,5120,1,0,1,0,1,11554,443 MSa/s,11572,442 MSa/s,1,1,2678,2450
+fir_interpolate_asym,cint32,cint32,80,2,1,5120,3,0,1,0,1,80951,63 MSa/s,80984,63 MSa/s,3,3,13788,7808 5684 4064
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10867,471 MSa/s,10887,470 MSa/s,1,1,2566,2082
+fir_interpolate_asym,int32,int32,64,2,1,5120,3,0,1,0,1,21721,235 MSa/s,21750,235 MSa/s,3,3,10684,5372 7140 5970
+fir_interpolate_asym,int32,int32,32,2,1,5120,2,0,1,0,1,13202,387 MSa/s,13229,387 MSa/s,2,2,6187,6006 3238
+fir_interpolate_asym,int32,int16,8,2,1,5120,1,0,1,0,1,10867,471 MSa/s,10887,470 MSa/s,1,1,2566,2082
+fir_interpolate_asym,int32,int16,64,2,1,5120,3,0,1,0,1,11873,431 MSa/s,11908,429 MSa/s,3,3,9052,5010 6486 2598
+fir_interpolate_asym,int32,int16,32,2,1,5120,2,0,1,0,1,11593,441 MSa/s,11620,440 MSa/s,2,2,5547,4726 2438
+fir_interpolate_asym,cint32,int32,8,2,1,5120,1,0,1,0,1,23074,221 MSa/s,23092,221 MSa/s,1,1,2614,2374
+fir_interpolate_asym,cint32,int32,64,2,1,5120,3,0,1,0,1,43282,118 MSa/s,43317,118 MSa/s,3,3,10204,6670 5242 3510
+fir_interpolate_asym,cint32,int32,32,2,1,5120,2,0,1,0,1,26315,194 MSa/s,26342,194 MSa/s,2,2,5931,4838 3126
+fir_interpolate_asym,cint32,int16,8,2,1,5120,1,0,1,0,1,20519,249 MSa/s,20537,249 MSa/s,1,1,2534,1974
+fir_interpolate_asym,cint32,int16,64,2,1,5120,3,0,1,0,1,23464,218 MSa/s,23499,217 MSa/s,3,3,8796,5174 3986 2550
+fir_interpolate_asym,cint32,int16,32,2,1,5120,2,0,1,0,1,23107,221 MSa/s,23134,221 MSa/s,2,2,5419,3826 2406
+fir_interpolate_asym,cint32,cint32,96,2,1,5120,4,0,1,0,1,78527,65 MSa/s,78570,65 MSa/s,4,4,19789,10752 8552 6196 4112
+fir_interpolate_asym,cint32,cint32,88,2,1,5120,4,0,1,0,1,109839,46 MSa/s,109882,46 MSa/s,4,4,19021,11968 9120 6548 3936
+fir_interpolate_asym,cint32,cint32,8,2,1,5120,1,0,1,0,1,21163,241 MSa/s,21181,241 MSa/s,1,1,2710,2854
+fir_interpolate_asym,cint32,cint32,72,2,1,5120,3,0,1,0,1,84622,60 MSa/s,84657,60 MSa/s,3,3,13116,8560 6196 4112
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10867,471 MSa/s,10887,470 MSa/s,1,1,2566,2082
+fir_interpolate_asym,cint16,int16,64,2,1,5120,2,0,1,0,1,13194,388 MSa/s,13221,387 MSa/s,2,2,6187,4806 3142
+fir_interpolate_asym,cint16,int16,8,2,1,512,1,0,0,0,1,294,1741 MSa/s,975,525 MSa/s,5,1,14766,1906
+fir_interpolate_asym,cint16,int16,2048,2,1,512,8,0,0,0,1,10707,47 MSa/s,10791,47 MSa/s,35,8,196361,4130 3902 3902 3902 3918 3918 3918 3994
+fir_interpolate_asym,cint16,int16,16,2,1,512,1,0,0,0,1,554,924 MSa/s,1008,507 MSa/s,5,1,14878,2284
+fir_interpolate_asym,cint16,int16,16,2,1,5120,1,0,1,1,1,11656,439 MSa/s,11707,437 MSa/s,4,1,2714,4436
+fir_interpolate_asym,cint16,int16,16,2,1,5120,1,0,1,0,1,11554,443 MSa/s,11572,442 MSa/s,1,1,2678,2374
+fir_interpolate_asym,cint16,int16,128,2,1,512,1,0,0,0,1,4516,113 MSa/s,4584,111 MSa/s,5,1,16894,4014
+fir_interpolate_asym,cint16,int16,128,2,1,5120,6,0,1,0,1,11941,428 MSa/s,12000,426 MSa/s,6,6,20399,5010 6534 4210 5106 5022 2598
+fir_interpolate_asym,cint16,int16,240,2,1,5120,5,0,1,0,1,23756,215 MSa/s,23807,215 MSa/s,5,5,21374,3114 7554 6394 5138 2994
+fir_interpolate_asym,cint16,int16,128,2,1,5120,5,0,1,0,1,12285,416 MSa/s,12336,415 MSa/s,5,5,17182,5702 7366 4850 6422 2774
+fir_interpolate_asym,cint16,int16,128,2,1,5120,3,0,1,1,1,22670,225 MSa/s,22714,225 MSa/s,6,3,10464,7906 6600 5016
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10867,471 MSa/s,10887,470 MSa/s,1,1,2566,2082
+fir_interpolate_asym,cint16,int16,1024,2,1,512,4,0,0,0,1,10038,51 MSa/s,10091,50 MSa/s,15,4,70549,4130 3902 3902 3978
+fir_interpolate_asym,cint16,cint16,8,2,1,5120,1,0,1,0,1,11554,443 MSa/s,11572,442 MSa/s,1,1,2678,2450
+fir_interpolate_asym,cint16,cint16,64,2,1,5120,3,0,1,0,1,21721,235 MSa/s,21750,235 MSa/s,3,3,10684,5372 7140 5970
+fir_interpolate_asym,cint16,cint16,32,2,1,5120,2,0,1,0,1,13202,387 MSa/s,13229,387 MSa/s,2,2,6187,5974 3238
+fir_interpolate_asym,cint16,int16,128,2,1,5120,4,0,1,0,1,13246,386 MSa/s,13289,385 MSa/s,4,4,13901,4854 3234 4998 3142
+fir_interpolate_asym,cint16,int16,240,2,1,5120,5,0,1,1,1,24167,211 MSa/s,24226,211 MSa/s,8,5,19938,4114 8036 6836 5600 3230
+fir_interpolate_asym,cint16,int16,128,2,1,5120,3,0,1,0,1,22391,228 MSa/s,22414,228 MSa/s,3,3,10716,7162 6418 4882
+fir_interpolate_asym,cint16,int16,24,3,1,5120,1,0,1,0,1,17962,285 MSa/s,17980,284 MSa/s,1,1,4050,3744
+fir_interpolate_asym,cint16,int16,24,2,1,5120,1,0,1,0,1,11874,431 MSa/s,11893,430 MSa/s,1,1,2822,2678
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,1,1,10929,468 MSa/s,10981,466 MSa/s,4,1,2602,3182
+fir_interpolate_asym,cint16,int16,8,2,1,5120,1,0,1,0,1,10867,471 MSa/s,10887,470 MSa/s,1,1,2566,2082
+fir_interpolate_asym,cint16,int16,64,2,1,5120,2,0,1,1,1,13431,381 MSa/s,13466,380 MSa/s,5,2,6191,5890 3678
+fir_interpolate_asym,cint16,int16,512,2,1,512,2,0,0,0,1,9610,53 MSa/s,9648,53 MSa/s,7,2,32219,4130 3978
+fir_interpolate_asym,cint16,int16,32,2,1,512,1,0,0,0,1,1444,354 MSa/s,1530,334 MSa/s,5,1,15166,2068
+fir_interpolate_asym,cint16,int16,32,2,1,5120,1,0,1,1,1,12363,414 MSa/s,12414,412 MSa/s,4,1,2970,3782
+fir_interpolate_asym,cint16,int16,64,2,1,512,1,0,0,0,1,2466,207 MSa/s,2530,202 MSa/s,5,1,15742,2916
+fir_interpolate_asym,cint16,int16,30,5,1,5120,2,0,1,0,1,27930,183 MSa/s,27957,183 MSa/s,2,2,12139,13042 4758
+fir_interpolate_asym,cint16,int16,30,3,1,5120,2,0,1,0,1,18310,279 MSa/s,18337,279 MSa/s,2,2,7931,9584 4468
+fir_interpolate_asym,cint16,int16,30,2,1,5120,2,0,1,0,1,11632,440 MSa/s,11652,439 MSa/s,2,2,5539,5174 4320
+fir_interpolate_asym,cint16,int16,256,2,1,512,1,0,0,0,1,9310,54 MSa/s,9388,54 MSa/s,5,1,19198,4158
+fir_interpolate_asym,cint16,int16,24,8,1,5120,1,0,1,0,1,45266,113 MSa/s,45285,113 MSa/s,2,1,8910,4068
+fir_interpolate_asym,cint16,int16,24,6,1,5120,1,0,1,0,1,33002,155 MSa/s,33020,155 MSa/s,1,1,6966,4238
+fir_interpolate_asym,cint16,int16,32,2,1,5120,1,0,1,0,1,12194,419 MSa/s,12212,419 MSa/s,1,1,2902,2982
+fir_interpolate_asym,cint16,int16,24,4,1,5120,1,0,1,0,1,22918,223 MSa/s,22936,223 MSa/s,1,1,4798,2242
+fir_interpolate_fract_asym,cint16,int16,60,5,2,256,1,0,0,0,1,680,376 MSa/s,748,342 MSa/s,5,1,13654,3742
+fir_interpolate_fract_asym,cint16,int16,60,5,2,240,1,0,0,0,1,640,375 MSa/s,708,338 MSa/s,5,1,13206,3742
+fir_interpolate_fract_asym,cint16,int16,48,4,3,144,1,0,0,0,1,252,571 MSa/s,315,457 MSa/s,5,1,7990,4496
+fir_interpolate_fract_asym,cint16,int16,41,5,4,256,1,0,0,0,1,333,768 MSa/s,396,646 MSa/s,5,1,10928,4798
+fir_interpolate_fract_asym,cint16,int16,40,10,3,120,1,0,0,0,1,318,377 MSa/s,409,293 MSa/s,6,1,15854,4664
+fir_interpolate_fract_asym,cint16,int16,40,10,7,280,1,0,0,0,1,340,823 MSa/s,411,681 MSa/s,6,1,17134,4786
+fir_interpolate_fract_asym,cint16,int16,36,9,8,576,1,0,0,0,1,438,1315 MSa/s,640,900 MSa/s,6,1,21062,4458
+fir_interpolate_fract_asym,cint16,int16,36,9,7,504,1,0,0,0,1,438,1150 MSa/s,640,787 MSa/s,6,1,20486,5132
+fir_interpolate_fract_asym,cint16,int16,60,5,3,240,1,0,0,0,1,469,511 MSa/s,538,446 MSa/s,5,1,11606,3726
+fir_interpolate_fract_asym,cint16,int16,40,10,9,360,1,0,0,0,1,283,1272 MSa/s,404,891 MSa/s,6,1,17774,4748
+fir_interpolate_fract_asym,cint16,int16,60,5,4,480,1,0,0,0,1,698,687 MSa/s,766,626 MSa/s,5,1,15126,3750
+fir_interpolate_fract_asym,cint16,int16,96,8,3,192,1,0,0,0,1,483,397 MSa/s,546,351 MSa/s,6,1,15366,3300
+fir_interpolate_fract_asym,cint16,int16,75,5,4,160,3,0,0,1,1,459,348 MSa/s,505,316 MSa/s,12,3,23022,4220 3714 3608
+fir_interpolate_fract_asym,cint16,int16,84,7,2,336,1,0,0,0,1,1220,275 MSa/s,1291,260 MSa/s,6,1,20854,4188
+fir_interpolate_fract_asym,cint16,int16,84,7,3,168,1,0,0,0,1,459,366 MSa/s,530,316 MSa/s,6,1,13238,4274
+fir_interpolate_fract_asym,cint16,int16,84,7,4,672,1,0,0,0,1,1327,506 MSa/s,1397,481 MSa/s,6,1,23542,4290
+fir_interpolate_fract_asym,cint16,int16,84,7,5,840,1,0,0,0,1,1367,614 MSa/s,1437,584 MSa/s,6,1,24886,4298
+fir_interpolate_fract_asym,cint16,int16,84,7,6,336,1,0,0,0,1,470,714 MSa/s,540,622 MSa/s,6,1,14582,4282
+fir_interpolate_fract_asym,cint16,int16,95,8,5,320,1,0,0,0,1,563,568 MSa/s,627,510 MSa/s,6,1,16388,3836
+fir_interpolate_fract_asym,cint16,int16,96,8,5,480,1,0,0,0,1,827,580 MSa/s,891,538 MSa/s,6,1,19718,3364
+fir_interpolate_fract_asym,cint16,int16,96,8,7,672,1,0,0,0,1,873,769 MSa/s,937,717 MSa/s,6,1,21254,3348
+fir_interpolate_fract_asym,cint32,cint32,60,5,2,256,1,0,0,0,1,12675,20 MSa/s,12739,20 MSa/s,6,1,23486,4034
+fir_interpolate_fract_asym,cint16,int16,36,9,5,360,1,0,0,0,1,475,757 MSa/s,645,558 MSa/s,6,1,19334,5172
+fir_interpolate_fract_asym,cint16,int16,72,6,5,360,1,0,0,0,1,508,708 MSa/s,571,630 MSa/s,5,1,13886,3202
+fir_interpolate_fract_asym,cint16,int16,36,9,2,144,1,0,0,0,1,465,309 MSa/s,644,223 MSa/s,6,1,17606,4442
+fir_interpolate_fract_asym,cint16,int16,36,9,4,288,1,0,0,0,1,479,601 MSa/s,645,446 MSa/s,6,1,18758,4440
+fir_interpolate_fract_asym,cint16,int16,108,9,4,864,1,0,0,0,1,2225,388 MSa/s,2293,376 MSa/s,6,1,36502,5440
+fir_interpolate_fract_asym,cint16,int16,36,3,2,144,1,0,0,0,1,280,514 MSa/s,343,419 MSa/s,5,1,7158,4654
+fir_interpolate_fract_asym,cint16,int16,108,9,2,432,1,0,0,0,1,2148,201 MSa/s,2216,194 MSa/s,6,1,33046,5418
+fir_interpolate_fract_asym,cint16,int16,108,9,5,1080,1,0,0,0,1,2252,479 MSa/s,2320,465 MSa/s,6,1,38230,5332
+fir_interpolate_fract_asym,cint16,int16,108,9,7,1512,1,0,0,0,1,2222,680 MSa/s,2291,659 MSa/s,6,1,41686,5308
+fir_interpolate_fract_asym,cint16,int16,108,9,8,1728,1,0,0,0,1,2200,785 MSa/s,2268,761 MSa/s,6,1,43414,5464
+fir_interpolate_fract_asym,cint16,int16,120,10,3,240,1,0,0,0,1,875,274 MSa/s,939,255 MSa/s,6,1,21838,4356
+fir_interpolate_fract_asym,cint16,int16,120,10,7,840,1,0,0,0,1,1383,607 MSa/s,1445,581 MSa/s,6,1,29838,4376
+fir_interpolate_fract_asym,cint16,int16,12,3,2,48,1,0,0,0,1,81,592 MSa/s,143,335 MSa/s,5,1,4742,1902
+fir_interpolate_fract_asym,cint16,int16,16,4,3,48,1,0,0,0,1,76,631 MSa/s,139,345 MSa/s,5,1,5686,1808
+fir_interpolate_fract_asym,cint16,int16,20,5,2,80,1,0,0,0,1,182,439 MSa/s,250,320 MSa/s,5,1,8198,2266
+fir_interpolate_fract_asym,cint16,int16,20,5,3,120,1,0,0,0,1,173,693 MSa/s,241,497 MSa/s,5,1,8518,2284
+fir_interpolate_fract_asym,cint16,int16,120,10,9,720,1,0,0,0,1,934,770 MSa/s,998,721 MSa/s,6,1,25678,4344
+fir_interpolate_fract_asym,cint16,int16,20,5,4,256,1,0,0,0,1,248,1032 MSa/s,338,757 MSa/s,5,1,10566,2244
+fir_interpolate_fract_asym,cint16,int16,24,3,2,256,1,0,0,0,1,537,476 MSa/s,618,414 MSa/s,7,1,12190,2236
+fir_interpolate_fract_asym,cint16,int16,24,6,5,120,1,0,0,0,1,126,952 MSa/s,188,638 MSa/s,5,1,9054,3274
+fir_interpolate_fract_asym,cint16,int16,28,7,2,112,1,0,0,0,1,318,352 MSa/s,402,278 MSa/s,5,1,12102,3978
+fir_interpolate_fract_asym,cint16,int16,28,7,3,168,1,0,0,0,1,331,507 MSa/s,404,415 MSa/s,5,1,12550,3990
+fir_interpolate_fract_asym,cint16,int16,28,7,4,224,1,0,0,0,1,342,654 MSa/s,410,546 MSa/s,5,1,12998,4010
+fir_interpolate_fract_asym,cint16,int16,28,7,5,280,1,0,0,0,1,303,924 MSa/s,401,698 MSa/s,5,1,13446,3970
+fir_interpolate_fract_asym,cint16,int16,28,7,6,336,1,0,0,0,1,323,1040 MSa/s,403,833 MSa/s,5,1,13894,3994
+fir_interpolate_fract_asym,cint16,int16,32,8,3,96,1,0,0,0,1,201,477 MSa/s,268,358 MSa/s,6,1,11846,1928
+fir_interpolate_fract_asym,cint16,int16,20,5,4,160,1,0,0,0,1,173,924 MSa/s,236,677 MSa/s,5,1,8838,2244
+fir_interpolate_fract_asym,cint16,int16,32,8,5,160,1,0,0,0,1,192,833 MSa/s,269,594 MSa/s,6,1,12358,1968
+fir_interpolate_fract_asym,cint16,int16,32,8,7,224,1,0,0,0,1,193,1160 MSa/s,273,820 MSa/s,6,1,12870,1938
+fir_interpolate_hb,cint32,cint16,239,2,1,256,1,0,0,0,1,6696,38 MSa/s,6783,37 MSa/s,5,1,19301,3964
+fir_interpolate_hb,cint32,cint16,7,2,1,256,1,0,0,0,1,423,605 MSa/s,1025,249 MSa/s,5,1,16741,1978
+fir_interpolate_hb,cint32,cint16,99,2,1,256,1,0,0,0,1,2023,126 MSa/s,2093,122 MSa/s,5,1,17829,3014
+fir_interpolate_hb,cint32,cint32,15,2,1,256,1,0,0,0,1,680,376 MSa/s,1030,248 MSa/s,5,1,19013,2548
+fir_interpolate_hb,cint32,int16,11,2,1,256,1,0,0,0,1,460,556 MSa/s,1026,249 MSa/s,5,1,15781,2094
+fir_interpolate_hb,cint32,cint32,7,2,1,256,1,0,0,0,1,425,602 MSa/s,1025,249 MSa/s,5,1,18853,2152
+fir_interpolate_hb,cint32,cint32,99,2,1,256,1,0,0,0,1,6945,36 MSa/s,7015,36 MSa/s,5,1,20197,3056
+fir_interpolate_hb,cint32,cint16,15,2,1,256,1,0,0,0,1,424,603 MSa/s,1025,249 MSa/s,5,1,16837,2080
+fir_interpolate_hb,cint32,cint32,239,2,1,256,1,0,0,0,1,9377,27 MSa/s,9464,27 MSa/s,5,1,22149,4096
+fir_interpolate_hb,cint32,cint16,11,2,1,256,1,0,0,0,1,422,606 MSa/s,1025,249 MSa/s,5,1,16805,2034
+fir_interpolate_hb,cint32,cint32,11,2,1,256,1,0,0,0,1,553,462 MSa/s,1028,249 MSa/s,5,1,18917,2376
+fir_interpolate_hb,cint16,int16,99,2,1,256,1,0,0,0,1,1572,162 MSa/s,1634,156 MSa/s,5,1,10085,2332
+fir_interpolate_hb,cint16,int16,99,2,1,128,5,0,0,0,1,419,305 MSa/s,439,291 MSa/s,13,5,23797,1832 1708 1652 1652 1784
+fir_interpolate_hb,cint16,int16,99,2,1,128,4,0,0,0,1,417,306 MSa/s,436,293 MSa/s,11,4,19601,1848 1708 1724 1782
+fir_interpolate_hb,cint16,int16,99,2,1,128,3,0,0,0,1,508,251 MSa/s,526,243 MSa/s,9,3,15405,1848 1724 1838
+fir_interpolate_hb,cint16,int16,99,2,1,128,2,0,0,0,1,540,237 MSa/s,566,226 MSa/s,7,2,11209,1884 1910
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint32,int16,15,2,1,256,1,0,0,0,1,503,508 MSa/s,1027,249 MSa/s,5,1,15781,2118
+fir_interpolate_hb,cint16,int16,99,2,1,256,1,0,0,1,1,1539,166 MSa/s,1632,156 MSa/s,8,1,10129,2578
+fir_interpolate_hb,cint32,int16,239,2,1,256,1,0,0,0,1,2539,100 MSa/s,2626,97 MSa/s,5,1,17893,3282
+fir_interpolate_hb,int32,int16,15,2,1,256,1,0,0,0,1,231,1108 MSa/s,517,495 MSa/s,5,1,9573,2002
+fir_interpolate_hb,cint32,int16,99,2,1,256,1,0,0,0,1,2789,91 MSa/s,2859,89 MSa/s,5,1,16613,2612
+fir_interpolate_hb,int32,int32,99,2,1,256,1,0,0,0,1,1703,150 MSa/s,1765,145 MSa/s,5,1,11301,2670
+fir_interpolate_hb,int32,int32,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,10597,2056
+fir_interpolate_hb,int32,int32,27,2,1,256,1,0,0,0,1,359,713 MSa/s,520,492 MSa/s,5,1,10693,2606
+fir_interpolate_hb,int32,int32,239,2,1,256,1,0,0,0,1,2402,106 MSa/s,2473,103 MSa/s,5,1,12197,3090
+fir_interpolate_hb,int32,int32,23,2,1,256,1,0,0,0,1,295,867 MSa/s,518,494 MSa/s,5,1,10693,2510
+fir_interpolate_hb,int32,int16,99,2,1,256,1,0,0,0,1,803,318 MSa/s,865,295 MSa/s,5,1,10085,2548
+fir_interpolate_hb,int32,int16,7,2,1,256,1,0,0,0,1,229,1117 MSa/s,517,495 MSa/s,5,1,9573,1886
+fir_interpolate_hb,int32,int16,239,2,1,256,1,0,0,0,1,1163,220 MSa/s,1234,207 MSa/s,5,1,10789,3098
+fir_interpolate_hb,int32,int16,19,2,1,256,1,0,0,0,1,232,1103 MSa/s,517,495 MSa/s,5,1,9637,2094
+fir_interpolate_hb,cint32,int16,7,2,1,256,1,0,0,0,1,427,599 MSa/s,1025,249 MSa/s,5,1,15717,1996
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,float,float,7,2,1,256,1,0,0,0,1,316,810 MSa/s,519,493 MSa/s,5,1,10853,2132
+fir_interpolate_hb,float,float,239,2,1,256,1,0,0,0,1,15667,16 MSa/s,15738,16 MSa/s,5,1,12453,5600
+fir_interpolate_hb,float,float,19,2,1,256,1,0,0,0,1,1003,255 MSa/s,1061,241 MSa/s,5,1,10949,2242
+fir_interpolate_hb,float,float,15,2,1,256,1,0,0,0,1,660,387 MSa/s,718,356 MSa/s,5,1,10885,2658
+fir_interpolate_hb,cint32,int32,99,2,1,256,1,0,0,0,1,2023,126 MSa/s,2093,122 MSa/s,5,1,17829,3014
+fir_interpolate_hb,cint32,int32,7,2,1,256,1,0,0,0,1,423,605 MSa/s,1025,249 MSa/s,5,1,16741,1978
+fir_interpolate_hb,cint32,int32,239,2,1,256,1,0,0,0,1,6696,38 MSa/s,6783,37 MSa/s,5,1,19301,3964
+fir_interpolate_hb,cint32,int32,15,2,1,256,1,0,0,0,1,424,603 MSa/s,1025,249 MSa/s,5,1,16837,2080
+fir_interpolate_hb,cint32,int32,11,2,1,256,1,0,0,0,1,422,606 MSa/s,1025,249 MSa/s,5,1,16805,2034
+fir_interpolate_hb,float,float,99,2,1,256,1,0,0,0,1,9790,26 MSa/s,9852,25 MSa/s,5,1,11557,3630
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,7,2,1,512,1,0,0,0,1,294,1741 MSa/s,1023,500 MSa/s,5,1,15717,2080
+fir_interpolate_hb,cint16,int16,19,2,1,256,1,0,0,0,1,231,1108 MSa/s,517,495 MSa/s,5,1,9637,2174
+fir_interpolate_hb,cint16,int16,15,2,1,256,1,0,0,1,1,192,1333 MSa/s,517,495 MSa/s,8,1,9601,2434
+fir_interpolate_hb,cint16,int16,15,2,1,256,1,0,1,0,1,544,470 MSa/s,589,434 MSa/s,3,1,5488,1980
+fir_interpolate_hb,cint16,int16,15,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,1996
+fir_interpolate_hb,cint16,int16,15,2,1,256,1,0,1,0,1,545,469 MSa/s,590,433 MSa/s,3,1,5485,2144
+fir_interpolate_hb,cint16,int16,11,2,1,256,1,0,0,1,1,192,1333 MSa/s,517,495 MSa/s,8,1,9593,2530
+fir_interpolate_hb,cint16,int16,11,2,1,256,1,0,1,0,1,544,470 MSa/s,589,434 MSa/s,3,1,5488,1980
+fir_interpolate_hb,cint16,int16,11,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,11,2,1,256,1,0,1,0,1,545,469 MSa/s,590,433 MSa/s,3,1,5485,2208
+fir_interpolate_hb,cint16,int16,1023,2,1,512,1,0,0,0,1,21481,23 MSa/s,21608,23 MSa/s,5,1,21325,6964
+fir_interpolate_hb,cint16,int16,19,2,1,256,1,0,1,0,1,546,468 MSa/s,594,430 MSa/s,3,1,5553,2148
+fir_interpolate_hb,cint16,cint16,99,2,1,256,1,0,0,0,1,1704,150 MSa/s,1766,144 MSa/s,5,1,11301,2672
+fir_interpolate_hb,cint16,cint16,27,2,1,256,1,0,0,0,1,359,713 MSa/s,520,492 MSa/s,5,1,10693,2646
+fir_interpolate_hb,cint16,cint16,239,2,1,256,1,0,0,0,1,2401,106 MSa/s,2473,103 MSa/s,5,1,12197,3106
+fir_interpolate_hb,cint16,cint16,23,2,1,256,1,0,0,0,1,295,867 MSa/s,518,494 MSa/s,5,1,10693,2534
+fir_interpolate_hb,cfloat,float,99,2,1,256,1,0,0,0,1,16340,15 MSa/s,16409,15 MSa/s,5,1,18085,3630
+fir_interpolate_hb,cfloat,float,7,2,1,256,1,0,0,0,1,589,434 MSa/s,1028,249 MSa/s,5,1,16997,2148
+fir_interpolate_hb,cfloat,float,239,2,1,256,1,0,0,0,1,32564,7 MSa/s,32652,7 MSa/s,5,1,19557,6400
+fir_interpolate_hb,cfloat,float,15,2,1,256,1,0,0,0,1,1134,225 MSa/s,1194,214 MSa/s,5,1,17093,2546
+fir_interpolate_hb,cfloat,float,11,2,1,256,1,0,0,0,1,908,281 MSa/s,1035,247 MSa/s,5,1,17061,2354
+fir_interpolate_hb,cfloat,cfloat,99,2,1,256,1,0,0,0,1,17145,14 MSa/s,17216,14 MSa/s,5,1,20453,4250
+fir_interpolate_hb,cfloat,cfloat,239,2,1,256,1,0,0,0,1,53838,4 MSa/s,53926,4 MSa/s,6,1,22405,7818
+fir_interpolate_hb,cint16,int16,7,2,1,64,1,0,0,0,1,70,914 MSa/s,136,470 MSa/s,5,1,4965,2080
+fir_interpolate_hb,cint16,int16,19,2,1,256,1,0,0,1,1,258,992 MSa/s,519,493 MSa/s,8,1,9665,2748
+fir_interpolate_hb,cint16,cint16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,10597,2080
+fir_interpolate_hb,cint16,int16,23,2,1,256,1,0,1,0,1,547,468 MSa/s,595,430 MSa/s,3,1,5549,2372
+fir_interpolate_hb,cint16,int16,2047,2,1,512,2,0,0,0,1,21796,23 MSa/s,21835,23 MSa/s,7,2,39536,4484 4354
+fir_interpolate_hb,cint16,int16,7,2,1,32,1,0,0,0,1,54,592 MSa/s,110,290 MSa/s,5,1,4197,1760
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,1,1,192,1333 MSa/s,517,495 MSa/s,8,1,9593,2514
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,7,2,1,128,1,0,0,0,1,102,1254 MSa/s,262,488 MSa/s,5,1,6501,2080
+fir_interpolate_hb,cint16,int16,6143,2,1,512,6,0,0,0,1,20548,24 MSa/s,20617,24 MSa/s,26,6,169736,4468 4270 4270 4270 4254 4402
+fir_interpolate_hb,cint16,int16,5119,2,1,512,5,0,0,0,1,22712,22 MSa/s,22774,22 MSa/s,22,5,124898,4468 4270 4254 4254 4402
+fir_interpolate_hb,cint16,int16,47,2,1,256,1,1,0,0,1,231,1108 MSa/s,518,494 MSa/s,7,1,11981,2502
+fir_interpolate_hb,cint16,int16,47,2,1,256,1,0,1,0,1,1307,195 MSa/s,1356,188 MSa/s,3,1,5645,1606
+fir_interpolate_hb,cint16,int16,43,2,1,256,1,1,0,0,1,233,1098 MSa/s,518,494 MSa/s,7,1,11981,2570
+fir_interpolate_hb,cint16,int16,7,2,1,256,1,0,0,0,1,166,1542 MSa/s,516,496 MSa/s,5,1,9573,2080
+fir_interpolate_hb,cint16,int16,4095,2,1,512,4,0,0,0,1,22638,22 MSa/s,22692,22 MSa/s,18,4,87228,4468 4254 4254 4418
+fir_interpolate_hb,cint16,int16,23,2,1,256,1,0,0,0,1,167,1532 MSa/s,516,496 MSa/s,5,1,9641,1976
+fir_interpolate_hb,cint16,int16,43,2,1,256,1,0,1,0,1,554,462 MSa/s,603,424 MSa/s,3,1,5645,1760
+fir_interpolate_hb,cint16,int16,239,2,1,256,1,0,0,0,1,3101,82 MSa/s,3173,80 MSa/s,5,1,10789,2772
+fir_interpolate_hb,cint16,int16,239,2,1,256,1,0,0,1,1,3096,82 MSa/s,3197,80 MSa/s,8,1,10913,2988
+fir_interpolate_hb,cint16,int16,23,2,1,256,1,0,1,0,1,546,468 MSa/s,594,430 MSa/s,3,1,5553,2148
+fir_interpolate_hb,cint16,int16,27,2,1,256,1,0,1,0,1,547,468 MSa/s,595,430 MSa/s,3,1,5549,2372
+fir_interpolate_hb,cint16,int16,27,2,1,256,1,0,1,0,1,544,470 MSa/s,592,432 MSa/s,3,1,5553,2148
+fir_interpolate_hb,cint16,int16,27,2,1,256,1,0,0,1,1,257,996 MSa/s,519,493 MSa/s,8,1,9673,2856
+fir_interpolate_hb,cint16,int16,3071,2,1,512,3,0,0,0,1,22550,22 MSa/s,22596,22 MSa/s,9,3,64918,4484 4206 4354
+fir_resampler,cint32,cint16,239,3,2,256,1,0,0,0,1,8743,29 MSa/s,8820,29 MSa/s,6,1,21550,6382
+fir_resampler,cint16,int16,80,5,3,240,4,0,0,0,1,782,306 MSa/s,837,286 MSa/s,11,4,30357,2478 2290 2290 2460
+fir_resampler,cint16,int16,8,2,1,8,1,0,0,0,1,47,170 MSa/s,109,73 MSa/s,5,1,3870,1608
+fir_resampler,cint16,int16,84,7,3,168,3,0,0,0,1,640,262 MSa/s,679,247 MSa/s,9,3,26024,4212 4142 4060
+fir_resampler,cint16,int16,88,11,10,880,2,0,0,0,1,767,1147 MSa/s,984,894 MSa/s,9,2,38555,5498 5432
+fir_resampler,cint16,int16,88,11,14,1232,2,0,0,0,1,741,1662 MSa/s,1215,1013 MSa/s,9,2,42779,5486 5412
+fir_resampler,cint16,int16,96,8,9,288,3,0,0,0,1,281,1024 MSa/s,445,647 MSa/s,9,3,28176,2026 1820 1930
+fir_resampler,cint16,int16,96,12,7,672,2,0,0,0,1,1181,569 MSa/s,1345,499 MSa/s,9,2,37035,4962 4846
+fir_resampler,cint16,int16,80,10,3,240,2,0,0,0,1,702,341 MSa/s,813,295 MSa/s,9,2,26555,4720 4758
+fir_resampler,cint16,int16,99,3,2,256,1,0,0,1,1,1085,235 MSa/s,1175,217 MSa/s,8,1,11170,4602
+fir_resampler,cint32,cint16,11,3,2,256,1,0,0,0,1,546,468 MSa/s,777,329 MSa/s,5,1,16110,1902
+fir_resampler,cint32,cint16,15,3,2,256,1,0,0,0,1,580,441 MSa/s,777,329 MSa/s,5,1,16238,1990
+fir_resampler,cint16,int16,88,11,7,616,2,0,0,0,1,776,793 MSa/s,981,627 MSa/s,9,2,35387,5488 5382
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,7,3,2,2560,1,0,1,0,1,4355,587 MSa/s,4374,585 MSa/s,1,1,4078,2280
+fir_resampler,cint16,int16,72,9,7,504,2,0,0,0,1,539,935 MSa/s,674,747 MSa/s,9,2,28699,5284 5158
+fir_resampler,cint16,int16,72,3,2,2560,2,0,1,0,1,4152,616 MSa/s,4179,612 MSa/s,2,2,8947,7256 8298
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1924
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,1,1,316,810 MSa/s,403,635 MSa/s,8,1,9394,2800
+fir_resampler,cint16,int16,7,3,2,256,1,0,0,0,1,276,927 MSa/s,392,653 MSa/s,5,1,9358,1908
+fir_resampler,cint16,int16,64,4,1,64,4,0,0,0,1,222,288 MSa/s,323,198 MSa/s,11,4,23093,1840 1646 1630 1676
+fir_resampler,cint32,cint16,7,3,2,256,1,0,0,0,1,578,442 MSa/s,777,329 MSa/s,5,1,16046,1872
+fir_resampler,cint16,int16,64,16,1,64,1,0,0,0,1,727,88 MSa/s,1005,63 MSa/s,6,1,20838,4004
+fir_resampler,cint16,int16,72,9,8,576,2,0,0,0,1,525,1097 MSa/s,672,857 MSa/s,9,2,29563,4602 4452
+fir_resampler,cint32,cint16,99,3,2,256,1,0,0,0,1,3675,69 MSa/s,3739,68 MSa/s,5,1,18286,3720
+fir_resampler,cint16,int16,64,8,3,192,2,0,0,0,1,619,310 MSa/s,657,292 MSa/s,7,2,20427,2076 2050
+fir_resampler,cint32,cint32,15,3,2,256,1,0,0,0,1,1376,186 MSa/s,1437,178 MSa/s,6,1,19758,1986
+fir_resampler,cint16,int16,60,5,8,960,3,0,0,0,1,1005,955 MSa/s,1368,701 MSa/s,9,3,36760,2472 2274 2238
+fir_resampler,int32,int32,99,3,2,256,1,0,0,0,1,2277,112 MSa/s,2337,109 MSa/s,6,1,13934,3866
+fir_resampler,int32,int32,7,3,2,256,1,0,0,0,1,275,930 MSa/s,392,653 MSa/s,5,1,10990,1928
+fir_resampler,int32,int32,27,3,2,256,1,0,0,0,1,1015,252 MSa/s,1074,238 MSa/s,5,1,11630,2746
+fir_resampler,int32,int32,239,3,2,256,1,0,0,0,1,4905,52 MSa/s,4970,51 MSa/s,6,1,18350,6490
+fir_resampler,int32,int32,23,3,2,256,1,0,0,0,1,436,587 MSa/s,494,518 MSa/s,5,1,11438,2300
+fir_resampler,int32,int16,99,3,2,256,1,0,0,0,1,1424,179 MSa/s,1484,172 MSa/s,5,1,10990,4584
+fir_resampler,int32,int16,7,3,2,256,1,0,0,0,1,322,795 MSa/s,393,651 MSa/s,5,1,9358,1914
+fir_resampler,int32,int16,239,3,2,256,1,0,0,0,1,2209,115 MSa/s,2274,112 MSa/s,5,1,13294,4772
+fir_resampler,int32,int16,19,3,2,256,1,0,0,0,1,823,311 MSa/s,880,290 MSa/s,5,1,9582,4168
+fir_resampler,int32,int16,15,3,2,256,1,0,0,0,1,292,876 MSa/s,391,654 MSa/s,5,1,9454,3598
+fir_resampler,float,float,99,3,2,256,1,0,0,0,1,4723,54 MSa/s,4783,53 MSa/s,6,1,14189,4074
+fir_resampler,float,float,7,3,2,256,1,0,0,0,1,323,792 MSa/s,393,651 MSa/s,5,1,11245,1964
+fir_resampler,float,float,239,3,2,256,1,0,0,0,1,10539,24 MSa/s,10604,24 MSa/s,6,1,18605,6858
+fir_resampler,float,float,19,3,2,256,1,0,0,0,1,675,379 MSa/s,732,349 MSa/s,5,1,11629,2332
+fir_resampler,float,float,15,3,2,256,1,0,0,0,1,499,513 MSa/s,556,460 MSa/s,5,1,11437,2158
+fir_resampler,cint32,int32,99,3,2,256,1,0,0,0,1,3675,69 MSa/s,3739,68 MSa/s,5,1,18286,3720
+fir_resampler,cint32,int32,7,3,2,256,1,0,0,0,1,578,442 MSa/s,777,329 MSa/s,5,1,16046,1872
+fir_resampler,cint32,int32,239,3,2,256,1,0,0,0,1,8743,29 MSa/s,8820,29 MSa/s,6,1,21550,6382
+fir_resampler,cint32,int32,15,3,2,256,1,0,0,0,1,580,441 MSa/s,777,329 MSa/s,5,1,16238,1990
+fir_resampler,cint32,int32,11,3,2,256,1,0,0,0,1,546,468 MSa/s,777,329 MSa/s,5,1,16110,1902
+fir_resampler,cint32,int16,99,3,2,256,1,0,0,0,1,1922,133 MSa/s,1986,128 MSa/s,5,1,15854,4058
+fir_resampler,cint32,int16,7,3,2,256,1,0,0,0,1,517,495 MSa/s,776,329 MSa/s,5,1,14414,1734
+fir_resampler,cint32,int16,239,3,2,256,1,0,0,0,1,7520,34 MSa/s,7597,33 MSa/s,5,1,17774,5188
+fir_resampler,cint32,int16,15,3,2,256,1,0,0,0,1,579,442 MSa/s,777,329 MSa/s,5,1,14574,1906
+fir_resampler,cint32,int16,11,3,2,256,1,0,0,0,1,578,442 MSa/s,777,329 MSa/s,5,1,14446,1760
+fir_resampler,cint32,cint32,99,3,2,256,1,0,0,0,1,7448,34 MSa/s,7512,34 MSa/s,6,1,24238,4072
+fir_resampler,cint32,cint32,7,3,2,256,1,0,0,0,1,929,275 MSa/s,988,259 MSa/s,6,1,19374,1830
+fir_resampler,cint32,cint32,239,3,2,256,1,0,0,0,1,18151,14 MSa/s,18228,14 MSa/s,7,1,31662,7170
+fir_resampler,cint32,cint32,11,3,2,256,1,0,0,0,1,2856,89 MSa/s,2915,87 MSa/s,6,1,19502,2400
+fir_resampler,cint16,int16,60,5,7,840,3,0,0,0,1,616,1363 MSa/s,945,888 MSa/s,9,3,34840,2290 2068 2202
+fir_resampler,cint16,int16,28,7,13,728,1,0,0,0,1,353,2062 MSa/s,697,1044 MSa/s,5,1,15438,4032
+fir_resampler,cint16,int16,52,13,1,104,1,0,0,0,1,923,112 MSa/s,1317,78 MSa/s,6,1,23006,4860
+fir_resampler,cint16,int16,144,12,5,720,3,0,0,0,1,1535,469 MSa/s,1793,401 MSa/s,12,3,55648,5006 4760 4818
+fir_resampler,cint16,int16,132,11,13,3432,3,0,0,0,1,2324,1476 MSa/s,3431,1000 MSa/s,18,3,109192,5596 5390 5478
+fir_resampler,cint16,int16,128,8,11,1408,4,0,0,0,1,937,1502 MSa/s,1517,928 MSa/s,11,4,65525,2026 1836 1836 1930
+fir_resampler,cint16,int16,128,16,15,1920,2,0,0,0,1,1627,1180 MSa/s,2055,934 MSa/s,9,2,64139,4152 3994
+fir_resampler,cint16,int16,12,3,4,96,1,0,0,0,1,87,1103 MSa/s,149,644 MSa/s,5,1,5614,1914
+fir_resampler,cint16,int16,12,3,2,48,1,0,0,0,1,81,592 MSa/s,143,335 MSa/s,5,1,5230,1902
+fir_resampler,cint16,int16,112,14,15,1680,2,0,0,0,1,1116,1505 MSa/s,1661,1011 MSa/s,9,2,54939,5102 5008
+fir_resampler,cint16,int16,112,14,11,1232,2,0,0,0,1,1194,1031 MSa/s,1568,785 MSa/s,9,2,49563,5092 4958
+fir_resampler,cint16,int16,11,3,2,256,1,0,0,1,1,317,807 MSa/s,404,633 MSa/s,8,1,9410,2826
+fir_resampler,cint16,int16,11,3,2,2560,1,0,1,0,1,4355,587 MSa/s,4374,585 MSa/s,1,1,4110,2312
+fir_resampler,cint16,int16,108,3,2,2560,3,0,1,0,1,4133,619 MSa/s,4168,614 MSa/s,3,3,13784,7048 7288 8250
+fir_resampler,cint16,int16,104,13,6,624,2,0,0,0,1,1027,607 MSa/s,1348,462 MSa/s,9,2,41339,5692 5566
+fir_resampler,cint16,int16,104,13,12,1248,2,0,0,0,1,996,1253 MSa/s,1354,921 MSa/s,9,2,48827,5716 5538
+fir_resampler,cint16,int16,1024,3,2,512,4,0,0,0,1,6508,78 MSa/s,7413,69 MSa/s,15,4,66613,5050 4438 4722 4828
+fir_resampler,cint16,cint16,7,3,2,256,1,0,0,0,1,278,920 MSa/s,392,653 MSa/s,5,1,10990,1896
+fir_resampler,cint16,cint16,27,3,2,256,1,0,0,0,1,469,545 MSa/s,528,484 MSa/s,5,1,11630,2356
+fir_resampler,cint16,cint16,239,3,2,256,1,0,0,0,1,4251,60 MSa/s,4316,59 MSa/s,6,1,18350,6314
+fir_resampler,cint16,cint16,23,3,2,256,1,0,0,0,1,439,583 MSa/s,497,515 MSa/s,5,1,11438,2276
+fir_resampler,cfloat,float,99,3,2,256,1,0,0,0,1,10499,24 MSa/s,10563,24 MSa/s,5,1,18541,4010
+fir_resampler,cfloat,float,7,3,2,256,1,0,0,0,1,645,396 MSa/s,779,328 MSa/s,5,1,16301,1984
+fir_resampler,cfloat,float,239,3,2,256,1,0,0,0,1,22322,11 MSa/s,22399,11 MSa/s,6,1,21805,6690
+fir_resampler,cfloat,float,15,3,2,256,1,0,0,0,1,900,284 MSa/s,960,266 MSa/s,5,1,16493,2126
+fir_resampler,cfloat,float,11,3,2,256,1,0,0,0,1,709,361 MSa/s,780,328 MSa/s,5,1,16365,2022
+fir_resampler,cfloat,cfloat,99,3,2,256,1,0,0,0,1,13716,18 MSa/s,13788,18 MSa/s,6,1,23405,5186
+fir_resampler,cfloat,cfloat,7,3,2,256,1,0,0,0,1,1121,228 MSa/s,1179,217 MSa/s,6,1,19501,2278
+fir_resampler,cfloat,cfloat,239,3,2,256,1,0,0,0,1,32057,7 MSa/s,32140,7 MSa/s,7,1,29357,9330
+fir_resampler,cfloat,cfloat,15,3,2,256,1,0,0,0,1,1857,137 MSa/s,1923,133 MSa/s,6,1,19821,2612
+fir_resampler,cfloat,cfloat,11,3,2,256,1,0,0,0,1,1478,173 MSa/s,1536,166 MSa/s,6,1,19629,2420
+fir_resampler,cint16,int16,56,14,1,56,1,0,0,0,1,573,97 MSa/s,777,72 MSa/s,6,1,17678,4218
+fir_resampler,cint16,int16,144,3,2,2560,4,0,1,0,1,4134,619 MSa/s,4176,613 MSa/s,4,4,18877,6840 7096 7336 8250
+fir_resampler,cint16,int16,144,9,13,1872,4,0,0,0,1,1302,1437 MSa/s,1899,985 MSa/s,15,4,83861,5434 5204 5204 5288
+fir_resampler,cint16,cint16,99,3,2,256,1,0,0,0,1,1831,139 MSa/s,1891,135 MSa/s,6,1,13934,3754
+fir_resampler,cint16,int16,15,3,2,256,1,0,0,1,1,292,876 MSa/s,407,628 MSa/s,8,1,9490,3178
+fir_resampler,cint16,int16,15,3,2,2560,1,0,1,0,1,4485,570 MSa/s,4504,568 MSa/s,1,1,4174,3024
+fir_resampler,cint16,int16,48,4,1,48,3,0,0,0,1,172,279 MSa/s,263,182 MSa/s,9,3,16960,1824 1598 1660
+fir_resampler,cint16,int16,48,3,1,48,4,0,0,0,1,229,209 MSa/s,317,151 MSa/s,11,4,19669,1996 1654 1654 1814
+fir_resampler,cint16,int16,44,11,6,528,1,0,0,0,1,715,738 MSa/s,955,552 MSa/s,6,1,21934,5400
+fir_resampler,cint16,int16,44,11,10,880,1,0,0,0,1,675,1303 MSa/s,950,926 MSa/s,6,1,24750,5410
+fir_resampler,cint16,int16,40,10,11,440,1,0,0,0,1,285,1543 MSa/s,436,1009 MSa/s,6,1,15262,4768
+fir_resampler,cint16,int16,36,9,1,72,1,0,0,0,1,472,152 MSa/s,645,111 MSa/s,6,1,14398,4468
+fir_resampler,cint16,int16,36,3,2,2560,1,0,1,0,1,4114,622 MSa/s,4132,619 MSa/s,1,1,4366,5118
+fir_resampler,cint16,int16,512,3,2,512,2,0,0,0,1,6210,82 MSa/s,6349,80 MSa/s,9,2,31995,5048 4786
+fir_resampler,cint16,int16,27,3,2,256,1,0,0,1,1,355,721 MSa/s,481,532 MSa/s,8,1,9762,4002
+fir_resampler,cint16,int16,27,3,2,2560,1,0,1,0,1,4113,622 MSa/s,4131,619 MSa/s,1,1,4302,3430
+fir_resampler,cint16,int16,256,3,2,512,1,0,0,0,1,4710,108 MSa/s,4783,107 MSa/s,5,1,18734,4940
+fir_resampler,cint16,int16,256,16,13,3328,4,0,0,0,1,3696,900 MSa/s,4600,723 MSa/s,22,4,150901,4138 3910 3942 3942
+fir_resampler,cint16,int16,240,15,8,960,4,0,0,0,1,1703,563 MSa/s,2015,476 MSa/s,15,4,87125,5326 5066 5066 5152
+fir_resampler,cint16,int16,32,4,1,32,2,0,0,0,1,123,260 MSa/s,199,160 MSa/s,7,2,10987,1776 1644
+fir_resampler,cint16,int16,239,3,2,256,1,0,0,1,1,2505,102 MSa/s,2601,98 MSa/s,8,1,13778,5104
+fir_resampler,cint16,int16,156,13,12,1248,3,0,0,0,1,1117,1117 MSa/s,1503,830 MSa/s,12,3,66008,5732 5494 5538
+fir_resampler,cint16,int16,16,1,1,16,2,0,0,0,1,62,258 MSa/s,128,125 MSa/s,7,2,7003,1690 1524
+fir_resampler,cint16,int16,168,14,3,168,3,0,0,0,1,772,217 MSa/s,810,207 MSa/s,12,3,43176,5190 4924 4956
+fir_resampler,cint16,int16,176,11,15,2640,4,0,0,0,1,1787,1477 MSa/s,2653,995 MSa/s,20,4,110165,5632 5470 5470 5510
+fir_resampler,cint16,int16,176,11,9,1584,4,0,0,0,1,1889,838 MSa/s,2356,672 MSa/s,15,4,89045,5624 5402 5402 5430
+fir_resampler,cint16,int16,19,3,2,2560,1,0,1,0,1,4523,565 MSa/s,4542,563 MSa/s,1,1,4238,3040
+fir_resampler,cint16,int16,180,15,4,1440,3,0,0,0,1,4633,310 MSa/s,10116,142 MSa/s,13,3,84232,5292 5010 5044
+fir_resampler,cint16,int16,192,12,5,960,4,0,0,0,1,2180,440 MSa/s,2496,384 MSa/s,17,4,78773,5006 4760 4760 4818
+fir_resampler,cint16,int16,20,5,7,280,1,0,0,0,1,184,1521 MSa/s,297,942 MSa/s,5,1,9246,2232
+fir_resampler,cint16,int16,208,13,12,1248,4,0,0,0,1,1170,1066 MSa/s,1554,803 MSa/s,15,4,83477,5676 5494 5494 5538
+fir_resampler,cint16,int16,208,13,5,1040,4,0,0,0,1,2135,487 MSa/s,2709,383 MSa/s,17,4,90133,5730 5484 5484 5574
+fir_resampler,cint16,int16,224,14,11,2464,4,0,0,0,1,2739,899 MSa/s,3428,718 MSa/s,22,4,120725,5124 4948 4946 4974
+fir_resampler,cint16,int16,19,3,2,256,1,0,0,1,1,277,924 MSa/s,404,633 MSa/s,8,1,9602,3532
+fir_sr_asym,cint16,int16,8,1,1,256,1,0,0,0,1,166,1542 MSa/s,265,966 MSa/s,5,1,7148,1902
+fir_sr_asym,cint32,cint16,32,1,1,256,1,0,0,0,1,2299,111 MSa/s,2362,108 MSa/s,5,1,12524,3364
+fir_sr_asym,cint32,cint16,16,1,1,256,1,0,0,0,1,1060,241 MSa/s,1122,228 MSa/s,5,1,12076,2760
+fir_sr_asym,cint16,int16,96,1,1,2560,2,0,1,0,3,2609,2949 MSa/s,2899,2879 MSa/s,18,18,61296,2068 2068 1630 1630 2046 2062 1630 1630 2062 2062 1652 1652 2068 1630 2046 1630 2046 1652
+fir_sr_asym,cint16,int16,8,1,1,256,1,0,0,0,1,166,1542 MSa/s,265,966 MSa/s,5,1,7148,1886
+fir_sr_asym,cint16,int16,8,1,1,64,1,0,0,0,1,70,914 MSa/s,126,507 MSa/s,5,1,4076,1918
+fir_sr_asym,cint16,int16,64,1,1,256,1,0,0,1,1,1230,208 MSa/s,1325,193 MSa/s,8,1,8048,3480
+fir_sr_asym,cint16,int16,8,1,1,256,1,0,0,0,1,166,1542 MSa/s,265,966 MSa/s,5,1,7148,1902
+fir_sr_asym,cint16,int16,8,1,1,2560,1,1,1,0,1,1302,1966 MSa/s,1320,1939 MSa/s,1,1,3004,1400
+fir_sr_asym,cint16,int16,8,1,1,128,1,0,0,0,1,102,1254 MSa/s,158,810 MSa/s,5,1,5100,1902
+fir_sr_asym,cint16,int16,80,1,1,2560,1,0,1,0,5,2589,4957 MSa/s,2990,4891 MSa/s,25,25,87068,1614 1614 1614 1630 1630 1630 1630 1630 1630 1630 1630 1630 1652 1652 1652 1614 1652 1630 1630 1630 1630 1630 1630 1652 1614
+fir_sr_asym,cint16,int16,64,1,1,2560,1,0,1,0,4,2589,3965 MSa/s,2850,3911 MSa/s,15,16,54076,1614 1652 1630 1630 1630 1630 1652 1614 1614 1652 1630 1630 1630 1630 1652 1614
+fir_sr_asym,cint16,int16,64,1,1,256,1,0,0,0,1,1163,220 MSa/s,1226,208 MSa/s,5,1,7916,3414
+fir_sr_asym,cint16,int16,8,1,1,256,1,0,0,1,1,166,1542 MSa/s,277,924 MSa/s,8,1,7184,2398
+fir_sr_asym,cint32,cint32,16,1,1,256,1,0,0,0,1,2637,97 MSa/s,2700,94 MSa/s,5,1,13292,3256
+fir_sr_asym,int32,int16,32,1,1,256,1,0,0,0,1,556,460 MSa/s,615,416 MSa/s,5,1,7468,3266
+fir_sr_asym,cint32,int16,16,1,1,256,1,0,0,0,1,550,465 MSa/s,613,417 MSa/s,5,1,11468,2180
+fir_sr_asym,cint16,int16,512,1,1,256,2,0,0,0,1,4838,52 MSa/s,4864,52 MSa/s,7,2,22196,4124 4006
+fir_sr_asym,int32,int32,32,1,1,256,1,0,0,0,1,1155,221 MSa/s,1214,210 MSa/s,5,1,8172,3678
+fir_sr_asym,int32,int32,16,1,1,256,1,0,0,0,1,551,464 MSa/s,609,420 MSa/s,5,1,7852,3068
+fir_sr_asym,int32,int16,16,1,1,256,1,0,0,0,1,294,870 MSa/s,352,727 MSa/s,5,1,7244,2248
+fir_sr_asym,int16,int16,5120,1,1,256,20,0,0,0,1,5551,46 MSa/s,5885,43 MSa/s,104,20,705103,3928 3912 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 4022 4124 3928
+fir_sr_asym,int16,int16,4096,1,1,256,16,0,0,0,1,4884,52 MSa/s,5156,49 MSa/s,84,16,465683,4124 3928 3928 3928 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 3960 4022
+fir_sr_asym,int16,int16,32,1,1,256,1,0,0,0,1,295,867 MSa/s,352,727 MSa/s,5,1,5298,3506
+fir_sr_asym,int16,int16,2048,1,1,256,8,0,0,0,1,3550,72 MSa/s,3697,69 MSa/s,27,8,135323,4124 3928 3928 3928 3960 3960 3960 4022
+fir_sr_asym,int16,int16,16,1,1,256,1,0,0,0,1,165,1551 MSa/s,220,1163 MSa/s,5,1,5138,2396
+fir_sr_asym,int16,int16,1024,1,1,256,4,0,0,0,1,2883,88 MSa/s,2967,86 MSa/s,11,4,43871,4124 3928 3928 4006
+fir_sr_asym,float,float,32,1,1,256,1,0,0,0,1,2545,100 MSa/s,2604,98 MSa/s,5,1,8425,4036
+fir_sr_asym,float,float,16,1,1,256,1,0,0,0,1,1165,219 MSa/s,1223,209 MSa/s,5,1,8105,2354
+fir_sr_asym,cint32,int32,32,1,1,256,1,0,0,0,1,2299,111 MSa/s,2362,108 MSa/s,5,1,12524,3364
+fir_sr_asym,cint32,int32,16,1,1,256,1,0,0,0,1,1060,241 MSa/s,1122,228 MSa/s,5,1,12076,2760
+fir_sr_asym,cint32,int16,32,1,1,256,1,0,0,0,1,1062,241 MSa/s,1125,227 MSa/s,5,1,11820,3282
+fir_sr_asym,cint32,cint32,32,1,1,256,1,0,0,0,1,4386,58 MSa/s,4449,57 MSa/s,5,1,13932,2980
+fir_sr_asym,cint16,int16,48,1,1,2560,4,1,1,0,2,1333,3840 MSa/s,1469,3675 MSa/s,16,16,55140,1772 1594 1506 1294 1734 1594 1506 1356 1772 1594 1506 1294 1718 1594 1506 1356
+fir_sr_asym,cint16,int16,2048,1,1,256,8,0,0,0,1,6127,41 MSa/s,6152,41 MSa/s,36,8,177764,4124 3928 3944 3944 3944 3944 3944 4022
+fir_sr_asym,cint16,int16,48,1,1,2560,2,1,1,0,2,1955,2618 MSa/s,2029,2581 MSa/s,8,8,24536,1960 1506 1922 1558 1960 1506 1922 1558
+fir_sr_asym,cint16,int16,16,1,1,2560,1,0,1,0,2,2584,1982 MSa/s,2626,1961 MSa/s,4,4,11928,1426 1444 1426 1444
+fir_sr_asym,cint16,int16,144,1,1,2560,3,0,1,0,3,2610,2947 MSa/s,3043,2825 MSa/s,27,27,96940,1860 2062 1630 1854 2062 1630 1854 2062 1652 1860 1860 2062 2062 1630 1630 1854 1854 2062 2062 1630 1630 1854 1854 2062 2062 1652 1652
+fir_sr_asym,cint16,int16,128,1,1,256,5,0,0,0,1,873,293 MSa/s,893,286 MSa/s,13,5,28620,3470 3178 3194 3178 3062
+fir_sr_asym,cint16,int16,128,1,1,256,4,0,0,0,1,951,269 MSa/s,971,263 MSa/s,11,4,23620,3686 3374 3374 3238
+fir_sr_asym,cint16,int16,128,1,1,256,1,0,0,1,1,2225,115 MSa/s,2328,109 MSa/s,8,1,9072,4108
+fir_sr_asym,cint16,int16,128,1,1,256,1,0,0,0,1,2117,120 MSa/s,2190,116 MSa/s,5,1,8812,4050
+fir_sr_asym,cint16,int16,16,1,1,2560,1,1,1,0,2,1304,3926 MSa/s,1346,3846 MSa/s,4,4,11928,1382 1432 1382 1432
+fir_sr_asym,cint16,int16,1024,1,1,256,4,0,0,0,1,5334,47 MSa/s,5355,47 MSa/s,11,4,57668,4124 3928 3944 4022
+fir_sr_asym,cint16,cint16,24,1,1,256,1,0,0,0,1,808,316 MSa/s,867,295 MSa/s,5,1,8012,3914
+fir_sr_asym,cint16,cint16,16,1,1,256,1,0,0,0,1,551,464 MSa/s,609,420 MSa/s,5,1,7852,3068
+fir_sr_asym,cfloat,float,32,1,1,256,1,0,0,0,1,4491,57 MSa/s,4554,56 MSa/s,5,1,12793,3668
+fir_sr_asym,cfloat,float,16,1,1,256,1,0,0,0,1,3297,77 MSa/s,3359,76 MSa/s,5,1,12345,2920
+fir_sr_asym,cint16,int16,48,1,1,2560,3,1,1,0,2,1325,3867 MSa/s,1430,3761 MSa/s,12,12,36760,1772 1594 1382 1734 1594 1432 1772 1594 1382 1718 1594 1432
+fir_sr_asym,cfloat,cfloat,16,1,1,256,1,0,0,0,1,4719,54 MSa/s,4782,53 MSa/s,5,1,13561,3384
+fir_sr_asym,cint16,cint16,32,1,1,256,1,0,0,0,1,1155,221 MSa/s,1214,210 MSa/s,5,1,8172,3678
+fir_sr_asym,cint16,int16,16,1,1,256,1,0,0,0,1,294,870 MSa/s,352,727 MSa/s,5,1,7244,2248
+fir_sr_asym,cfloat,cfloat,32,1,1,256,1,0,0,0,1,10206,25 MSa/s,10269,24 MSa/s,5,1,14201,2942
+fir_sr_asym,cint16,int16,240,1,1,256,1,0,0,1,1,4534,56 MSa/s,4652,55 MSa/s,8,1,10864,4364
+fir_sr_asym,cint16,int16,16,1,1,256,1,0,0,1,1,341,750 MSa/s,429,596 MSa/s,8,1,7280,3060
+fir_sr_asym,cint16,int16,48,1,1,2560,1,0,1,0,3,2587,2972 MSa/s,2736,2940 MSa/s,9,9,27060,1614 1614 1630 1630 1652 1652 1614 1630 1652
+fir_sr_asym,cint16,int16,48,1,1,2560,1,0,1,0,2,3866,1324 MSa/s,3908,1315 MSa/s,4,4,12440,1894 1924 1894 1924
+fir_sr_asym,cint16,int16,4096,1,1,256,16,0,0,0,1,7711,33 MSa/s,7746,33 MSa/s,98,16,597156,4140 3928 3944 3944 3944 3944 3944 3944 3944 3944 3944 3944 3944 3944 3944 4022
+fir_sr_asym,cint16,int16,32,1,1,256,1,0,0,1,1,587,436 MSa/s,676,378 MSa/s,8,1,7536,3324
+fir_sr_asym,cint16,int16,32,1,1,256,1,0,0,0,1,556,460 MSa/s,615,416 MSa/s,5,1,7468,3266
+fir_sr_asym,cint16,int16,32,1,1,2560,1,1,1,0,4,1309,7834 MSa/s,1447,7693 MSa/s,16,16,53500,1382 1432 1382 1382 1382 1382 1432 1382 1382 1432 1382 1382 1382 1382 1432 1382
+fir_sr_asym,cint16,int16,48,1,1,2560,1,1,1,0,2,3862,1325 MSa/s,3904,1316 MSa/s,4,4,12440,1926 1960 1926 1976
+fir_sr_asym,cint16,int16,256,1,1,256,1,0,0,0,1,4570,56 MSa/s,4660,54 MSa/s,5,1,10604,4138
+fir_sr_asym,cint16,int16,24,1,1,2560,1,1,1,0,4,1309,7834 MSa/s,1447,7693 MSa/s,16,16,53500,1382 1432 1382 1382 1382 1382 1432 1382 1382 1432 1382 1382 1382 1382 1432 1382
+fir_sr_asym,cint16,int16,24,1,1,2560,1,1,1,0,3,1306,5885 MSa/s,1388,5791 MSa/s,9,9,26772,1382 1382 1382 1382 1432 1432 1382 1382 1432
+fir_sr_asym,cint16,int16,24,1,1,2560,1,1,1,0,2,1942,2636 MSa/s,1984,2600 MSa/s,4,4,12056,1522 1558 1522 1558
+fir_sr_asym,cint16,int16,24,1,1,2560,1,1,1,0,1,3862,662 MSa/s,3880,659 MSa/s,1,1,3132,1928
+fir_sr_asym,cint16,int16,32,1,1,2560,1,0,1,0,2,2586,1979 MSa/s,2628,1959 MSa/s,4,4,12056,1614 1652 1614 1652
+fir_sr_asym,cint16,int16,24,1,1,2560,1,0,1,0,2,2585,1980 MSa/s,2627,1960 MSa/s,4,4,12056,1514 1550 1514 1566
+fir_sr_sym,cint32,cint32,16,1,1,256,1,0,0,0,1,1573,162 MSa/s,1636,156 MSa/s,5,1,12934,1844
+fir_sr_sym,cint32,cint16,32,1,1,256,1,0,0,0,1,1328,192 MSa/s,1395,183 MSa/s,5,1,12166,2104
+fir_sr_sym,cint32,cint16,16,1,1,256,1,0,0,0,1,812,315 MSa/s,876,292 MSa/s,5,1,11814,1924
+fir_sr_sym,cint16,int16,89,1,1,256,1,0,0,0,1,1051,243 MSa/s,1118,228 MSa/s,5,1,7910,2490
+fir_sr_sym,cint16,int16,8,1,1,256,1,0,0,0,1,101,2534 MSa/s,263,973 MSa/s,5,1,6982,1826
+fir_sr_sym,cint16,int16,8,1,1,256,1,0,0,1,1,127,2015 MSa/s,265,966 MSa/s,8,1,7002,2282
+fir_sr_sym,cint16,int16,8,1,1,64,1,0,0,0,1,56,1142 MSa/s,112,571 MSa/s,5,1,3910,1786
+fir_sr_sym,cint16,int16,8,1,1,256,1,0,0,0,1,101,2534 MSa/s,263,973 MSa/s,5,1,6982,1826
+fir_sr_sym,cint16,int16,8,1,1,128,1,0,0,0,1,69,1855 MSa/s,136,941 MSa/s,5,1,4934,1826
+fir_sr_sym,cint16,int16,64,1,1,256,1,0,0,1,1,951,269 MSa/s,1045,244 MSa/s,8,1,7626,2372
+fir_sr_sym,cint16,int16,64,1,1,256,1,0,0,0,1,921,277 MSa/s,984,260 MSa/s,5,1,7558,2104
+fir_sr_sym,cint32,cint32,32,1,1,256,1,0,0,0,1,2597,98 MSa/s,2663,96 MSa/s,5,1,13382,2112
+fir_sr_sym,cint16,int16,8,1,1,256,1,0,0,0,1,101,2534 MSa/s,263,973 MSa/s,5,1,6982,1826
+fir_sr_sym,cint32,int16,16,1,1,256,1,0,0,0,1,684,374 MSa/s,747,342 MSa/s,5,1,11270,1754
+fir_sr_sym,int16,int16,2048,1,1,256,4,0,0,0,1,3096,82 MSa/s,3149,81 MSa/s,11,4,53525,4292 4032 4032 4094
+fir_sr_sym,cint32,int32,16,1,1,256,1,0,0,0,1,812,315 MSa/s,876,292 MSa/s,5,1,11814,1924
+fir_sr_sym,cint32,int32,32,1,1,256,1,0,0,0,1,1328,192 MSa/s,1395,183 MSa/s,5,1,12166,2104
+fir_sr_sym,float,float,16,1,1,256,1,0,0,0,1,1306,196 MSa/s,1364,187 MSa/s,5,1,7845,2402
+fir_sr_sym,float,float,32,1,1,256,1,0,0,0,1,2919,87 MSa/s,2980,85 MSa/s,5,1,8069,2752
+fir_sr_sym,int16,int16,1024,1,1,256,2,0,0,0,1,2616,97 MSa/s,2655,96 MSa/s,7,2,19339,4292 4094
+fir_sr_sym,int16,int16,16,1,1,256,1,0,0,0,1,101,2534 MSa/s,156,1641 MSa/s,5,1,4934,2078
+fir_sr_sym,int16,int16,32,1,1,256,1,0,0,0,1,164,1560 MSa/s,221,1158 MSa/s,5,1,5030,2550
+fir_sr_sym,int16,int16,4096,1,1,256,8,0,0,0,1,3905,65 MSa/s,3990,64 MSa/s,36,8,171049,4292 4032 4032 4032 4048 4048 4048 4110
+fir_sr_sym,int16,int16,8192,1,1,256,16,0,0,0,1,5524,46 MSa/s,5671,45 MSa/s,98,16,585809,4244 4032 4032 4032 4048 4048 4048 4048 4048 4048 4048 4048 4048 4048 4048 4110
+fir_sr_sym,int16,int16,96,1,1,512,1,0,0,0,1,938,545 MSa/s,999,512 MSa/s,5,1,7526,2788
+fir_sr_sym,int32,int16,16,1,1,256,1,0,0,0,1,166,1542 MSa/s,265,966 MSa/s,5,1,7046,2070
+fir_sr_sym,int32,int16,32,1,1,256,1,0,0,0,1,454,563 MSa/s,514,498 MSa/s,5,1,7206,1888
+fir_sr_sym,cint16,int16,63,1,1,256,1,0,0,0,1,858,298 MSa/s,921,277 MSa/s,5,1,7558,2112
+fir_sr_sym,cint32,int16,32,1,1,256,1,0,0,0,1,1070,239 MSa/s,1137,225 MSa/s,5,1,11558,1960
+fir_sr_sym,cint16,int16,512,1,1,256,1,0,0,0,1,4505,56 MSa/s,4626,55 MSa/s,5,1,12486,4122
+fir_sr_sym,int32,int32,16,1,1,256,1,0,0,0,1,292,876 MSa/s,350,731 MSa/s,5,1,7590,2532
+fir_sr_sym,cint16,int16,32,1,1,256,1,0,0,1,1,692,369 MSa/s,781,327 MSa/s,8,1,7242,2524
+fir_sr_sym,cfloat,cfloat,16,1,1,256,1,0,0,0,1,4074,62 MSa/s,4136,61 MSa/s,5,1,13189,2692
+fir_sr_sym,cfloat,cfloat,32,1,1,256,1,0,0,0,1,10139,25 MSa/s,10206,25 MSa/s,5,1,13637,2816
+fir_sr_sym,cfloat,float,16,1,1,256,1,0,0,0,1,2727,93 MSa/s,2789,91 MSa/s,5,1,12069,2122
+fir_sr_sym,cfloat,float,32,1,1,256,1,0,0,0,1,7263,35 MSa/s,7330,34 MSa/s,5,1,12421,2392
+fir_sr_sym,cint16,cint16,16,1,1,256,1,0,0,0,1,292,876 MSa/s,350,731 MSa/s,5,1,7590,2532
+fir_sr_sym,cint16,cint16,24,1,1,256,1,0,0,0,1,421,608 MSa/s,480,533 MSa/s,5,1,7750,2972
+fir_sr_sym,cint16,cint16,24,1,1,256,2,0,1,0,1,321,797 MSa/s,371,690 MSa/s,6,2,11315,2294 2072
+fir_sr_sym,cint16,cint16,30,1,1,512,3,0,1,0,1,897,570 MSa/s,954,536 MSa/s,9,3,23352,1606 1660 1770
+fir_sr_sym,cint16,cint16,32,1,1,256,1,0,0,0,1,652,392 MSa/s,713,359 MSa/s,5,1,7814,2100
+fir_sr_sym,cint16,int16,1024,1,1,256,2,0,0,0,1,4824,53 MSa/s,4867,52 MSa/s,7,2,28043,4184 4024
+fir_sr_sym,cint16,int16,128,1,1,256,1,0,0,0,1,1433,178 MSa/s,1506,169 MSa/s,5,1,8262,2606
+fir_sr_sym,cint16,int16,128,1,1,256,1,0,1,0,1,1430,179 MSa/s,1491,171 MSa/s,3,1,6222,2360
+fir_sr_sym,cint16,int16,128,1,1,256,1,0,0,1,1,1503,170 MSa/s,1605,159 MSa/s,8,1,8394,2716
+fir_sr_sym,cint16,int16,128,1,1,256,2,0,0,0,1,1018,251 MSa/s,1045,244 MSa/s,7,2,12811,2194 2020
+fir_sr_sym,cint16,int16,128,1,1,256,2,0,1,0,1,928,275 MSa/s,990,258 MSa/s,6,2,12307,1922 2006
+fir_sr_sym,cint16,int16,128,1,1,256,3,0,0,0,1,945,270 MSa/s,963,265 MSa/s,9,3,17424,1954 1754 1816
+fir_sr_sym,cint16,int16,128,1,1,256,3,0,1,0,1,789,324 MSa/s,854,299 MSa/s,9,3,18456,1702 1822 1846
+fir_sr_sym,cint16,int16,128,1,1,256,4,0,0,0,1,818,312 MSa/s,837,305 MSa/s,11,4,21909,1938 1686 1686 1776
+fir_sr_sym,cint16,int16,128,1,1,256,4,0,1,0,1,670,382 MSa/s,736,347 MSa/s,12,4,24477,1666 1746 1746 1770
+fir_sr_sym,cint16,int16,128,1,1,256,5,0,0,0,1,821,311 MSa/s,841,304 MSa/s,13,5,26490,1938 1632 1632 1632 1706
+fir_sr_sym,cint16,int16,128,1,1,256,5,0,1,0,1,657,389 MSa/s,724,353 MSa/s,15,5,30594,1666 1676 1692 1692 1700
+fir_sr_sym,cint16,int16,16,1,1,256,1,0,0,0,1,166,1542 MSa/s,265,966 MSa/s,5,1,7046,1926
+fir_sr_sym,cint16,int16,16,1,1,256,1,0,0,0,1,166,1542 MSa/s,265,966 MSa/s,5,1,7046,1942
+fir_sr_sym,cint16,int16,16,1,1,256,1,0,0,1,1,193,1326 MSa/s,280,914 MSa/s,8,1,7082,2462
+fir_sr_sym,cint16,int16,199,1,1,256,1,0,0,0,1,2009,127 MSa/s,2091,122 MSa/s,5,1,9126,2998
+fir_sr_sym,cint16,int16,2048,1,1,256,4,0,0,0,1,5280,48 MSa/s,5329,48 MSa/s,16,4,77589,4184 3908 3908 4024
+fir_sr_sym,cint16,int16,240,1,1,256,1,0,0,0,1,2329,109 MSa/s,2416,105 MSa/s,5,1,9542,3070
+fir_sr_sym,cint16,int16,240,1,1,256,1,0,0,1,1,2446,104 MSa/s,2565,99 MSa/s,8,1,9770,3420
+fir_sr_sym,cint16,int16,32,1,1,256,1,0,0,0,1,662,386 MSa/s,724,353 MSa/s,5,1,7206,1784
+fir_sr_sym,cint16,int16,4096,1,1,256,8,0,0,0,1,6743,37 MSa/s,6860,37 MSa/s,42,8,233001,4136 3908 3908 3908 3908 3908 3908 4024
+fir_sr_sym,int32,int32,32,1,1,256,1,0,0,0,1,652,392 MSa/s,713,359 MSa/s,5,1,7814,2100

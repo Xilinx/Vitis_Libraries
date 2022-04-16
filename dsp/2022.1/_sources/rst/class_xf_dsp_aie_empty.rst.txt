@@ -1,0 +1,18 @@
+.. index:: pair: class; xf::dsp::aie::empty
+.. _doxid-classxf_1_1dsp_1_1aie_1_1empty:
+.. _cid-xf::dsp::aie::empty:
+
+class xf::dsp::aie::empty
+=========================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "graph_utils.hpp"
+
+
+
+

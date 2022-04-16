@@ -1,0 +1,259 @@
+.. index:: pair: class; xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph:
+
+template class xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph
+=================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fft_ifft_dit_1ch_graph.hpp"
+
+
+Overview
+~~~~~~~~
+
+fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.
+
+This class definition is only used with stream interfaces (TP_API == 1). Stream interface FFT graph is offered with a dual input stream configuration, which interleaves data samples betwwen the streams. Stream interface FFT implementation is capable of supporting parallel computation (TP_PARALLEL_POWER > 0). Dynamic point size, with a header embedded in the data stream, is not supported when TP_API==1.
+
+These are the templates to configure the single-channel decimation-in-time class.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - TT_DATA
+
+        - 
+          describes the type of individual data samples input to and output from the transform function. This is a typename and must be one of the following:
+          
+          int16, cint16, int32, cint32, float, cfloat.
+
+    *
+        - TT_TWIDDLE
+
+        - 
+          describes the type of twiddle factors of the transform.
+          
+          It must be one of the following: cint16, cint32, cfloat and must also satisfy the following rules:
+          
+          * 32 bit types are only supported when TT_DATA is also a 32 bit type,
+          
+          * TT_TWIDDLE must be an integer type if TT_DATA is an integer type
+          
+          * TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
+
+    *
+        - TP_POINT_SIZE
+
+        - 
+          is an unsigned integer which describes the number of samples in the transform.
+          
+          This must be 2^N where N is an integer in the range 4 to 16 inclusive.
+          
+          When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum point size possible.
+
+    *
+        - TP_FFT_NIFFT
+
+        - selects whether the transform to perform is an FFT (1) or IFFT (0).
+
+    *
+        - TP_SHIFT
+
+        - selects the power of 2 to scale the result by prior to output.
+
+    *
+        - TP_CASC_LEN
+
+        - selects the number of kernels the FFT will be divided over in series to improve throughput
+
+    *
+        - TP_DYN_PT_SIZE
+
+        - 
+          selects whether (1) or not (0) to use run-time point size determination.
+          
+          When set, each window of data must be preceeded, in the window, by a 256 bit header.
+          
+          The output frame will also be preceeded by a 256 bit vector which is a copy of the input vector, but for the top byte, which is 0 to indicate a legal frame or 1 to indicate an illegal frame.
+          
+          The lowest significance byte of the input header field describes forward (non-zero) or inverse(0) direction.
+          
+          The second least significant byte 8 bits of this field describe the Radix 2 power of the following frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512.
+          
+          Any value below 4 or greater than log2(TP_POINT_SIZE) is considered illegal.
+          
+          When this occurs the top byte of the output header will be set to 1 and the output samples will be set to 0 for a frame of TP_POINT_SIZE
+
+    *
+        - TP_WINDOW_VSIZE
+
+        - 
+          is an unsigned integer which describes the number of samples to be processed in each call to the function.
+          
+          By default, TP_WINDOW_SIZE is set to match TP_POINT_SIZE.
+          
+          TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case multiple FFT iterations will be performed on a given input window, resulting in multiple iterations of output samples, reducing the numer of times the kernel needs to be triggered to process a given number of input data samples.
+          
+          As a result, the overheads inferred during kernel triggering are reduced and overall performance is increased.
+
+    *
+        - TP_API
+
+        - is an unsigned integer to select window (0) or stream (1) interfaces. When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample from or two the next stream. Two streams mimimum are used. In this example, even samples are read from input stream[0] and odd samples from input stream[1].
+
+    *
+        - TP_PARALLEL_POWER
+
+        - 
+          is an unsigned integer to describe N where 2^N is the numbers of subframe processors to use, so as to achieve higher throughput.
+          
+          The default is 0. With TP_PARALLEL_POWER set to 2, 4 subframe processors will be used, each of which takes 2 streams in for a total of 8 streams input and output. Sample[p] must be written to stream[p modulus q] where q is the number of streams.
+
+    *
+        - TP_INDEX
+
+        -
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::kparallel_factor:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a58375a76f0e9adb76f961726426aec70:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::kwindowsize:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad99c1f4f80c8da87e7b04b559eaefc6f:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::knextparallelpower:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad73d75d574cfd8c3097556680d5d5e2c:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::kr2shift:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1adc4f7826924289e214db347bd8a5c6c9:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::kfftsubshift:
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ac815ee5c37b03f62204b4fc0c1bfb8b7:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::r2comb_tw_lut:
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename TT_DATA,
+	    typename TT_TWIDDLE,
+	    unsigned int TP_POINT_SIZE,
+	    unsigned int TP_FFT_NIFFT = 1,
+	    unsigned int TP_SHIFT = 0,
+	    unsigned int TP_CASC_LEN = 1,
+	    unsigned int TP_DYN_PT_SIZE = 0,
+	    unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+	    unsigned int TP_API = 0,
+	    unsigned int TP_PARALLEL_POWER = 0,
+	    unsigned int TP_INDEX = 0
+	    >
+	class fft_ifft_dit_1ch_graph: public graph
+
+	// fields
+
+	static constexpr int kParallel_factor
+	static constexpr int kWindowSize
+	static constexpr int kNextParallelPower
+	static constexpr int kR2Shift
+	static constexpr int kFFTsubShift
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <input, 2*:ref:`kParallel_factor<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2>`> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a1449812da3f54cf9bcb7b27bb9c86146>`
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <output, 2*:ref:`kParallel_factor<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2>`> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a16dbb24e846889ffdae3761293122f1d>`
+	parameter r2comb_tw_lut
+	kernel :ref:`m_combInKernel<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a5918fc01596ea26068c66bd1c00fd915>`[kParallel_factor]
+	kernel :ref:`m_r2Comb<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad5896287369b42ebf8d2d62ee9b98f4e>`[kParallel_factor]
+	kernel :ref:`m_combOutKernel<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad8965ee0f2fe85d370e741d26ea2f16b>`[kParallel_factor]
+	:ref:`fft_ifft_dit_1ch_graph<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph>` <TT_DATA, TT_TWIDDLE, (TP_POINT_SIZE>> 1), TP_FFT_NIFFT, :ref:`kFFTsubShift<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1adc4f7826924289e214db347bd8a5c6c9>`, TP_CASC_LEN, TP_DYN_PT_SIZE, (TP_WINDOW_VSIZE>> 1), kStreamAPI, :ref:`kNextParallelPower<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad99c1f4f80c8da87e7b04b559eaefc6f>`, TP_INDEX> :ref:`FFTsubframe0<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad96a63ecb06c7b73c4522aba200168b8>`
+	:ref:`fft_ifft_dit_1ch_graph<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph>` <TT_DATA, TT_TWIDDLE, (TP_POINT_SIZE>> 1), TP_FFT_NIFFT, :ref:`kFFTsubShift<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1adc4f7826924289e214db347bd8a5c6c9>`, TP_CASC_LEN, TP_DYN_PT_SIZE, (TP_WINDOW_VSIZE>> 1), kStreamAPI, :ref:`kNextParallelPower<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad99c1f4f80c8da87e7b04b559eaefc6f>`, TP_INDEX+:ref:`kParallel_factor<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2>`/2> :ref:`FFTsubframe1<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad49e39c9e10dfc4ecc437a1dea1d8886>`
+
+Fields
+------
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a1449812da3f54cf9bcb7b27bb9c86146:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::in:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <input, 2*:ref:`kParallel_factor<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2>`> in
+
+The input data to the function. I/O is two parallel streams each TT_DATA type.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a16dbb24e846889ffdae3761293122f1d:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::out:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <output, 2*:ref:`kParallel_factor<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2>`> out
+
+The output data from the function. I/O is two parallel streams each TT_DATA type.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a5918fc01596ea26068c66bd1c00fd915:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::m_combinkernel:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel m_combInKernel [kParallel_factor]
+
+FFT recursive decomposition. Widget kernel Widgets are used to reorder data as per FFT algorithm requirements.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad5896287369b42ebf8d2d62ee9b98f4e:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::m_r2comb:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel m_r2Comb [kParallel_factor]
+
+FFT recursive decomposition. R2Combiner kernel R2combiner kernels connect 2 subframe processors with next stage's r2combiner kernels
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad8965ee0f2fe85d370e741d26ea2f16b:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::m_comboutkernel:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel m_combOutKernel [kParallel_factor]
+
+FFT recursive decomposition. Widget kernel Widgets are used to reorder data as per FFT algorithm requirements.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad96a63ecb06c7b73c4522aba200168b8:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::fftsubframe0:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`fft_ifft_dit_1ch_graph<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph>` <TT_DATA, TT_TWIDDLE, (TP_POINT_SIZE>> 1), TP_FFT_NIFFT, :ref:`kFFTsubShift<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1adc4f7826924289e214db347bd8a5c6c9>`, TP_CASC_LEN, TP_DYN_PT_SIZE, (TP_WINDOW_VSIZE>> 1), kStreamAPI, :ref:`kNextParallelPower<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad99c1f4f80c8da87e7b04b559eaefc6f>`, TP_INDEX> FFTsubframe0
+
+FFT recursive decomposition. Subframe0 FFT is split into 2 subframe processors with a stage of r2cominers connecting subframe processors. This is a recursive call with decrementing TP_PARALLEL_POWER template parameter.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad49e39c9e10dfc4ecc437a1dea1d8886:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::fftsubframe1:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`fft_ifft_dit_1ch_graph<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph>` <TT_DATA, TT_TWIDDLE, (TP_POINT_SIZE>> 1), TP_FFT_NIFFT, :ref:`kFFTsubShift<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1adc4f7826924289e214db347bd8a5c6c9>`, TP_CASC_LEN, TP_DYN_PT_SIZE, (TP_WINDOW_VSIZE>> 1), kStreamAPI, :ref:`kNextParallelPower<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1ad99c1f4f80c8da87e7b04b559eaefc6f>`, TP_INDEX+:ref:`kParallel_factor<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1af615609267edc1ea62aac64808cb77a2>`/2> FFTsubframe1
+
+FFT recursive decomposition. Subframe1. FFT is split into 2 subframe processors with a stage of r2cominers connecting subframe processors. This is a recursive call with decrementing TP_PARALLEL_POWER template parameter.
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_1a3fb8697d95adc8bf15ff524a985e48d7:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::fft_ifft_dit_1ch_graph:
+
+fft_ifft_dit_1ch_graph
+----------------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	fft_ifft_dit_1ch_graph ()
+
+This is the constructor function for the Single channel DIT FFT graph. No arguments required.
+

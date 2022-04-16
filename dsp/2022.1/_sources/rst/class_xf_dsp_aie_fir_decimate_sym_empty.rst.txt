@@ -1,0 +1,18 @@
+.. index:: pair: class; xf::dsp::aie::fir::decimate_sym::empty
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1decimate__sym_1_1empty:
+.. _cid-xf::dsp::aie::fir::decimate_sym::empty:
+
+class xf::dsp::aie::fir::decimate_sym::empty
+============================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_decimate_sym_graph.hpp"
+
+
+
+

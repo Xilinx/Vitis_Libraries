@@ -1,0 +1,109 @@
+.. index:: pair: class; xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kWindowAPI, 0, TP_INDEX>
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph-2:
+
+template class xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kWindowAPI, 0, TP_INDEX>
+=====================================================================================================================================================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fft_ifft_dit_1ch_graph.hpp"
+
+
+Overview
+~~~~~~~~
+
+fft_dit_1ch template specialization for single (monolithic) FFT, window API
+
+Window interface FFT graph is offered with a single input windowed, ping-pong buffer. Window interface FFT implementation does not support parallel computation (TP_PARALLEL_POWER = 0 only). However, dynamic point size is available (TP_DYN_PT_SIZE = 1), which allows a window buffer size to be an integer multiple of the FFT's point size ( TP_WINDOW_VSIZE = N * TP_POINT_SIZE). Feature offers performance improvements, particularly with small FFT graphs.
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename TT_DATA,
+	    typename TT_TWIDDLE,
+	    unsigned int TP_POINT_SIZE,
+	    unsigned int TP_FFT_NIFFT,
+	    unsigned int TP_SHIFT,
+	    unsigned int TP_CASC_LEN,
+	    unsigned int TP_DYN_PT_SIZE,
+	    unsigned int TP_WINDOW_VSIZE,
+	    unsigned int TP_INDEX
+	    >
+	class fft_ifft_dit_1ch_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kWindowAPI, 0, TP_INDEX>: public graph
+
+	// fields
+
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <input, 1> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a5c7ab2d929f414fb07cd61e45406d132>`
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <output, 1> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a4618dbda04ac335c43d98d5efbfec336>`
+	fft_ifft_dit_1ch_mono_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kWindowAPI> :ref:`FFTwinproc<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a117bf324d15b7579f7537c31d472cb20>`
+
+Fields
+------
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a5c7ab2d929f414fb07cd61e45406d132:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::in-2:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <input, 1> in
+
+The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_POINT_SIZE.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a4618dbda04ac335c43d98d5efbfec336:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::out-2:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_array<doxid-namespacexf_1_1dsp_1_1aie_1ab4708eff876a1b889b8c86ee86ea8e02>` <output, 1> out
+
+A window API of TP_POINT_SIZE samples of TT_DATA type.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a117bf324d15b7579f7537c31d472cb20:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::fftwinproc:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	fft_ifft_dit_1ch_mono_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kWindowAPI> FFTwinproc
+
+Monolithic FFT block.
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a47a1c4649ff98d64c8fa79d7f53890b2:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76_1a237627191ffb7612b6c9925c9ef2187a:
+.. _cid-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph::fft_ifft_dit_1ch_graph-2:
+
+fft_ifft_dit_1ch_graph
+----------------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	fft_ifft_dit_1ch_graph ()
+
+This is the constructor function for the Single channel DIT FFT graph. No arguments required.
+

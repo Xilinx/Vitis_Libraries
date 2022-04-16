@@ -1,0 +1,12 @@
+Library Element,DATA_TYPE,INPUT_WINDOW_VSIZE,MIXER_MODE,P_API,cycleCountAvg,throughputAvg,initiationInterval,throughputInitIntAvg,NUM_BANKS,NUM_ME,DATA_MEMORY,PROGRAM_MEMORY
+dds_mixer,cint16,256,1,1,295,867 MSa/s,313,817 MSa/s,1,1,2265,1478
+dds_mixer,cint16,320,2,0,206,1553 MSa/s,337,949 MSa/s,7,1,9933,2120
+dds_mixer,cint16,4096,0,0,1056,3878 MSa/s,3730,1098 MSa/s,5,1,35015,1490
+dds_mixer,cint16,4096,0,1,4120,994 MSa/s,4138,989 MSa/s,1,1,2255,1334
+dds_mixer,cint16,4096,2,0,2094,1956 MSa/s,4231,968 MSa/s,13,1,100557,2136
+dds_mixer,cint16,4096,2,1,8227,497 MSa/s,8245,496 MSa/s,1,1,2269,1460
+dds_mixer,cint16,256,0,0,96,2666 MSa/s,250,1024 MSa/s,3,1,4295,1490
+dds_mixer,cint16,256,1,0,107,2392 MSa/s,266,962 MSa/s,5,1,6345,1940
+dds_mixer,cint16,256,1,1,295,867 MSa/s,313,817 MSa/s,1,1,2265,1478
+dds_mixer,cint16,8,1,1,42,190 MSa/s,60,133 MSa/s,1,1,2265,1262
+dds_mixer,cint16,8,2,0,41,195 MSa/s,93,86 MSa/s,7,1,2445,1810

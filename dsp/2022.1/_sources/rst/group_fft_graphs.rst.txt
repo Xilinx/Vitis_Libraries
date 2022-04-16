@@ -1,0 +1,68 @@
+.. index:: pair: group; FFT Graph
+.. _doxid-group__fft__graphs:
+.. _cid-fft_graphs:
+
+FFT Graph
+=========
+
+.. toctree::
+	:hidden:
+
+	class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_graph.rst
+	class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_graph-2.rst
+	class_xf_dsp_aie_fft_dit_1ch_fft_ifft_dit_1ch_graph-3.rst
+
+
+
+The FFT graph is offered as a template class that is available with 2 template specializations, that offer varied features and interfaces:
+
+* window interface (TP_API == 0) or
+
+* stream interface (TP_API == 1).
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	// classes
+
+	template <
+	    typename TT_DATA,
+	    typename TT_TWIDDLE,
+	    unsigned int TP_POINT_SIZE,
+	    unsigned int TP_FFT_NIFFT = 1,
+	    unsigned int TP_SHIFT = 0,
+	    unsigned int TP_CASC_LEN = 1,
+	    unsigned int TP_DYN_PT_SIZE = 0,
+	    unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+	    unsigned int TP_API = 0,
+	    unsigned int TP_PARALLEL_POWER = 0,
+	    unsigned int TP_INDEX = 0
+	    >
+	class :ref:`xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph>` 
+
+	template <
+	    typename TT_DATA,
+	    typename TT_TWIDDLE,
+	    unsigned int TP_POINT_SIZE,
+	    unsigned int TP_FFT_NIFFT,
+	    unsigned int TP_SHIFT,
+	    unsigned int TP_CASC_LEN,
+	    unsigned int TP_DYN_PT_SIZE,
+	    unsigned int TP_WINDOW_VSIZE,
+	    unsigned int TP_INDEX
+	    >
+	class :ref:`xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kWindowAPI, 0, TP_INDEX><doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_519ab93db854d490ae2ebe463ed61b76>` 
+
+	template <
+	    typename TT_DATA,
+	    typename TT_TWIDDLE,
+	    unsigned int TP_POINT_SIZE,
+	    unsigned int TP_FFT_NIFFT,
+	    unsigned int TP_SHIFT,
+	    unsigned int TP_CASC_LEN,
+	    unsigned int TP_DYN_PT_SIZE,
+	    unsigned int TP_WINDOW_VSIZE,
+	    unsigned int TP_INDEX
+	    >
+	class :ref:`xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, kStreamAPI, 0, TP_INDEX><doxid-classxf_1_1dsp_1_1aie_1_1fft_1_1dit__1ch_1_1fft__ifft__dit__1ch__graph_3_01_t_t___d_a_t_a_00_01_7522c05170bd37b7fd659b1507ee6148>` 
+

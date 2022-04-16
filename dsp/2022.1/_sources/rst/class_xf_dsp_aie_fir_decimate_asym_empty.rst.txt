@@ -1,0 +1,143 @@
+.. index:: pair: class; xf::dsp::aie::fir::decimate_asym::empty
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1decimate__asym_1_1empty:
+.. _cid-xf::dsp::aie::fir::decimate_asym::empty:
+
+class xf::dsp::aie::fir::decimate_asym::empty
+=============================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_decimate_asym_graph.hpp"
+
+
+Overview
+~~~~~~~~
+
+This is the constructor function for the asymmetrical decimator FIR graph with static coefficients.
+
+The input data to the function. This input is a window API of samples of TT_DATA type. The number of samples in the window is described by TP_INPUT_WINDOW_VSIZE. Note: Margin is added internally to the graph, when connecting input port with kernel port. Therefore, margin should not be added when connecting graph to a higher level design unit. Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest multiple of 32 bytes. A window API of TP_INPUT_WINDOW_VSIZE/TP_DECIMATE_FACTOR samples of TT_DATA type. Access function to get pointer to kernel (or first kernel in a chained configuration). These are the templates to configure the asymmetric decimator FIR class.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - taps
+
+        - a reference to the std::vector array of taps values of type TT_COEFF. This is the constructor function for the asymmetrical decimator FIR graph with static coefficients. The conditional input data to the function. Present when TP_DUAL_IP = DUAL_IP_DUAL fir_decimate_asym is an Asymmetric Decimation FIR filter
+
+    *
+        - TT_DATA
+
+        - 
+          describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:
+          
+          int16, cint16, int32, cint32, float, cfloat.
+
+    *
+        - TT_COEFF
+
+        - 
+          describes the type of individual coefficients of the filter taps.
+          
+          It must be one of the same set of types listed for TT_DATA and must also satisfy the following rules:
+          
+          * Complex types are only supported when TT_DATA is also complex.
+          
+          * 32 bit types are only supported when TT_DATA is also a 32 bit type,
+          
+          * TT_COEFF must be an integer type if TT_DATA is an integer type
+          
+          * TT_COEFF must be a float type if TT_DATA is a float type.
+
+    *
+        - TP_FIR_LEN
+
+        - is an unsigned integer which describes the number of taps in the filter. TP_FIR_LEN must be in the range 4 to 240 and must be an integer multiple of the TP_DECIMATE_FACTOR value.
+
+    *
+        - TP_SHIFT
+
+        - 
+          describes power of 2 shift down applied to the accumulation of FIR terms before output.
+          
+          TP_SHIFT must be in the range 0 to 61.
+
+    *
+        - TP_RND
+
+        - 
+          describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where
+          
+          * 0 = floor (truncate) eg. 3.8 Would become 3.
+          
+          * 1 = ceiling e.g. 3.2 would become 4.
+          
+          * 2 = round to positive infinity.
+          
+          * 3 = round to negative infinity.
+          
+          * 4 = round symmetrical to infinity.
+          
+          * 5 = round symmetrical to zero.
+          
+          * 6 = round convergent to even.
+          
+          * 7 = round convergent to odd.
+            
+            Modes 2 to 7 round to the nearest integer. They differ only in how they round for values of 0.5.
+
+    *
+        - TP_INPUT_WINDOW_VSIZE
+
+        - 
+          describes the number of samples in the window API used for input to the filter function.
+          
+          The number of values in the output window will be TP_INPUT_WINDOW_VSIZE divided by TP_DECIMATE_FACTOR by virtue the decimation factor. TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR. The resulting output window size must be a multiple of 256bits.
+          
+          Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
+
+    *
+        - TP_CASC_LEN
+
+        - 
+          describes the number of AIE processors to split the operation over.
+          
+          This allows resource to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
+
+    *
+        - TP_USE_COEFF_RELOAD
+
+        - 
+          allows the user to select if runtime coefficient reloading should be used.
+          
+          When defining the parameter:
+          
+          * 0 = static coefficients, defined in filter constructor,
+          
+          * 1 = reloadable coefficients, passed as argument to runtime function.
+            
+            Note: when used, optional port: ``port<input> coeff;`` will be added to the FIR.
+
+    *
+        - TP_NUM_OUTPUTS
+
+        - 
+          sets the number of ports to broadcast the output to.
+          
+          Note: when used, optional port: ``port<output> out2;`` will be added to the FIR.
+          
+          This is the constructor function for the asymmetrical decimator FIR graph with static coefficients. Constructor has no args. To be used with TP_USE_COEFF_RELOAD=1, taps needs to be passed through RTP This is the constructor function for the asymmetrical decimator FIR graph with static coefficients.
+
+    *
+        - taps
+
+        - a reference to the std::vector array of taps values of type TT_COEFF. Access function to get pointer to kernel (or first kernel in a chained configuration). No arguments required.
+

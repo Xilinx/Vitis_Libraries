@@ -1,0 +1,357 @@
+.. index:: pair: class; xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph:
+
+template class xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph
+==========================================================================
+
+.. toctree::
+	:hidden:
+
+.. code-block:: cpp
+	:class: overview-code-block
+
+	#include "fir_interpolate_hb_graph.hpp"
+
+
+Overview
+~~~~~~~~
+
+fir_interpolate_hb is a Halfband Interpolation FIR filter
+
+These are the templates to configure the halfband interpolator FIR class.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - TT_DATA
+
+        - 
+          describes the type of individual data samples input to and output from the filter function. This is a typename and must be one of the following:
+          
+          int16, cint16, int32, cint32, float, cfloat.
+
+    *
+        - TT_COEFF
+
+        - 
+          describes the type of individual coefficients of the filter taps.
+          
+          It must be one of the same set of types listed for TT_DATA and must also satisfy the following rules:
+          
+          * Complex types are only supported when TT_DATA is also complex.
+          
+          * 32 bit types are only supported when TT_DATA is also a 32 bit type,
+          
+          * TT_COEFF must be an integer type if TT_DATA is an integer type
+          
+          * TT_COEFF must be a float type if TT_DATA is a float type.
+
+    *
+        - TP_FIR_LEN
+
+        - is an unsigned integer which describes the number of taps in the filter. TP_FIR_LEN must be in the range 4 to 240 inclusive and must satisfy (TP_FIR_LEN +1)/4 = N where N is a positive integer.
+
+    *
+        - TP_SHIFT
+
+        - 
+          describes power of 2 shift down applied to the accumulation of FIR terms before output.
+          
+          TP_SHIFT must be in the range 0 to 61.
+
+    *
+        - TP_RND
+
+        - 
+          describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where
+          
+          * 0 = floor (truncate) eg. 3.8 Would become 3.
+          
+          * 1 = ceiling e.g. 3.2 would become 4.
+          
+          * 2 = round to positive infinity.
+          
+          * 3 = round to negative infinity.
+          
+          * 4 = round symmetrical to infinity.
+          
+          * 5 = round symmetrical to zero.
+          
+          * 6 = round convergent to even.
+          
+          * 7 = round convergent to odd.
+            
+            Modes 2 to 7 round to the nearest integer. They differ only in how they round for values of 0.5.
+
+    *
+        - TP_INPUT_WINDOW_VSIZE
+
+        - 
+          describes the number of samples in the window API used for input to the filter function.
+          
+          The number of values in the output window will be TP_INPUT_WINDOW_VSIZE multiplied by 2 by virtue the halfband interpolation factor.
+          
+          Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
+
+    *
+        - TP_CASC_LEN
+
+        - 
+          describes the number of AIE processors to split the operation over.
+          
+          This allows resource to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
+
+    *
+        - TP_DUAL_IP
+
+        - 
+          allows 2 input ports to be connected to FIR, increasing available throughput.
+          
+          Depending on TP_API, additional input ports functionality differs. If TP_API is set to use streams, then
+          
+          TP_DUAL_IP is an implementation trade-off between performance and data bank resource.
+          
+          When TP_DUAL_IP is set to 0, the FIR performance may be limited by load contention.
+          
+          When TP_DUAL_IP is set to 1, two ram banks are used for input.
+          
+          If TP_API is set to use streams, then:
+          
+          When TP_DUAL_IP is set to 0, single stream will be connected as FIRs input.
+          
+          When TP_DUAL_IP is set to 1, two stream inputs will be connected.
+          
+          In such case data should be organized in 128-bit interleaved pattern, e.g.:
+          
+          
+          
+          * samples 0-3 to be sent over stream0 for cint16 data type,
+          
+          * samples 4-7 to be sent over stream1 for cint16 data type.
+
+    *
+        - TP_USE_COEFF_RELOAD
+
+        - 
+          allows the user to select if runtime coefficient reloading should be used.
+          
+          When defining the parameter:
+          
+          * 0 = static coefficients, defined in filter constructor,
+          
+          * 1 = reloadable coefficients, passed as argument to runtime function.
+            
+            Note: when used, optional port: ``port<input> coeff;`` will be added to the FIR.
+
+    *
+        - TP_NUM_OUTPUTS
+
+        - 
+          sets the number of ports over which the output is sent.
+          
+          This can be 1 or 2. It is set to 1 by default.
+          
+          Depending on TP_API, additional output ports functionality differs. For Windows API, additional output provides flexibility in connecting FIR output with multiple destinations. Additional output ``out2`` is an exact copy of the data of the output port ``out`` .
+          
+          With Stream API, the additional output port increases the FIR's throughput.
+          
+          Data is sent in a 128-bit interleaved pattern, e.g. :
+          
+          
+          
+          * samples 0-3 is sent over stream0 for cint16 data type,
+          
+          * samples 4-7 is sent over stream1 for cint16 data type.
+            
+            Note: when used, optional port: ``port<output> out2;`` will be added to the FIR.
+
+    *
+        - TP_UPSHIFT_CT
+
+        - 
+          upshift unit center tap.
+          
+          Uses provided center tap's value to upshift data sample. Note: when complex coefficient's are used, center tap's real part will be used for the upshift.
+          
+          Note: Upshift UCT is only supported with 16-bit coefficient types, i.e. int16 and cint16.
+          
+          TP_UPSHIFT_CT must be in the range 0 to 47.
+
+    *
+        - TP_API
+
+        - 
+          specifies if the input/output interface should be window-based or stream-based.
+          
+          The values supported are 0 (window API) or 1 (stream API).
+
+.. ref-code-block:: cpp
+	:class: overview-code-block
+
+	template <
+	    typename TT_DATA,
+	    typename TT_COEFF,
+	    unsigned int TP_FIR_LEN,
+	    unsigned int TP_SHIFT,
+	    unsigned int TP_RND,
+	    unsigned int TP_INPUT_WINDOW_VSIZE,
+	    unsigned int TP_CASC_LEN = 1,
+	    unsigned int TP_DUAL_IP = 0,
+	    unsigned int TP_USE_COEFF_RELOAD = 0,
+	    unsigned int TP_NUM_OUTPUTS = 1,
+	    unsigned int TP_UPSHIFT_CT = 0,
+	    unsigned int TP_API = 0
+	    >
+	class fir_interpolate_hb_graph: public graph
+
+	// fields
+
+	port <input> :ref:`in<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a1799ef1a5919ad2e8d87a314e455eed1>`
+	port <output> :ref:`out<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a5cf3c4c1a30071e5d777b41058a482d2>`
+	:ref:`port_conditional<doxid-namespacexf_1_1dsp_1_1aie_1a5f0c6119facdd44d3456350e506b5d69>` <input, (TP_DUAL_IP==1)> :ref:`in2<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1ab8b1e3541bdcce3853cdf2efb72d32d4>`
+	:ref:`port_conditional<doxid-namespacexf_1_1dsp_1_1aie_1a5f0c6119facdd44d3456350e506b5d69>` <input, (TP_USE_COEFF_RELOAD==1)> :ref:`coeff<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1aae69e521b523ffb0a77e4494469d51d8>`
+	:ref:`port_conditional<doxid-namespacexf_1_1dsp_1_1aie_1a5f0c6119facdd44d3456350e506b5d69>` <output, (TP_NUM_OUTPUTS==2)> :ref:`out2<doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a2411e5c28a4124ecf8184d20858dc4e1>`
+
+Fields
+------
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a1799ef1a5919ad2e8d87a314e455eed1:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::in:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	port <input> in
+
+The input data to the function. This input is either a window API of samples of TT_DATA type or stream API (depending on TP_API). Note: Margin is added internally to the graph, when connecting input port with kernel port. Therefore, margin should not be added when connecting graph to a higher level design unit. Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest multiple of 32 bytes.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a5cf3c4c1a30071e5d777b41058a482d2:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::out:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	port <output> out
+
+The output data from the function. This output is either a window API of samples of TT_DATA type or stream API (depending on TP_API). Number of output samples is determined by interpolation & decimation factors (if present).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1ab8b1e3541bdcce3853cdf2efb72d32d4:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::in2:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_conditional<doxid-namespacexf_1_1dsp_1_1aie_1a5f0c6119facdd44d3456350e506b5d69>` <input, (TP_DUAL_IP==1)> in2
+
+The conditional input data to the function. This input is (generated when TP_DUAL_IP == 1) either a window API of samples of TT_DATA type or stream API (depending on TP_API).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1aae69e521b523ffb0a77e4494469d51d8:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::coeff:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_conditional<doxid-namespacexf_1_1dsp_1_1aie_1a5f0c6119facdd44d3456350e506b5d69>` <input, (TP_USE_COEFF_RELOAD==1)> coeff
+
+The conditional coefficient data to the function. This port is (generated when TP_USE_COEFF_RELOAD == 1) an array of coefficients of TT_COEFF type.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a2411e5c28a4124ecf8184d20858dc4e1:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::out2:
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	:ref:`port_conditional<doxid-namespacexf_1_1dsp_1_1aie_1a5f0c6119facdd44d3456350e506b5d69>` <output, (TP_NUM_OUTPUTS==2)> out2
+
+The output data from the function. This output is (generated when TP_NUM_OUTPUTS == 2) either a window API of samples of TT_DATA type or stream API (depending on TP_API). Number of output samples is determined by interpolation & decimation factors (if present).
+
+
+Methods
+~~~~~~~
+
+.. FunctionSection
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a18f9d479b4e77612e988e2e4b815cbda:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::getkernels:
+
+getKernels
+----------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	kernel* getKernels ()
+
+Access function to get pointer to kernel (or first kernel in a chained configuration).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1adce2cb1d0415897cab9a4665f6854286:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::getkernelarchs:
+
+getKernelArchs
+--------------
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	unsigned int getKernelArchs ()
+
+Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a8c2df8a250dd63179ebddfdeccf7a0a9:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::fir_interpolate_hb_graph:
+
+fir_interpolate_hb_graph
+------------------------
+
+
+fir_interpolate_hb_graph overload (1)
++++++++++++++++++++++++++++++++++++++
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	fir_interpolate_hb_graph (const std::vector <TT_COEFF>& taps)
+
+This is the constructor function for the FIR graph with static coefficients.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - taps
+
+        - 
+          a reference to the std::vector array of taps values of type TT_COEFF.
+          
+          The taps array must be supplied in a compressed form for this halfband application, i.e.
+          
+          taps[] = {c0, c2, c4, ..., cN, cCT} where
+          
+          N = (TP_FIR_LEN+1)/4 and cCT is the center tap.
+          
+          For example, a 7-tap halfband interpolator might use coeffs (1, 0, 2, 5, 2, 0, 1).
+          
+          This would be input as taps[]= {1,2,5} since the context of halfband interpolation allows the remaining coefficients to be inferred.
+
+.. _doxid-classxf_1_1dsp_1_1aie_1_1fir_1_1interpolate__hb_1_1fir__interpolate__hb__graph_1a75c0a1f3320bcf2664c56181d31f3271:
+.. _cid-xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph::fir_interpolate_hb_graph-2:
+
+fir_interpolate_hb_graph overload (2)
++++++++++++++++++++++++++++++++++++++
+
+
+.. ref-code-block:: cpp
+	:class: title-code-block
+
+	fir_interpolate_hb_graph ()
+
+This is the constructor function for the FIR graph with reloadable coefficients.
+
