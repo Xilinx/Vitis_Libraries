@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-set cflags "-std=c++14"
-add_files "dut.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb "tb.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb test.dat
+add_files "dut.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++14"
+add_files -tb "tb.cpp test.dat" -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top dut
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP
@@ -55,10 +56,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

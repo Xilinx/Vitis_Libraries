@@ -2,14 +2,14 @@
     "name": "Xilinx RSA", 
     "description": "", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
     "project": "prj", 
     "solution": "solution1", 
     "clock": "4", 
@@ -38,17 +38,17 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
-                    "hls_vivado_syn": 360, 
+                    "vivado_syn": 360, 
                     "hls_csim": 60, 
                     "hls_cosim": 360, 
-                    "hls_vivado_impl": 360, 
+                    "vivado_impl": 360, 
                     "hls_csynth": 60
                 }
             }

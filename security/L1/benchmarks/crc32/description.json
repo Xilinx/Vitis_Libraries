@@ -3,19 +3,19 @@
     "name": "Xilinx CRC32 Benchmark", 
     "description": "CRC32 Checksum Algorithm Benchmarking", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50", 
         "aws-vu9p-f1",
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

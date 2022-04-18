@@ -83,11 +83,6 @@ const ap_uint<8> PermMap[64] = {58, 50, 42, 34, 26, 18, 10, 2,  60, 52, 44, 36, 
                                 14, 6,  64, 56, 48, 40, 32, 24, 16, 8,  57, 49, 41, 33, 25, 17, 9,  1,  59, 51, 43, 35,
                                 27, 19, 11, 3,  61, 53, 45, 37, 29, 21, 13, 5,  63, 55, 47, 39, 31, 23, 15, 7};
 
-// Reverse of PermMap, not necessary
-const ap_uint<8> IPermMap[64] = {40, 8,  48, 16, 56, 24, 64, 32, 39, 7,  47, 15, 55, 23, 63, 31, 38, 6,  46, 14, 54, 22,
-                                 62, 30, 37, 5,  45, 13, 53, 21, 61, 29, 36, 4,  44, 12, 52, 20, 60, 28, 35, 3,  43, 11,
-                                 51, 19, 59, 27, 34, 2,  42, 10, 50, 18, 58, 26, 33, 1,  41, 9,  49, 17, 57, 25};
-
 const ap_uint<8> ExtMap[48] = {32, 1,  2,  3,  4,  5,  4,  5,  6,  7,  8,  9,  8,  9,  10, 11,
                                12, 13, 12, 13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21,
                                22, 23, 24, 25, 24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1};
@@ -162,28 +157,6 @@ const ap_uint<8> subkeyIndex[16][48] = {
     {17, 58, 41, 2,  56, 24, 40, 35, 9,  16, 26, 49, 10, 42, 33, 32, 51, 0,  1,  8,  43, 34, 25, 48,
      29, 4,  46, 61, 44, 11, 54, 37, 12, 60, 30, 36, 5,  28, 45, 3,  22, 27, 52, 21, 20, 6,  62, 38}};
 
-template <int W>
-static void convertEndian(ap_uint<W> in, ap_uint<W>& out) {
-    // speed up
-    // 8 * size and remaining
-    // actually W == 64
-    int size = W / 8;
-    if (W % 8 != 0 /*(W >> 3) << 3 != W*/) {
-        size++;
-    }
-
-    int start = 0;
-    for (int i = 0; i < size; ++i) {
-#pragma HLS pipeline
-        int end = start + 8 > W ? W : start + 8;
-        for (int j = start, k = end - 1; j < end; ++j, --k) {
-            out[j] = in[k];
-        }
-
-        start += 8;
-    }
-}
-
 // Convert number according to endian
 static void convert(ap_uint<64> in, ap_uint<64>& out) {
     int start = 0;
@@ -196,95 +169,6 @@ static void convert(ap_uint<64> in, ap_uint<64>& out) {
         }
 
         start += 8;
-    }
-}
-
-// Initialize subkeyC and subkeyD
-static void initSubkeyCD(ap_uint<64> key, ap_uint<28>& subkeyC, ap_uint<28>& subkeyD) {
-    for (int i = 0; i < 28; ++i) {
-#pragma HLS unroll
-        int id = PCMapC[i] - 1;
-        subkeyC[i] = key[id];
-        int idx = PCMapD[i] - 1;
-        subkeyD[i] = key[idx];
-    }
-}
-
-// Helper function for subkey index
-static void initSubkeyIndex(int cIndexArray[28], int dIndexArray[28]) {
-    for (int i = 0; i < 28; ++i) {
-#pragma HLS unroll
-        int id = PCMapC[i] - 1;
-        cIndexArray[i] = id;
-        int idx = PCMapD[i] - 1;
-        dIndexArray[i] = idx;
-    }
-}
-
-// Helper function for subkey index
-template <int W>
-static void leftRotateShiftArray(int in[W], int numShift) {
-    int tmp[W];
-    for (int i = 0; i < W; ++i) {
-        int idx = (i + numShift) % W;
-        tmp[i] = in[idx];
-    }
-
-    for (int i = 0; i < W; ++i) {
-        in[i] = tmp[i];
-    }
-}
-
-static void getSubkeyIndex(int iter, int cIndexArray[28], int dIndexArray[28], int subkeyIndex[48]) {
-    int numShift = 2;
-    int round = iter + 1;
-    if (round == 1 || round == 2 || round == 9 || round == 16) {
-        numShift = 1;
-    }
-
-    leftRotateShiftArray<28>(cIndexArray, numShift);
-    leftRotateShiftArray<28>(dIndexArray, numShift);
-
-    int cd[56];
-    for (int i = 0; i < 28; ++i) {
-        cd[i] = cIndexArray[i];
-        cd[i + 28] = dIndexArray[i];
-    }
-
-    for (int i = 0; i < 48; ++i) {
-        subkeyIndex[i] = cd[PC2Map[i] - 1];
-    }
-}
-
-static void leftRotateShift(ap_uint<28>& in, int numShift) {
-    ap_uint<28> tmp;
-    for (int i = 0; i < 28; ++i) {
-#pragma HLS unroll
-        int idx = (i + numShift) % 28;
-        tmp[i] = in[idx];
-    }
-
-    in = tmp;
-}
-
-// Get subkey for iteration iter, subkeyC and subkeyD are updated
-static void getSubkey(int iter, ap_uint<28>& subkeyC, ap_uint<28>& subkeyD, ap_uint<48>& subkey) {
-    int numShift = 2;
-    int round = iter + 1;
-    if (round == 1 || round == 2 || round == 9 || round == 16) {
-        numShift = 1;
-    }
-
-    leftRotateShift(subkeyC, numShift);
-    leftRotateShift(subkeyD, numShift);
-
-    ap_uint<56> cd;
-    cd(27, 0) = subkeyC;
-    cd(55, 28) = subkeyD;
-
-    for (int i = 0; i < 48; ++i) {
-#pragma HLS unroll
-        subkey[i] = cd[PC2Map[i] - 1];
     }
 }
 
@@ -371,54 +255,6 @@ static void finalPerm(ap_uint<64> in, ap_uint<64>& out) {
     }
 }
 
-static void process(ap_uint<32>& l, ap_uint<32>& r, ap_uint<48> subkeys, bool enc) {
-    const int IterNum = 16;
-Loop_Round:
-    for (int i = 0; i < IterNum; ++i) {
-#pragma HLS pipeline
-        int keyId = enc ? i : 15 - i;
-        ap_uint<32> rr = l ^ f(r, subkeys[keyId]);
-
-        // Update L and R, the order matters
-        l = r;
-        r = rr;
-    }
-}
-
-static void keyIndexSchedule(ap_uint<64> key, int subkeyIndex[16][48]) {
-    int cIndexArray[28];
-    int dIndexArray[28];
-
-    initSubkeyIndex(cIndexArray, dIndexArray);
-
-    ap_uint<28> subkeyC, subkeyD;
-    for (int i = 0; i < 28; ++i) {
-        subkeyC[i] = key[cIndexArray[i]];
-        subkeyD[i] = key[dIndexArray[i]];
-    }
-
-    for (int i = 0; i < 16; ++i) {
-        getSubkeyIndex(i, cIndexArray, dIndexArray, subkeyIndex[i]);
-
-#ifndef __SYNTHESIS__
-        printArray(subkeyIndex[i], 48, 12);
-        if (i != 15) {
-            std::cout << ",\n";
-        }
-#endif
-    }
-}
-
-static void keyScheduleOriginal(ap_uint<64> key, ap_uint<48> subkeys[16]) {
-    ap_uint<28> subkeyC, subkeyD;
-    initSubkeyCD(key, subkeyC, subkeyD);
-
-    for (int i = 0; i < 16; ++i) {
-#pragma HLS pipeline
-        getSubkey(i, subkeyC, subkeyD, subkeys[i]);
-    }
-}
-
 /**
  * @brief keySchedule is to schedule subkeys used in DES and 3DES
  *
@@ -461,7 +297,6 @@ static void desEncrypt(ap_uint<64> in, ap_uint<64> key, ap_uint<64>& out) {
     keySchedule(cKey, subkeys);
 
     // ap_uint<28> subkeyC, subkeyD;
-    // initSubkeyCD(cKey, subkeyC, subkeyD);
 
     // Initital permutation
     ap_uint<64> data;
@@ -477,7 +312,6 @@ Loop_Round:
     for (int i = 0; i < IterNum; ++i) {
 #pragma HLS pipeline
         // ap_uint<48> subkey;
-        // getSubkey(i, subkeyC, subkeyD, subkey);
 
         ap_uint<32> rr = l ^ f(r, subkeys[i]);
         // ap_uint<32> rr = l ^ f(r, subkey);
@@ -521,7 +355,6 @@ static void desDecrypt(ap_uint<64> in, ap_uint<64> cipherKey, ap_uint<64>& out) 
 
     ap_uint<48> subkeys[16];
     // int subkeyIndex[16][48];
-    // keyIndexSchedule(cKey, subkeyIndex);
     keySchedule(cKey, subkeys);
 
     // Initital permutation
@@ -595,81 +428,6 @@ static void des3Decrypt(ap_uint<64> in, ap_uint<64> key1, ap_uint<64> key2, ap_u
     desEncrypt(dat1, key2, dat2);
     desDecrypt(dat2, key1, out);
 }
-
-/*
-static void desEncrypt2(ap_uint<64> in, ap_uint<64> key, ap_uint<64>& out, bool enc) {
-#pragma HLS pipeline
-    ap_uint<48> subkeys[16];
-    keySchedule(key, subkeys);
-
-    // Initital permutation
-    ap_uint<64> data;
-    initPerm(in, data);
-
-    // Stated in FIPS 46, the left most bit of a block is bit one
-    ap_uint<32> l = data(31, 0);
-    ap_uint<32> r = data(63, 32);
-
-    // 16 rounds of processing
-    //process(l, r, subkeys, enc);
-    const int IterNum = 16;
-Loop_Round: for (int i = 0; i < IterNum; ++i) {
-#pragma HLS pipeline
-        int keyId = enc ? i : 15 - i;
-        ap_uint<32> rr = l ^ f(r, subkeys[keyId]);
-
-        // Update L and R, the order matters
-        l = r;
-        r = rr;
-    }
-
-    ap_uint<64> prePerm;
-    prePerm(31, 0) = r;
-    prePerm(63, 32) = l;
-
-    // Final permutation
-    ap_uint<64> result;
-    finalPerm(prePerm, result);
-}
-
-static void des3EncryptBk(ap_uint<64> in, ap_uint<64> key1, ap_uint<64> key2, ap_uint<64> key3, ap_uint<64>& out) {
-#pragma HLS pipeline
-    ap_uint<64> block;
-    convert(in, block);
-
-    ap_uint<64> cKey1, cKey2, cKey3;
-    convert(key1, cKey1);
-    convert(key2, cKey2);
-    convert(key3, cKey3);
-
-    ap_uint<64> dat1, dat2, dat3;
-
-    desEncrypt2(block, cKey1, dat1, true);
-    desEncrypt2(dat1, cKey2, dat2, false);
-    desEncrypt2(dat2, cKey3, dat3, true);
-
-    convert(dat3, out);
-}
-
-static void des3DecryptBk(ap_uint<64> in, ap_uint<64> key1, ap_uint<64> key2, ap_uint<64> key3, ap_uint<64>& out) {
-#pragma HLS pipeline
-    ap_uint<64> block;
-    convert(in, block);
-
-    ap_uint<64> cKey1, cKey2, cKey3;
-    convert(key1, cKey1);
-    convert(key2, cKey2);
-    convert(key3, cKey3);
-
-    ap_uint<64> dat1, dat2, dat3;
-
-    desEncrypt2(block, cKey3, dat1, false);
-    desEncrypt2(dat1, cKey2, dat2, true);
-    desEncrypt2(dat2, cKey1, dat3, false);
-
-    convert(dat3, out);
-}
-*/
 
 } // namespace security
 } // namespace xf

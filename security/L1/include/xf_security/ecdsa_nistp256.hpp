@@ -171,60 +171,6 @@ const ap_uint<256> Gx = ap_uint<256>("0x6B17D1F2E12C4247F8BCE6E563A440F277037D81
 const ap_uint<256> Gy = ap_uint<256>("0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5");
 const ap_uint<256> n = ap_uint<256>("0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551");
 
-ap_uint<256> productMod_p_karatsuba(ap_uint<256> opA, ap_uint<256> opB) {
-    ap_uint<224> negP = ap_uint<224>("0xFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001");
-    ap_uint<256> P = ap_uint<256>("0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF");
-
-    ap_uint<128> aH = opA.range(255, 128);
-    ap_uint<128> aL = opA.range(127, 0);
-    ap_uint<128> bH = opB.range(255, 128);
-    ap_uint<128> bL = opB.range(127, 0);
-
-    ap_uint<256> aLbH = aL * bH;
-    ap_uint<256> aHbL = aH * bL;
-    ap_uint<256> aHbH = aH * bH;
-    ap_uint<257> aLbL = aL * bL;
-    ap_uint<257> mid = aLbH + aHbL;
-
-    ap_uint<256> FL = 0;
-    FL.range(255, 128) = mid.range(127, 0);
-    aLbL += FL;
-    if (aLbL >= P) {
-        aLbL -= P;
-    }
-    aHbH += ap_uint<129>(mid.range(256, 128));
-    if (aHbH >= P) {
-        aHbH -= P;
-    }
-
-    ap_uint<257> res = 0;
-    for (int i = 223; i >= 0; i--) {
-        res <<= 1;
-        if (res >= P) {
-            res -= P;
-        }
-        if (negP[i] == 1) {
-            res += aHbH;
-            if (res >= P) {
-                res -= P;
-            }
-        }
-    }
-    res += aLbL;
-    if (res >= P) {
-        res -= P;
-    }
-    return res;
-}
-
-ap_uint<256> productMod_p_scanning(ap_uint<256> opA, ap_uint<256> opB) {
-    return xf::security::internal::productMod<256>(opA, opB, p);
-}
-
-ap_uint<256> productMod_p_direct(ap_uint<256> opA, ap_uint<256> opB) {
-    return opA * opB % p;
-}
-
 ap_uint<256> productMod_p_fastReduction(ap_uint<256> opA, ap_uint<256> opB) {
     ap_uint<128> aH = opA.range(255, 128);
     ap_uint<128> aL = opA.range(127, 0);
@@ -353,12 +299,6 @@ void add(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> Qx, ap_uint<256> Qy, ap_
         Rx = resX;
         Ry = resY;
     }
-}
-
-void toJacobian(ap_uint<256> x, ap_uint<256> y, ap_uint<256>& X, ap_uint<256>& Y, ap_uint<256>& Z) {
-    X = x;
-    Y = y;
-    Z = 1;
 }
 
 void fromJacobian(ap_uint<256> X, ap_uint<256> Y, ap_uint<256> Z, ap_uint<256>& x, ap_uint<256>& y) {
@@ -518,93 +458,6 @@ void addJacobianAffine(ap_uint<256> X1,
     }
 }
 
-void dotProduct(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, ap_uint<256>& Rx, ap_uint<256>& Ry) {
-#pragma HLS inline
-    ap_uint<256> resX = 0;
-    ap_uint<256> resY = 0;
-
-POINT_MULTIPLICATION:
-    for (int i = 0; i < 256; i++) {
-        if (k[i] == 1) {
-            add(Px, Py, resX, resY, resX, resY);
-        }
-        add(Px, Py, Px, Py, Px, Py);
-    }
-
-    Rx = resX;
-    Ry = resY;
-}
-
-void dotProductNAF(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, ap_uint<256>& Rx, ap_uint<256>& Ry) {
-    ap_uint<256> resX = 0;
-    ap_uint<256> resY = 0;
-
-    ap_uint<256> kNafPos = 0;
-    ap_uint<256> kNafNeg = 0;
-
-    getNAF(k, kNafPos, kNafNeg);
-
-    for (int i = 0; i < 256; i++) {
-        if (kNafPos[i] == 1) {
-            add(Px, Py, resX, resY, resX, resY);
-        }
-        if (kNafNeg[i] == 1) {
-            ap_uint<256> tmp = Py;
-            if (tmp > p) {
-                tmp = tmp - p;
-            }
-            ap_uint<256> negPy = getNeg(tmp);
-            add(Px, negPy, resX, resY, resX, resY);
-        }
-        add(Px, Py, Px, Py, Px, Py);
-    }
-
-    Rx = resX;
-    Ry = resY;
-}
-
-void dotProductNAFPrecompute(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, ap_uint<256>& Rx, ap_uint<256>& Ry) {
-#pragma HLS inline
-#pragma HLS bind_storage variable = preComputeX type = ROM_1P impl = LUTRAM
-#pragma HLS bind_storage variable = preComputeY type = ROM_1P impl = LUTRAM
-    ap_uint<256> kNafPos = 0;
-    ap_uint<256> kNafNeg = 0;
-    getNAF(k, kNafPos, kNafNeg);
-    ap_int<5> K[64];
-COMPUTE_K:
-    for (int i = 0; i < 64; i++) {
-        ap_uint<4> tmp1 = kNafPos.range(i * 4 + 3, i * 4);
-        ap_uint<4> tmp2 = kNafNeg.range(i * 4 + 3, i * 4);
-        K[i] = tmp1 - tmp2;
-    }
-
-    ap_uint<256> resX = 0;
-    ap_uint<256> resY = 0;
-    ap_uint<256> tmpX = 0;
-    ap_uint<256> tmpY = 0;
-POINT_MULTI_OUTER:
-    for (int j = 10; j > 0; j--) {
-    POINT_MULTI_INNER:
-        for (int i = 0; i < 64; i++) {
-            if (j == K[i]) {
-                add(preComputeX[i], preComputeY[i], tmpX, tmpY, tmpX, tmpY);
-            }
-            if (-j == K[i]) {
-                ap_uint<256> tmp = preComputeY[i];
-                if (tmp > p) {
-                    tmp = tmp - p;
-                }
-                ap_uint<256> negPy = getNeg(tmp);
-                add(preComputeX[i], negPy, tmpX, tmpY, tmpX, tmpY);
-            }
-        }
-
-        add(tmpX, tmpY, resX, resY, resX, resY);
-    }
-    Rx = resX;
-    Ry = resY;
-}
-
 void dotProductNAFPrecomputeJacobian(
     ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, ap_uint<256>& Rx, ap_uint<256>& Ry) {
 #pragma HLS inline
@@ -652,27 +505,6 @@ POINT_MULTI_OUTER:
     fromJacobian(resX, resY, resZ, Rx, Ry);
 }
 
-void dotProductJacobian(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, ap_uint<256>& Rx, ap_uint<256>& Ry) {
-    ap_uint<256> X1, Y1, Z1, X2, Y2, Z2;
-    toJacobian(Px, Py, X1, Y1, Z1);
-
-    ap_uint<256> RX = 1;
-    ap_uint<256> RY = 1;
-    ap_uint<256> RZ = 0;
-
-    for (int i = 256 - 1; i >= 0; i--) {
-        doubleJacobian(RX, RY, RZ, RX, RY, RZ);
-        if (k[i] == 1) {
-            addJacobian(RX, RY, RZ, X1, Y1, Z1, RX, RY, RZ);
-        }
-    }
-    X2 = RX;
-    Y2 = RY;
-    Z2 = RZ;
-
-    fromJacobian(X2, Y2, Z2, Rx, Ry);
-}
-
 void dotProductJacobianAffine(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, ap_uint<256>& Rx, ap_uint<256>& Ry) {
 #pragma HLS inline
     ap_uint<256> X2, Y2, Z2;
@@ -693,66 +525,6 @@ void dotProductJacobianAffine(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> k, 
     Z2 = RZ;
 
     fromJacobian(X2, Y2, Z2, Rx, Ry);
-}
-
-void preComputeW4(ap_uint<256> Px, ap_uint<256> Py, ap_uint<256> res_x[64], ap_uint<256> res_y[64]) {
-    ap_uint<256> tmp_x = Px;
-    ap_uint<256> tmp_y = Py;
-    res_x[0] = tmp_x;
-    res_y[0] = tmp_y;
-    for (int i = 1; i < 64; i++) {
-        for (int m = 0; m < 4; m++) {
-            add(tmp_x, tmp_y, tmp_x, tmp_y, tmp_x, tmp_y);
-        }
-        res_x[i] = tmp_x;
-        res_y[i] = tmp_y;
-    }
-}
-
-/**
- * @brief Generate Public Key point Q from private key
- *
- * @param privateKey Private Key.
- * @param Qx X coordinate of point Q.
- * @param Qy Y coordinate of point Q.
- */
-void generatePubKey(ap_uint<256> privateKey, ap_uint<256>& Qx, ap_uint<256>& Qy) {
-    dotProductNAFPrecompute(Gx, Gy, privateKey, Qx, Qy);
-}
-
-/**
- * @brief Verifying Public Key.
- * It will return true if verified, otherwise false.
- *
- * @param Px X coordinate of public key point P.
- * @param Py Y coordinate of public key point P.
- */
-bool verifyPubKey(ap_uint<256> Px, ap_uint<256> Py) {
-    if (Px == 0 && Py == 0) {
-        return false; // return false if public key is zero.
-    } else {
-        ap_uint<256> tx1 = productMod_p(Px, Px);
-        tx1 = productMod_p(tx1, Px);
-
-        ap_uint<256> tx2 = productMod_p(Px, a);
-        tx2 = xf::security::internal::addMod<256>(tx2, b, p);
-
-        ap_uint<256> tx3 = xf::security::internal::addMod<256>(tx2, tx1, p);
-
-        ap_uint<256> ty = productMod_p(Py, Py);
-
-        if (ty != tx3) { // return false if public key is not on the curve.
-            return false;
-        } else {
-            ap_uint<256> nPx, nPy;
-            dotProduct(Px, Py, n, nPx, nPy);
-
-            if (nPx != 0 || nPy != 0) { // return false if public key * n is not zero.
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 template <int HashW>

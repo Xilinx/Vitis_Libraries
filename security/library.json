@@ -18,8 +18,6 @@
             ],
 
             "libraries": [
-                "ssl",
-                "crypto"
             ]
         }
     }

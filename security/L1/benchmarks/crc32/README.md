@@ -18,12 +18,6 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Build kernel(Step 2)**
 
-Please check you've installed openSSL and make sure that its version is 1.0.2 or higher. Command to check openSSL version:
-
-```
-    openssl version
-```
-
 Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
 
 ```

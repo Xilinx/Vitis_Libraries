@@ -1959,21 +1959,28 @@ void crc32c(hls::stream<ap_uint<32> >& crcInitStrm,
                     int offset = j % 4;
                     crc ^= internal::table_crc32c[j][inTmp[W / 4 - 1 - index](31 - offset * 8, 24 - offset * 8)];
                 }
-
-                // crc = internal::table_crc32c[15][inTmp[0](7, 0)] ^ internal::table_crc32c[14][inTmp[0](15, 8)] ^
-                //      internal::table_crc32c[13][inTmp[0](23, 16)] ^ internal::table_crc32c[12][inTmp[0](31, 24)] ^
-                //      internal::table_crc32c[11][inTmp[1](7, 0)] ^ internal::table_crc32c[10][inTmp[1](15, 8)] ^
-                //      internal::table_crc32c[9][inTmp[1](23, 16)] ^ internal::table_crc32c[8][inTmp[1](31, 24)] ^
-                //      internal::table_crc32c[7][inTmp[2](7, 0)] ^ internal::table_crc32c[6][inTmp[2](15, 8)] ^
-                //      internal::table_crc32c[5][inTmp[2](23, 16)] ^ internal::table_crc32c[4][inTmp[2](31, 24)] ^
-                //      internal::table_crc32c[3][inTmp[3](7, 0)] ^ internal::table_crc32c[2][inTmp[3](15, 8)] ^
-                //      internal::table_crc32c[1][inTmp[3](23, 16)] ^ internal::table_crc32c[0][inTmp[3](31, 24)];
             }
-            for (uint64_t i = 0; i < len - (len / W) * W; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = W min = W
-                if (i == 0) in_data = inStrm.read();
-                crc = (crc >> 8) ^ internal::table_crc32c[0][crc(7, 0) ^ in_data.range(7 + 8 * i, 8 * i)];
+
+            ap_uint<6> resdu_byte = len - (len / W) * W;
+            if (resdu_byte > 0) {
+                in_data = inStrm.read();
+                in_data(31, 0) = in_data(31, 0) ^ crc;
+
+                ap_uint<8 * W> tmp = in_data << (8 * (W - resdu_byte));
+                if (resdu_byte == 1)
+                    crc = crc(31, 8) ^ internal::table_crc32c[0][tmp(W * 8 - 1, W * 8 - 8)];
+                else if (resdu_byte == 2)
+                    crc = crc(31, 16) ^ internal::table_crc32c[0][tmp(W * 8 - 1, W * 8 - 8)];
+                else if (resdu_byte == 3)
+                    crc = crc(31, 24) ^ internal::table_crc32c[0][tmp(W * 8 - 1, W * 8 - 8)];
+                else
+                    crc = internal::table_crc32c[0][tmp(W * 8 - 1, W * 8 - 8)];
+                for (int i = 1; i < W - 1; i++) {
+#pragma HLS unroll
+                    if (i < resdu_byte) {
+                        crc ^= internal::table_crc32c[i][tmp(7 + 8 * (W - 1 - i), 8 * (W - 1 - i))];
+                    }
+                }
             }
         }
         outStrm.write(~crc);
@@ -2051,7 +2058,8 @@ void crc32c(hls::stream<ap_uint<32> >& crcInitStrm,
                 }
 
                 // crc = internal::table_crc32c[15][inTmp[0](7, 0)] ^ internal::table_crc32c[14][inTmp[0](15, 8)] ^
-                //      internal::table_crc32c[13][inTmp[0](23, 16)] ^ internal::table_crc32c[12][inTmp[0](31, 24)] ^
+                //      internal::table_crc32c[13][inTmp[0](23, 16)] ^ internal::table_crc32c[12][inTmp[0](31, 24)]
+                //      ^
                 //      internal::table_crc32c[11][inTmp[1](7, 0)] ^ internal::table_crc32c[10][inTmp[1](15, 8)] ^
                 //      internal::table_crc32c[9][inTmp[1](23, 16)] ^ internal::table_crc32c[8][inTmp[1](31, 24)] ^
                 //      internal::table_crc32c[7][inTmp[2](7, 0)] ^ internal::table_crc32c[6][inTmp[2](15, 8)] ^

@@ -196,15 +196,12 @@ int main(int argc, char* argv[]) {
 
     // Host buffers
     ap_uint<512>* hb_in1 = aligned_alloc<ap_uint<512> >(CH_NM * 4 + N_ROW * N_TASK * CH_NM / 64 + 1);
-    ap_uint<512>* hb_in2 = aligned_alloc<ap_uint<512> >(CH_NM * 4 + N_ROW * N_TASK * CH_NM / 64 + 1);
-    ap_uint<512>* hb_in3 = aligned_alloc<ap_uint<512> >(CH_NM * 4 + N_ROW * N_TASK * CH_NM / 64 + 1);
-    ap_uint<512>* hb_in4 = aligned_alloc<ap_uint<512> >(CH_NM * 4 + N_ROW * N_TASK * CH_NM / 64 + 1);
-    ap_uint<512>* hb_out_a[4];
-    for (int i = 0; i < 4; i++) {
+    ap_uint<512>* hb_out_a[1];
+    for (int i = 0; i < 1; i++) {
         hb_out_a[i] = aligned_alloc<ap_uint<512> >(N_ROW * N_TASK * CH_NM / 64);
     }
-    ap_uint<512>* hb_out_b[4];
-    for (int i = 0; i < 4; i++) {
+    ap_uint<512>* hb_out_b[1];
+    for (int i = 0; i < 1; i++) {
         hb_out_b[i] = aligned_alloc<ap_uint<512> >(N_ROW * N_TASK * CH_NM / 64);
     }
 
@@ -212,28 +209,13 @@ int main(int argc, char* argv[]) {
     hb_in1[0].range(127, 0) = N_ROW;
     hb_in1[0].range(191, 128) = N_TASK;
     hb_in1[0].range(207, 192) = KEY_SIZE;
-    hb_in2[0].range(127, 0) = N_ROW;
-    hb_in2[0].range(191, 128) = N_TASK;
-    hb_in2[0].range(207, 192) = KEY_SIZE;
-    hb_in3[0].range(127, 0) = N_ROW;
-    hb_in3[0].range(191, 128) = N_TASK;
-    hb_in3[0].range(207, 192) = KEY_SIZE;
-    hb_in4[0].range(127, 0) = N_ROW;
-    hb_in4[0].range(191, 128) = N_TASK;
-    hb_in4[0].range(207, 192) = KEY_SIZE;
     // generate key blocks
     for (unsigned int j = 0; j < CH_NM * 4; j++) {
         hb_in1[j + 1] = keyBlock[j % 4];
-        hb_in2[j + 1] = keyBlock[j % 4];
-        hb_in3[j + 1] = keyBlock[j % 4];
-        hb_in4[j + 1] = keyBlock[j % 4];
     }
     // generate texts
     for (unsigned int j = 0; j < N_ROW * N_TASK * CH_NM / 64; j++) {
         hb_in1[j + 1 + 4 * CH_NM] = dataBlock;
-        hb_in2[j + 1 + 4 * CH_NM] = dataBlock;
-        hb_in3[j + 1 + 4 * CH_NM] = dataBlock;
-        hb_in4[j + 1 + 4 * CH_NM] = dataBlock;
     }
 
     std::cout << "Host map buffer has been allocated and set.\n";
@@ -262,40 +244,25 @@ int main(int argc, char* argv[]) {
 
     cl::Kernel kernel0(program, "rc4EncryptKernel_1", &err);
     logger.logCreateKernel(err);
-    cl::Kernel kernel1(program, "rc4EncryptKernel_2", &err);
-    logger.logCreateKernel(err);
-    cl::Kernel kernel2(program, "rc4EncryptKernel_3", &err);
-    logger.logCreateKernel(err);
-    cl::Kernel kernel3(program, "rc4EncryptKernel_4", &err);
-    logger.logCreateKernel(err);
 
-    cl_mem_ext_ptr_t mext_in[4];
+    cl_mem_ext_ptr_t mext_in[1];
     mext_in[0] = {XCL_MEM_DDR_BANK0, hb_in1, 0};
-    mext_in[1] = {XCL_MEM_DDR_BANK1, hb_in2, 0};
-    mext_in[2] = {XCL_MEM_DDR_BANK2, hb_in3, 0};
-    mext_in[3] = {XCL_MEM_DDR_BANK3, hb_in4, 0};
 
-    cl_mem_ext_ptr_t mext_out_a[4];
+    cl_mem_ext_ptr_t mext_out_a[1];
     mext_out_a[0] = {XCL_MEM_DDR_BANK0, hb_out_a[0], 0};
-    mext_out_a[1] = {XCL_MEM_DDR_BANK1, hb_out_a[1], 0};
-    mext_out_a[2] = {XCL_MEM_DDR_BANK2, hb_out_a[2], 0};
-    mext_out_a[3] = {XCL_MEM_DDR_BANK3, hb_out_a[3], 0};
 
-    cl_mem_ext_ptr_t mext_out_b[4];
+    cl_mem_ext_ptr_t mext_out_b[1];
     mext_out_b[0] = {XCL_MEM_DDR_BANK0, hb_out_b[0], 0};
-    mext_out_b[1] = {XCL_MEM_DDR_BANK1, hb_out_b[1], 0};
-    mext_out_b[2] = {XCL_MEM_DDR_BANK2, hb_out_b[2], 0};
-    mext_out_b[3] = {XCL_MEM_DDR_BANK3, hb_out_b[3], 0};
 
     // ping buffer
-    cl::Buffer in_buff_a[4];
-    cl::Buffer out_buff_a[4];
+    cl::Buffer in_buff_a[1];
+    cl::Buffer out_buff_a[1];
     // pong buffer
-    cl::Buffer in_buff_b[4];
-    cl::Buffer out_buff_b[4];
+    cl::Buffer in_buff_b[1];
+    cl::Buffer out_buff_b[1];
 
     // Map buffers
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 1; i++) {
         in_buff_a[i] =
             cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                        (size_t)(sizeof(ap_uint<512>) * (1 + CH_NM * 4 + N_ROW * N_TASK * CH_NM / 64)), &mext_in[i]);
@@ -320,7 +287,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<cl::Event> > read_events(num_rep);
     for (int i = 0; i < num_rep; i++) {
         write_events[i].resize(1);
-        kernel_events[i].resize(4);
+        kernel_events[i].resize(1);
         read_events[i].resize(1);
     }
 
@@ -336,14 +303,8 @@ int main(int argc, char* argv[]) {
         std::vector<cl::Memory> ib;
         if (use_a) {
             ib.push_back(in_buff_a[0]);
-            ib.push_back(in_buff_a[1]);
-            ib.push_back(in_buff_a[2]);
-            ib.push_back(in_buff_a[3]);
         } else {
             ib.push_back(in_buff_b[0]);
-            ib.push_back(in_buff_b[1]);
-            ib.push_back(in_buff_b[2]);
-            ib.push_back(in_buff_b[3]);
         }
 
         if (i > 1) {
@@ -357,46 +318,19 @@ int main(int argc, char* argv[]) {
             int j = 0;
             kernel0.setArg(j++, in_buff_a[0]);
             kernel0.setArg(j++, out_buff_a[0]);
-            j = 0;
-            kernel1.setArg(j++, in_buff_a[1]);
-            kernel1.setArg(j++, out_buff_a[1]);
-            j = 0;
-            kernel2.setArg(j++, in_buff_a[2]);
-            kernel2.setArg(j++, out_buff_a[2]);
-            j = 0;
-            kernel3.setArg(j++, in_buff_a[3]);
-            kernel3.setArg(j++, out_buff_a[3]);
         } else {
             int j = 0;
             kernel0.setArg(j++, in_buff_b[0]);
             kernel0.setArg(j++, out_buff_b[0]);
-            j = 0;
-            kernel1.setArg(j++, in_buff_b[1]);
-            kernel1.setArg(j++, out_buff_b[1]);
-            j = 0;
-            kernel2.setArg(j++, in_buff_b[2]);
-            kernel2.setArg(j++, out_buff_b[2]);
-            j = 0;
-            kernel3.setArg(j++, in_buff_b[3]);
-            kernel3.setArg(j++, out_buff_b[3]);
         }
         q.enqueueTask(kernel0, &write_events[i], &kernel_events[i][0]);
-        q.enqueueTask(kernel1, &write_events[i], &kernel_events[i][1]);
-        q.enqueueTask(kernel2, &write_events[i], &kernel_events[i][2]);
-        q.enqueueTask(kernel3, &write_events[i], &kernel_events[i][3]);
 
         // read data from DDR
         std::vector<cl::Memory> ob;
         if (use_a) {
             ob.push_back(out_buff_a[0]);
-            ob.push_back(out_buff_a[1]);
-            ob.push_back(out_buff_a[2]);
-            ob.push_back(out_buff_a[3]);
         } else {
             ob.push_back(out_buff_b[0]);
-            ob.push_back(out_buff_b[1]);
-            ob.push_back(out_buff_b[2]);
-            ob.push_back(out_buff_b[3]);
         }
         q.enqueueMigrateMemObjects(ob, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
     }
@@ -411,7 +345,7 @@ int main(int argc, char* argv[]) {
     // check result
     bool checked = true;
     // check ping buffer
-    for (unsigned int n = 0; n < 4; n++) {
+    for (unsigned int n = 0; n < 1; n++) {
         for (unsigned int j = 0; j < N_TASK; j++) {
             for (unsigned int k = 0; k < CH_NM; k++) {
                 for (unsigned int i = 0; i < N_ROW; i++) {
@@ -432,7 +366,7 @@ int main(int argc, char* argv[]) {
     }
 
     // check pong buffer
-    for (unsigned int n = 0; n < 4; n++) {
+    for (unsigned int n = 0; n < 1; n++) {
         for (unsigned int j = 0; j < N_TASK; j++) {
             for (unsigned int k = 0; k < CH_NM; k++) {
                 for (unsigned int i = 0; i < N_ROW; i++) {

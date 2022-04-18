@@ -1,0 +1,79 @@
+{
+    "gui": false, 
+    "name": "Xilinx L2 ETHASH (SC) Test", 
+    "description": "A SystemCompiler example for ETHASH acceleration.", 
+    "flow": "vitis", 
+    "platform_allowlist": [
+        "xilinx_u55n_gen3x4_xdma_2_202110_1"
+    ], 
+    "platform_blocklist": [
+        "other"
+    ], 
+    "platform_properties": {
+    }, 
+    "launch": [
+        {
+            "cmd_args": "-n 1", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "host/main.cpp"
+            ], 
+            "includepaths": [
+                "host", 
+                "LIB_DIR/L2/include"
+            ],
+            "options": "-O3"
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "host",
+                "LIB_DIR/L2/include"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/ethash_krl.cpp", 
+                    "frequency": 300.0, 
+                    "name": "kernel_ethash"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kernel_ethash"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

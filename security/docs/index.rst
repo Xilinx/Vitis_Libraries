@@ -32,6 +32,12 @@ Since all the primitive code is developed in HLS C++ with the permissive Apache 
 advanced users can easily tailor, optimize or assemble property logic.
 Benchmarks of 4 different acceleration applications are also provided with the library for easy on-boarding and comparison.
 
+.. toctree::
+   :caption: Tutorial
+   :maxdepth: 1
+   tutorial.rst
+
+
 Library Contents
 ================
 
