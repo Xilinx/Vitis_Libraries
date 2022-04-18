@@ -62,7 +62,7 @@ Example
     op0.operationName = (char*)opName.c_str();
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinPath = xclbinPath;
     op0.deviceNeeded = deviceNeeded;
 
     xf::graph::L3::Handle handle0;
@@ -94,7 +94,6 @@ Example
     int ret = ev.wait();
 
     //--------------- Free and delete -----------------------------------
-    (handle0.opsp)->join();
     handle0.free();
     g.freeBuffers();
 
@@ -122,54 +121,57 @@ Example of using multiple requests
     #define DT float
 
     //----------------- Setup shortestPathFloat thread -------------
-    std::string opName;
-    std::string kernelName;
-    int requestLoad;
-    std::string xclbinPath;
-    int deviceNeeded;
+    std::string opName0;
+    std::string kernelName0;
+    int requestLoad0;
+    std::string xclbinPath0;
+    int deviceNeeded0;
 
     xf::graph::L3::Handle::singleOP op0;
-    op0.operationName = (char*)opName.c_str();
-    op0.setKernelName((char*)kernelName.c_str());
-    op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
-    op0.deviceNeeded = deviceNeeded;
+    op0.operationName = (char*)opName0.c_str();
+    op0.setKernelName((char*)kernelName0.c_str());
+    op0.requestLoad = requestLoad0;
+    op0.xclbinPath = xclbinPath0;
+    op0.deviceNeeded = deviceNeeded0;
 
-    //----------------- Setup pageRank thread -------------
-    std::string opName2;
-    std::string kernelName2;
-    int requestLoad2;
-    std::string xclbinPath2;
-    int deviceNeeded2;
-
-    xf::graph::L3::Handle::singleOP op1;
-    op1.operationName = (char*)opName2.c_str();
-    op1.setKernelName((char*)kernelName2.c_str());
-    op1.requestLoad = requestLoad2;
-    op1.xclbinFile = (char*)xclbinPath2.c_str();
-    op1.deviceNeeded = deviceNeeded2;
-
-    handle0.addOp(op1);
+    handle0.addOp(op0)
     handle0.setUp();
 
+    //----------------- Setup pageRank thread -------------
+    std::string opName1;
+    std::string kernelName1;
+    int requestLoad1;
+    std::string xclbinPath1;
+    int deviceNeeded1;
+
+    xf::graph::L3::Handle::singleOP op1;
+    op1.operationName = (char*)opName1.c_str();
+    op1.setKernelName((char*)kernelName1.c_str());
+    op1.requestLoad = requestLoad1;
+    op1.xclbinPath = xclbinPath1;
+    op1.deviceNeeded = deviceNeeded1;
+
+    handle1.addOp(op1);
+    handle1.setUp();
+
     //----------------- Readin Graph data ---------------------------
-    uint32_t numVertices;
-    uint32_t numEdges;
-    xf::graph::Graph<uint32_t, DT> g("CSR", numVertices, numEdges);
-    uint32_t numVertices2;
-    uint32_t numEdges2;
-    xf::graph::Graph<uint32_t, DT> g2("CSR", numVertices2, numEdges2);
+    uint32_t numVertices0;
+    uint32_t numEdges0;
+    xf::graph::Graph<uint32_t, DT> g0("CSR", numVertices0, numEdges0);
+    uint32_t numVertices1;
+    uint32_t numEdges1;
+    xf::graph::Graph<uint32_t, DT> g1("CSR", numVertices1, numEdges1);
 
     //----------------- Load Graph ----------------------------------
-    (handle0.opsp)->loadGraph(g);
-    (handle0.oppg)->loadGraph(g2);
+    (handle0.opsp)->loadGraph(g0);
+    (handle1.oppg)->loadGraph(g1);
 
     //---------------- Run L3 API -----------------------------------
-    auto ev1 = xf::graph::L3::shortestPath(handle0, nSource1, &sourceID1, weighted1, g, result1, pred1);
-    auto ev2 = xf::graph::L3::shortestPath(handle0, nSource2, &sourceID2, weighted2, g, result2, pred2);
-    auto ev3 = xf::graph::L3::shortestPath(handle0, nSource3, &sourceID3, weighted3, g, result3, pred3);
-    auto ev4 = xf::graph::L3::shortestPath(handle0, nSource4, &sourceID5, weighted4, g, result4, pred4);
-    auto ev5 = xf::graph::L3::pageRankWeight(handle0, alpha, tolerance, maxIter, g2, pagerank);
+    auto ev1 = xf::graph::L3::shortestPath(handle0, nSource1, &sourceID1, weighted1, g0, result1, pred1);
+    auto ev2 = xf::graph::L3::shortestPath(handle0, nSource2, &sourceID2, weighted2, g0, result2, pred2);
+    auto ev3 = xf::graph::L3::shortestPath(handle0, nSource3, &sourceID3, weighted3, g0, result3, pred3);
+    auto ev4 = xf::graph::L3::shortestPath(handle0, nSource4, &sourceID5, weighted4, g0, result4, pred4);
+    auto ev5 = xf::graph::L3::pageRankWeight(handle1, alpha, tolerance, maxIter, g1, pagerank);
     int ret1 = ev1.wait();
     int ret2 = ev2.wait();
     int ret3 = ev3.wait();
@@ -177,11 +179,9 @@ Example of using multiple requests
     int ret5 = ev5.wait();
 
     //--------------- Free and delete -----------------------------------
-    (handle0.opsp)->join();
-    (handle0.oppg)->join();
     handle0.free();
-    g.freeBuffers();
-    g2.freeBuffers();
+    g0.freeBuffers();
+    g1.freeBuffers();
 
 
 

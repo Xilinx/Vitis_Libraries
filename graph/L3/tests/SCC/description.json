@@ -1,27 +1,40 @@
 {
     "gui": false, 
-    "name": "Xilinx Strongly Connected Components Test", 
+    "name": "Strongly Connected Components L3 Test", 
     "description": "", 
-    "flow": "vitis", 
-    "platform_whitelist": [
+    "flow": "vitis",
+    "xrm": true,
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": [], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50.ini"
+                    "clflags": [
+                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }
         }
-    }, 
+    },
+    "pre_build": [
+        {
+           "build_cmd":"make -f LIB_DIR/L3/lib/Makefile libgraphL3 TARGET=$(TARGET) CUR_DIR=PROJECT/BUILD"
+        }
+    ],
+    "output_files": [
+        "BUILD/libgraphL3.so",
+        "BUILD/libgraphL3.json"
+    ],
     "launch": [
         {
-            "cmd_args": " -offset PROJECT/data/test_offset.csr -indice PROJECT/data/test_column.csr -golden PROJECT/data/test_golden.mtx", 
-            "ld_library_path": "PROJECT/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib", 
+            "cmd_args": "-xclbin PROJECT/BUILD/scc_kernel.xclbin -offset PROJECT/data/test_offset.csr -indice PROJECT/data/test_column.csr -golden PROJECT/data/test_golden.mtx", 
+            "ld_library_path": ["BUILD",
+                                "$(XILINX_XRT)/lib",
+                                "$(XILINX_XRM)/lib"
+                                ], 
             "name": "generic launch for all flows"
         }
     ], 
@@ -29,17 +42,16 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/tests/SCC/test_scc.cpp", 
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L3/tests/SCC/test_scc.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include"
             ], 
-            "options": "-O3 -I$(XILINX_XRM)/include"
+            "options": "-I$(XILINX_XRM)/include"
         }, 
         "linker": {
             "librarypaths": [
-                "LIB_DIR/L3/lib"
+                "BUILD"
             ], 
             "libraries": [
                 "graphL3"
@@ -142,7 +154,7 @@
         }
     ], 
     "testinfo": {
-        "disable": true, 
+        "disable": false, 
         "jobs": [
             {
                 "index": 0, 
@@ -157,11 +169,15 @@
                 }, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }
             }
         ], 
         "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu",
             "vitis_hw_build", 
             "vitis_hw_run"
         ], 

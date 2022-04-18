@@ -24,6 +24,8 @@
 #include <limits>
 #include <stdlib.h>
 
+//#define USER_BUF_ON
+
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -124,6 +126,7 @@ bool shortestPath_execute_fpag(const int num_rep,
     auto infoBP = shortestPath_acc::create_bufpool(vpp::output);
 
     shortestPath_acc::send_while([&]() -> bool {
+#ifdef USER_BUF_ON
         shortestPath_acc::set_handle(si);
 
         shortestPath_acc::user_buf(configBP, config32, sizeof(ap_uint<32>) * 6);
@@ -138,10 +141,43 @@ bool shortestPath_execute_fpag(const int num_rep,
         shortestPath_acc::compute(numVertices, numEdges, config32, offset512, column512, weight512,
                                   (ap_uint<512>*)ddrQue32, ddrQue32, (ap_uint<512>*)result32, (ap_uint<32>*)result32,
                                   info8);
+#else
+        ap_uint<32>* acc_config32 = (ap_uint<32>*)shortestPath_acc::alloc_buf(configBP, sizeof(ap_uint<32>) * 6);
+        ap_uint<512>* acc_offset512 =
+            (ap_uint<512>*)shortestPath_acc::alloc_buf(offsetBP, sizeof(ap_uint<512>) * ((numVertices + 1 + 15) / 16));
+        ap_uint<512>* acc_column512 =
+            (ap_uint<512>*)shortestPath_acc::alloc_buf(columnBP, sizeof(ap_uint<512>) * ((numEdges + 15) / 16));
+        ap_uint<512>* acc_weight512 =
+            (ap_uint<512>*)shortestPath_acc::alloc_buf(weightBP, sizeof(ap_uint<512>) * ((numEdges + 15) / 16));
+        ap_uint<32>* acc_ddrQue32 =
+            (ap_uint<32>*)shortestPath_acc::alloc_buf(ddrQueBP, sizeof(ap_uint<32>) * (10 * 300 * 4096));
+        float* acc_result32 =
+            (float*)shortestPath_acc::alloc_buf(resultBP, sizeof(float) * ((numVertices + 1023) / 1024) * 1024);
+        ap_uint<8>* acc_info8 = (ap_uint<8>*)shortestPath_acc::alloc_buf(infoBP, sizeof(ap_uint<8>) * 4);
+
+        memcpy(acc_config32, config32, sizeof(ap_uint<32>) * 6);
+        memcpy(acc_offset512, offset512, sizeof(ap_uint<512>) * ((numVertices + 1 + 15) / 16));
+        memcpy(acc_column512, column512, sizeof(ap_uint<512>) * ((numEdges + 15) / 16));
+        memcpy(acc_weight512, weight512, sizeof(ap_uint<512>) * ((numEdges + 15) / 16));
+        memcpy(acc_info8, info8, sizeof(ap_uint<8>) * 4);
+
+        gettimeofday(&kernel_start_time, 0);
+        shortestPath_acc::compute(numVertices, numEdges, acc_config32, acc_offset512, acc_column512, acc_weight512,
+                                  (ap_uint<512>*)acc_ddrQue32, acc_ddrQue32, (ap_uint<512>*)acc_result32,
+                                  (ap_uint<32>*)acc_result32, acc_info8);
+#endif
         return (++si < num_rep);
     });
 
-    shortestPath_acc::receive_all_in_order([&]() {});
+    shortestPath_acc::receive_all_in_order([&]() {
+#ifndef USER_BUF_ON
+        float* acc_result32 = (float*)shortestPath_acc::get_buf(resultBP);
+        ap_uint<8>* acc_info8 = (ap_uint<8>*)shortestPath_acc::get_buf(infoBP);
+
+        memcpy(result32, acc_result32, sizeof(float) * ((numVertices + 1023) / 1024) * 1024);
+        memcpy(info8, acc_info8, sizeof(ap_uint<8>) * 4);
+#endif
+    });
     shortestPath_acc::join();
 
     gettimeofday(&end_time, 0);

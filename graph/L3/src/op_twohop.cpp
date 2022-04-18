@@ -26,11 +26,17 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
-void createHandleTwoHop(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
-    // Platform related operations
+void opTwoHop::createHandle(class openXRM* xrm,
+                            clHandle& handle,
+                            std::string kernelName,
+                            std::string kernelAlias,
+                            std::string xclbinFile,
+                            int32_t IDDevice,
+                            unsigned int requestLoad) {
     xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     cl_int fail;
 
+    // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
     handle.context = cl::Context(handle.device, NULL, NULL, NULL, &fail);
@@ -38,15 +44,51 @@ void createHandleTwoHop(clHandle& handle, const char* kernelName, const char* pX
     handle.q = cl::CommandQueue(handle.context, handle.device,
                                 CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
     logger.logCreateCommandQueue(fail);
-
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-    handle.xclBins = xcl::import_binary_file(pXclbin);
+    handle.xclBins = xcl::import_binary_file(xclbinFile);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
     handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
     logger.logCreateProgram(fail);
-}
+
+    handle.resR = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+    memset(handle.resR, 0, sizeof(xrmCuResource));
+    int ret = xrm->allocCU(handle.resR, kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+    std::string instanceName0;
+    if (ret == 0) {
+        instanceName0 = handle.resR->instanceName;
+        if (cuPerBoardTwoHop >= 2) instanceName0 = "twoHop_kernel:{" + instanceName0 + "}";
+    } else {
+        instanceName0 = "twoHop_kernel";
+        std::string cuID = std::to_string(handle.cuID);
+        if (cuPerBoardTwoHop >= 2) {
+            std::string instanceName1 = instanceName0 + cuID;
+            strcpy(handle.resR->instanceName, instanceName1.c_str());
+            instanceName0 = "twoHop_kernel:{" + instanceName0 + cuID + "}";
+        }
+    }
+    handle.isBusy = false;
+    const char* instanceName = instanceName0.c_str();
+    handle.kernel = cl::Kernel(handle.program, instanceName, &fail);
+    logger.logCreateKernel(fail);
+    std::cout << "INFO: Kernel has been created" << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "DEBUG:" << __FUNCTION__ << " IDDevice=" << IDDevice << "=" << devName << " CommandQueue=" << &handle.q
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " kernelName=" << kernelName << " kernelAlias=" << kernelAlias
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " resR.deviceId=" << handle.resR->deviceId
+              << " resR.cuId=" << handle.resR->cuId << " resR.channelID=" << handle.resR->channelId
+              << " resR.instanceName=" << handle.resR->instanceName << std::endl;
+
+    std::cout << "DEBUG: " << __FUNCTION__ << " instanceName0=" << instanceName0 << " created" << std::endl;
+
+#endif
+};
 
 uint32_t opTwoHop::cuPerBoardTwoHop;
 
@@ -59,10 +101,14 @@ void opTwoHop::setHWInfo(uint32_t numDev, uint32_t CUmax) {
     handles = new clHandle[CUmax];
 };
 
-void opTwoHop::freeTwoHop() {
+void opTwoHop::freeTwoHop(xrmContext* ctx) {
     twoHopThread.join();
     for (int i = 0; i < maxCU; ++i) {
         delete[] handles[i].buffer;
+        if (xrmCuRelease(ctx, handles[i].resR))
+            printf("success to release cu\n");
+        else
+            printf("fail to release cu\n");
     }
     delete[] handles;
 };
@@ -73,8 +119,13 @@ void opTwoHop::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
     free(resR);
 };
 
-void opTwoHop::init(
-    char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
+void opTwoHop::init(class openXRM* xrm,
+                    std::string kernelName,
+                    std::string kernelAlias,
+                    std::string xclbinFile,
+                    uint32_t* deviceIDs,
+                    uint32_t* cuIDs,
+                    unsigned int requestLoad) {
     dupNmTwoHop = 100 / requestLoad;
     cuPerBoardTwoHop /= dupNmTwoHop;
     uint32_t bufferNm = 6;
@@ -86,7 +137,7 @@ void opTwoHop::init(
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    createHandleTwoHop(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    createHandle(xrm, handles[cnt], kernelName, kernelAlias, xclbinFile, deviceIDs[cnt], requestLoad);
     handles[cnt].buffer = new cl::Buffer[bufferNm];
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
@@ -95,7 +146,7 @@ void opTwoHop::init(
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmTwoHop;
-        createHandleTwoHop(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        createHandle(xrm, handles[i], kernelName, kernelAlias, xclbinFile, deviceIDs[i], requestLoad);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];
@@ -123,27 +174,27 @@ void loadGraphCoreTwoHop(clHandle* hds, int nrows, int nnz, int cuID, xf::graph:
 
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(4);
 
-    if (cuID == 0) {
+    if (std::string(hds[0].resR->instanceName) == "twoHop_kernel0") {
         mext_in[0] = {(unsigned int)(3) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[1] = {(unsigned int)(3) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
         mext_in[2] = {(unsigned int)(5) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[3] = {(unsigned int)(5) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
-    } else if (cuID == 1) {
+    } else if (std::string(hds[0].resR->instanceName) == "twoHop_kernel1") {
         mext_in[0] = {(unsigned int)(9) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[1] = {(unsigned int)(9) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
         mext_in[2] = {(unsigned int)(10) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[3] = {(unsigned int)(10) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
-    } else if (cuID == 2) {
+    } else if (std::string(hds[0].resR->instanceName) == "twoHop_kernel2") {
         mext_in[0] = {(unsigned int)(14) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[1] = {(unsigned int)(14) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
         mext_in[2] = {(unsigned int)(16) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[3] = {(unsigned int)(16) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
-    } else if (cuID == 3) {
+    } else if (std::string(hds[0].resR->instanceName) == "twoHop_kernel3") {
         mext_in[0] = {(unsigned int)(20) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[1] = {(unsigned int)(20) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
         mext_in[2] = {(unsigned int)(23) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[3] = {(unsigned int)(23) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
-    } else if (cuID == 4) {
+    } else if (std::string(hds[0].resR->instanceName) == "twoHop_kernel4") {
         mext_in[0] = {(unsigned int)(27) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
         mext_in[1] = {(unsigned int)(27) | XCL_MEM_TOPOLOGY, g.indicesCSR, 0};
         mext_in[2] = {(unsigned int)(25) | XCL_MEM_TOPOLOGY, g.offsetsCSR, 0};
@@ -236,13 +287,9 @@ void opTwoHop::bufferInit(clHandle* hds,
                           cl::Kernel& kernel0,
                           std::vector<cl::Memory>& ob_in,
                           std::vector<cl::Memory>& ob_out) {
-    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
-    cl_int fail;
-
     int nnz = g.edgeNum;
 
     cl::Device device = hds[0].device;
-
     instanceName0 = "twoHop_kernel:{" + instanceName0 + "}";
     const char* instanceName = instanceName0.c_str();
 
@@ -254,10 +301,7 @@ void opTwoHop::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName, &fail);
-    logger.logCreateKernel(fail);
-
-    std::cout << "INFO: Kernel has been created" << std::endl;
+    kernel0 = hds[0].kernel;
 
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(2);
 
@@ -329,22 +373,7 @@ int opTwoHop::compute(unsigned int deviceID,
                       uint64_t* pairPart,
                       uint32_t* resPart,
                       xf::graph::Graph<uint32_t, float> g) {
-    uint32_t local_cuID;
-    if (strcmp(instanceName.c_str(), "twoHop_kernel0") == 0) {
-        local_cuID = 0;
-    } else if (strcmp(instanceName.c_str(), "twoHop_kernel1") == 0) {
-        local_cuID = 1;
-    } else if (strcmp(instanceName.c_str(), "twoHop_kernel2") == 0) {
-        local_cuID = 2;
-    } else if (strcmp(instanceName.c_str(), "twoHop_kernel3") == 0) {
-        local_cuID = 3;
-    } else if (strcmp(instanceName.c_str(), "twoHop_kernel4") == 0) {
-        local_cuID = 4;
-    } else {
-        std::cout << "unknown cu instance name" << std::endl;
-    }
-
-    clHandle* hds = &handles[local_cuID];
+    clHandle* hds = &handles[cuID];
     cl::Kernel kernel0;
     std::vector<cl::Memory> ob_in;
     std::vector<cl::Memory> ob_out;
@@ -357,7 +386,7 @@ int opTwoHop::compute(unsigned int deviceID,
     std::vector<cl::Event> events_kernel(num_runs);
     std::vector<cl::Event> events_read(1);
 
-    bufferInit(hds, instanceName, g, local_cuID, numPart, pairPart, resPart, kernel0, ob_in, ob_out);
+    bufferInit(hds, instanceName, g, cuID, numPart, pairPart, resPart, kernel0, ob_in, ob_out);
 
     migrateMemObj(hds, 0, num_runs, ob_in, nullptr, &events_write[0]);
 
@@ -366,9 +395,7 @@ int opTwoHop::compute(unsigned int deviceID,
     migrateMemObj(hds, 1, num_runs, ob_out, &events_kernel, &events_read[0]);
 
     events_read[0].wait();
-
-    cuRelease(ctx, resR);
-
+    hds->isBusy = false;
     return ret;
 };
 

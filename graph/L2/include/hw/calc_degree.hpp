@@ -972,9 +972,14 @@ void calcuWeightedDegree(int numVertex,
  * @tparam LOG2CACHEDEPTH cache depth in Binary, the cache onchip memory is 512 bit x uramRow
  * @tparam LOG2DATAPERCACHELINE number of data in one 512bit in Binary, for double, it's 3, for float, it's 4
  * @tparam RAMTYPE flag to tell use URAM LUTRAM or BRAM, 0 : LUTRAM, 1 : URAM, 2 : BRAM
+ * @tparam unrollbin log 2 of data numbers per buff, for buffType is 512b, and data type is double(64b), so there is 8
+ * data in one buff, 8=2^3, the unrollbin is 3
+ * @tparam CHANNELNUM pingpong channel number for the design, 2 channel will take 14 persudo channels of HBM while 6
+ * channel will take 26 persudo channels of HBM in multi-channel pagerank
  *
  * @param numVertex CSR/CSC data vertex number
  * @param numEdge CSR/CSC data edge number
+ * @param numEdgePerChannel the number of edge per channel to deal with
  * @param index input CSR/CSC data index array
  * @param weight input CSR/CSC data weight array, default float type.
  * @param degree output degree array, default float type.

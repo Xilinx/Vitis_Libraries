@@ -26,25 +26,63 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
-void createHandleTriangleCount(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
-    // Platform related operations
+void opTriangleCount::createHandle(class openXRM* xrm,
+                                   clHandle& handle,
+                                   std::string kernelName,
+                                   std::string kernelAlias,
+                                   std::string xclbinFile,
+                                   int32_t IDDevice,
+                                   unsigned int requestLoad) {
     xf::common::utils_sw::Logger logger(std::cout, std::cerr);
-    cl_int err;
+    cl_int fail;
+
+    // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &err);
-    logger.logCreateContext(err);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
-    logger.logCreateCommandQueue(err);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-    handle.xclBins = xcl::import_binary_file(pXclbin);
+    handle.xclBins = xcl::import_binary_file(xclbinFile);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &err);
-    logger.logCreateProgram(err);
-}
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
+
+    handle.resR = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+    memset(handle.resR, 0, sizeof(xrmCuResource));
+    int ret = xrm->allocCU(handle.resR, kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+    std::string instanceName0;
+    if (ret == 0) {
+        instanceName0 = handle.resR->instanceName;
+        if (cuPerBoardTriangleCount >= 2) instanceName0 = "TC_kernel:{" + instanceName0 + "}";
+    } else {
+        instanceName0 = "TC_kernel";
+    }
+    handle.isBusy = false;
+    const char* instanceName = instanceName0.c_str();
+    handle.kernel = cl::Kernel(handle.program, instanceName, &fail);
+    logger.logCreateKernel(fail);
+    std::cout << "INFO: Kernel has been created" << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "DEBUG:" << __FUNCTION__ << " IDDevice=" << IDDevice << "=" << devName << " CommandQueue=" << &handle.q
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " kernelName=" << kernelName << " kernelAlias=" << kernelAlias
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " resR.deviceId=" << handle.resR->deviceId
+              << " resR.cuId=" << handle.resR->cuId << " resR.channelID=" << handle.resR->channelId
+              << " resR.instanceName=" << handle.resR->instanceName << std::endl;
+
+    std::cout << "DEBUG: " << __FUNCTION__ << " instanceName0=" << instanceName0 << " created" << std::endl;
+
+#endif
+};
 
 uint32_t opTriangleCount::cuPerBoardTriangleCount;
 
@@ -57,9 +95,13 @@ void opTriangleCount::setHWInfo(uint32_t numDev, uint32_t CUmax) {
     handles = new clHandle[CUmax];
 };
 
-void opTriangleCount::freeTriangleCount() {
+void opTriangleCount::freeTriangleCount(xrmContext* ctx) {
     for (int i = 0; i < maxCU; ++i) {
         delete[] handles[i].buffer;
+        if (xrmCuRelease(ctx, handles[i].resR))
+            printf("success to release cu\n");
+        else
+            printf("fail to release cu\n");
     }
     delete[] handles;
 };
@@ -70,8 +112,13 @@ void opTriangleCount::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
     free(resR);
 };
 
-void opTriangleCount::init(
-    char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
+void opTriangleCount::init(class openXRM* xrm,
+                           std::string kernelName,
+                           std::string kernelAlias,
+                           std::string xclbinFile,
+                           uint32_t* deviceIDs,
+                           uint32_t* cuIDs,
+                           unsigned int requestLoad) {
     dupNmTriangleCount = 100 / requestLoad;
     cuPerBoardTriangleCount /= dupNmTriangleCount;
     uint32_t bufferNm = 7;
@@ -83,8 +130,7 @@ void opTriangleCount::init(
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    // th[0] = std::thread(&createHandleTriangleCount, std::ref(handles[cnt]), kernelName, xclbinFile, deviceIDs[cnt]);
-    createHandleTriangleCount(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    createHandle(xrm, handles[cnt], kernelName, kernelAlias, xclbinFile, deviceIDs[cnt], requestLoad);
     handles[cnt].buffer = new cl::Buffer[bufferNm];
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
@@ -93,8 +139,7 @@ void opTriangleCount::init(
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmTriangleCount;
-        // th[i] = std::thread(&createHandleTriangleCount, std::ref(handles[i]), kernelName, xclbinFile, deviceIDs[i]);
-        createHandleTriangleCount(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        createHandle(xrm, handles[i], kernelName, kernelAlias, xclbinFile, deviceIDs[i], requestLoad);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];
@@ -134,11 +179,7 @@ void opTriangleCount::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
-    cl_int err;
-    kernel0 = cl::Kernel(program, instanceName, &err);
-    logger.logCreateKernel(err);
-    std::cout << "INFO: Kernel has been created" << std::endl;
+    kernel0 = hds[0].kernel;
 
     uint32_t V = 800000;
     uint32_t E = 800000;
@@ -248,9 +289,7 @@ int opTriangleCount::compute(unsigned int deviceID,
 
     nTriangle[0] = TC[0];
 
-    cuRelease(ctx, resR);
-
-    // delete[] TC;
+    hds->isBusy = false;
     free(TC);
     free(offsets);
     free(rows);

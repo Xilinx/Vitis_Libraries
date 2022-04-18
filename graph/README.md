@@ -1,35 +1,36 @@
 # Vitis Graph Library
 
-Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2), the asynchronous software level (L3) and [TigerGraph](https://www.tigergraph.com/) integration (plugin) APIs. 
+Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2) and the asynchronous software level (L3). 
 
 ## Overview
 
 The algorithms implemented by Vitis Graph Library include:
 
-- Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the ‘weight’ feature is supported by Cosin Similarity.
+- Similarity analysis: Cosine Similarity, Jaccard Similarity.
+- Classification: k-nearest Neighbor, maximal independent set.
 - Centrality analysis: PageRank.
-- Pathfinding: Minimum Spanning Tree (MST, 2021.2), Estimated Diameter (2021.2), Single Source Shortest Path (SSSP) and Multi-Sources Shortest Path (MSSP).
+- Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP), Minimum Spanning Tree and Estimated Diameter.
 - Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
-- Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
+- Community Detection: Louvain Modularity (From 22.1, Louvain API can support large-scale graphs), Label Propagation and Triangle Count.
 - Search: Breadth First Search and 2-Hop Search.
-- Graph Format: Renumber (2021.2), Calculate Degree and Format Convert between CSR and CSC.
+- Graph Format: Renumber, Calculate Degree and Format Convertion between CSR and CSC.
 
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/benchmark.html).
+In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/benchmark.html).
 
 ## Software level API
 
-`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/guide_L3/L3_internal/getting_started.html).
+`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/guide_L3/L3_internal/getting_started.html).
 
-## Xilinx TigerGraph Integration
+## Get Start
 
-Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/plugin/tigergraph_integration.html).
+To get start with the Vitis Graph Library, please have a visit on our [tutorial page](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/tutorial.html).
 
 ## Documentations
 
-For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.2/index.html).
+For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/index.html).
 
 ## License
 

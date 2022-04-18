@@ -4,14 +4,66 @@
     "description": "", 
     "flow": "vitis", 
     "platform_type": "", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u200"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "xilinx_u250_xdma_201830_2",
         "xilinx_u200_xdma_201830_2",
         "zc"
+    ], 
+    "launch": [
+        {
+            "cmd_args": " -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx -i 0", 
+            "name": "generic launch for all flows"
+        },
+        {
+            "cmd_args": " -o test_offset.csr -c test_column.csr -g test_golden.mtx -i 0",
+            "platform": "vck190",
+            "name": "vck 190 launch"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "host/main.cpp" 
+            ], 
+            "includepaths": [
+                "host", 
+                "kernel", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/../utils/L1/include",
+                "LIB_DIR/../database/L1/include/hw",
+                "LIB_DIR/../quantitative_finance/L1/include"
+            ] 
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "host", 
+                "kernel", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/../utils/L1/include",
+                "LIB_DIR/../database/L1/include/hw",
+                "LIB_DIR/../quantitative_finance/L1/include"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/bfs_acc.cpp kernel/bfs_kernel.cpp", 
+                    "frequency": 300.0, 
+                    "name": "bfs_kernel" 
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "bfs_kernel"
+        }
     ], 
     "testinfo": {
         "disable": false, 

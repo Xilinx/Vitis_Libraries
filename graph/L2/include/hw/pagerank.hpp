@@ -591,7 +591,6 @@ void dataFlowWrapper(
     buffT buffPing[rowTemplate],
     buffT buffPong[rowTemplate]) {
 #pragma HLS inline off
-    cache0.initDualOffChip();
     if (share) {
         dataFlowPart<BURST_LENTH, T, rowTemplate, NNZTemplate, unrollNm, unrollBin, widthOr, uramRow, groupUramPart,
                      dataOneLine, addrWidth, usURAM>(nrows, nnz, adder, cache0, indices, weight, cntVal, order,
@@ -954,8 +953,6 @@ void initDDR(int nrows,
     writeOutDDR<T, rowTemplate>(nrows, cntStrm, pongStrm, cntValFull, buffPong);
     writeOutDDROrder<T, rowTemplate, widthOr>(nrows, orderStrm, orderUnroll);
 }
-} // namespace pagerank
-} // namespace internal
 
 template <typename T,
           int rowTemplate,
@@ -1023,6 +1020,7 @@ void pageRankCore(int nrows,
         iterator++;
         converged = 1;
 
+        cache0.initDualOffChip();
         internal::pagerank::dataFlowTop<BURST_LENTH, T, rowTemplate, NNZTemplate, unrollNm, unrollBin, widthOr, uramRow,
                                         groupUramPart, dataOneLine, addrWidth, usURAM>(
             nrows, nnz, share, adder, cache0, indices, weight, cntVal, order, buffPing, buffPong, tol, converged);
@@ -1040,6 +1038,9 @@ void pageRankCore(int nrows,
     std::cout << "isResultinPong = " << !share << std::endl;
 #endif
 }
+
+} // namespace pagerank
+} // namespace internal
 
 /**
  * @brief pagerank algorithm is implemented
@@ -1103,9 +1104,10 @@ void pageRankTop(int numVertex,
         numVertex, numEdge, indexCSC, weightCSC, degreeCSR);
     internal::pagerank::initDDR<T, BURST_LENTH, MAXVERTEX, MAXEDGE, WIDTHOR>(
         numVertex, numEdge, alpha, randomProbability, degreeCSR, offsetCSC, cntValFull, buffPong, orderUnroll);
-    pageRankCore<T, MAXVERTEX, MAXEDGE, LOG2UNROLL, WIDTHOR, LOG2CACHEDEPTH, LOG2DATAPERCACHELINECORE, RAMTYPE>(
-        numVertex, numEdge, buffPing, buffPong, orderUnroll, indexCSC, weightCSC, cntValFull, resultInfo, alpha,
-        tolerance, numIter);
+    internal::pagerank::pageRankCore<T, MAXVERTEX, MAXEDGE, LOG2UNROLL, WIDTHOR, LOG2CACHEDEPTH,
+                                     LOG2DATAPERCACHELINECORE, RAMTYPE>(numVertex, numEdge, buffPing, buffPong,
+                                                                        orderUnroll, indexCSC, weightCSC, cntValFull,
+                                                                        resultInfo, alpha, tolerance, numIter);
 }
 
 } // namespace graph

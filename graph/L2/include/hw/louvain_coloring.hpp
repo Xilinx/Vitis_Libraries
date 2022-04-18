@@ -29,6 +29,7 @@
 
 namespace xf {
 namespace graph {
+namespace internal {
 
 template <int N_E>
 ap_uint<32> loopNumGen(ap_uint<32> num) {
@@ -1044,6 +1045,8 @@ MOVE:
 #endif
 }
 
+} // namespace internal
+
 // Reference public parallel algorithm: https://arxiv.org/pdf/1410.1237.pdf
 
 /**
@@ -1094,17 +1097,18 @@ inline void kernelLouvainTop(int64_t* config0,
     DWEIGHT constant_recip = 0;
 
     // clang-format on
-    xf::graph::initComm<DWEIGHT, DWIDTHS, VERTEXS, EDGES>(config0[0], config0[3], offsets, weights, cidPrev, cidCurr,
-                                                          cidSizePrev, totPrev, constant_recip);
+    xf::graph::internal::initComm<DWEIGHT, DWIDTHS, VERTEXS, EDGES>(config0[0], config0[3], offsets, weights, cidPrev,
+                                                                    cidCurr, cidSizePrev, totPrev, constant_recip);
 
-    xf::graph::louvainWithColoring<DWEIGHT, DWIDTHS, CSRWIDTHS, COLORWIDTHS, VERTEXS, EDGES, DEGREES, COLORS>(
+    xf::graph::internal::louvainWithColoring<DWEIGHT, DWIDTHS, CSRWIDTHS, COLORWIDTHS, VERTEXS, EDGES, DEGREES, COLORS>(
         config0[0], config0[1], 0, config1[0], constant_recip, offsets, indices, weights, colorAxi, colorInx, cidPrev,
         cidSizePrev, totPrev, cidCurr, cidSizeCurr, totCurr, cidSizeUpdate, totUpdate, cWeight, offsetsDup, indicesDup,
         flag, flagUpdate, config0[2], config1[1]);
 
-    xf::graph::renumberClusters_ghost<DWIDTHS, VERTEXS>(config0[0], config0[4], config0[5], cidPrev, cidSizePrev);
+    xf::graph::internal::renumberClusters_ghost<DWIDTHS, VERTEXS>(config0[0], config0[4], config0[5], cidPrev,
+                                                                  cidSizePrev);
 }
 
-} // graph
-} // xf
+} // namespace graph
+} // namespace xf
 #endif

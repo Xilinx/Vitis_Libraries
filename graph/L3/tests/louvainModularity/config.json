@@ -1,0 +1,8 @@
+
+{
+    "operationName" : "louvain",
+    "kernelName" : "kernel_louvain",
+    "requestLoad" : 100,
+    "xclbinPath" : "PROJECTPATH/build_dir.hw.xilinx_u55c_gen3x16_xdma_3_202110_1/kernel_louvain.xclbin",
+    "deviceNeeded" : 2
+}

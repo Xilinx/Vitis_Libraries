@@ -20,26 +20,70 @@
 #define _XF_GRAPH_L3_OP_SIMILARITYSPARSE_CPP_
 
 #include "op_similaritysparse.hpp"
+#include "xf_utils_sw/logger.hpp"
 #include <unordered_map>
 
 namespace xf {
 namespace graph {
 namespace L3 {
 
-void createHandleSimSparse(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+void opSimilaritySparse::createHandle(class openXRM* xrm,
+                                      clHandle& handle,
+                                      std::string kernelName,
+                                      std::string kernelAlias,
+                                      std::string xclbinFile,
+                                      int32_t IDDevice,
+                                      unsigned int requestLoad) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-    handle.xclBins = xcl::import_binary_file(pXclbin);
+    handle.xclBins = xcl::import_binary_file(xclbinFile);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins);
-}
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
+
+    handle.resR = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+    memset(handle.resR, 0, sizeof(xrmCuResource));
+    int ret = xrm->allocCU(handle.resR, kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+    std::string instanceName0;
+    if (ret == 0) {
+        instanceName0 = handle.resR->instanceName;
+        if (cuPerBoardSimSparse >= 2) instanceName0 = "sparseSimilarityKernel:{" + instanceName0 + "}";
+    } else {
+        instanceName0 = "sparseSimilarityKernel";
+    }
+    handle.isBusy = false;
+    const char* instanceName = instanceName0.c_str();
+    handle.kernel = cl::Kernel(handle.program, instanceName, &fail);
+    logger.logCreateKernel(fail);
+    std::cout << "INFO: Kernel has been created" << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "DEBUG:" << __FUNCTION__ << " IDDevice=" << IDDevice << "=" << devName << " CommandQueue=" << &handle.q
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " kernelName=" << kernelName << " kernelAlias=" << kernelAlias
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " resR.deviceId=" << handle.resR->deviceId
+              << " resR.cuId=" << handle.resR->cuId << " resR.channelID=" << handle.resR->channelId
+              << " resR.instanceName=" << handle.resR->instanceName << std::endl;
+
+    std::cout << "DEBUG: " << __FUNCTION__ << " instanceName0=" << instanceName0 << " created" << std::endl;
+
+#endif
+};
 
 uint32_t opSimilaritySparse::cuPerBoardSimSparse;
 
@@ -52,10 +96,14 @@ void opSimilaritySparse::setHWInfo(uint32_t numDev, uint32_t CUmax) {
     handles = new clHandle[CUmax];
 };
 
-void opSimilaritySparse::freeSimSparse() {
+void opSimilaritySparse::freeSimSparse(xrmContext* ctx) {
     simSparseThread.join();
     for (int i = 0; i < maxCU; ++i) {
         delete[] handles[i].buffer;
+        if (xrmCuRelease(ctx, handles[i].resR))
+            printf("success to release cu\n");
+        else
+            printf("fail to release cu\n");
     }
     delete[] handles;
 };
@@ -66,8 +114,13 @@ void opSimilaritySparse::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
     free(resR);
 };
 
-void opSimilaritySparse::init(
-    char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
+void opSimilaritySparse::init(class openXRM* xrm,
+                              std::string kernelName,
+                              std::string kernelAlias,
+                              std::string xclbinFile,
+                              uint32_t* deviceIDs,
+                              uint32_t* cuIDs,
+                              unsigned int requestLoad) {
     dupNmSimSparse = 100 / requestLoad;
     cuPerBoardSimSparse /= dupNmSimSparse;
     uint32_t bufferNm = 29;
@@ -79,8 +132,7 @@ void opSimilaritySparse::init(
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    // th[0] = std::thread(&createHandleSim, std::ref(handles[cnt]), kernelName, xclbinFile, deviceIDs[cnt]);
-    createHandleSimSparse(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    createHandle(xrm, handles[cnt], kernelName, kernelAlias, xclbinFile, deviceIDs[cnt], requestLoad);
     handles[cnt].buffer = new cl::Buffer[bufferNm];
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
@@ -89,17 +141,13 @@ void opSimilaritySparse::init(
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmSimSparse;
-        // th[i] = std::thread(&createHandleSim, std::ref(handles[i]), kernelName, xclbinFile, deviceIDs[i]);
-        createHandleSimSparse(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        createHandle(xrm, handles[i], kernelName, kernelAlias, xclbinFile, deviceIDs[i], requestLoad);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];
             deviceOffset.push_back(i);
         }
     }
-    // for (int j = 0; j < maxCU; ++j) {
-    //     th[j].join();
-    // }
     delete[] handleID;
 }
 
@@ -233,8 +281,7 @@ void opSimilaritySparse::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName);
-    std::cout << "INFO: Kernel has been created" << std::endl;
+    kernel0 = hds[0].kernel;
 
     uint32_t splitNm = g.splitNum;
     uint32_t CHANNEL_NUMBER = 4;
@@ -376,8 +423,7 @@ int opSimilaritySparse::compute(unsigned int deviceID,
 
     events_read[0].wait();
 
-    cuRelease(ctx, resR);
-
+    hds->isBusy = false;
     free(config);
 
     return ret;
@@ -428,8 +474,7 @@ int opSimilaritySparse::computeKNN(unsigned int deviceID,
 
     postProcessKNN(topK, knownLabels, resultID, similarity, label);
 
-    cuRelease(ctx, resR);
-
+    hds->isBusy = false;
     free(config);
     free(resultID);
     free(similarity);
@@ -501,8 +546,7 @@ int opSimilaritySparse::computeAP(unsigned int deviceID,
 
     events_read[0].wait();
 
-    cuRelease(ctx, resR);
-
+    hds->isBusy = false;
     free(config);
     free(sourceIndice);
     free(sourceWeight);
@@ -582,8 +626,7 @@ int opSimilaritySparse::computeAPKNN(unsigned int deviceID,
 
     postProcessKNN(topK, knownLabels, resultID, similarity, label);
 
-    cuRelease(ctx, resR);
-
+    hds->isBusy = false;
     free(config);
     free(resultID);
     free(similarity);

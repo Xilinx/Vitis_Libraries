@@ -19,6 +19,16 @@
 #ifndef _XF_GRAPH_L3_HANDLE_HPP_
 #define _XF_GRAPH_L3_HANDLE_HPP_
 
+#define XF_GRAPH_L3_MAX_DEVICES_PER_NODE 16 // maximu supported devices per node
+#define XF_GRAPH_L3_SUCCESS 0
+#define XF_GRAPH_L3_ERROR_CONFIG_FILE_NOT_EXIST -2
+#define XF_GRAPH_L3_ERROR_XCLBIN_FILE_NOT_EXIST -3
+#define XF_GRAPH_L3_ERROR_DLOPEN -5
+#define XF_GRAPH_L3_ERROR_NOT_ENOUGH_DEVICES -6
+#define XF_GRAPH_L3_ERROR_CU_NOT_SETUP -7
+#define XF_GRAPH_L3_ERROR_ALLOC_CU -8
+#define XF_GRAPH_L3_ERROR_DLSYM -9
+
 #include "op_pagerank.hpp"
 #include "op_sp.hpp"
 #include "op_trianglecount.hpp"
@@ -30,6 +40,7 @@
 #include "op_similaritysparse.hpp"
 #include "op_similaritydense.hpp"
 #include "op_twohop.hpp"
+#include "op_louvainmodularity.hpp"
 
 namespace xf {
 namespace graph {
@@ -49,33 +60,29 @@ class Handle {
      * \param requestLoad percentation of computing unit's occupation. Maximum is 100, which represents that 100% of the
      * computing unit are occupied. By using lower requestLoad, the hardware resources can be pipelined and higher
      * throughput can be achieved
-     * \param xclbinFile xclbin file path
+     * \param xclbinPath xclbin file path
      * \param deviceNeeded needed FPGA board number
      * \param deviceIDs FPGA board IDs
      *
      */
     struct singleOP {
-        char* operationName; // for example, cosineSim
-        char* kernelName;    // user defined kernel names
-        char* kernelAlias;   // user defined kernel names
+        std::string operationName; // for example, cosineSim
+        std::string kernelName;    // user defined kernel names
+        std::string kernelAlias;   // user defined kernel names
         unsigned int requestLoad = 100;
-        char* xclbinFile;                    // xclbin full path
-        char* xclbinFile2;                   // xclbin full path
+        std::string xclbinPath;              // xclbin full path
         unsigned int deviceNeeded = 0;       // requested FPGA device number
         unsigned int cuPerBoard = 1;         // requested FPGA device number
         std::vector<unsigned int> deviceIDs; // deviceID
-        void setKernelName(char* input) {
-            std::string tmp = "";
-            kernelName = input;
-            kernelAlias = (char*)tmp.c_str();
-        }
-        void setKernelAlias(char* input) {
-            std::string tmp = "";
-            kernelName = (char*)tmp.c_str();
-            kernelAlias = input;
-        }
+        void setKernelName(char* input) { kernelName = input; }
+        void setKernelAlias(char* input) { kernelAlias = input; }
     };
 
+    /**
+     * \brief xilinx FPGA Resource Manager operation
+     *
+     */
+    class opLouvainModularity* oplouvainmod;
     /**
      * \brief twohop operation
      *
@@ -138,6 +145,7 @@ class Handle {
     class openXRM* xrm;
 
     Handle() {
+        oplouvainmod = new class opLouvainModularity;
         optwohop = new class opTwoHop;
         oppg = new class opPageRank;
         opsp = new class opSP;
@@ -154,11 +162,17 @@ class Handle {
 
     void free();
 
+    void showHandleInfo();
+
     int setUp();
 
-    void getEnv();
+    int setUp(std::string deviceNames); // Set up the handle with specified device names
+
+    void getEnvMultiBoards();
 
     void addOp(singleOP op);
+
+    uint32_t getNumDevices() { return numDevices; }
 
    private:
     uint32_t maxCU;
@@ -167,99 +181,111 @@ class Handle {
 
     uint32_t numDevices;
 
+    uint32_t totalSupportedDevices;
+
+    std::vector<std::string> supportedDeviceNames;
+
+    uint32_t supportedDeviceIds[XF_GRAPH_L3_MAX_DEVICES_PER_NODE];
+
     uint64_t maxChannelSize;
 
     std::vector<singleOP> ops;
 
-    void loadXclbin(unsigned int deviceId, char* xclbinName);
+    void loadXclbin(unsigned int deviceId, std::string& xclbinName);
 
-    std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName);
-    std::future<int> loadXclbinAsync(unsigned int deviceId, char* xclbinName);
+    std::thread loadXclbinNonBlock(unsigned int deviceId, std::string& xclbinName);
+    std::future<int> loadXclbinAsync(unsigned int deviceId, std::string& xclbinName);
 
-    void initOpTwoHop(const char* kernelName,
-                      char* xclbinFile,
-                      char* kernelAlias,
-                      unsigned int requestLoad,
-                      unsigned int deviceNeeded,
-                      unsigned int cuPerBoard);
-
-    void initOpPageRank(const char* kernelName,
-                        char* xclbinFile,
-                        char* kernelAlias,
-                        unsigned int requestLoad,
-                        unsigned int deviceNeeded,
-                        unsigned int cuPerBoard);
-
-    void initOpSP(const char* kernelName,
-                  char* xclbinFile,
-                  char* kernelAlias,
-                  unsigned int requestLoad,
-                  unsigned int deviceNeeded,
-                  unsigned int cuPerBoard);
-
-    void initOpTriangleCount(const char* kernelName,
-                             char* xclbinFile,
-                             char* kernelAlias,
-                             unsigned int requestLoad,
-                             unsigned int deviceNeeded,
-                             unsigned int cuPerBoard);
-
-    void initOpLabelPropagation(const char* kernelName,
-                                char* xclbinFile,
-                                char* kernelAlias,
+    int initOpLouvainModularity(std::string xclbinPath,
+                                std::string kernelName,
+                                std::string kernelAlias,
                                 unsigned int requestLoad,
                                 unsigned int deviceNeeded,
                                 unsigned int cuPerBoard);
 
-    void initOpBFS(const char* kernelName,
-                   char* xclbinFile,
-                   char* kernelAlias,
-                   unsigned int requestLoad,
-                   unsigned int deviceNeeded,
-                   unsigned int cuPerBoard);
+    int initOpTwoHop(std::string kernelName,
+                     std::string xclbinPath,
+                     std::string kernelAlias,
+                     unsigned int requestLoad,
+                     unsigned int deviceNeeded,
+                     unsigned int cuPerBoard);
 
-    void initOpWCC(const char* kernelName,
-                   char* xclbinFile,
-                   char* kernelAlias,
-                   unsigned int requestLoad,
-                   unsigned int deviceNeeded,
-                   unsigned int cuPerBoard);
+    int initOpPageRank(std::string kernelName,
+                       std::string xclbinPath,
+                       std::string kernelAlias,
+                       unsigned int requestLoad,
+                       unsigned int deviceNeeded,
+                       unsigned int cuPerBoard);
 
-    void initOpSCC(const char* kernelName,
-                   char* xclbinFile,
-                   char* kernelAlias,
-                   unsigned int requestLoad,
-                   unsigned int deviceNeeded,
-                   unsigned int cuPerBoard);
+    int initOpSP(std::string kernelName,
+                 std::string xclbinPath,
+                 std::string kernelAlias,
+                 unsigned int requestLoad,
+                 unsigned int deviceNeeded,
+                 unsigned int cuPerBoard);
 
-    void initOpConvertCsrCsc(const char* kernelName,
-                             char* xclbinFile,
-                             char* kernelAlias,
-                             unsigned int requestLoad,
-                             unsigned int deviceNeeded,
-                             unsigned int cuPerBoard);
+    int initOpTriangleCount(std::string kernelName,
+                            std::string xclbinPath,
+                            std::string kernelAlias,
+                            unsigned int requestLoad,
+                            unsigned int deviceNeeded,
+                            unsigned int cuPerBoard);
 
-    void initOpSimSparse(const char* kernelName,
-                         char* xclbinFile,
-                         char* kernelAlias,
-                         unsigned int requestLoad,
-                         unsigned int deviceNeeded,
-                         unsigned int cuPerBoard);
+    int initOpLabelPropagation(std::string kernelName,
+                               std::string xclbinPath,
+                               std::string kernelAlias,
+                               unsigned int requestLoad,
+                               unsigned int deviceNeeded,
+                               unsigned int cuPerBoard);
 
-    void initOpSimDense(const char* kernelName,
-                        char* xclbinFile,
-                        char* kernelAlias,
+    int initOpBFS(std::string kernelName,
+                  std::string xclbinPath,
+                  std::string kernelAlias,
+                  unsigned int requestLoad,
+                  unsigned int deviceNeeded,
+                  unsigned int cuPerBoard);
+
+    int initOpWCC(std::string kernelName,
+                  std::string xclbinPath,
+                  std::string kernelAlias,
+                  unsigned int requestLoad,
+                  unsigned int deviceNeeded,
+                  unsigned int cuPerBoard);
+
+    int initOpSCC(std::string kernelName,
+                  std::string xclbinPath,
+                  std::string kernelAlias,
+                  unsigned int requestLoad,
+                  unsigned int deviceNeeded,
+                  unsigned int cuPerBoard);
+
+    int initOpConvertCsrCsc(std::string kernelName,
+                            std::string xclbinPath,
+                            std::string kernelAlias,
+                            unsigned int requestLoad,
+                            unsigned int deviceNeeded,
+                            unsigned int cuPerBoard);
+
+    int initOpSimSparse(std::string kernelName,
+                        std::string xclbinPath,
+                        std::string kernelAlias,
                         unsigned int requestLoad,
                         unsigned int deviceNeeded,
                         unsigned int cuPerBoard);
 
-    void initOpSimDenseInt(const char* kernelName,
-                           char* xclbinFile,
-                           char* xclbinFile2,
-                           char* kernelAlias,
-                           unsigned int requestLoad,
-                           unsigned int deviceNeeded,
-                           unsigned int cuPerBoard);
+    int initOpSimDense(std::string kernelName,
+                       std::string xclbinPath,
+                       std::string kernelAlias,
+                       unsigned int requestLoad,
+                       unsigned int deviceNeeded,
+                       unsigned int cuPerBoard);
+
+    int initOpSimDenseInt(std::string kernelName,
+                          std::string xclbinPath,
+                          std::string kernelAlias,
+                          unsigned int requestLoad,
+                          unsigned int deviceNeeded,
+                          unsigned int cuPerBoard);
 };
 } // L3
 } // graph

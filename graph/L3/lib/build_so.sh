@@ -1,21 +1,48 @@
-
 xrtPath=/opt/xilinx/xrt
 xrmPath=/opt/xilinx/xrm
+target=sw_emu
 
-while getopts ":r:m:" opt
+usage(){
+  echo "
+Usage:
+  -r, --xrm    path of xrm
+  -m, --xrt    path of xrt
+  -t, --target    target of build sw_emu/hw_emu/hw
+  -h, --help    display this help and exit
+
+  example1: ./build_so.sh -x /opt/xilinx/xrt -m /opt/xilinx/xrm -t sw_emu
+  example2: ./build_so.sh -t sw_emu
+"
+}
+
+while true
 do
-case $opt in
-    r)
-    xrtPath=$OPTARG
+case "$1" in
+    -r|--xrt)
+    xrtPath="$2"
     echo "$xrtPath"
+    shift
     ;;
-    m)
-    xrmPath=$OPTARG
+    -m|--xrm)
+    xrmPath="$2"
     echo "$xrmPath"
+    shit
     ;;
-    ?)
-    echo "unknown"
-    exit 1;;
+    -t|--target)
+    target="$2"
+    echo "$target"
+    shift
+    ;;
+    -h|--help)
+    usage
+    exit 1
+    ;;
+    --)
+    shift
+    ;;
+    *)
+    break
+    ;;
     esac
 done
 
@@ -25,5 +52,15 @@ source $xrmPath/setup.sh
 
 make clean
 
-make libgraphL3
-
+if [ $target  == 'sw_emu' ];
+then
+    echo "build libgraphL3.so for sw_emu"
+    make libgraphL3 TARGET=sw_emu
+elif [ $target == 'hw_emu' ];
+then
+    echo "build libgraphL3.so for hw_emu"
+    make libgraphL3 TARGET=hw_emu
+else
+    echo "build libgraphL3.so for testing on board"
+    make libgraphL3 TARGET=hw
+fi

@@ -26,6 +26,21 @@ namespace graph {
 namespace L3 {
 
 /**
+ * @brief louvain algorithm is implemented.
+ *
+ * @param handle Graph library L3 handle
+ * @param flowMode flowMode of multi louvain kernel.
+ * LOUVAINMOD_PRUNING_KERNEL = 1 is a 1cu kernel design fit for u50
+ * LOUVAINMOD_2CU_U55C_KERNEL = 2 a 2cu kernel design fit for u55c
+ * the performance of one compute unit by different board is the same
+ * @param glv the original graph info before partition.
+ * @param pglv one of the partitioned sub-graph info to input to kernel.
+ * @param para_lv parameters of louvain kernel
+ *
+ */
+void louvainModularity(
+    std::shared_ptr<xf::graph::L3::Handle> handle, int flowMode, GLV* glv, GLV* pglv, LouvainPara* para_lv);
+/**
  * @brief twoHop algorithm is implemented.
  *
  * @param handle Graph library L3 handle
@@ -349,6 +364,23 @@ event<int> knnSimilarityAPDense(xf::graph::L3::Handle& handle,
                                 xf::graph::Graph<uint32_t, float> gr,
                                 std::string* knownLabels,
                                 std::string* label);
+
+/**
+ * @brief The all-pairs k-nearest neighbors API for sparse graph. knnSimilarity API is based on the cosine similarity
+ * algorithm.
+ *
+ * @param handle Graph library L3 handle
+ * @param topK Input, the output similarity buffer length
+ * @param gr Input, CSR graph of IDs' type of uint32_t and weights' type of float
+ * @param knownLabels Input, labels of each vertex in the dense graph
+ * @param label Output, the predicted most similar labels of all vertices in the dense graph
+ *
+ */
+event<int> knnSimilarityAPSparse(xf::graph::L3::Handle& handle,
+                                 uint32_t topK,
+                                 xf::graph::Graph<uint32_t, float> gr,
+                                 std::string* knownLabels,
+                                 std::string* label);
 
 /**
  * @brief triangleCount the triangle counting algorithm is implemented, the input is the matrix in CSC format.

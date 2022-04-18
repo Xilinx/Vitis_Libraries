@@ -227,7 +227,7 @@ void axiToCharStream(ap_uint<_WAxi>* rbuf, hls::stream<_TStrm>& ostrm, const int
     split_vec_to_aligned<_WAxi, _TStrm, scal_vec>(vec_strm, len, scal_char, offset, ostrm);
 }
 
-} // internal
-} // graph
-} // xf
+} // namespace internal
+} // namespace graph
+} // namespace xf
 #endif

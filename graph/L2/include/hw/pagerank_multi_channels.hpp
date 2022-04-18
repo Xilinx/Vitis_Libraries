@@ -1881,8 +1881,6 @@ void initDDR(int nrows,
 #endif
     writeOutDDROrder<T, rowTemplate, widthOr>(nrows, orderStrm, orderUnroll);
 }
-} // namespace pagerank
-} // namespace internal
 
 template <typename T,
           int rowTemplate,
@@ -2011,9 +2009,11 @@ void pageRankCore(int nrows,
     std::cout << "isResultinPong = " << !share << std::endl;
 #endif
 }
+} // namespace pagerankMultiChannel
+} // namespace internal
 
 /**
- * @brief pagerank algorithm is implemented
+ * @brief pagerankMultiChannel algorithm is implemented
  * support: 1. HBM based board
  * 2. double / float for PR value calculate
  * 3. weighted / unweighted graph / personalized graph
@@ -2116,7 +2116,8 @@ void pageRankTop(int numVertex,
         cntValFull1, buffPong1, cntValFull2, buffPong2, cntValFull3, buffPong3, cntValFull4, buffPong4, cntValFull5,
         buffPong5, orderUnroll);
 
-    pageRankCore<T, MAXVERTEX, MAXEDGE, LOG2UNROLL, WIDTHOR, LOG2CACHEDEPTH, LOG2DATAPERCACHELINECORE, RAMTYPE>(
+    internal::pagerankMultiChannel::pageRankCore<T, MAXVERTEX, MAXEDGE, LOG2UNROLL, WIDTHOR, LOG2CACHEDEPTH,
+                                                 LOG2DATAPERCACHELINECORE, RAMTYPE>(
         numVertex, numEdge, nsource, numEdgePerChannel, orderUnroll, indexCSC, weightCSC, buffPing0, buffPong0,
         buffPing1, buffPong1, cntValFull0, cntValFull1, buffPing2, buffPong2, buffPing3, buffPong3, buffPing4,
         buffPong4, buffPing5, buffPong5, cntValFull2, cntValFull3, cntValFull4, cntValFull5, resultInfo, alpha,
@@ -2162,7 +2163,8 @@ void pageRankTop(int numVertex,
     internal::pagerankMultiChannel::initDDR<T, BURST_LENTH, MAXVERTEX, MAXEDGE, WIDTHOR>(
         numVertex, numEdge, alpha, randomProbability, nsource, sourceID, degreeCSR, offsetCSC, cntValFull0, buffPong0,
         cntValFull1, buffPong1, orderUnroll);
-    pageRankCore<T, MAXVERTEX, MAXEDGE, LOG2UNROLL, WIDTHOR, LOG2CACHEDEPTH, LOG2DATAPERCACHELINECORE, RAMTYPE>(
+    internal::pagerankMultiChannel::pageRankCore<T, MAXVERTEX, MAXEDGE, LOG2UNROLL, WIDTHOR, LOG2CACHEDEPTH,
+                                                 LOG2DATAPERCACHELINECORE, RAMTYPE>(
         numVertex, numEdge, nsource, numEdgePerChannel, orderUnroll, indexCSC, weightCSC, buffPing0, buffPong0,
         buffPing1, buffPong1, cntValFull0, cntValFull1, resultInfo, alpha, tolerance, numIter);
 }

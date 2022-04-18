@@ -1,19 +1,19 @@
 {
     "gui": true, 
-    "name": "Xilinx Renumber Test", 
+    "name": "Xilinx Renumber Benchmark", 
     "description": "An example for fast renumber in graph cases", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50" 
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

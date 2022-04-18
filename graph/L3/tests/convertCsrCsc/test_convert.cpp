@@ -63,6 +63,14 @@ int main(int argc, const char* argv[]) {
     std::string filenameOffset2;
     std::string filenameIndice2;
     std::string num_str;
+    std::string xclbinPath;
+    if (!parser.getCmdOption("-xclbin", num_str)) { // xclbin
+        std::cout << "INFO: xclbin file path is not set!\n";
+        exit(1);
+    } else {
+        xclbinPath = num_str;
+        std::cout << "INFO: xclbin file path is " << xclbinPath << std::endl;
+    }
     if (!parser.getCmdOption("-offset", num_str)) {
         filenameOffset = "./data/csr_offsets.txt";
         std::cout << "INFO: offset file is not set!\n";
@@ -96,7 +104,6 @@ int main(int argc, const char* argv[]) {
     std::string opName;
     std::string kernelName;
     int requestLoad;
-    std::string xclbinPath;
     int deviceNeeded;
 
     std::fstream userInput("./config.json", std::ios::in);
@@ -118,9 +125,6 @@ int main(int argc, const char* argv[]) {
             } else if (!std::strcmp(token, "requestLoad")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 requestLoad = std::atoi(token);
-            } else if (!std::strcmp(token, "xclbinPath")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -135,7 +139,7 @@ int main(int argc, const char* argv[]) {
     op0.operationName = (char*)opName.c_str();
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinPath = (char*)xclbinPath.c_str();
     op0.deviceNeeded = deviceNeeded;
 
     xf::graph::L3::Handle handle0;
@@ -190,10 +194,10 @@ int main(int argc, const char* argv[]) {
 
     uint32_t err = 0;
     for (int i = 0; i < numVertices + 1; ++i) {
-        err += std::abs(g2.offsetsCSC[i] - offsetsCSC[i]);
+        err += std::abs((int)(g2.offsetsCSC[i] - offsetsCSC[i]));
     }
     for (int i = 0; i < numEdges; ++i) {
-        err += std::abs(g2.indicesCSC[i] - indicesCSC[i]);
+        err += std::abs((int)(g2.indicesCSC[i] - indicesCSC[i]));
     }
 
     delete[] offsetsCSC;
@@ -201,7 +205,6 @@ int main(int argc, const char* argv[]) {
     delete[] weightsCSC;
 
     //--------------- Free and delete -----------------------------------
-    (handle0.opconvertcsrcsc)->join();
     handle0.free();
     g.freeBuffers();
     g2.freeBuffers();

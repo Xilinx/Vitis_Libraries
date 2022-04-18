@@ -3,17 +3,17 @@
     "name": "Xilinx Multi-source Dense Similarity Test", 
     "description": "In graph theory, a similarity measure or similarity function is an real-valued function which indicates whether two vertices are similar to each other (from wikipedia). A case for Dense Similarity Test with Multi-source as inputs.", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u200": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -126,8 +126,8 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 800, 
-                    "vitis_hw_emu": 300, 
+                    "vitis_hw_build": 1800, 
+                    "vitis_hw_emu": 1200, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

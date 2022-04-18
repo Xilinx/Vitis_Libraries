@@ -3,25 +3,45 @@
     "name": "Xilinx Louvain Modularity Test", 
     "description": "The Louvain method for community detection is a method to extract communities from large networks created by Blondel from the University of Louvain (the source of this method's name). The method is a greedy optimization method that appears to run in time O(n cdot log n), if n is the number of nodes in the network", 
     "flow": "vitis", 
-    "platform_whitelist": [
-        "u50"
+    "platform_allowlist": [
+        "u50",
+        "u280",
+        "u55c"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/conn_u50_u280.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=PROJECT/postSysLink.tcl"
+                    ]
+                }
+            }
+        },
+        "u280": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/conn_u50_u280.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=PROJECT/postSysLink.tcl"
+                    ]
+                }
+            }
+        },
+        "u55c": {
             "host": {
                 "compiler": {
                     "symbols": [
-                        "USE_HBM"
+                        "USE_U55C"
                     ]
                 }
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50_u280.cfg"
+                    "clflags": [
+                        "--config PROJECT/conn_u55c.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=PROJECT/postSysLink.tcl"
                     ]
                 }
             }
@@ -32,7 +52,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": " -x BUILD/kernel_louvain.xclbin -f 3 -c -m 10000 -prun PROJECT/data/example-wt.txt", 
+            "cmd_args": " -x BUILD/kernel_louvain.xclbin -f 3 -c -m 10000 PROJECT/data/example-wt.txt -prun", 
             "name": "generic launch for all flows",
             "ld_library_path": [
                                 "$(LD_LIBRARY_PATH)",
@@ -75,7 +95,7 @@
                 "LIB_DIR/../utils/L1/include", 
                 "LIB_DIR/ext/xcl2" 
            ],  
-            "options": "-O3 -DPRAGMA -Ofast -fopenmp -fPIC -DMULTITHREAD"
+            "options": "-O3 -DPRAGMA -Ofast -fopenmp -fPIC -DMULTITHREAD -B/usr/lib/x86_64-linux-gnu"
         }
     }, 
     "v++": {
@@ -93,7 +113,7 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/louvain_fast/kernel/kernel_louvain.cpp", 
-                    "frequency": 300.0, 
+                    "frequency": 250.0, 
                     "clflags": " -D KERNEL_NAME=kernel_louvain", 
                     "name": "kernel_louvain", 
                     "num_compute_units": 1, 
@@ -116,70 +136,62 @@
                                 }, 
                                 {
                                     "name": "m_axi_gmem3", 
-                                    "memory": "HBM[6]"
+                                    "memory": "HBM[5:6]"
                                 }, 
                                 {
                                     "name": "m_axi_gmem4", 
-                                    "memory": "HBM[8]"
+                                    "memory": "HBM[5:6]"
                                 }, 
                                 {
                                     "name": "m_axi_gmem5", 
-                                    "memory": "HBM[10]"
+                                    "memory": "HBM[7]"
                                 }, 
                                 {
                                     "name": "m_axi_gmem6", 
-                                    "memory": "HBM[12]"
+                                    "memory": "HBM[8]"
                                 }, 
                                 {
                                     "name": "m_axi_gmem7", 
-                                    "memory": "HBM[14]"
+                                    "memory": "HBM[9]"
                                 },
                                 {
                                     "name": "m_axi_gmem8", 
-                                    "memory": "HBM[16]"
+                                    "memory": "HBM[10]"
                                 },
                                 {
                                     "name": "m_axi_gmem9", 
-                                    "memory": "HBM[18]"
+                                    "memory": "HBM[11]"
                                 },
                                 {
                                     "name": "m_axi_gmem10", 
-                                    "memory": "HBM[20]"
+                                    "memory": "HBM[12]"
                                 },
                                 {
                                     "name": "m_axi_gmem11", 
-                                    "memory": "HBM[22]"
+                                    "memory": "HBM[13]"
                                 },
                                 {
                                     "name": "m_axi_gmem12", 
-                                    "memory": "HBM[24]"
+                                    "memory": "HBM[14]"
                                 },
                                 {
                                     "name": "m_axi_gmem13", 
-                                    "memory": "HBM[26]"
+                                    "memory": "HBM[15]"
                                 },
                                 {
                                     "name": "m_axi_gmem14", 
-                                    "memory": "HBM[27]"
+                                    "memory": "HBM[4]"
                                 },
                                 {
                                     "name": "m_axi_gmem15", 
-                                    "memory": "HBM[28:29]"
-                                },
-                                {
-                                    "name": "m_axi_gmem16", 
-                                    "memory": "HBM[7]"
-                                },
-                                {
-                                    "name": "m_axi_gmem17", 
-                                    "memory": "HBM[9]"
+                                    "memory": "HBM[0:1]"
                                 }
                             ]
                         }
                     ]
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 250.0, 
             "name": "kernel_louvain"
         }
     ], 
@@ -198,7 +210,7 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 1200, 
                     "vitis_hw_emu": 300, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10

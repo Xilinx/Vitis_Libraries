@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 
 namespace xf {
 namespace graph {
+namespace internal {
 
 ////////////////////////////////////////////////////
 // big-hash
@@ -381,6 +382,14 @@ template <class T_V, class T_W, int LG2_W_HASHADDR, int LG2_W_MEMPORT>
 void SameColor_GetKins_HashAgg_big(short scl,
                                    hls::stream<ap_uint<128> >& str_GetCout,
                                    hls::stream<ap_uint<128> >& str_Aggout) {
+#ifndef __SYNTHESIS__
+    CkKins<T_V, T_W>* ckkins = (CkKins<T_V, T_W>*)malloc((1 << LG2_W_HASHADDR) * sizeof(CkKins<T_V, T_W>));
+    CkKins<T_V, T_W>* ckkins_s = (CkKins<T_V, T_W>*)malloc((1 << LG2_W_HASHADDR) * sizeof(CkKins<T_V, T_W>));
+    ValAddr<T_V>* valAdd = (ValAddr<T_V>*)malloc((1 << LG2_W_HASHADDR) * sizeof(ValAddr<T_V>));
+
+    ap_uint<1 << LG2_W_MEMPORT>* mem_used = (ap_uint<1 << LG2_W_MEMPORT>*)malloc(
+        (1 << (LG2_W_HASHADDR - LG2_W_MEMPORT)) * sizeof(ap_uint<1 << LG2_W_MEMPORT>));
+#else
     CkKins<T_V, T_W> ckkins[1 << LG2_W_HASHADDR];
 #pragma HLS RESOURCE variable = ckkins core = RAM_T2P_URAM
     CkKins<T_V, T_W> ckkins_s[1 << LG2_W_HASHADDR];
@@ -389,6 +398,7 @@ void SameColor_GetKins_HashAgg_big(short scl,
 #pragma HLS RESOURCE variable = valAdd core = RAM_T2P_URAM
     ap_uint<1 << LG2_W_MEMPORT> mem_used[1 << (LG2_W_HASHADDR - LG2_W_MEMPORT)];
 #pragma HLS RESOURCE variable = mem_used core = RAM_T2P_URAM
+#endif
 
     HashAgg<T_V, T_W, LG2_W_HASHADDR, LG2_W_MEMPORT> myHash(ckkins, valAdd, mem_used);
     ScanAgg<T_V, T_W, 1 << LG2_W_HASHADDR> myScan(ckkins_s);
@@ -568,6 +578,72 @@ GET_KIN_DISPATCH:
     }
 }
 
+static void SameColor_GetKins_hash_dispatch4(int th_2,
+                                             // input
+                                             hls::stream<ap_uint<128> >& str_GetCout,
+                                             // output
+                                             hls::stream<ap_uint<128> >& str_GetCout0,
+                                             hls::stream<ap_uint<128> >& str_GetCout1,
+                                             hls::stream<ap_uint<128> >& str_GetCout3,
+                                             hls::stream<ap_uint<128> >& str_GetCout4,
+                                             hls::stream<ap_uint<128> >& str_GetCout2) {
+    ap_uint<2> select_0 = 0;
+    short pre_degree_0;
+    short pre_degree_1;
+    short pre_degree_2;
+    short pre_degree_3;
+    bool e_GetC = false;
+    DF_V_T v;
+    DF_V_T vCid;
+    DF_D_T degree;
+    DF_W_T deg_w;
+    DF_V_T edge;
+    DF_V_T eCid;
+    StrmBus_L cout;
+    ap_uint<128> dinout;
+
+GET_KIN_DISPATCH:
+    while (e_GetC == false) {
+        str_GetCout.read(dinout);
+        cout.vcde.get(dinout, v, vCid, degree, e_GetC);
+        if (e_GetC == false) {
+            if (degree < th_2) {
+                if (select_0 == 0) {
+                    str_GetCout0.write(dinout);
+                    dispatch_send_ewc(degree, str_GetCout, str_GetCout0);
+                    select_0 = 1;
+                    pre_degree_0 = degree;
+                } else if (select_0 == 1) {
+                    str_GetCout1.write(dinout);
+                    dispatch_send_ewc(degree, str_GetCout, str_GetCout1);
+                    select_0 = 2; // zyl
+                    pre_degree_1 = degree;
+                } else if (select_0 == 2) {
+                    str_GetCout3.write(dinout);
+                    dispatch_send_ewc(degree, str_GetCout, str_GetCout3);
+                    select_0 = 3; // zyl
+                    pre_degree_2 = degree;
+                } else if (select_0 == 3) {
+                    str_GetCout4.write(dinout);
+                    dispatch_send_ewc(degree, str_GetCout, str_GetCout4);
+                    select_0 = 0; // zyl
+                    pre_degree_3 = degree;
+                }
+            } else {
+                str_GetCout2.write(dinout);
+                dispatch_send_ewc(degree, str_GetCout, str_GetCout2);
+            }
+        } else {
+            cout.vcde.set(0, 0, 0, true);
+            str_GetCout0.write(dinout);
+            str_GetCout1.write(dinout);
+            str_GetCout3.write(dinout);
+            str_GetCout4.write(dinout);
+            str_GetCout2.write(dinout);
+        }
+    }
+}
+
 static bool Collector_bus_vcde_ewc(hls::stream<ap_uint<128> >& str_Aggout1, hls::stream<ap_uint<128> >& str_Aggout) {
 #pragma HLS INLINE
     StrmBus_L vcdn;
@@ -631,9 +707,115 @@ static void SameColor_GetKins_hash_Collector(
     str_Aggout.write(dinout);
 }
 
+static void SameColor_GetKins_hash_Collector(
+    // input
+    hls::stream<ap_uint<128> >& str_Aggout0,
+    hls::stream<ap_uint<128> >& str_Aggout1,
+    hls::stream<ap_uint<128> >& str_Aggout3,
+    hls::stream<ap_uint<128> >& str_Aggout4,
+
+    hls::stream<ap_uint<128> >& str_Aggout2,
+    // output
+    // hls::stream<ap_uint<1> >& done,
+    hls::stream<ap_uint<128> >& str_Aggout) {
+    ap_uint<128> dinout;
+    ap_uint<3> selected = 0;
+    bool e_0 = false;
+    bool e_1 = false;
+    bool e_3 = false;
+    bool e_4 = false;
+    bool e_2 = false;
+    bool e01234 = e_0 & e_1 & e_2 & e_3 & e_4;
+    while (e01234 == false) {
+        if (selected == 0) {
+            if (!str_Aggout0.empty()) e_0 = Collector_bus_vcde_ewc(str_Aggout0, str_Aggout);
+            if (!str_Aggout1.empty()) e_1 = Collector_bus_vcde_ewc(str_Aggout1, str_Aggout);
+            if (!str_Aggout3.empty()) e_3 = Collector_bus_vcde_ewc(str_Aggout3, str_Aggout);
+            if (!str_Aggout4.empty()) e_4 = Collector_bus_vcde_ewc(str_Aggout4, str_Aggout);
+            if (!str_Aggout2.empty()) e_2 = Collector_bus_vcde_ewc(str_Aggout2, str_Aggout);
+            selected = 1;
+        } else if (selected == 1) {
+            if (!str_Aggout1.empty()) e_1 = Collector_bus_vcde_ewc(str_Aggout1, str_Aggout);
+            if (!str_Aggout3.empty()) e_3 = Collector_bus_vcde_ewc(str_Aggout3, str_Aggout);
+            if (!str_Aggout4.empty()) e_4 = Collector_bus_vcde_ewc(str_Aggout4, str_Aggout);
+            if (!str_Aggout2.empty()) e_2 = Collector_bus_vcde_ewc(str_Aggout2, str_Aggout);
+            if (!str_Aggout0.empty()) e_0 = Collector_bus_vcde_ewc(str_Aggout0, str_Aggout);
+            selected = 2;
+        } else if (selected == 2) {
+            if (!str_Aggout3.empty()) e_3 = Collector_bus_vcde_ewc(str_Aggout3, str_Aggout);
+            if (!str_Aggout4.empty()) e_4 = Collector_bus_vcde_ewc(str_Aggout4, str_Aggout);
+            if (!str_Aggout2.empty()) e_2 = Collector_bus_vcde_ewc(str_Aggout2, str_Aggout);
+            if (!str_Aggout0.empty()) e_0 = Collector_bus_vcde_ewc(str_Aggout0, str_Aggout);
+            if (!str_Aggout1.empty()) e_1 = Collector_bus_vcde_ewc(str_Aggout1, str_Aggout);
+            selected = 3;
+        } else if (selected == 3) {
+            if (!str_Aggout4.empty()) e_4 = Collector_bus_vcde_ewc(str_Aggout4, str_Aggout);
+            if (!str_Aggout2.empty()) e_2 = Collector_bus_vcde_ewc(str_Aggout2, str_Aggout);
+            if (!str_Aggout0.empty()) e_0 = Collector_bus_vcde_ewc(str_Aggout0, str_Aggout);
+            if (!str_Aggout1.empty()) e_1 = Collector_bus_vcde_ewc(str_Aggout1, str_Aggout);
+            if (!str_Aggout3.empty()) e_3 = Collector_bus_vcde_ewc(str_Aggout3, str_Aggout);
+            selected = 4;
+        } else {
+            if (!str_Aggout2.empty()) e_2 = Collector_bus_vcde_ewc(str_Aggout2, str_Aggout);
+            if (!str_Aggout0.empty()) e_0 = Collector_bus_vcde_ewc(str_Aggout0, str_Aggout);
+            if (!str_Aggout1.empty()) e_1 = Collector_bus_vcde_ewc(str_Aggout1, str_Aggout);
+            if (!str_Aggout3.empty()) e_3 = Collector_bus_vcde_ewc(str_Aggout3, str_Aggout);
+            if (!str_Aggout4.empty()) e_4 = Collector_bus_vcde_ewc(str_Aggout4, str_Aggout);
+            selected = 0;
+        }
+        e01234 = e_0 & e_1 & e_2 & e_3 & e_4;
+    }
+    StrmBus_L bus_out;
+    bus_out.vcdn.set(0, 0, -2, -2);
+    bus_out.vcdn.get(dinout);
+    str_Aggout.write(dinout);
+    // done.write(true);
+}
+
+// static void SameColor_GetKins_hash_top(short scl,
+//                                       // input
+//                                       hls::stream<ap_uint<128> >& str_GetCout,
+//                                       hls::stream<ap_uint<128> >& str_Aggout) {
+//#pragma HLS DATAFLOW
+//    //
+//    hls::stream<ap_uint<128> > str_GetCout0("str_GetCout0");
+//#pragma HLS RESOURCE variable = str_GetCout0 core = FIFO_LUTRAM
+//#pragma HLS STREAM variable = str_GetCout0 depth = 128
+//    hls::stream<ap_uint<128> > str_GetCout1("str_GetCout1");
+//#pragma HLS RESOURCE variable = str_GetCout1 core = FIFO_LUTRAM
+//#pragma HLS STREAM variable = str_GetCout1 depth = 128
+//    hls::stream<ap_uint<128> > str_GetCout2("str_GetCout2");
+//#pragma HLS RESOURCE variable = str_GetCout2 core = FIFO_LUTRAM
+//#pragma HLS STREAM variable = str_GetCout2 depth = 128
+//    SameColor_GetKins_hash_dispatch(63,
+//                                    // input
+//                                    str_GetCout, str_GetCout0, str_GetCout1, str_GetCout2);
+//
+//    hls::stream<ap_uint<128> > str_GetAggout0("str_GetAggout0");
+//#pragma HLS RESOURCE variable = str_GetAggout0 core = FIFO_LUTRAM
+//#pragma HLS STREAM variable = str_GetAggout0 depth = 128
+//    SameColor_GetKins_HashAgg_small(scl, str_GetCout0, str_GetAggout0);
+//
+//    hls::stream<ap_uint<128> > str_GetAggout1("str_GetAggout1");
+//#pragma HLS RESOURCE variable = str_GetAggout1 core = FIFO_LUTRAM
+//#pragma HLS STREAM variable = str_GetAggout1 depth = 128
+//
+//    SameColor_GetKins_HashAgg_small(scl, str_GetCout1, str_GetAggout1);
+//
+//    hls::stream<ap_uint<128> > str_GetAggout2("str_GetAggout2");
+//#pragma HLS RESOURCE variable = str_GetAggout2 core = FIFO_LUTRAM
+//#pragma HLS STREAM variable = str_GetAggout2 depth = 128
+//    const int LG2_NUM_HASH = 17;
+//    const int LG2_BITS_MEM = 10;
+//    SameColor_GetKins_HashAgg_big<DF_V_T, DF_W_T, LG2_NUM_HASH, LG2_BITS_MEM>(scl, str_GetCout2, str_GetAggout2);
+//
+//    SameColor_GetKins_hash_Collector(str_GetAggout0, str_GetAggout1, str_GetAggout2, str_Aggout);
+//}
+
 static void SameColor_GetKins_hash_top(short scl,
                                        // input
                                        hls::stream<ap_uint<128> >& str_GetCout,
+                                       // hls::stream<ap_uint<1> >& done,
                                        hls::stream<ap_uint<128> >& str_Aggout) {
 #pragma HLS DATAFLOW
     //
@@ -643,12 +825,20 @@ static void SameColor_GetKins_hash_top(short scl,
     hls::stream<ap_uint<128> > str_GetCout1("str_GetCout1");
 #pragma HLS RESOURCE variable = str_GetCout1 core = FIFO_LUTRAM
 #pragma HLS STREAM variable = str_GetCout1 depth = 128
+
+    hls::stream<ap_uint<128> > str_GetCout3("str_GetCout1");
+#pragma HLS RESOURCE variable = str_GetCout3 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = str_GetCout3 depth = 128
+    hls::stream<ap_uint<128> > str_GetCout4("str_GetCout1");
+#pragma HLS RESOURCE variable = str_GetCout4 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = str_GetCout4 depth = 128
+
     hls::stream<ap_uint<128> > str_GetCout2("str_GetCout2");
 #pragma HLS RESOURCE variable = str_GetCout2 core = FIFO_LUTRAM
 #pragma HLS STREAM variable = str_GetCout2 depth = 128
-    SameColor_GetKins_hash_dispatch(63,
-                                    // input
-                                    str_GetCout, str_GetCout0, str_GetCout1, str_GetCout2);
+    SameColor_GetKins_hash_dispatch4(63,
+                                     // input
+                                     str_GetCout, str_GetCout0, str_GetCout1, str_GetCout3, str_GetCout4, str_GetCout2);
 
     hls::stream<ap_uint<128> > str_GetAggout0("str_GetAggout0");
 #pragma HLS RESOURCE variable = str_GetAggout0 core = FIFO_LUTRAM
@@ -661,6 +851,18 @@ static void SameColor_GetKins_hash_top(short scl,
 
     SameColor_GetKins_HashAgg_small(scl, str_GetCout1, str_GetAggout1);
 
+    hls::stream<ap_uint<128> > str_GetAggout3("str_GetAggout3");
+#pragma HLS RESOURCE variable = str_GetAggout3 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = str_GetAggout3 depth = 128
+
+    SameColor_GetKins_HashAgg_small(scl, str_GetCout3, str_GetAggout3);
+
+    hls::stream<ap_uint<128> > str_GetAggout4("str_GetAggout4");
+#pragma HLS RESOURCE variable = str_GetAggout4 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = str_GetAggout4 depth = 128
+
+    SameColor_GetKins_HashAgg_small(scl, str_GetCout4, str_GetAggout4);
+
     hls::stream<ap_uint<128> > str_GetAggout2("str_GetAggout2");
 #pragma HLS RESOURCE variable = str_GetAggout2 core = FIFO_LUTRAM
 #pragma HLS STREAM variable = str_GetAggout2 depth = 128
@@ -668,9 +870,11 @@ static void SameColor_GetKins_hash_top(short scl,
     const int LG2_BITS_MEM = 10;
     SameColor_GetKins_HashAgg_big<DF_V_T, DF_W_T, LG2_NUM_HASH, LG2_BITS_MEM>(scl, str_GetCout2, str_GetAggout2);
 
-    SameColor_GetKins_hash_Collector(str_GetAggout0, str_GetAggout1, str_GetAggout2, str_Aggout);
+    SameColor_GetKins_hash_Collector(str_GetAggout0, str_GetAggout1, str_GetAggout3, str_GetAggout4, str_GetAggout2,
+                                     str_Aggout); // done
 }
 
-} // graph
-} // xf
+} // namespace internal
+} // namespace graph
+} // namespace xf
 #endif

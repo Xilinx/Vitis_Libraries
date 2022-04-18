@@ -22,6 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <cmath>
 
 template <class ID_T>
 void readInOffset(std::string filename, ID_T& numVertex, ID_T** offsetBuffer) {

@@ -373,6 +373,7 @@ void calcuIndexWrapper(
 /**
  * @brief convert Csr Csc algorithm is implemented
  *
+ * @tparam DT data type of the input and output, [float, double]
  * @tparam MAXVERTEX CSC/CSR data vertex(offset) array maxsize
  * @tparam MAXEDGE CSC/CSR data edge(indice) array maxsize
  * @tparam LOG2CACHEDEPTH cache depth in Binary, the cache onchip memory is 512 bit x uramRow

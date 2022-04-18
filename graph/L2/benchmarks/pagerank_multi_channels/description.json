@@ -3,17 +3,17 @@
     "name": "Xilinx Page Rank Weight benchmark 2 channels", 
     "description": "An example for weighted pagerank with 2 channels", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50_channel2.cfg"
                     ]
                 }
@@ -22,7 +22,7 @@
         "u280": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50_channel2.cfg"
                     ]
                 }

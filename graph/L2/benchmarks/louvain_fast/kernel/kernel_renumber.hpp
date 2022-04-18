@@ -26,6 +26,7 @@
 
 namespace xf {
 namespace graph {
+namespace internal {
 
 template <int DWIDTH, int VERTEX>
 void renumberClusters(int64_t numVertex,
@@ -162,6 +163,7 @@ UPDATE_RENUMBER:
     numClusters = cnt + numGhost - NV_l;
 }
 
+} // internal
 } // graph
 } // xf
 #endif // _KERNEL_RENUMBER_HPP_

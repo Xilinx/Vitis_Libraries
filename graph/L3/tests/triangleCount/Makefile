@@ -1,5 +1,4 @@
-#
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +11,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis makefile-generator v2.0.6
+
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "      Command to build xclbin application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "      Command to build host application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
+	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -28,253 +44,295 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to prepare sd_card files."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
-	$(ECHO) ""
 
 ############################## Setting up Project Variables ##############################
+
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L3/tests/triangleCount/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L3/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-ifneq ($(wildcard $(XILINX_VITIS)/aietools/.*),)
-XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/aietools
-LDXRT := -ladf_api_xrt
-else
-XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/cardano
-LDXRT := -lcardano_api_xrt
-endif
-
-SYSROOT := $(SYSROOT)
+# setting devault value
 TARGET ?= sw_emu
-DEVICE ?= xilinx_u50_gen3x16_xdma_201920_3
 HOST_ARCH ?= x86
 
-ifneq ($(findstring u50, $(DEVICE)), u50)
-$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+#setting PLATFORM
+ifeq ($(PLATFORM),)
+PLATFORM := $(DEVICE)
+endif
+ifeq ($(PLATFORM),)
+PLATFORM := xilinx_u50_gen3x16_xdma_5_202210_1
 endif
 
-include ./utils.mk
-XDEVICE := $(call device2xsa, $(DEVICE))
-TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
-TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
-BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
-BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
-EMCONFIG_DIR := $(BUILD_DIR)
+# #################### Checking if PLATFORM in whitelist ############################
+PLATFORM_ALLOWLIST +=  u50
+PLATFORM_BLOCKLIST += 
 
-PERL ?= perl
+include ./utils.mk
+TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
+BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
+EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
 
-# Setting tools
-VPP := v++
-SDCARD := sd_card
-EMU_DIR := $(SDCARD)/data/emulation
+EXE_FILE_DEPS :=
+BINARY_CONTAINERS_DEPS :=
+RUN_DEPS :=
 
+# get global setting
+ifeq ($(HOST_ARCH), x86)
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0  -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel 
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
+VPP_LDFLAGS += --optimize 2 -R 2 
+else ifeq ($(HOST_ARCH), aarch64)
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.o -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
+VPP_LDFLAGS += --optimize 2 -R 2 
+endif
+CXXFLAGS += $(EXTRA_CXXFLAGS)
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
-############################## Setting up Host Variables ##############################
-#Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L3/tests/triangleCount/test_trianglecount.cpp
-HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
-
-CXXFLAGS += -I$(XFLIB_DIR)/L3/include
-LDFLAGS += -L$(XFLIB_DIR)/L3/lib
-
-LDFLAGS += -lgraphL3
-
-LDFLAGS += -L$(XILINX_XRM)/lib -lxrm 
-
-CXXFLAGS += -I$(XFLIB_DIR)/L2/include
-CXXFLAGS += -I$(XFLIB_DIR)/../database/L1/include/hw
-CXXFLAGS += -I$(XFLIB_DIR)/../quantitative_finance/L1/include
-CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
-CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
-
-
+########################## Setting up Host Variables ##########################
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
 endif
-
 ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
-# Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
-CXXFLAGS += -fmessage-length=0 -O3 -I$(XILINX_XRM)/include
-CXXFLAGS += -I$(CUR_DIR)/src/ 
 
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
+endif
+
+#Inclue Required Host Source Files
+HOST_SRCS += $(XFLIB_DIR)/L3/tests/triangleCount/test_trianglecount.cpp 
+CXXFLAGS +=  -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += -I$(XILINX_XRM)/include
+LDFLAGS +=  -L $(BUILD_DIR)
+LDFLAGS +=  -l graphL3
+LDFLAGS += -L$(XILINX_XRM)/lib -lxrm 
+
+EXE_NAME := host.exe
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+
+HOST_ARGS := -xclbin $(CUR_DIR)/$(BUILD_DIR)/TC_kernel.xclbin -offset $(CUR_DIR)/data/csr_offsets.txt -indice $(CUR_DIR)/data/csr_columns.txt 
+ifneq ($(HOST_ARCH), x86)
+PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+endif
+LIBRARY_PATH := $(BUILD_DIR):$(XILINX_XRT)/lib:$(XILINX_XRM)/lib
+
+########################## Kernel compiler global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS +=   --config $(CUR_DIR)/conn_u50.cfg
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/triangle_count/kernel -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include
+
+else 
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/triangle_count/kernel -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include
+
+endif
+
+######################### binary container global settings ##########################
+VPP_FLAGS_TC_kernel +=  -D KERNEL_NAME=TC_kernel
+VPP_FLAGS_TC_kernel += --hls.clock 300000000:TC_kernel
+ifneq ($(HOST_ARCH), x86)
+VPP_LDFLAGS_TC_kernel += --clock.defaultFreqHz 300000000
+else
+VPP_LDFLAGS_TC_kernel += --kernel_frequency 300
+endif
 
 ifeq ($(HOST_ARCH), x86)
-#LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+BINARY_CONTAINERS += $(BUILD_DIR)/TC_kernel.xclbin
+else
+BINARY_CONTAINERS += $(BUILD_DIR)/TC_kernel_pkg.$(LINK_TARGET_FMT)
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/TC_kernel.xclbin
 endif
-PKG_OUT_DIR := package_$(TARGET)
-ifneq (,$(findstring zc706, $(XDEVICE)))
+
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
+$(TEMP_DIR)/TC_kernel.xo: $(XFLIB_DIR)/L2/tests/triangle_count/kernel/TC_kernel.cpp 
+	$(ECHO) "Compiling Kernel: TC_kernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(VPP_FLAGS_TC_kernel) $(VPP_FLAGS) -k TC_kernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_TC_kernel_OBJS += $(TEMP_DIR)/TC_kernel.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_TC_kernel_OBJS)
+$(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/TC_kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_TC_kernel) $(AIE_LDFLAGS)   -o $@ $^
+
+############################## Setting Rules for Host (Building Host Executable) ##############################
+ifeq ($(HOST_ARCH), x86)
+$(EXE_FILE): $(EXE_FILE_DEPS) |  check_xrt
+	mkdir -p $(BUILD_DIR)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+else
+$(EXE_FILE): $(EXE_FILE_DEPS) |  check_sysroot
+	mkdir -p $(BUILD_DIR)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+endif
+
+$(EMCONFIG):
+	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
+############################## Preparing sdcard folder ##############################
+ifneq ($(HOST_ARCH), x86)
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
 K_IMAGE := $(SYSROOT)/../../uImage
 else
 K_IMAGE := $(SYSROOT)/../../Image
 endif
-
-EXE_NAME := host.exe
-EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -offset $(CUR_DIR)/data/csr_offsets.txt -indice $(CUR_DIR)/data/csr_columns.txt 
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-LIBRARY_PATH =$(CUR_DIR)/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib:$(LD_LIBRARY_PATH)
-
-
-############################## Setting up Kernel Variables ##############################
-# Kernel compiler global settings
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-LDCLFLAGS += --optimize 2 --jobs 8
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
+RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
+$(RUN_SCRIPT):
+	rm -rf $(RUN_SCRIPT)
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
+ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
+	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
+endif
+	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_XRT=/usr' >> $(RUN_SCRIPT)
+	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
+	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
+	@echo 'fi' >> $(RUN_SCRIPT)
+	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
+	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
+	@echo 'if [ $$return_code -ne 0 ]; then' >> $(RUN_SCRIPT)
+	@echo '        echo "ERROR: Embedded host run failed, RC=$$return_code"' >> $(RUN_SCRIPT)
+	@echo 'else' >> $(RUN_SCRIPT)
+	@echo '        echo "INFO: TEST PASSED, RC=0"' >> $(RUN_SCRIPT)
+	@echo 'fi' >> $(RUN_SCRIPT)
+	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
+	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
+DATA_FILE := 
+DATA_DIR := 
+SD_FILES += $(RUN_SCRIPT)
+SD_FILES += $(EXE_FILE)
+SD_FILES += $(EMCONFIG)
+SD_FILES += xrt.ini
+SD_FILES += $(DATA_FILE)# where define DATAFILE in json
+SD_FILES_WITH_PREFIX = $(foreach sd_file,$(SD_FILES), $(if $(filter $(sd_file),$(wildcard $(sd_file))), --package.sd_file $(sd_file)))
+SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
+PACKAGE_FILES := $(BINARY_CONTAINERS)
+PACKAGE_FILES += $(AIE_CONTAINER)
+SD_CARD := $(CUR_DIR)/package_$(TARGET)
+vck190_dfx_hw := false
+$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
+	@echo "Generating sd_card folder...."
+	mkdir -p $(SD_CARD)
+	chmod a+rx $(BUILD_DIR)/run_script.sh
+ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	@echo "### ***** sd_card generation done! ***** ###"
+vck190_dfx_hw := true
+endif
+endif
+ifeq ($(vck190_dfx_hw), false)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	@echo "### ***** sd_card generation done! ***** ###"
 endif
 
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
-VPP_FLAGS += -I$(XFLIB_DIR)/../database/L1/include/hw
-VPP_FLAGS += -I$(XFLIB_DIR)/../quantitative_finance/L1/include
-VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
-
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/triangle_count/kernel
-
-
-
-TC_kernel_VPP_FLAGS +=  -D KERNEL_NAME=TC_kernel
-XFREQUENCY ?= 300.0
-VIVADO_FREQUENCY =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
-VPP_CFLAGS += --clock.defaultFreqHz $(VIVADO_FREQUENCY)
-
-############################## Declaring Binary Containers ##############################
-
-
-BINARY_CONTAINERS += $(BUILD_DIR)/TC_kernel.xclbin
-
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/TC_kernel.xclbin
-BINARY_CONTAINER_TC_kernel_OBJS += $(TEMP_DIR)/TC_kernel.xo
-
-############################## Setting Targets ##############################
-CP = cp -rf
-
-.PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-
-
-.PHONY: host
-host: check_xrt check_sysroot $(EXE_FILE)
-
-.PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
-
-.PHONY: build
-build: xclbin
-
-############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-
-
-$(TEMP_DIR)/TC_kernel.xo: $(XFLIB_DIR)/L2/tests/triangle_count/kernel/TC_kernel.cpp
-	$(ECHO) "Compiling Kernel: TC_kernel"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(TC_kernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k TC_kernel -I'$(<D)' -o'$@' '$<'
-
-
-$(BUILD_DIR)/TC_kernel.xclbin: $(BINARY_CONTAINER_TC_kernel_OBJS)
-	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/TC_kernel -l $(LDCLFLAGS) $(LDCLFLAGS_TC_kernel) -o'$@' $(+)
-
-############################## Setting Rules for Host (Building Host Executable) ##############################
-$(EXE_FILE): $(HOST_SRCS) | check_xrt
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-emconfig:$(EMCONFIG_DIR)/emconfig.json
-$(EMCONFIG_DIR)/emconfig.json:
-	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
-
+.PHONY: sd_card
+sd_card: $(SD_CARD)
+endif
 ############################## Setting Essential Checks and Building Rules ##############################
-############################## Setting Essential Checks and Running Rules ##############################
-RESULT_VAL ?= 
-RUN_LEVEL ?= 7
+RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += $(SD_CARD)
+
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+all: check_device pre_build check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+#hw_emu
+ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	
 else
-	export XCL_EMULATION_MODE=$(TARGET)
-	$(PERL) $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(PKG_OUT_DIR)/launch_$(TARGET).sh -no-reboot" "./run_script.sh" "$(RESULT_VAL)" "$(RUN_LEVEL)" | tee embedded_run.log 
+	@echo $(RUN_DEPS)
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
-else
+endif
+#sw_emu
+ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH) $(EXE_FILE) $(HOST_ARGS)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	
+else
+	@echo $(RUN_DEPS)
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
+endif
+endif
+#hw
+ifeq ($(TARGET), hw)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(HOST_ARGS)
+	
+endif
+else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(HOST_ARGS)
+	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
 endif
 
-############################## Preparing sdcard folder ##############################
-PACKAGE_FILES := run_script.sh
-PACKAGE_FILES += $(EXE_FILE)
-PACKAGE_FILES += emconfig.json
-PACKAGE_FILES += $(DATA_FILE)
-SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
-SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-ifneq ($(HOST_ARCH), x86)
-	@echo "Generating sd_card folder...."
-	mkdir -p $(PKG_OUT_DIR)
-	rm -rf run_script.sh
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_script.sh
-ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_script.sh
+############################## Setting Targets ##############################
+.PHONY: pre_build
+pre_build:
+	make -f $(XFLIB_DIR)/L3/lib/Makefile libgraphL3 TARGET=$(TARGET) CUR_DIR=$(CUR_DIR)/$(BUILD_DIR)
+
+.PHONY: clean cleanall emconfig
+emconfig: $(EMCONFIG)
+
+.PHONY: host
+ifeq ($(HOST_ARCH), x86)
+host:  pre_build check_xrt $(EXE_FILE)
+else
+host:  pre_build check_sysroot $(EXE_FILE)
 endif
-	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
-	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'if [ -f platform_desc.txt  ]; then' >> run_script.sh 
-	@echo '        cp platform_desc.txt /etc/xocl.txt' >> run_script.sh 
-	@echo 'fi' >> run_script.sh
-	emconfigutil --platform $(DEVICE) --nd 1;
-	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
-	@echo 'return_code=$$?' >> run_script.sh
-	@echo 'if [ $$return_code -ne 0 ]; then' >> run_script.sh
-	@echo '         echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_script.sh
-	@echo 'fi' >> run_script.sh
-	@echo 'echo "INFO: Embedded host run completed."' >> run_script.sh
-	@echo 'exit $$return_code' >> run_script.sh
-	chmod a+rx run_script.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS) -p $(BINARY_CONTAINERS) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(K_IMAGE) $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
-	@echo "### ***** sd_card generation done! ***** ###"
+
+.PHONY: xclbin
+ifeq ($(HOST_ARCH), x86)
+xclbin: pre_build check_vpp check_xrt $(BINARY_CONTAINERS) 
+else
+xclbin: pre_build check_vpp check_sysroot $(BINARY_CONTAINERS) 
 endif
+
 ############################## Cleaning Rules ##############################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
-	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
+	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) $(BUILD_DIR)/libgraphL3.json $(BUILD_DIR)/libgraphL3.so 
 
 clean: cleanh

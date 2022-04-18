@@ -22,7 +22,13 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2), the asynchronous software level (L3) and TigerGraph integration (plugin) APIs.
+Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2) and the asynchronous software level (L3).
+
+2022.1
+----
+- Add a new algorithm Maximal Independent Set.
+- Enhanced Louvain Modularity. L2 Louvain Modularity is able to support large-scale graphs.
+- Add a L3 API to divide huge graphs into multiple parts and add other data structures to support the Louvain Modularity on these parts.
 
 2021.2
 ----

@@ -35,9 +35,7 @@ PCIE Accelerator Card
 
 Hardware modules and kernels are designed to work with all Alveo cards.
 
-* `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted>`_
-* `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted>`_
-
+* `Alveo U50 <https://www.xilinx.com/products/boards-and-kits/alveo/u50.html>`_
 
 License
 -------

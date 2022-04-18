@@ -1,27 +1,37 @@
 {
     "gui": false, 
-    "name": "Xilinx Int Type Single Source Dense Matrix Cosine Similarity Benchmark ", 
+    "name": "Xilinx Int Type Single Source Dense Matrix Cosine Similarity Benchmark L3 Test", 
     "description": "An examplefor computing cosine similarity of a single vector in an integer dense graph by using multiple FPGA cards as a reference benchmark", 
-    "flow": "vitis", 
-    "platform_whitelist": [
+    "flow": "vitis",
+    "xrm": true,
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": [], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50_u280.cfg"
                     ]
                 }
             }
         }
-    }, 
+    },
+    "pre_build": [
+        {
+           "build_cmd":"make -f LIB_DIR/L3/lib/Makefile libgraphL3 TARGET=$(TARGET) CUR_DIR=PROJECT/BUILD"
+        }
+    ],
+    "output_files": [
+        "BUILD/libgraphL3.so",
+        "BUILD/libgraphL3.json"
+    ],
     "launch": [
         {
-            "cmd_args": "-weight PROJECT/data/cosine_dense_weight.csr -golden PROJECT/data/cosine_dense.mtx -topK 100 ", 
-            "ld_library_path": ["PROJECT/../../lib",
+            "cmd_args": "-xclbin PROJECT/BUILD/denseSimilarityKernel.xclbin -weight PROJECT/data/cosine_dense_weight.csr -golden PROJECT/data/cosine_dense.mtx -topK 100 ", 
+            "ld_library_path": ["BUILD",
                                 "$(XILINX_XRT)/lib",
                                 "$(XILINX_XRM)/lib"
                                 ],
@@ -32,18 +42,17 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/tests/cosineSimilaritySSDenseIntBench/test_cosineSimilaritySSDense.cpp", 
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L3/tests/cosineSimilaritySSDenseIntBench/test_cosineSimilaritySSDense.cpp" 
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include",
                 "LIB_DIR/../utils/L1/include"
             ], 
-            "options": "-O3 -I$(XILINX_XRM)/include"
+            "options": "-I$(XILINX_XRM)/include"
         }, 
         "linker": {
             "librarypaths": [
-                "LIB_DIR/L3/lib"
+                "BUILD"
             ], 
             "libraries": [
                 "graphL3"
@@ -218,7 +227,7 @@
         }
     ], 
     "testinfo": {
-        "disable": true, 
+        "disable": false, 
         "jobs": [
             {
                 "index": 0, 
@@ -232,12 +241,16 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 800, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }
             }
         ], 
         "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu",
             "vitis_hw_build", 
             "vitis_hw_run"
         ], 

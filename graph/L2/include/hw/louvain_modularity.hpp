@@ -41,6 +41,7 @@ typedef long long DF_WI_T;
 
 namespace xf {
 namespace graph {
+namespace internal {
 
 template <typename MType>
 union f_cast;
@@ -1128,7 +1129,9 @@ BATCH2MEM:
     num_cid_small = 0;
     isFirstAddr = true;
 }
-}
-}
+
+} // namespace internal
+} // namespace graph
+} // namespace xf
 
 #endif

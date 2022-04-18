@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
 template <typename MType>
 union f_cast;

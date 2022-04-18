@@ -40,3 +40,4 @@ Design Internals
    kernels/Renumbering.rst
    kernels/MST.rst
    kernels/estimated_diameter.rst
+   kernels/MaximalIndependentSet.rst

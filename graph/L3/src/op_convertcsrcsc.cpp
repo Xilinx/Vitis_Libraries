@@ -26,25 +26,62 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
-void createHandleConvertCsrCsc(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+void opConvertCsrCsc::createHandle(class openXRM* xrm,
+                                   clHandle& handle,
+                                   std::string kernelName,
+                                   std::string kernelAlias,
+                                   std::string xclbinFile,
+                                   int32_t IDDevice,
+                                   unsigned int requestLoad) {
     xf::common::utils_sw::Logger logger(std::cout, std::cerr);
-    cl_int err;
+    cl_int fail;
+
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &err);
-    logger.logCreateContext(err);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
-    logger.logCreateCommandQueue(err);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-    handle.xclBins = xcl::import_binary_file(pXclbin);
+    handle.xclBins = xcl::import_binary_file(xclbinFile);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &err);
-    logger.logCreateProgram(err);
-}
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
+
+    handle.resR = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+    memset(handle.resR, 0, sizeof(xrmCuResource));
+    int ret = xrm->allocCU(handle.resR, kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+    std::string instanceName0;
+    if (ret == 0) {
+        instanceName0 = handle.resR->instanceName;
+        if (cuPerBoardConvertCsrCsc >= 2) instanceName0 = "convertCsrCsc_kernel:{" + instanceName0 + "}";
+    } else {
+        instanceName0 = "convertCsrCsc_kernel";
+    }
+    handle.isBusy = false;
+    const char* instanceName = instanceName0.c_str();
+    handle.kernel = cl::Kernel(handle.program, instanceName, &fail);
+    logger.logCreateKernel(fail);
+    std::cout << "INFO: Kernel has been created" << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "DEBUG:" << __FUNCTION__ << " IDDevice=" << IDDevice << "=" << devName << " CommandQueue=" << &handle.q
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " kernelName=" << kernelName << " kernelAlias=" << kernelAlias
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " resR.deviceId=" << handle.resR->deviceId
+              << " resR.cuId=" << handle.resR->cuId << " resR.channelID=" << handle.resR->channelId
+              << " resR.instanceName=" << handle.resR->instanceName << std::endl;
+
+    std::cout << "DEBUG: " << __FUNCTION__ << " instanceName0=" << instanceName0 << " created" << std::endl;
+#endif
+};
 
 uint32_t opConvertCsrCsc::cuPerBoardConvertCsrCsc;
 
@@ -57,9 +94,13 @@ void opConvertCsrCsc::setHWInfo(uint32_t numDev, uint32_t CUmax) {
     handles = new clHandle[CUmax];
 };
 
-void opConvertCsrCsc::freeConvertCsrCsc() {
+void opConvertCsrCsc::freeConvertCsrCsc(xrmContext* ctx) {
     for (int i = 0; i < maxCU; ++i) {
         delete[] handles[i].buffer;
+        if (xrmCuRelease(ctx, handles[i].resR))
+            printf("success to release cu\n");
+        else
+            printf("fail to release cu\n");
     }
     delete[] handles;
 };
@@ -70,8 +111,13 @@ void opConvertCsrCsc::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
     free(resR);
 };
 
-void opConvertCsrCsc::init(
-    char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
+void opConvertCsrCsc::init(class openXRM* xrm,
+                           std::string kernelName,
+                           std::string kernelAlias,
+                           std::string xclbinFile,
+                           uint32_t* deviceIDs,
+                           uint32_t* cuIDs,
+                           unsigned int requestLoad) {
     dupNmConvertCsrCsc = 100 / requestLoad;
     cuPerBoardConvertCsrCsc /= dupNmConvertCsrCsc;
     uint32_t bufferNm = 6;
@@ -83,8 +129,7 @@ void opConvertCsrCsc::init(
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    // th[0] = std::thread(&createHandleConvertCsrCsc, std::ref(handles[cnt]), kernelName, xclbinFile, deviceIDs[cnt]);
-    createHandleConvertCsrCsc(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    createHandle(xrm, handles[cnt], kernelName, kernelAlias, xclbinFile, deviceIDs[cnt], requestLoad);
     handles[cnt].buffer = new cl::Buffer[bufferNm];
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
@@ -93,8 +138,7 @@ void opConvertCsrCsc::init(
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmConvertCsrCsc;
-        // th[i] = std::thread(&createHandleConvertCsrCsc, std::ref(handles[i]), kernelName, xclbinFile, deviceIDs[i]);
-        createHandleConvertCsrCsc(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        createHandle(xrm, handles[i], kernelName, kernelAlias, xclbinFile, deviceIDs[i], requestLoad);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];
@@ -124,8 +168,6 @@ void opConvertCsrCsc::bufferInit(clHandle* hds,
                                  cl::Kernel& kernel0,
                                  std::vector<cl::Memory>& ob_in,
                                  std::vector<cl::Memory>& ob_out) {
-    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
-    cl_int err;
     cl::Device device = hds[0].device;
     const char* instanceName = instanceName0.c_str();
     // Creating Context and Command Queue for selected Device
@@ -136,9 +178,7 @@ void opConvertCsrCsc::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName, &err);
-    logger.logCreateKernel(err);
-    std::cout << "INFO: Kernel has been created" << std::endl;
+    kernel0 = hds[0].kernel;
 
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(6);
     mext_in[0] = {(unsigned int)(2) | XCL_MEM_TOPOLOGY, g.offsetsCSR, kernel0()};
@@ -231,8 +271,7 @@ int opConvertCsrCsc::compute(unsigned int deviceID,
 
     events_read[0].wait();
 
-    cuRelease(ctx, resR);
-
+    hds->isBusy = false;
     free(offsetsCSC2);
     free(degree);
 

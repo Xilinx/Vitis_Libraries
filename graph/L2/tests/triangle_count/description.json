@@ -3,21 +3,21 @@
     "name": "Xilinx Triangle Count Test", 
     "description": "Triangle counting is a community detection graph algorithm that is used to determine the number of triangles passing through each node in the graph. A triangle is a set of three nodes, where each node has a relationship to all other nodes", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50", 
         "u200", 
         "u250", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }
@@ -26,7 +26,7 @@
         "u200": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
         "aws-vu9p-f1": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -44,7 +44,7 @@
         "u250": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -67,7 +67,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_vck190.cfg"
                     ]
                 }

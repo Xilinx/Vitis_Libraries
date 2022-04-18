@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @file dut.h
+ *
+ * @brief This file contains top function of test case.
+ */
 #ifndef _LOUVAIN_SAMECOLOR_H_
 #define _LOUVAIN_SAMECOLOR_H_
 
@@ -41,15 +45,16 @@ int pushcnt = 0;
 #endif
 namespace xf {
 namespace graph {
+namespace internal {
 
 template <int CSRWIDTH, int COLORWIDTH>
-void _new_bus(bool use_push_flag,
-              ap_uint<FLAGW>* flag,
-              int coloradj1,
-              int coloradj2,
-              ap_uint<COLORWIDTH>* colorInx,
-              ap_uint<CSRWIDTH>* offset,
-              hls::stream<ap_uint<96> >& str_GetVout) {
+void SameColor_GetV(bool use_push_flag,
+                    ap_uint<FLAGW>* flag,
+                    int coloradj1,
+                    int coloradj2,
+                    ap_uint<COLORWIDTH>* colorInx,
+                    ap_uint<CSRWIDTH>* offset,
+                    hls::stream<ap_uint<96> >& str_GetVout) {
     StrmBus_M out_v;
     ap_uint<96> dinout;
 
@@ -158,6 +163,8 @@ GetFlag3:
         if (pushV >= 0) {
             adj1 = AxiRead<8, 5>(offset, pushV); // axi_offset.rdi(v);
             adj2 = AxiRead<8, 5>(offset, pushV + 1);
+            adj1 = 0x7fffffff & adj1;
+            adj2 = 0x7fffffff & adj2;
             e_dgr = adj2 - adj1;
             out_v.vod.set(pushV, adj1, e_dgr);
             out_v.vod.get(dinout);
@@ -231,6 +238,11 @@ GET_E:
         if ((d + 0) == e_dgr) {
             str_GetVout.read(dinout);
             u_vod.vod.get(dinout, v, off, e_dgr);
+            if (e_dgr <= 0 && (off > 0)) {
+                e_dgr = 0; // when off!=0 & dgr<=0 reset
+                d = 0;
+                continue;
+            }
             u_vd_ew.vd.set(dinout, v, e_dgr);
             str_GetEout.write(dinout);
             d = 0;
@@ -469,6 +481,8 @@ void SameColor_GetBest_Update_Gain_step1(short scl,
     ap_uint<128> dinout;
     ap_uint<160> dout;
 
+    bool readnew = false;
+
     GetKins_e = false;
     d = 0;
     numComm = 0;
@@ -567,6 +581,151 @@ GET_BEST:
                 }
             }
     }
+    vf.vf.set(-1, -1);
+    str_GainUpdate.write(vf);
+}
+
+template <int DWIDTH>
+void SameColor_GetBest_Update_Gain_step_II1(short scl,
+                                            hls::stream<ap_uint<128> >& str_Aggout,
+                                            DF_W_T constant_recip,
+                                            ap_uint<DWIDTH>* totPrev,
+                                            // output
+                                            // hls::stream<ap_uint<1> >& done,
+                                            // hls::stream<ap_uint<1> >& doneupdate,
+                                            hls::stream<StrmBus_S>& str_GainUpdate,
+                                            hls::stream<ap_uint<160> >& str_Gainout) {
+    double constant = (1.0 / constant_recip);
+    long long constant_i = (long long)constant;
+    int scl_2 = 10;
+
+    AxiMap<float, DWIDTH> axi_totPrev(totPrev);
+    // AxiMap<float, DWIDTH> axi_commWeight(commWeight);
+    StrmBus_S vf;
+
+    DF_WI_T constant_i_scl = ToInt(constant, 0);
+    DF_V_T v, vCid, target, best_comm;
+    DF_W_T selfloop, ki, ei_u, a_u, best_gain;
+    DF_WI_T selfloop_i, ki_i, ei_u_i, a_u_i;
+    DF_WI_T best_gain_i;
+    DF_D_T degree, numComm, d;
+    DF_W_T kinCk_0_;
+    DF_V_T Ck_0;
+    bool GetKins_e;
+    StrmBus_L vcdn, kisf, ckkin;
+    StrmBus_M vcn, m_ki;
+    StrmBus_XL vcnki, cgain, vcnki_tmp;
+    ap_uint<128> dinout;
+    ap_uint<160> dout;
+
+    bool readnew = false;
+    GetKins_e = false;
+    d = 0;
+    numComm = 0;
+GET_BEST:
+    while (GetKins_e == false) {
+#pragma HLS LOOP_TRIPCOUNT MIN = 1 MAX = 1000000
+
+#pragma HLS PIPELINE II = 1
+#pragma HLS DEPENDENCE variable = totPrev inter false
+        if (d == numComm && !readnew) {
+            str_Aggout.read(dinout);
+            vcdn.vcdn.set(dinout);
+            vcdn.vcdn.get(v, vCid, degree, numComm);
+            if (degree < 0) numComm = -1;
+            vcn.vcn.set(v, vCid, numComm);
+            vcnki.vcnk.set(v, vCid, numComm, 0.0);
+            GetKins_e = degree < 0;
+
+            if (GetKins_e == false) {
+                readnew = true;
+            }
+        } else if (readnew) {
+            if (GetKins_e == false) {
+                str_Aggout.read(dinout);
+                kisf.kisf.set(dinout);
+                selfloop = degree > 0 ? kisf.kisf.self : 0;
+                ki = degree > 0 ? kisf.kisf.ki : 0;
+                vcnki.vcnk.ki = degree > 0 ? kisf.kisf.ki : 0;
+                d = 0;
+                ki_i = ToInt(ki, scl_2);
+#ifndef __SYNTHESIS__
+#ifdef _DEBUG_GAIN
+                printf("GAIN: v=%d\t, vCid=%d\t, degree=%d\t, numComm=%d\t, ki=%f\t, selfloop=%f\t \n", v, vCid, degree,
+                       numComm, ki, selfloop);
+#endif
+#endif
+            }
+            vcnki.vcnk.get(dout);
+            vcnki_tmp.vcnk.set(dout);
+            str_Gainout.write(dout);
+            readnew = false;
+        } else if (GetKins_e == false)
+            if (degree > 0) {
+                if (d == 0) {
+                    str_Aggout.read(dinout);
+                    ckkin.n_ckk.set(dinout);
+                    kinCk_0_ = ckkin.n_ckk.kin;
+                    Ck_0 = ckkin.n_ckk.ck;
+                    best_gain = 0;
+                    best_comm = vCid;
+                    // commWeight[v]    = kinCk_0_;
+                    vf.vf.set(v, (float)kinCk_0_);
+                    str_GainUpdate.write(vf);
+                    // axi_commWeight.wr(v, (float)kinCk_0_);
+                    ei_u = kinCk_0_ - selfloop;
+                    // a_u              = totPrev[vCid]-ki;
+                    a_u = axi_totPrev.rdf(vCid) - ki;
+                    best_gain_i = 0;
+                    ei_u_i = ToInt(ei_u, scl_2 * 2);
+                    a_u_i = ToInt(a_u, scl_2);
+                    d = 1;
+                    cgain.cgi.set(vCid, best_gain_i);
+                    cgain.cgi.get(dout);
+                    str_Gainout.write(dout);
+#ifndef __SYNTHESIS__
+#ifdef _DEBUG_GAIN
+                    printf("GAIN: vCid=%d\t, best_gain_i%x\t \n", vCid, best_gain_i);
+#endif
+#endif
+                } else if (d < numComm) {
+                    str_Aggout.read(dinout);
+                    ckkin.n_ckk.set(dinout);
+                    DF_V_T eCid = ckkin.n_ckk.ck;
+                    DF_W_T ei_v = ckkin.n_ckk.kin;
+                    // DF_W_T a_v              = totPrev[eCid];
+                    DF_W_T a_v = axi_totPrev.rdf(eCid);
+                    ;
+                    DF_W_T diff_e = (ei_v - ei_u);
+                    DF_W_T diff_a = (a_v - a_u);
+                    DF_W_T v_pos = diff_e * constant;
+                    DF_W_T v_neg = diff_a * ki;
+                    DF_W_T curr_gain_org = v_pos - v_neg;
+                    DF_WI_T ei_v_i = ToInt(ei_v, scl_2 * 2);
+                    DF_WI_T a_v_i = ToInt(a_v, scl_2);
+                    DF_WI_T diff_e_i = (ei_v_i - ei_u_i);
+                    DF_WI_T diff_a_i = (a_v_i - a_u_i);
+                    DF_WI_T v_pos_i = diff_e_i * constant_i_scl;
+                    DF_WI_T v_neg_i = diff_a_i * ki_i;
+                    DF_WI_T curr_gain_i = v_pos_i - v_neg_i;
+                    DF_W_T curr_gain = (curr_gain_i >> (scl_2 * 2));
+                    cgain.cgi.set(eCid, curr_gain_i);
+                    cgain.cgi.get(dout);
+                    str_Gainout.write(dout);
+#ifndef __SYNTHESIS__
+#ifdef _DEBUG_GAIN
+                    printf("GAIN: d=%d\t, eCid=%d\t, curr_gain_i%x\t \n", d, eCid, curr_gain_i);
+#endif
+#endif
+                    d++;
+                }
+            }
+    }
+
+    vcnki.vcnk.get(dout);
+    vcnki_tmp.vcnk.set(dout);
+    str_Gainout.write(dout);
+
     vf.vf.set(-1, -1);
     str_GainUpdate.write(vf);
 }
@@ -991,7 +1150,7 @@ void SameColor_dataflow(int numVertex,
     hls::stream<ap_uint<96> > str_GetVout("str_GetVout");
 #pragma HLS RESOURCE variable = str_GetVout core = FIFO_SRL
 #pragma HLS STREAM variable = str_GetVout depth = 256
-    _new_bus<CSRWIDTH, COLORWIDTH>(use_push_flag, flag, coloradj1, coloradj2, colorInx, offset, str_GetVout);
+    SameColor_GetV<CSRWIDTH, COLORWIDTH>(use_push_flag, flag, coloradj1, coloradj2, colorInx, offset, str_GetVout);
 
     hls::stream<ap_uint<96> > str_GetEout("str_GetEout");
 #pragma HLS RESOURCE variable = str_GetEout core = FIFO_LUTRAM
@@ -1015,8 +1174,8 @@ void SameColor_dataflow(int numVertex,
 #pragma HLS RESOURCE variable = str_Gainout_update core = FIFO_LUTRAM
 #pragma HLS STREAM variable = str_Gainout_update depth = 256
     // SameColor_GetBest_Update_Gain_bus3<DWIDTH>(scl, str_Aggout, constant_recip, totPrev, commWeight, str_Gainout);
-    SameColor_GetBest_Update_Gain_step1<DWIDTH>(scl, str_Aggout, constant_recip, totPrev, str_Gainout_update,
-                                                str_Gainout);
+    SameColor_GetBest_Update_Gain_step_II1<DWIDTH>(scl, str_Aggout, constant_recip, totPrev, str_Gainout_update,
+                                                   str_Gainout);
     SameColor_GetBest_Update_Gain_step2<DWIDTH>(commWeight, str_Gainout_update);
 
     hls::stream<StrmBus_L> str_Cidout("str_Cidout");
@@ -1046,6 +1205,7 @@ void SameColor_dataflow(int numVertex,
 
 } // SameColor
 
-} // graph
-} // xf
+} // namespace internal
+} // namespace graph
+} // namespace xf
 #endif

@@ -112,6 +112,7 @@ These are details for benchmark result and usage steps.
    guide_L2/manual/twoHop.rst
    guide_L2/manual/louvainFast.rst
    guide_L2/manual/renumber.rst
+   guide_L2/manual/MaximalIndependentSet.rst
 
 Test Overview
 --------------
@@ -126,7 +127,7 @@ Spark
 
 Tigergraph
 ~~~~~~~~~~
-* `Tigergraph 2.4.1 installed and configured <https://xilinx.github.io/Vitis_Libraries/graph/2021.2/plugin/tigergraph_integration.html>`_.
+* `Tigergraph 2.4.1 installed and configured <https://xilinx.github.io/Vitis_Libraries/graph/2022.1/plugin/tigergraph_integration.html>`_.
 * Tigergraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.600GHz, 32 Threads (16 Core(s)).
 
 .. _l2_vitis_graph:
@@ -151,6 +152,6 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.2/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2022.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

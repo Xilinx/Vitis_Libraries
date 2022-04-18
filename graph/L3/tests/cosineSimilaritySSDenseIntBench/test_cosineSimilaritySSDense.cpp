@@ -30,18 +30,90 @@ int main(int argc, const char* argv[]) {
     // cmd parser
     ArgParser parser(argc, argv);
 
-    std::string filenameWeight;
     std::string goldenFile;
     std::string tmpStr;
+    std::string xclbinPath;
 
     const int splitNm = 3;    // kernel has 4 PUs, the input data should be splitted into 4 parts
     const int channelsPU = 4; // each PU has 4 HBM channels
     const int cuNm = 2;       // equivalent CU numbers in one xclbin
-    int deviceNeeded = 1;     // needed fpga board number
+    int deviceNeeded = 2;     // needed fpga board number
     const int channelW = 16;  // AXI interface bitwidth is 512bits, which equals to 16 x 32bits
 
-    int numVertices = 10240 * 14 * cuNm * deviceNeeded; // total number of vertex read from file
-    int numEdges = 200;                                 // total number of edge read from file
+    int32_t topK;
+    std::cout << "INFO: use dense graph" << std::endl;
+
+    if (!parser.getCmdOption("-xclbin", tmpStr)) { // xclbin
+        std::cout << "INFO: xclbin file path is not set!\n";
+        exit(1);
+    } else {
+        xclbinPath = tmpStr;
+        std::cout << "INFO: xclbin file path is " << xclbinPath << std::endl;
+    }
+    if (!parser.getCmdOption("-golden", tmpStr)) { // golden
+        goldenFile = "./data/cosine_dense.mtx";
+        std::cout << "INFO: golden file path is not set!\n";
+    } else {
+        goldenFile = tmpStr;
+        std::cout << "INFO: golden file path is " << goldenFile << std::endl;
+    }
+
+    if (!parser.getCmdOption("-topK", tmpStr)) { // topK
+        topK = 100;
+        std::cout << "INFO: topK is not set, use 100 by default" << std::endl;
+    } else {
+        topK = std::stoi(tmpStr);
+    }
+
+    //----------------- Text Parser ----------------------------------
+    std::string opName;
+    std::string kernelName;
+    int requestLoad = 100;
+
+    std::fstream userInput("./config.json", std::ios::in);
+    if (!userInput) {
+        std::cout << "Error : file doesn't exist !" << std::endl;
+        exit(1);
+    }
+    char line[1024] = {0};
+    char* token;
+    while (userInput.getline(line, sizeof(line))) {
+        token = strtok(line, "\"\t ,}:{\n");
+        while (token != NULL) {
+            if (!std::strcmp(token, "operationName")) {
+                token = strtok(NULL, "\"\t ,}:{\n");
+                opName = token;
+            } else if (!std::strcmp(token, "kernelName")) {
+                token = strtok(NULL, "\"\t ,}:{\n");
+                kernelName = token;
+            } else if (!std::strcmp(token, "requestLoad")) {
+                token = strtok(NULL, "\"\t ,}:{\n");
+                requestLoad = std::atoi(token);
+            } else if (!std::strcmp(token, "deviceNeeded")) {
+                token = strtok(NULL, "\"\t ,}:{\n");
+                deviceNeeded = std::atoi(token);
+            }
+            token = strtok(NULL, "\"\t ,}:{\n");
+        }
+    }
+    userInput.close();
+    //----------------- Setup similarity thread ---------
+    xf::graph::L3::Handle::singleOP op0;
+    op0.operationName = opName;
+    op0.setKernelName((char*)kernelName.c_str());
+    op0.requestLoad = requestLoad;
+    op0.xclbinPath = xclbinPath;
+    op0.deviceNeeded = deviceNeeded;
+    op0.cuPerBoard = cuNm;
+
+    xf::graph::L3::Handle handle0;
+    handle0.addOp(op0);
+    handle0.setUp();
+
+    //---------------- setup number of vertices in each PU ---------
+
+    int numVertices = 1000 * 12 * cuNm * deviceNeeded; // total number of vertex read from file
+    int numEdges = 208;                                // total number of edge read from file
     int32_t edgeAlign8 = ((numEdges + channelW - 1) / channelW) * channelW;
     int general = ((numVertices + deviceNeeded * cuNm * splitNm * channelsPU - 1) /
                    (deviceNeeded * cuNm * splitNm * channelsPU)) *
@@ -64,88 +136,6 @@ int main(int argc, const char* argv[]) {
             }
         }
     }
-    int32_t topK;
-    std::cout << "INFO: use dense graph" << std::endl;
-
-    if (!parser.getCmdOption("-weight", tmpStr)) { // weight
-        filenameWeight = "./data/cosine_dense_weight.csr";
-        std::cout << "INFO: indices file path is not set, use default " << filenameWeight << "\n";
-    } else {
-        filenameWeight = tmpStr;
-        std::cout << "INFO: indices file path is " << filenameWeight << std::endl;
-    }
-
-    if (!parser.getCmdOption("-golden", tmpStr)) { // golden
-        goldenFile = "./data/cosine_sparse.mtx";
-        std::cout << "INFO: golden file path is not set!\n";
-    } else {
-        goldenFile = tmpStr;
-        std::cout << "INFO: golden file path is " << goldenFile << std::endl;
-    }
-
-    if (!parser.getCmdOption("-topK", tmpStr)) { // topK
-        topK = 100;
-        std::cout << "INFO: topK is not set, use 100 by default" << std::endl;
-    } else {
-        topK = std::stoi(tmpStr);
-    }
-
-    //----------------- Text Parser ----------------------------------
-    std::string opName;
-    std::string kernelName;
-    int requestLoad = 100;
-    std::string xclbinPath;
-    std::string xclbinPath2;
-
-    std::fstream userInput("./config.json", std::ios::in);
-    if (!userInput) {
-        std::cout << "Error : file doesn't exist !" << std::endl;
-        exit(1);
-    }
-    char line[1024] = {0};
-    char* token;
-    while (userInput.getline(line, sizeof(line))) {
-        token = strtok(line, "\"\t ,}:{\n");
-        while (token != NULL) {
-            if (!std::strcmp(token, "operationName")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                opName = token;
-            } else if (!std::strcmp(token, "kernelName")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                kernelName = token;
-            } else if (!std::strcmp(token, "requestLoad")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                requestLoad = std::atoi(token);
-            } else if (!std::strcmp(token, "xclbinPath")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
-            } else if (!std::strcmp(token, "xclbinPath2")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath2 = token;
-            } else if (!std::strcmp(token, "deviceNeeded")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                //    deviceNeeded = std::atoi(token);
-            }
-            token = strtok(NULL, "\"\t ,}:{\n");
-        }
-    }
-    userInput.close();
-
-    //----------------- Setup similarity thread ---------
-    xf::graph::L3::Handle::singleOP op0;
-    op0.operationName = (char*)opName.c_str();
-    op0.setKernelName((char*)kernelName.c_str());
-    op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
-    op0.xclbinFile2 = (char*)xclbinPath2.c_str();
-    op0.deviceNeeded = deviceNeeded;
-    op0.cuPerBoard = cuNm;
-
-    xf::graph::L3::Handle handle0;
-    handle0.addOp(op0);
-    handle0.setUp();
-
-    //---------------- setup number of vertices in each PU ---------
     for (int i = 0; i < deviceNeeded * cuNm; ++i) {
         for (int j = 0; j < splitNm; ++j) {
             numVerticesPU[i][j] = general;
@@ -173,7 +163,7 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    int32_t requestNm = 3;
+    int32_t requestNm = 1;
     int sourceLen = edgeAlign8; // sourceIndice array length
     int32_t** sourceWeight = new int32_t*[requestNm];
     for (int i = 0; i < requestNm; ++i) {

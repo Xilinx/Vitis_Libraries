@@ -26,7 +26,13 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
-void createHandleSP(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+void opSP::createHandle(class openXRM* xrm,
+                        clHandle& handle,
+                        std::string kernelName,
+                        std::string kernelAlias,
+                        std::string xclbinFile,
+                        int32_t IDDevice,
+                        unsigned int requestLoad) {
     xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     cl_int fail;
 
@@ -38,15 +44,44 @@ void createHandleSP(clHandle& handle, const char* kernelName, const char* pXclbi
     handle.q = cl::CommandQueue(handle.context, handle.device,
                                 CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
     logger.logCreateCommandQueue(fail);
-
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-    handle.xclBins = xcl::import_binary_file(pXclbin);
+    handle.xclBins = xcl::import_binary_file(xclbinFile);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
     handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
     logger.logCreateProgram(fail);
-}
+    handle.isBusy = false;
+    handle.resR = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+    memset(handle.resR, 0, sizeof(xrmCuResource));
+    int ret = xrm->allocCU(handle.resR, kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+    std::string instanceName0;
+    if (ret == 0) {
+        instanceName0 = handle.resR->instanceName;
+        if (cuPerBoardSP >= 2) instanceName0 = "SP:{" + instanceName0 + "}";
+    } else {
+        instanceName0 = "shortestPath_top";
+    }
+
+    const char* instanceName = instanceName0.c_str();
+    handle.kernel = cl::Kernel(handle.program, instanceName, &fail);
+    logger.logCreateKernel(fail);
+    std::cout << "INFO: Kernel has been created" << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "DEBUG:" << __FUNCTION__ << " IDDevice=" << IDDevice << "=" << devName << " CommandQueue=" << &handle.q
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " kernelName=" << kernelName << " kernelAlias=" << kernelAlias
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " resR.deviceId=" << handle.resR->deviceId
+              << " resR.cuId=" << handle.resR->cuId << " resR.channelID=" << handle.resR->channelId
+              << " resR.instanceName=" << handle.resR->instanceName << std::endl;
+
+    std::cout << "DEBUG: " << __FUNCTION__ << " instanceName0=" << instanceName0 << " created" << std::endl;
+#endif
+};
 
 uint32_t opSP::cuPerBoardSP;
 
@@ -59,21 +94,25 @@ void opSP::setHWInfo(uint32_t numDev, uint32_t CUmax) {
     handles = new clHandle[CUmax];
 };
 
-void opSP::freeSP() {
+void opSP::freeSP(xrmContext* ctx) {
     msspThread.join();
     for (int i = 0; i < maxCU; ++i) {
         delete[] handles[i].buffer;
+        if (xrmCuRelease(ctx, handles[i].resR))
+            printf("success to release cu\n");
+        else
+            printf("fail to release cu\n");
     }
     delete[] handles;
 };
 
-void opSP::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
-    while (!xrmCuRelease(ctx, resR)) {
-    };
-    free(resR);
-};
-
-void opSP::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
+void opSP::init(class openXRM* xrm,
+                std::string kernelName,
+                std::string kernelAlias,
+                std::string xclbinFile,
+                uint32_t* deviceIDs,
+                uint32_t* cuIDs,
+                unsigned int requestLoad) {
     dupNmSP = 100 / requestLoad;
     cuPerBoardSP /= dupNmSP;
     uint32_t bufferNm = 8;
@@ -85,7 +124,7 @@ void opSP::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    createHandleSP(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    createHandle(xrm, handles[cnt], kernelName, kernelAlias, xclbinFile, deviceIDs[cnt], requestLoad);
     handles[cnt].buffer = new cl::Buffer[bufferNm];
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
@@ -94,7 +133,7 @@ void opSP::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmSP;
-        createHandleSP(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        createHandle(xrm, handles[i], kernelName, kernelAlias, xclbinFile, deviceIDs[i], requestLoad);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];
@@ -225,8 +264,7 @@ void opSP::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName);
-    std::cout << "INFO: Kernel has been created" << std::endl;
+    kernel0 = hds[0].kernel;
 
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(4);
 #ifdef USE_HBM
@@ -355,18 +393,12 @@ int opSP::compute(unsigned int deviceID,
     std::vector<cl::Event> events_read(1);
 
     bufferInit(hds, instanceName, g, nrows, info, result, pred, config, kernel0, ob_in, ob_out);
-
     migrateMemObj(hds, 0, num_runs, ob_in, nullptr, &events_write[0]);
-
     int ret = cuExecute(hds, kernel0, num_runs, &events_write, &events_kernel[0]);
-
     migrateMemObj(hds, 1, num_runs, ob_out, &events_kernel, &events_read[0]);
-
     events_read[0].wait();
-
+    hds->isBusy = false;
     postProcess(nrows, info, ret);
-
-    cuRelease(ctx, resR);
 
     free(info);
     free(config);

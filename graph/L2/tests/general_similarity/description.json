@@ -3,17 +3,17 @@
     "name": "Xillinx General Similarity Test", 
     "description": "A case for API generalSimilarity, similarity function which support both dense and sparse graph. It also support both Jaccard and Cosine Similarity.", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50_u280.cfg"
                     ]
                 }

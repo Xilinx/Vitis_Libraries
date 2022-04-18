@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
 class ArgParser {
    public:
@@ -77,7 +78,6 @@ int checkData(std::string goldenFile, int32_t* kernelID, float* kernelSimilarity
         ref_map.insert(std::make_pair(tmp_id, tmp_data));
         golden_num++;
     }
-
     int index = 0;
     while (index < golden_num) {
         auto it = ref_map.find((int32_t)kernelID[index]);

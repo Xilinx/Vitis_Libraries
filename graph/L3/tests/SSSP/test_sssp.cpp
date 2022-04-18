@@ -60,6 +60,14 @@ int main(int argc, const char* argv[]) {
     std::string dataSetDir;
     std::string refDir;
     std::string num_str;
+    std::string xclbinPath;
+    if (!parser.getCmdOption("-xclbin", num_str)) { // xclbin
+        std::cout << "INFO: xclbin file path is not set!\n";
+        exit(1);
+    } else {
+        xclbinPath = num_str;
+        std::cout << "INFO: xclbin file path is " << xclbinPath << std::endl;
+    }
     if (!parser.getCmdOption("-files", num_str)) {
         files = "";
         std::cout << "INFO: dataSet name is not set!\n";
@@ -91,7 +99,6 @@ int main(int argc, const char* argv[]) {
     std::string opName;
     std::string kernelName;
     int requestLoad;
-    std::string xclbinPath;
     int deviceNeeded;
 
     std::fstream userInput("./config.json", std::ios::in);
@@ -113,9 +120,6 @@ int main(int argc, const char* argv[]) {
             } else if (!std::strcmp(token, "requestLoad")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 requestLoad = std::atoi(token);
-            } else if (!std::strcmp(token, "xclbinPath")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -130,7 +134,7 @@ int main(int argc, const char* argv[]) {
     op0.operationName = (char*)opName.c_str();
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinPath = xclbinPath;
     op0.deviceNeeded = deviceNeeded;
 
     xf::graph::L3::Handle handle0;
@@ -147,8 +151,6 @@ int main(int argc, const char* argv[]) {
 
     readInOffset<uint32_t>(filenameOffset, numVertices, &offsetsCSR);
     readInIndice<uint32_t, DT>(filenameIndice, weighted, numEdges, &indicesCSR, &weightsCSR);
-    // readInCOO<uint32_t, DT>(filenameCOO, weighted, numVertices, numEdges,
-    // &offsetsCSR, &indicesCSR, &weightsCSR);
 
     xf::graph::Graph<uint32_t, DT> g("CSR", numVertices, numEdges, offsetsCSR, indicesCSR, weightsCSR);
 
@@ -276,7 +278,6 @@ int main(int argc, const char* argv[]) {
     free(connect);
 
     //--------------- Free and delete -----------------------------------
-    (handle0.opsp)->join();
     handle0.free();
     g.freeBuffers();
 

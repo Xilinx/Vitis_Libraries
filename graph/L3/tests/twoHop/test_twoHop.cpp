@@ -65,23 +65,28 @@ int main(int argc, const char* argv[]) {
     std::string indexfile;
     std::string pairfile;
     std::string goldenfile;
+    std::string xclbinPath;
+    if (!parser.getCmdOption("-xclbin", xclbinPath)) { // xclbin
+        std::cout << "INFO: xclbin file path is not set!\n";
+        return -1;
+    }
 
-    if (!parser.getCmdOption("--offset", offsetfile)) {
+    if (!parser.getCmdOption("-offset", offsetfile)) {
         std::cout << "ERROR: offset file path is not set!\n";
         return -1;
     }
 
-    if (!parser.getCmdOption("--index", indexfile)) {
+    if (!parser.getCmdOption("-index", indexfile)) {
         std::cout << "ERROR: index file path is not set!\n";
         return -1;
     }
 
-    if (!parser.getCmdOption("--pair", pairfile)) {
+    if (!parser.getCmdOption("-pair", pairfile)) {
         std::cout << "ERROR: pair file path is not set!\n";
         return -1;
     }
 
-    if (!parser.getCmdOption("--golden", goldenfile)) {
+    if (!parser.getCmdOption("-golden", goldenfile)) {
         std::cout << "ERROR: golden file path is not set!\n";
         return -1;
     }
@@ -90,7 +95,6 @@ int main(int argc, const char* argv[]) {
     std::string opName;
     std::string kernelName;
     int requestLoad;
-    std::string xclbinPath;
     int deviceNeeded;
 
     std::fstream userInput("./config.json", std::ios::in);
@@ -112,9 +116,6 @@ int main(int argc, const char* argv[]) {
             } else if (!std::strcmp(token, "requestLoad")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 requestLoad = std::atoi(token);
-            } else if (!std::strcmp(token, "xclbinPath")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -129,7 +130,7 @@ int main(int argc, const char* argv[]) {
     op0.operationName = (char*)opName.c_str();
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinPath = xclbinPath;
     op0.deviceNeeded = deviceNeeded;
     op0.cuPerBoard = 5;
 
@@ -280,7 +281,6 @@ int main(int argc, const char* argv[]) {
     }
 
     //--------------- Free and delete -----------------------------------
-    (handle0.optwohop)->join();
     handle0.free();
     g.freeBuffers();
 

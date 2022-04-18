@@ -31,11 +31,14 @@ class clHandle {
     cl::Context context;
     cl::CommandQueue q;
     cl::Program::Binaries xclBins;
+    cl::Kernel kernel;
     cl::Program program;
     cl::Buffer* buffer;
+    xrmCuResource* resR;
     unsigned int deviceID;
     unsigned int cuID;
     unsigned int dupID;
+    bool isBusy;
 };
 
 } // L3

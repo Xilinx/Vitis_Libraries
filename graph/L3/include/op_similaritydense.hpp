@@ -43,13 +43,28 @@ class opSimilarityDense : public opBase {
 
     void setHWInfo(uint32_t numDev, uint32_t CUmax);
 
-    void freeSimDense();
+    void freeSimDense(xrmContext* ctx);
 
-    void init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad);
+    void createHandle(class openXRM* xrm,
+                      clHandle& handle,
+                      std::string kernelName,
+                      std::string kernelAlias,
+                      std::string xclbinFile,
+                      int32_t IDDevice,
+                      unsigned int requestLoad);
 
-    void initInt(char* kernelName,
-                 char* xclbinFile,
-                 char* xclbinFile2,
+    void init(class openXRM* xrm,
+              std::string kernelName,
+              std::string kernelAlias,
+              std::string xclbinFile,
+              uint32_t* deviceIDs,
+              uint32_t* cuIDs,
+              unsigned int requestLoad);
+
+    void initInt(class openXRM* xrm,
+                 std::string kernelName,
+                 std::string kernelAlias,
+                 std::string xclbinFile,
                  uint32_t* deviceIDs,
                  uint32_t* cuIDs,
                  unsigned int requestLoad);

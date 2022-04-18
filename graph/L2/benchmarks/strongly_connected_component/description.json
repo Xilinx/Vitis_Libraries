@@ -3,21 +3,21 @@
     "name": "Xilinx Strongly Connected Components Benchmark", 
     "description": "An example for the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50", 
         "u200", 
         "u250",
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }
@@ -26,7 +26,7 @@
         "u200": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
         "aws-vu9p-f1": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -44,7 +44,7 @@
         "u250": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -67,7 +67,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_vck190.cfg"
                     ]
                 }

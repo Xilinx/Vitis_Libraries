@@ -1,17 +1,17 @@
 /*
- * Copyright 2020 Xilinx, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+* Copyright 2020 Xilinx, Inc.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
 */
 
 #pragma once
@@ -25,261 +25,410 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
-void Handle::initOpTwoHop(const char* kernelName,
-                          char* xclbinFile,
-                          char* kernelAlias,
-                          unsigned int requestLoad,
-                          unsigned int deviceNeeded,
-                          unsigned int cuPerBoard) {
-    uint32_t* deviceID;
-    uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
-    optwohop->setHWInfo(deviceNm, maxCU);
-    optwohop->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    optwohop->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
-    delete[] cuID;
-    delete[] deviceID;
-};
-
-void Handle::initOpSP(const char* kernelName,
-                      char* xclbinFile,
-                      char* kernelAlias,
-                      unsigned int requestLoad,
-                      unsigned int deviceNeeded,
-                      unsigned int cuPerBoard) {
-    uint32_t* deviceID;
-    uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
-    opsp->setHWInfo(deviceNm, maxCU);
-    opsp->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opsp->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
-    delete[] cuID;
-    delete[] deviceID;
-};
-
-void Handle::initOpTriangleCount(const char* kernelName,
-                                 char* xclbinFile,
-                                 char* kernelAlias,
-                                 unsigned int requestLoad,
-                                 unsigned int deviceNeeded,
-                                 unsigned int cuPerBoard) {
-    uint32_t* deviceID;
-    uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
-    optcount->setHWInfo(deviceNm, maxCU);
-    optcount->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    optcount->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
-    delete[] cuID;
-    delete[] deviceID;
-};
-
-void Handle::initOpLabelPropagation(const char* kernelName,
-                                    char* xclbinFile,
-                                    char* kernelAlias,
+int Handle::initOpLouvainModularity(std::string xclbinPath,
+                                    std::string kernelName,
+                                    std::string kernelAlias,
                                     unsigned int requestLoad,
                                     unsigned int deviceNeeded,
                                     unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    int32_t status = 0;
+
+    // fetchCuInfo will scan all available devices/CUs.
+    std::cout << "INFO: Init Louvain" << std::endl;
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
+    oplouvainmod->setHWInfo(deviceNm, maxCU);
+    oplouvainmod->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    oplouvainmod->initRoundRobinThread(xrm, oplouvainmod->handles, kernelName, kernelAlias, requestLoad, deviceNeeded,
+                                       cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+    return 0;
+};
+
+int Handle::initOpTwoHop(std::string kernelName,
+                         std::string xclbinPath,
+                         std::string kernelAlias,
+                         unsigned int requestLoad,
+                         unsigned int deviceNeeded,
+                         unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    int32_t status = 0;
+
+    std::cout << "INFO: Init twoHop" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
+    optwohop->setHWInfo(deviceNm, maxCU);
+    optwohop->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    optwohop->initThread(xrm, optwohop->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+    return 0;
+};
+
+int Handle::initOpSP(std::string kernelName,
+                     std::string xclbinPath,
+                     std::string kernelAlias,
+                     unsigned int requestLoad,
+                     unsigned int deviceNeeded,
+                     unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    int32_t status = 0;
+
+    std::cout << "INFO: Init SP" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
+    opsp->setHWInfo(deviceNm, maxCU);
+    opsp->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opsp->initThread(xrm, opsp->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+    return 0;
+};
+
+int Handle::initOpTriangleCount(std::string kernelName,
+                                std::string xclbinPath,
+                                std::string kernelAlias,
+                                unsigned int requestLoad,
+                                unsigned int deviceNeeded,
+                                unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    int32_t status = 0;
+
+    std::cout << "INFO: Init triangleCount" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
+    optcount->setHWInfo(deviceNm, maxCU);
+    optcount->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    optcount->initThread(xrm, optcount->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+    return 0;
+};
+
+int Handle::initOpLabelPropagation(std::string kernelName,
+                                   std::string xclbinPath,
+                                   std::string kernelAlias,
+                                   unsigned int requestLoad,
+                                   unsigned int deviceNeeded,
+                                   unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    int32_t status = 0;
+
+    std::cout << "INFO: Init labelPropagation" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
     oplprop->setHWInfo(deviceNm, maxCU);
-    oplprop->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    oplprop->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    oplprop->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    oplprop->initThread(xrm, oplprop->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
-void Handle::initOpBFS(const char* kernelName,
-                       char* xclbinFile,
-                       char* kernelAlias,
-                       unsigned int requestLoad,
-                       unsigned int deviceNeeded,
-                       unsigned int cuPerBoard) {
+int Handle::initOpBFS(std::string kernelName,
+                      std::string xclbinPath,
+                      std::string kernelAlias,
+                      unsigned int requestLoad,
+                      unsigned int deviceNeeded,
+                      unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    int32_t status = 0;
+
+    std::cout << "INFO: Init BFS" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
     opbfs->setHWInfo(deviceNm, maxCU);
-    opbfs->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opbfs->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    opbfs->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opbfs->initThread(xrm, opbfs->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
-void Handle::initOpWCC(const char* kernelName,
-                       char* xclbinFile,
-                       char* kernelAlias,
-                       unsigned int requestLoad,
-                       unsigned int deviceNeeded,
-                       unsigned int cuPerBoard) {
+int Handle::initOpWCC(std::string kernelName,
+                      std::string xclbinPath,
+                      std::string kernelAlias,
+                      unsigned int requestLoad,
+                      unsigned int deviceNeeded,
+                      unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    int32_t status = 0;
+
+    std::cout << "INFO: Init WCC" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
     opwcc->setHWInfo(deviceNm, maxCU);
-    opwcc->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opwcc->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    opwcc->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opwcc->initThread(xrm, opwcc->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
-void Handle::initOpSCC(const char* kernelName,
-                       char* xclbinFile,
-                       char* kernelAlias,
-                       unsigned int requestLoad,
-                       unsigned int deviceNeeded,
-                       unsigned int cuPerBoard) {
+int Handle::initOpSCC(std::string kernelName,
+                      std::string xclbinPath,
+                      std::string kernelAlias,
+                      unsigned int requestLoad,
+                      unsigned int deviceNeeded,
+                      unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    int32_t status = 0;
+
+    std::cout << "INFO: Init SCC" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
     opscc->setHWInfo(deviceNm, maxCU);
-    opscc->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opscc->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    opscc->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opscc->initThread(xrm, opscc->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
-void Handle::initOpConvertCsrCsc(const char* kernelName,
-                                 char* xclbinFile,
-                                 char* kernelAlias,
-                                 unsigned int requestLoad,
-                                 unsigned int deviceNeeded,
-                                 unsigned int cuPerBoard) {
+int Handle::initOpConvertCsrCsc(std::string kernelName,
+                                std::string xclbinPath,
+                                std::string kernelAlias,
+                                unsigned int requestLoad,
+                                unsigned int deviceNeeded,
+                                unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    int32_t status = 0;
+
+    std::cout << "INFO: Init convertCsrCsc" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
     opconvertcsrcsc->setHWInfo(deviceNm, maxCU);
-    opconvertcsrcsc->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opconvertcsrcsc->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    opconvertcsrcsc->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opconvertcsrcsc->initThread(xrm, opconvertcsrcsc->handles, kernelName, kernelAlias, requestLoad, deviceNeeded,
+                                cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
-void Handle::initOpPageRank(const char* kernelName,
-                            char* xclbinFile,
-                            char* kernelAlias,
-                            unsigned int requestLoad,
-                            unsigned int deviceNeeded,
-                            unsigned int cuPerBoard) {
+int Handle::initOpPageRank(std::string kernelName,
+                           std::string xclbinPath,
+                           std::string kernelAlias,
+                           unsigned int requestLoad,
+                           unsigned int deviceNeeded,
+                           unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    int32_t status = 0;
+
+    std::cout << "INFO: Init pageRank" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
     oppg->setHWInfo(deviceNm, maxCU);
-    oppg->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    oppg->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    oppg->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    oppg->initThread(xrm, oppg->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
-void Handle::initOpSimDense(const char* kernelName,
-                            char* xclbinFile,
-                            char* kernelAlias,
+int Handle::initOpSimDense(std::string kernelName,
+                           std::string xclbinPath,
+                           std::string kernelAlias,
+                           unsigned int requestLoad,
+                           unsigned int deviceNeeded,
+                           unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    int32_t status = 0;
+
+    std::cout << "INFO: Init similarityDense" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+
+    opsimdense->setHWInfo(deviceNm, maxCU);
+    opsimdense->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opsimdense->initThread(xrm, opsimdense->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+    return 0;
+};
+
+int Handle::initOpSimDenseInt(std::string kernelName,
+                              std::string xclbinPath,
+                              std::string kernelAlias,
+                              unsigned int requestLoad,
+                              unsigned int deviceNeeded,
+                              unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    int32_t status = 0;
+
+    std::cout << "INFO: Init similarityDenseInt" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
+    opsimdense->setHWInfo(deviceNm, maxCU);
+    opsimdense->initInt(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opsimdense->initRoundRobinThread(xrm, opsimdense->handles, kernelName, kernelAlias, requestLoad, deviceNeeded,
+                                     cuPerBoard);
+
+    delete[] cuID;
+    delete[] deviceID;
+    return 0;
+};
+
+int Handle::initOpSimSparse(std::string kernelName,
+                            std::string xclbinPath,
+                            std::string kernelAlias,
                             unsigned int requestLoad,
                             unsigned int deviceNeeded,
                             unsigned int cuPerBoard) {
     uint32_t* deviceID;
     uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
-    opsimdense->setHWInfo(deviceNm, maxCU);
-    opsimdense->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opsimdense->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
-    delete[] cuID;
-    delete[] deviceID;
-};
+    int32_t status = 0;
 
-void Handle::initOpSimDenseInt(const char* kernelName,
-                               char* xclbinFile,
-                               char* xclbinFile2,
-                               char* kernelAlias,
-                               unsigned int requestLoad,
-                               unsigned int deviceNeeded,
-                               unsigned int cuPerBoard) {
-    uint32_t* deviceID;
-    uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
-    opsimdense->setHWInfo(deviceNm, maxCU);
-    opsimdense->initInt((char*)kernelName, xclbinFile, xclbinFile2, deviceID, cuID, requestLoad);
-    opsimdense->initThreadInt(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
-    delete[] cuID;
-    delete[] deviceID;
-};
+    std::cout << "INFO: Init similaritySparse" << std::endl;
+    // fetchCuInfo will scan all available devices/CUs.
+    deviceNm = deviceNeeded; // set initial requested number of devices
+    status = xrm->fetchCuInfo(kernelName.c_str(), kernelAlias.c_str(), requestLoad, deviceNm, cuPerBoard,
+                              maxChannelSize, maxCU, &deviceID, &cuID);
+    if (status < 0) return status;
 
-void Handle::initOpSimSparse(const char* kernelName,
-                             char* xclbinFile,
-                             char* kernelAlias,
-                             unsigned int requestLoad,
-                             unsigned int deviceNeeded,
-                             unsigned int cuPerBoard) {
-    uint32_t* deviceID;
-    uint32_t* cuID;
-    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
     opsimsparse->setHWInfo(deviceNm, maxCU);
-    opsimsparse->init((char*)kernelName, xclbinFile, deviceID, cuID, requestLoad);
-    opsimsparse->initThread(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    opsimsparse->init(xrm, kernelName, kernelAlias, xclbinPath, deviceID, cuID, requestLoad);
+    opsimsparse->initThread(xrm, opsimsparse->handles, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
     delete[] cuID;
     delete[] deviceID;
+    return 0;
 };
 
 void Handle::addOp(singleOP op) {
     ops.push_back(op);
 }
 
-int Handle::setUp() {
-    getEnv();
+int Handle::setUp(std::string deviceNames) {
+    const std::string delimiters(" ");
+    for (int i = deviceNames.find_first_not_of(delimiters, 0); i != std::string::npos;
+         i = deviceNames.find_first_not_of(delimiters, i)) {
+        auto tokenEnd = deviceNames.find_first_of(delimiters, i);
+        if (tokenEnd == std::string::npos) tokenEnd = deviceNames.size();
+        const std::string token = deviceNames.substr(i, tokenEnd - i);
+        supportedDeviceNames.push_back(token);
+        std::cout << token << std::endl;
+        i = tokenEnd;
+    }
+    getEnvMultiBoards();
+
     unsigned int opNm = ops.size();
     unsigned int deviceCounter = 0;
-    for (int i = 0; i < opNm; ++i) {
-        if (strcmp(ops[i].operationName, "twoHop") == 0) {
-            unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
-                std::cout << "Error: Need more devices" << std::endl;
-                exit(1);
-            }
-            std::thread thUn[boardNm];
-            for (int j = 0; j < boardNm; ++j) {
-                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
-            }
-            for (int j = 0; j < boardNm; ++j) {
-                thUn[j].join();
-            }
-            std::thread th[boardNm];
-            for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
-            }
-            for (int j = 0; j < boardNm; ++j) {
-                th[j].join();
-            }
-            deviceCounter += boardNm;
-            initOpTwoHop(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                         ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "pagerank") == 0) {
-            unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
-                std::cout << "Error: Need more devices" << std::endl;
-                exit(1);
-            }
-            std::thread thUn[boardNm];
-            for (int j = 0; j < boardNm; ++j) {
-                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
-            }
-            for (int j = 0; j < boardNm; ++j) {
-                thUn[j].join();
-            }
-            std::thread th[boardNm];
-            for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
-            }
-            for (int j = 0; j < boardNm; ++j) {
-                th[j].join();
-            }
-            deviceCounter += boardNm;
+    int32_t status = 0;
 
-            initOpPageRank(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                           ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "shortestPathFloat") == 0) {
+    for (int i = 0; i < opNm; ++i) {
+        if (ops[i].operationName == "louvainModularity") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
+            // Unload existing xclbin first if present
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+#ifndef NDEBUG
+                std::cout << "DEBUG: "
+                          << "xrm->unloadXclbinNonBlock devId=" << supportedDeviceIds[j] << std::endl;
+#endif
+                thUn[j] = xrm->unloadXclbinNonBlock(supportedDeviceIds[j]);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+
+            // load xclbin asynchronously (i.e. non-blocking) using thread
+            std::future<int> th[boardNm];
+
+            for (int j = 0; j < boardNm; ++j) {
+#ifndef NDEBUG
+                std::cout << "DEBUG: " << __FUNCTION__ << ": xrm->loadXclbinAsync "
+                          << "\n    devId=" << supportedDeviceIds[j] << "\n    ops[i].xclbinFile=" << ops[i].xclbinPath
+                          << std::endl;
+#endif
+                th[j] = loadXclbinAsync(supportedDeviceIds[j], ops[i].xclbinPath);
+            }
+
+            // wait for thread to finish
+            for (int j = 0; j < boardNm; ++j) {
+                auto loadedDevId = th[j].get();
+                if (loadedDevId < 0) {
+                    std::cout << "ERROR: Failed to load " << ops[i].xclbinPath << "(Status=" << loadedDevId
+                              << "). Please check if it is "
+                              << "created for the Xilinx Acceleration card installed on "
+                              << "the server." << std::endl;
+                    return loadedDevId;
+                }
+            }
+#endif
+            deviceCounter += boardNm;
+            status = initOpLouvainModularity(ops[i].xclbinPath, ops[i].kernelName, ops[i].kernelAlias,
+                                             ops[i].requestLoad, ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "twoHop") {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            if (deviceCounter + boardNm > totalSupportedDevices) {
+                std::cout << "Error: Need more devices" << std::endl;
+                exit(1);
+            }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -289,20 +438,72 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpSP(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad, ops[i].deviceNeeded,
-                     ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "similarityDense") == 0) {
+            status = initOpTwoHop(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                  ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "pagerank") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            std::thread th[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                th[j].join();
+            }
+#endif
+            deviceCounter += boardNm;
+            status = initOpPageRank(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                    ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "shortestPathFloat") {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            if (deviceCounter + boardNm > totalSupportedDevices) {
+                std::cout << "Error: Need more devices" << std::endl;
+                exit(1);
+            }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            std::thread th[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                th[j].join();
+            }
+#endif
+            deviceCounter += boardNm;
+            status = initOpSP(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                              ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "similarityDense") {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            if (deviceCounter + boardNm > totalSupportedDevices) {
+                std::cout << "Error: Need more devices" << std::endl;
+                exit(1);
+            }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -312,27 +513,29 @@ int Handle::setUp() {
             }
             std::future<int> th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinAsync(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinAsync(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 auto loadedDevId = th[j].get();
                 if (loadedDevId < 0) {
-                    std::cout << "ERROR: failed to load " << ops[i].xclbinFile << "(Status=" << loadedDevId
+                    std::cout << "ERROR: failed to load " << ops[i].xclbinPath << "(Status=" << loadedDevId
                               << "). Please check if it is "
                               << "created for the Xilinx Acceleration card installed on "
                               << "the server." << std::endl;
                     return loadedDevId;
                 }
             }
+#endif
             deviceCounter += boardNm;
-            initOpSimDense(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                           ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "similarityDenseInt") == 0) {
+            status = initOpSimDense(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                    ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "similarityDenseInt") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -340,26 +543,31 @@ int Handle::setUp() {
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j].join();
             }
-            std::thread th[boardNm];
+            std::future<int> th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                if (j > 0) {
-                    th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile2);
-                } else {
-                    th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinAsync(deviceCounter + j, ops[i].xclbinPath);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                auto loadedDevId = th[j].get();
+                if (loadedDevId < 0) {
+                    std::cout << "ERROR: failed to load " << ops[i].xclbinPath << "(Status=" << loadedDevId
+                              << "). Please check if it is "
+                              << "created for the Xilinx Acceleration card installed on "
+                              << "the server." << std::endl;
+                    return loadedDevId;
                 }
             }
-            for (int j = 0; j < boardNm; ++j) {
-                th[j].join();
-            }
+#endif
             deviceCounter += boardNm;
-            initOpSimDenseInt(ops[i].kernelName, ops[i].xclbinFile, ops[i].xclbinFile2, ops[i].kernelAlias,
-                              ops[i].requestLoad, ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "similaritySparse") == 0) {
+            status = initOpSimDenseInt(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                       ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "similaritySparse") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -369,20 +577,22 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpSimSparse(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                            ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "triangleCount") == 0) {
+            status = initOpSimSparse(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                     ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "triangleCount") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -392,20 +602,22 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpTriangleCount(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                                ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "labelPropagation") == 0) {
+            status = initOpTriangleCount(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                         ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "labelPropagation") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -415,20 +627,22 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpLabelPropagation(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                                   ops[i].deviceNeeded, ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "BFS") == 0) {
+            status = initOpLabelPropagation(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias,
+                                            ops[i].requestLoad, ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "BFS") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -438,20 +652,22 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpBFS(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad, ops[i].deviceNeeded,
-                      ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "WCC") == 0) {
+            status = initOpBFS(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                               ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "WCC") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -461,20 +677,22 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpWCC(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad, ops[i].deviceNeeded,
-                      ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "SCC") == 0) {
+            status = initOpWCC(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                               ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "SCC") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -484,20 +702,22 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpSCC(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad, ops[i].deviceNeeded,
-                      ops[i].cuPerBoard);
-        } else if (strcmp(ops[i].operationName, "convertCsrCsc") == 0) {
+            status = initOpSCC(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                               ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (ops[i].operationName == "convertCsrCsc") {
             unsigned int boardNm = ops[i].deviceNeeded;
-            if (deviceCounter + boardNm > numDevices) {
+            if (deviceCounter + boardNm > totalSupportedDevices) {
                 std::cout << "Error: Need more devices" << std::endl;
                 exit(1);
             }
+#if !(SW_EMU_TEST || HW_EMU_TEST)
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
@@ -507,30 +727,38 @@ int Handle::setUp() {
             }
             std::thread th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinPath);
             }
             for (int j = 0; j < boardNm; ++j) {
                 th[j].join();
             }
+#endif
             deviceCounter += boardNm;
-            initOpConvertCsrCsc(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
-                                ops[i].deviceNeeded, ops[i].cuPerBoard);
+            status = initOpConvertCsrCsc(ops[i].kernelName, ops[i].xclbinPath, ops[i].kernelAlias, ops[i].requestLoad,
+                                         ops[i].deviceNeeded, ops[i].cuPerBoard);
         } else {
             std::cout << "Error: the operation " << ops[i].operationName << " is not supported" << std::endl;
             exit(1);
         }
+        if (status < 0) return XF_GRAPH_L3_ERROR_ALLOC_CU;
     }
     return 0;
 }
 
-void Handle::getEnv() {
-    cl_uint platformID = NULL;
+int Handle::setUp() {
+    // std::string deviceNames = "xilinx_u50_gen3x16_xdma_201920_3";
+    std::string deviceNames = "xilinx_u50_gen3x16_xdma_201920_3 xilinx_u50_gen3x16_xdma_5_202210_1";
+    return setUp(deviceNames);
+}
+
+void Handle::getEnvMultiBoards() {
+    cl_uint platformID = 0;
     cl_platform_id* platforms = NULL;
     char vendor_name[128] = {0};
     cl_uint num_platforms = 0;
     cl_int err2 = clGetPlatformIDs(0, NULL, &num_platforms);
     if (CL_SUCCESS != err2) {
-        std::cout << "INFO: get platform failed" << std::endl;
+        std::cout << "INFO: get platform failed1" << std::endl;
     }
     platforms = (cl_platform_id*)malloc(sizeof(cl_platform_id) * num_platforms);
     if (NULL == platforms) {
@@ -538,39 +766,71 @@ void Handle::getEnv() {
     }
     err2 = clGetPlatformIDs(num_platforms, platforms, NULL);
     if (CL_SUCCESS != err2) {
-        std::cout << "INFO: get platform failed" << std::endl;
+        std::cout << "INFO: get platform failed2" << std::endl;
     }
     for (cl_uint ui = 0; ui < num_platforms; ++ui) {
         err2 = clGetPlatformInfo(platforms[ui], CL_PLATFORM_VENDOR, 128 * sizeof(char), vendor_name, NULL);
         if (CL_SUCCESS != err2) {
-            std::cout << "INFO: get platform failed" << std::endl;
+            std::cout << "INFO: get platform failed3" << std::endl;
         } else if (!std::strcmp(vendor_name, "Xilinx")) {
             platformID = ui;
         }
     }
     cl_device_id* devices;
     std::vector<cl::Device> devices0 = xcl::get_xil_devices();
-    numDevices = devices0.size();
-    devices = (cl_device_id*)malloc(sizeof(cl_device_id) * numDevices);
-    err2 = clGetDeviceIDs(platforms[platformID], CL_DEVICE_TYPE_ALL, numDevices, devices, NULL);
-    std::cout << "INFO: num devices = " << numDevices << std::endl;
+    uint32_t totalXilinxDevices = devices0.size();
+    totalSupportedDevices = 0;
+    devices = (cl_device_id*)malloc(sizeof(cl_device_id) * totalXilinxDevices);
+    err2 = clGetDeviceIDs(platforms[platformID], CL_DEVICE_TYPE_ALL, totalXilinxDevices, devices, NULL);
+    std::cout << "INFO: total xilinx devices = " << totalXilinxDevices << std::endl;
     size_t valueSize;
     char* value;
-    for (int i = 0; i < numDevices; ++i) {
+
+    for (int i = 0; i < totalXilinxDevices; ++i) {
         // print device name
         clGetDeviceInfo(devices[i], CL_DEVICE_NAME, 0, NULL, &valueSize);
         value = new char[valueSize];
         clGetDeviceInfo(devices[i], CL_DEVICE_NAME, valueSize, value, NULL);
-        printf("INFO: Device %d: %s\n", i, value);
-        delete[] value;
+        std::cout << "INFO: " << __FUNCTION__ << ": Scanned device " << i << ":" << value << std::endl;
+        std::string strValue = value;
+        std::size_t found50 = strValue.rfind("u50");
+        std::size_t found55 = strValue.rfind("u55c");
+        if (found50 != std::string::npos) {
+            value = "u50";
+        }
+        if (found55 != std::string::npos) {
+            value = "u55c";
+        }
+        for (int j = 0; j < supportedDeviceNames.size(); j++) {
+            if (supportedDeviceNames[j].rfind(value) != std::string::npos) {
+                std::cout << "    Supported device found:" << value << std::endl;
+                supportedDeviceIds[totalSupportedDevices++] = i; // save curret supported supported devices
+                break;
+            }
+        }
+        // delete value;
     }
+
+    std::cout << "INFO: Total matching devices: " << totalSupportedDevices << std::endl;
+}
+
+void Handle::showHandleInfo() {
+#ifndef NDEBUG
+    std::cout << "INFO: " << __FUNCTION__ << " deviceNm_=" << deviceNm << " maxCU=" << maxCU << std::endl;
+    unsigned int opNm = ops.size();
+    for (unsigned int i = 0; i < opNm; ++i) {
+        std::cout << "INFO: " << __FUNCTION__ << " operationName=" << ops[i].operationName
+                  << " kernelname=" << ops[i].kernelName << " requestLoad=" << ops[i].requestLoad
+                  << " xclbinFile=" << ops[i].xclbinPath << std::endl;
+    }
+#endif
 }
 
 void Handle::free() {
     unsigned int opNm = ops.size();
     unsigned int deviceCounter = 0;
     for (int i = 0; i < opNm; ++i) {
-        if (strcmp(ops[i].operationName, "twoHop") == 0) {
+        if (ops[i].operationName == "louvainModularity") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -580,8 +840,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            optwohop->freeTwoHop();
-        } else if (strcmp(ops[i].operationName, "pagerank") == 0) {
+            oplouvainmod->freeLouvainModularity(xrm->ctx);
+        } else if (ops[i].operationName == "twoHop") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -591,8 +851,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            oppg->freePG();
-        } else if (strcmp(ops[i].operationName, "shortestPathFloat") == 0) {
+            optwohop->freeTwoHop(xrm->ctx);
+        } else if (ops[i].operationName == "pagerank") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -602,8 +862,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opsp->freeSP();
-        } else if (strcmp(ops[i].operationName, "similarityDense") == 0) {
+            oppg->freePG(xrm->ctx);
+        } else if (ops[i].operationName == "shortestPathFloat") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -613,8 +873,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opsimdense->freeSimDense();
-        } else if (strcmp(ops[i].operationName, "similarityDenseInt") == 0) {
+            opsp->freeSP(xrm->ctx);
+        } else if (ops[i].operationName == "similarityDense") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -624,9 +884,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opsimdense->freeSimDense();
-            xrm->freeCuGroup(boardNm);
-        } else if (strcmp(ops[i].operationName, "similaritySparse") == 0) {
+            opsimdense->freeSimDense(xrm->ctx);
+        } else if (ops[i].operationName == "similarityDenseInt") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -636,8 +895,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opsimsparse->freeSimSparse();
-        } else if (strcmp(ops[i].operationName, "triangleCount") == 0) {
+            opsimdense->freeSimDense(xrm->ctx);
+        } else if (ops[i].operationName == "similaritySparse") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -647,8 +906,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            optcount->freeTriangleCount();
-        } else if (strcmp(ops[i].operationName, "labelPropagation") == 0) {
+            opsimsparse->freeSimSparse(xrm->ctx);
+        } else if (ops[i].operationName == "triangleCount") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -658,8 +917,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            oplprop->freeLabelPropagation();
-        } else if (strcmp(ops[i].operationName, "BFS") == 0) {
+            optcount->freeTriangleCount(xrm->ctx);
+        } else if (ops[i].operationName == "labelPropagation") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -669,8 +928,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opbfs->freeBFS();
-        } else if (strcmp(ops[i].operationName, "WCC") == 0) {
+            oplprop->freeLabelPropagation(xrm->ctx);
+        } else if (ops[i].operationName == "BFS") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -680,8 +939,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opwcc->freeWCC();
-        } else if (strcmp(ops[i].operationName, "SCC") == 0) {
+            opbfs->freeBFS(xrm->ctx);
+        } else if (ops[i].operationName == "WCC") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -691,8 +950,8 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opscc->freeSCC();
-        } else if (strcmp(ops[i].operationName, "convertCsrCsc") == 0) {
+            opwcc->freeWCC(xrm->ctx);
+        } else if (ops[i].operationName == "SCC") {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
             for (int j = 0; j < boardNm; ++j) {
@@ -702,21 +961,32 @@ void Handle::free() {
                 thUn[j].join();
             }
             deviceCounter += boardNm;
-            opconvertcsrcsc->freeConvertCsrCsc();
+            opscc->freeSCC(xrm->ctx);
+        } else if (ops[i].operationName == "convertCsrCsc") {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            deviceCounter += boardNm;
+            opconvertcsrcsc->freeConvertCsrCsc(xrm->ctx);
         }
     }
     xrm->freeXRM();
 };
 
-void Handle::loadXclbin(unsigned int deviceId, char* xclbinName) {
+void Handle::loadXclbin(unsigned int deviceId, std::string& xclbinName) {
     xrm->loadXclbin(deviceId, xclbinName);
 };
 
-std::thread Handle::loadXclbinNonBlock(unsigned int deviceId, char* xclbinName) {
+std::thread Handle::loadXclbinNonBlock(unsigned int deviceId, std::string& xclbinName) {
     return xrm->loadXclbinNonBlock(deviceId, xclbinName);
 };
 
-std::future<int> Handle::loadXclbinAsync(unsigned int deviceId, char* xclbinName) {
+std::future<int> Handle::loadXclbinAsync(unsigned int deviceId, std::string& xclbinName) {
     return xrm->loadXclbinAsync(deviceId, xclbinName);
 };
 

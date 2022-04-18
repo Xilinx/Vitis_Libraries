@@ -3,17 +3,17 @@
     "name": "Xilinx Multiple Kernel Integer Dense Similarity Test", 
     "description": "In graph theory, a similarity measure or similarity function is an real-valued function which indicates whether two vertices are similar to each other (from wikipedia). A case for Multiple Kernel Integer Dense Similarity Test.", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50_u280.cfg"
                     ]
                 }

@@ -1,27 +1,40 @@
 {
     "gui": false, 
-    "name": "Xilinx Single Source Sparse Matrix Cosine Similarity ", 
+    "name": "Single Source Sparse Matrix Cosine Similarity L3 Test", 
     "description": "An example for computing cosine similarity of a single vector in sparse graph", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "xrm": true,
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": [], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u50_u280.ini"
+                    "clflags": [
+                        "--config PROJECT/conn_u50_u280.cfg"
                     ]
                 }
             }
         }
-    }, 
+    },
+    "pre_build": [
+        {
+           "build_cmd":"make -f LIB_DIR/L3/lib/Makefile libgraphL3 TARGET=$(TARGET) CUR_DIR=PROJECT/BUILD"
+        }
+    ],
+    "output_files": [
+        "BUILD/libgraphL3.so",
+        "BUILD/libgraphL3.json"
+    ],
     "launch": [
         {
-            "cmd_args": "-offset PROJECT/data/cosine_sparse_offset.csr -indiceWeight PROJECT/data/cosine_sparse_indice_weight.csr -golden PROJECT/data/cosine_sparse.mtx -topK 32", 
-            "ld_library_path": "PROJECT/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib", 
+            "cmd_args": "-xclbin PROJECT/BUILD/sparseSimilarityKernel.xclbin -offset PROJECT/data/cosine_sparse_offset.csr -indiceWeight PROJECT/data/cosine_sparse_indice_weight.csr -golden PROJECT/data/cosine_sparse.mtx -topK 32", 
+            "ld_library_path": ["BUILD",
+                                "$(XILINX_XRT)/lib",
+                                "$(XILINX_XRM)/lib"
+                                ], 
             "name": "generic launch for all flows"
         }
     ], 
@@ -29,18 +42,17 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/tests/cosineSimilaritySSSparse/test_cosineSimilaritySSSparse.cpp", 
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L3/tests/cosineSimilaritySSSparse/test_cosineSimilaritySSSparse.cpp" 
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include",
                 "LIB_DIR/../utils/L1/include"
             ], 
-            "options": "-O3 -I$(XILINX_XRM)/include"
+            "options": "-I$(XILINX_XRM)/include"
         }, 
         "linker": {
             "librarypaths": [
-                "LIB_DIR/L3/lib"
+                "BUILD"
             ], 
             "libraries": [
                 "graphL3"
@@ -197,7 +209,7 @@
         }
     ], 
     "testinfo": {
-        "disable": true, 
+        "disable": false, 
         "jobs": [
             {
                 "index": 0, 
@@ -211,12 +223,16 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 800, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }
             }
         ], 
         "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu",
             "vitis_hw_build", 
             "vitis_hw_run"
         ], 

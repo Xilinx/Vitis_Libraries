@@ -26,7 +26,13 @@ namespace xf {
 namespace graph {
 namespace L3 {
 
-void createHandlePG(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+void opPageRank::createHandle(class openXRM* xrm,
+                              clHandle& handle,
+                              std::string kernelName,
+                              std::string kernelAlias,
+                              std::string xclbinFile,
+                              int32_t IDDevice,
+                              unsigned int requestLoad) {
     xf::common::utils_sw::Logger logger(std::cout, std::cerr);
     cl_int fail;
 
@@ -40,12 +46,42 @@ void createHandlePG(clHandle& handle, const char* kernelName, const char* pXclbi
     logger.logCreateCommandQueue(fail);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-    handle.xclBins = xcl::import_binary_file(pXclbin);
+    handle.xclBins = xcl::import_binary_file(xclbinFile);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
     handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
     logger.logCreateProgram(fail);
-}
+
+    handle.resR = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+    memset(handle.resR, 0, sizeof(xrmCuResource));
+    int ret = xrm->allocCU(handle.resR, kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+    std::string instanceName0;
+    if (ret == 0) {
+        instanceName0 = handle.resR->instanceName;
+        if (cuPerBoardPG >= 2) instanceName0 = "kernel_pagerank_0:{" + instanceName0 + "}";
+    } else {
+        instanceName0 = "kernel_pagerank_0";
+    }
+    handle.isBusy = false;
+    const char* instanceName = instanceName0.c_str();
+    handle.kernel = cl::Kernel(handle.program, instanceName, &fail);
+    logger.logCreateKernel(fail);
+    std::cout << "INFO: Kernel has been created" << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "DEBUG:" << __FUNCTION__ << " IDDevice=" << IDDevice << "=" << devName << " CommandQueue=" << &handle.q
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " kernelName=" << kernelName << " kernelAlias=" << kernelAlias
+              << std::endl;
+
+    std::cout << "DEBUG:" << __FUNCTION__ << " resR.deviceId=" << handle.resR->deviceId
+              << " resR.cuId=" << handle.resR->cuId << " resR.channelID=" << handle.resR->channelId
+              << " resR.instanceName=" << handle.resR->instanceName << std::endl;
+
+    std::cout << "DEBUG: " << __FUNCTION__ << " instanceName0=" << instanceName0 << " created" << std::endl;
+#endif
+};
 
 uint32_t opPageRank::cuPerBoardPG;
 
@@ -58,9 +94,13 @@ void opPageRank::setHWInfo(uint32_t numDev, uint32_t CUmax) {
     handles = new clHandle[CUmax];
 };
 
-void opPageRank::freePG() {
+void opPageRank::freePG(xrmContext* ctx) {
     for (int i = 0; i < maxCU; ++i) {
         delete[] handles[i].buffer;
+        if (xrmCuRelease(ctx, handles[i].resR))
+            printf("success to release cu\n");
+        else
+            printf("fail to release cu\n");
     }
     delete[] handles;
 };
@@ -71,8 +111,13 @@ void opPageRank::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
     free(resR);
 };
 
-void opPageRank::init(
-    char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
+void opPageRank::init(class openXRM* xrm,
+                      std::string kernelName,
+                      std::string kernelAlias,
+                      std::string xclbinFile,
+                      uint32_t* deviceIDs,
+                      uint32_t* cuIDs,
+                      unsigned int requestLoad) {
     dupNmPG = 100 / requestLoad;
     cuPerBoardPG /= dupNmPG;
     uint32_t bufferNm = 9;
@@ -81,8 +126,7 @@ void opPageRank::init(
     unsigned int* handleID = new unsigned int[maxCU];
     handleID[0] = cnt;
     std::thread th[maxCU];
-    // th[0] = std::thread(&createHandlePG, std::ref(handles[cnt]), kernelName, xclbinFile, deviceIDs[cnt]);
-    createHandlePG(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    createHandle(xrm, handles[cnt], kernelName, kernelAlias, xclbinFile, deviceIDs[cnt], requestLoad);
     handles[cnt].buffer = new cl::Buffer[bufferNm];
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
@@ -94,17 +138,13 @@ void opPageRank::init(
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmPG;
-        // th[i] = std::thread(&createHandlePG, std::ref(handles[i]), kernelName, xclbinFile, deviceIDs[i]);
-        createHandlePG(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        createHandle(xrm, handles[i], kernelName, kernelAlias, xclbinFile, deviceIDs[i], requestLoad);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];
             deviceOffset.push_back(i);
         }
     }
-    //  for (int j = 0; j < maxCU; ++j) {
-    //      th[j].join();
-    //  }
     delete[] handleID;
 }
 
@@ -243,13 +283,10 @@ void opPageRank::bufferInit(clHandle* hds,
     cl::CommandQueue q = hds[0].q;
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
-
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-
-    kernel0 = cl::Kernel(program, instanceName);
-    std::cout << "INFO: Kernel has been created" << std::endl;
+    kernel0 = hds[0].kernel;
 
     std::vector<cl::Buffer> buffer;
     std::vector<cl_mem_ext_ptr_t> mext_in;
@@ -420,14 +457,13 @@ int opPageRank::compute(unsigned int deviceID,
 
     postProcess(nrows, resultInfo, buffPing, buffPong, pagerank);
 
+    hds->isBusy = false;
     free(orderUnroll);
     free(cntValFull);
     free(degreeCSR);
     free(buffPing);
     free(buffPong);
     free(resultInfo);
-
-    cuRelease(ctx, resR);
 
     return ret;
 };

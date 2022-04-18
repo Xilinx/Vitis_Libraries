@@ -25,7 +25,7 @@ int main(int argc, const char* argv[]) {
 
     // cmd parser
     ArgParser parser(argc, argv);
-
+    std::string xclbinPath;
     std::string filenameWeight;
     std::string goldenFile;
     std::string tmpStr;
@@ -38,6 +38,14 @@ int main(int argc, const char* argv[]) {
     uint32_t* numEdgesPU = new uint32_t[splitNm];    // edge numbers in each PU
     uint32_t topK;
     std::cout << "INFO: use dense graph" << std::endl;
+
+    if (!parser.getCmdOption("-xclbin", tmpStr)) { // xclbin
+        std::cout << "INFO: xclbin file path is not set!\n";
+        exit(1);
+    } else {
+        xclbinPath = tmpStr;
+        std::cout << "INFO: xclbin file path is " << xclbinPath << std::endl;
+    }
 
     if (!parser.getCmdOption("-weight", tmpStr)) { // weight
         filenameWeight = "./data/jaccard_dense_weight.csr";
@@ -113,7 +121,6 @@ int main(int argc, const char* argv[]) {
     std::string opName;
     std::string kernelName;
     int requestLoad;
-    std::string xclbinPath;
     int deviceNeeded;
 
     std::fstream userInput("./config.json", std::ios::in);
@@ -135,9 +142,6 @@ int main(int argc, const char* argv[]) {
             } else if (!std::strcmp(token, "requestLoad")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 requestLoad = std::atoi(token);
-            } else if (!std::strcmp(token, "xclbinPath")) {
-                token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -152,7 +156,7 @@ int main(int argc, const char* argv[]) {
     op0.operationName = (char*)opName.c_str();
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
-    op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinPath = xclbinPath;
     op0.deviceNeeded = deviceNeeded;
 
     xf::graph::L3::Handle handle0;
@@ -176,7 +180,6 @@ int main(int argc, const char* argv[]) {
     auto ev = xf::graph::L3::jaccardSimilarityAPDense(handle0, topK, g, resultID, similarity);
     int ret = ev.wait();
 
-    (handle0.opsimdense)->join();
     handle0.free();
     g.freeBuffers();
 

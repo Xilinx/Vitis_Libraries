@@ -39,9 +39,23 @@ class opWCC : public opBase {
 
     void setHWInfo(uint32_t numDev, uint32_t CUmax);
 
-    void freeWCC();
+    void freeWCC(xrmContext* ctx);
 
-    void init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad);
+    void createHandle(class openXRM* xrm,
+                      clHandle& handle,
+                      std::string kernelName,
+                      std::string kernelAlias,
+                      std::string xclbinFile,
+                      int32_t IDDevice,
+                      unsigned int requestLoad);
+
+    void init(class openXRM* xrm,
+              std::string kernelName,
+              std::string kernelAlias,
+              std::string xclbinFile,
+              uint32_t* deviceIDs,
+              uint32_t* cuIDs,
+              unsigned int requestLoad);
 
     static int compute(unsigned int deviceID,
                        unsigned int cuID,

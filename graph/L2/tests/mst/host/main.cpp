@@ -19,6 +19,8 @@
 #else
 #include "mst_top.hpp"
 #endif
+
+#include "xf_utils_sw/logger.hpp"
 #include "ap_int.h"
 #include "utils.hpp"
 #include <cstring>
@@ -141,7 +143,8 @@ int main(int argc, const char* argv[]) {
 
     unsigned* mst = aligned_alloc<unsigned>(numVertices);
     for (int i = 0; i < numVertices; i++) mst[i] = -1;
-
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int err;
 #ifndef HLS_TEST
     // do pre-process on CPU
     struct timeval start_time, end_time;
@@ -150,14 +153,17 @@ int main(int argc, const char* argv[]) {
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &err);
+    logger.logCreateProgram(err);
     cl::Kernel mst_knl;
     mst_knl = cl::Kernel(program, "mst_top");
 
@@ -252,14 +258,14 @@ int main(int argc, const char* argv[]) {
     bool* edge_color = aligned_alloc<bool>(numEdges);
     memset(edge_color, 0, numEdges);
 
-    unsigned err = 0;
+    unsigned errs = 0;
     float total = 0.0;
     unsigned edge_cnt = 0;
     std::set<unsigned long> tree;
     for (int i = 0; i < numVertices; i++) {
         if (mst[i] == -1) {
             std::cout << "vertex " << i << " not connected with the tree." << std::endl;
-            err++;
+            errs++;
         }
         unsigned start = offset32[mst[i]];
         unsigned end = offset32[mst[i] + 1];
@@ -286,16 +292,19 @@ int main(int argc, const char* argv[]) {
             }
         }
         if (!found) {
-            err++;
+            errs++;
             std::cout << "edge not found " << mst[mst[i]] << " " << mst[i] << std::endl;
         }
     }
 
     if (tree.size() != numVertices - 1) {
         std::cout << "not a tree" << std::endl;
-        err++;
+        errs++;
     }
     std::cout << "f784c8c0 total mst weight: " << total << std::endl;
 
-    return err;
+    errs ? logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL)
+         : logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+
+    return errs;
 }

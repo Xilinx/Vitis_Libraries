@@ -38,7 +38,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash
 
-   make run TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3
+   make run TARGET=hw DEVICE=xilinx_u55c_gen3x16_xdma_2_202110_1
 
 * **Run kernel(Step 3)**
 
@@ -46,7 +46,7 @@ To get the benchmark results, please run the following command.
 
 .. code-block:: bash
 
-   ./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/host.exe -x build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/kernel_louvain.xclbin -f 3 -c -o -m 10 -prun data/example-wt.txt
+   ./build_dir.hw.xilinx_u55c_gen3x16_xdma_2_202110_1/host.exe -x build_dir.hw.xilinx_u55c_gen3x16_xdma_2_202110_1/kernel_louvain.xclbin -f 3 -c -o -m 10 data/example-wt.txt -prun 
 
 Louvain fast Input Arguments:
 
@@ -109,7 +109,18 @@ Profiling
 The hardware resource utilizations are listed in the following table.
 Different tool versions may result slightly different resource.
 
-.. table:: Table 1 Hardware resources for Louvain fast
+.. table:: Table 1 Hardware resources for Louvain fast in u55c now, higher frequency and lower resources.
+    :align: center
+
+    +-------------------+----------+----------+----------+----------+---------+-----------------+
+    |    Kernel         |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
+    +-------------------+----------+----------+----------+----------+---------+-----------------+
+    | kernel_louvain_0  |   150    |    208   |    118   |  169109  |  147344 |      214.1      |
+    +-------------------+----------+----------+----------+----------+---------+-----------------+
+    | kernel_louvain_1  |   150    |    208   |    118   |  169109  |  147344 |      214.1      |
+    +-------------------+----------+----------+----------+----------+---------+-----------------+
+
+.. table:: Table 2 Hardware resources for Louvain fast in u50
     :align: center
 
     +-------------------+----------+----------+----------+----------+---------+-----------------+
@@ -119,7 +130,7 @@ Different tool versions may result slightly different resource.
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
 
-Table 2 Louvain FPGA acceleration benchmark  
+Table 3 Louvain FPGA acceleration benchmark by L2
 
 .. image:: /images/louvainPerformace.PNG
    :alt: Performance of louvainPerformance
@@ -128,14 +139,15 @@ Table 2 Louvain FPGA acceleration benchmark
 
 .. note::
 
-   1. 2 FPGA versions of kernel are used: 
-      * Normal kernel    : 18.1 X 
-      * Prune kernel     : 33.1 X without modularity loss VS. parallel Louvain on CPU
+   1. 3 FPGA versions of kernel are used: 
+      * Normal kernel      : 18.1 X 
+      * Prune kernel       : 33.1 X without modularity loss VS. parallel Louvain on CPU
+      * Opt kernel in u55c : 65.6 X without modularity loss by just 1cu VS. parallel Louvain on CPU
       * the Latency time = CPU time + FPGA time
    2. TigerGraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.60GHz, cache(20480 KB), cores(8).
    3. Parallel Louvain running on Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz, cache(35840 KB), cores(14).
    4. time unit: second.
-   5. FPGA platorm is Alveo u50
+   5. FPGA platorm is Alveo u50 for Prune kernel, Alveo u55c for 2cu opt kernel
 
 .. toctree::
     :maxdepth: 1

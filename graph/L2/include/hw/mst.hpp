@@ -201,7 +201,7 @@ loop2:
     }
 }
 
-} // namspace mst
+} // namespace mst
 } // namespace internal
 
 /**

@@ -38,7 +38,7 @@ Given an undirected graph, and a source vertex, print out a MST for the connecte
 Interface
 =========
 The input should be an undirected graph in compressed sparse row (CSR) format.
-The result is an array which shows the predecessor of a vertex in the generated tre. The vertex ID can be used to index the result array.
+The result is an array which shows the predecessor of a vertex in the generated tree. The vertex ID can be used to index the result array.
 
 Implementation
 ==============
@@ -53,11 +53,11 @@ There are 4 functional blocks as shown in the figure:
 
 1. QueuePop is responsible to load the next vertex in the priority queue and pass it to the loadOffset.
 
-2. loadOffset load the offset value associate with current vertex from the CSR offset values and pass it to the next block.
+2. loadOffset loads the offset value associate with current vertex from the CSR offset values and pass it to the next block.
 
-3. loadCol&Wei load the ID and weight of the next hop vertices accroding to the offset values. And pass these IDs and weights to the loadRes.
+3. loadCol&Wei loads the ID and weight of the next hop vertices according to the offset values. And it passes these IDs and weights to the loadRes.
 
-4. Queue push put the next hop vertices into the priority queue. And sort the priority again.
+4. Queue pushes the next hop vertices into the priority queue. And it sorts the priority again.
 
 This system starts from pushing the source vertex into the queue and iterate until the queue is empty.
 

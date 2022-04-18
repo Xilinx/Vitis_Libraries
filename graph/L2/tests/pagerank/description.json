@@ -3,10 +3,10 @@
     "name": "Xilinx Page Rank Test", 
     "description": "An example for pagerank with only 1 compute unit", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
@@ -20,7 +20,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }
@@ -36,7 +36,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -52,7 +52,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -169,7 +169,7 @@
                 }, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 300, 
+                    "vitis_hw_emu": 470, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

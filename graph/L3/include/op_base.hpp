@@ -21,6 +21,7 @@
 
 #include "common.hpp"
 #include "task.hpp"
+#include "openclHandle.hpp"
 
 namespace xf {
 namespace graph {
@@ -33,23 +34,25 @@ class opBase {
     opBase(){};
 
     void initThread(class openXRM* xrm,
+                    clHandle* handles,
                     std::string kernelName,
                     std::string kernelAlias,
                     unsigned int requestLoad,
                     unsigned int deviceNeeded,
                     unsigned int cuNumber) {
-        task_workers.emplace_back(std::thread(worker, std::ref(task_queue[0]), xrm, kernelName, kernelAlias,
-                                              requestLoad, deviceNeeded, cuNumber));
+        task_workers.emplace_back(std::thread(dynamicWorker, std::ref(task_queue[0]), xrm, handles, kernelName,
+                                              kernelAlias, requestLoad, deviceNeeded, cuNumber));
     };
 
-    void initThreadInt(class openXRM* xrm,
-                       std::string kernelName,
-                       std::string kernelAlias,
-                       unsigned int requestLoad,
-                       unsigned int deviceNeeded,
-                       unsigned int cuNumber) {
-        task_workers.emplace_back(std::thread(worker2, std::ref(task_queue[0]), xrm, kernelName, kernelAlias,
-                                              requestLoad, deviceNeeded, cuNumber));
+    void initRoundRobinThread(class openXRM* xrm,
+                              clHandle* handles,
+                              std::string kernelName,
+                              std::string kernelAlias,
+                              unsigned int requestLoad,
+                              unsigned int deviceNeeded,
+                              unsigned int cuNumber) {
+        task_workers.emplace_back(std::thread(staticWorker, std::ref(task_queue[0]), xrm, handles, kernelName,
+                                              kernelAlias, requestLoad, deviceNeeded, cuNumber));
     };
 
     void join() {

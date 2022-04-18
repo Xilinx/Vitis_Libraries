@@ -26,13 +26,13 @@ Vitis Graph Library is an open-sourced Vitis library written in C++ for accelera
 
 Currently, this includes the following algorithm implementation:
 
- - Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor. From 2021.2, the 'weight' feature is supported for Cosin Similarity. 
+ - Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest Neighbor.
  - Centrality analysis: PageRank.
- - Pathfinding: Minimum Spanning Tree (MST, 2021.2), Estimated Diameter (2021.2), Single Source Shortest Path (SSSP) and Multi-Sources Shortest Path (MSSP).
- - Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
- - Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
- - Search: Breadth First Search, 2-Hop Search 
- - Graph Format: Renumber(2021.2), Calculate Degree and Format Convert between CSR and CSC.
+ - Pathfinding: Single Source Shortest Path (SSSP), Multi-Source Shortest Path (MSSP), Minimum Spanning Tree and Estimated Diameter.
+ - Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
+ - Community Detection: Louvain Modularity (From 22.1, Louvain API can support large-scale graphs), Label Propagation and Triangle Count.
+ - Search: Breadth First Search and 2-Hop Search.
+ - Graph Format: Renumber, Calculate Degree and Format Convertion between CSR and CSC.
 
 
 Shell Environment
@@ -43,7 +43,7 @@ Setup the build environment using the Vitis and XRT scripts.
 .. ref-code-block:: bash
 	:class: overview-code-block
 
-        source <install path>/Vitis/2021.2/settings64.sh
+        source <install path>/Vitis/2022.1/settings64.sh
         source /opt/xilinx/xrt/setup.sh
         export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
@@ -58,6 +58,7 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
 
    overview.rst
    release.rst
+   tutorial.rst
 
 .. toctree::
    :caption: L1 User Guide
@@ -83,7 +84,7 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
 
 .. toctree::
    :caption: L3 User Guide
-   :maxdepth: 3
+   :maxdepth: 4
 
    guide_L3/utilization_L3.rst
 
@@ -93,7 +94,7 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
    guide_L3/api.rst
 
 .. toctree::
-   :caption: Plugin User Guide
+   :caption: TigerGraph Plugin
    :maxdepth: 3
 
    plugin/tigergraph_integration.rst

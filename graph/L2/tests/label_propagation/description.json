@@ -3,21 +3,21 @@
     "name": "Xilinx Label Propagation Test", 
     "description": "Within complex networks, real networks tend to have community structure. Label propagation is an algorithm for finding communities. In comparison with other algorithms label propagation has advantages in its running time and amount of a priori information needed about the network structure (no parameter is required to be known beforehand). The disadvantage is that it produces no unique solution, but an aggregate of many solutions.(from wikipedia)", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u50", 
         "u200", 
         "u250", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
         "u50": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }
@@ -26,7 +26,7 @@
         "u200": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -35,7 +35,7 @@
         "aws-vu9p-f1": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -44,7 +44,7 @@
         "u250": {
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
                     ]
                 }
@@ -67,7 +67,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_vck190.cfg"
                     ]
                 }
@@ -190,7 +190,7 @@
                 "max_memory_MB": 32768, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 950, 
+                    "vitis_hw_emu": 2880, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }

@@ -42,8 +42,62 @@
 #define XCL_BANK13 XCL_BANK(13)
 #define XCL_BANK14 XCL_BANK(14)
 #define XCL_BANK15 XCL_BANK(15)
+#define XCL_BANK16 XCL_BANK(16)
+#define XCL_BANK17 XCL_BANK(17)
+#define XCL_BANK18 XCL_BANK(18)
+#define XCL_BANK19 XCL_BANK(19)
+#define XCL_BANK20 XCL_BANK(20)
+#define XCL_BANK21 XCL_BANK(21)
+#define XCL_BANK22 XCL_BANK(22)
+#define XCL_BANK23 XCL_BANK(23)
+#define XCL_BANK24 XCL_BANK(24)
+#define XCL_BANK25 XCL_BANK(25)
+#define XCL_BANK26 XCL_BANK(26)
+#define XCL_BANK27 XCL_BANK(27)
+#define XCL_BANK28 XCL_BANK(28)
+#define XCL_BANK29 XCL_BANK(29)
+#define XCL_BANK30 XCL_BANK(30)
+#define XCL_BANK31 XCL_BANK(31)
 
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePointType;
+
+struct ToolOptions {
+    int argc;
+    char** argv; // strings not owned!
+
+    double opts_C_thresh;   //; //Threshold with coloring on
+    long opts_minGraphSize; //; //Min |V| to enable coloring
+    double threshold;       //; //Value of threshold
+    int opts_ftype;         //; //File type
+    char opts_inFile[4096]; //;
+    bool opts_coloring;     //
+    bool opts_output;       //;
+    std::string outputFile;
+    bool opts_VF; //;
+    std::string xclbinFile;
+    std::string deviceNames;
+    int numNodes;
+    int nodeId;
+    int numThreads;
+    int numPars;
+    int gh_par; // same as par_prune
+    int kernelMode;
+    int numDevices;
+    int modeZmq;
+    char path_zmq[4096];
+    bool useCmd;
+    int mode_alveo;
+    char nameProj[4096];      // used for create partitions
+    std::string alveoProject; // used for load/compute TODO: consolidate with nameProj
+    int numPureWorker;
+    char* nameWorkers[128];
+    int max_level;
+    int max_iter;
+
+    ToolOptions(int argc, char** argv);
+};
+
+enum { ZMQ_NONE = 0, ZMQ_DRIVER = 1, ZMQ_WORKER = 2 };
 
 namespace xf {
 namespace graph {

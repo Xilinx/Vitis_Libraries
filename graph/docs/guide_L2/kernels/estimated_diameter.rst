@@ -25,12 +25,12 @@ The diameter of a graph is the worst-case distance interm of shortest path betwe
 
 Algorithm
 =========
-The implemented algorithm estimates the diameter in a heuristic way. It randomly choose several vertices and compute the distance from each of the chosen vertex to all the other vertices. And find out the maximum distance. The higher the final distance is, the greater the likelihood of getting the actual graph diameter.
+The implemented algorithm estimates the diameter in a heuristic way. It randomly chooses several vertices and computes the distance from each of the chosen vertex to all the other vertices. And it finds out the maximum distance. The higher the final distance is, the greater the likelihood of getting the actual graph diameter.
 
 Interface
 =========
 The input should be a directed graph in compressed sparse row (CSR) format.
-The result is a value shows the final estimated diameter. Also, the source and destination of the path is given.
+The result is a value that shows the final estimated diameter. Also, the source and destination of the path are given.
 
 Implementation
 ==============
@@ -41,9 +41,9 @@ The algorithm implemention is shown in the figure below:
    :width: 80%
    :align: center
 
-There are several SSSP algorithm run in parallel as shown in the figure.
+There are several SSSP algorithms run in parallel as shown in the figure.
 
-The max module will find the maxmum distance found and keep record it.
+The max module will find the maximum distance found and keep a record of it.
 
 To find more distance between pairs of vertices, user can re-run this kernel multiple times.
 
