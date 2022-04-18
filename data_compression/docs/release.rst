@@ -7,6 +7,23 @@ Release Note
    :hidden
    :maxdepth: 1
 
+2022.1
+------
+
+Following is the 2022.1 release notes.
+
+* **ZLIB Compression Improvement**
+    - Reduced TreeGen Initial Interval < 1K to reduce overall resource utilization for 8KB octa core compression.
+    - Customized Octa-Core compression for 8KB solution ( Reduced Booster Window 8KB)
+    - Static IP customized.
+    - Improved Compression IP Timing for Versal and achieved > 250MHz.
+    - Provided Memory Mapped GZIP File Decompression.
+
+* **ZLIB Decompression Improvement**
+    - Customized IP for 8KB file size.
+    - Added ADL32 and provided uncompressed size in TUSER.
+    - Provided Quad-Core Decompress solution for 32KB and 8KB file size to achieve 4x throughput (upto 2GB/s).
+
 2021.2
 ------
 

@@ -375,7 +375,7 @@ $(HOST_OBJ_FILES): $(OBJ_DIR)/host.o $(SRC_DIR)/host.cpp
 $(EXE_FILE): $(HOST_OBJ_FILES)
 	@echo -e "----\nCompiling host executable..."
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. $(LIBZLIB_NAME) $(LDXRM) -lboost_system -lboost_filesystem -lOpenCL
+	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. $(LIBZLIB_NAME) $(LDXRM) -lboost_system -lboost_filesystem -lOpenCL -lpthread
 
 # ------------------------------------------------------------
 #                      build rules

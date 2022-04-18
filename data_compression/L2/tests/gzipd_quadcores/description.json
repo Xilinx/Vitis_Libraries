@@ -18,8 +18,7 @@
     ],
     "platform_allowlist": [
         "xilinx_u250_gen3x16_xdma_3_1_202020_1",
-        "u200",
-        "u50"
+        "u200"
     ],
     "host": {
         "host_exe": "xil_zlib",
