@@ -231,7 +231,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -304,6 +304,7 @@ function OptanonWrapper() { }
 			
 				<h3>Versions</h3>
 				<ul>
+				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
@@ -451,8 +452,8 @@ make cleanall
 <pre class="highlight literal-block">
 <span></span><span class="nb">cd</span> L2/tests/vitis_case_folder
 
-<span class="c1"># build and run one of the following using U2 platform</span>
-make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEVICE</span><span class="o">=</span>/path/to/xilinx_u2_gen3x4_xdma_gc_2_202110_1.xpfm
+<span class="c1"># build and run one of the following using u200 platform</span>
+make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEVICE</span><span class="o">=</span>/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 <span class="c1"># delete generated files</span>
 make cleanall
@@ -484,7 +485,7 @@ With the HLS test project provided in L1 layer, user could get:</p>
 <span></span><span class="nb">cd</span> L1/tests/hls_case_folder
 
 make run <span class="nv">CSIM</span><span class="o">=</span><span class="m">1</span> <span class="nv">CSYNTH</span><span class="o">=</span><span class="m">0</span> <span class="nv">COSIM</span><span class="o">=</span><span class="m">0</span> <span class="nv">VIVADO_SYN</span><span class="o">=</span><span class="m">0</span> <span class="nv">VIVADO_IMPL</span><span class="o">=</span><span class="m">0</span> <span class="se">\</span>
-    <span class="nv">DEVICE</span><span class="o">=</span>/path/to/xilinx_u2_gen3x4_xdma_gc_2_202110_1.xpfm
+    <span class="nv">DEVICE</span><span class="o">=</span>/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 </pre>
 <p>Test control variables are:</p>
 <ul class="simple">

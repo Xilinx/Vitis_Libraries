@@ -227,7 +227,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -281,6 +281,7 @@ function OptanonWrapper() { }
 			
 				<h3>Versions</h3>
 				<ul>
+				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
@@ -353,7 +354,7 @@ function OptanonWrapper() { }
 <p>Recommended design flows are decribed as follows:</p>
 <p>Setup the build environment using the Vitis and XRT scripts, and set the <code class="docutils literal notranslate"><span class="pre">PLATFORM_REPO_PATHS</span></code> to installation folder of platform files.</p>
 <pre class="highlight literal-block">
-<span></span><span class="nb">source</span> &lt;install path&gt;/Vitis/2020.2/settings64.sh
+<span></span><span class="nb">source</span> &lt;install path&gt;/Vitis/2022.1/settings64.sh
 <span class="nb">source</span> /opt/xilinx/xrt/setup.sh
 <span class="nb">export</span> <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span>/opt/xilinx/platforms
 </pre>
@@ -374,7 +375,7 @@ passes them to the design under test, then performs any output data post process
 <span class="nb">export</span> <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span>/opt/xilinx/platforms
 <span class="nb">cd</span> L1/tests/specific_algorithm/
 <span class="c1"># Only run C++ simulation on U250 card</span>
-make run <span class="nv">CSIM</span><span class="o">=</span><span class="m">1</span> <span class="nv">CSYNTH</span><span class="o">=</span><span class="m">0</span> <span class="nv">COSIM</span><span class="o">=</span><span class="m">0</span> <span class="nv">VIVADO_SYN</span><span class="o">=</span><span class="m">0</span> <span class="nv">VIVADO_IMPL</span><span class="o">=</span><span class="m">0</span> <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u250_xdma_201830_2
+make run <span class="nv">CSIM</span><span class="o">=</span><span class="m">1</span> <span class="nv">CSYNTH</span><span class="o">=</span><span class="m">0</span> <span class="nv">COSIM</span><span class="o">=</span><span class="m">0</span> <span class="nv">VIVADO_SYN</span><span class="o">=</span><span class="m">0</span> <span class="nv">VIVADO_IMPL</span><span class="o">=</span><span class="m">0</span> <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u250_gen3x16_xdma_4_1_202210_1
 </pre>
 <p>As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization,
 timing performance, latency and throughput. The output files of interest can be located at the location of
@@ -385,11 +386,11 @@ the test project where the path name is correlated with the algorithm. i.e. the 
 <span class="nb">export</span> <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span>/opt/xilinx/platforms
 <span class="nb">cd</span> L1/benchmarks/specific_algorithm/
 <span class="c1"># Run software emulation for correctness test</span>
-make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEIVCE</span><span class="o">=</span>xilinx_u250_xdma_201830_2
+make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEIVCE</span><span class="o">=</span>xilinx_u250_gen3x16_xdma_4_1_202210_1
 <span class="c1"># Run hardware emulation for cycle-accurate simulation with the RTL-model</span>
-make run <span class="nv">TARGET</span><span class="o">=</span>hw_emu <span class="nv">DEIVCE</span><span class="o">=</span>xilinx_u250_xdma_201830_2
+make run <span class="nv">TARGET</span><span class="o">=</span>hw_emu <span class="nv">DEIVCE</span><span class="o">=</span>xilinx_u250_gen3x16_xdma_4_1_202210_1
 <span class="c1"># Run hardware to generate the desired xclbin binary</span>
-make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEIVCE</span><span class="o">=</span>xilinx_u250_xdma_201830_2
+make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEIVCE</span><span class="o">=</span>xilinx_u250_gen3x16_xdma_4_1_202210_1
 <span class="c1"># Delete xclbin and host excutable program</span>
 make cleanall
 </pre>

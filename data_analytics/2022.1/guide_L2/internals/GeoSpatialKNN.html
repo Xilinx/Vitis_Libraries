@@ -74,7 +74,9 @@ function OptanonWrapper() { }
   <link rel="stylesheet" href="../../_static/css/header-footer.min.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="L3 Overlay User Guide" href="../../guide_L3/L3.html" />
+    <link rel="prev" title="STRTree Engine" href="geospatialJoin.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -225,7 +227,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -263,8 +265,33 @@ function OptanonWrapper() { }
 <li class="toctree-l1"><a class="reference internal" href="../../guide_L1/hw_guide.html">L1 Module User Guide</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L2 User Guide</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../l2_guide.html">L2 Kernel User Guide</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../l2_guide.html">L2 Kernel User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../l2_api.html">Kernel Templates in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::clustering</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l2_api.html#kernel-templates-xf-data-analytics-regression">Kernel Templates <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::regression</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l2_api.html#kernel-templates-in-xf-data-analytics-text">Kernel Templates in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::text</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../l2_api.html#kernel-templates-in-xf-data-analytics-geospatial">Kernel Templates in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::geospatial</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../internals.html">Design Internals</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="DT.html">Decision Tree (training)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kMeansTrain.html">Internals of kMeansTaim</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RF.html">Random Forest (training)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SGD.html">Stochastic Gradient Descent Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svm.html">Internals of svm_train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reEngine.html">Regular Expression Engine (reEngine)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geoip.html">GeoIP Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="twoGramPredicate.html">Two Gram Predicate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geospatialJoin.html">STRTree Engine</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">GeoSpatial K-nearest Neighbors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kernel-implemention">Kernel Implemention</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#end2end-performance">End2End Performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resource-utilization">Resource Utilization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">L3 User Guide</span></p>
 <ul>
@@ -279,6 +306,7 @@ function OptanonWrapper() { }
 			
 				<h3>Versions</h3>
 				<ul>
+				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
@@ -328,6 +356,10 @@ function OptanonWrapper() { }
     
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="../l2_guide.html">L2 Kernel User Guide</a> &raquo;</li>
+        
+          <li><a href="../internals.html">Design Internals</a> &raquo;</li>
+        
       <li>GeoSpatial K-nearest Neighbors</li>
     
     
@@ -361,9 +393,9 @@ One typical input format of geospatial data is CSV, thus a csv parser to extract
 <img alt="../../_images/knn_diagram.png" class="align-center" src="../../_images/knn_diagram.png" />
 <p>Building Blocks:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://xilinx.github.io/Vitis_Libraries/graph/2021.2/guide_L1/primitives/sortTopK.html">CSV Parser(DataAnalytic Library L1 Primitive)</a>: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.</li>
+<li><a class="reference external" href="https://xilinx.github.io/Vitis_Libraries/graph/2022.1/guide_L1/primitives/sortTopK.html">CSV Parser(DataAnalytic Library L1 Primitive)</a>: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.</li>
 <li>Distance: compute distance between base location and spatial object location; Euclidean distance is applied.</li>
-<li><a class="reference external" href="https://pages.gitenterprise.xilinx.com/FaaSApps/xf_DataAnalytics/2021.2/guide_L1/internals/csvParser.html">Sort Top-K(Graph Library L1 Primitive)</a>: sort distance in ascending order and keep top-k objects.</li>
+<li><a class="reference external" href="https://pages.gitenterprise.xilinx.com/FaaSApps/xf_DataAnalytics/2022.1/guide_L1/internals/csvParser.html">Sort Top-K(Graph Library L1 Primitive)</a>: sort distance in ascending order and keep top-k objects.</li>
 </ul>
 </div>
 <div class="section" id="end2end-performance">
@@ -473,6 +505,15 @@ One typical input format of geospatial data is CSV, thus a csv parser to extract
 
 
 	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../guide_L3/L3.html" class="btn btn-neutral float-right" title="L3 Overlay User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="geospatialJoin.html" class="btn btn-neutral float-left" title="STRTree Engine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

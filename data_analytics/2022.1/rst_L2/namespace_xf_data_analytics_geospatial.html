@@ -225,7 +225,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -279,6 +279,7 @@ function OptanonWrapper() { }
 			
 				<h3>Versions</h3>
 				<ul>
+				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
@@ -349,11 +350,69 @@ function OptanonWrapper() { }
 <span id="cid-xf-data-analytics-geospatial"></span><span id="doxid-namespacexf-1-1data-analytics-1-1geospatial"></span><span id="index-0"></span><h1>namespace geospatial<a class="headerlink" href="#namespace-geospatial" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<pre class="highlight overview-code-block literal-block" id="cid-xf-data-analytics-geospatial-knn">
-<span id="doxid-namespacexf-1-1data-analytics-1-1geospatial-1aff534267e7782611aba92a558896ee1d"></span><span></span><span class="c1">// namespaces</span>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="c1">// namespaces</span>
 
 <span class="k">namespace</span> <a class="reference internal" href="namespace_xf_data_analytics_geospatial_internal.html#doxid-namespacexf-1-1data-analytics-1-1geospatial-1-1internal"><span class="std std-ref">xf::data_analytics::geospatial::internal</span></a>
 </pre>
+<div class="section" id="knn">
+<span id="cid-xf-data-analytics-geospatial-knn"></span><span id="doxid-namespacexf-1-1data-analytics-1-1geospatial-1aff534267e7782611aba92a558896ee1d"></span><h2>knn<a class="headerlink" href="#knn" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/geospatial/knn.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">CSV_PU_NUM</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">MAX_SORT_NUM</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">knn</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">128</span><span class="o">&gt;*</span> <span class="n">csv_buf</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">schema</span><span class="p">,</span>
+    <span class="kt">float</span> <span class="n">base_x</span><span class="p">,</span>
+    <span class="kt">float</span> <span class="n">base_y</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">k</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">sorted_dist_buf</span><span class="p">,</span>
+    <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">sorted_idx_buf</span>
+    <span class="p">)</span>
+</pre>
+<p>K Nearest Neighbors(KNN): find nearest-K points for a given base point.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>CSV_PU_NUM</td>
+<td>num of csv parser core used to parallel parse csv data, only support 2/4/8</td>
+</tr>
+<tr class="row-even"><td>MAX_SORT_NUM</td>
+<td>the max number of the sequence can be sorted, should be less than 1024</td>
+</tr>
+<tr class="row-odd"><td>csv_buf</td>
+<td>input csv data</td>
+</tr>
+<tr class="row-even"><td>schema</td>
+<td>input csv schema</td>
+</tr>
+<tr class="row-odd"><td>base_x</td>
+<td>base point x coordinate</td>
+</tr>
+<tr class="row-even"><td>base_y</td>
+<td>base point y coordinate</td>
+</tr>
+<tr class="row-odd"><td>k</td>
+<td>num of nearest point, k &lt;= MAX_SORT_NUM</td>
+</tr>
+<tr class="row-even"><td>sorted_dist_buf</td>
+<td>output distance of nearest-K points</td>
+</tr>
+<tr class="row-odd"><td>sorted_idx_buf</td>
+<td>output index of nearest-K points</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="strtreetop">
 <span id="cid-xf-data-analytics-geospatial-strtreetop"></span><span id="doxid-namespacexf-1-1data-analytics-1-1geospatial-1aaa933a9bf90a6f1f98dfb6f8071344f5"></span><h2>strtreeTop<a class="headerlink" href="#strtreetop" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">
