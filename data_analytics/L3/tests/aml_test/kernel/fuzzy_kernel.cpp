@@ -41,11 +41,11 @@ void splitToString(const int nrow,
     const int elem_per_line = 128 / (M + 1);
 
     ap_uint<8 * M> str;
+    ap_uint<8> len;
     for (int i = 0; i < nrow; i++) {
 #pragma HLS pipeline
         ap_uint<128> t = vec_strm.read();
         ap_uint<8> index = i % elem_per_line;
-        ap_uint<8> len;
         if (index == 0) {
             len = t(127, 120);
             str(279, 160) = t(119, 0);

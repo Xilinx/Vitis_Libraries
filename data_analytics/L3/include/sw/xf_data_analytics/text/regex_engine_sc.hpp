@@ -49,9 +49,9 @@ class RegexEngine {
     const int kMaxSliceSize;
     const int kMaxSliceNum;
 
-    VPP_BP* msg_buf_pool;
-    VPP_BP* len_buf_pool;
-    VPP_BP* out_buf_pool;
+    static VPP_BP msg_buf_pool;
+    static VPP_BP len_buf_pool;
+    static VPP_BP out_buf_pool;
 
     /**
      * @brief Calculates the number of sections for current input message block

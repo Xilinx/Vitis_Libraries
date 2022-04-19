@@ -1,43 +1,122 @@
 {
-    "gui": false, 
-    "name": "Xilinx Regex L3 SC", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "", 
-    "platform_whitelist": [
+    "gui": false,
+    "name": "Xilinx Regex L3 SC",
+    "description": "",
+    "flow": "vitis",
+    "platform_type": "",
+    "platform_allowlist": [
         "u50"
-    ], 
-    "platform_blacklist": [
-        "zc"
+    ],
+    "platform_blocklist": [
+        "zc",
+        "aws-vu9p-f1"
+    ],
+    "pre_build" : [
+        {
+            "build_cmd" : "make -C ./re_compile"
+        }
+    ],
+    "launch" : [
+	{
+	    "target": "sw_emu",
+            "ld_library_path": ["$(CUR_DIR)/re_compile/lib/lib"],
+	    "cmd_args": " -in LIB_DIR/L2/tests/text/reEngine/log_data/access_5k.log -out $(CUR_DIR)/check.log"
+	},
+	{
+	    "target" : "hw_emu",
+            "ld_library_path": ["$(CUR_DIR)/re_compile/lib/lib"],
+	    "cmd_args" : "-in LIB_DIR/L2/tests/text/reEngine/log_data/access_5k.log -lnm 10 -out $(CUR_DIR)/check.log"
+	},
+	{
+	    "target": "hw",
+            "ld_library_path": ["$(CUR_DIR)/re_compile/lib/lib"],
+	    "cmd_args": "-in LIB_DIR/L2/tests/text/reEngine/log_data/access_5k.log -out $(CUR_DIR)/check.log"
+	}
+    ],
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L3/src/sw/text/regex_engine_sc.cpp", 
+                "LIB_DIR/L3/src/sw/text/reEngine_config.cpp", 
+                "host/main.cpp" 
+            ], 
+            "includepaths": [
+                "$(XILINX_VITIS)/data/system_compiler/include",
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/sw", 
+                "LIB_DIR/L2/include/hw", 
+                "LIB_DIR/L3/include/sw", 
+                "re_compile/lib/include", 
+                "LIB_DIR/../utils/L1/include", 
+                "kernel"
+            ],
+            "options": "-std=c++11 -fpermissive" 
+        },
+        "linker": {
+            "librarypaths": [
+                "PROJECT/re_compile/lib/lib"
+            ], 
+            "libraries": [
+                "onig", 
+                "xfcompile"
+            ], 
+            "options": ""
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/sw", 
+                "LIB_DIR/L2/include/hw", 
+                "LIB_DIR/L3/include/sw", 
+                "re_compile/lib/include", 
+                "LIB_DIR/../utils/L1/include", 
+                "kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/re_engine_acc.cpp", 
+                    "frequency": 300.0, 
+                    "name": "hls_kernel" 
+                }
+            ], 
+            "name": "hls_kernel"
+        }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 81920, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 81920,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 1200, 
-                    "vitis_hw_emu": 470, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_build": 1200,
+                    "vitis_hw_emu": 1200,
+                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "canary"
     }
 }

@@ -4,13 +4,13 @@
     "description": "", 
     "flow": "vitis", 
     "platform_type": "", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "xilinx_u250_gen3x16_xdma_3_1_202020_1", 
         "xilinx_u50_gen3x16_xdma_201920_3", 
-        "aws-vu9p-f1", 
-        "vck190"
+        "aws-vu9p-f1" 
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
+	"vck190",
         "xilinx_u250_xdma_201830_2",
         "xilinx_u200_xdma_201830_2"
     ], 
@@ -25,7 +25,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -41,7 +41,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

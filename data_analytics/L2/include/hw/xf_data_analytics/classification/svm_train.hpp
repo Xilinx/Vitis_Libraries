@@ -35,6 +35,7 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 #include "xf_data_analytics/common/table_sample.hpp"
+#include <hls_burst_maxi.h>
 
 #define BURST_LEN 64
 #ifndef MAX_NUM_FEATURE
@@ -70,5 +71,5 @@ DATA_TYPE funcC(DATA_TYPE op) {
  * @param tree output weight buffer
  *
  */
-extern "C" void SVM(ap_uint<512>* ddr, ap_uint<512>* weight);
+extern "C" void SVM(ap_uint<512>* ddr, hls::burst_maxi<ap_uint<64> > weight);
 #endif

@@ -31,7 +31,7 @@ The TGP kernel design is show in the figure below:
 .. _my-figure1:
 .. figure:: /images/text/twoGramPredicate.png
     :alt: Figure 1 TGP Kenrel architecture on FPGA
-    :width: 80%
+    :width: 30%
     :align: center
 
 The functions of each module in the figure is:
@@ -45,7 +45,7 @@ The functions of each module in the figure is:
 .. _my-figure2:
 .. figure:: /images/text/weightedUnion.png
     :alt: Figure 2 Key Design of weighted Union
-    :width: 80%
+    :width: 150%
     :align: center
 
 The function of each module of `weighted Union` in the figure is:

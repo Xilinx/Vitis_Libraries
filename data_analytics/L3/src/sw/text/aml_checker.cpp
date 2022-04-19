@@ -342,9 +342,9 @@ int SwiftMT103Checker::initialize(const std::string& xclbinPath,
         int i = 0;
         for (i = 0; i < devices.size(); i++) {
             std::string dev_n = devices[i].getInfo<CL_DEVICE_NAME>();
-            if (dev_n.find("xilinx_u50_gen3x16_xdma_201920_3") != std::string::npos ||
-                dev_n.find("xilinx_u200_xdma_201830_2") != std::string::npos ||
-                dev_n.find("xilinx_u250_xdma_201830_2") != std::string::npos ||
+            if (dev_n.find("u50") != std::string::npos ||
+                dev_n.find("u200") != std::string::npos ||
+                dev_n.find("u250") != std::string::npos ||
                 dev_n.find("aws-vu9p-f1") != std::string::npos) {
                 cardID = i;
                 std::cout << "Auto choose card:" << cardID << std::endl;

@@ -3,13 +3,13 @@
     "description": "Xilinx Anti-Money-Laundering L3 API Demo", 
     "flow": "vitis", 
     "platform_type": "", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "xilinx_u250_xdma_201830_2", 
         "u50", 
         "aws-vu9p-f1"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc",
         "vck190"
     ], 
@@ -22,7 +22,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [
@@ -40,7 +40,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [
@@ -58,7 +58,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [
@@ -76,7 +76,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [

@@ -1,0 +1,35 @@
+{
+    "gui": false,
+    "match_makefile": false,
+    "name": "Xilinx GeoSpatial Contains with STRTree Test", 
+    "description": "Xilinx GeoSpatial Contains with STRTree Test", 
+    "flow": "vitis", 
+    "platform_allowlist": [
+        "u200"
+    ], 
+    "platform_blocklist": [
+        "zc"
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": 600
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu"
+        ], 
+        "category": "canary"
+    }
+}

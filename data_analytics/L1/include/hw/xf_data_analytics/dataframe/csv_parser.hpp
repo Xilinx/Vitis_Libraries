@@ -27,7 +27,7 @@
 #include "xf_data_analytics/common/obj_interface.hpp"
 #include "xf_data_analytics/dataframe/df_utils.hpp"
 #include "xf_data_analytics/dataframe/parser_blocks/read_block.hpp"
-#include "xf_data_analytics/dataframe/parser_blocks/parse_block.hpp"
+#include "xf_data_analytics/dataframe/parser_blocks/csv_parse_block.hpp"
 
 #ifndef __SYNTHESIS__
 #include <iostream>
@@ -138,7 +138,7 @@ inline void mergeLineUnitL2(hls::stream<Object> i_obj_array_strm[2],
 MERGE_CORE_LOOP:
     while (e != (ap_uint<2>)-1) {
 #pragma HLS pipeline II = 1
-        if (!e[pu_idx]) {
+        if (!e[pu_idx] && !i_obj_array_strm[pu_idx].empty()) {
             i_obj_array_strm[pu_idx] >> obj;
             if (obj.get_type() == FEOF) {
                 e[pu_idx] = true;

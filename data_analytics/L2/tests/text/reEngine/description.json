@@ -4,13 +4,13 @@
     "description": "Xilinx Regex Engine Test", 
     "flow": "vitis", 
     "platform_type": "pcie", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "u250", 
         "u50",
         "aws-vu9p-f1"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
@@ -22,11 +22,20 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [
                 {
+                    "accelerators": [
+                        {
+                            "name": "reEngineKernel", 
+                            "location": "PROJECT/kernel/re_engine_kernel.cpp", 
+                            "frequency": 250, 
+                            "num_compute_units": 1
+                        }
+                    ], 
+                    "frequency": 250, 
                     "ldclflags": "--config PROJECT/conn_u200.cfg --config PROJECT/opts.cfg", 
                     "name": "reEngineKernel"
                 }
@@ -40,11 +49,20 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [
                 {
+                    "accelerators": [
+                        {
+                            "name": "reEngineKernel", 
+                            "location": "PROJECT/kernel/re_engine_kernel.cpp", 
+                            "frequency": 250, 
+                            "num_compute_units": 1
+                        }
+                    ], 
+                    "frequency": 250, 
                     "ldclflags": "--config PROJECT/conn_u250.cfg", 
                     "name": "reEngineKernel"
                 }
@@ -58,11 +76,20 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": []
+                    "clflags": []
                 }
             }, 
             "containers": [
                 {
+                    "accelerators": [
+                        {
+                            "name": "reEngineKernel", 
+                            "location": "PROJECT/kernel/re_engine_kernel.cpp", 
+                            "frequency": 250, 
+                            "num_compute_units": 1
+                        }
+                    ], 
+                    "frequency": 250, 
                     "ldclflags": "--config PROJECT/conn_u50.cfg", 
                     "name": "reEngineKernel"
                 }
@@ -141,12 +168,12 @@
             "accelerators": [
                 {
                     "location": "PROJECT/kernel/re_engine_kernel.cpp", 
-                    "frequency": 300, 
+                    "frequency": 250, 
                     "name": "reEngineKernel", 
                     "num_compute_units": 1
                 }
             ], 
-            "frequency": 300, 
+            "frequency": 250, 
             "name": "reEngineKernel"
         }
     ], 

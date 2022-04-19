@@ -715,7 +715,7 @@ namespace internal {
 /**
  * @brief loadTheta, likehood probability matrix loader, it will read num_of_class * num_of_term times
  */
-template <int GRP_NM>
+template <int CH_NM, int GRP_NM>
 void loadTheta(const int num_of_class,
                const int num_of_term,
                hls::stream<ap_uint<64> >& i_theta_strm,
@@ -732,16 +732,19 @@ void loadTheta(const int num_of_class,
     const int depth_per_line = 4096 / line;
 
     for (int i = 0; i < num_of_class; i++) {
-        for (int j = 0; j < num_of_term; j++) {
+        for (int j = 0; j < ((num_of_term + CH_NM - 1) / CH_NM) * CH_NM; j++) {
 #pragma HLS PIPELINE II = 1
-            ap_uint<72> tmp;
-            tmp(71, 64) = 0;
-            tmp(63, 0) = i_theta_strm.read();
-
             int offset = (i / GRP_NM) * depth_per_line;
             int z_addr = offset + j / num_per_grp;
 
-            lh_vector[i % GRP_NM][j % num_per_grp][z_addr] = tmp;
+            if (j < num_of_term) {
+                ap_uint<72> tmp;
+                tmp(71, 64) = 0;
+                tmp(63, 0) = i_theta_strm.read();
+                lh_vector[i % GRP_NM][j % num_per_grp][z_addr] = tmp;
+            } else {
+                lh_vector[i % GRP_NM][j % num_per_grp][z_addr] = 0;
+            }
         }
     }
 }
@@ -785,7 +788,7 @@ void initResVector(
     }
 }
 
-template <int GRP_NM>
+template <int CH_NM, int GRP_NM>
 void loadModel(const int num_of_class,
                const int num_of_term,
                hls::stream<ap_uint<64> >& i_theta_strm,
@@ -803,7 +806,7 @@ void loadModel(const int num_of_class,
 #pragma HLS inline off
 #pragma HLS DATAFLOW
 
-    loadTheta<GRP_NM>(num_of_class, num_of_term, i_theta_strm, lh_vector);
+    loadTheta<CH_NM, GRP_NM>(num_of_class, num_of_term, i_theta_strm, lh_vector);
 
     loadPrior<GRP_NM>(num_of_class, i_prior_strm, prior_vector);
 
@@ -854,7 +857,7 @@ void uramAccess(const int num_of_class,
                 for (int k = 0; k < GRP_NM; k++) {
 #pragma HLS UNROLL
                     f_cast<double> cc0;
-                    cc0.i = lh_vector[k][r + j][depth_per_line * i + r / num_per_grp];
+                    cc0.i = lh_vector[k][(r + j) % num_per_grp][depth_per_line * i + r / num_per_grp];
                     o_prob_strm[k][j].write(cc0.f);
                     o_data_strm[k][j].write(sample[j]);
                 }
@@ -1489,8 +1492,8 @@ void naiveBayesPredict(const int num_of_class,
 #pragma HLS array_partition variable = result_vector complete dim = 1
 
 #endif
-    internal::loadModel<GRP_NM>(num_of_class, num_of_term, i_theta_strm, i_prior_strm, lh_vector, prior_vector,
-                                result_vector);
+    internal::loadModel<CH_NM, GRP_NM>(num_of_class, num_of_term, i_theta_strm, i_prior_strm, lh_vector, prior_vector,
+                                       result_vector);
 
     internal::predictCore<CH_NM, GRP_NM>(num_of_class, num_of_term, i_data_strm, i_e_strm, o_class_strm, o_e_strm,
                                          lh_vector, prior_vector, result_vector);

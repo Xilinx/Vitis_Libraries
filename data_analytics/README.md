@@ -21,6 +21,9 @@ Three categories of APIs are provided by this library, namely:
   - The in-memory format follows the design principles of [Apache Arrow](https://arrow.apache.org/) with goal of allowing access
     without per-element transformation.
   - Loaders from common formats are planned to be added in future releases, for example CSV and JSONLine loaders.
+* **GeoSpatial** APIs for for spatial analysis and spatial data mining, new in 2022.1 release!
+  - _Spatial Join_ API inserts the columns from one feature table to another based on location or proximity.
+  - _KNN_ is often used to find the K nearest neighbors around the center point.
 
 ## API Levels
 

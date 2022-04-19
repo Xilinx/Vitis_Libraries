@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <hls_burst_maxi.h>
 #include "xf_data_analytics/classification/svm_train.hpp"
 #include "xf_data_analytics/common/math_helper.hpp"
 
@@ -35,6 +36,8 @@ void gradient_processing(const ap_uint<64> feature_num,
                          hls::stream<MType> gradient_strm[StreamN],
                          hls::stream<bool>& e_gradient_strm) {
     int count = 0;
+    MType y_data;
+    MType dot_sum;
     eRetStrm.read();
     while (!(e_data_strm.read())) {
 #pragma HLS pipeline
@@ -42,8 +45,6 @@ void gradient_processing(const ap_uint<64> feature_num,
 #pragma HLS array_partition variable = x_data dim = 1
         MType gradient_data[StreamN];
 #pragma HLS array_partition variable = gradient_data dim = 1
-        MType y_data;
-        MType dot_sum;
         if (count == 0) {
             y_data = MType(y_label_strm.read()) * 2.0 - 1.0;
             dot_sum = retStrm[0].read();
@@ -138,11 +139,11 @@ void SVM_flow(
 } // namespace data_analytics
 } // namespace xf
 
-extern "C" void SVM(ap_uint<512>* ddr, ap_uint<512>* weight) {
-#pragma HLS INTERFACE m_axi port = ddr offset = slave bundle = gmem_in1 latency = 125 num_read_outstanding = \
-    32 max_read_burst_length = 32 depth = 3624
-#pragma HLS INTERFACE m_axi offset = slave latency = 125 num_write_outstanding = 1 num_read_outstanding = \
-    16 max_write_burst_length = 16 max_read_burst_length = 16 bundle = gmem_inout2 port = weight depth = 4
+extern "C" void SVM(ap_uint<512>* ddr, hls::burst_maxi<ap_uint<64> > weight) {
+#pragma HLS INTERFACE m_axi offset = slave latency = 64 num_write_outstanding = 2 num_read_outstanding = \
+    32 max_write_burst_length = 2 max_read_burst_length = 16 bundle = gmem0 port = ddr
+#pragma HLS INTERFACE m_axi offset = slave latency = 64 num_write_outstanding = 32 num_read_outstanding = \
+    2 max_write_burst_length = 16 max_read_burst_length = 2 bundle = gmem1 port = weight depth = 2048
 
 #pragma HLS INTERFACE s_axilite port = ddr bundle = control
 #pragma HLS INTERFACE s_axilite port = weight bundle = control
@@ -172,16 +173,10 @@ extern "C" void SVM(ap_uint<512>* ddr, ap_uint<512>* weight) {
     bool flag_tol = false;
     int i = 0;
     DATA_TYPE weight_temp[1][STREAM_NUM][SAMPLE_DEP];
-#pragma HLS array_partition variable = weight_temp dim = 2 complete
-
+    //#pragma HLS array_partition variable = weight_temp dim = 2 complete
     for (int i = 0; i < SAMPLE_DEP; i++) {
-#pragma HLS pipeline
-        ap_uint<512> temp = weight[i];
-        for (ap_uint<4> j = 0; j < STREAM_NUM; j++) {
-#pragma HLS unroll
-            xf::data_analytics::common::internal::f_cast<DATA_TYPE> w;
-            w.i = temp(j * DATA_WIDTH + DATA_WIDTH - 1, j * DATA_WIDTH);
-            weight_temp[0][j][i] = w.f;
+        for (int j = 0; j < STREAM_NUM; j++) {
+            weight_temp[0][j][i] = 0;
         }
     }
 
@@ -213,13 +208,14 @@ mainloop:
     // calculate weight difference L2 norminization and update weight
     loop_update:
         for (int k = 0; k < NUM_FEATURE; k++) {
-#pragma HLS pipeline
-            weight_norm_diff += (weight_temp[0][k % STREAM_NUM][k / STREAM_NUM] * REG + sum_grediant[k] * GRA) *
-                                (weight_temp[0][k % STREAM_NUM][k / STREAM_NUM] * REG + sum_grediant[k] * GRA);
-            weight_temp[0][k % STREAM_NUM][k / STREAM_NUM] =
-                weight_temp[0][k % STREAM_NUM][k / STREAM_NUM] * REG_1 - sum_grediant[k] * GRA;
-            weight_norm_new +=
-                weight_temp[0][k % STREAM_NUM][k / STREAM_NUM] * weight_temp[0][k % STREAM_NUM][k / STREAM_NUM];
+#pragma HLS pipeline off
+            DATA_TYPE temp_old = weight_temp[0][k % STREAM_NUM][k / STREAM_NUM];
+            DATA_TYPE temp_gred = sum_grediant[k];
+            DATA_TYPE temp_sq = temp_old * REG + temp_gred * GRA;
+            weight_norm_diff += temp_sq * temp_sq;
+            DATA_TYPE temp_new = temp_old * REG_1 - temp_gred * GRA;
+            weight_temp[0][k % STREAM_NUM][k / STREAM_NUM] = temp_new;
+            weight_norm_new += temp_new * temp_new;
         }
         // end condition decision
 
@@ -234,17 +230,35 @@ mainloop:
         }
 
         i++;
+#ifndef __SYNTHESIS__
+        std::cout << "i = " << i << std::endl;
+#endif
+
+        if (i >= MAX_ITER || flag_tol) {
+        loop_writeout:
+            for (int k = 0; k < SAMPLE_DEP; k++) {
+                for (ap_uint<4> j = 0; j < STREAM_NUM; j++) {
+#pragma HLS pipeline off
+                    xf::data_analytics::common::internal::f_cast<DATA_TYPE> w;
+                    w.f = weight_temp[0][j][k];
+                    weight.write_request(k * STREAM_NUM + j, 1);
+                    weight.write(w.i);
+                    weight.write_response();
+                }
+            }
+        }
     }
-loop_writeout:
+    /*
     for (int i = 0; i < SAMPLE_DEP; i++) {
-#pragma HLS pipeline
+    #pragma HLS pipeline off
         ap_uint<512> temp;
         for (ap_uint<4> j = 0; j < STREAM_NUM; j++) {
-#pragma HLS unroll
+    #pragma HLS pipeline off
             xf::data_analytics::common::internal::f_cast<DATA_TYPE> w;
             w.f = weight_temp[0][j][i];
             temp(j * DATA_WIDTH + DATA_WIDTH - 1, j * DATA_WIDTH) = w.i;
         }
         weight[i] = temp;
     }
+    */
 }

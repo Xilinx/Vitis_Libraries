@@ -39,7 +39,7 @@ using namespace xf::data_analytics::common::internal;
  *
  * @tparam WAxi AXI interface width to load training data.
  * @tparam D Number of features that processed each cycle
- * @tparam DDepth DDepth * D is max feature numbers supported.
+ * @tparam Depth Depth * D is max feature numbers supported.
  * @tparam BurstLen, Length of burst read.
  *
  * @param input, training configs and training data
@@ -144,7 +144,7 @@ void linearLeastSquareRegressionSGDTrain(ap_uint<WAxi>* input, ap_uint<WAxi>* ou
  *
  * @tparam WAxi AXI interface width to load training data.
  * @tparam D Number of features that processed each cycle
- * @tparam DDepth DDepth * D is max feature numbers supported.
+ * @tparam Depth Depth * D is max feature numbers supported.
  * @tparam BurstLen, Length of burst read.
  *
  * @param input, training configs and training data
@@ -253,7 +253,7 @@ void ridgeRegressionSGDTrain(ap_uint<WAxi>* input, ap_uint<WAxi>* output) {
  *
  * @tparam WAxi AXI interface width to load training data.
  * @tparam D Number of features that processed each cycle
- * @tparam DDepth DDepth * D is max feature numbers supported.
+ * @tparam Depth Depth * D is max feature numbers supported.
  * @tparam BurstLen, Length of burst read.
  *
  * @param input, training configs and training data

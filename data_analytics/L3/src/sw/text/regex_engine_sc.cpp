@@ -25,6 +25,10 @@ namespace data_analytics {
 namespace text {
 namespace re {
 
+VPP_BP RegexEngine::msg_buf_pool;
+VPP_BP RegexEngine::len_buf_pool;
+VPP_BP RegexEngine::out_buf_pool;
+
 // constructor
 // load binary and program
 RegexEngine::RegexEngine(const int instr_depth,
@@ -40,9 +44,9 @@ RegexEngine::RegexEngine(const int instr_depth,
       kMsgSize(msg_size),
       kMaxSliceSize(max_slice_size),
       kMaxSliceNum(max_slice_num) {
-    msg_buf_pool = &re_engine_acc::create_bufpool(vpp::input);
-    len_buf_pool = &re_engine_acc::create_bufpool(vpp::input);
-    out_buf_pool = &re_engine_acc::create_bufpool(vpp::output);
+    msg_buf_pool = re_engine_acc::create_bufpool(vpp::input);
+    len_buf_pool = re_engine_acc::create_bufpool(vpp::input);
+    out_buf_pool = re_engine_acc::create_bufpool(vpp::output);
 }
 
 ErrCode RegexEngine::compile(std::string pattern) {
@@ -115,14 +119,14 @@ ErrCode RegexEngine::match(
 
     int sec = 0;
     gettimeofday(&tv_start, 0);
-    re_engine_acc::send_while([&]() -> bool {
+    re_engine_acc::send_while([=, &sec]() -> bool {
         re_engine_acc::set_handle(sec);
         ap_uint<64>* msg_ptr =
-            (ap_uint<64>*)re_engine_acc::alloc_buf(*msg_buf_pool, msg_size_per_cu * sizeof(ap_uint<64>));
+            (ap_uint<64>*)re_engine_acc::alloc_buf(msg_buf_pool, msg_size_per_cu * sizeof(ap_uint<64>));
         ap_uint<16>* len_ptr =
-            (ap_uint<16>*)re_engine_acc::alloc_buf(*len_buf_pool, len_size_per_cu * sizeof(ap_uint<16>));
+            (ap_uint<16>*)re_engine_acc::alloc_buf(len_buf_pool, len_size_per_cu * sizeof(ap_uint<16>));
         ap_uint<32>* out_ptr =
-            (ap_uint<32>*)re_engine_acc::alloc_buf(*out_buf_pool, out_size_per_cu * sizeof(ap_uint<32>));
+            (ap_uint<32>*)re_engine_acc::alloc_buf(out_buf_pool, out_size_per_cu * sizeof(ap_uint<32>));
 
         memcpy(len_ptr, len_ptr_src + len_size_per_cu * sec, len_size_per_cu * sizeof(ap_uint<16>));
         memcpy(msg_ptr, msg_ptr_src + msg_size_per_cu * sec, msg_size_per_cu * sizeof(ap_uint<64>));
@@ -132,9 +136,9 @@ ErrCode RegexEngine::match(
         return (++sec < sec_num);
     });
     // receive all result in order
-    re_engine_acc::receive_all_in_order([&]() {
+    re_engine_acc::receive_all_in_order([=]() {
         int secID = re_engine_acc::get_handle();
-        ap_uint<32>* ptr_src = (ap_uint<32>*)re_engine_acc::get_buf(*out_buf_pool);
+        ap_uint<32>* ptr_src = (ap_uint<32>*)re_engine_acc::get_buf(out_buf_pool);
 
         uint16_t lnm = lnm_per_sec[secID];
         uint32_t pos = pos_per_sec[secID];

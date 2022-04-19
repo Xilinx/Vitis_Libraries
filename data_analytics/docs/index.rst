@@ -23,6 +23,7 @@
    release.rst
    requirements.rst
    design_flows.rst
+   tutorial.rst
 
 .. toctree::
    :caption: L1 User Guide

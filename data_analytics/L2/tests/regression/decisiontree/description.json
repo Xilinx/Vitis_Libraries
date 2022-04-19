@@ -3,12 +3,12 @@
     "name": "Xilinx Decision Tree Regression Training", 
     "description": "", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u50", 
         "aws-vu9p-f1"
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": [], 
     "platform_properties": {
         "u250": {
             "host": {
@@ -20,7 +20,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -36,7 +36,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

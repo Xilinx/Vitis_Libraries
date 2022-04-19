@@ -2,16 +2,16 @@
     "name": "Xilinx Regex Virtual Machine HLS Test", 
     "description": "Xilinx RegexVM HLS Test", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u250", 
         "u50", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
     "project": "re_test", 
     "solution": "sol1", 
     "clock": "3.33", 
@@ -41,10 +41,10 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": 300
@@ -54,8 +54,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "canary"
     }

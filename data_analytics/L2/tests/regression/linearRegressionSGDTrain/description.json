@@ -3,13 +3,12 @@
     "name": "Xilinx Linear Regression SGD Training", 
     "description": "", 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u250", 
         "u50", 
-        "aws-vu9p-f1", 
-        "vck190"
+        "aws-vu9p-f1" 
     ], 
-    "platform_blacklist": [], 
+    "platform_blocklist": ["vck190"], 
     "platform_properties": {
         "u250": {
             "host": {
@@ -21,7 +20,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -37,7 +36,7 @@
             }, 
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u50.cfg"
                     ]
                 }

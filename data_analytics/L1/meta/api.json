@@ -1,0 +1,861 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::data_analytics::classification::decisionTreePredict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::classification::decisionTreePredict",
+                "display_name": "decisionTreePredict",
+                "brief": "decisionTreePredict, Top function of Decision Tree Predict.",
+                "target_domain": "",
+                "header_file_name": [
+                    "decision_tree_predict.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/classification"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "MType",
+                        "type": "typename",
+                        "description": "The data type of sample"
+                    },
+                    {
+                        "name": "WD",
+                        "type": "unsigned int",
+                        "description": "The width of data type MType, can get by sizeof(MType)"
+                    },
+                    {
+                        "name": "MAX_FEA_NUM",
+                        "type": "unsigned int",
+                        "description": "The max feature num function can support"
+                    },
+                    {
+                        "name": "MAX_TREE_DEPTH",
+                        "type": "unsigned int",
+                        "description": "The max tree depth function can support"
+                    },
+                    {
+                        "name": "MAX_CAT_BITS",
+                        "type": "unsigned",
+                        "description": "The category max bit number"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "dstrm_batch",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< WD > >[MAX_FEA_NUM],"
+                    },
+                    {
+                        "name": "estrm_batch",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "treeStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 512 > > &"
+                    },
+                    {
+                        "name": "treeTag",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "predictionsStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< MAX_CAT_BITS > > &"
+                    },
+                    {
+                        "name": "predictionsTagStrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &predictionsTa"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::classification::axiVarColToStreams",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::classification::axiVarColToStreams",
+                "display_name": "axiVarColToStreams",
+                "brief": "Loading table from AXI master to stream. Table should be row based storage of identical datawidth.",
+                "target_domain": "",
+                "header_file_name": [
+                    "decision_tree_train.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/classification"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "_BurstLen",
+                        "type": "int",
+                        "description": "burst length of AXI buffer, default is 32."
+                    },
+                    {
+                        "name": "_WAxi",
+                        "type": "int",
+                        "description": "width of AXI port, must be multiple of datawidth, default is 512."
+                    },
+                    {
+                        "name": "_WData",
+                        "type": "int",
+                        "description": "datawith, default is 64."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "ddr",
+                        "direction": "",
+                        "type": "ap_uint< _WAxi > *"
+                    },
+                    {
+                        "name": "offset",
+                        "direction": "",
+                        "type": "const ap_uint< 32 >"
+                    },
+                    {
+                        "name": "rows",
+                        "direction": "",
+                        "type": "const ap_uint< 32 >"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "",
+                        "type": "ap_uint< 32 >"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::classification::naiveBayesTrain",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::classification::naiveBayesTrain",
+                "display_name": "naiveBayesTrain",
+                "brief": "naiveBayesTrain, top function of multinomial Naive Bayes Training.",
+                "target_domain": "",
+                "header_file_name": [
+                    "naive_bayes.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/classification"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "DT_WIDTH",
+                        "type": "int",
+                        "description": "the width of type DT, in bits"
+                    },
+                    {
+                        "name": "WL",
+                        "type": "int",
+                        "description": "the width of bit to enable dispatcher, only 3 is supported so far"
+                    },
+                    {
+                        "name": "DT",
+                        "type": "typename",
+                        "description": "the data type of internal counter for terms, can be 32/64-bit integer, float or double"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "num_of_class",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "num_of_term",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "i_data_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > >[1<< WL],"
+                    },
+                    {
+                        "name": "i_e_strm",
+                        "direction": "",
+                        "type": "hls::stream< bool >[1<< WL],"
+                    },
+                    {
+                        "name": "o_terms_strm",
+                        "direction": "",
+                        "type": "hls::stream< int > &"
+                    },
+                    {
+                        "name": "o_data0_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > >[1<< WL],"
+                    },
+                    {
+                        "name": "o_data1_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > >"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::classification::naiveBayesPredict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::classification::naiveBayesPredict",
+                "display_name": "naiveBayesPredict",
+                "brief": "naiveBayesPredict, top function of multinomial Naive Bayes Prediction",
+                "target_domain": "",
+                "header_file_name": [
+                    "naive_bayes.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/classification"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "CH_NM",
+                        "type": "int",
+                        "description": "the number of channel for input sample data, should be power of 2"
+                    },
+                    {
+                        "name": "GRP_NM",
+                        "type": "int",
+                        "description": "the unroll factor for handling the classes simultaneously, must be power of 2 in 1~256"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "num_of_term",
+                        "direction": "",
+                        "type": "const int num_of_class, const int"
+                    },
+                    {
+                        "name": "num_of_term",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > > &i_theta_strm, hls::stream< ap_uint< 64 > > &i_prior_strm, hls::stream< ap_uint< 32 > > i_data_strm[CH_NM], hls::stream< bool > &i_e_strm, hls::stream< ap_uint< 10 > > &o_class_strm, hls::stream< bool > &o_e_strm"
+                    },
+                    {
+                        "name": "i_theta_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > > &"
+                    },
+                    {
+                        "name": "i_prior_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > > &"
+                    },
+                    {
+                        "name": "i_data_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 32 > >[CH_NM],"
+                    },
+                    {
+                        "name": "i_e_strm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "o_class_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 10 > > &"
+                    },
+                    {
+                        "name": "o_e_strm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &o_e_str"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::classification::svmPredict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::classification::svmPredict",
+                "display_name": "svmPredict",
+                "brief": "svmPredict, Top function of svm Predict.",
+                "target_domain": "",
+                "header_file_name": [
+                    "svm_predict.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/classification"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "MType",
+                        "type": "typename",
+                        "description": "The data type of sample"
+                    },
+                    {
+                        "name": "WD",
+                        "type": "unsigned",
+                        "description": "The width of data type MType, can get by sizeof(MType)"
+                    },
+                    {
+                        "name": "StreamN",
+                        "type": "unsigned",
+                        "description": "The stream number of input sample stream vector"
+                    },
+                    {
+                        "name": "SampleDepth",
+                        "type": "unsigned",
+                        "description": "stream depth number of one input sample"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "cols",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "sample_strm",
+                        "direction": "",
+                        "type": "hls::stream< MType >"
+                    },
+                    {
+                        "name": "e_sample_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 512 > > &weight_strm, hls::stream< bool > &eTag, hls::stream< ap_uint< 1 > > &predictionsStrm, hls::stream< bool > &predictionsTag"
+                    },
+                    {
+                        "name": "weight_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 512 > > &"
+                    },
+                    {
+                        "name": "eTag",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "predictionsStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 1 > > &"
+                    },
+                    {
+                        "name": "predictionsTagStrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &predictionsTag"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::clustering::kMeansPredict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::clustering::kMeansPredict",
+                "display_name": "kMeansPredict",
+                "brief": "kMeansPredict predicts cluster index for each sample. In order to achive to acceleration, please make sure partition 1-dim of centers.",
+                "target_domain": "",
+                "header_file_name": [
+                    "kmeansPredict.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/clustering"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "DT",
+                        "type": "typename",
+                        "description": "data type, supporting float and double"
+                    },
+                    {
+                        "name": "Dim",
+                        "type": "int",
+                        "description": "the maximum number of dimensions,dynamic number of dimension should be not greater than the maximum."
+                    },
+                    {
+                        "name": "Kcluster",
+                        "type": "int",
+                        "description": "the maximum number of cluster,dynamic number of cluster should be not greater than the maximum."
+                    },
+                    {
+                        "name": "uramDepth",
+                        "type": "int",
+                        "description": "the depth of uram where centers are stored. uramDepth should be not less than ceiling(Kcluster/KU)"
+                    },
+                    {
+                        "name": "KU",
+                        "type": "int",
+                        "description": "unroll factor of Kcluster, KU centers are took part in calculating distances concurrently with one sample. After Kcluster/KU+1 times at most, ouput the minimum distance of a sample and Kcluster centers."
+                    },
+                    {
+                        "name": "DV",
+                        "type": "int",
+                        "description": "unroll factor of Dim, DV elements in a center are took part in calculating distances concurrently with one sample."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "sampleStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< sizeof(DT)*8 > >[DV],"
+                    },
+                    {
+                        "name": "endSampleStrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "centers",
+                        "direction": "",
+                        "type": "ap_uint< sizeof(DT)*8 *DV >[KU][uramDepth],"
+                    },
+                    {
+                        "name": "dims",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "kcluster",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "tagStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 32 > > &"
+                    },
+                    {
+                        "name": "endTagStrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &endTagSt"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::dataframe::csvParser",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::dataframe::csvParser",
+                "display_name": "csvParser",
+                "brief": "read one standard CSV file from DDR and parse into object stream with schma defination",
+                "target_domain": "",
+                "header_file_name": [
+                    "csv_parser.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/dataframe"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "PU_NUM",
+                        "type": "int",
+                        "description": "number of CSV parse core, only support 2/4/8"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "csv_buf",
+                        "direction": "",
+                        "type": "ap_uint< 128 > *"
+                    },
+                    {
+                        "name": "schema",
+                        "direction": "",
+                        "type": "ap_uint< 8 > *"
+                    },
+                    {
+                        "name": "o_obj_strm",
+                        "direction": "",
+                        "type": "hls::stream< Object > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::dataframe::jsonParser",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::dataframe::jsonParser",
+                "display_name": "jsonParser",
+                "brief": "read one standard JSON file from DDR and parse into object stream with schma defination",
+                "target_domain": "",
+                "header_file_name": [
+                    "json_parser.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/dataframe"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "PU_NUM",
+                        "type": "int",
+                        "description": "number of JSON parse core, only support 2/4/8"
+                    },
+                    {
+                        "name": "COL_NUM",
+                        "type": "int",
+                        "description": "number of maximum column, should be power of 2"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "json_buf",
+                        "direction": "",
+                        "type": "ap_uint< 128 > *"
+                    },
+                    {
+                        "name": "schema",
+                        "direction": "",
+                        "type": "ap_uint< 8 > *"
+                    },
+                    {
+                        "name": "o_obj_strm",
+                        "direction": "",
+                        "type": "hls::stream< Object > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::dataframe::readFromDataFrame",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::dataframe::readFromDataFrame",
+                "display_name": "readFromDataFrame",
+                "brief": "read the data frame format data from DDR and pack into object streams",
+                "target_domain": "",
+                "header_file_name": [
+                    "read_from_dataframe.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/dataframe"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::dataframe::writeToDataFrame",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::dataframe::writeToDataFrame",
+                "display_name": "writeToDataFrame",
+                "brief": "write object stream data to DDR",
+                "target_domain": "",
+                "header_file_name": [
+                    "write_to_dataframe.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/dataframe"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "obj_strm",
+                        "direction": "",
+                        "type": "hls::stream< Object > &"
+                    },
+                    {
+                        "name": "ddr_buff",
+                        "direction": "",
+                        "type": "ap_uint< 64 > *"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::dataframe::writeToParquetSupport",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::dataframe::writeToParquetSupport",
+                "display_name": "writeToParquetSupport",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "write_to_parquet.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/dataframe"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::regression::decisionTreePredict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::classification::decisionTreePredict",
+                "display_name": "decisionTreePredict",
+                "brief": "decisionTreePredict, Top function of Decision Tree Predict.",
+                "target_domain": "",
+                "header_file_name": [
+                    "decision_tree_predict.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/classification"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "MType",
+                        "type": "typename",
+                        "description": "The data type of sample"
+                    },
+                    {
+                        "name": "WD",
+                        "type": "unsigned int",
+                        "description": "The width of data type MType, can get by sizeof(MType)"
+                    },
+                    {
+                        "name": "MAX_FEA_NUM",
+                        "type": "unsigned int",
+                        "description": "The max feature num function can support"
+                    },
+                    {
+                        "name": "MAX_TREE_DEPTH",
+                        "type": "unsigned int",
+                        "description": "The max tree depth function can support"
+                    },
+                    {
+                        "name": "MAX_CAT_BITS",
+                        "type": "unsigned",
+                        "description": "The category max bit number"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "dstrm_batch",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< WD > >[MAX_FEA_NUM],"
+                    },
+                    {
+                        "name": "estrm_batch",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "treeStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 512 > > &"
+                    },
+                    {
+                        "name": "treeTag",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "predictionsStrm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< MAX_CAT_BITS > > &"
+                    },
+                    {
+                        "name": "predictionsTagStrm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &predictionsTa"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::text::editDistance",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::text::editDistance",
+                "display_name": "editDistance",
+                "brief": "Levenshtein distance implementation.",
+                "target_domain": "",
+                "header_file_name": [
+                    "editDistance.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/text"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "N",
+                        "type": "int",
+                        "description": "maximum length of query string."
+                    },
+                    {
+                        "name": "M",
+                        "type": "int",
+                        "description": "maximum length of input stream string, N must be less than M."
+                    },
+                    {
+                        "name": "BITS",
+                        "type": "int",
+                        "description": "data width of internal edit distance in bits."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "len1_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< BITS > > &"
+                    },
+                    {
+                        "name": "query_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > > &"
+                    },
+                    {
+                        "name": "len2_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< BITS > > &"
+                    },
+                    {
+                        "name": "input_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 64 > > &"
+                    },
+                    {
+                        "name": "max_ed_strm",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< BITS > > &"
+                    },
+                    {
+                        "name": "i_e_strm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "o_e_strm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    },
+                    {
+                        "name": "o_match_strm",
+                        "direction": "",
+                        "type": "hls::stream< bool > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::text::regexVM",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::text::regexVM",
+                "display_name": "regexVM",
+                "brief": "Implementation for regular expression VM (1 instruction per iteration).",
+                "target_domain": "",
+                "header_file_name": [
+                    "regexVM.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/text"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "STACK_SIZE",
+                        "type": "int",
+                        "description": "Size of internal stack."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "bitSetBuff",
+                        "direction": "",
+                        "type": "ap_uint< 32 > *"
+                    },
+                    {
+                        "name": "instrBuff",
+                        "direction": "",
+                        "type": "ap_uint< 64 > *"
+                    },
+                    {
+                        "name": "msgBuff",
+                        "direction": "",
+                        "type": "ap_uint< 32 > *"
+                    },
+                    {
+                        "name": "lenMsg",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "match",
+                        "direction": "",
+                        "type": "ap_uint< 2 > &"
+                    },
+                    {
+                        "name": "offsetBuff",
+                        "direction": "",
+                        "type": "ap_uint< 16 > *"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::data_analytics::text::regexVM_opt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::data_analytics::text::regexVM_opt",
+                "display_name": "regexVM_opt",
+                "brief": "Implementation for regular expression VM (2 instructions per iteration).",
+                "target_domain": "",
+                "header_file_name": [
+                    "regexVM.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw/xf_data_analytics/text"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "STACK_SIZE",
+                        "type": "int",
+                        "description": "Size of internal stack."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "bitSetBuff",
+                        "direction": "",
+                        "type": "ap_uint< 32 > *"
+                    },
+                    {
+                        "name": "instrBuff",
+                        "direction": "",
+                        "type": "ap_uint< 64 > *"
+                    },
+                    {
+                        "name": "msgBuff",
+                        "direction": "",
+                        "type": "ap_uint< 32 > *"
+                    },
+                    {
+                        "name": "lenMsg",
+                        "direction": "",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "match",
+                        "direction": "",
+                        "type": "ap_uint< 2 > &"
+                    },
+                    {
+                        "name": "offsetBuff",
+                        "direction": "",
+                        "type": "ap_uint< 16 > *"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}

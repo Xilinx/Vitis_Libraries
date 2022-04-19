@@ -1,0 +1,95 @@
+{
+    "gui": false, 
+    "name": "Xilinx L3 GUNZIP CSV PARSER (SC) Test", 
+    "description": "A SystemCompiler example for Gunzip CSV parser acceleration.", 
+    "flow": "vitis", 
+    "platform_allowlist": [
+        "u2"
+    ], 
+    "platform_blocklist": [
+        "zc"
+    ], 
+    "launch": [
+        {
+            "cmd_args": "not_use_by_now \"LIB_DIR/L3/tests/gunzip_csv_sc_test/data/input*.csv.gz\" \"LIB_DIR/L3/tests/gunzip_csv_sc_test/data\"", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "host/main.cpp",
+		        "LIB_DIR/L3/src/sw/gunzip_csv/data_engine_sc.cpp",
+		        "LIB_DIR/L3/src/sw/gunzip_csv/data_engine_config.cpp",
+		        "LIB_DIR/L3/src/sw/gunzip_csv/smart_ssd_cache.cpp",
+		        "LIB_DIR/L3/src/sw/gunzip_csv/sssd_api.cpp"
+            ], 
+            "includepaths": [
+                "kernel",
+                "LIB_DIR/../data_compression/L1/include/hw",
+                "LIB_DIR/../security/L1/include",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/include/hw/xf_data_analytics/dataframe",
+                "LIB_DIR/L2/include/hw/xf_data_analytics/dataframe/gunzip_csv",
+                "LIB_DIR/L3/include/sw/xf_data_analytics/gunzip_csv"
+            ],
+            "options": "-O3"
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "kernel",
+                "LIB_DIR/../data_compression/L1/include/hw",
+                "LIB_DIR/../security/L1/include",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/include/hw/xf_data_analytics/dataframe",
+                "LIB_DIR/L2/include/hw/xf_data_analytics/dataframe/gunzip_csv"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/data_engine_acc.cpp", 
+                    "frequency": 300.0, 
+                    "name": "data_engine_acc_hls_kernel"
+                }
+            ], 
+            "frequency": 250.0, 
+            "name": "data_engine_acc_hls_kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 81920,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 1200, 
+                    "vitis_hw_emu": 900, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

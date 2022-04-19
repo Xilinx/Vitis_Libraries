@@ -22,6 +22,7 @@
 #include <xcl2.hpp>
 #include "test.hpp"
 #include "xf_utils_sw/logger.hpp"
+
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
 #define XCL_BANK0 XCL_BANK(0)

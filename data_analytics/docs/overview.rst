@@ -48,6 +48,11 @@ Three categories of APIs are provided by this library, namely:
     with goal of allowing access without per-element transformation.
   * Loaders from common formats are planned to be added in future releases, for example CSV and JSONLine loaders.
 
+* **GeoSpatial** APIs for for spatial analysis and spatial data mining, new in 2022.1 release!
+
+  * Spatial Join API inserts the columns from one feature table to another based on location or proximity.
+  * KNN is often used to find the K nearest neighbors around the center point.
+
 Like most other Vitis sub libraries, Data Analytics Library also organize its APIs by levels.
 
 * The bottom level, L1, is mostly hardware modules with its software configuration generators.

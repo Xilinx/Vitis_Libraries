@@ -25,7 +25,8 @@
 INPUT                  = ../L2/include/hw/xf_data_analytics/classification \
                          ../L2/include/hw/xf_data_analytics/clustering \
                          ../L2/include/hw/xf_data_analytics/regression \
-                         ../L2/include/hw/xf_data_analytics/text
+                         ../L2/include/hw/xf_data_analytics/text \
+                         ../L2/include/hw/xf_data_analytics/geospatial
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

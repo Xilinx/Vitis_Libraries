@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ enum TypeFlags {
     TDouble = 3,
     TDate = 4,
     TString = 5,
-    TCount = 6,
+    TNumeric = 6,
+    TCount = 7,
     FEOL = 13, // end of json line
     FEOC = 14, // end of column
     FEOF = 15  // end of file
@@ -54,8 +55,8 @@ struct FieldInfo {
     ap_uint<20> size; // ap_uint<32>
 };
 
-} // end of dataframe namespace
-} // end of data_analytics namespace
-} // end of xf namespace
+} // namespace dataframe
+} // namespace data_analytics
+} // namespace xf
 
 #endif
