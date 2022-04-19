@@ -140,9 +140,7 @@ template <typename DATA_TYPE, typename KEY_TYPE, int MAX_SORT_NUMBER>
 void insertSort(hls::stream<Pair<DATA_TYPE, KEY_TYPE> >& packInStrm,
                 hls::stream<Pair<DATA_TYPE, KEY_TYPE> >& packOutStrm,
                 bool order) {
-#pragma HLS PIPELINE
-#pragma HLS INLINE
-
+#pragma HLS inline recursive
     insert_sort_top<DATA_TYPE, KEY_TYPE, MAX_SORT_NUMBER>(packInStrm, packOutStrm, order);
 }
 

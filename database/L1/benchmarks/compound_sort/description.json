@@ -4,13 +4,13 @@
     "flow": "vitis",
     "gui": true,
     "platform_type": "pcie",
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3",
+    "platform_allowlist": [
+        "u280",
         "u250",
         "u200",
-        "xilinx_u50_gen3x16_xdma_201920_3"
+        "u50"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {

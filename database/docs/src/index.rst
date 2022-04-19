@@ -19,8 +19,6 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-.. include:: overview.rst
-
 .. toctree::
    :caption: Library Overview
    :maxdepth: 1
@@ -29,6 +27,7 @@
    release.rst
    requirements.rst
    design_flows.rst
+   tutorial.rst
 
 .. toctree::
    :caption: User Guide

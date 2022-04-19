@@ -24,6 +24,7 @@
 
 #include <ap_int.h>
 #include <hls_stream.h>
+#include "hls_burst_maxi.h"
 
 #include "xf_database/gqe_blocks_v3/gqe_types.hpp"
 
@@ -31,225 +32,132 @@ namespace xf {
 namespace database {
 namespace gqe {
 
-// load kernel config for gqeJoin(with bloom-filter) kernel
-static void load_config(bool build_probe_flag,
-                        ap_uint<512> din_krn_cfg[14],
-                        ap_uint<512> din_meta[24],
-                        int64_t& nrow,
-                        int& secID,
-                        bool& bf_on,
-                        hls::stream<ap_uint<6> >& join_cfg_strm,
+// load kernel config for gqeKernel
+static void load_config(const int bucket_depth,
+                        hls::burst_maxi<ap_uint<64> >& din_krn_cfg,
+                        hls::burst_maxi<ap_uint<64> >& din_meta,
+                        hls::stream<int64_t>& nrow_strm,
+                        int32_t& secID,
+                        hls::stream<ap_uint<8> >& general_cfg_strm,
+                        hls::stream<ap_uint<8> >& dup_general_cfg_strm,
+                        hls::stream<ap_uint<3> >& join_cfg_strm,
                         hls::stream<ap_uint<36> >& bf_cfg_strm,
+                        hls::stream<ap_uint<15> >& part_cfg_strm,
+                        hls::stream<int>& bit_num_strm_copy,
                         hls::stream<ap_uint<32> >& filter_cfg_strm,
                         ap_uint<3>& din_col_en,
-                        ap_uint<2>& rowid_flags,
+                        ap_uint<2>& rowID_flags,
                         hls::stream<ap_uint<8> >& write_out_cfg_strm) {
 #ifdef USER_DEBUG
     std::cout << "-------- load kernel config --------" << std::endl;
 #endif
     const int filter_cfg_depth = 53;
 
+    din_meta.read_request(0, 512 / 64);
+    ap_uint<512> meta;
+    for (int j = 0; j < 512 / 64; j++) {
+#pragma HLS pipeline II = 1
+        meta.range(j * 32 + 31, j * 32) = din_meta.read();
+    }
     // read in the number of rows
-    nrow = din_meta[0].range(71, 8);
+    int64_t nrow = meta.range(71, 8);
+    nrow_strm.write(nrow);
     // read in the secID and pass to scan_cols module
-    secID = din_meta[0].range(167, 136);
-#ifdef USER_DEBUG
-    std::cout << "nrow = " << nrow << std::endl;
+    secID = meta.range(167, 136);
+#ifndef __SYNTHESIS__
+    std::cout << "===================meta buffer ===================" << std::endl;
+    std::cout << "din_meta.vnum = " << meta.range(7, 0) << std::endl;
+    std::cout << "din_meta.nrow = " << nrow << std::endl;
+    std::cout << "din_meta.secID = " << secID << std::endl;
 #endif
-    // read in krn_cfg from ddr
+
+    // read in krn_cfg from off-chip memory
+    din_krn_cfg.read_request(0, 14 * 512 / 64);
     ap_uint<512> config[14];
     for (int i = 0; i < 14; ++i) {
-        config[i] = din_krn_cfg[i];
+        for (int j = 0; j < 512 / 64; j++) {
+#pragma HLS pipeline II = 1
+            config[i].range(j * 64 + 63, j * 64) = din_krn_cfg.read() /* [i*(512/64)+j] */;
+        }
     }
 
-    ap_uint<36> bf_cfg;
-    // bloom-filter on
-    bf_cfg[0] = config[0][1];
-    bf_on = config[0][1];
-#ifdef USER_DEBUG
-    std::cout << "in load_cfg: bloomfilter_on: " << bf_cfg[0] << std::endl;
-#endif
-    // bloom-filter size
-    bf_cfg.range(35, 1) = config[2].range(54, 20);
-    bf_cfg_strm.write(bf_cfg);
+    bool tab_index = config[0][5];
+
+    // define general_cfg to represent the general cfg for each module:
+    // bit6: dual key on or off; bit5: build/probe flag; bit4 aggr on or off; bit3: part on or off; bit2: bf on or off;
+    // bit1: join on or off; bit0: bypass on or off
+    ap_uint<8> general_cfg = config[0].range(7, 0);
+    general_cfg_strm.write(general_cfg);
+    dup_general_cfg_strm.write(general_cfg);
 
     // define join_cfg to represent the join cfg for each module:
-    // bit5: build_probe_flag; bit4: bf on or off; bit3-2: join type; bit1: dual key on or off; bit0: join on or bypass
-    ap_uint<6> join_cfg;
-
-    // join or bypass
-    join_cfg[0] = config[0][0];
-    // single key or dual key?
-    if (config[0][1]) {
-        join_cfg[1] = config[2][2];
-    } else {
-        join_cfg[1] = config[0][2];
-    }
-    // join type: normal, semi- or anti-
-    join_cfg.range(3, 2) = config[0].range(4, 3);
-#ifdef USER_DEBUG
-    std::cout << "in load_cfg: join_on: " << join_cfg[0] << std::endl;
-#endif
-    // build_probe_flag
-    join_cfg[5] = build_probe_flag;
+    // bit2: append mode; bit1-0: join type
+    ap_uint<3> join_cfg;
+    join_cfg.range(1, 0) = config[1].range(51, 50);
+    join_cfg[2] = config[1][52];
     join_cfg_strm.write(join_cfg);
 
-    // cfg flags used in build phase
-    if (!build_probe_flag) {
-        // read in input col enable flag for table A
-        din_col_en = config[0].range(8, 6);
-    } else { // cfg flags used in probe phase
+    // define part_cfg to represent the part cfg for each module:
+    // bit14-4: bucket_depth; bit3-0: log_part;
+    ap_uint<15> part_cfg;
+    // log_part
+    part_cfg.range(3, 0) = config[2].range(53, 50);
+    part_cfg.range(14, 4) = bucket_depth;
+    part_cfg_strm.write(part_cfg);
+    // a copy of log_part to write-out module
+    bit_num_strm_copy.write(config[2].range(53, 50));
+
+    // define bf_cfg to represent the bloom filter cfg for each module:
+    // bit 35-0: bloom filter size in bits
+    ap_uint<36> bf_cfg;
+    // bloom filter size
+    bf_cfg.range(35, 0) = config[3].range(85, 50);
+    bf_cfg_strm.write(bf_cfg);
+
+    // read in input col enable flag for table A
+    if (!tab_index) {
+        din_col_en = config[0].range(12, 10);
         // read in input col enable flag for table B
-        // read from bloom-filter config: config[2]
-        if (config[0][1]) {
-            din_col_en = config[2].range(11, 9);
-            // read from join config: config[0]
-        } else {
-            din_col_en = config[0].range(11, 9);
-        }
+    } else {
+        din_col_en = config[0].range(15, 13);
     }
 
-    // gen_rowid and valid en flag
-    // 16/18: gen_rowid_en; 17/19: valid_en
-    if (!build_probe_flag) {
-        rowid_flags = config[0].range(17, 16);
+    // gen_rowid and valid_en flag
+    if (!tab_index) {
+        rowID_flags = config[0].range(31, 30);
     } else {
-        if (config[0][1]) {
-            rowid_flags = config[2].range(19, 18);
-        } else {
-            rowid_flags = config[0].range(19, 18);
-        }
+        rowID_flags = config[0].range(33, 32);
     }
 
     // write out col cfg
     ap_uint<8> write_out_en;
     // append mode
-    write_out_en[7] = config[0][5];
-    // write out en
-    // read from bloom-filter config: config[2]
-    if (config[0][1]) {
-        write_out_en.range(3, 0) = config[2].range(15, 12);
-        // read from join config: config[0]
+    write_out_en[7] = config[1][52];
+    if (!tab_index) {
+        // build
+        write_out_en.range(3, 0) = config[0].range(19, 16);
     } else {
-        write_out_en.range(3, 0) = config[0].range(15, 12);
+        // probe
+        write_out_en.range(3, 0) = config[0].range(23, 20);
     }
     write_out_cfg_strm.write(write_out_en);
 #ifdef USER_DEBUG
     std::cout << "write_out_en: " << (int)write_out_en << std::endl;
 #endif
 
-    ap_uint<32> filter_cfg_a[filter_cfg_depth];
-#pragma HLS resource variable = filter_cfg_a core = RAM_1P_LUTRAM
-    ap_uint<32> filter_cfg_b[filter_cfg_depth];
-#pragma HLS resource variable = filter_cfg_b core = RAM_1P_LUTRAM
-
-    // filter cfg
-    for (int i = 0; i < filter_cfg_depth; i++) {
-        filter_cfg_a[i] = config[6 + i / 16].range(32 * ((i % 16) + 1) - 1, 32 * (i % 16));
-    }
-
-    for (int i = 0; i < filter_cfg_depth; i++) {
-        filter_cfg_b[i] = config[10 + i / 16].range(32 * ((i % 16) + 1) - 1, 32 * (i % 16));
-    }
-
-    if (!build_probe_flag) {
-        for (int i = 0; i < filter_cfg_depth; i++) {
-            filter_cfg_strm.write(filter_cfg_a[i]);
-        }
-    } else {
-        for (int i = 0; i < filter_cfg_depth; i++) {
-            filter_cfg_strm.write(filter_cfg_b[i]);
-        }
-    }
-}
-
-// load kernel config for gqePart kernel
-static void load_config(bool tab_index,
-                        const int bucket_depth,
-                        ap_uint<512> din_krn_cfg[14],
-                        ap_uint<512> din_meta[24],
-                        int64_t& nrow,
-                        int32_t& secID,
-                        bool& bf_on,
-                        hls::stream<ap_uint<16> >& part_cfg_strm,
-                        ap_uint<3>& din_col_en,
-                        ap_uint<2>& rowID_flags,
-                        hls::stream<ap_uint<32> >& filter_cfg_strm,
-                        hls::stream<int>& bit_num_strm_copy,
-                        hls::stream<ap_uint<8> >& write_out_cfg_strm) {
-#ifdef USER_DEBUG
-    std::cout << "-------- load kernel config --------" << std::endl;
-#endif
-    const int filter_cfg_depth = 53;
-
-    // read in the number of rows
-    nrow = din_meta[0].range(71, 8);
-    // read in the secID and pass to scan_cols module
-    secID = din_meta[0].range(167, 136);
-#ifdef USER_DEBUG
-    std::cout << "nrow = " << nrow << std::endl;
-#endif
-    // read in krn_cfg from ddr
-    ap_uint<512> config[14];
-    for (int i = 0; i < 14; ++i) {
-        config[i] = din_krn_cfg[i];
-    }
-
-    bf_on = config[0][1];
-    // define part_cfg to represent the part cfg for each module:
-    // part_cfg 16 - bits:
-    // bit0: dual key or single key; bit4-1: log_part; bit 15-5: kernel_depth
-    ap_uint<16> part_cfg;
-    // dual key or single key
-    part_cfg[0] = config[1][2];
-    part_cfg.range(4, 1) = config[1].range(33, 30);
-    part_cfg.range(15, 5) = bucket_depth;
-    part_cfg_strm.write(part_cfg);
-
-    bit_num_strm_copy.write(config[1].range(33, 30));
-
-    // read in input col enable flag for table A
-    // build table
-    if (!tab_index) {
-        din_col_en = config[1].range(8, 6);
-    } else { // join table
-        din_col_en = config[1].range(11, 9);
-    }
-
-    // gen_rowid and valid en flag
-    // 19: gen_rowid_en; 20: valid_en
-    if (!tab_index) {
-        rowID_flags = config[1].range(20, 19);
-    } else {
-        rowID_flags = config[1].range(22, 21);
-    }
-
     // filter cfg
     ap_uint<32> filter_cfg_a[filter_cfg_depth];
-#pragma HLS resource variable = filter_cfg_a core = RAM_1P_LUTRAM
+#pragma HLS bind_storage variable = filter_cfg_a type = ram_1p impl = lutram
 
     for (int i = 0; i < filter_cfg_depth; i++) {
+#pragma HLS pipeline II = 1
         filter_cfg_a[i] = config[4 * tab_index + 6 + i / 16].range(32 * ((i % 16) + 1) - 1, 32 * (i % 16));
         filter_cfg_strm.write(filter_cfg_a[i]);
     }
-
-    // write out col cfg
-    ap_uint<8> write_out_en;
-    if (!tab_index) {
-        // build
-        write_out_en.range(2, 0) = config[1].range(14, 12);
-    } else {
-        // probe
-        write_out_en.range(2, 0) = config[1].range(18, 16);
-    }
-    write_out_cfg_strm.write(write_out_en);
-#ifdef USER_DEBUG
-    std::cout << "write_out_en: " << (int)write_out_en << std::endl;
-#endif
 }
 
 } // namespace gqe
 } // namespace database
 } // namespace xf
 
-#endif
+#endif // GQE_ISV_LOAD_CONFIG_HPP

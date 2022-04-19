@@ -423,29 +423,29 @@ void PartJoinConfig::SetupKernelConfig(int join_type,
 
     // set gen_rowID_en and valid en for partition kernel
     // tab A
-    partcmd.setRowIDValidEnable(1, 0, gen_rowID_en[0], valid_en[0]);
+    partcmd.setRowIDValidEnable(0, gen_rowID_en[0], valid_en[0]); // table, rowid_en, valid_en
     // tab  B
-    partcmd.setRowIDValidEnable(1, 1, gen_rowID_en[1], valid_en[1]);
+    partcmd.setRowIDValidEnable(1, gen_rowID_en[1], valid_en[1]);
     // join, gen_rowID_en off, valid_en off
     // build
-    joincmd.setRowIDValidEnable(0, 0, 0, 0);
+    joincmd.setRowIDValidEnable(0, 0, 0); // table, rowid_en, valid_en
     // probe
-    joincmd.setRowIDValidEnable(0, 1, 0, 0);
+    joincmd.setRowIDValidEnable(1, 0, 0);
 
     // using join solution, se filter in join kernel
-    partcmd.setScanColEnable(1, 0, sw_shuffle_scan_part[0]);
-    joincmd.setScanColEnable(0, 0, sw_shuffle_scan_hj[0]);
+    partcmd.setScanColEnable(0, sw_shuffle_scan_part[0]);
+    joincmd.setScanColEnable(0, sw_shuffle_scan_hj[0]);
     if (filter_a != "") partcmd.setFilter(0, filter_a);
 
     // using join solution, se filter in join kernel
-    partcmd.setScanColEnable(1, 1, sw_shuffle_scan_part[1]);
-    joincmd.setScanColEnable(0, 1, sw_shuffle_scan_hj[1]);
+    partcmd.setScanColEnable(1, sw_shuffle_scan_part[1]);
+    joincmd.setScanColEnable(1, sw_shuffle_scan_hj[1]);
     if (filter_b != "") partcmd.setFilter(1, filter_b);
 
     // setup the write col en
-    partcmd.setPartWriteColEnable(1, 0, sw_shuffle_wr_part[0]);
-    partcmd.setPartWriteColEnable(1, 1, sw_shuffle_wr_part[1]);
-    joincmd.setJoinWriteColEnable(0, 0, sw_shuffle_wr_hj);
+    partcmd.setWriteColEnable(1, 0, sw_shuffle_wr_part[0]);
+    partcmd.setWriteColEnable(1, 1, sw_shuffle_wr_part[1]);
+    joincmd.setWriteColEnable(0, 0, sw_shuffle_wr_hj);
 
     ap_uint<512>* part_config_bits = partcmd.getConfigBits();
     ap_uint<512>* join_config_bits = joincmd.getConfigBits();

@@ -42,54 +42,51 @@
 #include <cstdio>
 #include <unordered_map>
 
-#define VEC_SCAN 8
-
 const int PU_NM = 8;
 
 #ifndef __SYNTHESIS__
-extern "C" void gqeJoin(size_t _build_probe_flag,
+extern "C" void gqeKernel(
+    // input data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col2,
 
-                        // input data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col2,
+    // validation buffer
+    ap_uint<64>* din_val,
 
-                        // validation buffer
-                        ap_uint<64>* din_val,
+    // kernel config
+    ap_uint<64> din_krn_cfg[14 * (512 / 64)],
 
-                        // kernel config
-                        ap_uint<512> din_krn_cfg[14],
+    // meta input buffer
+    ap_uint<64> din_meta[24 * (512 / 64)],
+    // meta output buffer
+    ap_uint<256> dout_meta[48],
 
-                        // meta input buffer
-                        ap_uint<512> din_meta[24],
-                        // meta output buffer
-                        ap_uint<512> dout_meta[24],
+    //  output data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col3,
 
-                        //  output data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col3,
+    // hbm buffers used to save build table key/payload
+    ap_uint<256>* htb_buf0,
+    ap_uint<256>* htb_buf1,
+    ap_uint<256>* htb_buf2,
+    ap_uint<256>* htb_buf3,
+    ap_uint<256>* htb_buf4,
+    ap_uint<256>* htb_buf5,
+    ap_uint<256>* htb_buf6,
+    ap_uint<256>* htb_buf7,
 
-                        // hbm buffers used to save build table key/payload
-                        ap_uint<256>* htb_buf0,
-                        ap_uint<256>* htb_buf1,
-                        ap_uint<256>* htb_buf2,
-                        ap_uint<256>* htb_buf3,
-                        ap_uint<256>* htb_buf4,
-                        ap_uint<256>* htb_buf5,
-                        ap_uint<256>* htb_buf6,
-                        ap_uint<256>* htb_buf7,
-
-                        // overflow buffers
-                        ap_uint<256>* stb_buf0,
-                        ap_uint<256>* stb_buf1,
-                        ap_uint<256>* stb_buf2,
-                        ap_uint<256>* stb_buf3,
-                        ap_uint<256>* stb_buf4,
-                        ap_uint<256>* stb_buf5,
-                        ap_uint<256>* stb_buf6,
-                        ap_uint<256>* stb_buf7);
+    // overflow buffers
+    ap_uint<256>* stb_buf0,
+    ap_uint<256>* stb_buf1,
+    ap_uint<256>* stb_buf2,
+    ap_uint<256>* stb_buf3,
+    ap_uint<256>* stb_buf4,
+    ap_uint<256>* stb_buf5,
+    ap_uint<256>* stb_buf6,
+    ap_uint<256>* stb_buf7);
 
 #endif
 
@@ -140,9 +137,9 @@ TPCH_INT get_golden_sum(TPCH_INT o_row,
                         TPCH_INT* col_o_rowID,
                         TPCH_INT l_row,
                         TPCH_INT* col_l_orderkey,
-                        TPCH_INT* col_l_rowID) {
+                        TPCH_INT* col_l_rowID,
+                        TPCH_INT& cnt) {
     TPCH_INT sum = 0;
-    TPCH_INT cnt = 0;
 
     // std::unordered_multimap<uint32_t, uint32_t> ht1;
     std::unordered_multimap<TPCH_INT, TPCH_INT> ht1;
@@ -421,7 +418,6 @@ int main(int argc, const char* argv[]) {
 
     int error = 0;
     error += generate_data<TPCH_INT>((TPCH_INT*)(table_o_user_0), 100000, o_nrow);
-    // error += generate_data<TPCH_INT>((TPCH_INT*)(table_o_user_1), 1000, o_nrow);
     if (error) return error;
     std::cout << "Orders table data has been generated" << std::endl;
 
@@ -430,97 +426,89 @@ int main(int argc, const char* argv[]) {
     TPCH_INT* table_l_user_2 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_LEN);
 
     error += generate_data<TPCH_INT>((TPCH_INT*)(table_l_user_0), 10000, l_nrow);
-    // error += generate_data<TPCH_INT>((TPCH_INT*)(table_l_user_1), 10000, l_nrow);
-    // error += generate_data<TPCH_INT>((TPCH_INT*)(table_l_user_2), 10000, l_nrow);
     if (error) return error;
     std::cout << "LineItem table data has been generated" << std::endl;
 
-    TPCH_INT golden = get_golden_sum(o_nrow, table_o_user_0, table_o_user_1, l_nrow, table_l_user_0, table_l_user_1);
+    // getting number of result rows from CPU golden
+    TPCH_INT result_nrow = 0;
+    TPCH_INT golden =
+        get_golden_sum(o_nrow, table_o_user_0, table_o_user_1, l_nrow, table_l_user_0, table_l_user_1, result_nrow);
+    if (result_nrow > 32UL * 1024 * 1024) {
+        std::cout << "Number of joined result rows exceeds the maximum capacity of HBM banck.\n";
+        std::cout << "Please consider reducing the problem scale.\n";
+        exit(1);
+    }
 
     ap_uint<64>* din_val = mm.aligned_alloc<ap_uint<64> >((l_nrow + 63) / 64);
     for (int i = 0; i < (l_nrow + 63) / 64; i++) {
         din_val[i] = 0xffffffffffffffff;
     }
 
-    // result buff
-    size_t result_nrow = (1 << 24);
-    size_t table_result_depth = result_nrow / VEC_LEN; // 8 columns in one buffer
+    size_t table_result_depth = (result_nrow + VEC_LEN - 1) / VEC_LEN;
     size_t table_result_size = table_result_depth * VEC_LEN * TPCH_INT_SZ;
-    ap_uint<512>* table_out_0 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
-    ap_uint<512>* table_out_1 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
-    ap_uint<512>* table_out_2 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
-    ap_uint<512>* table_out_3 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
+    ap_uint<TPCH_INT_SZ* 8 * VEC_LEN>* table_out_0 =
+        mm.aligned_alloc<ap_uint<TPCH_INT_SZ * 8 * VEC_LEN> >(table_result_depth);
+    ap_uint<TPCH_INT_SZ* 8 * VEC_LEN>* table_out_1 =
+        mm.aligned_alloc<ap_uint<TPCH_INT_SZ * 8 * VEC_LEN> >(table_result_depth);
+    ap_uint<TPCH_INT_SZ* 8 * VEC_LEN>* table_out_2 =
+        mm.aligned_alloc<ap_uint<TPCH_INT_SZ * 8 * VEC_LEN> >(table_result_depth);
+    ap_uint<TPCH_INT_SZ* 8 * VEC_LEN>* table_out_3 =
+        mm.aligned_alloc<ap_uint<TPCH_INT_SZ * 8 * VEC_LEN> >(table_result_depth);
     memset(table_out_0, 0, table_result_size);
     memset(table_out_1, 0, table_result_size);
     memset(table_out_2, 0, table_result_size);
     memset(table_out_3, 0, table_result_size);
 
-    // using jcmdclass = xf::database::gqe::JoinCommand;
-    // jcmdclass jcmd = jcmdclass();
+    // kernel command object
+    xf::database::gqe::KernelCommand krn_cmd_b, krn_cmd_p;
 
-    // jcmd.setJoinType(xf::database::INNER_JOIN);
-    // jcmd.Scan(0, {0, 1});
-    // jcmd.Scan(1, {0, 1});
-    // jcmd.setWriteCol({0, 1});
-
-    //// jcmd.setEvaluation(0, "strm1*(-strm2+c2)", {0, 100});
-    // jcmd.setFilter(0, "19940101<=b && b<19950101");
-
-    //// jcmd.setShuffle0(0, {0, 1});
-    //// jcmd.setShuffle0(1, {0, 1, 2});
-
-    //// jcmd.setShuffle1(0, {0, 1});    // setJoinKeys
-    //// jcmd.setShuffle1(1, {0, 1, 2}); // setJoinKeys
-
-    //// jcmd.setShuffle2({0, 1});
-    //// jcmd.setShuffle3({8});
-    //// jcmd.setShuffle4({0});
-    //// jcmd.setShuffle2({0, 1, 6, 12});
-    //// jcmd.setShuffle3({0, 1, 2, 3});
-    //// jcmd.setShuffle4({0, 1, 2, 3});
-    // ap_uint<512>* krn_cfg = jcmd.getConfigBits();
-
-    ap_uint<512>* krn_cfg = mm.aligned_alloc<ap_uint<512> >(14);
-    memset(krn_cfg, 0, sizeof(ap_uint<512>) * 14);
     // join on
-    krn_cfg[0].range(0, 0) = 1;
-    // join type: normal hash join
-    krn_cfg[0].range(4, 3) = 0;
-    // tab A gen_row_id
-    krn_cfg[0].range(16, 16) = 1;
-    // tab A din_val_en
-    krn_cfg[0].range(17, 17) = 0;
-    // tab B gen_row_id
-    krn_cfg[0].range(18, 18) = 1;
-    // tab B din_val_en
-    krn_cfg[0].range(19, 19) = 1;
-    // tab A col enable
-    krn_cfg[0].range(8, 6) = 1;
-    // tab B col enable
-    krn_cfg[0].range(11, 9) = 1;
-    // append mode off
-    krn_cfg[0].range(5, 5) = 0;
-    // write out enable
-    krn_cfg[0].range(15, 12) = 7;
+    krn_cmd_b.setJoinOn(1);
+    krn_cmd_p.setJoinOn(1);
+    // inner join
+    krn_cmd_b.setJoinType(0);
+    krn_cmd_p.setJoinType(0);
+    // table_id, gen_rowID_en, valid_en
+    krn_cmd_b.setRowIDValidEnable(0, 1, 0);
+    krn_cmd_p.setRowIDValidEnable(0, 1, 0);
+    // table_id, gen_rowID_en, valid_en
+    krn_cmd_b.setRowIDValidEnable(1, 1, 1);
+    krn_cmd_p.setRowIDValidEnable(1, 1, 1);
+    // for enabling input channels
+    std::vector<int8_t> enable_A;
+    enable_A.push_back(0);
+    enable_A.push_back(-1);
+    enable_A.push_back(-1);
+    // table_id, index
+    krn_cmd_b.setScanColEnable(0, enable_A);
+    krn_cmd_p.setScanColEnable(0, enable_A);
+    std::vector<int8_t> enable_B;
+    enable_B.push_back(0);
+    enable_B.push_back(-1);
+    enable_B.push_back(-1);
+    // table_id, index
+    krn_cmd_b.setScanColEnable(1, enable_B);
+    krn_cmd_p.setScanColEnable(1, enable_B);
+    std::vector<int8_t> enable_C;
+    enable_C.push_back(0);
+    enable_C.push_back(1);
+    enable_C.push_back(2);
+    enable_C.push_back(-1);
+    // krn_id, table_id, index
+    krn_cmd_b.setWriteColEnable(0, 1, enable_C);
+    krn_cmd_p.setWriteColEnable(0, 1, enable_C);
 
-    // filter for build table
-    uint32_t cfg[53];
-    gen_pass_fcfg(cfg);
-    memcpy(&krn_cfg[6], cfg, sizeof(uint32_t) * 53);
+    // set build probe flag
+    // 0 for build, 1 for probe
+    krn_cmd_b.setJoinBuildProbe(0);
+    krn_cmd_p.setJoinBuildProbe(1);
 
-    // 512b word * 4
-    // filter b
-    gen_pass_fcfg(cfg);
-    memcpy(&krn_cfg[10], cfg, sizeof(uint32_t) * 53);
-
-    // filter for join table
-    // std::cout << "cfg---------------cfg" << std::endl;
-    // for (int i = 0; i < 14; i++) {
-    //    for (int n = 0; n < 16; n++) {
-    //        std::cout << "i, n: " << i << ", " << n << ": " << krn_cfg[i].range(32 * n + 31, 32 * n) << std::endl;
-    //    }
-    //}
-    // std::cout << "cfg--------end------cfg" << std::endl;
+    // no dynamic filtering by default, put the condition into the second paramter of setFilter for setting up the
+    // filter
+    // krn_cmd_b.setFilter(0, "c > 0");
+    // krn_cmd_b.setFilter(1, "c > 0");
+    // krn_cmd_p.setFilter(0, "c > 0");
+    // krn_cmd_p.setFilter(1, "c > 0");
 
     //--------------- metabuffer setup -----------------
     // using col0 and col1 buffer during build
@@ -578,17 +566,21 @@ int main(int argc, const char* argv[]) {
     ap_uint<256>* stb_buf7 = mm.aligned_alloc<ap_uint<256> >(stb_buf_depth);
 
     // build
-    gqeJoin(flag_build, (ap_uint<512>*)table_o_user_0, (ap_uint<512>*)table_o_user_1, (ap_uint<512>*)table_o_user_2,
-            din_val, krn_cfg, meta_build_in.meta(), meta_probe_out.meta(), table_out_0, table_out_1, table_out_2,
-            table_out_3, htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6, htb_buf7, stb_buf0,
-            stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
+    gqeKernel(
+        (ap_uint<TPCH_INT_SZ * 8 * VEC_SCAN>*)table_o_user_0, (ap_uint<TPCH_INT_SZ * 8 * VEC_SCAN>*)table_o_user_1,
+        (ap_uint<TPCH_INT_SZ * 8 * VEC_SCAN>*)table_o_user_2, din_val, (ap_uint<64>*)krn_cmd_b.getConfigBits(),
+        (ap_uint<64>*)meta_build_in.meta(), (ap_uint<TPCH_INT_SZ * 8 * VEC_LEN>*)meta_probe_out.meta(), table_out_0,
+        table_out_1, table_out_2, table_out_3, htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6,
+        htb_buf7, stb_buf0, stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
 
     std::cout << std::endl << "probe starts................." << std::endl;
     // probe
-    gqeJoin(flag_probe, (ap_uint<512>*)table_l_user_0, (ap_uint<512>*)table_l_user_1, (ap_uint<512>*)table_l_user_2,
-            din_val, krn_cfg, meta_probe_in.meta(), meta_probe_out.meta(), table_out_0, table_out_1, table_out_2,
-            table_out_3, htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6, htb_buf7, stb_buf0,
-            stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
+    gqeKernel(
+        (ap_uint<TPCH_INT_SZ * 8 * VEC_SCAN>*)table_l_user_0, (ap_uint<TPCH_INT_SZ * 8 * VEC_SCAN>*)table_l_user_1,
+        (ap_uint<TPCH_INT_SZ * 8 * VEC_SCAN>*)table_l_user_2, din_val, (ap_uint<64>*)krn_cmd_p.getConfigBits(),
+        (ap_uint<64>*)meta_probe_in.meta(), (ap_uint<TPCH_INT_SZ * 8 * VEC_LEN>*)meta_probe_out.meta(), table_out_0,
+        table_out_1, table_out_2, table_out_3, htb_buf0, htb_buf1, htb_buf2, htb_buf3, htb_buf4, htb_buf5, htb_buf6,
+        htb_buf7, stb_buf0, stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
     std::cout << "probe ends................." << std::endl;
 
 #else
@@ -615,45 +607,46 @@ int main(int argc, const char* argv[]) {
 
     // build kernel
     cl_kernel bkernel;
-    bkernel = clCreateKernel(prg, "gqeJoin", &err);
+    bkernel = clCreateKernel(prg, "gqeKernel", &err);
     // will not exit with failure by default
     logger.logCreateKernel(err);
     // probe kernel, pipeline used handle
     cl_kernel jkernel;
-    jkernel = clCreateKernel(prg, "gqeJoin", &err);
+    jkernel = clCreateKernel(prg, "gqeKernel", &err);
     logger.logCreateKernel(err);
 
     std::cout << "Kernels has been created\n";
 
-    cl_mem_ext_ptr_t mext_table_o[3], mext_table_l[3], mext_cfg5s;
+    cl_mem_ext_ptr_t mext_table_o[3], mext_table_l[3], mext_cfg5s_b, mext_cfg5s_p;
     cl_mem_ext_ptr_t mext_valid_in_col;
     cl_mem_ext_ptr_t mext_table_out[4];
     cl_mem_ext_ptr_t memExt[PU_NM * 2];
 
-    mext_table_o[0] = {1, table_o_user_0, bkernel};
-    mext_table_o[1] = {2, table_o_user_1, bkernel};
-    mext_table_o[2] = {3, table_o_user_2, bkernel};
+    mext_table_o[0] = {0, table_o_user_0, bkernel};
+    mext_table_o[1] = {1, table_o_user_1, bkernel};
+    mext_table_o[2] = {2, table_o_user_2, bkernel};
 
-    mext_valid_in_col = {4, din_val, bkernel};
+    mext_valid_in_col = {3, din_val, bkernel};
 
-    mext_cfg5s = {5, krn_cfg, bkernel};
+    mext_cfg5s_b = {4, krn_cmd_b.getConfigBits(), bkernel};
+    mext_cfg5s_p = {4, krn_cmd_p.getConfigBits(), bkernel};
 
-    mext_table_l[0] = {1, table_l_user_0, jkernel};
-    mext_table_l[1] = {2, table_l_user_1, jkernel};
-    mext_table_l[2] = {3, table_l_user_2, jkernel};
+    mext_table_l[0] = {0, table_l_user_0, jkernel};
+    mext_table_l[1] = {1, table_l_user_1, jkernel};
+    mext_table_l[2] = {2, table_l_user_2, jkernel};
 
-    mext_table_out[0] = {8, table_out_0, jkernel};
-    mext_table_out[1] = {9, table_out_1, jkernel};
-    mext_table_out[2] = {10, table_out_2, jkernel};
-    mext_table_out[3] = {11, table_out_3, jkernel};
+    mext_table_out[0] = {7, table_out_0, jkernel};
+    mext_table_out[1] = {8, table_out_1, jkernel};
+    mext_table_out[2] = {9, table_out_2, jkernel};
+    mext_table_out[3] = {10, table_out_3, jkernel};
     for (int j = 0; j < 16; j++) {
-        memExt[j] = {12 + j, NULL, bkernel};
+        memExt[j] = {11 + j, NULL, bkernel};
     }
 
     cl_mem_ext_ptr_t mext_meta_build_in, mext_meta_probe_in, mext_meta_probe_out;
-    mext_meta_build_in = {6, meta_build_in.meta(), bkernel};
-    mext_meta_probe_in = {6, meta_probe_in.meta(), jkernel};
-    mext_meta_probe_out = {7, meta_probe_out.meta(), jkernel};
+    mext_meta_build_in = {5, meta_build_in.meta(), bkernel};
+    mext_meta_probe_in = {5, meta_probe_in.meta(), jkernel};
+    mext_meta_probe_out = {6, meta_probe_out.meta(), jkernel};
 
     // Map buffers
     cl_mem buf_table_o[3];
@@ -674,8 +667,10 @@ int main(int argc, const char* argv[]) {
                                           table_result_size, &mext_table_out[c], &err);
     }
 
-    cl_mem buf_cfg5s = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                      (sizeof(ap_uint<512>) * 14), &mext_cfg5s, &err);
+    cl_mem buf_cfg5s_b = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        (sizeof(ap_uint<512>) * 14), &mext_cfg5s_b, &err);
+    cl_mem buf_cfg5s_p = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        (sizeof(ap_uint<512>) * 14), &mext_cfg5s_p, &err);
 
     // htb stb buffers
     cl_mem buf_tmp[PU_NM * 2];
@@ -689,14 +684,12 @@ int main(int argc, const char* argv[]) {
     }
 
     cl_mem buf_meta_build_in = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                              (sizeof(ap_uint<512>) * 8), &mext_meta_build_in, &err);
+                                              (sizeof(ap_uint<512>) * 24), &mext_meta_build_in, &err);
 
     cl_mem buf_meta_probe_in = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                              (sizeof(ap_uint<512>) * 8), &mext_meta_probe_in, &err);
+                                              (sizeof(ap_uint<512>) * 24), &mext_meta_probe_in, &err);
     cl_mem buf_meta_probe_out = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                               (sizeof(ap_uint<512>) * 8), &mext_meta_probe_out, &err);
-
-    std::cout << "buffers have been mapped.\n";
+                                               (sizeof(ap_uint<512>) * 24), &mext_meta_probe_out, &err);
 
     // helper buffer sets
     std::vector<cl_mem> non_loop_bufs;
@@ -704,7 +697,8 @@ int main(int argc, const char* argv[]) {
         non_loop_bufs.push_back(buf_table_o[c]);
         non_loop_bufs.push_back(buf_valid_in_col);
     }
-    non_loop_bufs.push_back(buf_cfg5s);
+    non_loop_bufs.push_back(buf_cfg5s_b);
+    non_loop_bufs.push_back(buf_cfg5s_p);
     non_loop_bufs.push_back(buf_meta_build_in);
     non_loop_bufs.push_back(buf_meta_probe_out);
 
@@ -729,12 +723,11 @@ int main(int argc, const char* argv[]) {
 
     // set args for bkernel
     int j = 0;
-    clSetKernelArg(bkernel, j++, sizeof(size_t), &flag_build);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_table_o[0]);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_table_o[1]);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_table_o[2]);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_valid_in_col);
-    clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_cfg5s);
+    clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_cfg5s_b);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_meta_build_in);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_meta_probe_out);
     clSetKernelArg(bkernel, j++, sizeof(cl_mem), &buf_table_out[0]);
@@ -747,12 +740,11 @@ int main(int argc, const char* argv[]) {
 
     // set args for jkernel
     j = 0;
-    clSetKernelArg(jkernel, j++, sizeof(size_t), &flag_probe);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_table_l[0]);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_table_l[1]);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_table_l[2]);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_valid_in_col);
-    clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_cfg5s);
+    clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_cfg5s_p);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_meta_probe_in);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_meta_probe_out);
     clSetKernelArg(jkernel, j++, sizeof(cl_mem), &buf_table_out[0]);
@@ -829,8 +821,8 @@ int main(int argc, const char* argv[]) {
     // printing only first 64 data
     std::cout << "key, o_rowid, l_rowid" << std::endl;
     int64_t cnt = 0;
-    for (int n = 0; n < p_nrow / 8; n++) {
-        for (int i = 0; i < 8; i++) {
+    for (int n = 0; n < p_nrow / VEC_LEN; n++) {
+        for (int i = 0; i < VEC_LEN; i++) {
             l_rowid = table_out_0[n](63 + 64 * i, 64 * i);
             o_rowid = table_out_1[n](63 + 64 * i, 64 * i);
             key = table_out_2[n](63 + 64 * i, 64 * i);
@@ -840,15 +832,16 @@ int main(int argc, const char* argv[]) {
             cnt++;
         }
     }
-    for (int i = 0; i < p_nrow % 8; i++) {
-        l_rowid = table_out_0[p_nrow / 8](63 + 64 * i, 64 * i);
-        o_rowid = table_out_1[p_nrow / 8](63 + 64 * i, 64 * i);
-        key = table_out_2[p_nrow / 8](63 + 64 * i, 64 * i);
+    for (int i = 0; i < p_nrow % VEC_LEN; i++) {
+        l_rowid = table_out_0[p_nrow / VEC_LEN](63 + 64 * i, 64 * i);
+        o_rowid = table_out_1[p_nrow / VEC_LEN](63 + 64 * i, 64 * i);
+        key = table_out_2[p_nrow / VEC_LEN](63 + 64 * i, 64 * i);
         int64_t sum_i = key + l_rowid + o_rowid;
         sum += sum_i;
         if (cnt < 64) std::cout << key << ", " << o_rowid << ", " << l_rowid << std::endl;
         cnt++;
     }
+
     std::cout << "fpga, sum = " << sum << std::endl;
     std::cout << "cpu ref, golden= " << golden << std::endl;
 

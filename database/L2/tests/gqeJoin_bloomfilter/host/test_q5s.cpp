@@ -23,6 +23,10 @@
 #include "xf_utils_sw/logger.hpp"
 
 #include "x_utils.hpp"
+
+// for hash-lookup3 in L1
+#include "xf_database/hash_lookup3.hpp"
+
 // GQE common
 #include "xf_database/meta_table.hpp"
 #include "xf_database/kernel_command.hpp"
@@ -54,55 +58,55 @@ const int BUILD_FACTOR = 10;
 #define rot(x, k) (((x) << (k)) | ((x) >> (32 - (k))));
 
 #ifndef __SYNTHESIS__
-extern "C" void gqeJoin(size_t _build_probe_flag,
-                        // input data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* din_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* din_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* din_col2,
+extern "C" void gqeKernel(
+    // input data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* din_col2,
 
-                        // validation buffer
-                        ap_uint<64>* din_val,
+    // validation buffer
+    ap_uint<64>* din_val,
 
-                        // kernel config
-                        ap_uint<512> din_krn_cfg[14],
+    // kernel config
+    ap_uint<64> din_krn_cfg[14 * (512 / 64)],
 
-                        // meta input buffer
-                        ap_uint<512> din_meta[24],
-                        // meta output buffer
-                        ap_uint<512> dout_meta[24],
+    // meta input buffer
+    ap_uint<64> din_meta[24 * (512 / 64)],
+    // meta output buffer
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN> dout_meta[48],
 
-                        //  output data columns
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2,
-                        ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col3,
+    //  output data columns
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col0,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col1,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col2,
+    ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* dout_col3,
 
-                        // hbm buffers used to save build table key/payload
-                        ap_uint<256>* htb_buf0,
-                        ap_uint<256>* htb_buf1,
-                        ap_uint<256>* htb_buf2,
-                        ap_uint<256>* htb_buf3,
-                        ap_uint<256>* htb_buf4,
-                        ap_uint<256>* htb_buf5,
-                        ap_uint<256>* htb_buf6,
-                        ap_uint<256>* htb_buf7,
+    // hbm buffers used to save build table key/payload
+    ap_uint<256>* htb_buf0,
+    ap_uint<256>* htb_buf1,
+    ap_uint<256>* htb_buf2,
+    ap_uint<256>* htb_buf3,
+    ap_uint<256>* htb_buf4,
+    ap_uint<256>* htb_buf5,
+    ap_uint<256>* htb_buf6,
+    ap_uint<256>* htb_buf7,
 
-                        // overflow buffers
-                        ap_uint<256>* stb_buf0,
-                        ap_uint<256>* stb_buf1,
-                        ap_uint<256>* stb_buf2,
-                        ap_uint<256>* stb_buf3,
-                        ap_uint<256>* stb_buf4,
-                        ap_uint<256>* stb_buf5,
-                        ap_uint<256>* stb_buf6,
-                        ap_uint<256>* stb_buf7);
+    // overflow buffers
+    ap_uint<256>* stb_buf0,
+    ap_uint<256>* stb_buf1,
+    ap_uint<256>* stb_buf2,
+    ap_uint<256>* stb_buf3,
+    ap_uint<256>* stb_buf4,
+    ap_uint<256>* stb_buf5,
+    ap_uint<256>* stb_buf6,
+    ap_uint<256>* stb_buf7);
 
-// int to 512 bits
-void int_to_vec(int nrow, int64_t* col_in, ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* col_out) {
+// int to 256 bits
+void int_to_vec(int nrow, int64_t* col_in, ap_uint<8 * TPCH_INT_SZ * VEC_SCAN>* col_out) {
     int t = 0;
-    for (int i = 0; i < nrow; i = i + VEC_LEN) {
-        ap_uint<8 * TPCH_INT_SZ* VEC_LEN> tmp = 0;
-        for (int j = 0; j < VEC_LEN; ++j) {
+    for (int i = 0; i < nrow; i = i + VEC_SCAN) {
+        ap_uint<8 * TPCH_INT_SZ* VEC_SCAN> tmp = 0;
+        for (int j = 0; j < VEC_SCAN; ++j) {
             tmp.range(64 * j + 63, 64 * j) = col_in[i + j];
         }
         col_out[t] = tmp;
@@ -416,13 +420,6 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 #endif
-    std::string in_dir = "../../../../../db_data";
-#ifndef HLS_TEST
-    if (!parser.getCmdOption("-in", in_dir)) {
-        std::cout << "Please provide the path to the input tables...\n";
-        exit(1);
-    }
-#endif
 
     // set up bloom-filter size
     std::string in_size;
@@ -437,6 +434,15 @@ int main(int argc, const char* argv[]) {
         }
     }
 #endif
+    if (bf_size % 4096 > 0) {
+        bf_size = bf_size / 4096 * 4096 + ((bf_size % 4096) > 0) * 4096;
+        std::cout << "Bloom filter hash table size should be 4096-bit aligned, automatically changed the size to "
+                  << bf_size << "bits.\n";
+    }
+    if (bf_size > 16UL * 1024 * 1024 * 1024) {
+        std::cout << "16Gbits is the current hardware limitation of bloom filter hash table size.\n";
+        exit(1);
+    }
 
     std::string scale;
     int factor_o = 1;
@@ -559,43 +565,20 @@ int main(int argc, const char* argv[]) {
     x_utils::MM mm;
 
     // Number of vec in input buf. Add some extra and align.
-    size_t table_l_depth = (l_nrow + VEC_LEN - 1) / VEC_LEN;
-    size_t table_o_depth = (o_nrow + VEC_LEN - 1) / VEC_LEN;
+    size_t table_l_depth = (l_nrow + VEC_SCAN - 1) / VEC_SCAN;
 
-    size_t table_l_size = table_l_depth * VEC_LEN * TPCH_INT_SZ;
-    size_t table_o_size = table_o_depth * VEC_LEN * TPCH_INT_SZ;
+    size_t table_l_size = table_l_depth * VEC_SCAN * TPCH_INT_SZ;
 
-    // data load from disk. will re-use in each call, but assumed to be different.
-    int32_t* table_o_in_0 = mm.aligned_alloc<int32_t>(table_o_depth * VEC_LEN);
-    int32_t* table_o_in_1 = mm.aligned_alloc<int32_t>(table_o_depth * VEC_LEN);
-    int32_t* table_o_in_2 = mm.aligned_alloc<int32_t>(table_o_depth * VEC_LEN);
-
-    TPCH_INT* table_o_user_0 = mm.aligned_alloc<TPCH_INT>(table_o_depth * VEC_LEN);
-    TPCH_INT* table_o_user_1 = mm.aligned_alloc<TPCH_INT>(table_o_depth * VEC_LEN);
-    TPCH_INT* table_o_user_2 = mm.aligned_alloc<TPCH_INT>(table_o_depth * VEC_LEN);
-
-    int error = 0;
-    for (int i = 0; i < o_nrow; i++) {
-        table_o_in_0[i] = i;
-        table_o_in_1[i] = i;
-    }
-    std::cout << "Orders table has been generated" << std::endl;
-
-    for (int i = 0; i < o_nrow; ++i) {
-        table_o_user_0[i] = table_o_in_0[i];
-        table_o_user_1[i] = table_o_in_1[i];
-    }
-
-    int32_t* table_l_in_0 = mm.aligned_alloc<int32_t>(table_l_depth * VEC_LEN);
-    int32_t* table_l_in_1 = mm.aligned_alloc<int32_t>(table_l_depth * VEC_LEN);
-    int32_t* table_l_in_2 = mm.aligned_alloc<int32_t>(table_l_depth * VEC_LEN);
+    int32_t* table_l_in_0 = mm.aligned_alloc<int32_t>(table_l_depth * VEC_SCAN);
+    int32_t* table_l_in_1 = mm.aligned_alloc<int32_t>(table_l_depth * VEC_SCAN);
+    int32_t* table_l_in_2 = mm.aligned_alloc<int32_t>(table_l_depth * VEC_SCAN);
 
     // key column
-    TPCH_INT* table_l_user_0 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_LEN);
+    TPCH_INT* table_l_user_0 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_SCAN);
     // price column
-    TPCH_INT* table_l_user_1 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_LEN);
+    TPCH_INT* table_l_user_1 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_SCAN);
     // discount column
-    TPCH_INT* table_l_user_2 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_LEN);
+    TPCH_INT* table_l_user_2 = mm.aligned_alloc<TPCH_INT>(table_l_depth * VEC_SCAN);
 
     for (int i = 0; i < l_nrow; i++) {
         table_l_in_0[i] = i;
@@ -614,37 +597,53 @@ int main(int argc, const char* argv[]) {
     // total size split to 8 individual HBM pseudo channels with 256-bit for each block
     int htb_buf_depth = bf_size / 8 / 256; // HT_BUFF_DEPTH;
     int stb_buf_depth = bf_size / 8 / 256; // HT_BUFF_DEPTH;
-    int htb_buf_size = sizeof(ap_uint<256>) * htb_buf_depth;
-    int stb_buf_size = sizeof(ap_uint<256>) * stb_buf_depth;
-    unsigned long* htb_buf[PU_NM];
-    unsigned long* stb_buf[PU_NM];
+    // htb buff holds lower space of the hash table of the bloom filter
+    int htb_buf_size = sizeof(ap_uint<256>) * htb_buf_depth / 2;
+    // stb buff holds higher space of the hash table of the bloom filter
+    int stb_buf_size = sizeof(ap_uint<256>) * stb_buf_depth / 2;
+    uint64_t* htb_buf[PU_NM];
+    uint64_t* stb_buf[PU_NM];
     for (int i = 0; i < PU_NM; i++) {
-        htb_buf[i] = (unsigned long*)mm.aligned_alloc<unsigned long>(htb_buf_depth / (sizeof(unsigned long) * 8) * 256);
-        stb_buf[i] = (unsigned long*)mm.aligned_alloc<unsigned long>(stb_buf_depth / (sizeof(unsigned long) * 8) * 256);
+        htb_buf[i] = (uint64_t*)mm.aligned_alloc<uint64_t>(htb_buf_depth / (sizeof(uint64_t) * 8) * 256);
+        stb_buf[i] = (uint64_t*)mm.aligned_alloc<uint64_t>(stb_buf_depth / (sizeof(uint64_t) * 8) * 256);
     }
 
     // build bloom-filter, using multi-hash algorithm build in Hive (number of hash functions is 4, default cache line
     // size is 512-bit)
     for (int i = 0; i < l_nrow / BUILD_FACTOR; i++) {
-        unsigned long hash = (unsigned long)hashlookup3_64((ap_uint<64>)table_l_user_0[i], (ap_uint<64>)0);
-        unsigned long idx = hash >> HASH_WIDTH_LOW;
+        ap_uint<32> seed = 0xdeadbeef;
+        hls::stream<ap_uint<128> > key_strm;
+        ap_uint<128> key = 0;
+        key.range(63, 0) = table_l_user_0[i];
+        key_strm.write(key);
+        hls::stream<ap_uint<64> > hash_strm;
+        xf::database::hashLookup3(seed, key_strm, hash_strm);
+        uint64_t hash = hash_strm.read();
+        uint64_t idx = hash >> HASH_WIDTH_LOW;
         hash = hash & 0x1FFFFFFFFFFFFFFFUL;
         // first hash is used to locate start of the block
-        unsigned int hash1 = (unsigned int)hash;
-        unsigned int hash2 = (unsigned int)(hash >> 32);
-        unsigned int firstHash = hash1 + hash2;
-        unsigned int totalBlockCountEach = bf_size / 64 / 8;
-        unsigned int blockIdx = firstHash % totalBlockCountEach;
-        unsigned int blockBaseOffset = blockIdx & 0xFFFFFFF8;
+        uint32_t hash1 = (uint32_t)hash;
+        uint32_t hash2 = (uint32_t)(hash >> 32);
+        uint32_t firstHash = hash1 + hash2;
+        uint32_t totalBlockCountEach = bf_size / 64 / 8;
+        uint32_t blockIdx = firstHash % totalBlockCountEach;
+        uint32_t blockBaseOffset = blockIdx & 0xFFFFFFF8;
         // subsequent K hashes are used to generate K bits within a cache line (4 blocks)
         for (int i = 1; i <= NUM_HASH_FUNCS; i++) {
-            unsigned int combinedHash = hash1 + ((i + 1) * hash2);
-            unsigned int absOffset = blockBaseOffset + (combinedHash & 0x00000007);
+            uint32_t combinedHash = hash1 + ((i + 1) * hash2);
+            uint32_t absOffset = blockBaseOffset + (combinedHash & 0x00000007);
             int bitPos = (combinedHash >> 3) & 63;
-            htb_buf[idx][absOffset] |= ((unsigned long)1 << bitPos);
+            htb_buf[idx][absOffset] |= ((uint64_t)1 << bitPos);
         }
     }
     std::cout << "Bloom-filter created and built" << std::endl;
+    // copy higher space of htb_buf to stb_buf
+    uint32_t totalBlockCountEach = bf_size / 64 / 16;
+    for (int i = 0; i < PU_NM; i++) {
+        for (int j = 0; j < totalBlockCountEach; j++) {
+            stb_buf[i][j] = htb_buf[i][j + totalBlockCountEach];
+        }
+    }
 
     ap_uint<64>* din_val = mm.aligned_alloc<ap_uint<64> >((l_nrow + 63) / 64);
     for (int i = 0; i < (l_nrow + 63) / 64; i++) {
@@ -653,12 +652,17 @@ int main(int argc, const char* argv[]) {
 
     // result buff
     size_t result_nrow = l_nrow;
-    size_t table_result_depth = (result_nrow / VEC_LEN) + ((l_nrow % VEC_LEN) > 0); // 8 columns in one buffer
+    size_t table_result_depth =
+        (result_nrow / (8 * TPCH_INT_SZ * VEC_LEN) + ((result_nrow % (8 * TPCH_INT_SZ * VEC_LEN)) > 0));
     size_t table_result_size = table_result_depth * VEC_LEN * TPCH_INT_SZ;
-    ap_uint<512>* table_out_0 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
-    ap_uint<512>* table_out_1 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
-    ap_uint<512>* table_out_2 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
-    ap_uint<512>* table_out_3 = mm.aligned_alloc<ap_uint<512> >(table_result_depth);
+    ap_uint<8 * TPCH_INT_SZ* VEC_LEN>* table_out_0 =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_LEN> >(table_result_depth);
+    ap_uint<8 * TPCH_INT_SZ* VEC_LEN>* table_out_1 =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_LEN> >(table_result_depth);
+    ap_uint<8 * TPCH_INT_SZ* VEC_LEN>* table_out_2 =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_LEN> >(table_result_depth);
+    ap_uint<8 * TPCH_INT_SZ* VEC_LEN>* table_out_3 =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_LEN> >(table_result_depth);
     memset(table_out_0, 0, table_result_size);
     memset(table_out_1, 0, table_result_size);
     memset(table_out_2, 0, table_result_size);
@@ -678,13 +682,17 @@ int main(int argc, const char* argv[]) {
     ch_in.push_back(0);
     ch_in.push_back(1);
     ch_in.push_back(2);
-    krn_cmd.setScanColEnable(krn_id, table_id, ch_in);
+    krn_cmd.setScanColEnable(table_id, ch_in);
 
     // for enableing bloom-filter
-    krn_cmd.setBloomfilterOn(bf_size);
+    krn_cmd.setBloomfilterOn(1);
+    // set bloom filter size
+    krn_cmd.setBloomfilterSize(bf_size);
+    // set bloom filter to probe mode
+    krn_cmd.setBloomfilterBuildProbe(1);
 
-    // krn_id, table_id, gen_rowID_en, validEn,
-    krn_cmd.setRowIDValidEnable(2, 1, 1, 1);
+    // table_id, gen_rowID_en, validEn,
+    krn_cmd.setRowIDValidEnable(1, 1, 1);
 
     // for enabling output channels
     std::vector<int8_t> ch_out;
@@ -692,11 +700,15 @@ int main(int argc, const char* argv[]) {
     ch_out.push_back(1);
     ch_out.push_back(2);
     ch_out.push_back(3);
-    krn_cmd.setJoinWriteColEnable(krn_id, table_id, ch_out);
+    krn_cmd.setWriteColEnable(krn_id, table_id, ch_out);
 
     // no dynamic filtering by default, put the condition into the second paramter of setFilter for setting up the
     // filter
     // krn_cmd.setFilter(1, "c > 0");
+
+    // set build probe flag
+    // 0 for build, 1 for probe
+    krn_cmd.setJoinBuildProbe(1);
 
     //--------------- metabuffer setup -----------------
     // setup probe used meta input
@@ -717,25 +729,18 @@ int main(int argc, const char* argv[]) {
     meta_probe_out.setCol(2, 2, result_nrow);
     meta_probe_out.setCol(3, 3, result_nrow);
 
-    size_t flag_build = 0;
-    size_t flag_probe = 1;
     std::cout << "Kernel config & Meta set" << std::endl;
 
     using namespace xf::common::utils_sw;
     Logger logger(std::cout, std::cerr);
 
 #ifdef HLS_TEST
-    ap_uint<512>* table_o_0_new = mm.aligned_alloc<ap_uint<512> >(table_o_depth);
-    ap_uint<512>* table_o_1_new = mm.aligned_alloc<ap_uint<512> >(table_o_depth);
-    ap_uint<512>* table_o_2_new = mm.aligned_alloc<ap_uint<512> >(table_o_depth);
-    ap_uint<512>* table_l_0_new = mm.aligned_alloc<ap_uint<512> >(table_l_depth);
-    ap_uint<512>* table_l_1_new = mm.aligned_alloc<ap_uint<512> >(table_l_depth);
-    ap_uint<512>* table_l_2_new = mm.aligned_alloc<ap_uint<512> >(table_l_depth);
-
-    std::cout << "Table A col0: " << std::endl;
-    int_to_vec(o_nrow, table_o_user_0, table_o_0_new);
-    std::cout << "Table A col1: " << std::endl;
-    int_to_vec(o_nrow, table_o_user_1, table_o_1_new);
+    ap_uint<8 * TPCH_INT_SZ* VEC_SCAN>* table_l_0_new =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> >(table_l_depth);
+    ap_uint<8 * TPCH_INT_SZ* VEC_SCAN>* table_l_1_new =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> >(table_l_depth);
+    ap_uint<8 * TPCH_INT_SZ* VEC_SCAN>* table_l_2_new =
+        mm.aligned_alloc<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> >(table_l_depth);
 
     std::cout << "Table B col0: " << std::endl;
     int_to_vec(l_nrow, table_l_user_0, table_l_0_new);
@@ -743,15 +748,37 @@ int main(int argc, const char* argv[]) {
     int_to_vec(l_nrow, table_l_user_1, table_l_1_new);
     std::cout << "Table B col2: " << std::endl;
     int_to_vec(l_nrow, table_l_user_2, table_l_2_new);
+    /*
+    // bloom-filter build
+    std::cout << std::endl << "build starts................." << std::endl;
+    krn_cmd.setBloomfilterBuildProbe(0);
+    meta_probe_in.setCol(0, 0, l_nrow / BUILD_FACTOR);
+    meta_probe_in.setCol(1, 1, l_nrow / BUILD_FACTOR);
+    meta_probe_in.setCol(2, 2, l_nrow / BUILD_FACTOR);
+    gqeKernel(table_l_0_new, table_l_1_new, table_l_2_new, din_val, krn_cmd.getConfigBits(), meta_probe_in.meta(),
+              meta_probe_out.meta(), table_out_0, table_out_1, table_out_2, table_out_3, (ap_uint<256>*)htb_buf[0],
+              (ap_uint<256>*)htb_buf[1], (ap_uint<256>*)htb_buf[2], (ap_uint<256>*)htb_buf[3],
+              (ap_uint<256>*)htb_buf[4], (ap_uint<256>*)htb_buf[5], (ap_uint<256>*)htb_buf[6],
+              (ap_uint<256>*)htb_buf[7], (ap_uint<256>*)stb_buf[0], (ap_uint<256>*)stb_buf[1],
+              (ap_uint<256>*)stb_buf[2], (ap_uint<256>*)stb_buf[3], (ap_uint<256>*)stb_buf[4],
+              (ap_uint<256>*)stb_buf[5], (ap_uint<256>*)stb_buf[6], (ap_uint<256>*)stb_buf[7]);
+    std::cout << "build ends................." << std::endl;
+    krn_cmd.setBloomfilterBuildProbe(1);
+    meta_probe_in.setCol(0, 0, l_nrow);
+    meta_probe_in.setCol(1, 1, l_nrow);
+    meta_probe_in.setCol(2, 2, l_nrow);
+    */
 
     // bloom-filter probe
     std::cout << std::endl << "probe starts................." << std::endl;
-    gqeJoin(flag_probe, table_l_0_new, table_l_1_new, table_l_2_new, din_val, krn_cmd.getConfigBits(),
-            meta_probe_in.meta(), meta_probe_out.meta(), table_out_0, table_out_1, table_out_2, table_out_3,
-            (ap_uint<256>*)htb_buf[0], (ap_uint<256>*)htb_buf[1], (ap_uint<256>*)htb_buf[2], (ap_uint<256>*)htb_buf[3],
-            (ap_uint<256>*)htb_buf[4], (ap_uint<256>*)htb_buf[5], (ap_uint<256>*)htb_buf[6], (ap_uint<256>*)htb_buf[7],
-            (ap_uint<256>*)stb_buf[0], (ap_uint<256>*)stb_buf[1], (ap_uint<256>*)stb_buf[2], (ap_uint<256>*)stb_buf[3],
-            (ap_uint<256>*)stb_buf[4], (ap_uint<256>*)stb_buf[5], (ap_uint<256>*)stb_buf[6], (ap_uint<256>*)stb_buf[7]);
+    gqeKernel(table_l_0_new, table_l_1_new, table_l_2_new, din_val, (ap_uint<64>*)krn_cmd.getConfigBits(),
+              (ap_uint<64>*)meta_probe_in.meta(), (ap_uint<TPCH_INT_SZ * 8 * VEC_LEN>*)meta_probe_out.meta(),
+              table_out_0, table_out_1, table_out_2, table_out_3, (ap_uint<256>*)htb_buf[0], (ap_uint<256>*)htb_buf[1],
+              (ap_uint<256>*)htb_buf[2], (ap_uint<256>*)htb_buf[3], (ap_uint<256>*)htb_buf[4],
+              (ap_uint<256>*)htb_buf[5], (ap_uint<256>*)htb_buf[6], (ap_uint<256>*)htb_buf[7],
+              (ap_uint<256>*)stb_buf[0], (ap_uint<256>*)stb_buf[1], (ap_uint<256>*)stb_buf[2],
+              (ap_uint<256>*)stb_buf[3], (ap_uint<256>*)stb_buf[4], (ap_uint<256>*)stb_buf[5],
+              (ap_uint<256>*)stb_buf[6], (ap_uint<256>*)stb_buf[7]);
     std::cout << "probe ends................." << std::endl;
 
 #else
@@ -777,47 +804,47 @@ int main(int argc, const char* argv[]) {
 
     // filter kernel
     cl_kernel fkernel;
-    fkernel = clCreateKernel(prg, "gqeJoin", &err);
+    fkernel = clCreateKernel(prg, "gqeKernel", &err);
     logger.logCreateKernel(err);
     std::cout << "Kernel has been created\n";
 
     cl_mem_ext_ptr_t mext_table_l[3], mext_cfg5s, mext_valid_in_col;
-    mext_table_l[0] = {1, table_l_user_0, fkernel};
-    mext_table_l[1] = {2, table_l_user_1, fkernel};
-    mext_table_l[2] = {3, table_l_user_2, fkernel};
+    mext_table_l[0] = {0, table_l_user_0, fkernel};
+    mext_table_l[1] = {1, table_l_user_1, fkernel};
+    mext_table_l[2] = {2, table_l_user_2, fkernel};
 
-    mext_valid_in_col = {4, din_val, fkernel};
+    mext_valid_in_col = {3, din_val, fkernel};
 
-    mext_cfg5s = {5, krn_cmd.getConfigBits(), fkernel};
+    mext_cfg5s = {4, krn_cmd.getConfigBits(), fkernel};
 
     cl_mem_ext_ptr_t memExt[PU_NM * 2];
-    memExt[0] = {12, htb_buf[0], fkernel};
-    memExt[1] = {13, htb_buf[1], fkernel};
-    memExt[2] = {14, htb_buf[2], fkernel};
-    memExt[3] = {15, htb_buf[3], fkernel};
-    memExt[4] = {16, htb_buf[4], fkernel};
-    memExt[5] = {17, htb_buf[5], fkernel};
-    memExt[6] = {18, htb_buf[6], fkernel};
-    memExt[7] = {19, htb_buf[7], fkernel};
-    memExt[8] = {20, stb_buf[0], fkernel};
-    memExt[9] = {21, stb_buf[1], fkernel};
-    memExt[10] = {22, stb_buf[2], fkernel};
-    memExt[11] = {23, stb_buf[3], fkernel};
-    memExt[12] = {24, stb_buf[4], fkernel};
-    memExt[13] = {25, stb_buf[5], fkernel};
-    memExt[14] = {26, stb_buf[6], fkernel};
-    memExt[15] = {27, stb_buf[7], fkernel};
+    memExt[0] = {11, htb_buf[0], fkernel};
+    memExt[1] = {12, htb_buf[1], fkernel};
+    memExt[2] = {13, htb_buf[2], fkernel};
+    memExt[3] = {14, htb_buf[3], fkernel};
+    memExt[4] = {15, htb_buf[4], fkernel};
+    memExt[5] = {16, htb_buf[5], fkernel};
+    memExt[6] = {17, htb_buf[6], fkernel};
+    memExt[7] = {18, htb_buf[7], fkernel};
+    memExt[8] = {19, stb_buf[0], fkernel};
+    memExt[9] = {20, stb_buf[1], fkernel};
+    memExt[10] = {21, stb_buf[2], fkernel};
+    memExt[11] = {22, stb_buf[3], fkernel};
+    memExt[12] = {23, stb_buf[4], fkernel};
+    memExt[13] = {24, stb_buf[5], fkernel};
+    memExt[14] = {25, stb_buf[6], fkernel};
+    memExt[15] = {26, stb_buf[7], fkernel};
 
     cl_mem_ext_ptr_t mext_table_out[5];
-    mext_table_out[0] = {8, table_out_0, fkernel};
-    mext_table_out[1] = {9, table_out_1, fkernel};
-    mext_table_out[2] = {10, table_out_2, fkernel};
-    mext_table_out[3] = {11, table_out_3, fkernel};
+    mext_table_out[0] = {7, table_out_0, fkernel};
+    mext_table_out[1] = {8, table_out_1, fkernel};
+    mext_table_out[2] = {9, table_out_2, fkernel};
+    mext_table_out[3] = {10, table_out_3, fkernel};
 
     cl_mem_ext_ptr_t mext_meta_probe_in, mext_meta_probe_out;
 
-    mext_meta_probe_in = {6, meta_probe_in.meta(), fkernel};
-    mext_meta_probe_out = {7, meta_probe_out.meta(), fkernel};
+    mext_meta_probe_in = {5, meta_probe_in.meta(), fkernel};
+    mext_meta_probe_out = {6, meta_probe_out.meta(), fkernel};
 
     // Map buffers
     cl_mem buf_table_l[3];
@@ -885,7 +912,6 @@ int main(int argc, const char* argv[]) {
 
     // set args for fkernel
     int j = 0;
-    clSetKernelArg(fkernel, j++, sizeof(size_t), &flag_probe);
     clSetKernelArg(fkernel, j++, sizeof(cl_mem), &buf_table_l[0]);
     clSetKernelArg(fkernel, j++, sizeof(cl_mem), &buf_table_l[1]);
     clSetKernelArg(fkernel, j++, sizeof(cl_mem), &buf_table_l[2]);
@@ -954,7 +980,8 @@ int main(int argc, const char* argv[]) {
     std::unordered_map<int64_t, int64_t> filtered_pairs;
     for (int n = 0; n < p_nrow; n++) {
         // valid key flag
-        if (table_out_0[n / (sizeof(ap_uint<512>) * 8)][n % (sizeof(ap_uint<512>) * 8)]) {
+        if (table_out_0[n / (sizeof(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>) * 8)]
+                       [n % (sizeof(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>) * 8)]) {
             filtered_pairs.insert(
                 std::make_pair<int64_t, int64_t>((int64_t)table_l_user_0[n], (int64_t)table_l_user_2[n]));
         }

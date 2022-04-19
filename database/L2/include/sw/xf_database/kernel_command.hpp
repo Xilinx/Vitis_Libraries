@@ -43,10 +43,12 @@ class KernelCommand {
    private:
     ap_uint<512>* hbuf;
     int joinType;
-    bool isBypass;
+    bool isBypassOn;
+    bool isJoinOn;
+    bool isBloomfilterOn;
+    bool isPartOn;
     bool isAggrOn;
     bool isDualKeyOn;
-    bool isBloomfilterOn;
 
    public:
     /**
@@ -56,76 +58,63 @@ class KernelCommand {
     KernelCommand() {
         hbuf = gqe::utils::aligned_alloc<ap_uint<512> >(14);
         memset(hbuf, 0, sizeof(ap_uint<512>) * 14);
-        hbuf[0] = 1;
         hbuf[9].range(159, 159) = 1;
         hbuf[13].range(159, 159) = 1;
-        isBypass = false;
+        isBypassOn = false;
+        isJoinOn = false;
+        isBloomfilterOn = false;
+        isPartOn = false;
         isAggrOn = false;
         isDualKeyOn = false;
+        joinType = 0;
     }
     ~KernelCommand() { free(hbuf); }
 
     /**
-     * @brief scan valid cols.
+     * @brief set bypass on.
      *
-     * @param krn_id 0 for gqeJoin, 1 for gqePart, 2 for gqeFilter.
-     * @param table_id 0 for left table, 1 for right table.
-     * @param index valid input column ids.
+     * @param trigger 0 for off, 1 for on.
      *
      */
-    void setScanColEnable(int krn_id, int table_id, std::vector<int8_t> index) {
-        if (table_id > 1) {
-            std::cerr << "table_id can only be set 0/1" << std::endl;
-            exit(1);
-        }
-        if (table_id == 0) {
-            for (size_t d = 0; d < index.size(); d++) {
-                // if (index[d] != -1) hbuf[krn_id].set_bit((6 + index[d]), 1);
-                if (index[d] != -1) hbuf[krn_id].set_bit((6 + d), 1);
-            }
-        } else {
-            for (size_t d = 0; d < index.size(); d++) {
-                // if (index[d] != -1) hbuf[krn_id].set_bit((9 + index[d]), 1);
-                if (index[d] != -1) hbuf[krn_id].set_bit((9 + d), 1);
-            }
-        }
-#ifdef USER_DEBUG
-        if (table_id == 0)
-            std::cout << "table A enable col / hbuf[krn_id].range(8, 6): " << hbuf[krn_id].range(8, 6) << std::endl;
-        else
-            std::cout << "table B enable col / hbuf[krn_id].range(11, 9): " << hbuf[krn_id].range(11, 9) << std::endl;
-#endif
+    void setBypassOn(bool trigger) {
+        isBypassOn = trigger;
+        hbuf[0][0] = trigger;
+    }
+    /**
+     * @brief set join on.
+     *
+     * @param trigger 0 for off, 1 for on.
+     *
+     */
+    void setJoinOn(bool trigger) {
+        isJoinOn = trigger;
+        hbuf[0][1] = trigger;
     }
 
     /**
-     * @brief set gen_rowIDEnable and validEnable flag.
+     * @brief set join type.
      *
-     * @param krn_id 0 for gqeJoin, 1 for gqePart, 2 for gqeFilter.
-     * @param table_id 0 for left table, 1 for right table.
-     * @param gen_rowID_en enable flag for using GQE to generate row IDs internally. 1 for enable, 0 for disable.
-     * @param valid_en enable flag for getting valid bits from off-chip memory or enabing every row internally. 1 for
-     * valid bits from off-chip memory, 0 for enabling every row.
+     * @param join_type hash join type, 0 for INNER, 1 for SEMI, 2 for ANTI.
      *
      */
-    void setRowIDValidEnable(int krn_id, int table_id, bool gen_rowID_en, bool valid_en) {
-        if (krn_id == 0 || krn_id == 2) {
-            // gen-rowid for tab
-            hbuf[krn_id].set_bit(16 + 2 * table_id, gen_rowID_en);
-            // valid_en for tab
-            hbuf[krn_id].set_bit(17 + 2 * table_id, valid_en);
-        } else if (krn_id == 1) {
-            hbuf[krn_id].set_bit(19 + 2 * table_id, gen_rowID_en);
-            hbuf[krn_id].set_bit(20 + 2 * table_id, valid_en);
+    void setJoinType(int join_type) {
+        if (join_type > 2) {
+            std::cerr << "Error: only INNER/SEMI/ANTI join supported." << std::endl;
+            exit(1);
         }
+        hbuf[1].range(51, 50) = join_type;
     }
+
     /**
-     * @brief set bypass on.
+     * @brief set join append mode.
+     *
+     * @param ap_mode append mode.
+     *
      */
-    void setBypassOn() {
-        isBypass = true;
-        hbuf[0].set_bit(0, 0);
-        hbuf[1].set_bit(0, 0);
-        hbuf[2].set_bit(0, 0);
+    void setJoinAppendMode(int ap_mode) {
+        std::cout << "Warning: append mode is not supported in GQE currently. Ignored user-specified append mode."
+                  << std::endl;
+        hbuf[1][52] = ap_mode;
     }
 
     /**
@@ -134,98 +123,162 @@ class KernelCommand {
      * @param bf_size size of bloom-filter in bits, we need 35 bits to represent a range between 1 to 16 Gbits.
      *
      */
-    void setBloomfilterOn(ap_uint<35> bf_size) {
-        isBloomfilterOn = true;
-        // since bloom-filter is merged into gqeJoin
-        // should use Join config bit instead of Filter
-        hbuf[0].set_bit(1, 1);
-        hbuf[2].range(54, 20) = bf_size;
+    void setBloomfilterOn(bool trigger) {
+        isBloomfilterOn = trigger;
+        hbuf[0][2] = trigger;
+    }
+
+    /**
+     * @brief set bloom-filter size.
+     *
+     * @param bf_size size of bloom-filter in bits, we need 35 bits to represent a range between 1 to 16 Gbits.
+     *
+     */
+    void setBloomfilterSize(ap_uint<36> bf_size) {
+        // As we use 16 HBMs and 512-bit cache line size
+        // The size of the bloom filter should be 16 * 512 bits aligned
+        if ((bf_size % 8192) != 0) {
+            std::cout << "Error: size of bloom filter have to be 8192-bit aligned\n";
+            exit(1);
+        }
+        // Current hardware storage limitation
+        if (bf_size > 32UL * 1024 * 1024 * 1024) {
+            std::cout << "Error: maximum supported bloom filter size is 32Gbits\n";
+            exit(1);
+        }
+        hbuf[3].range(85, 50) = bf_size;
+    }
+
+    /**
+     * @brief set partition on.
+     *
+     * @param trigger 0 for off, 1 for on.
+     *
+     */
+    void setPartOn(int trigger) {
+        isPartOn = trigger;
+        hbuf[0][3] = trigger;
+    }
+
+    /**
+     * @brief set log of partition number.
+     *
+     * @param log_part log of partition number.
+     *
+     */
+    void setLogPart(int log_part) {
+        if (log_part < 3) {
+            std::cerr << "Error, supported minimum number of log_part is 3" << std::endl;
+            exit(1);
+        }
+        if (log_part > 8) {
+            std::cerr << "Error, supported maximum number of log_part is 8" << std::endl;
+        }
+        // set log part
+        hbuf[2].range(53, 50) = log_part;
+    }
+
+    // TODO: add required parameters when designing 4-in-1 GQE.
+    /**
+     * @brief set aggregate on.
+     *
+     * @param trigger false for off, true for on.
+     */
+    void setAggrOn(bool trigger = true) {
+        isAggrOn = trigger;
+        hbuf[0][4] = trigger;
     }
 
     /**
      * @brief set dual key on.
      *
+     * @param trigger false for using 1 column as key, true for using two.
+     *
      */
-    void setDualKeyOn() {
-        isDualKeyOn = true;
-        hbuf[0].set_bit(2, 1); // set dual key for gqeJoin
-        hbuf[1].set_bit(2, 1); // set dual key for gqePart
-        hbuf[2].set_bit(2, 1); // set dual key for gqeFilter
+    void setDualKeyOn(bool trigger = true) {
+        isDualKeyOn = trigger;
+        hbuf[0][6] = trigger;
     }
 
     /**
-     * @brief set join type.
+     * @brief set join build probe flag.
      *
-     * @param jointype Join type, default is INNER_JOIN.
+     * @param flag 0 for build, 1 for probe.
+     *
      */
-    void setJoinType(int jointype) {
-        joinType = jointype;
-        hbuf[0].range(4, 3) = jointype;
-    }
+    void setJoinBuildProbe(bool flag) { hbuf[0][5] = flag; }
 
     /**
-     * @brief enables output columns for gqeJoin/Filter.
+     * @brief set bloom filter build probe flag.
      *
-     * @param krn_id 0 for gqeJoin, 1 for gqePart, 2 for gqeFilter.
+     * @param flag 0 for build, 1 for probe.
+     *
+     */
+    void setBloomfilterBuildProbe(bool flag) { hbuf[0][7] = flag; }
+
+    /**
+     * @brief enables input columns for gqeKernel.
+     *
      * @param table_id 0 for left table, 1 for right table.
-     * @param index output column ids.
+     * @param index valid input column ids.
      *
      */
-    void setJoinWriteColEnable(int krn_id, int table_id, std::vector<int8_t> index) {
-        int8_t value = 0;
-        // gqeJoin / gqeFilter setup
-        if (krn_id == 0 || krn_id == 2) {
-            if (index.size() > 4) {
-                std::cerr << "Error,max supporting col number is 4" << std::endl;
-                exit(1);
+    void setScanColEnable(int table_id, std::vector<int8_t> index) {
+        if (table_id > 1) {
+            std::cerr << "Error: table_id can only be set to 0 or 1" << std::endl;
+            exit(1);
+        }
+        // table A
+        if (table_id == 0) {
+            for (size_t d = 0; d < index.size(); d++) {
+                if (index[d] != -1) {
+                    hbuf[0].set_bit((10 + index[d]), 1);
+                }
             }
-            for (size_t i = 0; i < index.size(); i++) {
-                if (index[i] >= 0) value += (1 << i);
-            }
-            hbuf[krn_id].range(15, 12) = value;
-            // gqePart setup
+            // table B
         } else {
-            if (index.size() > 3) {
-                std::cerr << "Error,max supporting col number is 3" << std::endl;
-                exit(1);
-            }
-            for (size_t i = 0; i < index.size(); i++) {
-                if (index[i] >= 0) value += (1 << i);
-            }
-            if (table_id) {
-                // L table
-                hbuf[krn_id].range(18, 16) = value;
-            } else {
-                // O table
-                hbuf[krn_id].range(14, 12) = value;
+            for (size_t d = 0; d < index.size(); d++) {
+                if (index[d] != -1) {
+                    hbuf[0].set_bit((13 + index[d]), 1);
+                }
             }
         }
+#ifdef USER_DEBUG
+        if (table_id == 0)
+            std::cout << "table A enable col / hbuf[0].range(12, 10): " << hbuf[0].range(12, 10) << std::endl;
+        else
+            std::cout << "table B enable col / hbuf[0].range(15, 13): " << hbuf[0].range(15, 13) << std::endl;
+#endif
     }
 
     /**
-     * @brief enables output columns for gqePart.
+     * @brief enables output columns for gqeKernel.
      *
-     * @param krn_id 0 for gqeJoin, 1 for gqePart, 2 for gqeFilter
+     * @param krn_type 0 for gqeJoin, 1 for gqePart, 2 for gqeFilter
      * @param table_id 0 for left table, 1 for right table
      * @param index output column ids
      *
      */
-    void setPartWriteColEnable(int krn_id, int table_id, std::vector<int8_t> index) {
+    void setWriteColEnable(int krn_type, int table_id, std::vector<int8_t> index) {
         int8_t value = 0;
         // gqeJoin / gqeFilter setup
-        if (krn_id == 0 || krn_id == 2) {
+        if (krn_type == 0 || krn_type == 2) {
             if (index.size() > 4) {
-                std::cerr << "Error,max supporting col number is 4" << std::endl;
+                std::cerr << "Error: max supported number of columns is 4" << std::endl;
                 exit(1);
             }
             for (size_t i = 0; i < index.size(); i++) {
                 if (index[i] >= 0) value += (1 << index[i]);
             }
-            hbuf[krn_id].range(15, 12) = value;
+            if (table_id) {
+                hbuf[0].range(23, 20) = value;
+            } else {
+                hbuf[0].range(19, 16) = value;
+            }
             // gqePart setup
         } else {
             if (index.size() > 3) {
-                std::cerr << "Error,max supporting col number is 3" << std::endl;
+                std::cerr << "Error: max supported number of columns is 3" << std::endl;
                 exit(1);
             }
             for (size_t i = 0; i < index.size(); i++) {
@@ -233,19 +286,30 @@ class KernelCommand {
             }
             if (table_id) {
                 // L table
-                hbuf[krn_id].range(18, 16) = value;
+                hbuf[0].range(22, 20) = value;
             } else {
                 // O table
-                hbuf[krn_id].range(14, 12) = value;
+                hbuf[0].range(18, 16) = value;
             }
         }
     }
 
-    /*
+    /**
+     * @brief set gen_rowIDEnable and validEnable flag.
      *
-     * 3. hbuf[0x06~0x13]
+     * @param table_id 0 for left table, 1 for right table.
+     * @param gen_rowID_en enable flag for using GQE to generate row IDs internally. 1 for enable, 0 for disable.
+     * @param valid_en enable flag for getting valid bits from off-chip memory or enabing every row internally. 1 for
+     * valid bits from off-chip memory, 0 for enabling every row.
      *
-     * */
+     */
+    void setRowIDValidEnable(int table_id, bool gen_rowID_en, bool valid_en) {
+        // gen-rowid for tab
+        hbuf[0].set_bit(30 + 2 * table_id, gen_rowID_en);
+        // valid_en for tab
+        hbuf[0].set_bit(31 + 2 * table_id, valid_en);
+    }
+
     /**
      * @brief set Filter string.
      *
@@ -281,12 +345,6 @@ class KernelCommand {
     ap_uint<512>* getConfigBits() const { return hbuf; }
 
 #ifdef USER_DEBUG
-    /*
-        std::shared_ptr<ap_uint<512> > getConfigBits() const {
-            std::shared_ptr<ap_uint<512> > cfgs(hbuf);
-            return cfgs;
-        }
-    */
     /**
      * @brief for comparing the current configurations with the original ones.
      *
@@ -322,4 +380,4 @@ class KernelCommand {
 } // namespace database
 } // namespace xf
 
-#endif // GQE_JOIN_COMMAND_HPP
+#endif // GQE_KERNEL_COMMAND_HPP

@@ -4,10 +4,10 @@
     "flow": "vitis",
     "gui": false,
     "platform_type": "pcie",
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3"
+    "platform_allowlist": [
+        "u280"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
@@ -60,7 +60,7 @@
                 "host",
                 "LIB_DIR/../utils/L1/include"
             ],
-            "options": "-O3 -D XDEVICE=$(XDEVICE)"
+            "options": "-O3 -D XDEVICE=$(PLATFORM_NAME)"
         }
     },
     "v++": {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef GQE_TYPES_HPP
-#define GQE_TYPES_HPP
+#ifndef GQE_ISV_GQE_TYPES_HPP
+#define GQE_ISV_GQE_TYPES_HPP
 
 // XXX inline with tpch_read_2.h
 #include <stdint.h>
@@ -34,8 +34,8 @@ typedef int64_t KEY_T;
 #define DATE_SZ sizeof(int64_t)
 #define KEY_SZ sizeof(int64_t)
 
-#define VEC_LEN 8
 #define VEC_SCAN 4
+#define VEC_LEN 4
 
 //#define FILTER_MAX_ROW (1 << 20)
 //#define HASHJOIN_MAX_ROW (1 << 20)
@@ -47,4 +47,4 @@ typedef int64_t KEY_T;
 } // namespace database
 } // namespace xf
 
-#endif
+#endif // GQE_ISV_GQE_TYPES_HPP

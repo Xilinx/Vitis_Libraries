@@ -49,7 +49,8 @@ void insert_sort_top(hls::stream<Data_Type>& din_strm,
     comparative_sign[0] = 0;
 
     uint16_t inserting_id = 1;
-    uint16_t residual_count = max_sort_number + 1;
+    uint16_t residual_count = 1;
+    uint16_t begin = 0;
     end = strm_in_end.read();
 
 insert_loop:
@@ -61,6 +62,10 @@ insert_loop:
             in_temp = kin_strm.read();
             in_dtemp = din_strm.read();
             end = strm_in_end.read();
+            if (begin < max_sort_number) {
+                residual_count++;
+                begin++;
+            }
         } else {
         }
 
@@ -80,8 +85,8 @@ insert_loop:
         }
 
         // manage the last element
-        out_temp = array_temp[max_sort_number - 1];
-        out_dtemp = array_dtemp[max_sort_number - 1];
+        out_temp = array_temp[begin - 1];
+        out_dtemp = array_dtemp[begin - 1];
         if (comparative_sign[max_sort_number - 1] == 0) {
             array_temp[max_sort_number - 1] = in_temp;
             array_dtemp[max_sort_number - 1] = in_dtemp;

@@ -1,30 +1,28 @@
 {
-    "name": "Xilinx gqeJoin Kernel Bloom Filter Test",
-    "description": "Xilinx gqeJoin kernel run as Bloom filter",
+    "name": "Xilinx gqeBloomfilter Kernel Test",
+    "description": "Xilinx gqeBloomfilter Kernel Test",
     "flow": "vitis",
     "gui": true,
     "platform_type": "pcie",
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3",
-        "xilinx_u50_gen3x16_xdma_201920_3"
+    "platform_allowlist": [
+        "u50"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
-        "u280": {
-            "containers": [
-                {
-                    "name": "gqe_filter",
-                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
-                }
-            ]
-        },
         "u50": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/hls_pre.cfg -D PART_FLOW=0"
+                    ]
+                }
+            },
             "containers": [
                 {
                     "name": "gqe_filter",
-                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
                 }
             ]
         }
@@ -33,21 +31,21 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_filter.xclbin -in db_data/ -scale 10000"
+            "cmd_args": " -xclbin BUILD/gqe_filter.xclbin -scale 10000"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_filter.xclbin -in db_data/ -scale 100000"
+            "cmd_args": " -xclbin BUILD/gqe_filter.xclbin -scale 100000"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/gqe_filter.xclbin -in db_data/ -scale 100"
+            "cmd_args": " -xclbin BUILD/gqe_filter.xclbin -scale 100"
         }
     ],
     "host": {
-        "host_exe": "test_gqeJoin_bloomfilter.exe",
+        "host_exe": "test_gqeBloomfilter.exe",
         "compiler": {
             "sources": [
                 "host/test_q5s.cpp",
@@ -60,7 +58,7 @@
                 "LIB_DIR/L2/tests/common",
                 "host"
             ],
-            "options": "-g -O3 -D XDEVICE=$(XDEVICE)"
+            "options": "-g -O3 -D XDEVICE=$(PLATFORM_NAME)"
         }
     },
     "v++": {
@@ -85,13 +83,13 @@
             "name": "gqe_filter",
             "accelerators": [
                 {
-                    "name": "gqeJoin",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_filter.cpp",
-                    "frequency": 250,
+                    "name": "gqeKernel",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_3_in_1.cpp",
+                    "frequency": 300,
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 180
+            "frequency": 200
         }
     ],
     "testinfo": {

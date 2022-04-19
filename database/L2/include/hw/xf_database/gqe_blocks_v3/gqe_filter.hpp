@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef GQE_FILTER_PART_HPP
-#define GQE_FILTER_PART_HPP
+#ifndef GQE_ISV_GQE_FILTER_HPP
+#define GQE_ISV_GQE_FILTER_HPP
 
 #ifndef __SYNTHESIS__
 #include <stdio.h>
@@ -109,20 +109,20 @@ void filter_ongoing(hls::stream<ap_uint<32> >& filter_cfg_strm,
                     hls::stream<bool> e_out_strm[CH_NM]) {
     hls::stream<ap_uint<32> > fcfg_strm[CH_NM];
 #pragma HLS stream variable = fcfg_strm depth = 64
-#pragma HLS resource variable = fcfg_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = fcfg_strm type = fifo impl = lutram
     hls::stream<ap_uint<8 * TPCH_INT_SZ> > filter_key_strm[CH_NM][3];
 #pragma HLS stream variable = filter_key_strm depth = 64
-#pragma HLS resource variable = filter_key_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_key_strm type = fifo impl = lutram
     hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_OUT_NM> > filter_pld_strm[CH_NM];
 #pragma HLS stream variable = filter_pld_strm depth = 64
-#pragma HLS resource variable = filter_pld_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_pld_strm type = fifo impl = lutram
 
     hls::stream<bool> e_filter_pld_strm[CH_NM];
 #pragma HLS stream variable = e_filter_pld_strm depth = 64
 
     hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_OUT_NM> > filter_result_strm[CH_NM];
 #pragma HLS stream variable = filter_result_strm depth = 64
-#pragma HLS resource variable = filter_result_strm core = FIFO_LUTRAM
+#pragma HLS bind_storage variable = filter_result_strm type = fifo impl = lutram
 
     hls::stream<bool> e_filter_result_strm[CH_NM];
 #pragma HLS stream variable = e_filter_result_strm depth = 64
@@ -148,4 +148,4 @@ void filter_ongoing(hls::stream<ap_uint<32> >& filter_cfg_strm,
 } // namespace database
 } // namespace xf
 
-#endif
+#endif // GQE_ISV_GQE_FILTER_HPP

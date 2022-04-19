@@ -13,6 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical load_cfg_and_scan_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical load_cfg_and_scan_*] -clear_locs
 add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical filter_ongoing_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical bloomfilter_join_wrapper_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical write_table_out_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_U0*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_47*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_48*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_49*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_50*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_51*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_52*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical build_probe_core_wrapper_1_3_61_17_128_64_64_24_64_53*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_U0*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_61*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_62*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_63*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_64*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_65*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_66*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical adapt_size_8_128_64_64_64_3_256_67*] -clear_locs

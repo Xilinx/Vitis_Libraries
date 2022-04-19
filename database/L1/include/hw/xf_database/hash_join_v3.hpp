@@ -43,7 +43,7 @@
 //#define DEBUG_BUILD true
 //#define DEBUG_PROBE true
 //#define DEBUG_JOIN true
-//#define DEBUG_MISS true
+#define DEBUG_MISS true
 //#define DEBUG_HBM true
 
 #endif
@@ -723,7 +723,7 @@ BUILD_HASH_LOOP:
 #ifndef __SYNTHESIS__
 
 #ifdef DEBUG_MISS
-                if (key == 3680482 || key == 3691265 || key == 4605699 || key == 4987782)
+                if (key == 8887)
                     std::cout << std::hex << "hashwrapper: key=" << key << " hash=" << s_hash_val << std::endl;
 #endif
 
@@ -963,9 +963,9 @@ PRE_BUILD_LOOP:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-        if (key == 3680482 || key == 3691265 || key == 4605699 || key == 4987782)
+        if (key == 8887)
             std::cout << std::hex << "build_stb debug: key=" << key << " hash=" << hash_val
-                      << " error bitmap=" << bit_vector0[0x21e] << " array_idx=" << array_idx << " bit_idx=" << bit_idx
+                      << " error bitmap=" << bit_vector0[0xa7ed] << " array_idx=" << array_idx << " bit_idx=" << bit_idx
                       << std::endl;
 #endif
 #endif
@@ -993,16 +993,16 @@ PRE_BUILD_LOOP:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-        if (key == 3680482 || key == 3691265 || key == 4605699 || key == 4987782) {
+        if (key == 8887) {
             for (int i = 0; i < 8; i++) {
                 std::cout << std::hex << "build_stb: ele_temp[" << i << "]" << elem_temp[i] << " array_idx_temp[" << i
                           << "]=" << array_idx_temp[i] << std::endl;
             }
         }
 
-        if (array_idx == 0x21e) {
+        if (array_idx == 0xa7ed) {
             std::cout << std::hex << "build_stb debug: key=" << key << " hash=" << hash_val
-                      << " error bitmap=" << bit_vector0[0x21e] << " elem=" << elem << std::endl;
+                      << " error bitmap=" << bit_vector0[0xa7ed] << " elem=" << elem << std::endl;
         }
 
 #endif
@@ -1073,7 +1073,7 @@ PRE_BUILD_LOOP:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-        if (array_idx == 0x21e) {
+        if (array_idx == 0xa7ed) {
             std::cout << std::hex << "build_stb debug: key=" << key << " hash=" << hash_val
                       << " error bitmap=" << bit_vector0[0x21e] << " elem=" << elem << std::endl;
         }
@@ -1102,7 +1102,7 @@ PRE_BUILD_LOOP:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-        if (key == 3680482 || key == 3691265 || key == 4605699 || key == 4987782 || array_idx == 0x21e)
+        if (key == 8887 || array_idx == 0xa7ed)
             std::cout << std::hex << "build_stb: key=" << key << " hash=" << hash_val << " hash_cnt=" << hash_cnt
                       << " depth=" << depth << " array_idx=" << array_idx << " bit_idx=" << bit_idx << " elem=" << elem
                       << " base_ht_addr=" << array_idx << " base_ht=" << bit_vector0[array_idx]
@@ -1346,7 +1346,7 @@ LOOP_BUILD_UNIT:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-            if (key == 3680482 || key == 3691265 || key == 4605699 || key == 4987782)
+            if (key == 8887)
                 std::cout << std::hex << "merge_unit: key=" << key << " hash=" << hash_val << " array_idx=" << array_idx
                           << " bit_idx=" << bit_idx << " overflow_ht_addr=" << array_idx << " old_elem=" << elem
                           << " new_elem=" << new_elem << " stb_addr=" << o_addr << " stb_row=" << stb_row << std::endl;
@@ -1567,7 +1567,7 @@ LOOP_PROBE:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-        if (key == 3680482 || key == 3691265 || key == 4605699 || key == 4987782)
+        if (key == 8887)
             std::cout << std::hex << "probe_ahead: key=" << key << " hash_val=" << hash_val
                       << " array_idx=" << array_idx << " bit_idx=" << bit_idx << " nm=" << nm
                       << " base_ht_addr=" << base_ht_addr << " base_bitmap=" << base_bitmap
@@ -2110,8 +2110,7 @@ JOIN_LOOP:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-        if (t_key == 3680482 || t_key == 3691265 || t_key == 4605699 || t_key == 4987782)
-            std::cout << std::hex << "Join: t_key=" << t_key << " nm=" << nm << std::endl;
+        if (t_key == 8887) std::cout << std::hex << "Join: t_key=" << t_key << " nm=" << nm << std::endl;
 #endif
 #endif
 
@@ -2133,7 +2132,7 @@ JOIN_LOOP:
 
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_MISS
-            if (s_key == 3680482 || s_key == 3691265 || s_key == 4605699 || s_key == 4987782)
+            if (s_key == 8887)
                 std::cout << std::hex << "Join: s_key=" << s_key << " s_pld" << s_pld << " base_nm=" << base_nm
                           << " overflow_nm=" << overflow_nm << std::endl;
 #endif
@@ -2835,10 +2834,12 @@ LOOP_BUILD_UNIT:
             o_e_strm.write(false);
 
 #ifndef __SYNTHESIS__
-#ifdef DEBUG
-            std::cout << std::hex << "merge_unit: cnt=" << cnt << " array_idx=" << array_idx << " bit_idx=" << bit_idx
-                      << " overflow_ht_addr=" << array_idx << " old_elem=" << elem << " new_elem=" << new_elem
-                      << " stb_addr=" << o_addr << " stb_row=" << stb_row << std::endl;
+#ifdef DEBUG_MISS
+            if (key == 8887) {
+                std::cout << std::hex << "merge_unit: cnt=" << cnt << " array_idx=" << array_idx
+                          << " bit_idx=" << bit_idx << " overflow_ht_addr=" << array_idx << " old_elem=" << elem
+                          << " new_elem=" << new_elem << " stb_addr=" << o_addr << " stb_row=" << stb_row << std::endl;
+            }
 #endif
             cnt++;
 #endif

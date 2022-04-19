@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef GQE_ISV_SCAN_TO_CHANNEL_HPP
-#define GQE_ISV_SCAN_TO_CHANNEL_HPP
+#ifndef GQE_ISV_SCAN_COLS_HPP
+#define GQE_ISV_SCAN_COLS_HPP
 
 #ifndef __SYNTHESIS__
 #include <stdio.h>
@@ -36,8 +36,8 @@ namespace gqe {
 
 template <int CH_NM, int BLEN, int GRP_SZ>
 void read_col(hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col,
-              int64_t nrow,
-              bool bf_on,
+              hls::stream<int64_t>& nrow_strm,
+              hls::stream<ap_uint<8> >& general_cfg_strm,
               bool din_col_en,
               hls::stream<ap_uint<8 * TPCH_INT_SZ> >& ch_strm0,
               hls::stream<ap_uint<8 * TPCH_INT_SZ> >& ch_strm1,
@@ -45,6 +45,9 @@ void read_col(hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col,
               hls::stream<ap_uint<8 * TPCH_INT_SZ> >& ch_strm3,
               bool gen_e,
               hls::stream<bool> e_ch_strms[CH_NM]) {
+    int64_t nrow = nrow_strm.read();
+    ap_uint<8> general_cfg = general_cfg_strm.read();
+    bool bf_on = general_cfg[2];
     int GRP_CNT = GRP_SZ / (VEC_SCAN * BLEN);
     // each burst data: 512bit * burst_len, burst num:
     int n_burst = (nrow + BLEN * VEC_SCAN - 1) / (BLEN * VEC_SCAN);
@@ -379,10 +382,10 @@ void gen_row_id_col(int sec_id,
 template <int CH_NM, int BLEN, int GRP_SZ>
 void read_gen_row_id(ap_uint<2> rowID_flags,
                      int sec_id,
-                     bool bf_on,
+                     hls::stream<ap_uint<8> >& general_cfg_strm,
                      hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col,
                      hls::burst_maxi<ap_uint<64> > din_val,
-                     int64_t nrow,
+                     hls::stream<int64_t>& nrow_strm,
                      bool din_col_en,
                      hls::stream<ap_uint<8 * TPCH_INT_SZ> >& ch_strm0,
                      hls::stream<ap_uint<8 * TPCH_INT_SZ> >& ch_strm1,
@@ -398,19 +401,37 @@ void read_gen_row_id(ap_uint<2> rowID_flags,
 #endif
 
     if (gen_row_id) { // gen rowid inside kernel
+        int64_t nrow = nrow_strm.read();
+        ap_uint<8> general_cfg = general_cfg_strm.read();
+        bool bf_on = general_cfg[2];
         gen_row_id_col<BLEN, GRP_SZ>(sec_id, nrow, bf_on, din_val_en, din_val, ch_strm0, ch_strm1, ch_strm2, ch_strm3);
     } else { // read row-id from col dat
-        read_col<CH_NM, BLEN, GRP_SZ>(din_col, nrow, bf_on, din_col_en, ch_strm0, ch_strm1, ch_strm2, ch_strm3, gen_e,
-                                      e_ch_strms);
+        read_col<CH_NM, BLEN, GRP_SZ>(din_col, nrow_strm, general_cfg_strm, din_col_en, ch_strm0, ch_strm1, ch_strm2,
+                                      ch_strm3, gen_e, e_ch_strms);
+    }
+}
+
+// duplicate nrow & general_cfg stream for each column
+template <int COL_NM>
+void dup_strm(hls::stream<int64_t>& nrow_strm,
+              hls::stream<ap_uint<8> >& general_cfg_strm,
+              hls::stream<int64_t> nrow_strms[COL_NM],
+              hls::stream<ap_uint<8> > general_cfg_strms[COL_NM]) {
+    int64_t nrow = nrow_strm.read();
+    ap_uint<8> general_cfg = general_cfg_strm.read();
+    for (int i = 0; i < COL_NM; i++) {
+#pragma HLS unroll
+        nrow_strms[i].write(nrow);
+        general_cfg_strms[i].write(general_cfg);
     }
 }
 
 // scan column data in
 template <int CH_NM, int COL_NM, int BLEN, int GRP_SZ>
 void scan_cols(ap_uint<2> rowID_flags,
-               int64_t nrow,
+               hls::stream<int64_t>& nrow_strm,
                int secID,
-               bool bf_on,
+               hls::stream<ap_uint<8> >& general_cfg_strm,
                ap_uint<3> din_col_en,
                hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col0,
                hls::burst_maxi<ap_uint<8 * TPCH_INT_SZ * VEC_SCAN> > din_col1,
@@ -418,26 +439,36 @@ void scan_cols(ap_uint<2> rowID_flags,
                hls::burst_maxi<ap_uint<64> > din_val,
                hls::stream<ap_uint<8 * TPCH_INT_SZ> > ch_strms[CH_NM][COL_NM],
                hls::stream<bool> e_ch_strms[CH_NM]) {
-    hls::stream<bool> e_ch_strms_nouse[2][CH_NM];
-#pragma HLS stream variable = e_ch_strms_nouse depth = 2
 #ifndef __SYNTHESIS__
     // assertion for grouping input rows and sending separator all Fs
     assert(GRP_SZ == (2 * VEC_SCAN * BLEN) && "GRP_SZ has to be 2 * (VEC_SCAN * BLEN)");
     std::cout << "din_col_en: " << (int)din_col_en << std::endl;
 #endif
 
+    hls::stream<bool> e_ch_strms_nouse[COL_NM - 1][CH_NM];
+#pragma HLS stream variable = e_ch_strms_nouse depth = 2
+#pragma HLS bind_storage variable = e_ch_strms_nouse type = fifo impl = lutram
+    hls::stream<int64_t> nrow_strms[COL_NM];
+#pragma HLS stream variable = nrow_strms depth = 2
+#pragma HLS bind_storage variable = nrow_strms type = fifo impl = lutram
+    hls::stream<ap_uint<8> > general_cfg_strms[COL_NM];
+#pragma HLS stream variable = general_cfg_strms depth = 2
+#pragma HLS bind_storage variable = general_cfg_strms type = fifo impl = lutram
+
+    dup_strm<COL_NM>(nrow_strm, general_cfg_strm, nrow_strms, general_cfg_strms);
+
 #pragma HLS dataflow
-    read_col<CH_NM, BLEN, GRP_SZ>(din_col0, nrow, bf_on, din_col_en[0], ch_strms[0][0], ch_strms[1][0], ch_strms[2][0],
-                                  ch_strms[3][0], 1, e_ch_strms);
-    read_col<CH_NM, BLEN, GRP_SZ>(din_col1, nrow, bf_on, din_col_en[1], ch_strms[0][1], ch_strms[1][1], ch_strms[2][1],
-                                  ch_strms[3][1], 0, e_ch_strms_nouse[0]);
-    read_gen_row_id<CH_NM, BLEN, GRP_SZ>(rowID_flags, secID, bf_on, din_col2, din_val, nrow, din_col_en[2],
-                                         ch_strms[0][2], ch_strms[1][2], ch_strms[2][2], ch_strms[3][2], 0,
-                                         e_ch_strms_nouse[1]);
+    read_col<CH_NM, BLEN, GRP_SZ>(din_col0, nrow_strms[0], general_cfg_strms[0], din_col_en[0], ch_strms[0][0],
+                                  ch_strms[1][0], ch_strms[2][0], ch_strms[3][0], 1, e_ch_strms);
+    read_col<CH_NM, BLEN, GRP_SZ>(din_col1, nrow_strms[1], general_cfg_strms[1], din_col_en[1], ch_strms[0][1],
+                                  ch_strms[1][1], ch_strms[2][1], ch_strms[3][1], 0, e_ch_strms_nouse[0]);
+    read_gen_row_id<CH_NM, BLEN, GRP_SZ>(rowID_flags, secID, general_cfg_strms[2], din_col2, din_val, nrow_strms[2],
+                                         din_col_en[2], ch_strms[0][2], ch_strms[1][2], ch_strms[2][2], ch_strms[3][2],
+                                         0, e_ch_strms_nouse[1]);
 }
 
 } // namespace gqe
 } // namespace database
 } // namespace xf
 
-#endif // GQE_SCAN_TO_CHANNEL_HPP
+#endif // GQE_ISV_SCAN_COLS_HPP

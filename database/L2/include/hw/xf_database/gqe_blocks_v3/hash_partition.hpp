@@ -189,15 +189,24 @@ LOOP_DISPATCH:
 
 // generate the mk_on, bit_num for multi-channel
 template <int CH_NM, int PU>
-void gen_signal(hls::stream<ap_uint<16> >& i_part_cfg_strm,
+void gen_signal(hls::stream<ap_uint<8> >& i_general_cfg_strm,
+                hls::stream<ap_uint<15> >& i_part_cfg_strm,
+                hls::stream<ap_uint<8> >& o_general_cfg_strm,
+                hls::stream<ap_uint<8> >& general_cfg2combine_strm,
                 hls::stream<bool> o_mk_on_strms[CH_NM],
                 hls::stream<int> o_k_depth_strms[PU],
-                hls::stream<int> o_bit_num_strms[PU]) {
-    ap_uint<16> part_cfg = i_part_cfg_strm.read();
+                hls::stream<int> o_bit_num_strms[PU],
+                hls::stream<ap_uint<32> >& nr_row_strm) {
+    nr_row_strm.write(0);
 
-    bool mk_on = part_cfg[0];
-    int bit_num = part_cfg.range(4, 1);
-    int k_depth = part_cfg.range(15, 5);
+    ap_uint<8> general_cfg = i_general_cfg_strm.read();
+    o_general_cfg_strm.write(general_cfg);
+    general_cfg2combine_strm.write(general_cfg);
+    bool mk_on = general_cfg[6];
+
+    ap_uint<16> part_cfg = i_part_cfg_strm.read();
+    int bit_num = part_cfg.range(3, 0);
+    int k_depth = part_cfg.range(14, 4);
 
     for (int ch = 0; ch < CH_NM; ch++) {
 #pragma HLS pipeline
@@ -633,6 +642,10 @@ BU_WLOOP:
             if (rcnt == depth - 1) {
                 o_nm_strm.write(depth);
                 o_bk_nm_strm.write(bksize1);
+#ifndef __SYNTHESIS__
+                std::cout << "access_uram: nm = " << depth << std::endl;
+                std::cout << "access_uram: bk = " << bksize1 << std::endl;
+#endif
                 rcnt = 0;
                 bucket_flag[bksize1][rsector] = 0;
 #ifdef USER_DEBUG
@@ -664,11 +677,20 @@ BU_WLOOP:
             o_kpld_strm.write(rdata);
         }
         o_nm_strm.write(depth);
+#ifndef __SYNTHESIS__
+        std::cout << "access_uram: nm = " << depth << std::endl;
+#endif
 
         if (bit_num > 0) {
             o_bk_nm_strm.write(bk_num(bit_num, 1));
+#ifndef __SYNTHESIS__
+            std::cout << "access_uram: bk = " << bk_num(bit_num, 1) << std::endl;
+#endif
         } else {
             o_bk_nm_strm.write(0);
+#ifndef __SYNTHESIS__
+            std::cout << "access_uram: bk = 0" << std::endl;
+#endif
         }
     }
 
@@ -683,10 +705,19 @@ BU_WLOOP:
             o_kpld_strm.write(rdata);
         }
         o_nm_strm.write(depth);
+#ifndef __SYNTHESIS__
+        std::cout << "access_uram: nm = " << depth << std::endl;
+#endif
         if (bit_num > 0) {
             o_bk_nm_strm.write(bk_num(bit_num, 1));
+#ifndef __SYNTHESIS__
+            std::cout << "access_uram: bk = " << bk_num(bit_num, 1) << std::endl;
+#endif
         } else {
             o_bk_nm_strm.write(0);
+#ifndef __SYNTHESIS__
+            std::cout << "access_uram: bk = 0" << std::endl;
+#endif
         }
     }
 
@@ -707,6 +738,10 @@ BU_WLOOP:
         if (len != 0) {
             o_nm_strm.write(len);
             o_bk_nm_strm.write(i);
+#ifndef __SYNTHESIS__
+            std::cout << "access_uram: nm = " << len << std::endl;
+            std::cout << "access_uram: bk = " << i << std::endl;
+#endif
         BUILD_INCOMPLETE_BUCKET_OUT_LOOP:
             for (int j = 0; j < len; j++) {
 #pragma HLS PIPELINE II = 1
@@ -723,6 +758,10 @@ BU_WLOOP:
     if (!isNonBlocking && last) {
         o_nm_strm.write(1);
         o_bk_nm_strm.write(bucket_idx);
+#ifndef __SYNTHESIS__
+        std::cout << "access_uram: nm = " << 1 << std::endl;
+        std::cout << "access_uram: bk = " << bucket_idx << std::endl;
+#endif
         o_kpld_strm.write(wdata);
     }
 
@@ -822,37 +861,29 @@ void split_col(hls::stream<ap_uint<KEYW + PW> >& i_kpld_strm,
 
 // round robin output
 template <int KEYW, int PW, int EW, int PU, int COL_NM>
-void combine_pu(hls::stream<ap_uint<10> > i_bk_strm_arry[PU],
+void combine_pu(hls::stream<ap_uint<8> >& i_general_cfg_strm,
+                hls::stream<ap_uint<10> > i_bk_strm_arry[PU],
                 hls::stream<ap_uint<10> > i_nm_strm_arry[PU],
                 hls::stream<ap_uint<EW * PU> > i_strm_arry[PU][COL_NM],
 
                 hls::stream<ap_uint<10 + Log2<PU>::value> >& o_bk_nm_strm,
                 hls::stream<ap_uint<10> >& o_nm_strm,
                 hls::stream<ap_uint<EW * PU> > o_strm[COL_NM]) {
+    ap_uint<8> general_cfg = i_general_cfg_strm.read();
+    bool part_on = general_cfg[3];
     ap_uint<Log2<PU>::value> pu_idx = 0;
     ap_uint<EW * PU> tmp[COL_NM] = {0};
     ap_uint<PU> cond = 0;
     ap_uint<PU> last = -1;
-    // int sss = 0;
     while (cond != last) {
         if (!i_nm_strm_arry[pu_idx].empty()) {
             ap_uint<10> nm = i_nm_strm_arry[pu_idx].read();
-            // sss += nm;
-            // std::cout << "nm: " << nm << ", sss: " << sss << std::endl;
             if (nm > 0) {
                 for (int i = 0; i < (nm + PU - 1) / PU; i++) {
-// std::cout << "i: " << i << std::endl;
 #pragma HLS pipeline II = 1
                     for (int c = 0; c < COL_NM; c++) {
 #pragma HLS unroll
                         tmp[c] = i_strm_arry[pu_idx][c].read();
-#ifdef USER_DEBUG
-                        std::cout << "tmp[c].range(63,0) : " << tmp[c].range(63, 0) << std::endl;
-                        std::cout << "tmp[c].range(63,0) : " << tmp[c].range(127, 64) << std::endl;
-                        std::cout << "tmp[c].range(63,0) : " << tmp[c].range(191, 128) << std::endl;
-                        std::cout << "tmp[c].range(63,0) : " << tmp[c].range(255, 192) << std::endl;
-#endif
-
                         o_strm[c].write(tmp[c]);
                     }
                 }
@@ -869,7 +900,8 @@ void combine_pu(hls::stream<ap_uint<10> > i_bk_strm_arry[PU],
 }
 
 template <int KEYW, int PW, int EW, int PU, int COL_NM>
-void combine_read(hls::stream<ap_uint<KEYW + PW> > i_kpld_strm[PU],
+void combine_read(hls::stream<ap_uint<8> >& i_general_cfg_strm,
+                  hls::stream<ap_uint<KEYW + PW> > i_kpld_strm[PU],
                   hls::stream<ap_uint<10> > i_nm_strm[PU],
                   hls::stream<ap_uint<10> > i_bk_strm[PU],
 
@@ -892,7 +924,8 @@ void combine_read(hls::stream<ap_uint<KEYW + PW> > i_kpld_strm[PU],
         split_col<KEYW, PW, EW, PU, COL_NM>( // mk_on,
             i_kpld_strm[i], i_nm_strm[i], i_bk_strm[i], mid_bk_strm[i], mid_nm_strm[i], mid_strm[i]);
     }
-    combine_pu<KEYW, PW, EW, PU, COL_NM>(mid_bk_strm, mid_nm_strm, mid_strm, o_bk_nm_strm, o_nm_strm, o_strm);
+    combine_pu<KEYW, PW, EW, PU, COL_NM>(i_general_cfg_strm, mid_bk_strm, mid_nm_strm, mid_strm, o_bk_nm_strm,
+                                         o_nm_strm, o_strm);
 }
 
 } // namespace details
@@ -931,16 +964,19 @@ namespace database {
 template <int HASH_MODE, int KEYW, int PW, int EW, int HASHWH, int HASHWL, int ARW, int CH_NM, int COL_NM>
 void hashPartition(
     // input
-    hls::stream<ap_uint<16> >& part_cfg_strm,
+    hls::stream<ap_uint<8> >& general_cfg_strm,
+    hls::stream<ap_uint<15> >& part_cfg_strm,
 
     hls::stream<ap_uint<KEYW> > k0_strm_arry[CH_NM],
     hls::stream<ap_uint<PW> > p0_strm_arry[CH_NM],
     hls::stream<bool> e0_strm_arry[CH_NM],
 
     // output
+    hls::stream<ap_uint<8> >& o_general_cfg_strm,
     hls::stream<ap_uint<10 + HASHWH> >& o_bk_nm_strm,
     hls::stream<ap_uint<10> >& o_nm_strm,
-    hls::stream<ap_uint<EW*(1 << HASHWH)> > o_kpld_strm[COL_NM]) {
+    hls::stream<ap_uint<EW*(1 << HASHWH)> > o_kpld_strm[COL_NM],
+    hls::stream<ap_uint<32> >& nr_row_strm) {
     enum { PU = (1 << HASHWH), BDEPTH = 512 * 4 };
 
 #pragma HLS DATAFLOW
@@ -990,9 +1026,12 @@ void hashPartition(
 
     hls::stream<int> mid_bit_num_strms[PU];
 #pragma HLS stream variable = mid_bit_num_strms depth = 2
+    hls::stream<ap_uint<8> > general_cfg2combine_strm;
+#pragma HLS stream variable = general_cfg2combine_strm depth = 2
 
     // gen mk_on and bit_num signal for multi- CH/PU
-    details::gen_signal<CH_NM, PU>(part_cfg_strm, mid_mk_on_strms, mid_k_depth_strms, mid_bit_num_strms);
+    details::gen_signal<CH_NM, PU>(general_cfg_strm, part_cfg_strm, o_general_cfg_strm, general_cfg2combine_strm,
+                                   mid_mk_on_strms, mid_k_depth_strms, mid_bit_num_strms, nr_row_strm);
 
 //---------------------------------dispatch PU-------------------------------
 #ifndef __SYNTHESIS__
@@ -1196,8 +1235,8 @@ void hashPartition(
 #endif
 
     //-----------------------------------round-robin-----------------------------
-    details::combine_read<KEYW, PW, EW, PU, COL_NM>(t_kpld_strm_arry, t_nm_strm_arry, t_bk_nm_strm_arry, o_bk_nm_strm,
-                                                    o_nm_strm, o_kpld_strm);
+    details::combine_read<KEYW, PW, EW, PU, COL_NM>(general_cfg2combine_strm, t_kpld_strm_arry, t_nm_strm_arry,
+                                                    t_bk_nm_strm_arry, o_bk_nm_strm, o_nm_strm, o_kpld_strm);
 }
 
 } // namespace database

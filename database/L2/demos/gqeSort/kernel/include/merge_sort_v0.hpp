@@ -61,6 +61,8 @@ void mergeSortPair(hls::stream<Pair<Data_Type, Key_Type> >& left_strm,
                    hls::stream<Pair<Data_Type, Key_Type> >& right_strm,
                    hls::stream<Pair<Data_Type, Key_Type> >& out_strm,
                    bool sign) {
+#pragma HLS inline off
+
     typedef Pair<Data_Type, Key_Type> PT;
 
     Key_Type iLeft = 0;
@@ -188,7 +190,7 @@ struct mergeTreeS {
     static void f(hls::stream<Pair<Data_Type, Key_Type> > inStrm[Ch_Num],
                   bool order,
                   hls::stream<Pair<Data_Type, Key_Type> >& outStrm) {
-#pragma HLS inline
+#pragma HLS inline recursive
 
 #pragma HLS dataflow
 

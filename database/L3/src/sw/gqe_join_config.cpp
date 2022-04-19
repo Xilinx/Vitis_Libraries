@@ -30,6 +30,7 @@ JoinConfig::JoinConfig(Table a,
                        std::string join_str, // comma separated
                        Table c,
                        std::string output_str,
+                       bool build_probe,
                        int join_type) {
     // 0) process gen-rowid_en  and val_en
     bool gen_rowID_en[2];
@@ -174,7 +175,7 @@ JoinConfig::JoinConfig(Table a,
 
     // 5) setup kernel cfg, which includes join setup, input_col_en, wr_col_en
     // input_col_en and wr_col_en are taken from sw_shuffle_scan/wr cfg
-    SetupKernelConfig(join_type, filter_a, filter_b, gen_rowID_en, valid_en, join_keys, sw_shuffle_scan_hj,
+    SetupKernelConfig(build_probe, join_type, filter_a, filter_b, gen_rowID_en, valid_en, join_keys, sw_shuffle_scan_hj,
                       sw_shuffle_wr_hj);
 }
 
@@ -188,6 +189,7 @@ JoinConfig::JoinConfig(TableSection a,
                        std::string join_str, // comma separated
                        TableSection c,
                        std::string output_str,
+                       bool build_probe,
                        int join_type) {
     // 0) process gen-rowid_en  and val_en
     bool gen_rowID_en[2];
@@ -332,7 +334,7 @@ JoinConfig::JoinConfig(TableSection a,
 
     // 5) setup kernel cfg, which includes join setup, input_col_en, wr_col_en
     // input_col_en and wr_col_en are taken from sw_shuffle_scan/wr cfg
-    SetupKernelConfig(join_type, filter_a, filter_b, gen_rowID_en, valid_en, join_keys, sw_shuffle_scan_hj,
+    SetupKernelConfig(build_probe, join_type, filter_a, filter_b, gen_rowID_en, valid_en, join_keys, sw_shuffle_scan_hj,
                       sw_shuffle_wr_hj);
 }
 
@@ -344,7 +346,8 @@ JoinConfig::JoinConfig(TableSection a,
  * - scan input col enable, get from sw_shuffle_scan
  * - write out col enable, get from sw_shuffle_wr
 **/
-void JoinConfig::SetupKernelConfig(int join_type,
+void JoinConfig::SetupKernelConfig(bool build_probe,
+                                   int join_type,
                                    std::string filter_a,
                                    std::string filter_b,
                                    bool gen_rowID_en[2],
@@ -354,26 +357,37 @@ void JoinConfig::SetupKernelConfig(int join_type,
                                    std::vector<int8_t> sw_shuffle_wr_hj) {
     using krncmdclass = xf::database::gqe::KernelCommand;
     krncmdclass krncmd = krncmdclass();
+    krncmd.setJoinOn(1);
+    if (build_probe)
+        krncmd.setJoinBuildProbe(1);
+    else
+        krncmd.setJoinBuildProbe(0);
     if (join_keys[0].size() == 2) {
         krncmd.setDualKeyOn();
     }
     krncmd.setJoinType(join_type);
 
     // setting gen_rowID_en and valid_en for tab a
-    krncmd.setRowIDValidEnable(0, 0, gen_rowID_en[0], valid_en[0]);
+    krncmd.setRowIDValidEnable(0, gen_rowID_en[0], valid_en[0]);
     // setting gen_rowID_en and valid_en for tab b
-    krncmd.setRowIDValidEnable(0, 1, gen_rowID_en[1], valid_en[1]);
+    krncmd.setRowIDValidEnable(1, gen_rowID_en[1], valid_en[1]);
 
     // using join solution, se filter in join kernel
-    krncmd.setScanColEnable(0, 0, sw_shuffle_scan_hj[0]);
+    krncmd.setScanColEnable(0, sw_shuffle_scan_hj[0]);
     if (filter_a != "") krncmd.setFilter(0, filter_a);
 
     // using join solution, se filter in join kernel
-    krncmd.setScanColEnable(0, 1, sw_shuffle_scan_hj[1]);
+    krncmd.setScanColEnable(1, sw_shuffle_scan_hj[1]);
     if (filter_b != "") krncmd.setFilter(1, filter_b);
 
     // setup the write col en
-    krncmd.setJoinWriteColEnable(0, 0, sw_shuffle_wr_hj);
+    krncmd.setWriteColEnable(0, 0, sw_shuffle_wr_hj);
+    std::vector<int8_t> enable_c;
+    enable_c.push_back(0);
+    enable_c.push_back(1);
+    enable_c.push_back(2);
+    enable_c.push_back(-1);
+    krncmd.setWriteColEnable(0, 1, enable_c);
 
     ap_uint<512>* config_bits = krncmd.getConfigBits();
     table_join_cfg = mm.aligned_alloc<ap_uint<512> >(14);

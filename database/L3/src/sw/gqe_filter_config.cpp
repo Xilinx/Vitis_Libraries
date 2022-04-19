@@ -159,7 +159,7 @@ void BloomFilterConfig::SetupKernelConfig(uint64_t bf_size,
     }
 
     // setup scan column enable
-    krncmd.setScanColEnable(2, 1, sw_shuffle_scan);
+    krncmd.setScanColEnable(1, sw_shuffle_scan);
 
     // setup bloom-filter switcher & size
     if (bf_size > (uint64_t)16 * 1024 * 1024 * 1024) {
@@ -169,14 +169,14 @@ void BloomFilterConfig::SetupKernelConfig(uint64_t bf_size,
     krncmd.setBloomfilterOn(bf_size);
 
     // only validation buffer supported for gqeFilter
-    // 2 for gqeFilter kernel, 1 for big table (as gqeFilter only uses big table)
-    krncmd.setRowIDValidEnable(2, 1, gen_rowID_en, valid_en);
+    // 1 for big table (as gqeFilter only uses big table)
+    krncmd.setRowIDValidEnable(1, gen_rowID_en, valid_en);
 
     // setup dynamic filter
     if (filter_condition != "") krncmd.setFilter(1, filter_condition);
 
     // setup the write col en
-    krncmd.setJoinWriteColEnable(2, 1, sw_shuffle_write);
+    krncmd.setWriteColEnable(2, 1, sw_shuffle_write);
 
     // setup kernel config
     ap_uint<512>* config_bits = krncmd.getConfigBits();

@@ -31,8 +31,10 @@ typedef TPCH_INT KEY_T;
 
 #define TPCH_INT_SZ sizeof(TPCH_INT)
 
-// every cycle, 8 input rows.
-#define VEC_LEN 8
+// every cycle, 4 input rows.
+#define VEC_SCAN 4
+// every cycle, 4 output rows.
+#define VEC_LEN 4
 
 //
 // ensure when kernel read in vec, won't over read

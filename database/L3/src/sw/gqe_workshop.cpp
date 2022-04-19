@@ -131,8 +131,11 @@ void Workshop::processJoin(join_task tsk) {
             cout << "In Join solution 1, tab_a should only has 1 section" << endl;
         }
         JoinConfig jcfg(*tsk.tab_a, tsk.filter_a, *tsk.tab_b, tsk.filter_b, tsk.join_str, *tsk.tab_c, tsk.output_str,
-                        tsk.join_type);
+                        false, tsk.join_type);
+        JoinConfig jcfg_probe(*tsk.tab_a, tsk.filter_a, *tsk.tab_b, tsk.filter_b, tsk.join_str, *tsk.tab_c,
+                              tsk.output_str, true, tsk.join_type);
         ap_uint<512>* join_cfg = jcfg.getJoinConfigBits();
+        ap_uint<512>* probe_cfg = jcfg_probe.getJoinConfigBits();
         vector<vector<int8_t> > join_scan = jcfg.getShuffleScan();
         vector<int8_t> join_wr = jcfg.getShuffleWrite();
         // 1. build
@@ -333,7 +336,7 @@ void Workshop::processJoin(join_task tsk) {
                 probe_p2d_arg_size[i].push_back((tab_b_sec_row[i] + 7) / 8);
             }
             // 2.3.1.3 din_krn_cfg
-            probe_h2p_src[i][0].push_back((char*)join_cfg);
+            probe_h2p_src[i][0].push_back((char*)probe_cfg);
             probe_h2p_dst[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][4] +
                                           worker[w_id].sub_buf_head[1][p_id][4]);
             probe_h2p_bias[i][0].push_back(0);

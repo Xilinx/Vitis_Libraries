@@ -30,7 +30,7 @@
 #include <CL/cl_ext_xilinx.h>
 #include <CL/cl.h>
 
-//#include <gflags/gflags.h>
+#include "gendata.hpp"
 #include "db_intpair_sort_1g.hpp"
 #include "xf_utils_sw/arg_parser.hpp"
 #include "x_utils.hpp"
@@ -154,6 +154,7 @@ int batch_mode_fun(std::string input_list, std::string output_list, int FLAGS_or
 
 int main(int argc, const char* argv[]) {
     xf::common::utils_sw::ArgParser parser(argc, argv);
+    parser.addFlag("-g", "--gen", "Generate a small input data set as specified with -i option");
     parser.addOption("-d", "--device-id", "Set Device id by user, if not set, choose the first available one", "-1");
     parser.addOption("-i", "--in", "Single run, input dat", "");
     parser.addOption("-o", "--out", "Single run, output dat", "");
@@ -167,6 +168,7 @@ int main(int argc, const char* argv[]) {
         parser.showUsage();
         return 0;
     }
+    bool FLAGS_g = parser.getAs<bool>("gen");
     bool FLAGS_y = parser.getAs<bool>("accept-EULA");
     bool FLAGS_demo = parser.getAs<bool>("demo");
     int FLAGS_order = parser.getAs<int>("asc");
@@ -250,6 +252,17 @@ int main(int argc, const char* argv[]) {
         if (acknow == "yes") {
             setenv("XILINX_LICENCE", "pass", 1);
         }
+    }
+    if (FLAGS_g) {
+        if (batch_mode) {
+            std::cout << "Cannot generate batch input!" << std::endl;
+            return 1;
+        }
+        std::cout << "Creating " << FLAGS_in << "..." << std::endl;
+        gen_dat(FLAGS_in, 1024 * 1024);
+        std::cout << "Creating " << FLAGS_out << "..." << std::endl;
+        gen_dat(FLAGS_out, 1024 * 1024);
+        std::cout << "Inputs generated!" << std::endl;
     }
 
     if (single_mode) {

@@ -4,22 +4,12 @@
     "flow": "vitis",
     "gui": false,
     "platform_type": "pcie",
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3"
+    "platform_allowlist": [
+        "u50"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ],
-    "platform_properties": {
-        "u280": {
-            "containers": [
-                {
-                    "name": "gqe_join_part",
-                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
-                }
-            ]
-        }
-    },
     "launch": [
         {
             "name": "generic launch for sw_emu flows",
@@ -43,24 +33,29 @@
             "sources": [
                 "host/test_q5s.cpp",
                 "LIB_DIR/L3/src/sw/gqe_table.cpp",
+                "LIB_DIR/L3/src/sw/gqe_input.cpp",
+                "LIB_DIR/L3/src/sw/gqe_workshop.cpp",
+                "LIB_DIR/L3/src/sw/gqe_platform.cpp",
+                "LIB_DIR/L3/src/sw/gqe_worker.cpp",
+                "LIB_DIR/L3/src/sw/gqe_memcpy.cpp",
                 "LIB_DIR/L3/src/sw/gqe_base_config.cpp",
                 "LIB_DIR/L3/src/sw/gqe_join_config.cpp",
                 "LIB_DIR/L3/src/sw/gqe_partjoin_config.cpp",
-                "LIB_DIR/L3/src/sw/gqe_init.cpp",
                 "LIB_DIR/L3/src/sw/gqe_ocl.cpp",
                 "LIB_DIR/L3/src/sw/gqe_base.cpp",
+                "LIB_DIR/L3/src/sw/gqe_init.cpp",
                 "LIB_DIR/L3/src/sw/gqe_join.cpp"
             ],
             "includepaths": [
+                "host",
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/L1/include/sw",
                 "LIB_DIR/L2/include/sw",
                 "LIB_DIR/L3/tests/gqe/common",
                 "LIB_DIR/L3/include/sw",
-                "host",
                 "LIB_DIR/../utils/L1/include"
             ],
-            "options": "-O3 -D XDEVICE=$(XDEVICE)"
+            "options": "-O3 -g -D XDEVICE=$(PLATFORM_NAME) -Wno-narrowing"
         }
     },
     "v++": {
@@ -69,6 +64,9 @@
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/L2/include/hw",
                 "LIB_DIR/../utils/L1/include"
+            ],
+            "clflags": [
+                "-g --config PROJECT/hls_pre.cfg -D PART_FLOW=0"
             ],
             "hls_jobs": 16
         },
@@ -82,19 +80,14 @@
             "name": "gqe_join_part",
             "accelerators": [
                 {
-                    "name": "gqeJoin",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_filter.cpp",
-                    "frequency": 250,
-                    "num_compute_units": 1
-                },
-                {
-                    "name": "gqePart",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v3.cpp",
-                    "frequency": 250,
+                    "name": "gqeKernel",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_3_in_1.cpp",
+                    "frequency": 300,
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 160
+            "frequency": 200,
+	    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
         }
     ],
     "testinfo": {

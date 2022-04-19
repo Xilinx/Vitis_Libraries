@@ -290,10 +290,10 @@ Worker::Worker(cl_context context, cl_device_id device_id, string xclbin_path, W
         case JOIN:
             // create kernels
             krn.resize(2); //[part,join][ping,pong]
-            krn[0].push_back(clCreateKernel(prg, "gqePart", &err));
-            krn[0].push_back(clCreateKernel(prg, "gqePart", &err));
-            krn[1].push_back(clCreateKernel(prg, "gqeJoin", &err));
-            krn[1].push_back(clCreateKernel(prg, "gqeJoin", &err));
+            krn[0].push_back(clCreateKernel(prg, "gqeKernel", &err));
+            krn[0].push_back(clCreateKernel(prg, "gqeKernel", &err));
+            krn[1].push_back(clCreateKernel(prg, "gqeKernel", &err));
+            krn[1].push_back(clCreateKernel(prg, "gqeKernel", &err));
 
             // max buf size
             max_buf_size.clear();
@@ -527,25 +527,25 @@ void Worker::runKernel(WorkerFunctions func,
                        size_t evt_wait_num,
                        cl_event* evt) {
     if (func == WorkerFunctions::JOIN) {
-        if (k_id == 0) {
+        if (k_id == 0) { // part
             // set arg
             for (size_t i = 0; i < 13; i++) {
                 if (i < 3) {
-                    int int_arg = scalar_arg[i];
-                    clSetKernelArg(krn[k_id][p_id], i, sizeof(int), &int_arg);
+                    // int int_arg = scalar_arg[i];
+                    // clSetKernelArg(krn[k_id][p_id], i, sizeof(int), &int_arg);
                 } else {
-                    clSetKernelArg(krn[k_id][p_id], i, sizeof(cl_mem), &sub_buf[k_id][p_id][i - 3]);
+                    clSetKernelArg(krn[k_id][p_id], i - 3, sizeof(cl_mem), &sub_buf[k_id][p_id][i - 3]);
                 }
             }
             // enqueue task
             clEnqueueTask(cq, krn[k_id][p_id], evt_wait_num, evt_wait_list, evt);
-        } else if (k_id == 1) {
+        } else if (k_id == 1) { // join
             // set arg
             for (size_t i = 0; i < 28; i++) {
                 if (i < 1) {
-                    clSetKernelArg(krn[k_id][p_id], i, sizeof(size_t), &(scalar_arg[i]));
+                    // clSetKernelArg(krn[k_id][p_id], i, sizeof(size_t), &(scalar_arg[i]));
                 } else {
-                    clSetKernelArg(krn[k_id][p_id], i, sizeof(cl_mem), &sub_buf[k_id][p_id][i - 1]);
+                    clSetKernelArg(krn[k_id][p_id], i - 1, sizeof(cl_mem), &sub_buf[k_id][p_id][i - 1]);
                 }
             }
             // enqueue task

@@ -58,6 +58,8 @@ void merge_sort_top(hls::stream<Data_Type>& left_din_strm,
         iLeft = left_kin_strm.read();
         dLeft = left_din_strm.read();
         left_strm_end = left_strm_in_end.read();
+    } else {
+        output_last_left = 1;
     }
 
     // read 1st right key
@@ -66,10 +68,12 @@ void merge_sort_top(hls::stream<Data_Type>& left_din_strm,
         iRight = right_kin_strm.read();
         dRight = right_din_strm.read();
         right_strm_end = right_strm_in_end.read();
+    } else {
+        output_last_right = 1;
     }
 
 merge_loop:
-    while (!left_strm_end || !right_strm_end) {
+    while (!output_last_right || !output_last_left) {
 #pragma HLS PIPELINE II = 1
 
         // output && read next left or right
@@ -84,12 +88,12 @@ merge_loop:
                     iLeft = left_kin_strm.read();
                     dLeft = left_din_strm.read();
                     left_strm_end = left_strm_in_end.read();
-                } else if (left_strm_end && !output_last_left && !right_strm_end) {
+                } else if (!output_last_left) {
                     // output last left && no read
                     Result = iLeft;
                     dResult = dLeft;
                     output_last_left = 1;
-                } else if (left_strm_end && output_last_left && !right_strm_end) {
+                } else if (!right_strm_end) {
                     // output right && read risidual right
                     Result = iRight;
                     dResult = dRight;
@@ -97,6 +101,10 @@ merge_loop:
                     iRight = right_kin_strm.read();
                     dRight = right_din_strm.read();
                     right_strm_end = right_strm_in_end.read();
+                } else if (!output_last_right) {
+                    Result = iRight;
+                    dResult = dRight;
+                    output_last_right = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -110,12 +118,12 @@ merge_loop:
                     iRight = right_kin_strm.read();
                     dRight = right_din_strm.read();
                     right_strm_end = right_strm_in_end.read();
-                } else if (right_strm_end && !output_last_right && !left_strm_end) {
+                } else if (!output_last_right) {
                     // output last right && no read
                     Result = iRight;
                     dResult = dRight;
                     output_last_right = 1;
-                } else if (right_strm_end && output_last_right && !left_strm_end) {
+                } else if (!left_strm_end) {
                     // output left && read risidual left
                     Result = iLeft;
                     dResult = dLeft;
@@ -123,6 +131,10 @@ merge_loop:
                     iLeft = left_kin_strm.read();
                     dLeft = left_din_strm.read();
                     left_strm_end = left_strm_in_end.read();
+                } else if (!output_last_left) {
+                    Result = iLeft;
+                    dResult = dLeft;
+                    output_last_left = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -140,12 +152,12 @@ merge_loop:
                     iRight = right_kin_strm.read();
                     dRight = right_din_strm.read();
                     right_strm_end = right_strm_in_end.read();
-                } else if (right_strm_end && !output_last_right && !left_strm_end) {
+                } else if (!output_last_right) {
                     // output last right && no read
                     Result = iRight;
                     dResult = dRight;
                     output_last_right = 1;
-                } else if (right_strm_end && output_last_right && !left_strm_end) {
+                } else if (!left_strm_end) {
                     // output left && read risidual left
                     Result = iLeft;
                     dResult = dLeft;
@@ -153,6 +165,10 @@ merge_loop:
                     iLeft = left_kin_strm.read();
                     dLeft = left_din_strm.read();
                     left_strm_end = left_strm_in_end.read();
+                } else if (!output_last_left) {
+                    Result = iLeft;
+                    dResult = dLeft;
+                    output_last_left = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -166,12 +182,12 @@ merge_loop:
                     iLeft = left_kin_strm.read();
                     dLeft = left_din_strm.read();
                     left_strm_end = left_strm_in_end.read();
-                } else if (left_strm_end && !output_last_left && !right_strm_end) {
+                } else if (!output_last_left) {
                     // output last left && no read
                     Result = iLeft;
                     dResult = dLeft;
                     output_last_left = 1;
-                } else if (left_strm_end && output_last_left && !right_strm_end) {
+                } else if (!right_strm_end) {
                     // output right && read risidual right
                     Result = iRight;
                     dResult = dRight;
@@ -179,6 +195,10 @@ merge_loop:
                     iRight = right_kin_strm.read();
                     dRight = right_din_strm.read();
                     right_strm_end = right_strm_in_end.read();
+                } else if (!output_last_right) {
+                    Result = iRight;
+                    dResult = dRight;
+                    output_last_right = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -191,80 +211,6 @@ merge_loop:
         strm_out_end.write(0);
     }
 
-    //------------------------------output last element------------------------//
-    if (sign) {
-        if (iLeft < iRight) {
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                dout_strm.write(dLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                dout_strm.write(dRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        } else {
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                dout_strm.write(dRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                dout_strm.write(dLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        }
-    } else {
-        if (iLeft < iRight) {
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                dout_strm.write(dRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                dout_strm.write(dLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        } else {
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                dout_strm.write(dLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                dout_strm.write(dRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        }
-    }
     //-------------------------------------end---------------------------------//
 
     strm_out_end.write(1);
@@ -311,7 +257,7 @@ void merge_sort_top(hls::stream<Key_Type>& left_kin_strm,
     }
 
 merge_loop:
-    while (!left_strm_end || !right_strm_end) {
+    while (!output_last_right || !output_last_left) {
 #pragma HLS PIPELINE II = 1
 #pragma HLS loop_tripcount max = 20 min = 20
         // output && read next left or right
@@ -324,16 +270,19 @@ merge_loop:
 
                     iLeft = left_kin_strm.read();
                     left_strm_end = left_strm_in_end.read();
-                } else if (left_strm_end && !output_last_left && !right_strm_end) {
+                } else if (!output_last_left) {
                     // output last left && no read
                     Result = iLeft;
                     output_last_left = 1;
-                } else if (left_strm_end && output_last_left && !right_strm_end) {
+                } else if (!right_strm_end) {
                     // output right && read risidual right
                     Result = iRight;
 
                     iRight = right_kin_strm.read();
                     right_strm_end = right_strm_in_end.read();
+                } else if (!output_last_right) {
+                    Result = iRight;
+                    output_last_right = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -345,16 +294,19 @@ merge_loop:
 
                     iRight = right_kin_strm.read();
                     right_strm_end = right_strm_in_end.read();
-                } else if (right_strm_end && !output_last_right && !left_strm_end) {
+                } else if (!output_last_right) {
                     // output last right && no read
                     Result = iRight;
                     output_last_right = 1;
-                } else if (right_strm_end && output_last_right && !left_strm_end) {
+                } else if (!left_strm_end) {
                     // output left && read risidual left
                     Result = iLeft;
 
                     iLeft = left_kin_strm.read();
                     left_strm_end = left_strm_in_end.read();
+                } else if (!output_last_left) {
+                    Result = iLeft;
+                    output_last_left = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -370,16 +322,19 @@ merge_loop:
 
                     iRight = right_kin_strm.read();
                     right_strm_end = right_strm_in_end.read();
-                } else if (right_strm_end && !output_last_right && !left_strm_end) {
+                } else if (!output_last_right) {
                     // output last right && no read
                     Result = iRight;
                     output_last_right = 1;
-                } else if (right_strm_end && output_last_right && !left_strm_end) {
+                } else if (!left_strm_end) {
                     // output left && read risidual left
                     Result = iLeft;
 
                     iLeft = left_kin_strm.read();
                     left_strm_end = left_strm_in_end.read();
+                } else if (!output_last_left) {
+                    Result = iLeft;
+                    output_last_left = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -391,16 +346,19 @@ merge_loop:
 
                     iLeft = left_kin_strm.read();
                     left_strm_end = left_strm_in_end.read();
-                } else if (left_strm_end && !output_last_left && !right_strm_end) {
+                } else if (!output_last_left) {
                     // output last left && no read
                     Result = iLeft;
                     output_last_left = 1;
-                } else if (left_strm_end && output_last_left && !right_strm_end) {
+                } else if (!right_strm_end) {
                     // output right && read risidual right
                     Result = iRight;
 
                     iRight = right_kin_strm.read();
                     right_strm_end = right_strm_in_end.read();
+                } else if (!output_last_right) {
+                    Result = iRight;
+                    output_last_right = 1;
                 } else {
                     // left_strm_end && right_strm_end
                     // no operation, break loop
@@ -412,72 +370,6 @@ merge_loop:
         strm_out_end.write(0);
     }
 
-    //------------------------------output last element------------------------//
-    if (sign) {
-        if (iLeft < iRight) {
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        } else {
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        }
-    } else {
-        if (iLeft < iRight) {
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        } else {
-            // whether output last left
-            if (!output_last_left) {
-                kout_strm.write(iLeft);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-            // whether output last right
-            if (!output_last_right) {
-                kout_strm.write(iRight);
-                strm_out_end.write(0);
-            } else {
-                // no operation
-            }
-        }
-    }
     //-------------------------------------end---------------------------------//
 
     strm_out_end.write(1);

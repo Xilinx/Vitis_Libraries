@@ -3,12 +3,12 @@
     "description": "Xilinx Q5 Demo",
     "flow": "vitis",
     "platform_type": "pcie",
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3",
+    "platform_allowlist": [
+        "u280",
         "u250",
         "u200"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
@@ -22,7 +22,7 @@
             },
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u280.cfg"
                     ]
                 }
@@ -38,7 +38,7 @@
             },
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
@@ -54,7 +54,7 @@
             },
             "v++": {
                 "compiler": {
-                    "cflags": [
+                    "clflags": [
                         "--config PROJECT/conn_u200.cfg"
                     ]
                 }

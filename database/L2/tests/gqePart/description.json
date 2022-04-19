@@ -4,18 +4,25 @@
     "flow": "vitis",
     "gui": false,
     "platform_type": "pcie",
-    "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3"
+    "platform_allowlist": [
+        "u50"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
-        "u280": {
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/hls_pre.cfg -D PART_FLOW=1"
+                    ]
+                }
+            },
             "containers": [
                 {
-                    "name": "gqe_part_v2",
-                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg"
+                    "name": "gqe_part_v3",
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
                 }
             ]
         }
@@ -24,21 +31,21 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_part_v2.xclbin -scale 100"
+            "cmd_args": " -xclbin BUILD/gqe_part_v3.xclbin -scale 1000"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_part_v2.xclbin -scale 1000"
+            "cmd_args": " -xclbin BUILD/gqe_part_v3.xclbin -scale 100000"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/gqe_part_v2.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_part_v3.xclbin"
         }
     ],
     "host": {
-        "host_exe": "test_hash_partition.exe",
+        "host_exe": "test_gqePart.exe",
         "compiler": {
             "sources": [
                 "host/test_hash_partition.cpp",
@@ -52,7 +59,7 @@
                 "host",
                 "LIB_DIR/../utils/L1/include"
             ],
-            "options": "-O3 -D XDEVICE=$(XDEVICE)"
+            "options": "-g -O3 -D XDEVICE=$(PLATFORM_NAME)"
         }
     },
     "v++": {
@@ -61,6 +68,9 @@
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/L2/include/hw",
                 "LIB_DIR/../utils/L1/include"
+            ],
+            "clflags": [
+                "-g"
             ],
             "hls_jobs": 16
         },
@@ -71,17 +81,16 @@
     },
     "containers": [
         {
-            "name": "gqe_part_v2",
+            "name": "gqe_part_v3",
             "accelerators": [
                 {
-                    "name": "gqePart",
-                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v3.cpp",
-                    "frequency": 200,
+                    "name": "gqeKernel",
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_3_in_1.cpp",
+                    "frequency": 300,
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 200,
-            "ldclflags": "--config PROJECT/opts.cfg"
+            "frequency": 200
         }
     ],
     "testinfo": {
@@ -99,7 +108,7 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 800,
+                    "vitis_hw_build": 2400,
                     "vitis_hw_emu": 470,
                     "vitis_sw_emu": 60,
                     "vitis_hw_run": 10

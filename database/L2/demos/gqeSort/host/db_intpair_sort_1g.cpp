@@ -58,7 +58,7 @@ void sortAPI::init(std::string xclbin_path, int device_id, bool user_setting) {
     mext_k4 = {XCL_MEM_TOPOLOGY | unsigned(2), nullptr, 0};
 
     // Map buffers
-    ap_uint<64>* init_buf = mm.aligned_alloc<ap_uint<64> >(sz_test);
+    // ap_uint<64>* init_buf = mm.aligned_alloc<ap_uint<64> >(sz_test);
     // memset(init_buf, 0, sz_test * sizeof(ap_uint<64>));
     for (int i = 0; i < 2; i++) {
         buf_in[i] = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_READ_ONLY, sz_64m * sizeof(ap_uint<64>),
@@ -85,11 +85,11 @@ void sortAPI::init(std::string xclbin_path, int device_id, bool user_setting) {
             std::cout << "Create Device buf_k2 " << i << " Failed!" << std::endl;
             exit(1);
         }
-        err = clEnqueueWriteBuffer(cq, buf_in[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
-        err = clEnqueueWriteBuffer(cq, buf_k0[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
-        err = clEnqueueWriteBuffer(cq, buf_k1[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
-        err = clEnqueueWriteBuffer(cq, buf_k2[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
-        clFinish(cq);
+        // err = clEnqueueWriteBuffer(cq, buf_in[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
+        // err = clEnqueueWriteBuffer(cq, buf_k0[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
+        // err = clEnqueueWriteBuffer(cq, buf_k1[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
+        // err = clEnqueueWriteBuffer(cq, buf_k2[i], 0, 0, sizeof(ap_uint<64>) * sz_64m, init_buf, 0, NULL, NULL);
+        // clFinish(cq);
     }
     buf_k3 =
         clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_READ_WRITE, sz_test * sizeof(ap_uint<64>), &mext_k3, &err);
@@ -105,14 +105,14 @@ void sortAPI::init(std::string xclbin_path, int device_id, bool user_setting) {
         exit(1);
     }
 
-    err = clEnqueueWriteBuffer(cq, buf_k3, 0, 0, sizeof(ap_uint<64>) * sz_test, init_buf, 0, NULL, NULL);
-    clFinish(cq);
+    // err = clEnqueueWriteBuffer(cq, buf_k3, 0, 0, sizeof(ap_uint<64>) * sz_test, init_buf, 0, NULL, NULL);
+    // clFinish(cq);
 
-    err = clEnqueueWriteBuffer(cq, buf_k4, 0, 0, sizeof(ap_uint<64>) * sz_test, init_buf, 0, NULL, NULL);
-    clFinish(cq);
+    // err = clEnqueueWriteBuffer(cq, buf_k4, 0, 0, sizeof(ap_uint<64>) * sz_test, init_buf, 0, NULL, NULL);
+    // clFinish(cq);
     // init for
-    sort_64m_once(init_buf, init_buf, sz_64m, 1, 0);
-    sort_64m_once(init_buf, init_buf, sz_64m, 1, 1);
+    // sort_64m_once(init_buf, init_buf, sz_64m, 1, 0);
+    // sort_64m_once(init_buf, init_buf, sz_64m, 1, 1);
     std::cout << "start Initial done" << std::endl;
 }
 

@@ -48,7 +48,8 @@ class JoinConfig : protected BaseConfig {
     ap_uint<512>* table_join_cfg;
 
     // setup kernel config (table_join_cfg) for gqeJoin
-    void SetupKernelConfig(int join_type,
+    void SetupKernelConfig(bool build_probe,
+                           int join_type,
                            std::string filter_a,
                            std::string filter_b,
                            bool gen_rowID_en[2],
@@ -83,6 +84,7 @@ class JoinConfig : protected BaseConfig {
                std::string join_str, // comma separated
                Table c,
                std::string output_str, // comma separated
+               bool build_probe,
                int join_Type = INNER_JOIN);
 
     /**
@@ -110,6 +112,7 @@ class JoinConfig : protected BaseConfig {
                std::string join_str, // comma separated
                TableSection c,
                std::string output_str, // comma separated
+               bool build_probe,
                int join_Type = INNER_JOIN);
 
     /**

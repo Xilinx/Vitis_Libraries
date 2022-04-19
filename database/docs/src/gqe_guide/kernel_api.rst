@@ -35,7 +35,8 @@ These APIs are implemented as OpenCL kernels:
    :start-after: FunctionSection
 
 .. NOTE::
-   GQE has been tested on Alveo U280 card, and makes use of both HBM and DDR.
-   While other cards like U250 and U200 are not supported out-of-box,
+   3-in-1 GQE has been tested on Alveo U50 card, and makes only use of HBM.
+   Only gqeAggr is now still using the Alveo U280 card, and makes use of both HBM and DDR.
+   While other cards like U200 and U250 are not supported out-of-box,
    porting and gaining acceleration is surely possible, with tailoring and tuning.
 

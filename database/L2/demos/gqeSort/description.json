@@ -4,67 +4,37 @@
     "flow": "vitis",
     "gui": false,
     "platform_type": "pcie",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "u250"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
         "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            }, 
             "v++": {
-                "compiler": {
-                    "cflags": [
+                "linker": {
+                    "ldclflags": [
                         "--config PROJECT/conn_u250.cfg"
                     ]
                 }
             }
-        }, 
+        },
         "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            }, 
             "v++": {
-                "compiler": {
-                    "cflags": [
+                "linker": {
+                    "ldclflags": [
                         "--config PROJECT/conn_u200.cfg"
                     ]
                 }
             }
         }
     },
-    "pre_build": [
-        {
-            "build_cmd": "make -C PROJECT/gen_data data SS=1 LN=2 TARGET=$(TARGET) DEVICE=$(DEVICE)"
-        }
-    ],
     "launch": [
         {
-            "name": "generic launch for sw_emu flows",
-            "target": "sw_emu",
-            "cmd_args": " --xclbin BUILD/gqe_sorting.xclbin -i gen_data/demo_data/input_1M_0.dat -o gen_data/demo_data/output_1M_0.dat --accept-EULA"
-        },
-        {
-            "name": "generic launch for hw_emu flows",
-            "target": "hw_emu",
-            "cmd_args": " --xclbin BUILD/gqe_sorting.xclbin -i gen_data/demo_data/input_1M_0.dat -o gen_data/demo_data/output_1M_0.dat --accept-EULA"
-        },
-        {
-            "name": "generic launch for hw flows",
-            "target": "hw",
-            "cmd_args": " --xclbin BUILD/gqe_sorting.xclbin -i gen_data/demo_data/input_1M_0.dat -o gen_data/demo_data/output_1M_0.dat --accept-EULA"
+            "name": "generic launch default flow",
+            "cmd_args": "--xclbin BUILD/gqe_sorting.xclbin -g -i BUILD/input_1M_0.dat -o BUILD/output_1M_0.dat --accept-EULA"
         }
     ],
     "host": {
@@ -76,9 +46,10 @@
             ],
             "includepaths": [
                 "LIB_DIR/../utils/L1/include/",
+                "gen_data",
                 "host"
             ],
-            "options": "-O3 -std=c++14"
+            "options": "-O3 -g -std=c++14"
         }
     },
     "v++": {
@@ -282,6 +253,10 @@
             }
         ],
         "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run",
             "docker_build"
         ],
         "category": "canary"

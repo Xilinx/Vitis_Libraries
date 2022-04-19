@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <vector>
 
 namespace xclhost {
 
@@ -62,7 +63,7 @@ cl_int init_hardware(cl_context* context,
                      cl_command_queue* cmd_queue,
                      cl_command_queue_properties queue_props,
                      std::string& dsa_name,
-                     int device_id_user,
+                     unsigned device_id_user,
                      bool user_setting) {
     cl_int err;
 
@@ -107,7 +108,8 @@ cl_int init_hardware(cl_context* context,
                 err = clGetDeviceInfo(devices[did], CL_DEVICE_NAME, 256, device_name, 0);
                 printf("DEBUG: found device %d: %s\n", did, device_name);
                 std::string device_name_str(device_name);
-                if (device_name_str == "xilinx_u200_xdma_201830_2" || device_name_str == "xilinx_u250_xdma_201830_2") {
+                if (device_name_str.find("xilinx_u200_") != std::string::npos ||
+                    device_name_str.find("xilinx_u250_") != std::string::npos) {
                     printf("DEBUG: select device %d: %s\n", did, device_name);
                     dsa_name = device_name;
                     break; // choose the first one
@@ -140,7 +142,7 @@ cl_int init_hardware(cl_context* context,
     }
     if (pid == platform_count) {
         fprintf(stderr, "ERROR: Xilinx platform not found.\n");
-        fprintf(stderr, "DEBUG: %d Non-Xilinx platforms were found:\n", pls.size());
+        fprintf(stderr, "DEBUG: %lu Non-Xilinx platforms were found:\n", pls.size());
         for (std::string dname : pls) {
             fprintf(stderr, "dname\n");
         }

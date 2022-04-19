@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef XF_DATABASE_GQE_TRAITS_HPP
-#define XF_DATABASE_GQE_TRAITS_HPP
+#ifndef GQE_ISV_TRAITS_HPP
+#define GQE_ISV_TRAITS_HPP
 
 #include <hls_stream.h>
 #include <ap_int.h>
@@ -59,7 +59,22 @@ struct MaskU32 {
 };
 
 } // namespace gqe
+
+namespace details {
+
+/// @brief Duplicate signals
+template <int SIG_NUM, int SIG_WIDTH>
+void dup_signals(hls::stream<ap_uint<SIG_WIDTH> >& i_strm, hls::stream<ap_uint<SIG_WIDTH> > o_strm[SIG_NUM]) {
+    ap_uint<SIG_WIDTH> in = i_strm.read();
+    for (int i = 0; i < SIG_NUM; i++) {
+#pragma HLS unroll
+        o_strm[i].write(in);
+    }
+}
+
+} // namespace details
+
 } // namespace database
 } // namespace xf
 
-#endif
+#endif // GQE_ISV_GQE_TRAITS_HPP

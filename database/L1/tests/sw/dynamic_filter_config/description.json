@@ -2,16 +2,16 @@
     "name": "Xilinx Dynamic Filter Config HLS Test", 
     "description": "generation of configuration bits", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u280", 
         "u250", 
         "u200", 
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
     "project": "filter_test", 
     "solution": "sol1", 
     "clock": "2.5", 
@@ -40,10 +40,10 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": 300

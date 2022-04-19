@@ -1,5 +1,5 @@
 #
-# Copyright 2020 Xilinx, Inc.
+# Copyright 2020-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
 # limitations under the License.
 #
 
-#
-DEVICE ?= xilinx_u200_xdma_201830_2
-XDEVICE=$(basename $(notdir $(DEVICE)))
+ifeq ($(TARGET),)
+$(error TARGET must be set for gen_data/makefile!)
+endif
+ifeq ($(PLATFORM),)
+$(error PLATFORM must be set for gen_data/makefile!)
+endif
+XDEVICE=$(basename $(notdir $(PLATFORM)))
 SS ?= 1
 LN ?= 1
 VERSION ?=
-TARGET ?= sw_emu
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
