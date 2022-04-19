@@ -118,6 +118,12 @@ CXXFLAGS +=  -D USE_DDR -D TEST_DT=float -D DEVICE_PART=u200
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3 
 
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -D USE_DDR -D TEST_DT=float -D DEVICE_PART=u50
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS += -O3 
+
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_DDR -D TEST_DT=float -D DEVICE_PART=u250
@@ -143,6 +149,10 @@ endif
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 VPP_FLAGS +=   --config $(CUR_DIR)/conn_u200.cfg
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS +=   --config $(CUR_DIR)/conn_u50.cfg
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))

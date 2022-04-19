@@ -13,6 +13,22 @@
         "zc"
     ], 
     "platform_properties": {
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }, 
         "u200": {
             "host": {
                 "compiler": {

@@ -12,6 +12,24 @@
         "zc"
     ], 
     "platform_properties": {
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR",
+                        "TEST_DT=float", 
+                        "DEVICE_PART=u50"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }, 
         "u200": {
             "host": {
                 "compiler": {

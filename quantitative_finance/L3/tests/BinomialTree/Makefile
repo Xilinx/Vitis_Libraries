@@ -149,7 +149,7 @@ VPP_FLAGS_BinomialTreeKernel += --hls.clock 300000000:BinomialTreeKernel
 ifneq ($(HOST_ARCH), x86)
 VPP_LDFLAGS_binomialtree += --clock.defaultFreqHz 300000000
 else
-VPP_LDFLAGS_binomialtree += --kernel_frequency 300
+VPP_LDFLAGS_binomialtree += --kernel_frequency 250
 endif
 
 ifeq ($(HOST_ARCH), x86)

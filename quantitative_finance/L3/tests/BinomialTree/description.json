@@ -53,7 +53,7 @@
                     "name": "BinomialTreeKernel"
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 250.0, 
             "name": "binomialtree"
         }
     ], 
