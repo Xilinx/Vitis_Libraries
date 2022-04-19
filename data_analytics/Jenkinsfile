@@ -1,4 +1,4 @@
 @Library('pipeline-library')_
 VitisLibPipeline (branch: 'next', libname: 'xf_DataAnalytics', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build',
-                  upstream_dependencies: 'xf_utils_hw,next,../utils; xf_compression,next,../data_compression; xf_security,next,../security; xf_graph,next,../xf_graph; xf_database,next,../database',
+                  upstream_dependencies: 'xf_utils_hw,next,../utils; xf_compression,next,../data_compression; xf_security,next,../security; xf_graph,next,../graph; xf_database,next,../database',
                   devtest: 'RunDeploy.sh', TOOLVERSION: '2022.1_stable_latest')

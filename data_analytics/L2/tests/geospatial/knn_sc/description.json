@@ -38,7 +38,7 @@
                 "LIB_DIR/L2/include/hw",
                 "./host",
                 "./kernel",
-                "LIB_DIR/../xf_graph/L1/include/hw"
+                "LIB_DIR/../graph/L1/include/hw"
             ],
             "options": "-O3"
         }
@@ -47,7 +47,7 @@
         "compiler": {
             "includepaths": [
                 "./kernel",
-                "LIB_DIR/../xf_graph/L1/include/hw"
+                "LIB_DIR/../graph/L1/include/hw"
             ]
         }
     }, 

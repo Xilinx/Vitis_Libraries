@@ -125,7 +125,7 @@ endif
 
 #Inclue Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/host/main.cpp $(CUR_DIR)/kernel/knn_acc.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../xf_graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3
 
 EXE_NAME := host.exe
@@ -142,10 +142,10 @@ endif
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u2_gen3x4_xdma_gc_2_202110_1/'))
 VPP_FLAGS +=   -DUSE_U2
-VPP_FLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../xf_graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
+VPP_FLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
 
 else 
-VPP_FLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../xf_graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
+VPP_FLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
 
 endif
 
