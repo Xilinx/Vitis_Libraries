@@ -11,7 +11,7 @@ THe binary host file generated is named as "**xil_pairhmm**" and is present in `
 Executable Usage
 -----------------
 
-To execute Single PairHMM kernel :      ``./build/xil_pairhmm ./build/xclbin_<xsa_name>_<TARGET mode>/pairhmm.xclbin``
+To execute Single PairHMM kernel :      ``./build/xil_pairhmm ./build/xclbin_<xsa_name>_<TARGET mode>/pairhmm.xclbin --syn <number of tests>``
 
 
 

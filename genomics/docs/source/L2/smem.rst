@@ -19,11 +19,11 @@ Resource Utilization
 Table below presents resource utilization of Xilinx Smithwaterman Genomics
 kernels. The final Fmax achieved is 300MHz 
 
-============= ====== ====== ====== ======  ==== 
-Flow           LUT   LUTMem  REG    BRAM   URAM 
-============= ====== ====== ====== ======  ==== 
-Smithwaterman   46K     5k    60K    70     70       
-============= ====== ====== =====  ======  ==== 
+======= ===== ====== ===== ===== ===== 
+Flow    LUT   LUTMem REG   BRAM  URAM 
+======= ===== ====== ===== ===== ===== 
+SMEM    46K     5K   60K    70    70    
+======= ===== ====== ===== ===== =====  
 
 Performance Data
 ~~~~~~~~~~~~~~~~

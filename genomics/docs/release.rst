@@ -7,10 +7,12 @@ Release Note
    :hidden
    :maxdepth: 1
 
-2021.2
+2022.1
 ------
 
-Following is the 2021.2 release notes.
+Following is the 2022.1 release notes.
+
+* Three new Genomics accelerators are added namely Smithwaterman, PairHMM and SMEM
 
 * **Smithwaterman Algorithm**
    Created Smithwaterman Algorithm to provide high throughput than existing benchmark solution.

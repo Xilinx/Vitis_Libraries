@@ -27,7 +27,7 @@ The host executable generated is named as "**xil_pairhmm**" and it is generated 
 
 Following is the usage of the executable:
 
-To execute Single PairHMM kernel :      ``./build/xil_pairhmm ./build/xclbin_<xsa_name>_<TARGET mode>/pairhmm.xclbin``
+To execute Single PairHMM kernel :      ``./build/xil_pairhmm ./build/xclbin_<xsa_name>_<TARGET mode>/pairhmm.xclbin --syn <number of tests>``
 
 
 ===========================================================

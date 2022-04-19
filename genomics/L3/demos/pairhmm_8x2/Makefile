@@ -66,7 +66,7 @@ endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  u200 u250
-PLATFORM_BLOCKLIST +=  zc u50
+PLATFORM_BLOCKLIST +=  zc u50 vck190
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -115,14 +115,14 @@ endif
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 HOST_SRCS += $(CUR_DIR)/src/host.cpp $(wildcard $(XFLIB_DIR)/common/libs/pairhmm/*.cpp) $(wildcard $(XFLIB_DIR)/common/libs/xcl2/*.cpp) 
-CXXFLAGS +=  -D SLR0_PE_NUM=32 -D SLR1_PE_NUM=32 -D SLR2_PE_NUM=32 -D FPGA -D DIE_NUM=3
+CXXFLAGS +=  -D SLR0_PE_NUM=16 -D SLR1_PE_NUM=16 -D SLR2_PE_NUM=16 -D FPGA -D DIE_NUM=3
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/libs/pairhmm -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
 CXXFLAGS += --sysroot=$(SYSROOT)
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
 
 else 
 HOST_SRCS += $(CUR_DIR)/src/host.cpp $(wildcard $(XFLIB_DIR)/common/libs/pairhmm/*.cpp) $(wildcard $(XFLIB_DIR)/common/libs/xcl2/*.cpp) 
-CXXFLAGS +=  -D SLR0_PE_NUM=32 -D SLR1_PE_NUM=32 -D SLR2_PE_NUM=32 -D FPGA -D DIE_NUM=3
+CXXFLAGS +=  -D SLR0_PE_NUM=16 -D SLR1_PE_NUM=16 -D SLR2_PE_NUM=16 -D FPGA -D DIE_NUM=3
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/libs/pairhmm -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/xcl2 -I $(XFLIB_DIR)/common/libs/cmdparser -I $(XFLIB_DIR)/common/libs/logger
 
 endif
@@ -136,12 +136,10 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -D SLR_PE_NUM=32 -D FPGA
+VPP_FLAGS +=  -D SLR_PE_NUM=16 -D FPGA
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/common/libs/pairhmm -I $(XFLIB_DIR)/L2/src -I $(XFLIB_DIR)/L2/src -I $(XFLIB_DIR)/common/libs
 
 ######################### binary container global settings ##########################
-VPP_LDFLAGS_pairhmm_temp := --config $(CUR_DIR)/auto_pairhmm.cfg
-VPP_LDFLAGS_pairhmm += $(VPP_LDFLAGS_pairhmm_temp)
 
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/pairhmm.xclbin
@@ -216,23 +214,12 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-vck190_dfx_hw := false
 $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-ifeq ($(findstring vck190_base_dfx, $(PLATFORM_NAME)), vck190_base_dfx)
-ifeq ($(TARGET),$(filter $(TARGET), hw))
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
-	@echo "### ***** sd_card generation done! ***** ###"
-vck190_dfx_hw := true
-endif
-endif
-ifeq ($(vck190_dfx_hw), false)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)

@@ -2,12 +2,12 @@
 Xilinx PairHMM Genomics
 =========================================
 
-PairHMM Algorithm resides in ``L2/tests/pairhmm`` directory.
+PairHMM Algorithm resides in ``L2/tests/pairhmm_8x2`` directory.
 
 Xilinx PairHMM Algorithm is FPGA based implementation of
 standard PairHMM. Xilinx implementation of PairHMM application is 
 aimed for achieving high throughput. This Xilinx PairHMM 
-application is developed and tested on Xilinx Alveo U200. 
+application is developed and tested on Xilinx Alveo U250. 
 
 
 Results
@@ -17,13 +17,13 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx Smithwaterman Genomics
-kernels. The final Fmax achieved is 300MHz 
+kernels. The final Fmax achieved is 300MHz. 
 
-============= ====== ====== ======  ==== 
-Flow           LUT    DSP    BRAM   URAM 
-============= ====== ====== ======  ====  
-PairHMM        253K   2K      95     56
-============= ====== ====== ======  ====
+============= ======= ====== ======  ==== 
+Flow           LUT     DSP    BRAM   URAM 
+============= ======= ====== ======  ====  
+PairHMM        66.9K   504     35     32
+============= ======= ====== ======  ====
 
 Performance Data
 ~~~~~~~~~~~~~~~~
@@ -34,7 +34,7 @@ unit.
 ====================== =========================
 Topic                      Results
 ====================== =========================
-Genomics Throughput         11GCUPS
+Genomics Throughput         4.8GCups
 ====================== =========================
 
 Note: Overall throughput can still be increased with multiple compute
@@ -51,7 +51,7 @@ Software & Hardware
 Executable Usage
 ----------------
  
-To execute pairHMM kernel  : ``./build/xil_pairhmm ./build/xclbin_<xsa_name>_<TARGET mode>/<___.xclbin>``
+To execute pairHMM kernel  : ``./build/xil_pairhmm ./build/xclbin_<xsa_name>_<TARGET mode>/pairhmm.xclbin --syn <number of tests>``
  
            
 

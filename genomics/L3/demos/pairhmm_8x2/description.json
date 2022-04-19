@@ -12,7 +12,8 @@
     ], 
     "platform_blocklist": [
         "zc", 
-        "u50"
+        "u50",
+	"vck190"
     ], 
     "platform_allowlist": [
         "u200",
@@ -33,9 +34,9 @@
                 "LIB_DIR/common/libs/xcl2"
             ], 
             "symbols": [
-                "SLR0_PE_NUM=32",
-                "SLR1_PE_NUM=32",
-                "SLR2_PE_NUM=32",
+                "SLR0_PE_NUM=16",
+                "SLR1_PE_NUM=16",
+                "SLR2_PE_NUM=16",
                 "FPGA",
                 "DIE_NUM=3"
             ]
@@ -50,15 +51,14 @@
                  "LIB_DIR/L2/src"
             ],
             "symbols": [
-                "SLR_PE_NUM=32",
+                "SLR_PE_NUM=16",
                 "FPGA"
             ]
         }
     }, 
     "containers": [
         {
-            "name": "pairhmm", 
-            "ldclflags": "--config PROJECT/auto_pairhmm.cfg", 
+            "name": "pairhmm",  
             "accelerators": [
                 {
                     "name": "pairhmm", 
