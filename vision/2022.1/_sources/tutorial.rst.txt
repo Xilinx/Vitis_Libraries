@@ -1,0 +1,240 @@
+<table>
+ <tr>
+   <td align="center"><img src="https://www.xilinx.com/content/dam/xilinx/imgs/press/media-kits/corporate/xilinx-logo.png" width="30%"/><h1>2022.1 Vitis™ Vision Application Development Flow Tutorials</h1>
+   </td>
+ </tr>
+</table>
+
+Getting Started with Vitis Vision Libraries
+############################################
+
+In the first section, this tutorial focuses on how to leverage the Vitis Vision Libraries to build your own design. The tutorial will use L1 library custom convolution as an example. It contains instructions from cloning the library, compile and simulate on its own till instantiate it into top-level design.
+
+Before You Begin
+=================
+
+Setup Environment
+~~~~~~~~~~~~~~~~~~
+Before playing with the libraries, you need to set up Vitis environment first. For how to set up Vitis environment, please refer to https://www.xilinx.com/html_docs/xilinx2022_1/vitis_doc/settingupvitisenvironment.html#zks1565446519267.
+Below are the example scripts to do environment settings for L1 functions:
+
+```
+$ source <Vitis Tool Installation Path>/Xilinx/Vitis/2022.1/settings64.sh
+$ export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+$ source <XRT Installation Path>/xilinx/xrt/setup.sh
+$ export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+$ export OPENCV_LIB=< path-to-opencv-lib-folder >
+$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+
+```
+
+Get Vitis Libraries
+~~~~~~~~~~~~~~~~~~~~
+
+Now we need to clone the Vitis Libraries into local path.
+
+The Vitis Library repo is located at this link:
+https://github.com/Xilinx/Vitis_Libraries. Assuming you are using $/home/project$ as working directory, then use following command to clone the Vitis Library repository into the working directory:
+
+```
+cd /home/project
+git clone https://github.com/Xilinx/Vitis_Libraries.git
+```
+
+This will take a few seconds to minutes for downloading depending on network.
+After it is completed, you may browse into the sub folders to get familiar with the file structure.
+
+~~~
+Vitis_Libraries/
+├── Jenkinsfile
+├── LICENSE.txt
+├── README.md
+├── blas/
+├── codec/
+├── data_analytics/
+├── data_compression/
+├── database/
+├── dsp/
+├── graph/
+├── hpc/
+├── quantitative_finance/
+├── security/
+├── solver/
+├── sparse/
+├── utils/
+└── vision/
+~~~
+
+There are many different categories of libraries under the top-level folder. In this lab, we are going to use the **vision** library. So, let’s enter the sub-directory *vision*, and you can find following directory structure.
+
+~~~
+vision/
+├── Jenkinsfile
+├── L1/
+│   ├── README.md
+│   ├── examples/
+│   ├── include/
+│   ├── lib/
+│   └── tests/
+├── L2/
+│   ├── README.md
+│   ├── examples/
+│   └── tests/
+├── L3/
+│   ├── README.md
+│   ├── benchmarks/
+│   ├── examples/
+│   └── tests/
+├── data/
+├── LICENSE.txt
+├── README.md
+├── docs/
+│   ├── images/
+│   ├── include/
+│   ├── Makefile
+│   ├── Makefile.sphinx
+│   ├── rst files
+│   ├── conf.py
+│   ├── conf_bhp.py
+│   ├── env.csh
+├── ext/
+│   ├── make_utility/
+│   └── xcl2/
+└── library.json
+~~~
+
+This library is written in C++ and it contains three levels of abstractions.
+
+* L1: Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels' use model in HLS flow
+* L2: Examples that evaluate the Vitis Vision kernels and demonstrate the kernels' use model in Vitis flow.
+* L3: Applications formed by stitching a pipeline of Vitis Vision functions.
+
+Running the Tutorial
+=====================
+
+Create and run an HLS project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this step, we are going to create an HLS project by using the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L1/examples/customconv. The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into */home/project/Vitis_Libraries* directory.
+
+1. Go into the `/home/project/Vitis_libraries/vision/L1/examples/customconv` folder and run below command to create the HLS project.
+
+```
+ make run CSIM=1 CSYNTH=1 COSIM=1
+```
+By executing the command, it will run through project creation, C simulation, C synthesis, and Co-simulation flow. You can modify the parameter to skip certain steps. After the execution, console window will print out the verification results and show ***PASS*** at the end of simulation.
+
+~~~
+
+INFO: Verification results:
+        Minimum error in intensity = 0
+        Maximum error in intensity = 1
+        Percentage of pixels above error threshold = 0
+
+INFO: [COSIM 212-1000] *** C/RTL co-simulation finished: PASS ***
+
+~~~
+
+Once your job is complete, the minimum error in intensity, maximum error in intensity, percentage of pixels above error threshold is displayed on screen. The testbench uses an image as input to the customconv and produces the output image and difference image, which are shown below:
+Input image:
+![](images/ref_img.jpg)
+Output image:
+![](images/out_img.jpg)
+Difference image:
+![](images/diff_img.jpg)
+
+2. Now we will open the project in Vitis HLS GUI. Enter the following  `/home/project/Vitis_libraries/vision/L1/examples/customconv` directory and run the below command:
+
+```
+vitis_hls -p customconv.prj &
+```
+
+You may browse into the source files, synthesis report or waveform viewer by simply selecting them from the 'Explorer' window and 'Flow Navigator' window.
+
+The xf_custom_convolution_tb.cpp calls the Filter2d accel and the parameters are defined in the xf_custom_convolution_config.h and xf_config_params.h files. For detailed instructions about how to use custom convolution, please refer to the github page at: https://xilinx.github.io/Vitis_Libraries/vision/2022.1/api-reference.html#custom-convolution.
+
+3. Export IP in HLS project
+
+Now we have verified that the library IP is working properly and we will export it to a Vivado IP. To do so, click the `Export RTL` from *IMPLEMENTATION* item in *Flow Navigator*. In the pop-up window, we will leave every settings unchanged and click `OK` to export the IP.
+By default, the IP will be exported to the <project folder>/solN/impl; in this case, it is in following directory:
+
+~~~
+/home/project/Vitis_Libraries/vision/L1/examples/customconv/customconv.prj/sol1/impl
+~~~
+
+However, you may customize the path in the export pop-up menu.
+
+4. View Co-Simulation Waveform
+
+You could modify the co-simulation related command lines in file *./run_hls.tcl* (around line 46) as below to turn-on the xsim waveform dump switch:
+
+~~~
+...
+if {$COSIM == 1} {
+  cosim_design -wave_debug
+}
+...
+~~~
+
+Then re-run the command:
+
+```
+ make run COSIM=1 
+```
+
+You can also perform this operation in GUI, by clicking Run Co-Simulation icon in Flow Navigator and selecting Wave debug option. In this way you could get the simulation waveform, as shown in following example image:
+
+![](images/cosim_wave.png)
+
+
+5. Implement the top-level project
+
+Click `Run Implementation` from Flow navigator panel and click ***OK*** in the pop-up window. This will run through the Vivado synthesis and implementation flow which will generate both timing and resource reports for this IP.
+
+### Create and run a Vitis project
+
+In this section, we are going to create a Vitis project by using the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L2/examples/customconv. The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into */home/project/Vitis_Libraries* directory.
+
+Go into the `/home/project/Vitis_libraries/vision/L2/examples/customconv` folder and run below command to create the HLS project for a DC platform like U200.
+
+```
+ make run TARGET=sw_emu
+```
+To delete generated files
+
+```
+ make cleanall
+```
+Here, `TARGET` decides the FPGA binary type
+
+* `sw_emu` is for software emulation
+* `hw_emu` is for hardware emulation
+* `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
+
+Besides `run`, the Vitis case makefile also allows `host` and `xclbin` as build target.
+At the end of the flow, console window will print out the verification results and show ***Test Passed .... !!!*** at the end of simulation. The output image is saved in the working directory.
+
+~~~
+...
+
+INFO: Verification results:
+        Minimum error in intensity = 0
+        Maximum error in intensity = 1
+        Percentage of pixels above error threshold = 0
+
+Test Passed .... !!!
+
+...
+
+~~~
+
+Summary
+========
+
+In this tutorial, we explained how to leverage a L1 and L2 Vitis library element to build your own design. The custom convolution example is selected for explanation, and you may follow similar flow to use other library elements.
+
+Reference
+==========
+
+Documentation on Vitis Libraries: https://xilinx.github.io/Vitis_Libraries/
+
