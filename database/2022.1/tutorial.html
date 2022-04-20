@@ -230,7 +230,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -298,6 +298,7 @@ function OptanonWrapper() { }
 			
 				<h3>Versions</h3>
 				<ul>
+				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
@@ -374,7 +375,7 @@ Users only need to specify the result they want with a query language like SQL.
 DBMS converts a query into an execution plan which is a tree of operators, based on certain set of rules and cost functions.
 Execution of the plan is that data flows from the leaves towards the root and the root node produce the final result.
 Query execution performances depends on both execution plan and performance of operator nodes.</p>
-<a class="reference internal image-reference" href="images/exe_plan.png"><img alt="Execution Plan" class="align-center" src="images/exe_plan.png" /></a>
+<a class="reference internal image-reference" href="_images/exe_plan.png"><img alt="Execution Plan" class="align-center" src="_images/exe_plan.png" style="width: 602.2px; height: 308.8px;" /></a>
 <p>Xilinx Alveo card can help improve operator performance in following way:</p>
 <ol class="arabic simple">
 <li>Instruction parallelism by creating a customized and long pipeline.</li>
@@ -410,13 +411,12 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 <li>Generalized query execution. L3 API pre-defined operator combinations like “scan + filter + aggregation + write”, “scan + filter + bloom filter + write”, “scan + filter + hash-join + write”, “scan + filter + aggregation + write”. Filter condition support comparision between 4 input columns and 2 constants. Aggregation support max / min / sum / count / mean / variance / norm_L1 / norm_L2. In this way, L3 API could support a generalized query operators.</li>
 <li>Automatic card management. As soon as program created a instance of GQE, it will scan the machine and find all qualified Xilinx FPGA cards by their shell name. It will load the cards with the xclbins, create context / command queue / kernel / host buffer / device buffer / job queue for each card. It will keep alive until user call release() functions. This will finish all the initialization automatically and save the overhead to repeat such setup each time user call GQE API.</li>
 </ol>
-<a class="reference internal image-reference" href="images/card_mng.png"><img alt="Card Management" class="align-center" src="images/card_mng.png" /></a>
+<a class="reference internal image-reference" href="_images/card_mng.png"><img alt="Card Management" class="align-center" src="_images/card_mng.png" style="width: 570.0px; height: 289.6px;" /></a>
 <ol class="arabic simple" start="3">
 <li>Light weight memory management. The input and output of GQE are data structure call “TableSection”. It only contains pointers to memories which user allocated. In such way, GQE won’t do memory allocation related to input / output. This will make it easier for customer to integrate since it won’t impact original DBMS’s memory pool managment.</li>
 <li>Asynchronous API call. Input for processing will be cut into multiple section of rows. GQE API requries customer to provide an std::future type argument for each row, to indicate readiness of input. GQE also requires an std::promise type arugment for each output section, to notify the caller thread that result is ready. GQE API will push all input arguments into an internal job queue and return immediately. Actual processing won’t begin until the corresponding std::future arguments for input is ready. This will seperate input preparing from actual GQE processing. GQE could start processing the ready sections ahead even if not all input sections are ready. It will help pipeline the “preparing” and “processing” and improve system performance.</li>
 <li>Column-oriented. Columnar DBMS will benefit from only accessing subset of columns and more options for data compression.</li>
 </ol>
-<a class="reference internal image-reference" href="images/asyn_call.png"><img alt="Asynchronous API" class="align-center" src="images/asyn_call.png" /></a>
 </div>
 <div class="section" id="example-usage">
 <h3>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h3>
@@ -578,7 +578,7 @@ if the corresponding step is not wanted.</p>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 13, 2022.
+        Last updated on April 20, 2022.
       </span>
 
     </p>

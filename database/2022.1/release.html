@@ -230,7 +230,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -259,11 +259,12 @@ function OptanonWrapper() { }
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Vitis Database Library</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Release Note</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id2">2021.2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id3">2021.1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4">2020.2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id5">2020.1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id6">2019.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">2022.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">2021.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">2021.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">2020.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">2020.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">2019.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#internal-release">Internal Release</a></li>
 </ul>
 </li>
@@ -287,6 +288,7 @@ function OptanonWrapper() { }
 			
 				<h3>Versions</h3>
 				<ul>
+				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
 				  <li><a href=""></a></li>
@@ -359,7 +361,18 @@ function OptanonWrapper() { }
 <div class="toctree-wrapper compound">
 </div>
 <div class="section" id="id2">
-<h2>2021.2<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>2022.1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>In 2022.1 release, database library introduce (1) GQE combines partition / bloomfilter / join into single kernel (2) Key-Value store offloading.</p>
+<ul class="simple">
+<li>Merge partition / bloomfilter / join into single kernel make three operators shares resource on FPGA. Although such kernel
+could only performance one of the three operators at the same time, it will take much less resource than 3 stand alone kernels.
+With such design, it will help eliminate the time cost to switch xclbins for different operators. Also such design will enable
+pipelined execution of kernels and reduce DMA workload. This design targets for U50. U50 costs less and still retains HBM.</li>
+<li>Key-Value store offloading introduce a new kernel for accelerate K-V compaction operation in log-structure merge tree database.</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>2021.2<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>In 2021.2 release, GQE start to support asynchronous input / output feature, along with multi-card support.</p>
 <ul class="simple">
 <li>Asynchronous input / output: use std::future&lt;size_t&gt; to notify GQE L3 readiness of each input sections, and its value
@@ -373,8 +386,8 @@ keep pinned host buffer and device buffer alive before they’re explicitly rele
 xclbins / create pinned buffer / create device buffer.</li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h2>2021.1<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>2021.1<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>In 2021.1 release, GQE receives early-access support the following features</p>
 <ul class="simple">
 <li>64-bit join support: now the gqeJoin kernel and its companion gqePart kernel has been extended to 64-bit
@@ -384,8 +397,8 @@ This improves efficiency on certain multi-node flows where minimizing data size 
 </ul>
 <p>Both features are offered now as L3 pure software APIs, please check corresponding L3 test cases.</p>
 </div>
-<div class="section" id="id4">
-<h2>2020.2<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2>2020.2<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>The 2020.2 release brings a major update to the GQE kernel design, and brand new L3 APIs for JOIN and GROUP-BY
 AGGREGATE.</p>
 <ul class="simple">
@@ -404,8 +417,8 @@ The strategy of execution is separated from execution, so database gurus can fin
 statistics, without messing with the OpenCL execution part.</li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h2>2020.1<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>2020.1<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>The 2020.1 release contains:</p>
 <ul class="simple">
 <li>Compound sort API (compoundSort): Previously three sort algorithm modules have been provided,
@@ -418,8 +431,8 @@ to avoid this problem.</li>
 <li>Various bug fixes: many small issues has been cleaned up, especially in host code of L2/demos.</li>
 </ul>
 </div>
-<div class="section" id="id6">
-<h2>2019.2<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h2>2019.2<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>The 2019.2 release introduces GQE (generic query engine) kernels,
 which are post-bitstream programmable
 and allow different SQL queries to be accelerated with one xclbin.
@@ -467,7 +480,7 @@ when possible.</p>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 13, 2022.
+        Last updated on April 20, 2022.
       </span>
 
     </p>
