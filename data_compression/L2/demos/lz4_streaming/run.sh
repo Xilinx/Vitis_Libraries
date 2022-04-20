@@ -3,8 +3,12 @@ EXE_FILE=$1
 LIB_PROJ_ROOT=$2
 XCLBIN_FILE=$3
 echo "XCL_MODE=${XCL_EMULATION_MODE}"
-if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] 
+PLATFORM_NAME=${PLATFORM}
+DEV='vck190'
+if [[ "$PLATFORM_NAME" != *"$DEV"* ]];
 then
+ if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] 
+ then
     cp $LIB_PROJ_ROOT/common/data/sample.txt ./sample_run.txt
     cp $LIB_PROJ_ROOT/common/data/test.list ./test.list
     find ./reports/ -type f | xargs cat >> ./sample_run.txt
@@ -16,5 +20,5 @@ then
     cmd1="$EXE_FILE -l ./test.list -mcr 20 -xbin $XCLBIN_FILE"
     echo $cmd1
     $cmd1
-
+  fi
 fi

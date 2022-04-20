@@ -1,116 +1,114 @@
 {
-    "name": "Xilinx ZSTD Compress 32KB Block Quad engine", 
+    "name": "Xilinx ZSTD Compress 32KB Block Quad engine",
     "description": [
         "Xilinx ZSTD Compression for 32KB block with four compression engine"
-    ], 
+    ],
     "flow": "vitis",
     "default_device": "u200",
-    "platform_blocklist": [
-        "xilinx_vck190_base_202210_1"
-    ],
+    "platform_blocklist": [],
     "platform_allowlist": [
-        "u200", 
-        "u250", 
-        "u50", 
+        "u200",
+        "u250",
+        "u50",
         "u280",
-        "vck190", 
+        "vck190",
         "aws-vu9p-f1"
     ],
     "data": [
-        "PROJECT/data/sample.txt" 
-    ],   
+        "PROJECT/data/sample.txt"
+    ],
     "launch": [
         {
-            "cmd_args": "-xbin BUILD/xilZstdCompressStream.xclbin -c PROJECT/data/sample.txt", 
+            "cmd_args": "-xbin BUILD/xilZstdCompressStream.xclbin -c PROJECT/data/sample.txt",
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
     "post_launch": [
         {
             "launch_cmd": [
-                  "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/xilZstdCompressStream.xclbin"
-             ]
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/xilZstdCompressStream.xclbin"
+            ]
         }
-    ], 
+    ],
     "config_make": "./config.mk",
     "host": {
-        "host_exe": "xil_zstd", 
+        "host_exe": "xil_zstd",
         "compiler": {
             "sources": [
                 "./src/host.cpp",
                 "LIB_DIR/common/libs/compress/zstdOCLHost.cpp",
-                "LIB_DIR/common/libs/compress/zstdApp.cpp", 
-                "LIB_DIR/common/libs/compress/compressApp.cpp", 
-                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
-                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
-                "LIB_DIR/common/libs/logger/logger.cpp" 
-            ], 
+                "LIB_DIR/common/libs/compress/zstdApp.cpp",
+                "LIB_DIR/common/libs/compress/compressApp.cpp",
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
+                "LIB_DIR/common/libs/logger/logger.cpp"
+            ],
             "includepaths": [
                 "LIB_DIR/common/libs/compress/",
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include/hw",
                 "LIB_DIR/L2/tests/src"
-            ], 
+            ],
             "symbols": [
-                "MULTIPLE_BYTES=8", 
-                "ZSTD_BLOCK_SIZE_KB=32", 
+                "MULTIPLE_BYTES=8",
+                "ZSTD_BLOCK_SIZE_KB=32",
                 "CORE_NUM=4"
             ]
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "symbols": [
-                "MULTIPLE_BYTES=8", 
-                "ZSTD_BLOCK_SIZE_KB=32", 
+                "MULTIPLE_BYTES=8",
+                "ZSTD_BLOCK_SIZE_KB=32",
                 "CORE_NUM=4"
             ]
         }
-    }, 
+    },
     "containers": [
         {
-            "name": "xilZstdCompressStream", 
-            "ldclflags": "--config PROJECT/connectivity.cfg", 
+            "name": "xilZstdCompressStream",
+            "ldclflags": "--config PROJECT/connectivity.cfg",
             "accelerators": [
                 {
-                    "name": "xilZstdCompress", 
+                    "name": "xilZstdCompress",
                     "location": "LIB_DIR/L2/src/zstd_compress_multicore_stream.cpp"
                 },
                 {
-                    "name": "xilZstdDataMover", 
+                    "name": "xilZstdDataMover",
                     "location": "LIB_DIR/L2/tests/src/zstd_datamover.cpp"
                 }
             ]
         }
-    ], 
-    "output_files": "data/sample.txt.*", 
+    ],
+    "output_files": "data/sample.txt.*",
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 300, 
-                    "vitis_sw_emu": 25, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 300,
+                    "vitis_sw_emu": 25,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     },
     "platform_properties": {
@@ -118,17 +116,23 @@
             "host": {
                 "linker": {
                     "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
+                        "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/opt/xilinx/xrt/lib"
                     ]
-                }, 
+                },
                 "compiler": {
                     "includepaths": [
                         "$(SYSROOT)/usr/include"
                     ],
                     "options": "--sysroot=$(SYSROOT)"
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "xilZstdCompressStream",
+                    "ldclflags": "--config PROJECT/connectivity.cfg --clock.id 4:xilZstdCompress_1"
+                }
+            ]
         }
     }
 }

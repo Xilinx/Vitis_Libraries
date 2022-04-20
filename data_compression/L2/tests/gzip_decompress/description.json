@@ -20,8 +20,7 @@
     "config_make": "./config.mk",
     "default_device": "u200",
     "platform_blocklist": [
-        "zc",
-        "xilinx_vck190_base_202210_1"
+        "zc"
     ],
     "platform_allowlist": [
         "u200",
@@ -141,7 +140,13 @@
                     ],
                     "options": "--sysroot=$(SYSROOT)"
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "decompress",
+                    "ldclflags": "--config PROJECT/connectivity.cfg --clock.id 4:xilDecompress_1"
+                }
+            ]
         }
     }
 }

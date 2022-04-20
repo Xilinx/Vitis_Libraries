@@ -66,7 +66,7 @@ endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  u200 u250 u50 vck190 aws-vu9p-f1
-PLATFORM_BLOCKLIST +=  zc xilinx_vck190_base_202210_1
+PLATFORM_BLOCKLIST +=  zc
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -88,7 +88,7 @@ RUN_DEPS :=
 # get global setting
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0  -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel 
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -Wl,--as-needed -lOpenCL -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
@@ -140,9 +140,15 @@ VPP_FLAGS +=  -D MULTIPLE_BYTES=8 -D GZIP_MODE=1
 VPP_FLAGS +=  -I $(XFLIB_DIR)/../security/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/src
 
 ######################### binary container global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+VPP_LDFLAGS_decompress_temp := --config $(CUR_DIR)/connectivity.cfg --clock.id 4:xilDecompress_1
+VPP_LDFLAGS_decompress += $(VPP_LDFLAGS_decompress_temp)
+
+else 
 VPP_LDFLAGS_decompress_temp := --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_decompress += $(VPP_LDFLAGS_decompress_temp)
 
+endif
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress.xclbin
 else
@@ -330,11 +336,12 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
+	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
+	-$(RMDIR) _x_temp.* $(CUR_DIR)/test.list $(CUR_DIR)/sample_run.* $(CUR_DIR)/data/sample.txt.gz.* 
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) $(CUR_DIR)/test.list $(CUR_DIR)/sample_run.* $(CUR_DIR)/data/sample.txt.gz.* 
 
 clean: cleanh

@@ -66,7 +66,7 @@ endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  u200 u250 u280 vck190 aws-vu9p-f1
-PLATFORM_BLOCKLIST +=  xilinx_vck190_base_202210_1
+PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -88,7 +88,7 @@ RUN_DEPS :=
 # get global setting
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0  -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel 
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -Wl,--as-needed -lOpenCL -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
@@ -140,9 +140,15 @@ VPP_FLAGS +=  -D MULTIPLE_BYTES=8 -D ZSTD_BLOCK_SIZE_KB=32 -D CORE_NUM=6
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/src
 
 ######################### binary container global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+VPP_LDFLAGS_xilZstdCompressStream_temp := --config $(CUR_DIR)/connectivity.cfg --clock.id 4:xilZstdCompress_1
+VPP_LDFLAGS_xilZstdCompressStream += $(VPP_LDFLAGS_xilZstdCompressStream_temp)
+
+else 
 VPP_LDFLAGS_xilZstdCompressStream_temp := --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_xilZstdCompressStream += $(VPP_LDFLAGS_xilZstdCompressStream_temp)
 
+endif
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/xilZstdCompressStream.xclbin
 else
@@ -226,9 +232,9 @@ $(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-ifeq ($(findstring vck190_base_dfx, $(PLATFORM_NAME)),vck190_base_dfx)
+ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
 ifeq ($(TARGET),hw)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 vck190_dfx_hw := true
@@ -325,11 +331,12 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
+	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
+	-$(RMDIR) _x_temp.* $(CUR_DIR)/* $(CUR_DIR)/. $(CUR_DIR)/t $(CUR_DIR)/x $(CUR_DIR)/t $(CUR_DIR)/. $(CUR_DIR)/e $(CUR_DIR)/l $(CUR_DIR)/p $(CUR_DIR)/m $(CUR_DIR)/a $(CUR_DIR)/s $(CUR_DIR)// $(CUR_DIR)/a $(CUR_DIR)/t $(CUR_DIR)/a $(CUR_DIR)/d 
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) $(CUR_DIR)/* $(CUR_DIR)/. $(CUR_DIR)/t $(CUR_DIR)/x $(CUR_DIR)/t $(CUR_DIR)/. $(CUR_DIR)/e $(CUR_DIR)/l $(CUR_DIR)/p $(CUR_DIR)/m $(CUR_DIR)/a $(CUR_DIR)/s $(CUR_DIR)// $(CUR_DIR)/a $(CUR_DIR)/t $(CUR_DIR)/a $(CUR_DIR)/d 
 
 clean: cleanh

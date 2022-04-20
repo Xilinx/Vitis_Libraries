@@ -9,12 +9,25 @@ List below presents infrastructure required to build & deploy this demo.
 Mandatory requirements are marked accordingly in order to get this demo working in
 deployment environment. Vitis is required only for development.
 
-    ``Vitis: 2022.1_released (Only for Developers)``
+    ``Vitis: 2022.1``
     
-    ``XRT: 2022.1_PU1 (Mandatory)``
-    
-    ``SHELL: u50_gen3x16_xdma_201920_3 (Mandatory)``
-    
+    ``SHELL: u50_gen3x16_xdma``
+
+Setup
+-----
+
+``source scripts/setup.csh``
+
+Build
+-----
+
+Emulation:
+
+``make run TARGET=<sw_emu/hw_emu> DEVICE=< absolute path to u50 xpfm >``
+
+Hardware:
+
+``make all TARGET=hw DEVICE=< absolute path to u50 xpfm >``
     
 Application Usage
 -----------------
