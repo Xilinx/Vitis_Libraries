@@ -226,7 +226,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -355,21 +355,21 @@ function OptanonWrapper() { }
             
   <div class="section" id="xilinx-pairhmm-genomics">
 <h1>Xilinx PairHMM Genomics<a class="headerlink" href="#xilinx-pairhmm-genomics" title="Permalink to this headline">¶</a></h1>
-<p>PairHMM Algorithm resides in <code class="docutils literal notranslate"><span class="pre">L2/tests/pairhmm</span></code> directory.</p>
+<p>PairHMM Algorithm resides in <code class="docutils literal notranslate"><span class="pre">L2/tests/pairhmm_8x2</span></code> directory.</p>
 <p>Xilinx PairHMM Algorithm is FPGA based implementation of
 standard PairHMM. Xilinx implementation of PairHMM application is
 aimed for achieving high throughput. This Xilinx PairHMM
-application is developed and tested on Xilinx Alveo U200.</p>
+application is developed and tested on Xilinx Alveo U250.</p>
 <div class="section" id="results">
 <h2>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="resource-utilization">
 <h3>Resource Utilization<a class="headerlink" href="#resource-utilization" title="Permalink to this headline">¶</a></h3>
 <p>Table below presents resource utilization of Xilinx Smithwaterman Genomics
-kernels. The final Fmax achieved is 300MHz</p>
+kernels. The final Fmax achieved is 300MHz.</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="37%" />
-<col width="17%" />
+<col width="36%" />
+<col width="19%" />
 <col width="17%" />
 <col width="17%" />
 <col width="11%" />
@@ -384,10 +384,10 @@ kernels. The final Fmax achieved is 300MHz</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>PairHMM</td>
-<td>253K</td>
-<td>2K</td>
-<td>95</td>
-<td>56</td>
+<td>66.9K</td>
+<td>504</td>
+<td>35</td>
+<td>32</td>
 </tr>
 </tbody>
 </table>
@@ -408,7 +408,7 @@ unit.</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>Genomics Throughput</td>
-<td>11GCUPS</td>
+<td>4.8GCups</td>
 </tr>
 </tbody>
 </table>
@@ -425,7 +425,7 @@ units.</p>
 </div>
 <div class="section" id="executable-usage">
 <h2>Executable Usage<a class="headerlink" href="#executable-usage" title="Permalink to this headline">¶</a></h2>
-<p>To execute pairHMM kernel  : <code class="docutils literal notranslate"><span class="pre">./build/xil_pairhmm</span> <span class="pre">./build/xclbin_&lt;xsa_name&gt;_&lt;TARGET</span> <span class="pre">mode&gt;/&lt;___.xclbin&gt;</span></code></p>
+<p>To execute pairHMM kernel  : <code class="docutils literal notranslate"><span class="pre">./build/xil_pairhmm</span> <span class="pre">./build/xclbin_&lt;xsa_name&gt;_&lt;TARGET</span> <span class="pre">mode&gt;/pairhmm.xclbin</span> <span class="pre">--syn</span> <span class="pre">&lt;number</span> <span class="pre">of</span> <span class="pre">tests&gt;</span></code></p>
 <blockquote>
 <div><ul class="simple">
 <li>Note: Default arguments are set in Makefile</li>
@@ -463,7 +463,7 @@ units.</p>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 14, 2022.
+        Last updated on April 20, 2022.
       </span>
 
     </p>

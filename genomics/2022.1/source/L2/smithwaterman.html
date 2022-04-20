@@ -226,7 +226,7 @@ function OptanonWrapper() { }
             
             
               <div class="version">
-                2021.2
+                2022.1
               </div>
             
           
@@ -357,14 +357,43 @@ function OptanonWrapper() { }
 <h1>Xilinx Smithwaterman Genomics<a class="headerlink" href="#xilinx-smithwaterman-genomics" title="Permalink to this headline">¶</a></h1>
 <p>Smithwaterman demo resides in <code class="docutils literal notranslate"><span class="pre">L2/demos/smithwaterman</span></code> directory.</p>
 <p>Xilinx Smithwaterman Algorithm is FPGA based implementation of
-standard Smithwaterman. Xilinx implementation of Smithwaterman application                                                                                   is aimed for achieving high throughput. This
-Xilinx Smithwaterman application is developed and tested on Xilinx Alveo U200.</p>
+standard Smithwaterman. Xilinx implementation of Smithwaterman application
+is aimed for achieving high throughput. This Xilinx Smithwaterman
+application is developed and tested on Xilinx Alveo U200.</p>
 <div class="section" id="results">
 <h2>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="resource-utilization">
 <h3>Resource Utilization<a class="headerlink" href="#resource-utilization" title="Permalink to this headline">¶</a></h3>
 <p>Table below presents resource utilization of Xilinx Smithwaterman Genomics
 kernels. The final Fmax achieved is 300MHz</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="16%" />
+<col width="16%" />
+<col width="13%" />
+<col width="11%" />
+<col width="11%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flow</th>
+<th class="head">LUT</th>
+<th class="head">LUTMem</th>
+<th class="head">REG</th>
+<th class="head">BRAM</th>
+<th class="head">URAM</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Smithwaterman</td>
+<td>172K</td>
+<td>11K</td>
+<td>136K</td>
+<td>2</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="performance-data">
 <h3>Performance Data<a class="headerlink" href="#performance-data" title="Permalink to this headline">¶</a></h3>
@@ -400,27 +429,16 @@ units.</p>
 <div class="section" id="executable-usage">
 <h2>Executable Usage<a class="headerlink" href="#executable-usage" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">To execute single file for genomics  : <code class="docutils literal notranslate"><span class="pre">./build/xil_sw</span> <span class="pre">-xbin</span> <span class="pre">./build/xclbin_&lt;xsa_name&gt;_&lt;TARGET</span> <span class="pre">mode&gt;/&lt;krnl_smithwaterman.xclbin&gt;</span> <span class="pre">-c</span> <span class="pre">&lt;file_name&gt;</span></code></p>
+<li><p class="first">To execute single file for genomics  : <code class="docutils literal notranslate"><span class="pre">./build/xil_sw</span> <span class="pre">-xbin</span> <span class="pre">./build/xclbin_&lt;xsa_name&gt;_&lt;TARGET</span> <span class="pre">mode&gt;/&lt;krnl_smithwaterman.xclbin&gt;</span></code></p>
 </li>
-<li><p class="first">To validate single file (genomics)   : <code class="docutils literal notranslate"><span class="pre">./build/xil_sw</span> <span class="pre">-xbin</span> <span class="pre">./build/xclbin_&lt;xsa_name&gt;_&lt;TARGET</span> <span class="pre">mode&gt;/&lt;krnl_smithwaterman.xclbin&gt;</span> <span class="pre">-t</span> <span class="pre">&lt;file_name&gt;</span></code></p>
+<li><p class="first">To validate single file (genomics)   : <code class="docutils literal notranslate"><span class="pre">./build/xil_sw</span> <span class="pre">-xbin</span> <span class="pre">./build/xclbin_&lt;xsa_name&gt;_&lt;TARGET</span> <span class="pre">mode&gt;/&lt;krnl_smithwaterman.xclbin&gt;</span></code></p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">&lt;files.list&gt;</span></code>: Contains various file names with current path</li>
 <li>Note: Default arguments are set in Makefile</li>
 </ul>
 </div></blockquote>
 </li>
 </ol>
-<p>The usage of the generated executable is as follows:</p>
-<pre class="highlight literal-block">
-<span></span>Usage: application.exe -<span class="o">[</span>-h-t-l-xbin-B-id<span class="o">]</span>
-       --help,                -h        Print Help Options
-       --test,                -t        Xilinx genomics
-       --test_list,           -l        Xilinx genomics on Input Files
-       --max_cr,              -mcr      Maximum CR
-       --xclbin,              -xbin     XCLBIN
-       --device_id,           -id       Device ID                                             Default: <span class="o">[</span><span class="m">0</span><span class="o">]</span>
-</pre>
 </div>
 </div>
 
@@ -453,7 +471,7 @@ units.</p>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 14, 2022.
+        Last updated on April 20, 2022.
       </span>
 
     </p>
