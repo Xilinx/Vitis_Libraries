@@ -26,7 +26,7 @@ Setup the build environment using the Vitis and XRT scripts, and set the ``PLATF
 
 .. code-block:: bash
 
-    source <install path>/Vitis/2020.2/settings64.sh
+    source <install path>/Vitis/2022.1/settings64.sh
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
@@ -50,7 +50,7 @@ The flow is launched from the shell by calling ``make`` with variables set as in
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
    cd L1/tests/specific_algorithm/
    # Only run C++ simulation on U250 card
-   make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=xilinx_u250_xdma_201830_2
+   make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=xilinx_u250_gen3x16_xdma_4_1_202210_1
 
 
 As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization,
@@ -65,11 +65,11 @@ To run the Vitis projects for benchmark evaluation and test, you may need the ex
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
     cd L1/benchmarks/specific_algorithm/
     # Run software emulation for correctness test
-    make run TARGET=sw_emu DEIVCE=xilinx_u250_xdma_201830_2
+    make run TARGET=sw_emu DEIVCE=xilinx_u250_gen3x16_xdma_4_1_202210_1
     # Run hardware emulation for cycle-accurate simulation with the RTL-model
-    make run TARGET=hw_emu DEIVCE=xilinx_u250_xdma_201830_2
+    make run TARGET=hw_emu DEIVCE=xilinx_u250_gen3x16_xdma_4_1_202210_1
     # Run hardware to generate the desired xclbin binary
-    make run TARGET=hw DEIVCE=xilinx_u250_xdma_201830_2
+    make run TARGET=hw DEIVCE=xilinx_u250_gen3x16_xdma_4_1_202210_1
     # Delete xclbin and host excutable program
     make cleanall
 

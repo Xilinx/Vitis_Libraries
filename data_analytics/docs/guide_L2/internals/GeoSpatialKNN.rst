@@ -36,9 +36,9 @@ The overall diagram of KNN kernel is shown in the figure below:
 
 Building Blocks:
 
-- `CSV Parser(DataAnalytic Library L1 Primitive) <https://xilinx.github.io/Vitis_Libraries/graph/2021.2/guide_L1/primitives/sortTopK.html>`_: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.
+- `CSV Parser(DataAnalytic Library L1 Primitive) <https://xilinx.github.io/Vitis_Libraries/graph/2022.1/guide_L1/primitives/sortTopK.html>`_: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.
 - Distance: compute distance between base location and spatial object location; Euclidean distance is applied.
-- `Sort Top-K(Graph Library L1 Primitive) <https://pages.gitenterprise.xilinx.com/FaaSApps/xf_DataAnalytics/2021.2/guide_L1/internals/csvParser.html>`_: sort distance in ascending order and keep top-k objects.
+- `Sort Top-K(Graph Library L1 Primitive) <https://pages.gitenterprise.xilinx.com/FaaSApps/xf_DataAnalytics/2022.1/guide_L1/internals/csvParser.html>`_: sort distance in ascending order and keep top-k objects.
 
 
 End2End Performance

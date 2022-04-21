@@ -33,5 +33,5 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 Development Tools
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis 2020.2, and a matching version of XRT should be installed.
+This library is designed to work with Vitis 2022.1, and a matching version of XRT should be installed.
 

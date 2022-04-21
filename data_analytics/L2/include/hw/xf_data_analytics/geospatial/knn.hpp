@@ -37,6 +37,15 @@ union toFloat {
     float b;
 };
 
+/**
+ * @brief split object stream of csv parser into seperate streams for distance computation.
+ *
+ * @param obj_strm stream of csv parser output object
+ * @param idx_strm stream of point index
+ * @param x_strm stream of point x coordinate
+ * @param y_strm stream of point y coordinate
+ * @param strm_out_end stream end flags
+ */
 void split_csv_stream(hls::stream<xf::data_analytics::dataframe::Object>& obj_strm,
                       hls::stream<ap_uint<32> >& idx_strm,
                       hls::stream<float>& x_strm,
@@ -65,6 +74,17 @@ void split_csv_stream(hls::stream<xf::data_analytics::dataframe::Object>& obj_st
     strm_out_end.write(1);
 }
 
+/**
+ * @brief Compute distance between input point and base point. Euclidean distance is used.
+ *
+ * @param x_strm stream of input point x coordinate
+ * @param y_strm stream of input point y coordinate
+ * @param strm_in_end input stream end flag
+ * @param base_x base point x coordinate
+ * @param base_y base point y coordinate
+ * @param distance_strm stream of output distance
+ * @param strm_out_end output stream end flag
+ */
 void compute_distance(hls::stream<float>& x_strm,
                       hls::stream<float>& y_strm,
                       hls::stream<bool>& strm_in_end,
@@ -89,6 +109,17 @@ void compute_distance(hls::stream<float>& x_strm,
     strm_out_end.write(1);
 }
 
+/**
+ * @brief Postprocess and write result to DDR
+ *
+ * @tparam CSV_PU_NUM num of csv parser used to parallel parse csv data
+ * @param line_cnt_buf num of csv lines that each pu processes
+ * @param sorted_distance_strm input stream of sorted distance
+ * @param sorted_index_strm input stream of sorted point index
+ * @param strm_in_end input stream end flag
+ * @param distance output sorted top-k distance
+ * @param index output sorted top-k index
+ */
 template <int CSV_PU_NUM = 2>
 void write2mem(ap_uint<32> line_cnt_buf[CSV_PU_NUM / 2][2],
                hls::stream<float>& sorted_distance_strm,
@@ -140,6 +171,19 @@ void write2mem(ap_uint<32> line_cnt_buf[CSV_PU_NUM / 2][2],
 
 } // end namespace internal
 
+/**
+ * @brief K Nearest Neighbors(KNN): find nearest-K points for a given base point.
+ *
+ * @tparam CSV_PU_NUM num of csv parser core used to parallel parse csv data, only support 2/4/8
+ * @tparam MAX_SORT_NUM the max number of the sequence can be sorted, should be less than 1024
+ * @param csv_buf input csv data
+ * @param schema input csv schema
+ * @param base_x base point x coordinate
+ * @param base_y base point y coordinate
+ * @param k num of nearest point, k <= MAX_SORT_NUM
+ * @param sorted_dist_buf output distance of nearest-K points
+ * @param sorted_idx_buf output index of nearest-K points
+ */
 template <int CSV_PU_NUM = 2, int MAX_SORT_NUM = 8>
 void knn(ap_uint<128>* csv_buf,
          ap_uint<8>* schema,

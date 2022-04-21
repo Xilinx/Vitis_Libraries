@@ -31,3 +31,4 @@ The profiling in this documentation is based on U250, and the tool version is Vi
    internals/geoip.rst
    internals/twoGramPredicate.rst
    internals/geospatialJoin.rst
+   internals/GeoSpatialKNN.rst
