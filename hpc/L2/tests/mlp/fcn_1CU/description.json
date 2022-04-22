@@ -74,7 +74,7 @@
         {
             "name": "fcn", 
             "ldclflags": "--config opts.cfg", 
-            "frequency": 300,
+            "frequency": 200,
             "accelerators": [
                 {
                     "name": "fcnKernel", 

@@ -67,7 +67,7 @@
         {
             "name": "rtm", 
             "ldclflags": "--config opts.cfg", 
-            "frequency": 250, 
+            "frequency": 150, 
             "accelerators": [
                 {
                     "name": "rtmforward", 

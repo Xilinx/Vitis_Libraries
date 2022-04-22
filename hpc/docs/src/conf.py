@@ -37,13 +37,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis HPC Library'
-copyright = '2019, Xilinx Inc.'
+copyright = '2022, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
 # The short X.Y version
-version = '2021.2'
+version = '2022.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2021.2'
+release = 'v2022.1'
 
 
 # -- General configuration ---------------------------------------------------

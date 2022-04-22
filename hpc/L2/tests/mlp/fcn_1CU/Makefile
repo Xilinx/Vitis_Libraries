@@ -148,7 +148,7 @@ VPP_FLAGS_fcnKernel += --hls.clock 300000000:fcnKernel
 ifneq ($(HOST_ARCH), x86)
 VPP_LDFLAGS_fcn += --clock.defaultFreqHz 300000000
 else
-VPP_LDFLAGS_fcn += --kernel_frequency 300
+VPP_LDFLAGS_fcn += --kernel_frequency 200
 endif
 VPP_LDFLAGS_fcn_temp := --config opts.cfg
 VPP_LDFLAGS_fcn += $(VPP_LDFLAGS_fcn_temp)

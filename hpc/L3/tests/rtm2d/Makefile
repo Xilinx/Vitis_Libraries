@@ -136,7 +136,7 @@ VPP_FLAGS_rtmbackward += --hls.clock 250000000:rtmbackward
 ifneq ($(HOST_ARCH), x86)
 VPP_LDFLAGS_rtm += --clock.defaultFreqHz 250000000
 else
-VPP_LDFLAGS_rtm += --kernel_frequency 250
+VPP_LDFLAGS_rtm += --kernel_frequency 150
 endif
 VPP_LDFLAGS_rtm_temp := --config $(CUR_DIR)/conn_u280.cfg
 VPP_LDFLAGS_rtm += $(VPP_LDFLAGS_rtm_temp)
@@ -147,7 +147,7 @@ VPP_FLAGS_rtmbackward += --hls.clock 250000000:rtmbackward
 ifneq ($(HOST_ARCH), x86)
 VPP_LDFLAGS_rtm += --clock.defaultFreqHz 250000000
 else
-VPP_LDFLAGS_rtm += --kernel_frequency 250
+VPP_LDFLAGS_rtm += --kernel_frequency 150
 endif
 VPP_LDFLAGS_rtm_temp := --config opts.cfg
 VPP_LDFLAGS_rtm += $(VPP_LDFLAGS_rtm_temp)
