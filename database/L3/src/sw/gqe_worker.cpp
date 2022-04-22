@@ -297,18 +297,18 @@ Worker::Worker(cl_context context, cl_device_id device_id, string xclbin_path, W
 
             // max buf size
             max_buf_size.clear();
-            max_buf_size.resize(18, (1 << 28)); // 0 - 15 mapped to HBM
-            max_buf_size[16] = 4000000000;      // 16 and 17 mapped to DDR
-            max_buf_size[17] = 4000000000;      // 16 and 17 mapped to DDR
-            acc_buf_size.resize(18, 0);
+            max_buf_size.resize(24, (1 << 28)); // 0 - 15 mapped to HBM
+            // max_buf_size[16] = 4000000000;      // 16 and 17 mapped to DDR
+            // max_buf_size[17] = 4000000000;      // 16 and 17 mapped to DDR
+            acc_buf_size.resize(24, 0);
             // create raw pinned buffer
-            h_buf.resize(18);
+            h_buf.resize(24);
             for (size_t i = 0; i < h_buf.size(); i++) {
                 h_buf[i] = internal::aligned_alloc<char>(max_buf_size[i]);
                 memset(h_buf[i], 0, max_buf_size[i] * sizeof(char));
             }
             // create raw device buffer
-            d_buf.resize(18);
+            d_buf.resize(24);
             for (size_t i = 0; i < d_buf.size(); i++) {
                 cl_mem_ext_ptr_t mext_d_buf;
                 switch (i) {
@@ -316,55 +316,73 @@ Worker::Worker(cl_context context, cl_device_id device_id, string xclbin_path, W
                         mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(0), h_buf[i], 0};
                         break;
                     case 1:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(2), h_buf[i], 0};
-                        break;
-                    case 2:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(6), h_buf[i], 0};
-                        break;
-                    case 3:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(8), h_buf[i], 0};
-                        break;
-                    case 4:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(12), h_buf[i], 0};
-                        break;
-                    case 5:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(22), h_buf[i], 0};
-                        break;
-                    case 6:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(24), h_buf[i], 0};
-                        break;
-                    case 7:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(28), h_buf[i], 0};
-                        break;
-                    case 8:
                         mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(1), h_buf[i], 0};
                         break;
-                    case 9:
+                    case 2:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(2), h_buf[i], 0};
+                        break;
+                    case 3:
                         mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(3), h_buf[i], 0};
                         break;
+                    case 4:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(14), h_buf[i], 0};
+                        break;
+                    case 5:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(15), h_buf[i], 0};
+                        break;
+                    case 6:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(16), h_buf[i], 0};
+                        break;
+                    case 7:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(17), h_buf[i], 0};
+                        break;
+                    case 8:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(4), h_buf[i], 0};
+                        break;
+                    case 9:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(6), h_buf[i], 0};
+                        break;
                     case 10:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(7), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(8), h_buf[i], 0};
                         break;
                     case 11:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(9), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(10), h_buf[i], 0};
                         break;
                     case 12:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(13), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(20), h_buf[i], 0};
                         break;
                     case 13:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(23), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(22), h_buf[i], 0};
                         break;
                     case 14:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(25), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(24), h_buf[i], 0};
                         break;
                     case 15:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(29), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(26), h_buf[i], 0};
                         break;
                     case 16:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(32), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(5), h_buf[i], 0};
                         break;
                     case 17:
-                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(33), h_buf[i], 0};
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(7), h_buf[i], 0};
+                        break;
+                    case 18:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(9), h_buf[i], 0};
+                        break;
+                    case 19:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(11), h_buf[i], 0};
+                        break;
+                    case 20:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(21), h_buf[i], 0};
+                        break;
+                    case 21:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(23), h_buf[i], 0};
+                        break;
+                    case 22:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(25), h_buf[i], 0};
+                        break;
+                    case 23:
+                        mext_d_buf = {XCL_MEM_TOPOLOGY | unsigned(27), h_buf[i], 0};
                         break;
                     default:
                         break;
@@ -380,34 +398,35 @@ Worker::Worker(cl_context context, cl_device_id device_id, string xclbin_path, W
             // set cl buffer for kernel 0
             resetAccBufSize();
             for (size_t p_id = 0; p_id < 2; p_id++) {
-                createNoneOverLap(0, p_id, 0, 17, (1 << 26));
-                createNoneOverLap(0, p_id, 1, 17, (1 << 26));
-                createNoneOverLap(0, p_id, 2, 17, (1 << 26));
-                createNoneOverLap(0, p_id, 3, 17, (1 << 26));
-                createNoneOverLap(0, p_id, 4, 17, (512 / 8 * 14));
-                createNoneOverLap(0, p_id, 5, 17, (512 / 8 * 24));
-                createNoneOverLap(0, p_id, 6, 16, (512 / 8 * 24));
-                createNoneOverLap(0, p_id, 7, 16, (1 << 26));
-                createNoneOverLap(0, p_id, 8, 16, (1 << 26));
-                createNoneOverLap(0, p_id, 9, 16, (1 << 26));
+                createNoneOverLap(0, p_id, 0, 0, (1 << 26));
+                createNoneOverLap(0, p_id, 1, 1, (1 << 26));
+                createNoneOverLap(0, p_id, 2, 2, (1 << 26));
+                createNoneOverLap(0, p_id, 3, 3, (1 << 26));
+                createNoneOverLap(0, p_id, 4, 3, (512 / 8 * 14));
+                createNoneOverLap(0, p_id, 5, 3, (512 / 8 * 24));
+                createNoneOverLap(0, p_id, 6, 7, (512 / 8 * 24));
+                createNoneOverLap(0, p_id, 7, 4, (1 << 26));
+                createNoneOverLap(0, p_id, 8, 5, (1 << 26));
+                createNoneOverLap(0, p_id, 9, 6, (1 << 26));
+                createNoneOverLap(0, p_id, 10, 7, (1 << 26));
             }
             // set cl buffer for kernel 1
             // resetAccBufSize();
             for (size_t p_id = 0; p_id < 2; p_id++) {
-                createNoneOverLap(1, p_id, 0, 17, (1 << 26));
-                createNoneOverLap(1, p_id, 1, 17, (1 << 26));
-                createNoneOverLap(1, p_id, 2, 17, (1 << 26));
-                createNoneOverLap(1, p_id, 3, 17, (1 << 26));
-                createNoneOverLap(1, p_id, 4, 17, (512 / 8 * 14));
-                createNoneOverLap(1, p_id, 5, 17, (512 / 8 * 24));
-                createNoneOverLap(1, p_id, 6, 16, (512 / 8 * 24));
-                createNoneOverLap(1, p_id, 7, 16, (1 << 26));
-                createNoneOverLap(1, p_id, 8, 16, (1 << 26));
-                createNoneOverLap(1, p_id, 9, 16, (1 << 26));
-                createNoneOverLap(1, p_id, 10, 16, (1 << 26));
+                createNoneOverLap(1, p_id, 0, 0, (1 << 26));
+                createNoneOverLap(1, p_id, 1, 1, (1 << 26));
+                createNoneOverLap(1, p_id, 2, 2, (1 << 26));
+                createNoneOverLap(1, p_id, 3, 3, (1 << 26));
+                createNoneOverLap(1, p_id, 4, 3, (512 / 8 * 14));
+                createNoneOverLap(1, p_id, 5, 3, (512 / 8 * 24));
+                createNoneOverLap(1, p_id, 6, 7, (512 / 8 * 24));
+                createNoneOverLap(1, p_id, 7, 4, (1 << 26));
+                createNoneOverLap(1, p_id, 8, 5, (1 << 26));
+                createNoneOverLap(1, p_id, 9, 6, (1 << 26));
+                createNoneOverLap(1, p_id, 10, 7, (1 << 26));
                 if (p_id == 0) {
                     for (size_t i = 0; i < 16; i++) {
-                        createNoneOverLap(1, p_id, i + 11, i, (1 << 28));
+                        createNoneOverLap(1, p_id, i + 11, i + 8, (1 << 28));
                     }
                 } else { // 16 HBM channel's buffer are the same between ping and pong
                     for (size_t i = 0; i < 16; i++) {

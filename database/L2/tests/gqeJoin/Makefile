@@ -141,7 +141,7 @@ endif
 
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/hls_pre.cfg -D PART_FLOW=0
+VPP_FLAGS += -g  --config $(CUR_DIR)/hls_pre.cfg -D PART_FLOW=0
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include
 VPP_FLAGS += --hls.jobs 16
 VPP_LDFLAGS += --vivado.synth.jobs 16
@@ -166,16 +166,8 @@ VPP_LDFLAGS_gqe_join_v3 += --kernel_frequency 200
 endif
 VPP_LDFLAGS_gqe_join_v3_temp := --config $(CUR_DIR)/conn_u50.cfg --config $(CUR_DIR)/opts.cfg
 VPP_LDFLAGS_gqe_join_v3 += $(VPP_LDFLAGS_gqe_join_v3_temp)
-
-else 
-VPP_FLAGS_gqeKernel += --hls.clock 300000000:gqeKernel
-ifneq ($(HOST_ARCH), x86)
-VPP_LDFLAGS_gqe_join_v3 += --clock.defaultFreqHz 200000000
-else
-VPP_LDFLAGS_gqe_join_v3 += --kernel_frequency 200
 endif
 
-endif
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/gqe_join_v3.xclbin
 else

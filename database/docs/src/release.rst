@@ -28,6 +28,18 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2022.1
+------
+
+In 2022.1 release, GQE merges partition / bloomfilter / join into single kernel and targets for U50.
+
+* Merge partition / bloomfilter / join into single kernel make three operators shares resource on FPGA. Although such kernel
+  could only performance one of the three operators at the same time, it will take much less resource than 3 stand alone kernels.
+  With such design, it will help eliminate the time cost to switch xclbins for different operators. Also such design will enable
+  pipelined execution of kernels and reduce DMA workload.
+  
+* In this release, 3 in 1 design targets for U50. U50 costs less and still retains HBM which is key in database acceleration.
+
 2021.2
 ------
 

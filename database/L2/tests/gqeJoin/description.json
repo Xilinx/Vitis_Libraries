@@ -15,7 +15,7 @@
             "v++": {
                 "compiler": {
                     "clflags": [
-                        "--config PROJECT/hls_pre.cfg -D PART_FLOW=0"
+                        "-g --config PROJECT/hls_pre.cfg -D PART_FLOW=0"
                     ]
                 }
             },
@@ -109,7 +109,7 @@
                 },
                 "max_time_min": {
                     "vitis_hw_build": 2400,
-                    "vitis_hw_emu": 470,
+                    "vitis_hw_emu": 1200,
                     "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }

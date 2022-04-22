@@ -124,9 +124,13 @@ int main(int argc, const char* argv[]) {
     }
 
     string scale;
+    int sim_scale = 1;
+    if (parser.getCmdOption("-scale", scale)) {
+        sim_scale = std::stoi(scale);
+    } else
+        sim_scale = 1000;
     int factor_o = 1;
     int factor_l = 1;
-    int sim_scale = 1;
     string validate = "on";
 
     vector<string> cols_lt{"o_orderkey", "o_orderdate"};

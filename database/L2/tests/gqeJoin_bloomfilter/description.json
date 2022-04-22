@@ -15,7 +15,7 @@
             "v++": {
                 "compiler": {
                     "clflags": [
-                        "--config PROJECT/hls_pre.cfg -D PART_FLOW=0"
+                        "-g --config PROJECT/hls_pre.cfg -D PART_FLOW=0"
                     ]
                 }
             },

@@ -86,10 +86,6 @@ The major feature of L3 API are:
 (4) Asynchronous API call. Input for processing will be cut into multiple section of rows. GQE API requries customer to provide an std::future type argument for each row, to indicate readiness of input. GQE also requires an std::promise type arugment for each output section, to notify the caller thread that result is ready. GQE API will push all input arguments into an internal job queue and return immediately. Actual processing won't begin until the corresponding std::future arguments for input is ready. This will seperate input preparing from actual GQE processing. GQE could start processing the ready sections ahead even if not all input sections are ready. It will help pipeline the "preparing" and "processing" and improve system performance.
 (5) Column-oriented. Columnar DBMS will benefit from only accessing subset of columns and more options for data compression.
 
-.. image:: /images/asyn_call.png
-   :alt: Asynchronous API
-   :scale: 60%
-   :align: center
 
 Example Usage
 ---------------
