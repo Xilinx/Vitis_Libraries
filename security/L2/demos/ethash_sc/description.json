@@ -27,7 +27,7 @@
                 "host", 
                 "LIB_DIR/L2/include"
             ],
-            "options": "-O3"
+            "options": "-O3 -z stack-size=16777216"
         }
     }, 
     "v++": {

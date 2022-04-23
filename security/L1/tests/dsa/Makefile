@@ -236,7 +236,7 @@ setup: | check_part
 
 HLS ?= vitis_hls
 runhls: data setup | check_vivado check_vpp
-	$(HLS) -f run_hls.tcl;
+	ulimit -S -s 16384 && $(HLS) -f run_hls.tcl;
 
 clean:
 	rm -rf settings.tcl *_hls.log prj.prj

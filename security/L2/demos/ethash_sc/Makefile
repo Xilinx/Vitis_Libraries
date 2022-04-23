@@ -125,7 +125,7 @@ endif
 #Inclue Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/host/main.cpp 
 CXXFLAGS +=  -I $(CUR_DIR)/host -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3
+CXXFLAGS += -O3 -z stack-size=16777216
 
 EXE_NAME := host.exe
 EXE_OBJS := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(HOST_SRCS))))
@@ -203,7 +203,7 @@ run: check_device  $(RUN_DEPS)
 #sw_emu
 ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	ulimit -S -s 16384 &&  LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(HOST_PREAMBLE) $(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -214,7 +214,7 @@ endif
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	ulimit -S -s 16384 && LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(HOST_PREAMBLE) $(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -225,7 +225,7 @@ endif
 #hw
 ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	ulimit -S -s 16384 &&  LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(HOST_PREAMBLE) $(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -258,12 +258,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) 
 
 clean: cleanh

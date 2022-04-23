@@ -25,7 +25,7 @@
             "test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
-        "ldflags": "", 
+        "ldflags": "-z stack-size=16777216",
         "argv": {}, 
         "stdmath": false
     }, 

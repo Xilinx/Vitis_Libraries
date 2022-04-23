@@ -39,7 +39,7 @@ create_clock -period $CLKP
 set_clock_uncertainty 0.42
 
 if {$CSIM == 1} {
-  csim_design
+  csim_design -ldflags "-z stack-size=16777216"
 }
 
 if {$CSYNTH == 1} {
@@ -47,7 +47,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design
+  cosim_design -ldflags "-z stack-size=16777216"
 }
 
 if {$VIVADO_SYN == 1} {
