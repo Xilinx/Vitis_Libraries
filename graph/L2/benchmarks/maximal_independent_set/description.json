@@ -4,11 +4,7 @@
     "description": "mis graph algorithm",
     "flow": "vitis",
     "platform_allowlist": [
-        "u50",
-        "u200",
-        "u250",
-        "aws-vu9p-f1",
-        "vck190"
+        "u50"
     ],
     "platform_blocklist": [
         "zc"
@@ -22,68 +18,12 @@
                     ]
                 }
             }
-        },
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "aws-vu9p-f1": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u250": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_vck190.cfg"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "frequency": 300.0,
-                    "name": "mis_kernel"
-                }
-            ]
         }
     },
     "data": [
-        "PROJECT/data/cage6-undir-offset.mtx",
-        "PROJECT/data/cage6-undir-indicesweights.mtx",
-        "PROJECT/data/mis_kernel.txt"
+        "PROJECT/data/data-csr-offset.mtx",
+        "PROJECT/data/data-csr-indicesweights.mtx",
+        "PROJECT/data/mis.txt"
     ],
     "launch": [
         {
@@ -95,12 +35,11 @@
         "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/maximal_independent_set/host/main.cpp",
+                "LIB_DIR/L2/benchmarks/maximal_independent_set/host/main.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include",
-                "LIB_DIR/L2/tests/maximal_independent_set/kernel",
+                "LIB_DIR/L2/benchmarks/maximal_independent_set/kernel",
                 "LIB_DIR/ext/xcl2"
             ],
             "options": "-O3 "
@@ -110,6 +49,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L2/include",
+                "LIB_DIR/L2/include/hw",
                 "LIB_DIR/L2/tests/maximal_independent_set/kernel"
             ]
         }
@@ -118,7 +58,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/maximal_independent_set/kernel/mis_kernel.cpp",
+                    "location": "LIB_DIR/L2/benchmarks/maximal_independent_set/kernel/mis_kernel.cpp",
                     "frequency": 300.0,
                     "clflags": " -D KERNEL_NAME=mis_kernel",
                     "name": "mis_kernel",

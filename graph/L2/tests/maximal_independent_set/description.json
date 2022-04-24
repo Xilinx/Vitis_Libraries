@@ -4,11 +4,7 @@
     "description": "mis graph algorithm",
     "flow": "vitis",
     "platform_allowlist": [
-        "u50",
-        "u200",
-        "u250",
-        "aws-vu9p-f1",
-        "vck190"
+        "u50"
     ],
     "platform_blocklist": [
         "zc"
@@ -22,68 +18,12 @@
                     ]
                 }
             }
-        },
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "aws-vu9p-f1": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u250": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_vck190.cfg"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "frequency": 300.0,
-                    "name": "mis_kernel"
-                }
-            ]
         }
     },
     "data": [
-        "PROJECT/data/cage6-undir-offset.mtx",
-        "PROJECT/data/cage6-undir-indicesweights.mtx",
-        "PROJECT/data/mis_kernel.txt"
+        "PROJECT/data/data-csr-offset.mtx",
+        "PROJECT/data/data-csr-indicesweights.mtx",
+        "PROJECT/data/mis.txt"
     ],
     "launch": [
         {

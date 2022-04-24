@@ -7,7 +7,7 @@ Here are benchmarks of the Vitis Graph Library using the Vitis environment and c
 ### Vitis Graph Library
 - Alveo U250 installed and configured as per [Alveo U250 Data Center Accelerator Card](https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted)
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2021.2 installed and configured
+- Xilinx Vitis 2022.1 installed and configured
 
 ### Spark
 - Spark 3.0.0 installed and configured
@@ -51,7 +51,7 @@ These graph benchmarks can be downloaded from [vitis libraries](https://github.c
 Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
 
 ```
-   source <intstall_path>/installs/lin64/Vitis/2021.2/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2022.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```

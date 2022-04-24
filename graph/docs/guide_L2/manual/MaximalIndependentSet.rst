@@ -70,7 +70,7 @@ Different tool versions may result slightly different resource.
     +-------------------+----------+----------+----------+---------+-----------------+
     |    Kernel         |   BRAM   |   URAM   |    FF    |   LUT   | Frequency(MHz)  |
     +-------------------+----------+----------+----------+---------+-----------------+
-    |   mis_kernel      |    75    |   0      |   15751  |  11255  |     300.0       |
+    |   mis_kernel      |    786   |    0     |    12    |  13595  |     211.9       |
     +-------------------+----------+----------+----------+---------+-----------------+
 
 Benchmark
@@ -99,4 +99,5 @@ The performance is shown in the table below.
    1. Maximal independent set CPU time benchmarking is running on Intel(R) Xeon(R) CPU E5-2667 v3 @ 3.20GHz, cache(2048 KB), cores(31)
    2. time unit: ms.
    3. This mis implementation focus on single-kernel-level design and focusing on mid-scale dataset processing. As showed in table, with the increasing of the graph vertex number, the FPGA show increasingly advantage over CPU offloading.
+   4. The performance is tested under config of "set_property -dict [list CONFIG.ECC_EN {false} CONFIG.ECC_SCRUB_EN {false}] [get_bd_cells hmss_0]"
 

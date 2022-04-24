@@ -7,10 +7,10 @@ This folder contains basic test for each of Graph kernels. They are meant to dis
 To run the test, execute the following command:
 
 ```
-source <install path>/Vitis/2019.2/settings64.sh
+source <install path>/Vitis/2022.1/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-make run TARGET=sw_emu DEVICE=xilinx_u250_xdma_201830_2
+make run TARGET=sw_emu DEVICE=xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 ```
 
 `TARGET` can also be `hw_emu` or `hw`.

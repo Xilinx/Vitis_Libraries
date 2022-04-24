@@ -190,7 +190,7 @@ If a pure FPGA based graph accelerator is required, then the Vitis Graph L2 inte
 Example Usage
 ^^^^^^^^^^^^^^^^^
 
-The L2 API can be found at ``Vitis_Libraries/L2/include``. A typical code for calling L2 APIs may looks like this:
+The L2 API can be found at ``Vitis_Libraries/graph/L2/include``. A typical code for calling L2 APIs may looks like this:
 
 .. code-block:: cpp
 
