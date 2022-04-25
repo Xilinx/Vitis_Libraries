@@ -49,9 +49,13 @@ int main(int argc, char** argv) {
     out_img.create(in_img.rows, in_img.cols, in_img.type());
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
     unsigned char* tmp_out_data1 = (unsigned char*)malloc(height * width);
     unsigned char* tmp_out_data2 = (unsigned char*)malloc(height * width);
     int def_pix, obj_pix;
+
+    std::cout << "Input Image Channels:" << in_img.channels() << std::endl;
 
     /////////////////////////////////////// CL ////////////////////////
     (void)cl_kernel_mgr::registerKernel("cca_custom_accel", "krnl_ccacustom", XCLIN(post_blur_threshold_binary_image),

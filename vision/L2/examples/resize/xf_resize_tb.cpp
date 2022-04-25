@@ -43,6 +43,8 @@ int main(int argc, char** argv) {
     int in_height = img.rows;
     int out_height = atoi(argv[2]);
     int out_width = atoi(argv[3]);
+    std::cout << "Input image height : " << in_height << std::endl;
+    std::cout << "Input image width  : " << in_width << std::endl;
 
 #if GRAY
     result_hls.create(cv::Size(out_width, out_height), CV_8UC1);
@@ -76,6 +78,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC_T) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC_T) << std::endl;
+    std::cout << "NPPC:" << NPC_T << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize");

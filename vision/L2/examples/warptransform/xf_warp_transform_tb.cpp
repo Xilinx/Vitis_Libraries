@@ -114,7 +114,8 @@ int main(int argc, char* argv[]) {
     // Allocate memory for the output images:
     image_output.create(image_input.rows, image_input.cols, image_input.type());
     diff_img.create(image_input.rows, image_input.cols, image_input.type());
-
+    std::cout << "Input image height : " << image_input.rows << std::endl;
+    std::cout << "Input image width  : " << image_input.cols << std::endl;
 // OpenCL section:
 #if GRAY
     size_t image_in_size_bytes = image_input.rows * image_input.cols * sizeof(unsigned char);
@@ -139,6 +140,9 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     // Load binary:
     ;
@@ -247,4 +251,12 @@ int main(int argc, char* argv[]) {
     cv::absdiff(image_output, opencv_image, diff_img);
 
     xf::cv::analyzeDiff(diff_img, 0, err_per);
+
+    if (err_per > 1) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
+
+    return 0;
 }

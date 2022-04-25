@@ -199,7 +199,8 @@ int main(int argc, char** argv) {
     frame = cv::imread(img_name, 1);
     unsigned int imageWidth = frame.cols;
     unsigned int imageHeight = frame.rows;
-
+    std::cout << "Input image height : " << frame.rows << std::endl;
+    std::cout << "Input image width  : " << frame.cols << std::endl;
 #endif
     unsigned int harrisThresh = atoi(argv[3]);
 
@@ -270,6 +271,9 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_32UC1, XF_NPPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_32UC1, XF_NPPC1) << std::endl;
+    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_cornertracker");

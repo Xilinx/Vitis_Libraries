@@ -2,7 +2,7 @@
     "name": "Xilinx Demosaicing_4Ppc_8Bit_Gb Test", 
     "description": "HLS case", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "u50", 
         "zcu102", 
@@ -10,9 +10,9 @@
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
     "project": "demosaicing", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -21,7 +21,7 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_accel.cpp"
         ], 
-        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
@@ -29,7 +29,7 @@
             "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_tb.cpp", 
             "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_ref.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/128x128.png ", 
@@ -47,17 +47,17 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384, 
+                    "vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "hls_vivado_impl": 16384, 
+                    "vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
-                    "hls_vivado_syn": 300, 
+                    "vivado_syn": 300, 
                     "hls_csim": 60, 
                     "hls_cosim": 300, 
-                    "hls_vivado_impl": 300, 
+                    "vivado_impl": 300, 
                     "hls_csynth": 60
                 }
             }
@@ -66,8 +66,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "full"
     }

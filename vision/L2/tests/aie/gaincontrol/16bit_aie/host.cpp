@@ -298,9 +298,9 @@ int main(int argc, char** argv)
             int16_t res = outp[i];
             int16_t res_g = refp[i];
 
-            int diff = abs(int((int16_t)bufferMapped[1][i] - golden[i]));
+            int diff = abs(int(res - res_g));
             if (diff > 1) {
-                printf("Error found @ %d, %d != %d\n", i, (int16_t)bufferMapped[1][i], golden[i]);
+                printf("Error found @ %d, %d != %d\n", i, outp[i], refp[i]);
                 errorCount++;
             }
         }

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ add_files -tb "${XF_PROJ_ROOT}/L1/examples/pyrdown/xf_pyr_down_tb.cpp" -cflags "
 set_top pyr_down_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

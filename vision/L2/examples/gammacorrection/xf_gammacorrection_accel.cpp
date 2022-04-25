@@ -25,7 +25,7 @@ void gammacorrection_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 // clang-format off
 #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
 #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
-#pragma HLS INTERFACE s_axilite port=gamma_lut     
+#pragma HLS INTERFACE m_axi     port=gamma_lut offset=slave bundle=gmem3
 #pragma HLS INTERFACE s_axilite port=rows     
 #pragma HLS INTERFACE s_axilite port=cols     
 #pragma HLS INTERFACE s_axilite port=return

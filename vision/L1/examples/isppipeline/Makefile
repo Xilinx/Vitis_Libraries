@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/examples/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # MK_INC_BEGIN hls_common.mk
 
@@ -51,13 +51,6 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2020.1
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
-
 .PHONY: check_vivado
 check_vivado:
 ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
@@ -72,27 +65,14 @@ DEVICE ?= u200
 
 # MK_INC_BEGIN vitis_set_part.mk
 
-.PHONY: check_part
-
-ifeq (,$(XPART))
 # MK_INC_BEGIN vitis.mk
 
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
 .PHONY: check_vpp
 check_vpp:
 ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
 	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
 endif
 
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
 .PHONY: check_xrt
 check_xrt:
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
@@ -120,6 +100,10 @@ export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITI
 endif
 
 # MK_INC_END vitis.mk
+
+.PHONY: check_part
+
+ifeq (,$(XPART))
 # MK_INC_BEGIN vitis_set_platform.mk
 
 ifneq (,$(wildcard $(DEVICE)))
@@ -128,31 +112,48 @@ XPLATFORM := $(DEVICE)
 else
 # Use DEVICE as a file name pattern
 DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
+# 1. search paths specified by variable
 ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(DEVICE_L)/$(DEVICE_L).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
 XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 2.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 3.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 3.2
+endif # 3
 endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
 Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point DEVICE variable to the full path of platform .xpfm file.
 endef
 export MSG_PLATFORM
 
 define MSG_DEVICE
 More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+Please set DEVICE variable more accurately to select only one platform file, or set DEVICE variable to the full path of the platform .xpfm file.
 endef
 export MSG_DEVICE
 
@@ -171,7 +172,7 @@ XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
 ifeq (1, $(words $(XPLATFORM)))
 # Query the part name of device
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
-override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
+override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.devices[0].fpgaPart" --platform $(firstword $(XPLATFORM)) | sed 's/^[^:]*://g' | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/-\+/-/g')
 endif
 endif
 check_part: check_platform check_vpp
@@ -249,7 +250,7 @@ runhls: data setup | check_vivado check_vpp
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log ISPPipeline.prj
+	rm -rf settings.tcl *_hls.log isppipeline.prj
 
 # Used by Jenkins test
 cleanall: clean

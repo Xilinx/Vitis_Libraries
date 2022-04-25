@@ -462,6 +462,7 @@ int main(int argc, char* argv[]) {
     rggb_out.create(in_rows, in_cols, CV_INTYPE);
     ir_out.create(in_rows, in_cols, CV_INTYPE);
 
+    char bformat = BPATTERN;
     xf::cv::cvMat2AXIvideoxf<NPC>(img_in, Input);
 
     rgbir_accel(Input, rggbOutput, irOutput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, wgts,

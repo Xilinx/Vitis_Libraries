@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ set PROJ "distancetransform.prj"
 set SOLN "sol1"
 
 if {![info exists CLKP]} {
-  set CLKP 5.0
+  set CLKP 3.3
 }
 
 open_project -reset $PROJ
@@ -30,6 +30,9 @@ add_files -tb "${XF_PROJ_ROOT}/L1/examples/distancetransform/xf_distancetransfor
 set_top distancetransform_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

@@ -571,6 +571,7 @@ loop_row:
     for (int ro = 0; ro < height; ro++) {
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+	#pragma HLS DEPENDENCE variable=Lr_min array inter false
     // clang-format on
 
     loop_col:

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XF_THRESHOLD_HPP_
-#define _XF_THRESHOLD_HPP_
+#ifndef _XF_PAINTMASK_HPP_
+#define _XF_PAINTMASK_HPP_
 
 #ifndef __cplusplus
 #error C++ is needed to include this header

@@ -21,11 +21,11 @@ sys.path.insert(0, os.path.abspath('docs'))
 # -- Project information -----------------------------------------------------
 
 project = 'xfOpenCV'
-copyright = '2021, Xilinx'
+copyright = '2022, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = ''
+version = '2022.1'
 # The full version, including alpha/beta/rc tags
 release = 'v1.0'
 

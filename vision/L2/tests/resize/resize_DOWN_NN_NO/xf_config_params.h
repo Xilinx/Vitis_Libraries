@@ -39,3 +39,16 @@
 /* Output image Dimensions */
 #define NEWWIDTH 1920  // Maximum output image width
 #define NEWHEIGHT 1080 // Maximum output image height
+
+/* Interface types*/
+#if RO
+
+#if RGB
+#define NPC_T XF_NPPC4
+#else
+#define NPC_T XF_NPPC8
+#endif
+
+#else
+#define NPC_T XF_NPPC1
+#endif

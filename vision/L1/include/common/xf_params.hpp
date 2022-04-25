@@ -317,7 +317,8 @@ enum _pixeltype {
     XF_12UC4 = 16,
     XF_10UC3 = 17,
     XF_12UC3 = 18,
-    XF_32FC3 = 19
+    XF_32FC3 = 19,
+    XF_64UC1 = 20
 };
 typedef _pixeltype XF_npt_e;
 

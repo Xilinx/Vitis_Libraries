@@ -851,6 +851,19 @@ struct DataType<XF_32UC1, XF_NPPC1> {
     static const int channel = 1;
 };
 template <>
+struct DataType<XF_64UC1, XF_NPPC1> {
+    typedef ap_uint<64> name;
+    typedef ap_uint<64> uname;
+    typedef ap_uint<64> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 64;
+    static const int pixelwidth = 64;
+    static const int pixeldepth = XF_64UP;
+    static const int wordwidth = XF_64UW;
+    static const int channel = 1;
+};
+template <>
 struct DataType<XF_32UC1, XF_NPPC2> {
     typedef ap_uint<64> name;
     typedef ap_uint<32> uname;

@@ -268,6 +268,9 @@ int main(int argc, char** argv) {
     int height = in_gray.rows;
     int width = in_gray.cols;
 
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device);
@@ -280,6 +283,9 @@ int main(int argc, char** argv) {
     devices.resize(1);
     cl::Program program(context, devices, bins);
     cl::Kernel krnl(program, "autowhitebalance_accel");
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     std::vector<cl::Memory> inBufVec, outBufVec;
     cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * 3));

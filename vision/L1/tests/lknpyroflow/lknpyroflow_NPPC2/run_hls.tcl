@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ add_files -tb "${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical_flo
 set_top dense_non_pyr_of_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

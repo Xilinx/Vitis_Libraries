@@ -38,6 +38,8 @@ int main(int argc, char** argv) {
 
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     // create memory for output images
     in_img.copyTo(in_img_copy);
@@ -55,6 +57,10 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC_T) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC_T) << std::endl;
+    std::cout << "NPPC:" << NPC_T << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_hist_equalize");
@@ -110,6 +116,8 @@ int main(int argc, char** argv) {
 
     if (err_per > 0.0f) {
         return 1;
-    }
+    } else
+        std::cout << "Test Passed .... !!!" << std::endl;
+
     return 0;
 }

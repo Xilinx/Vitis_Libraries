@@ -47,11 +47,18 @@ int main(int argc, char** argv) {
         blk_width = (1 << i);
     }
 
+    std::cout << "Input image height : " << rows << std::endl;
+    std::cout << "Input image width  : " << cols << std::endl;
     std::cout << "Block height : " << blk_height << std::endl;
     std::cout << "Block width  : " << blk_width << std::endl;
 
     cv::Mat out_img_tmp(rows, cols, CV_8UC3);
     cv::Mat out_img(rows, cols, CV_8UC3);
+
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC) << std::endl;
+    std::cout << "NPPC:" << NPC << std::endl;
+
     ////////////Top function call //////////////////
     cl_kernel_wrapper* krnl1 =
         cl_kernel_mgr::registerKernel("tonemapping_accel", "krnl_tonemapping", XCLIN(in_img), XCLOUT(out_img_tmp),

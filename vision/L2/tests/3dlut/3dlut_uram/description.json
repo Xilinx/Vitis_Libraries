@@ -4,14 +4,14 @@
         "3dlut L2 function URAM test"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "aws-vu9p-f1", 
         "vck190", 
         "zcu104",
 	"u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
         "zcu102", 
         "u250"
@@ -140,6 +140,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
+ 		"LIB_DIR/L2/examples/3dlut",
                 "LIB_DIR/L2/tests/3dlut/3dlut_uram"
             ], 
             "options": "-O3"
@@ -149,6 +150,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
+ 		"LIB_DIR/L2/examples/3dlut",
                 "LIB_DIR/L2/tests/3dlut/3dlut_uram"
             ], 
             "clflags": []

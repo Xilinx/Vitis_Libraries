@@ -29,49 +29,54 @@ The following table describes the template and the function parameters.
 
 .. table:: Table GTM Parameter Description
 
-    +----------------------+--------------------------------------------------------------------+
-    | Parameter            | Description                                                        |
-    +======================+====================================================================+
-    | SRC_T                | Pixel Width of Input and Output Pointer                            |
-    +----------------------+--------------------------------------------------------------------+
-    | DST_T                | Input and Output Pixel type                                        |
-    +----------------------+--------------------------------------------------------------------+
-    | SIN_CHANNEL_IN_TYPE  | Maximum height of input and output image (Must be multiple of NPC) |
-    +----------------------+--------------------------------------------------------------------+
-    | SIN_CHANNEL_OUT_TYPE | Maximum width of input and output image (Must be multiple of NPC)  |
-    +----------------------+--------------------------------------------------------------------+
-    | ROWS                 | Height of the image                                                |
-    +----------------------+--------------------------------------------------------------------+
-    | COLS                 | Width of the image                                                 |
-    +----------------------+--------------------------------------------------------------------+
-    | NPC                  | Number of Pixels to be processed per cycle.                        |
-    +----------------------+--------------------------------------------------------------------+
-    | src                  | Input Image                                                        |
-    +----------------------+--------------------------------------------------------------------+
-    | dst                  | Output Image                                                       |
-    +----------------------+--------------------------------------------------------------------+
-    | mean1                | mean of pixel values computed in current frame                     |
-    +----------------------+--------------------------------------------------------------------+
-    | mean2                | mean of pixel values read by next frame                            |
-    +----------------------+--------------------------------------------------------------------+
-    | L_max1               | Maximum pixel value computed in current frame                     	|
-    +----------------------+--------------------------------------------------------------------+
-    | L_max2               | Maximum pixel value read by next frame                             |
-    +----------------------+--------------------------------------------------------------------+
-    | L_min1               | Maximum pixel value computed in current frame                      |
-    +----------------------+--------------------------------------------------------------------+
-    | L_min2               | Maximum pixel value read by next frame                             |
-    +----------------------+--------------------------------------------------------------------+
-    | c1            	   | To retain the details in bright area, default value is 3.0,        |
-    |                      | value ranges from 1 to 7                                           |
-    +----------------------+--------------------------------------------------------------------+
-    | c2                   | Efficiency factor, value ranges from 0.5 to 1 based on             |
-    |                      | output device dynamic range                                        |
-    +----------------------+--------------------------------------------------------------------+
+    +----------------------+-------------------------------------------------------------+
+    | Parameter            | Description                                                 |
+    +======================+=============================================================+
+    | SRC_T                | Input Pixel type. The current supported pixel value is      |
+    |                      | XF_16UC3                                                    |
+    +----------------------+-------------------------------------------------------------+
+    | DST_T                | Output Pixel type. The current supported pixel value is     |
+    |                      | XF_8UC3                                                     |
+    +----------------------+-------------------------------------------------------------+
+    | SIN_CHANNEL_IN_TYPE  | Single channel type. It's pixel value is XF_16UC1           |
+    +----------------------+-------------------------------------------------------------+
+    | SIN_CHANNEL_OUT_TYPE | Single channel type. It's pixel value is XF_8UC1            |
+    +----------------------+-------------------------------------------------------------+
+    | ROWS                 | Maximum height of the image that hardware kernel must be    |
+    |                      | built for                                                   |
+    +----------------------+-------------------------------------------------------------+
+    | COLS                 | Maximum width of the image that hardware kernel must be     |
+    |                      | built for                                                   |                                  
+    +----------------------+-------------------------------------------------------------+
+    | NPC                  | Number of Pixels to be processed per cycle. NPPC1 and NPPC2 |
+    |                      | are supported.                                              |
+    +----------------------+-------------------------------------------------------------+
+    | src                  | Input Image                                                 |
+    +----------------------+-------------------------------------------------------------+
+    | dst                  | Output Image                                                |
+    +----------------------+-------------------------------------------------------------+
+    | mean1                | mean of pixel values computed in current frame              |
+    +----------------------+-------------------------------------------------------------+
+    | mean2                | mean of pixel values read by next frame                     |
+    +----------------------+-------------------------------------------------------------+
+    | L_max1               | Maximum pixel value computed in current frame               |
+    +----------------------+-------------------------------------------------------------+
+    | L_max2               | Maximum pixel value read by next frame                      |
+    +----------------------+-------------------------------------------------------------+
+    | L_min1               | Minimum pixel value computed in current frame               |
+    +----------------------+-------------------------------------------------------------+
+    | L_min2               | Minimum pixel value read by next frame                      |
+    +----------------------+-------------------------------------------------------------+
+    | c1                   | To retain the details in bright area, default value is 3.0, |
+    |                      | value ranges from 1 to 7                                    |
+    +----------------------+-------------------------------------------------------------+
+    | c2                   | Efficiency factor, value ranges from 0.5 to 1 based on      |
+    |                      | output device dynamic range                                 |
+    +----------------------+-------------------------------------------------------------+
 
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.2 tool for the xczu7ev-ffvc1156-2-e, to process a 4k, 3 channel image.  
+The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.  
 
 .. table:: Table GTM Resource Utilization Summary
 
@@ -82,17 +87,17 @@ The following table summarizes the resource utilization in different configurati
     +                +                     +------------------+----------+-------+-------+------+
     |                |                     | BRAM_18K         | DSP      | FF    | LUT   | URAM |
     +================+=====================+==================+==========+=======+=======+======+
-    | 1 Pixel        |  300                | 3                | 64       | 14091 | 11566 | 0    |
+    | 1 Pixel        |  300                | 0                | 60       | 7949  | 7476  | 0    |
     +----------------+---------------------+------------------+----------+-------+-------+------+
-    | 2 Pixel        |  300                | 6                | 117      | 22550 | 19232 | 0    |
+    | 2 Pixel        |  300                | 0                | 113      | 13579 | 13126 | 0    |
     +----------------+---------------------+------------------+----------+-------+-------+------+
 
 .. rubric:: Performance Estimate
 
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.2 tool for the xczu7ev-ffvc1156-2-e, to process a 4k, 3 channel image.
+The following table summarizes the performance estimates in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.
 
-.. table:: Table GTM Resource Utilization Summary
+.. table:: Table GTM Performance Estimate Summary
 
     +----------------+---------------------+------------------+
     | Operating Mode | Operating Frequency | Latency Estimate |
@@ -101,7 +106,7 @@ The following table summarizes the resource utilization in different configurati
     +                +                     +------------------+
     |                |                     | Max (ms)         |
     +================+=====================+==================+
-    | 1 pixel        | 300                 | 7.53             |
+    | 1 pixel        | 300                 | 28.4             |
     +----------------+---------------------+------------------+
-    | 2 pixel        | 300                 | 4.08             |
+    | 2 pixel        | 300                 | 14.7             |
     +----------------+---------------------+------------------+

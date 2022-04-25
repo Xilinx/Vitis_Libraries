@@ -60,6 +60,8 @@ cv::Mat floyd_steinberg_dithering(cv::Mat image, int scale) {
     int height = image.rows;
     float old_pix, new_pix;
     float max = MAXVALUE, err_pix;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     for (int rowID = 0; rowID < image.rows; rowID++) {
         for (int colID = 0; colID < image.cols; colID++) {
@@ -209,6 +211,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPEIN, NPC_T) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPEIN, NPC_T) << std::endl;
+    std::cout << "NPPC:" << NPC_T << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_quantizationdithering");

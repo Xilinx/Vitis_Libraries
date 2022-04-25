@@ -22,28 +22,30 @@ namespace xf {
 namespace cv {
 namespace aie {
 
-static constexpr int METADATA_ELEMENTS = 64;
+static constexpr int METADATA_ELEMENTS = 32;
 using metadata_elem_t = int16_t;
 static constexpr int METADATA_SIZE = METADATA_ELEMENTS * sizeof(metadata_elem_t);
 
 enum SmartTileMDPOS {
-    POS_MDS_TILEWIDTH = 0,
-    POS_MDS_TILEHEIGHT = 4,
-    POS_MDS_POSITIONH = 8,
-    POS_MDS_POSITIONV = 12,
-    POS_MDS_OVLPH_LEFT = 16,
-    POS_MDS_OVLPH_RIGHT = 20,
-    POS_MDS_OVLPV_TOP = 24,
-    POS_MDS_OVLPV_BOTTOM = 28,
-    POS_MDS_DATA_BITWIDTH = 32,
-    POS_MDS_FINAL_WIDTH = 36,
-    POS_MDS_FINAL_HEIGHT = 40,
-    POS_MDS_CRCTPOSH = 44,
-    POS_MDS_CRCTPOSV = 48,
-    POS_MDS_CRCT_TWIDTH = 52,
-    POS_MDS_CRCT_THEIGHT = 56,
-    POS_MDS_SAT_EN = 60,
-    POS_MDS_IMG_PTR = 64
+    POS_MDS_IN_OFFSET = 0,
+    POS_MDS_TILEWIDTH = 2,
+    POS_MDS_TILEHEIGHT = 3,
+    POS_MDS_OVLPH_LEFT = 4,
+    POS_MDS_OVLPH_RIGHT = 5,
+    POS_MDS_OVLPV_TOP = 6,
+    POS_MDS_OVLPV_BOTTOM = 7,
+    POS_MDS_OUT_OFFSET = 8,
+    POS_MDS_CRCT_TWIDTH = 10,
+    POS_MDS_CRCT_THEIGHT = 11,
+    POS_MDS_SAT_EN = 12,
+    POS_MDS_CRCTPOSH = 13,
+    POS_MDS_CRCTPOSV = 14,
+    POS_MDS_POSITIONH = 15,
+    POS_MDS_POSITIONV = 16,
+    POS_MDS_DATA_BITWIDTH = 17,
+    POS_MDS_FINAL_WIDTH = 18,
+    POS_MDS_FINAL_HEIGHT = 19,
+    POS_MDS_IMG_PTR = 32
 };
 }
 }

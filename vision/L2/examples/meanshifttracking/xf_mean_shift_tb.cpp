@@ -90,6 +90,8 @@ int main(int argc, char* argv[]) {
 
     int height = frame.rows;
     int width = frame.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     cl_int err;
 
@@ -154,6 +156,10 @@ int main(int argc, char* argv[]) {
                   cl::Buffer dyFromDevice(context, CL_MEM_WRITE_ONLY, no_objects * sizeof(unsigned short), NULL, &err));
         OCL_CHECK(err, cl::Buffer trackFromDevice(context, CL_MEM_READ_WRITE, no_objects * sizeof(unsigned short), NULL,
                                                   &err));
+
+        std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC4, XF_NPPC1) << std::endl;
+        std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC4, XF_NPPC1) << std::endl;
+        std::cout << "NPPC:" << XF_NPPC1 << std::endl;
 
         // Set the kernel arguments
         OCL_CHECK(err, err = krnl.setArg(0, imageToDevice));

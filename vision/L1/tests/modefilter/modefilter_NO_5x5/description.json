@@ -2,7 +2,7 @@
     "name": "Xilinx modefilter_NO_5X5 Test", 
     "description": "HLS case", 
     "flow": "hls", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "zcu102", 
         "zcu104", 
@@ -10,9 +10,9 @@
         "aws-vu9p-f1", 
         "vck190"
     ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
     "project": "modefilter", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -31,8 +31,8 @@
         "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
         "argv": {
-            "hls_csim": " ${XF_PROJ_ROOT}/data/hd.png ", 
-            "hls_cosim": " ${XF_PROJ_ROOT}/data/hd.png "
+            "hls_csim": " ${XF_PROJ_ROOT}/data/128x128.png ", 
+            "hls_cosim": " ${XF_PROJ_ROOT}/data/128x128.png "
         }, 
         "stdmath": false, 
         "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
@@ -53,8 +53,8 @@
             "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
-            "hls_vivado_syn", 
-            "hls_vivado_impl"
+            "vivado_syn", 
+            "vivado_impl"
         ], 
         "category": "full"
     }

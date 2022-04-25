@@ -14,531 +14,125 @@
  * limitations under the License.
  */
 
-#ifndef _XF_RGBIR_HPP_
-#define _XF_RGBIR_HPP_
+#ifndef __XF_RGBIRBAYER_HPP__
+#define __XF_RGBIRBAYER_HPP__
 
-#include <limits>
-#include "common/xf_video_mem.hpp"
-#include "common/xf_utility.hpp"
+#include "ap_int.h"
+#include "common/xf_common.hpp"
+#include "hls_stream.h"
 #include "imgproc/xf_rgbir_bilinear.hpp"
 #include "imgproc/xf_duplicateimage.hpp"
 
 namespace xf {
 namespace cv {
 
-// Internal constants
-#define _NPPC (XF_NPIXPERCYCLE(NPPC))       // Number of pixel per clock to be processed
-#define _NPPC_SHIFT_VAL (XF_BITSHIFT(NPPC)) // Gives log base 2 on NPPC; Used for shifting purpose in case of division
-#define _ECPR ((((K_COLS >> 1) + (_NPPC - 1)) / _NPPC)) // Extra clocks required for processing a row
-#define _NP_IN_PREV \
-    (_NPPC - ((K_COLS >> 1) - (((K_COLS >> 1) / _NPPC) * _NPPC))) // No.of valid destination pixels in previous clock
-#define _DST_PIX_WIDTH (XF_PIXELDEPTH(XF_DEPTH(DST_T, NPPC)))     // destination pixel width
-
-// ======================================================================================
-// A generic structure for filter operation
-// --------------------------------------------------------------------------------------
-// Template Args:-
-//        SRC_T : Data type of soruce image element
-//         ROWS : Image height
-//         COLS : Image width
-//         NPPC : No.of pixels per clock
-//     BORDER_T : Type of boder to be used for edge pixel(s) computation
-// ......................................................................................
-
-template <typename F,
-          int SRC_T,
-          int DST_T,
-          int XFCV_DEPTH,
-          int ROWS,
-          int COLS,
-          int K_ROWS,
-          int K_COLS,
-          int NPPC = 1,
-          int BORDER_T = XF_BORDER_CONSTANT,
-          int USE_URAM = 0,
-          int USE_MAT = 1,
-          int BFORMAT = 0>
-class GenericFilter {
-   public:
-    // Internal regsiters/buffers
-    xf::cv::Window<K_ROWS, XF_NPIXPERCYCLE(NPPC) + (K_COLS - 1), XF_DTUNAME(SRC_T, NPPC)>
-        src_blk; // Kernel sized image block with pixel parallelism
-    xf::cv::LineBuffer<K_ROWS - 1,
-                       (COLS >> _NPPC_SHIFT_VAL),
-                       XF_TNAME(SRC_T, NPPC),
-                       (USE_URAM ? RAM_S2P_URAM : RAM_S2P_BRAM),
-                       (USE_URAM ? K_ROWS - 1 : 1)>
-        buff; // Line Buffer for K_ROWS from the image
-
-    // Internal Registers
-    unsigned short num_clks_per_row; // No.of clocks required for processing one row
-    unsigned int rd_ptr;             // Read pointer
-    unsigned int wr_ptr;             // Write pointer-rggb
-    unsigned int wr_ptr_ir;          // Write pointer-ir
-
-    // Default Constructor
-    GenericFilter() {
-        num_clks_per_row = 0;
-        rd_ptr = 0;
-        wr_ptr = 0;
-        wr_ptr_ir = 0;
-    }
-
-    // Internal functions
-    void initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src);
-
-    void process_row(unsigned short readRow,
-                     unsigned short row,
-                     xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                     ap_int<4> R_IR_C1_wgts[5][5],
-                     ap_int<4> R_IR_C2_wgts[5][5],
-                     ap_int<4> B_at_R_wgts[5][5],
-                     ap_int<4> IR_at_R_wgts[3][3],
-                     ap_int<4> IR_at_B_wgts[3][3],
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCV_DEPTH>& _dst_rggb,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPPC>& _dst_half_ir);
-    void process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                       ap_int<4> R_IR_C1_wgts[5][5],
-                       ap_int<4> R_IR_C2_wgts[5][5],
-                       ap_int<4> B_at_R_wgts[5][5],
-                       ap_int<4> IR_at_R_wgts[3][3],
-                       ap_int<4> IR_at_B_wgts[3][3],
-                       xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCV_DEPTH>& _dst_rggb,
-                       xf::cv::Mat<DST_T, ROWS, COLS, NPPC>& _dst_half_ir);
-};
-
-// -----------------------------------------------------------------------------------
-// Function to initialize internal regsiters and buffers
-// -----------------------------------------------------------------------------------
-template <typename RGBIR,
-          int SRC_T,
-          int DST_T,
-          int XFCV_DEPTH,
-          int ROWS,
-          int COLS,
-          int K_ROWS,
-          int K_COLS,
-          int NPPC,
-          int BORDER_T,
-          int USE_URAM,
-          int USE_MAT,
-          int BFORMAT>
-void GenericFilter<RGBIR,
-                   SRC_T,
-                   DST_T,
-                   XFCV_DEPTH,
-                   ROWS,
-                   COLS,
-                   K_ROWS,
-                   K_COLS,
-                   NPPC,
-                   BORDER_T,
-                   USE_URAM,
-                   USE_MAT,
-                   BFORMAT>::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src) {
-#pragma HLS INLINE
-
-    // Computing no.of clocks required for processing a row of given image dimensions
-    num_clks_per_row = (_src.cols + _NPPC - 1) >> _NPPC_SHIFT_VAL;
-
-    // Read/Write pointer set to start location of input image
-    rd_ptr = 0;
-    wr_ptr = 0;
-    wr_ptr_ir = 0;
-
-    return;
-} // End of initialize()
-
-// -----------------------------------------------------------------------------------
-// Function to process a row
-// -----------------------------------------------------------------------------------
-template <typename RGBIR,
-          int SRC_T,
-          int DST_T,
-          int XFCV_DEPTH,
-          int ROWS,
-          int COLS,
-          int K_ROWS,
-          int K_COLS,
-          int NPPC,
-          int BORDER_T,
-          int USE_URAM,
-          int USE_MAT,
-          int BFORMAT>
-void GenericFilter<RGBIR,
-                   SRC_T,
-                   DST_T,
-                   XFCV_DEPTH,
-                   ROWS,
-                   COLS,
-                   K_ROWS,
-                   K_COLS,
-                   NPPC,
-                   BORDER_T,
-                   USE_URAM,
-                   USE_MAT,
-                   BFORMAT>::process_row(unsigned short readRow,
-                                         unsigned short row,
-                                         xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                         ap_int<4> R_IR_C1_wgts[5][5],
-                                         ap_int<4> R_IR_C2_wgts[5][5],
-                                         ap_int<4> B_at_R_wgts[5][5],
-                                         ap_int<4> IR_at_R_wgts[3][3],
-                                         ap_int<4> IR_at_B_wgts[3][3],
-                                         xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCV_DEPTH>& _dst_rggb,
-                                         xf::cv::Mat<DST_T, ROWS, COLS, NPPC>& _dst_half_ir) {
+template <int TYPE, int NPPC, int F_ROWS = 5, int F_COLS = 5>
+void apply_filter(XF_DTUNAME(TYPE, NPPC) patch[F_ROWS][F_COLS],
+                  ap_int<4> wgt[F_ROWS][F_COLS],
+                  XF_DTUNAME(TYPE, NPPC) & pix) {
 #pragma HLS INLINE OFF
 
-    // --------------------------------------
-    // Constants
-    // --------------------------------------
-    const uint32_t _TC = (COLS >> _NPPC_SHIFT_VAL) + (K_COLS >> 1); // MAX Trip Count per row
+    // Weights used for applying the filter are the values by which the pixel values are to be shifted
+    int partial_sum[F_ROWS] = {0};
+    int sum = 0;
 
-    // --------------------------------------
-    // Internal variables
-    // --------------------------------------
-    // Loop count variable
-    unsigned short col_loop_cnt = num_clks_per_row + _ECPR;
-    unsigned short col_wo_npc = 0, original_col = 0;
-    bool toggle_weights = 0, toggle_weights_ir = 0;
-    bool flag = 0;
-    ap_uint<10> count = 0;
-    unsigned short candidateRow = row;
-    unsigned short candidateCol = col_wo_npc;
-    RGBIR oper;
+    XF_DTUNAME(TYPE, NPPC) tempVal = 0, NtempVal = 0;
 
-    // To store out pixels in packed format
-    XF_TNAME(DST_T, NPPC) out_pixels, out_pixels_ir;
-    XF_TNAME(SRC_T, NPPC) in_pixel;
-
-// --------------------------------------
-// Initialize source block buffer to all zeros
-// --------------------------------------
-SRC_INIT_LOOP:
-    for (unsigned short kr = 0; kr < K_ROWS; kr++) {
-#pragma HLS UNROLL
-
-        for (unsigned short kc = 0; kc < (_NPPC + K_COLS - 1); kc++) {
-#pragma HLS UNROLL
-            src_blk.val[kr][kc] = 0;
-        }
-    }
-
-// --------------------------------------
-// Process columns of the row
-// --------------------------------------
-COL_LOOP:
-    for (unsigned short c = 0; c < col_loop_cnt; c++) {
+apply_row:
+    for (int fr = 0; fr < F_ROWS; fr++) {
 // clang-format off
 #pragma HLS PIPELINE II=1
-#pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPPC
-#pragma HLS DEPENDENCE variable=buff.val inter false
-        // clang-format on
-
-        // Fetch next pixel of current row
-        // .........................................................
-        in_pixel = ((readRow < _src.rows) && (c < num_clks_per_row)) ? _src.read(rd_ptr++) : (XF_TNAME(SRC_T, NPPC))0;
-
-    // Fetch data from RAMs and store in 'src_blk' for processing
-    // .........................................................
-    BUFF_RD_LOOP:
-        for (unsigned short kr = 0; kr < K_ROWS; kr++) {
-#pragma HLS UNROLL
-            //#pragma HLS DEPENDENCE variable=buff.val inter false
-
-            XF_TNAME(SRC_T, NPPC) tmp_rd_buff;
-
-            // Read packed data
-            tmp_rd_buff =
-                (kr == (K_ROWS - 1)) ? in_pixel : (c < num_clks_per_row) ? buff.val[kr][c] : (XF_TNAME(SRC_T, NPPC))0;
-
-            // Extract pixels from packed data and store in 'src_blk'
-            xfExtractPixels<NPPC, XF_WORDWIDTH(SRC_T, NPPC), XF_DEPTH(SRC_T, NPPC)>(src_blk.val[kr], tmp_rd_buff,
-                                                                                    (K_COLS - 1));
-        }
-
-    // Process the kernel block
-    // ........................
-    PROCESS_BLK_LOOP:
-        for (int pix_idx = 0; pix_idx < _NPPC; pix_idx++) {
-#pragma HLS UNROLL
-
-            XF_DTUNAME(DST_T, NPPC) out_pix;
-            XF_DTUNAME(DST_T, NPPC) out_pix_ir;
-
-            XF_DTUNAME(SRC_T, NPPC) NxM_src_blk[K_ROWS][K_COLS];
-            XF_DTUNAME(SRC_T, NPPC) IR_3x3_src_blk[3][3]; // 3x3 block for IR filter
-                                                          // clang-format off
-#pragma HLS ARRAY_PARTITION variable=NxM_src_blk complete dim=1
-#pragma HLS ARRAY_PARTITION variable=NxM_src_blk complete dim=2
-        // clang-format on
-
-        // Extract _NPPC, NxM-blocks from 'src_blk'
-        REARRANGE_LOOP:
-            for (unsigned short kr = 0; kr < K_ROWS; kr++) {
-                //#pragma HLS UNROLL
-                for (unsigned short kc = 0; kc < K_COLS; kc++) {
-#pragma HLS UNROLL
-                    NxM_src_blk[kr][kc] = src_blk.val[kr][pix_idx + kc];
-                    if ((kr > 0 && kr < 4) &&
-                        (kc > 0 && kc < 4)) { // Filling 3x3 block for IR calculation from 5x5 block
-                        IR_3x3_src_blk[kr - 1][kc - 1] = NxM_src_blk[kr][kc];
-                    }
+    // clang-format on
+    apply_col:
+        for (int fc = 0; fc < F_COLS; fc++) {
+            //				#pragma HLS UNROLL
+            if (wgt[fr][fc] > 0) {
+                if (wgt[fr][fc] == 7) { // wgt is -1
+                    partial_sum[fr] -= patch[fr][fc];
+                } else if (wgt[fr][fc] == 6) { // wgt is 0
+                    partial_sum[fr] += 0;
+                } else {
+                    partial_sum[fr] += patch[fr][fc] >> (__ABS((char)wgt[fr][fc]));
                 }
-            }
-
-            original_col = c * _NPPC + pix_idx;
-            col_wo_npc = c * _NPPC - 2 + pix_idx;
-            candidateCol = col_wo_npc;
-
-            if (BFORMAT == XF_BAYER_GR) {
-                candidateRow = row + 1;
-                candidateCol = c * _NPPC + pix_idx;
-                //				candidateCol = col_wo_npc + 2;
-            }
-
-            if (c >= _ECPR) {
-                out_pix = NxM_src_blk[K_ROWS / 2][K_COLS / 2];
-                out_pix_ir = NxM_src_blk[K_ROWS / 2][K_COLS / 2];
-
-                if (((((candidateRow - 2) % 4) == 0) && ((candidateCol % 4) == 0)) ||
-                    (((candidateRow % 4) == 0) && (((candidateCol - 2) % 4) == 0))) {
-                    oper.apply_filter(NxM_src_blk, B_at_R_wgts, out_pix); // B at R
-                } else if ((candidateRow & 0x0001) ==
-                           1) { // BG Mode - This is odd row, IR location. Compute R here with 5x5 filter
-
-                    if (((candidateCol - 1) % 4) == 0) {
-                        oper.apply_filter(NxM_src_blk, R_IR_C1_wgts,
-                                          out_pix); // B at IR - Constellation-1 (Red on the top left)
-                    } else if (((candidateCol + 1) % 4) == 0) {
-                        oper.apply_filter(NxM_src_blk, R_IR_C2_wgts,
-                                          out_pix); // B at IR - Constellation-2 (Blue on the top left)
-                    }
-                }
-                if ((((candidateRow % 4) == 0) &&
-                     ((candidateCol % 4) == 0)) || // BG Mode - B location, apply 3x3 IR filter
-                    ((((candidateRow - 2) % 4) == 0) && (((candidateCol - 2) % 4) == 0))) {
-                    oper.template apply_filter<3, 3>(IR_3x3_src_blk, IR_at_B_wgts, out_pix_ir); // IR at B location
-                } else if (((((candidateRow - 2) % 4) == 0) && ((candidateCol % 4) == 0)) ||
-                           (((candidateRow % 4) == 0) &&
-                            (((candidateCol - 2) % 4) == 0))) { // BG Mode - R location, apply 3x3 IR filter
-
-                    oper.template apply_filter<3, 3>(IR_3x3_src_blk, IR_at_R_wgts, out_pix_ir); // IR at R location
-                }
-
-                // Start packing the out pixel value every clock of NPPC
-                out_pixels.range(((pix_idx + 1) * _DST_PIX_WIDTH) - 1, (pix_idx * _DST_PIX_WIDTH)) = out_pix;
-                out_pixels_ir.range(((pix_idx + 1) * _DST_PIX_WIDTH) - 1, (pix_idx * _DST_PIX_WIDTH)) = out_pix_ir;
-            }
-        }
-
-        // Write the data out to DDR
-        // .........................
-        if (c >= _ECPR) {
-            _dst_rggb.write(wr_ptr++, out_pixels);
-
-            _dst_half_ir.write(wr_ptr_ir++, out_pixels_ir);
-        }
-
-        // Move the data in Line Buffers
-        // ...........................................
-        if (c < num_clks_per_row) {
-        BUFF_WR_LOOP:
-            for (unsigned short kr = 0; kr < K_ROWS - 1; kr++) {
-#pragma HLS UNROLL
-                buff.val[kr][c] = src_blk.val[kr + 1][K_COLS - 1];
-            }
-        }
-
-    // Now get ready for next cycle of computation. So copy the last K_COLS-1 data to start location of 'src_blk'
-    // ...........................................
-    SHIFT_LOOP:
-        for (unsigned short kr = 0; kr < K_ROWS; kr++) {
-#pragma HLS UNROLL
-            for (unsigned short kc = 0; kc < K_COLS - 1; kc++) {
-#pragma HLS UNROLL
-                src_blk.val[kr][kc] = src_blk.val[kr][_NPPC + kc];
+            } else if (wgt[fr][fc] < 0) {
+                partial_sum[fr] -= patch[fr][fc] >> (__ABS((char)wgt[fr][fc]));
             }
         }
     }
+
+apply_sum:
+    for (int fsum = 0; fsum < F_ROWS; fsum++) {
+#pragma HLS UNROLL
+        sum += partial_sum[fsum];
+    }
+
+    pix = xf::cv::xf_satcast<XF_PIXELWIDTH(TYPE, NPPC)>(sum);
 
     return;
-} // End of process_row_gauss()
+}
 
-// -----------------------------------------------------------------------------------
-// Main function that runs the filter over the image
-// -----------------------------------------------------------------------------------
-template <typename RGBIR,
-          int SRC_T,
-          int DST_T,
-          int XFCV_DEPTH,
-          int ROWS,
-          int COLS,
-          int K_ROWS,
-          int K_COLS,
-          int NPPC,
-          int BORDER_T,
-          int USE_URAM,
-          int USE_MAT,
-          int BFORMAT>
-void GenericFilter<RGBIR,
-                   SRC_T,
-                   DST_T,
-                   XFCV_DEPTH,
-                   ROWS,
-                   COLS,
-                   K_ROWS,
-                   K_COLS,
-                   NPPC,
-                   BORDER_T,
-                   USE_URAM,
-                   USE_MAT,
-                   BFORMAT>::process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                           ap_int<4> R_IR_C1_wgts[5][5],
-                                           ap_int<4> R_IR_C2_wgts[5][5],
-                                           ap_int<4> B_at_R_wgts[5][5],
-                                           ap_int<4> IR_at_R_wgts[3][3],
-                                           ap_int<4> IR_at_B_wgts[3][3],
-                                           xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCV_DEPTH>& _dst_rggb,
-                                           xf::cv::Mat<DST_T, ROWS, COLS, NPPC>& _dst_half_ir) {
-#pragma HLS INLINE OFF
-    // Constant declaration
-    const uint32_t _TC =
-        ((COLS >> _NPPC_SHIFT_VAL) + (K_COLS >> 1)) / NPPC; // MAX Trip Count per row considering N-Pixel parallelsim
-
-    // ----------------------------------
-    // Start process with initialization
-    // ----------------------------------
-    initialize(_src);
-
-// ----------------------------------
-// Initialize Line Buffer
-// ----------------------------------
-// Part1: Initialize the buffer with 1st (kernel height)/2 rows of image
-//        Start filling rows from (kernel height)/2 and rest depending on border type
-READ_LINES_INIT:
-    for (unsigned short r = (K_ROWS >> 1); r < (K_ROWS - 1); r++) { // Note: Ignoring last row
-#pragma HLS UNROLL
-        for (unsigned short c = 0; c < num_clks_per_row; c++) {
-// clang-format off
-#pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
-            // clang-format on
-            buff.val[r][c] = _src.read(rd_ptr++); // Reading the rows of image
-        }
-    }
-// Part2: Take care of borders depending on border type.
-//        In border replicate mode, fill with 1st row of the image.
-BORDER_INIT:
-    for (unsigned short r = 0; r < (K_ROWS >> 1); r++) {
-#pragma HLS UNROLL
-        for (unsigned short c = 0; c < num_clks_per_row; c++) {
-#pragma HLS PIPELINE
-// clang-format off
-#pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS/2
-            // clang-format on
-            buff.val[r][c] = (BORDER_T == XF_BORDER_REPLICATE) ? buff.val[K_ROWS >> 1][c] : (XF_TNAME(SRC_T, NPPC))0;
-        }
-    }
-
-    short int row = 0;
-    short int rLoopEnd = _src.rows + (K_ROWS >> 1);
-// ----------------------------------
-// Processing each row of the image
-// ----------------------------------
-ROW_LOOP:
-    for (unsigned short r = (K_ROWS >> 1); r < rLoopEnd; r++) {
-// clang-format off
-#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        process_row(r, row, _src, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, _dst_rggb,
-                    _dst_half_ir);
-        row++;
-    }
-
-    return;
-} // End of process_image()
-
-// ======================================================================================
-
-// ======================================================================================
-// Class for applying the specific filters
-// ======================================================================================
-
-template <int SRC_T, int K_ROWS, int K_COLS, int NPPC>
-class RGBIR {
-   public:
-    const int NUM_CH = XF_CHANNELS(SRC_T, NPPC);
-    static constexpr int KR_MOD = ((K_ROWS + 1) / 2);
-    static constexpr int BIT_DEPTH = XF_DTPIXELDEPTH(SRC_T, NPPC);
-
-    // -------------------------------------------------------------------------
-    // Creating apply function (applying filter)
-    // -------------------------------------------------------------------------
-    // void apply_filter(XF_DTUNAME(SRC_T, NPPC) patch[F_ROWS][F_COLS], XF_DTUNAME(SRC_T, NPPC) wgt[F_ROWS][F_COLS],
-    // XF_DTUNAME(SRC_T, NPPC) &pix) {
-    template <int F_ROWS = K_ROWS, int F_COLS = K_COLS>
-    void apply_filter(XF_DTUNAME(SRC_T, NPPC) patch[F_ROWS][F_COLS],
-                      ap_int<4> wgt[F_ROWS][F_COLS],
-                      XF_DTUNAME(SRC_T, NPPC) & pix) {
-#pragma HLS INLINE OFF
-
-        // Weights used for applying the filter are the values by which the pixel values are to be shifted
-        int partial_sum[F_ROWS] = {0};
-        int sum = 0;
-
-        XF_DTUNAME(SRC_T, NPPC) tempVal = 0, NtempVal = 0;
-
-    apply_row:
-        for (int fr = 0; fr < F_ROWS; fr++) {
-// clang-format off
-        #pragma HLS PIPELINE II=1
-        // clang-format on
-        apply_col:
-            for (int fc = 0; fc < F_COLS; fc++) {
-                //				#pragma HLS UNROLL
-                if (wgt[fr][fc] > 0) {
-                    if (wgt[fr][fc] == 7) { // wgt is -1
-                        partial_sum[fr] -= patch[fr][fc];
-                    } else if (wgt[fr][fc] == 6) { // wgt is 0
-                        partial_sum[fr] += 0;
-                    } else {
-                        partial_sum[fr] += patch[fr][fc] >> (__ABS((char)wgt[fr][fc]));
+template <int BSIZE1 = 5, int BSIZE2 = 3, int TYPE, int ROWS, int COLS, int NPPC = 1>
+void coreProcess(XF_DTUNAME(TYPE, NPPC) imgblock[5][BSIZE1],
+                 XF_DTUNAME(TYPE, NPPC) IR_imgblock[3][BSIZE2],
+                 short int i,
+                 short int j,
+                 ap_int<4> B_at_R_wgts[5][5],
+                 ap_int<4> R_IR_C1_wgts[5][5],
+                 ap_int<4> R_IR_C2_wgts[5][5],
+                 ap_int<4> IR_at_B_wgts[3][3],
+                 ap_int<4> IR_at_R_wgts[3][3],
+                 XF_DTUNAME(TYPE, NPPC) & out_pix,
+                 XF_DTUNAME(TYPE, NPPC) & out_pix_ir) {
+    /*	if (((((i - 2) % 4) == 0) && ((j % 4) == 0)) ||
+                            (((i % 4) == 0) && (((j - 2) % 4) == 0))) {
+                    apply_filter<TYPE, NPPC>(imgblock, B_at_R_wgts, out_pix); // B at R
+            } else if ((i & 0x0001) == 1) { // BG Mode - This is odd row, IR location. Compute R here with 5x5 filter
+                    if (((j - 1) % 4) == 0) {
+                            apply_filter<TYPE, NPPC>(imgblock, R_IR_C2_wgts, out_pix); // B at IR - Constellation-1 (Red
+       on the top left)
+                    } else if (((j + 1) % 4) == 0) {
+                            apply_filter<TYPE, NPPC>(imgblock, R_IR_C1_wgts, out_pix); // B at IR - Constellation-2
+       (Blue on the top left)
                     }
-                } else if (wgt[fr][fc] < 0) {
-                    partial_sum[fr] -= patch[fr][fc] >> (__ABS((char)wgt[fr][fc]));
-                }
             }
+            if ((((i % 4) == 0) && ((j % 4) == 0)) || // BG Mode - B location, apply 3x3 IR filter
+                            ((((i - 2) % 4) == 0) && (((j - 2) % 4) == 0))) {
+                    apply_filter<TYPE, NPPC,3, 3>(IR_imgblock, IR_at_B_wgts, out_pix_ir); // IR at B location
+            } else if (((((i - 2) % 4) == 0) && ((j % 4) == 0)) ||
+                            (((i % 4) == 0) && (((j - 2) % 4) == 0))) { // BG Mode - R location, apply 3x3 IR filter
+
+                    apply_filter<TYPE, NPPC,3, 3>(IR_imgblock, IR_at_R_wgts, out_pix_ir); // IR at R location
+            }*/
+
+    if (((((i - 2) % 4) == 0) && ((j % 4) == 0)) || (((i % 4) == 0) && (((j - 2) % 4) == 0))) {
+        apply_filter<TYPE, NPPC>(imgblock, B_at_R_wgts, out_pix); // B at R
+    } else if (((i - 1) % 4) == 0) { // BG Mode - This is odd row, IR location. Compute R here with 5x5 filter
+        if (((j - 1) % 4) == 0) {
+            apply_filter<TYPE, NPPC>(imgblock, R_IR_C2_wgts,
+                                     out_pix); // B at IR - Constellation-1 (Red on the top left)
+        } else if (((j + 1) % 4) == 0) {
+            apply_filter<TYPE, NPPC>(imgblock, R_IR_C1_wgts,
+                                     out_pix); // B at IR - Constellation-2 (Blue on the top left)
         }
-
-    apply_sum:
-        for (int fsum = 0; fsum < F_ROWS; fsum++) {
-#pragma HLS UNROLL
-            sum += partial_sum[fsum];
+    } else if (((i + 1) % 4) == 0) { // BG Mode - This is odd row, IR location. Compute R here with 5x5 filter
+        if (((j - 1) % 4) == 0) {
+            apply_filter<TYPE, NPPC>(imgblock, R_IR_C1_wgts,
+                                     out_pix); // B at IR - Constellation-1 (Red on the top left)
+        } else if (((j + 1) % 4) == 0) {
+            apply_filter<TYPE, NPPC>(imgblock, R_IR_C2_wgts,
+                                     out_pix); // B at IR - Constellation-2 (Blue on the top left)
         }
-
-        pix = xf::cv::xf_satcast<BIT_DEPTH>(sum);
-
-        return;
     }
-};
+    if ((((i % 4) == 0) && ((j % 4) == 0)) || // BG Mode - B location, apply 3x3 IR filter
+        ((((i - 2) % 4) == 0) && (((j - 2) % 4) == 0))) {
+        apply_filter<TYPE, NPPC, 3, 3>(IR_imgblock, IR_at_B_wgts, out_pix_ir); // IR at B location
+    } else if (((((i - 2) % 4) == 0) && ((j % 4) == 0)) ||
+               (((i % 4) == 0) && (((j - 2) % 4) == 0))) { // BG Mode - R location, apply 3x3 IR filter
 
-// ======================================================================================
-// Top level RGB-IR Demosaic API
-// --------------------------------------------------------------------------------------
-// Template Args:-
-//         TYPE : Data type of source image
-//         ROWS : Image height
-//         COLS : Image width
-//         NPPC : No.of pixels per clock
-//     BORDER_T : Type of border to be used for edge pixel(s) computation
-//                (XF_BORDER_REPLICATE, XF_BORDER_CONSTANT, XF_BORDER_REFLECT_101, XF_BORDER_REFLECT)
-// ......................................................................................
-#define _RGB_IR_ RGB_IR<TYPE, K_SIZE, K_SIZE, NPPC>
+        apply_filter<TYPE, NPPC, 3, 3>(IR_imgblock, IR_at_R_wgts, out_pix_ir); // IR at R location
+    }
+}
 
-// --------------------------------------------------------------------------------------
-// Function to perform demosaicing on RGB-IR image
-// --------------------------------------------------------------------------------------
 template <int FSIZE1 = 5,
           int FSIZE2 = 3,
           int BFORMAT = 0,
@@ -546,21 +140,35 @@ template <int FSIZE1 = 5,
           int ROWS,
           int COLS,
           int NPPC = 1,
-          int XFCV_DEPTH,
+          int XFCV_DEPTH = 2,
           int BORDER_T = XF_BORDER_CONSTANT,
           int USE_URAM = 0>
-void RGBIR_Demosaic(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
+void xf_form_mosaic(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
                     char R_IR_C1_wgts[FSIZE1 * FSIZE1],
                     char R_IR_C2_wgts[FSIZE1 * FSIZE1],
                     char B_at_R_wgts[FSIZE1 * FSIZE1],
                     char IR_at_R_wgts[FSIZE2 * FSIZE2],
                     char IR_at_B_wgts[FSIZE2 * FSIZE2],
                     xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCV_DEPTH>& _dst_rggb,
-                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_half_ir) {
-#pragma HLS INLINE OFF
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _half_ir) {
+#ifndef __SYNTHESIS__
+    assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
+            (BFORMAT == XF_BAYER_RG)) &&
+           ("Unsupported Bayer pattern. Use anyone among: "
+            "XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
+    assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
+    assert(((NPPC == 1) || (NPPC == 2) || (NPPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
+    assert(((TYPE == XF_8UC1) || (TYPE == XF_10UC1) || (TYPE == XF_12UC1) || (TYPE == XF_16UC1)) &&
+           "Only 8, 10, 12 and 16 bit, single channel images are supported");
+#endif
+
+    static constexpr int __BWIDTH = XF_NPIXPERCYCLE(NPPC) + (FSIZE1 - 1);
+    static constexpr int __IR_BWIDTH = XF_NPIXPERCYCLE(NPPC) + (FSIZE2 - 1);
+    const int _ECPR = (((FSIZE1 >> 1) + (NPPC - 1)) / NPPC);
 
     ap_int<4> R_IR_C1_wgts_loc[FSIZE1][FSIZE1], R_IR_C2_wgts_loc[FSIZE1][FSIZE1], B_at_R_wgts_loc[FSIZE1][FSIZE1];
     ap_int<4> IR_at_R_wgts_loc[FSIZE2][FSIZE2], IR_at_B_wgts_loc[FSIZE2][FSIZE2];
+
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=R_IR_C1_wgts_loc complete dim=0
 #pragma HLS ARRAY_PARTITION variable=R_IR_C2_wgts_loc complete dim=0
@@ -588,17 +196,228 @@ FILTER2_ROW:
         }
     }
 
-    xf::cv::GenericFilter<RGBIR<TYPE, FSIZE1, FSIZE1, NPPC>, TYPE, TYPE, XFCV_DEPTH, ROWS, COLS, FSIZE1, FSIZE1, NPPC,
-                          BORDER_T, USE_URAM, 1, BFORMAT>
-        rgbIr_filter;
+#pragma HLS INLINE OFF
 
-    rgbIr_filter.process_image(_src, R_IR_C1_wgts_loc, R_IR_C2_wgts_loc, B_at_R_wgts_loc, IR_at_R_wgts_loc,
-                               IR_at_B_wgts_loc, _dst_rggb, _dst_half_ir);
+    XF_TNAME(TYPE, NPPC) linebuffer[FSIZE1 - 1][COLS >> XF_BITSHIFT(NPPC)];
+    if (USE_URAM) {
+// clang-format off
+#pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_URAM
+#pragma HLS array_reshape variable=linebuffer dim=1 factor=4 cyclic
+        // clang-format on
+    } else {
+// clang-format off
+#pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_BRAM
+#pragma HLS array_partition variable=linebuffer complete dim=1
+        // clang-format on
+    }
+    XF_CTUNAME(TYPE, NPPC) imgblock[FSIZE1][__BWIDTH];
+    XF_CTUNAME(TYPE, NPPC) IR_imgblock[FSIZE2][__IR_BWIDTH];
+    /*
+const int pre_read_count = (2 / NPPC) + ((NPPC * NPPC) >> 2);  // 2-2-4
+const int post_read_count = pre_read_count + 2;             // 4-4-6
+const int end_read_count = ((NPPC << 1) >> (NPPC * NPPC)) + 1; // 2-1-1
+     */
+    const int pre_read_count = NPPC; // 2-2-4
 
-    return;
+// clang-format off
+#pragma HLS array_partition variable=imgblock complete dim=0
+    // clang-format on
+
+    int lineStore = 3, read_index = 0, write_index = 0, write_index_ir = 0;
+LineBuffer:
+    for (int i = 0; i < 2; i++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=2 max=2
+        // clang-format on
+        for (int j = 0; j<_src.cols>> XF_BITSHIFT(NPPC); j++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPPC max=COLS/NPPC
+#pragma HLS pipeline ii=1
+            // clang-format on
+            XF_TNAME(TYPE, NPPC) tmp = _src.read(read_index++);
+            linebuffer[i][j] = 0;
+            linebuffer[i + 2][j] = tmp;
+        }
+    }
+    ap_uint<3> line0 = 3, line1 = 0, line2 = 1, line3 = 2;
+    int step = XF_DTPIXELDEPTH(TYPE, NPPC);
+    XF_TNAME(TYPE, NPPC) tmp = 0;
+
+Row_Loop:
+    for (int i = 0; i < _src.rows; i++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+        // clang-format on
+        int bram_read_count = 0;
+        lineStore++;
+        if (lineStore > 3) {
+            lineStore = 0;
+        }
+        if (line0 == 0) {
+            line0 = 1;
+            line1 = 2;
+            line2 = 3;
+            line3 = 0;
+        } else if (line0 == 1) {
+            line0 = 2;
+            line1 = 3;
+            line2 = 0;
+            line3 = 1;
+        } else if (line0 == 2) {
+            line0 = 3;
+            line1 = 0;
+            line2 = 1;
+            line3 = 2;
+        } else {
+            line0 = 0;
+            line1 = 1;
+            line2 = 2;
+            line3 = 3;
+        }
+
+    /*Image left corner case */
+    Zero:
+        for (int p = 0; p < FSIZE1; ++p) {
+// clang-format off
+#pragma HLS PIPELINE II=1
+            // clang-format on
+            for (int k = 0; k < FSIZE1 - 1 + NPPC; k++) {
+                imgblock[p][k] = 0;
+            }
+        }
+
+    /*Filling the data in the first four rows of 5x5/5x6/5x10 window from
+     * linebuffer */
+    Datafill:
+        for (int n = 0, w = 0, v = 0; n < pre_read_count; ++n, ++v) {
+#pragma HLS UNROLL
+
+            imgblock[0][FSIZE1 - 1 + n] = linebuffer[line0][w].range((step + step * v) - 1, step * v);
+            imgblock[1][FSIZE1 - 1 + n] = linebuffer[line1][w].range((step + step * v) - 1, step * v);
+            imgblock[2][FSIZE1 - 1 + n] = linebuffer[line2][w].range((step + step * v) - 1, step * v);
+            imgblock[3][FSIZE1 - 1 + n] = linebuffer[line3][w].range((step + step * v) - 1, step * v);
+        }
+    //        bram_read_count++ ;
+
+    Col_Loop:
+        for (int j = 0; j < ((_src.cols) >> XF_BITSHIFT(NPPC)) + _ECPR; j++) {
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS dependence variable=linebuffer inter false
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPPC max=COLS/NPPC
+#pragma HLS LOOP_FLATTEN OFF
+            // clang-format on
+
+            unsigned short candidateRow = i;
+            unsigned short candidateCol = 0;
+
+            if ((i < _src.rows - 2) && j < ((_src.cols) >> XF_BITSHIFT(NPPC))) {
+                tmp = _src.read(read_index++); // Reading 5th row element
+            } else {
+                tmp = 0;
+            }
+
+            // Fill 4th row last element
+            for (int z = 0; z < NPPC; ++z) {
+                imgblock[4][FSIZE1 - 1 + z] = tmp.range((step + step * z) - 1, step * z);
+            }
+
+            // Extract 3x3 IR bloc from 5x5 block
+            for (int r = 0; r < 3; r++) {
+                for (int c = 0; c < 3; c++) {
+                    IR_imgblock[r][c] = imgblock[r + 1][c + 1];
+                }
+            }
+
+            // Calculate the resultant intensities at each pixel
+            XF_TNAME(TYPE, NPPC) packed_res_pixel = 0, ir_packed_res_pixel = 0;
+            int pstep = XF_PIXELWIDTH(TYPE, NPPC);
+
+            XF_DTUNAME(TYPE, NPPC) out_pix = imgblock[FSIZE1 >> 1][FSIZE1 >> 1];
+            XF_DTUNAME(TYPE, NPPC) ir_out_pix = IR_imgblock[FSIZE2 >> 1][FSIZE2 >> 1];
+            //            int a =0;
+
+            if (j >= _ECPR) {
+                for (int loop = 0; loop < NPPC; loop++) {
+                    candidateCol = j * NPPC - 2 + loop;
+
+                    if (BFORMAT == XF_BAYER_GR) {
+                        candidateRow = i + 1;
+                        candidateCol = j * NPPC + loop;
+                    }
+                    /*		            if(candidateCol == 1923){
+                                                    a = 1;
+                                                }*/
+
+                    coreProcess<__BWIDTH, __IR_BWIDTH, TYPE, ROWS, COLS, NPPC>(
+                        imgblock, IR_imgblock, candidateRow, candidateCol, B_at_R_wgts_loc, R_IR_C1_wgts_loc,
+                        R_IR_C2_wgts_loc, IR_at_B_wgts_loc, IR_at_R_wgts_loc, out_pix, ir_out_pix);
+                }
+
+                for (int ploop = 0; ploop < NPPC; ploop++) {
+                    packed_res_pixel.range(pstep + pstep * ploop - 1, pstep * ploop) = out_pix;
+                    ir_packed_res_pixel.range(pstep + pstep * ploop - 1, pstep * ploop) = ir_out_pix;
+                }
+
+                // Write the data out to DDR
+                // .........................
+
+                _dst_rggb.write(write_index++, out_pix);
+
+                _half_ir.write(write_index_ir++, ir_out_pix);
+            }
+
+            // Left-shift the elements in imgblock by NPPC
+            for (int k = 0; k < 5; k++) {
+                for (int m = 0; m < NPPC; ++m) {
+                    for (int l = 0; l < (__BWIDTH - 1); l++) {
+                        imgblock[k][l] = imgblock[k][l + 1];
+                    }
+                }
+            }
+
+            bram_read_count++;
+
+            XF_TNAME(TYPE, NPPC)
+            packed_read1 = 0, packed_read2 = 0, packed_read3 = 0, packed_read4 = 0, packed_store = 0;
+
+            if (j < ((_src.cols >> XF_BITSHIFT(NPPC)) - 1)) { // for each element being processed that is
+                                                              // not at borders
+                packed_read1 = linebuffer[line0][bram_read_count];
+                packed_read2 = linebuffer[line1][bram_read_count];
+                packed_read3 = linebuffer[line2][bram_read_count];
+                packed_read4 = linebuffer[line3][bram_read_count];
+
+                for (int q = 0; q < NPPC; ++q) {
+                    imgblock[0][FSIZE1 - 1 + q] = packed_read1.range((step + step * q) - 1, step * q);
+                    imgblock[1][FSIZE1 - 1 + q] = packed_read2.range((step + step * q) - 1, step * q);
+                    imgblock[2][FSIZE1 - 1 + q] = packed_read3.range((step + step * q) - 1, step * q);
+                    imgblock[3][FSIZE1 - 1 + q] = packed_read4.range((step + step * q) - 1, step * q);
+                    // imgblock[4][FSIZE1-1+q] = tmp.range((step + step * q) - 1, step * q);
+                    packed_store.range((step + step * q) - 1, step * q) =
+                        imgblock[4][FSIZE1 - 2 + q]; // Write back to linebuffer
+                }
+                linebuffer[lineStore][j] = packed_store;
+
+            } else { // For processing elements at the end of the line.
+                for (int r = 0; r < NPPC; ++r) {
+                    if (j == ((_src.cols >> XF_BITSHIFT(NPPC)) - 1)) {
+                        linebuffer[lineStore][j].range((step + step * r) - 1, step * r) = imgblock[4][FSIZE1 - 2 + r];
+                    }
+
+                    imgblock[0][FSIZE1 - 1 + r] = 0;
+                    imgblock[1][FSIZE1 - 1 + r] = 0;
+                    imgblock[2][FSIZE1 - 1 + r] = 0;
+                    imgblock[3][FSIZE1 - 1 + r] = 0;
+                    imgblock[4][FSIZE1 - 1 + r] = 0;
+                }
+            }
+
+            //			bram_read_count++;
+
+        } // end COL loop
+    }     // end ROW loop
 }
-
-// ======================================================================================
 
 template <int FSIZE1 = 5,
           int FSIZE2 = 3,
@@ -619,22 +438,31 @@ void rgbir2bayer(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
                  char sub_wgts[4],
                  xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_rggb,
                  xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_ir) {
-#pragma HLS DATAFLOW
+#ifndef __SYNTHESIS__
+    assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
+            (BFORMAT == XF_BAYER_RG)) &&
+           ("Unsupported Bayer pattern. Use anyone among: "
+            "XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
+    assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
+    assert(((NPPC == 1) || (NPPC == 2) || (NPPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
+    assert(((TYPE == XF_8UC1) || (TYPE == XF_10UC1) || (TYPE == XF_12UC1) || (TYPE == XF_16UC1)) &&
+           "Only 8, 10, 12 and 16 bit, single channel images are supported");
+#endif
 
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, 3 * COLS> rggbOutput(_src.rows, _src.cols);
+#pragma HLS DATAFLOW
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCV_DEPTH> rggbOutput(_src.rows, _src.cols);
     xf::cv::Mat<TYPE, ROWS, COLS, NPPC> halfIrOutput(_src.rows, _src.cols);
     xf::cv::Mat<TYPE, ROWS, COLS, NPPC> fullIrOutput(_src.rows, _src.cols);
     xf::cv::Mat<TYPE, ROWS, COLS, NPPC> fullIrOutput_copy1(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC> fullIrOutput_copy2(_src.rows, _src.cols);
 
-    xf::cv::RGBIR_Demosaic<FSIZE1, FSIZE2, BFORMAT, TYPE, ROWS, COLS, NPPC, 3 * COLS, XF_BORDER_CONSTANT, USE_URAM>(
+    xf_form_mosaic<FSIZE1, FSIZE2, BFORMAT, TYPE, ROWS, COLS, NPPC, XFCV_DEPTH, BORDER_T, USE_URAM>(
         _src, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, rggbOutput, halfIrOutput);
-    xf::cv::IR_bilinear<BFORMAT>(halfIrOutput, fullIrOutput);
+    xf::cv::xf_ir_bilinear<TYPE, ROWS, COLS, NPPC, BFORMAT, USE_URAM>(halfIrOutput, fullIrOutput);
     xf::cv::duplicateMat(fullIrOutput, fullIrOutput_copy1, _dst_ir);
-    xf::cv::weightedSub<BFORMAT, TYPE, ROWS, COLS, NPPC, 3 * COLS>(sub_wgts, rggbOutput, fullIrOutput_copy1, _dst_rggb);
+    xf::cv::weightedSub<BFORMAT, TYPE, ROWS, COLS, NPPC, XFCV_DEPTH>(sub_wgts, rggbOutput, fullIrOutput_copy1,
+                                                                     _dst_rggb);
 }
 
 } // namespace cv
-} // namespace xf
-
-#endif //_XF_RGBIR_HPP_
+}; // namespace xf
+#endif

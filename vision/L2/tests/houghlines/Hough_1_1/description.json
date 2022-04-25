@@ -4,13 +4,13 @@
         "Houghlines L2 function example"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "aws-vu9p-f1", 
         "vck190", 
         "zcu102"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
         "u250", 
         "zcu104"
@@ -177,9 +177,11 @@
             "accelerators": [
                 {
                     "name": "houghlines_accel", 
-                    "location": "LIB_DIR/L2/examples/houghlines/xf_houghlines_accel.cpp"
+                    "location": "LIB_DIR/L2/examples/houghlines/xf_houghlines_accel.cpp",
+		    "frequency": 200
                 }
-            ]
+            ],
+	    "frequency": 200
         }
     ], 
     "check_env": [

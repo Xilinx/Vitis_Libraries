@@ -76,14 +76,13 @@ HISTOGRAM_ROW_LOOP:
             else
                 in_buf1 = _src_mat.read(row * (imgwidth) + col + 1); //.data[row*(imgwidth) + col+1];
 
-        EXTRACT_UPDATE:
-            for (ap_uint<9> i = 0, j = 0; i < ((8 << XF_BITSHIFT(NPC)) * PLANES); j++, i += 8) {
 // clang-format off
 #pragma HLS DEPENDENCE variable=tmp_hist array intra false
 #pragma HLS DEPENDENCE variable=tmp_hist1 array intra false
+        // clang-format on
+        EXTRACT_UPDATE:
+            for (ap_uint<9> i = 0, j = 0; i < ((8 << XF_BITSHIFT(NPC)) * PLANES); j++, i += 8) {
 #pragma HLS UNROLL
-                // clang-format on
-
                 ap_uint<8> val = 0, val1 = 0;
                 val = in_buf.range(i + 7, i);
                 val1 = in_buf1.range(i + 7, i);

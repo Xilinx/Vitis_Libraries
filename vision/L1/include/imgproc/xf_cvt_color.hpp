@@ -5580,6 +5580,12 @@ rowloop:
                 short int v_add = (Vmax + Vmin);
                 short int v_sub = (Vmax - Vmin);
                 two_L = (Vmax + Vmin);
+                if (v_add == 0) {
+                    v_add = 1;
+                }
+                if (v_sub == 0) {
+                    v_sub = 1;
+                }
                 int h = 0;
                 if (two_L < 255) {
                     inv_add = ((255 << 12) / (v_add));
@@ -5696,6 +5702,13 @@ rowloop:
 
                 short int v_add = (Vmax + Vmin);
                 short int v_sub = (Vmax - Vmin);
+
+                if (v_add == 0) {
+                    v_add = 1;
+                }
+                if (v_sub == 0) {
+                    v_sub = 1;
+                }
                 two_L = (Vmax + Vmin);
                 int h = 0;
                 if (two_L < 255) {

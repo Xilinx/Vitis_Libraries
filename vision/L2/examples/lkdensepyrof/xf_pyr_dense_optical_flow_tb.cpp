@@ -331,6 +331,8 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Loading image 2 failed, exiting!!\n");
         return -1;
     }
+    std::cout << "Input image height : " << im0.rows << std::endl;
+    std::cout << "Input image width  : " << im0.cols << std::endl;
 
     // OpenCV Implementation
     cv::Mat glx_cv = cv::Mat::zeros(im0.size(), CV_32F);
@@ -389,6 +391,10 @@ int main(int argc, char** argv) {
     }
     flow.init(HEIGHT, WIDTH);
     flow_in.init(HEIGHT, WIDTH);
+
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, XF_NPPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, XF_NPPC1) << std::endl;
+    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
 
     // call the hls optical flow implementation
     pyrof_hw(im0, im1, glx, gly, flow, flow_in, imagepyr1, imagepyr2, pyr_h, pyr_w);

@@ -1,8 +1,8 @@
 ## Level 1: HLS Functions and Modules
 
-The Level 1 APIs are presented as HLS C++ classes and functions.
+The Level 1 APIs are presented as HLS C++ classes and functions. These APIs mostly match their [OpenCV](https://docs.opencv.org/4.4.0/d7/dbd/group__imgproc.html) counterparts.
 
-This level of API is mainly provide for hardware-savvy HLS developers. The API description and design details of these modules can be found in Vitis Vision User Guide. 
+The API description and design details of these modules can be found in [Vitis Vision User Guide]([Vitis Vision documentation](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/index.html)). 
 
 'examples' folder contains the testbench and accel C++ files that demonstrate the call of Vitis Vision functions in HLS flow.
 
@@ -29,4 +29,4 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
 
 make run CSIM=1 CSYNTH=1 COSIM=0
 
-Note : Please read "Getting started with HLS" section of [Vitis Vision documentation](https://xilinx.github.io/Vitis_Libraries/vision/2021.2/index.html) for special cases, constraints and other full details.
+Note : Please read "Getting started with HLS" section of [Vitis Vision documentation](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/index.html) for special cases, constraints and other full details.

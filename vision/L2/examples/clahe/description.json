@@ -4,7 +4,7 @@
         "Clahe L2 function example"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200", 
         "aws-vu9p-f1", 
         "vck190", 
@@ -12,7 +12,7 @@
         "zcu104", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
         "u250"
     ], 
@@ -158,7 +158,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/clahe/build"
+                "LIB_DIR/L2/examples/clahe"
             ], 
             "options": "-O3", 
             "symbols": []
@@ -168,7 +168,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L2/examples/clahe/build"
+                "LIB_DIR/L2/examples/clahe"
             ], 
             "clflags": []
         }

@@ -29,7 +29,6 @@
 
 #include "common/xf_infra.hpp"
 #include "imgproc/xf_rgbir.hpp"
-#include "imgproc/xf_rgbir_bilinear.hpp"
 #include "imgproc/xf_duplicateimage.hpp"
 
 // Requried Vision modules
@@ -50,17 +49,17 @@
 #define S_DEPTH 4096
 
 // --------------------------------------------------------------------
-// Macros definations
+// Macros definitions
 // --------------------------------------------------------------------
 
-// Useful macro functions definations
+// Useful macro functions definitions
 #define _DATA_WIDTH_(_T, _N) (XF_PIXELWIDTH(_T, _N) * XF_NPIXPERCYCLE(_N))
 #define _BYTE_ALIGN_(_N) ((((_N) + 7) / 8) * 8)
 
 #define IN_DATA_WIDTH _DATA_WIDTH_(XF_SRC_T, XF_NPPC)
 //#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_DST_T, XF_NPPC)
-#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_LTM_T, XF_NPPC)
-//#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_16UC1, XF_NPPC)
+//#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_LTM_T, XF_NPPC) //if output is rgb
+#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_16UC1, XF_NPPC) // if outptut is YUV
 
 #define AXI_WIDTH_IN _BYTE_ALIGN_(IN_DATA_WIDTH)
 #define AXI_WIDTH_OUT _BYTE_ALIGN_(OUT_DATA_WIDTH)

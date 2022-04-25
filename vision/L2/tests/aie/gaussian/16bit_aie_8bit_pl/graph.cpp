@@ -17,8 +17,8 @@
 #include "graph.h"
 
 // Virtual platform ports
-PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
+PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
+PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
 simulation::platform<1, 1> platform(in1, out1);
 
 // Graph object

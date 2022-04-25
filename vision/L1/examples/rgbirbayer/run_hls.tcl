@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "rgbir.prj"
+set PROJ "rgbirbayer.prj"
 set SOLN "sol1"
 
 if {![info exists CLKP]} {
@@ -25,11 +25,14 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/rgbirbayer/xf_rgbir_accel_axivideo.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ./" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ./"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/rgbirbayer/xf_rgbir_tb_axivideo.cpp" -cflags "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ./" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I ./"
+add_files "${XF_PROJ_ROOT}/L1/examples/rgbirbayer/xf_rgbir_accel_axivideo.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${XF_PROJ_ROOT}/L1/include -I ./ " -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/rgbirbayer/xf_rgbir_tb_axivideo.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ " -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
 set_top rgbir_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

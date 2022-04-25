@@ -19,13 +19,12 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis™ 2021.2 or later version and the
+#. Valid installation of Vitis™ 2022.1 or later version and the
    corresponding licenses.
-#. Install the Vitis Vision libraries, if you intend to use libraries
-   compiled differently than what is provided in Vitis.
-#. Install the card for which the platform is supported in Vitis 2021.2 or
+#. Download the Vitis Vision library from github.
+#. Install the card for which the platform is supported in Vitis 2022.1 or
    later versions.
-#. If targeting an embedded platform, set up the evaluation board.
+#. If targeting an embedded platform, downlaod the platform, common images and set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
    interface to Xilinx FPGAs.
 #. Install/compile OpenCV libraries(with compatible libjpeg.so). 
@@ -583,9 +582,6 @@ For embedded devices, set the following:
 
    $ export SYSROOT=< path-to-platform-sysroot >
    
-   $ export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-   
-   $ export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
    
 Software Emulation
 ------------------

@@ -4,7 +4,7 @@
         "Boundingbox L2 function example"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "aws-vu9p-f1", 
         "vck190", 
@@ -12,7 +12,7 @@
         "zcu104", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
         "u250"
     ], 
@@ -145,8 +145,7 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/4k.jpg", 
-        "3"
+        "LIB_DIR/data/4k.jpg"
     ], 
     "host": {
         "host_exe": "boundingbox", 

@@ -95,6 +95,8 @@ int main(int argc, char** argv) {
     // OpenCL section:
     size_t image_in_size_bytes = image_height * image_width * sizeof(unsigned char) * _planes;
     size_t image_out_size_bytes = 1 * no_of_descs_hw * sizeof(uint32_t);
+    std::cout << "Input image height : " << image_height << std::endl;
+    std::cout << "Input image width  : " << image_width << std::endl;
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -109,6 +111,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+
+    std::cout << "NPPC:" << NPC << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_hog");

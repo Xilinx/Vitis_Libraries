@@ -43,6 +43,8 @@ int main(int argc, char* argv[]) {
 
     in_width = img_tmp.cols;
     in_height = img_tmp.rows;
+    std::cout << "Input image height : " << in_height << std::endl;
+    std::cout << "Input image width  : " << in_width << std::endl;
 
     // Add padding in the input image
     int in_pad = in_width;
@@ -72,6 +74,10 @@ int main(int argc, char* argv[]) {
 
     /////////////////////////////////////// CL
     /// Wrapper///////////////////////////////////////
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC) << std::endl;
+    std::cout << "NPPC:" << NPC << std::endl;
+
     (void)cl_kernel_mgr::registerKernel(
         "blobfromimage_accel", "krnl_blobfromimage_accel", XCLIN(img), XCLOUT(result_hls),
         XCLIN(params, 6 * sizeof(float)), XCLIN(in_width), XCLIN(in_height), XCLIN(in_stride), XCLIN(resize_width),

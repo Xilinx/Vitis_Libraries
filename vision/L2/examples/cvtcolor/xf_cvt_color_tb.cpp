@@ -93,10 +93,16 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     int height_u = inputimg1.rows;
     int width_u = inputimg1.cols;
     int height_v = inputimg2.rows;
     int width_v = inputimg2.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_iyuv2nv12", &err));
     printf("started buffer creation task\n");
@@ -217,10 +223,16 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     int height_u = inputimg1.rows;
     int width_u = inputimg1.cols;
     int height_v = inputimg2.rows;
     int width_v = inputimg2.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_iyuv2rgba", &err));
 
@@ -321,10 +333,16 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     int height_u = inputimg1.rows;
     int width_u = inputimg1.cols;
     int height_v = inputimg2.rows;
     int width_v = inputimg2.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_iyuv2rgb", &err));
 
@@ -429,10 +447,16 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     int height_u = inputimg1.rows;
     int width_u = inputimg1.cols;
     int height_v = inputimg2.rows;
     int width_v = inputimg2.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_iyuv2yuv4", &err));
 
@@ -552,8 +576,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122iyuv", &err));
 
@@ -672,8 +701,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122rgba", &err));
 
@@ -759,8 +793,14 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
+
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122rgb", &err));
 
@@ -847,8 +887,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122bgr", &err));
 
@@ -932,8 +977,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212bgr", &err));
 
@@ -1018,8 +1068,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122uyvy", &err));
 
@@ -1111,8 +1166,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122nv21", &err));
 
@@ -1216,8 +1276,14 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
+
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212nv12", &err));
 
@@ -1316,8 +1382,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122yuyv", &err));
 
@@ -1403,8 +1474,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212uyvy", &err));
 
@@ -1490,8 +1566,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212yuyv", &err));
 
@@ -1587,8 +1668,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv122yuv4", &err));
 
@@ -1705,8 +1791,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212iyuv", &err));
 
@@ -1818,8 +1909,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212rgba", &err));
 
@@ -1900,8 +1996,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212rgb", &err));
 
@@ -1994,8 +2095,13 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height_y = inputimg0.rows;
     int width_y = inputimg0.cols;
+    std::cout << "Input image height : " << height_y << std::endl;
+    std::cout << "Input image width  : " << width_y << std::endl;
     int height_u_y = inputimg1.rows;
     int width_u_y = inputimg1.cols;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_nv212yuv4", &err));
 
@@ -2110,6 +2216,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgba2yuv4", &err));
 
@@ -2215,6 +2326,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgba2iyuv", &err));
 
@@ -2328,6 +2444,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgba2nv12", &err));
 
@@ -2425,6 +2546,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgba2nv21", &err));
 
@@ -2523,6 +2649,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2iyuv", &err));
 
@@ -2633,6 +2764,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2nv12", &err));
 
@@ -2731,6 +2867,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2nv12", &err));
 
@@ -2829,6 +2970,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2nv21", &err));
 
@@ -2922,6 +3068,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg0.rows;
     int width = inputimg0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2nv21", &err));
 
@@ -3021,6 +3172,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2yuv4", &err));
 
@@ -3123,6 +3279,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2yuyv", &err));
 
@@ -3196,6 +3357,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2yuyv", &err));
 
@@ -3272,6 +3438,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2uyvy", &err));
 
@@ -3343,6 +3514,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2uyvy", &err));
 
@@ -3420,6 +3596,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_uyvy2iyuv", &err));
 
@@ -3532,6 +3713,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_uyvy2nv12", &err));
 
@@ -3628,6 +3814,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_uyvy2nv21", &err));
 
@@ -3718,6 +3909,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_uyvy2yuyv", &err));
 
@@ -3790,6 +3986,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_uyvy2rgba", &err));
 
@@ -3861,6 +4062,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_uyvy2rgb", &err));
 
@@ -3947,6 +4153,11 @@ int main(int argc, char** argv) {
     ////////////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_yuyv2iyuv", &err));
 
@@ -4052,6 +4263,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_yuyv2nv12", &err));
 
@@ -4154,6 +4370,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_yuyv2nv21", &err));
 
@@ -4246,6 +4467,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_yuyv2rgba", &err));
 
@@ -4317,6 +4543,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_yuyv2uyvy", &err));
 
@@ -4385,6 +4616,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_yuyv2rgb", &err));
 
@@ -4455,6 +4691,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2gray", &err));
 
@@ -4522,6 +4763,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2gray", &err));
 
@@ -4589,6 +4835,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_gray2rgb", &err));
 
@@ -4654,6 +4905,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_gray2bgr", &err));
 
@@ -4720,6 +4976,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2bgr", &err));
 
@@ -4785,6 +5046,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2rgb", &err));
 
@@ -4853,6 +5119,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2xyz", &err));
 
@@ -4920,6 +5191,11 @@ int main(int argc, char** argv) {
     ////////////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2xyz", &err));
 
@@ -4988,6 +5264,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_xyz2rgb", &err));
 
@@ -5062,6 +5343,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_xyz2bgr", &err));
     OCL_CHECK(err, cl::Buffer imageToDevicexyz(context, CL_MEM_READ_ONLY,
@@ -5127,6 +5413,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2ycrcb", &err));
 
@@ -5191,6 +5482,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2ycrcb", &err));
 
@@ -5258,6 +5554,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_ycrcb2rgb", &err));
 
@@ -5323,6 +5624,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_ycrcb2bgr", &err));
 
@@ -5390,6 +5696,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2hls", &err));
 
@@ -5457,6 +5768,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2hls", &err));
 
@@ -5525,6 +5841,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_hls2rgb", &err));
 
@@ -5590,6 +5911,11 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_hls2bgr", &err));
 
@@ -5661,6 +5987,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2hsv", &err));
 
@@ -5727,6 +6058,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2hsv", &err));
 
@@ -5794,6 +6130,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_hsv2rgb", &err));
 
@@ -5860,6 +6201,11 @@ int main(int argc, char** argv) {
     //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC3, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC3, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_hsv2bgr", &err));
 

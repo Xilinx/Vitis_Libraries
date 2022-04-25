@@ -53,6 +53,9 @@ int main(int argc, char** argv) {
     int height = in_img.rows;
     int width = in_img.cols;
 
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     out_img.create(in_img.rows, in_img.cols, CV_8UC3);
     out_img_hls.create(in_img.rows, in_img.cols, CV_8UC3);
     diff.create(in_img.rows, in_img.cols, CV_8UC3);
@@ -75,6 +78,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPIX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPIX) << std::endl;
+    std::cout << "NPPC:" << NPIX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_aec");

@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
+#ifndef _KERNELS_H_
+#define _KERNELS_H_
+
 // clang-format off
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
 // clang-format on
 #include <stdint.h>
-#include <assert.h>
+#include <stdlib.h>
 #include <stdio.h>
 
-#define PARALLEL_FACTOR_32b 8 // Parallelization factor for 32b operations (8x mults)
-#define SRS_SHIFT 16          // SRS shift used can be increased if input data likewise adjusted)
-//#define IMAGE_SIZE 2048         // 256x16
-//#define MAX_KERNEL_SIZE 128
+#define SRS_SHIFT 10 // SRS shift used can be increased if input data likewise adjusted)
 
-const int kernel_width = 3;
-const int kernel_height = 3;
+void gaussian(input_window_int16* input, const int16_t (&coeff)[16], output_window_int16* output);
 
-#ifdef INLINE
-#define INLINE_DECL inline
-#else
-#define INLINE_DECL
 #endif
-
-void gaussian(input_window_int32* img_in, output_window_int32* img_out);

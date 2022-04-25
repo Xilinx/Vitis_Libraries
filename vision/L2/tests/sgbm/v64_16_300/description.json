@@ -4,17 +4,17 @@
         "Sgbm L2 function example"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "aws-vu9p-f1", 
-        "vck190", 
-        "zcu102", 
-        "zcu104", 
+        "vck190",  
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
-        "u250"
+        "u250",
+        "zcu102", 
+        "zcu104"
     ], 
     "platform_properties": {
         "u200": {
@@ -59,40 +59,6 @@
                 }
             }
         }, 
-        "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-						"$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }
-            }
-        }, 
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-						"$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }
-            }
-        },
         "vck190": {
             "host": {
                 "compiler": {

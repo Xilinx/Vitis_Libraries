@@ -177,6 +177,8 @@ int main(int argc, char** argv) {
     int low_threshold, high_threshold;
     height = img_gray.rows;
     width = img_gray.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     int npcCols = width;
     int divNum = (int)(width / 32);
@@ -207,6 +209,10 @@ int main(int argc, char** argv) {
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, INTYPE) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, INTYPE) << std::endl;
+    std::cout << "NPPC:" << INTYPE << std::endl;
+
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_canny");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
@@ -233,17 +239,13 @@ int main(int argc, char** argv) {
     double diff_prof = 0.0f;
     cl::Event event_sp;
 
-    printf("before kernel");
     // Launch the kernel
     q.enqueueTask(krnl, NULL, &event_sp);
     clWaitForEvents(1, (const cl_event*)&event_sp);
 
-    printf("after kernel");
-
     event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
     event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
     diff_prof = end - start;
-    std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
     cl::Kernel krnl2(program, "edgetracing_accel");
     cl::Buffer imageFromDeviceedge(context, CL_MEM_WRITE_ONLY, (height * npcCols_8));
@@ -260,17 +262,14 @@ int main(int argc, char** argv) {
     double diff_prof_edge = 0.0f;
     cl::Event event_sp_edge;
 
-    printf("before kernel");
     // Launch the kernel
     q.enqueueTask(krnl2, NULL, &event_sp_edge);
     clWaitForEvents(1, (const cl_event*)&event_sp_edge);
 
-    printf("after kernel");
-
     event_sp_edge.getProfilingInfo(CL_PROFILING_COMMAND_START, &startedge);
     event_sp_edge.getProfilingInfo(CL_PROFILING_COMMAND_END, &endedge);
     diff_prof_edge = endedge - startedge;
-    std::cout << (diff_prof_edge / 1000000) << "ms" << std::endl;
+    std::cout << ((diff_prof + diff_prof_edge) / 1000000) << "ms" << std::endl;
 
     // Copying Device result data to Host memory
     q.enqueueReadBuffer(imageFromDeviceedge, CL_TRUE, 0, (height * npcCols_8), out_img_edge.data);
@@ -314,36 +313,38 @@ int main(int argc, char** argv) {
 
     std::cout << "Latency for CPU function is: " << hw_time << "ms" << std::endl;
 
-    // absdiff(ocv_img, out_img_edge, diff); // Absolute difference between opencv
+    absdiff(ocv_img, out_img_edge, diff); // Absolute difference between opencv
     // and hls result
     imwrite("hls.png", out_img_edge); // Save HLS result
     imwrite("ocv.png", ocv_img);      // Save Opencv result
-    // imwrite("diff.png", diff);
+    imwrite("diff.png", diff);
     // Save difference image
     // Find minimum and maximum differences.
-    /* double minval = 256, maxval = 0;
+    double minval = 256, maxval = 0;
 
-     int cnt = 0;
-     for (int i = 0; i < diff.rows - 0; i++) {
-         for (int j = 0; j < diff.cols - 0; j++) {
-             uchar v = diff.at<uchar>(i, j);
+    int cnt = 0;
+    for (int i = 0; i < diff.rows - 0; i++) {
+        for (int j = 0; j < diff.cols - 0; j++) {
+            uchar v = diff.at<uchar>(i, j);
 
-             if (v > 0) cnt++;
-             if (minval > v) minval = v;
-             if (maxval < v) maxval = v;
-         }
-     }
+            if (v > 0) cnt++;
+            if (minval > v) minval = v;
+            if (maxval < v) maxval = v;
+        }
+    }
 
-     float err_per = 100.0 * (float)cnt / (diff.rows * diff.cols);
-     std::cout << "\tMinimum error in intensity = " << minval << std::endl;
-     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
-     std::cout << "\tPercentage of pixels above error threshold = " << err_per <<
-     std::endl;
-     std::cout << "\tNo of Pixels with Error = " << cnt << std::endl;
+    float err_per = 100.0 * (float)cnt / (diff.rows * diff.cols);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
+    std::cout << "\tNo of Pixels with Error = " << cnt << std::endl;
 
-     std::cout << "\tkernel done" << std::endl;
-     if (err_per > 2.5f) return 1;
-     /*			Destructors			*/
+    std::cout << "\tkernel done" << std::endl;
+    if (err_per < 2.5f)
+        std::cout << "Test Passed .... !!!" << std::endl;
+    else
+        return 1;
+    /*			Destructors			*/
     in_img.~Mat();
     img_gray.~Mat();
     img_gray1.~Mat();

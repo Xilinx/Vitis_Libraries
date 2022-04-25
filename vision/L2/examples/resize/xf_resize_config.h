@@ -23,19 +23,6 @@
 #include "xf_config_params.h"
 #include "imgproc/xf_resize.hpp"
 
-/* Interface types*/
-#if RO
-
-#if RGB
-#define NPC_T XF_NPPC4
-#else
-#define NPC_T XF_NPPC8
-#endif
-
-#else
-#define NPC_T XF_NPPC1
-#endif
-
 #if RGB
 #define TYPE XF_8UC3
 #define CH_TYPE XF_RGB

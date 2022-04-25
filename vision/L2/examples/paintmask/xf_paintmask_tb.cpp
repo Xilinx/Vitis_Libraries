@@ -17,6 +17,8 @@
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
 
+#include "xf_paintmask_config.h"
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
@@ -35,6 +37,9 @@ int main(int argc, char** argv) {
 
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     // Allocate memory for output images:
     ocv_ref.create(in_img.rows, in_img.cols, in_img.depth());
     out_img.create(in_img.rows, in_img.cols, in_img.depth());
@@ -79,6 +84,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_paintmask");

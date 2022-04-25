@@ -360,7 +360,7 @@ int main(int argc, char** argv) {
         ISPPipeline_accel(in_rows, in_cols, src_axi, dst_axi, ir_axi, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
                           IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, gamma_lut, mode_reg, pawb);
 
-        // Convert processed image back to CV image, then to XVID image
+        // Convert processed image back to CV image
         // MultiPixelAXIvideo2Mat(dst_axi, final_output, 0);
         AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(dst_axi, final_output);
         AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);

@@ -42,18 +42,22 @@
 #define XF_SRC_T XF_8UC1 // XF_8UC1
 #define XF_LTM_T XF_8UC3 // XF_8UC3
 #define XF_DST_T XF_8UC3 // XF_8UC3
+#define XF_YUV_T XF_16UC1
 #elif T_16U
 #define XF_SRC_T XF_16UC1 // XF_8UC1
 #define XF_LTM_T XF_8UC3  // XF_8UC3
 #define XF_DST_T XF_16UC3 // XF_8UC3
+#define XF_YUV_T XF_16UC1
 #elif T_10U
 #define XF_SRC_T XF_10UC1 // XF_8UC1
 #define XF_LTM_T XF_8UC3  // XF_8UC3
 #define XF_DST_T XF_10UC3 // XF_8UC3
+#define XF_YUV_T XF_16UC1
 #elif T_12U
 #define XF_SRC_T XF_12UC1 // XF_8UC1
 #define XF_LTM_T XF_8UC3  // XF_8UC3
 #define XF_DST_T XF_12UC3 // XF_8UC3
+#define XF_YUV_T XF_16UC1
 #endif
 
 #define SIN_CHANNEL_TYPE XF_8UC1

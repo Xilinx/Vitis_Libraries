@@ -47,7 +47,13 @@ int main(int argc, char** argv) {
     out_img.create(in_img.rows, in_img.cols, ocv_ref.type());
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
     unsigned int* fw_pass_data = (unsigned int*)malloc(height * width * 4); // 4-bytes
+
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE_IN, NPC_T) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE_IN, NPC_T) << std::endl;
+    std::cout << "NPPC:" << NPC_T << std::endl;
 
     ////////////////////	HLS TOP function call	/////////////////
 

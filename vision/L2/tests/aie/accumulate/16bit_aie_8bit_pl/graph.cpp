@@ -16,9 +16,9 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input1.txt");
-PLIO* in2 = new PLIO("DataIn2", adf::plio_64_bits, "data/input2.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
+PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input1.txt");
+PLIO* in2 = new PLIO("DataIn2", adf::plio_128_bits, "data/input2.txt");
+PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
 
 simulation::platform<2, 1> platform(in1, in2, out1);
 

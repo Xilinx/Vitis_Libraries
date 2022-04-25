@@ -60,6 +60,10 @@ int main(int argc, char** argv) {
 
     int height = in_gray.rows;
     int width = in_gray.cols;
+
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     // OpenCV functions
     in_gray1.convertTo(ocv_ref_32f, CV_32F);
     cv::accumulate(in_gray, ocv_ref_32f, cv::noArray());
@@ -85,6 +89,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     // Load binary:
 

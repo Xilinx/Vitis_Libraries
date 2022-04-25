@@ -166,6 +166,9 @@ int main(int argc, char** argv) {
 
     int height = frame0.rows;
     int width = frame0.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
 #if HLS
     dense_non_pyr_of_accel(frame0.data, frame1.data, (float*)flowx.data, (float*)flowy.data, height, width);
 #endif
@@ -178,6 +181,9 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     std::cout << "device context created" << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPPC) << std::endl;
+    std::cout << "NPPC:" << NPPC << std::endl;
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 

@@ -53,6 +53,7 @@ __attribute__((noinline)) void laplacian_k3_border(input_window_int16* img_in,
     const int16_t stride = image_width;
 
     xfCopyMetaData(img_in_ptr, img_out_ptr);
+    xfUnsignedSaturation(img_out_ptr);
 
     v16int16* restrict ptr_img_buffer = (v16int16*)xfGetImgDataPtr(img_in_ptr);
     v16int16* restrict ptr_img_out = (v16int16*)xfGetImgDataPtr(img_out_ptr);

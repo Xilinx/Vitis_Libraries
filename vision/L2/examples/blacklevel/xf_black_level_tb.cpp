@@ -66,6 +66,9 @@ int main(int argc, char** argv) {
     height = InImg.rows;
     width = InImg.cols;
 
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     // OutImg.create(cv::Size(img.cols, img.rows), img.type());
 
     RefImg.create(InImg.size(), InImg.type());
@@ -88,6 +91,9 @@ int main(int argc, char** argv) {
 #else
 
     msg.info("Registering Kernel ...");
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_SRC_T, XF_NPPC) << std::endl;
+    std::cout << "NPPC:" << XF_NPPC << std::endl;
 
     (void)cl_kernel_mgr::registerKernel("blackLevelCorrection_accel", "krnl_blacklevel", XCLIN(InImg), XCLOUT(OutImg),
                                         XCLIN(BlackLevel), XCLIN(MulValue), XCLIN(height), XCLIN(width));

@@ -39,6 +39,8 @@ int main(int argc, char* argv[]) {
 
     in_width = img.cols;
     in_height = img.rows;
+    std::cout << "Input image height : " << in_height << std::endl;
+    std::cout << "Input image width  : " << in_width << std::endl;
 
     out_height = 64;
     out_width = 80;
@@ -72,6 +74,9 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC_T) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC_T) << std::endl;
+    std::cout << "NPPC:" << NPC_T << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_letterbox");

@@ -53,6 +53,8 @@ int main(int argc, char** argv) {
 
     int rows = left_img.rows;
     int cols = left_img.cols;
+    std::cout << "Input image height : " << rows << std::endl;
+    std::cout << "Input image width  : " << cols << std::endl;
 
     cv::Mat disp, hls_disp;
 
@@ -121,6 +123,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC) << std::endl;
+    std::cout << "NPPC:" << NPC << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_stereolbm");

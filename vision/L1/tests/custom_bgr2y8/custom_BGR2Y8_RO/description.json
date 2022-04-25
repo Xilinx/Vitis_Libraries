@@ -1,0 +1,73 @@
+{
+    "name": "Xilinx CUSTOM_BGR2Y8_RO Test", 
+    "description": "HLS case", 
+    "flow": "hls", 
+    "platform_allowlist": [
+        "u200", 
+        "u50",
+		"zcu102", 
+        "zcu104",
+        "aws-vu9p-f1", 
+        "vck190"
+    ], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
+    "project": "custom_bgr2y8", 
+    "solution": "sol1", 
+    "clock": "3.3", 
+    "topfunction": "custom_bgr2y8_accel", 
+    "top": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/xf_custom_bgr2y8_accel.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+    }, 
+    "testbench": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/xf_custom_bgr2y8_tb.cpp"
+        ], 
+        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
+        "argv": {
+            "hls_csim": " ${XF_PROJ_ROOT}/data/HD2.JPG", 
+            "hls_cosim": " ${XF_PROJ_ROOT}/data/HD2.JPG "
+        }, 
+        "stdmath": false, 
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+    }, 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vivado_syn": 16384, 
+                    "hls_csim": 10240, 
+                    "hls_cosim": 16384, 
+                    "vivado_impl": 16384, 
+                    "hls_csynth": 10240
+                }, 
+                "max_time_min": {
+                    "vivado_syn": 300, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 300, 
+                    "vivado_impl": 300, 
+                    "hls_csynth": 60
+                }
+            }
+        ], 
+        "targets": [
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "vivado_syn", 
+            "vivado_impl"
+        ], 
+        "category": "canary"
+    }
+}

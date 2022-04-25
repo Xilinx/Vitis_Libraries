@@ -4,7 +4,7 @@
         "ISPPipeline MONO L3 function example"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "aws-vu9p-f1", 
         "vck190", 
@@ -12,7 +12,7 @@
         "zcu104", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
         "u250"
     ], 
@@ -180,7 +180,7 @@
             "name": "krnl_ISPPipeline", 
             "accelerators": [
                 {
-                    "name": "isppipeline_mono", 
+                    "name": "ISPPipeline_accel", 
                     "location": "LIB_DIR/L3/examples/isppipeline_mono/xf_isp_accel.cpp"
                 }
             ]

@@ -139,7 +139,7 @@ template <DataMoverKind KIND,
           int TILE_WIDTH_MAX,
           int AIE_VECTORIZATION_FACTOR,
           int CORES = 1,
-          int PL_AXI_BITWIDTH = 32,
+          int PL_AXI_BITWIDTH = 16,
           bool USE_GMIO = false>
 class xfcvDataMovers {
    private:
@@ -332,12 +332,11 @@ class xfcvDataMovers {
         for (int i = 0; i < CORES; i++) {
             uint16_t r = tileRowsPerCore(i);
             uint16_t c = tileColsPerCore(i);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 1, mMetadataBOHndl[i]);
+            uint32_t NumTiles = r * c;
+            (void)xrtRunSetArg(mPLRHandleArr[i], 0, mImageSize[1]); // Stride is same as Width
+            (void)xrtRunSetArg(mPLRHandleArr[i], 1, NumTiles);      // Number of Tiles
             (void)xrtRunSetArg(mPLRHandleArr[i], 2, mImageBOHndl);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 3, r);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 4, c);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 5, std::min(mBurstLength, c));
-            (void)xrtRunSetArg(mPLRHandleArr[i], 6, mImageSize[1]);
+            (void)xrtRunSetArg(mPLRHandleArr[i], 3, mMetadataBOHndl[i]);
         }
     }
 
@@ -347,12 +346,12 @@ class xfcvDataMovers {
         for (int i = 0; i < CORES; i++) {
             uint16_t r = tileRowsPerCore(i);
             uint16_t c = tileColsPerCore(i);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 1, mImageBOHndl);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 2, r);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 3, c);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 4, std::min(mBurstLength, c));
-            (void)xrtRunSetArg(mPLRHandleArr[i], 5, mImageSize[1]);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 6, mImageSize[0]);
+            uint32_t NumTiles = r * c;
+            (void)xrtRunSetArg(mPLRHandleArr[i], 0, mImageSize[1]); // Width
+            (void)xrtRunSetArg(mPLRHandleArr[i], 1, NumTiles);      // Number of Tiles
+            (void)xrtRunSetArg(mPLRHandleArr[i], 2, mImageBOHndl);
+            (void)xrtRunSetArg(mPLRHandleArr[i], 3, r); // Number of Tiles rows
+            (void)xrtRunSetArg(mPLRHandleArr[i], 4, c); // Number of Tiles cols
         }
     }
 
@@ -636,30 +635,64 @@ void xfcvDataMovers<KIND,
             TILE_HEIGHT_MAX, TILE_WIDTH_MAX, mMetaDataList[0].tileHeight(), mMetaDataList[0].tileWidth(), mTileRows,
             mTileCols);
     std::cout << sMesg << std::endl;
+    std::cout << "Entering into compute_metadata..." << std::endl;
 
     mTileRowsPerCore = (mTileRows + CORES - 1) / CORES;
     mTileColsPerCore = mTileCols;
 
+    int OutOffset, InOffset, OutpositionV, OutpositionH, OutWidth, OutHeight, ImageStride;
+    int i;
+
+    ImageStride = (int)img_size.width;
+    std::cout << "Entering into compute_metadata...(for loop)" << std::endl;
+
     for (auto& metaData : mMetaDataList) {
+        OutpositionV = metaData.positionV() + metaData.overlapSizeV_top();
+        OutpositionH = metaData.positionH() + metaData.overlapSizeH_left();
+
+        OutWidth = (metaData.tileWidth() - (metaData.overlapSizeH_left() + metaData.overlapSizeH_right()));
+        OutHeight = (metaData.tileHeight() - (metaData.overlapSizeV_top() + metaData.overlapSizeV_bottom()));
+
+        OutOffset = ((OutpositionV * ImageStride) + OutpositionH);
+        InOffset = ((metaData.positionV() * ImageStride) + metaData.positionH());
+
+        mMetaDataVec.emplace_back((int16_t)(InOffset & 0x0000ffff));
+        mMetaDataVec.emplace_back((int16_t)(InOffset >> 16));
         mMetaDataVec.emplace_back((int16_t)metaData.tileWidth());
         mMetaDataVec.emplace_back((int16_t)metaData.tileHeight());
-        mMetaDataVec.emplace_back((int16_t)metaData.positionH());
-        mMetaDataVec.emplace_back((int16_t)metaData.positionV());
         mMetaDataVec.emplace_back((int16_t)metaData.overlapSizeH_left());
         mMetaDataVec.emplace_back((int16_t)metaData.overlapSizeH_right());
         mMetaDataVec.emplace_back((int16_t)metaData.overlapSizeV_top());
         mMetaDataVec.emplace_back((int16_t)metaData.overlapSizeV_bottom());
-        mMetaDataVec.emplace_back((int16_t)16); // BIT_WIDTH
-        mMetaDataVec.emplace_back((int16_t)0);  // DUP_WIDTH
-        mMetaDataVec.emplace_back((int16_t)0);  // DUP_HEIGHT
-        mMetaDataVec.emplace_back((int16_t)(metaData.positionH() + metaData.overlapSizeH_left()));
-        mMetaDataVec.emplace_back((int16_t)(metaData.positionV() + metaData.overlapSizeV_top()));
-        mMetaDataVec.emplace_back(
-            (int16_t)(metaData.tileWidth() - (metaData.overlapSizeH_left() + metaData.overlapSizeH_right())));
-        mMetaDataVec.emplace_back(
-            (int16_t)(metaData.tileHeight() - (metaData.overlapSizeV_top() + metaData.overlapSizeV_bottom())));
-        mMetaDataVec.emplace_back((int16_t)1); // Enable saturation, 1: 8U, 2: 8S
+        mMetaDataVec.emplace_back((int16_t)(OutOffset & 0x0000ffff));
+        mMetaDataVec.emplace_back((int16_t)(OutOffset >> 16));
+        mMetaDataVec.emplace_back((int16_t)OutWidth);
+        mMetaDataVec.emplace_back((int16_t)OutHeight);
+        mMetaDataVec.emplace_back((int16_t)0); // Enable saturation, 1: 8U, 2: 8S
+        mMetaDataVec.emplace_back((int16_t)OutpositionH);
+        mMetaDataVec.emplace_back((int16_t)OutpositionV);
+        mMetaDataVec.emplace_back((int16_t)metaData.positionH()); // In PosH
+        mMetaDataVec.emplace_back((int16_t)metaData.positionV()); // In PosV
+        mMetaDataVec.emplace_back((int16_t)16);                   // BIT_WIDTH
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+        mMetaDataVec.emplace_back((int16_t)0);
+
+        // std::cout << "Entering into compute_metadata...(for loop done)" << std::endl;
     }
+
+    std::cout << "Entering into compute_metadata... done" << std::endl;
 }
 
 template <DataMoverKind KIND,

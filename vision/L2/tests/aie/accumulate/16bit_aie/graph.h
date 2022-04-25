@@ -20,6 +20,7 @@
 #include <adf.h>
 #include <common/xf_aie_const.hpp>
 #include "kernels.h"
+#include "aie_api/aie.hpp"
 
 static constexpr int TILE_ELEMENTS = 4096;
 static constexpr int TILE_WINDOW_SIZE = TILE_ELEMENTS * sizeof(int16_t) + xf::cv::aie::METADATA_SIZE;

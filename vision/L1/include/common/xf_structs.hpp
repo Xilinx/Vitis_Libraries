@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -892,6 +892,21 @@ struct log2<1> {
     static constexpr int fvalue = 0;
     static constexpr int cvalue = 0;
 };
+
+struct bgr2y8_params {
+    int black_Vmax = 20;
+    int black_Smax = 70;
+    int brown_Hmax = 15;
+    int brown_Vmax = 40;
+    int Smin = 60;
+    int Smax = 90;
+    int darkgreen_Vmax = 35;
+    int darkgreen_Hmin = 30;
+    int darkgreen_Hmax = 45;
+    int green_Hmax = 90;
+    int green_Hmin = 50;
+    int green_Vmax = 45;
+};
 //]]
 
 /*
@@ -917,7 +932,8 @@ class MMIter : public Mat<T, ROWS, COLS, NPC, XFCVDEPTH> {
         ((COLS >> XF_BITSHIFT(NPC)) == COLS_BOUND_PER_NPC)
             ? XF_BITS_PER_CLOCK
             : XF_PIXELWIDTH(T, NPC) * (COLS - ((COLS >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC)));
-
+    static constexpr int COLS_ADDRBOUND = ((COLS * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >>
+                                          (log2<PTR_WIDTH>::cvalue);
     static int cols_npc_aligned(int cols) { return ((cols + (XF_NPIXPERCYCLE(NPC) - 1)) >> XF_BITSHIFT(NPC)); }
 
     static int last_blk_pxl_width(int cols, int cols_bound_per_npc) {
@@ -933,9 +949,17 @@ class MMIter : public Mat<T, ROWS, COLS, NPC, XFCVDEPTH> {
     static int addrbound(int rows, int cols) {
         ap_uint<16> rows_int16 = rows;
         ap_uint<16> cols_int16 = cols;
-        return ((rows_int16 * cols_int16 * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >> (log2<PTR_WIDTH>::cvalue);
-    }
 
+        ap_uint<32> mul_rows_cols;
+
+// clang-format off
+#pragma HLS BIND_OP variable=mul_rows_cols op=mul impl=dsp latency=2
+        // clang-format on
+
+        mul_rows_cols = rows_int16 * cols_int16;
+
+        return ((mul_rows_cols * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >> (log2<PTR_WIDTH>::cvalue);
+    }
     MMIter() : Mat<T, ROWS, COLS, NPC, XFCVDEPTH>() {}
 
     MMIter(int _rows, int _cols) : Mat<T, ROWS, COLS, NPC, XFCVDEPTH>(_rows, _cols) {}
@@ -954,6 +978,7 @@ class MMIterIn : public _MMITER {
     using _MMITER::COLS_BOUND_PER_NPC;
     using _MMITER::LAST_BLK_PXL_WIDTH;
     using _MMITER::LOOPBOUND;
+    using _MMITER::COLS_ADDRBOUND;
 
    private:
     static void Axi2AxiStream(ap_uint<PTR_WIDTH>* din,
@@ -985,6 +1010,30 @@ class MMIterIn : public _MMITER {
         }
     }
 
+    static void Axi2AxiStream(ap_uint<PTR_WIDTH>* din,
+                              hls::stream<ap_uint<PTR_WIDTH> >& dout,
+                              int rows_burst,
+                              int rows,
+                              int cols,
+                              int stride = -1) {
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> cols_addrbound = _MMITER::addrbound(rows_burst, cols);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> stride_addrbound = _MMITER::addrbound(rows_burst, stride);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> addrbound = (stride == -1) ? cols_addrbound : stride_addrbound;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> c;
+    MMIterInLoop1:
+        for (int r = 0; r < rows; r++) {
+// clang-format off
+	#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+            // clang-format on
+            for (c = 0; c < cols_addrbound; c++) {
+// clang-format off
+	#pragma HLS LOOP_TRIPCOUNT min=1 max=COLS_ADDRBOUND
+	#pragma HLS PIPELINE II=1
+                // clang-format on
+                dout.write(din[c + r * addrbound]);
+            }
+        }
+    }
     template <int DEPTH>
     static void AxiStream2MatStream(hls::stream<ap_uint<PTR_WIDTH> >& din,
                                     hls::stream<ap_uint<XF_BITS_PER_CLOCK>, DEPTH>& dout,
@@ -994,13 +1043,13 @@ class MMIterIn : public _MMITER {
                                     int stride = -1) {
         int stride_bound_per_npc, strideBased_last_blk_width;
 
-        if (stride == -1) {
-            stride_bound_per_npc = cols_bound_per_npc;
-            strideBased_last_blk_width = last_blk_width;
-        } else {
-            stride_bound_per_npc = _MMITER::cols_npc_aligned(stride);
-            strideBased_last_blk_width = _MMITER::last_blk_pxl_width(stride, stride_bound_per_npc);
-        }
+        // if (stride == -1) {
+        stride_bound_per_npc = cols_bound_per_npc;
+        strideBased_last_blk_width = last_blk_width;
+        //} else {
+        //  stride_bound_per_npc = _MMITER::cols_npc_aligned(stride);
+        //  strideBased_last_blk_width = _MMITER::last_blk_pxl_width(stride, stride_bound_per_npc);
+        //}
 
         int rd_cnt = 0;
 
@@ -1101,14 +1150,17 @@ class MMIterIn : public _MMITER {
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
 
-        int cols_tmp;
-        if (stride == -1)
-            cols_tmp = cols;
-        else
-            cols_tmp = stride;
+        int rows_burst, rows_stride;
 
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
-        Axi2AxiStream(din, ldata, axibound);
+        if (stride == -1) {
+            rows_burst = rows;
+            rows_stride = 1;
+        } else {
+            rows_burst = 1;
+            rows_stride = rows;
+        }
+
+        Axi2AxiStream(din, ldata, rows_burst, rows_stride, cols, stride);
         AxiStream2Mat(ldata, dout, rows, cols, stride);
     }
 
@@ -1133,14 +1185,17 @@ class MMIterIn : public _MMITER {
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
 
-        int cols_tmp;
-        if (stride == -1)
-            cols_tmp = cols;
-        else
-            cols_tmp = stride;
+        int rows_burst, rows_stride;
 
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = _MMITER::addrbound(rows, cols_tmp);
-        Axi2AxiStream(din, ldata, axibound);
+        if (stride == -1) {
+            rows_burst = rows;
+            rows_stride = 1;
+        } else {
+            rows_burst = 1;
+            rows_stride = rows;
+        }
+
+        Axi2AxiStream(din, ldata, rows_burst, rows_stride, cols, stride);
         AxiStream2Mat(ldata, dout, rows, cols, stride);
     }
 
@@ -1238,11 +1293,11 @@ class MMIterOut : public _MMITER {
                                     int last_blk_width,
                                     int stride = -1) {
         ap_uint<16> strideBased_cols_bound_per_npc;
-        if (stride == -1 || FILLZERO == 0) {
-            strideBased_cols_bound_per_npc = cols_bound_per_npc;
-        } else {
-            strideBased_cols_bound_per_npc = _MMITER::cols_npc_aligned(stride);
-        }
+        // if (stride == -1 || FILLZERO == 0) {
+        strideBased_cols_bound_per_npc = cols_bound_per_npc;
+        //} else {
+        //    strideBased_cols_bound_per_npc = _MMITER::cols_npc_aligned(stride);
+        //}
 
         ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled = 0; // valid bits remaining in current buffer
         ap_uint<PTR_WIDTH> localbuffer = 0;

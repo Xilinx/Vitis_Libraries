@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ add_files -tb "${XF_PROJ_ROOT}/L1/examples/fast/xf_fast_tb.cpp" -cflags "-I${OPE
 set_top fast_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

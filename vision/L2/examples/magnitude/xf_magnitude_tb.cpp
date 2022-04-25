@@ -74,6 +74,8 @@ int main(int argc, char** argv) {
 
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -83,6 +85,9 @@ int main(int argc, char** argv) {
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16SC1, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16SC1, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_magnitude");

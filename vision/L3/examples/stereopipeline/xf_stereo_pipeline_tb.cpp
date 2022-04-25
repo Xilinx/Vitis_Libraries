@@ -47,6 +47,9 @@ int main(int argc, char** argv) {
     //////////////////	HLS TOP Function Call  ////////////////////////
     int rows = left_img.rows;
     int cols = left_img.cols;
+    std::cout << "Input image height : " << rows << std::endl;
+    std::cout << "Input image width  : " << cols << std::endl;
+
     cv::Mat disp_img(rows, cols, CV_16UC1);
 
     // allocate mem for camera parameters for rectification and bm_state class
@@ -99,6 +102,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, XF_NPPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, XF_NPPC1) << std::endl;
+    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_stereopipeline");

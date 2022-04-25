@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XF_MEDIAN_BLUR_
-#define _XF_MEDIAN_BLUR_
+#ifndef _XF_EROSION_HPP__
+#define _XF_EROSION_HPP_
 
 #include "ap_int.h"
 #include "hls_stream.h"

@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    cv::Mat out_img, ocv_ref, in_gray, diff;
+    cv::Mat out_img, ocv_ref, in_gray, in_gray1, in_gray2, diff;
 
     // Reading in the image:
     in_gray = cv::imread(argv[1], 0);
@@ -47,6 +47,13 @@ int main(int argc, char** argv) {
     float sigma = 0.8333f;
 #endif
 
+    // OpenCV Reference
+    cv::GaussianBlur(in_gray, in_gray1, cv::Size(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
+                     cv::BORDER_CONSTANT);
+    cv::GaussianBlur(in_gray1, in_gray2, cv::Size(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
+                     cv::BORDER_CONSTANT);
+    cv::subtract(in_gray1, in_gray2, ocv_ref);
+
     // OpenCL section:
     size_t image_in_size_bytes = in_gray.rows * in_gray.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = image_in_size_bytes;
@@ -59,6 +66,19 @@ int main(int argc, char** argv) {
 
     // Write the output of kernel:
     cv::imwrite("output_hls.png", out_img);
+    cv::imwrite("ocv_ref.png", ocv_ref);
+
+    cv::absdiff(ocv_ref, out_img, diff);
+    cv::imwrite("error.png", diff); // Save the difference image for debugging purpose
+
+    float err_per;
+    xf::cv::analyzeDiff(diff, 1, err_per);
+
+    if (err_per > 1) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

@@ -118,6 +118,11 @@ int main(int argc, char** argv) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device);
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 

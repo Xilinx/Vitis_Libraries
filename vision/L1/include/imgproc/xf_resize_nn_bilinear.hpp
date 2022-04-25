@@ -26,23 +26,26 @@
 #endif
 
 template <int DEPTH, int INTERPOLATION_TYPE, int NPPC>
-void interpolatePixel(XF_CTUNAME(DEPTH, NPPC) A0,
-                      XF_CTUNAME(DEPTH, NPPC) B0,
-                      XF_CTUNAME(DEPTH, NPPC) A1,
-                      XF_CTUNAME(DEPTH, NPPC) B1,
+void interpolatePixel(XF_PTNAME(XF_DEPTH(DEPTH, NPPC)) A0,
+                      XF_PTNAME(XF_DEPTH(DEPTH, NPPC)) B0,
+                      XF_PTNAME(XF_DEPTH(DEPTH, NPPC)) A1,
+                      XF_PTNAME(XF_DEPTH(DEPTH, NPPC)) B1,
                       ap_ufixed<12, 2> Wx,
                       ap_ufixed<12, 2> Wy,
-                      XF_CTUNAME(DEPTH, NPPC) & pixel) {
+                      XF_PTNAME(XF_DEPTH(DEPTH, NPPC)) & pixel) {
 // clang-format off
     #pragma HLS inline
+
+    const int CHANNEL_NUM = XF_CHANNELS(DEPTH, NPPC);
+    const int DATA_BW = XF_PIXELWIDTH(DEPTH, NPPC)/CHANNEL_NUM;
+
     // clang-format on
     if (INTERPOLATION_TYPE == XF_INTERPOLATION_NN) {
         pixel = A0;
     } else {
         ap_ufixed<12, 2> Wxy;
-        ap_int<16> val0, val1, val2;
-        ap_fixed<28, 18> P1, P2, P3, P4;
-        ap_ufixed<28, 18> one_num = 1.0;
+        ap_int<DATA_BW + 2> val0, val1, val2;
+        ap_fixed<DATA_BW + 14, DATA_BW + 4> P1, P2, P3, P4;
 
         Wxy = (Wx * Wy); // Wx - 0.32, Wy-0.32  (Wx*Wy-0.64)  Wxy - 0.32
         val0 = (A0 + B1 - (B0 + A1));
@@ -54,28 +57,28 @@ void interpolatePixel(XF_CTUNAME(DEPTH, NPPC) A0,
         P3 = (val2 * Wx);  // val1(16.0) * Wx(0.32) = P3(16.32)
         P4 = (A0);         // A0(8.0) P4(8.32)
 
-        pixel = (XF_CTUNAME(DEPTH, NPPC))((ap_fixed<32, 22>)(P1 + P2 + P3 + P4));
+        pixel = (XF_PTNAME(XF_DEPTH(DEPTH, NPPC)))((ap_fixed<DATA_BW + 18, DATA_BW + 8>)(P1 + P2 + P3 + P4));
         // to get only integer part from sum of 8.32's , right shift by 32
     }
 }
-template <int DEPTH,
+template <int SRC_TYPE,
           int INTERPOLATION_TYPE,
           int NPPC,
           int T_INDEX_INT,
           int NUMBEROFINPUTWORDS,
           int WEIGHT_WIDTH,
           int WEIGHT_INT>
-void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
-                        XF_TNAME(DEPTH, NPPC) B0[NUMBEROFINPUTWORDS],
+void computeOutputPixel(XF_TNAME(SRC_TYPE, NPPC) A0[NUMBEROFINPUTWORDS],
+                        XF_TNAME(SRC_TYPE, NPPC) B0[NUMBEROFINPUTWORDS],
                         ap_uint<T_INDEX_INT> initIndex,
                         ap_uint<T_INDEX_INT> indexx[XF_NPIXPERCYCLE(NPPC)],
                         ap_ufixed<WEIGHT_WIDTH, WEIGHT_INT> Wx[XF_NPIXPERCYCLE(NPPC)],
                         ap_ufixed<WEIGHT_WIDTH, WEIGHT_INT> Wy,
-                        XF_TNAME(DEPTH, NPPC) & pixel) {
+                        XF_TNAME(SRC_TYPE, NPPC) & pixel) {
 // clang-format off
     #pragma HLS inline
     // clang-format on
-    const int PIXELDEPTH = XF_DTPIXELDEPTH(DEPTH, NPPC);
+    const int PIXELDEPTH = XF_DTPIXELDEPTH(SRC_TYPE, NPPC);
     /*if(indexx[XF_NPIXPERCYCLE(NPPC)-1] > (initIndex+NUMBEROFINPUTWORDS*XF_NPIXPERCYCLE(NPPC)-1))
             {
                     fprintf(stderr, "Insufficient number of words to resize in X\n");
@@ -84,15 +87,15 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
     assert((indexx[XF_NPIXPERCYCLE(NPPC) - 1] < (initIndex + NUMBEROFINPUTWORDS * XF_NPIXPERCYCLE(NPPC) - 1)) &&
            "Insufficient number of words to resize in X");
 
-    XF_PTUNAME(DEPTH) unpackX1[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
+    XF_PTUNAME(XF_DEPTH(SRC_TYPE, NPPC)) unpackX1[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=unpackX1 complete dim=1
     // clang-format on
-    XF_PTUNAME(DEPTH) unpackX2[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
+    XF_PTUNAME(XF_DEPTH(SRC_TYPE, NPPC)) unpackX2[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=unpackX2 complete dim=1
     // clang-format on
-    XF_PTUNAME(DEPTH) outputPixel[XF_NPIXPERCYCLE(NPPC)];
+    XF_PTUNAME(XF_DEPTH(SRC_TYPE, NPPC)) outputPixel[XF_NPIXPERCYCLE(NPPC)];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=outputPixel complete dim=1
     // clang-format on
@@ -105,11 +108,11 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
             #pragma HLS UNROLL
             // clang-format on
             unpackX1[k * XF_NPIXPERCYCLE(NPPC) + i] =
-                A0[k].range((i + 1) * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC) - 1,
-                            i * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC));
+                A0[k].range((i + 1) * XF_DTPIXELDEPTH(SRC_TYPE, NPPC) * XF_CHANNELS(SRC_TYPE, NPPC) - 1,
+                            i * XF_DTPIXELDEPTH(SRC_TYPE, NPPC) * XF_CHANNELS(SRC_TYPE, NPPC));
             unpackX2[k * XF_NPIXPERCYCLE(NPPC) + i] =
-                B0[k].range((i + 1) * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC) - 1,
-                            i * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC));
+                B0[k].range((i + 1) * XF_DTPIXELDEPTH(SRC_TYPE, NPPC) * XF_CHANNELS(SRC_TYPE, NPPC) - 1,
+                            i * XF_DTPIXELDEPTH(SRC_TYPE, NPPC) * XF_CHANNELS(SRC_TYPE, NPPC));
         }
     }
     for (int i = 0; i < XF_NPIXPERCYCLE(NPPC); i++) {
@@ -117,15 +120,15 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
         #pragma HLS UNROLL
         // clang-format on
 
-        for (int k = 0; k < XF_CHANNELS(DEPTH, NPPC); k++) {
+        for (int k = 0; k < XF_CHANNELS(SRC_TYPE, NPPC); k++) {
 // clang-format off
             #pragma HLS UNROLL
             // clang-format on
-            XF_CTUNAME(DEPTH, NPPC) unpackX1temp[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
+            XF_PTNAME(XF_DEPTH(SRC_TYPE, NPPC)) unpackX1temp[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
 // clang-format off
             #pragma HLS ARRAY_PARTITION variable=unpackX1temp complete dim=1
             // clang-format on
-            XF_CTUNAME(DEPTH, NPPC) unpackX2temp[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
+            XF_PTNAME(XF_DEPTH(SRC_TYPE, NPPC)) unpackX2temp[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
 // clang-format off
             #pragma HLS ARRAY_PARTITION variable=unpackX2temp complete dim=1
             // clang-format on
@@ -133,11 +136,13 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
 // clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
-                unpackX1temp[l] = unpackX1[l].range((k + 1) * PIXELDEPTH - 1, k * PIXELDEPTH);
-                unpackX2temp[l] = unpackX2[l].range((k + 1) * PIXELDEPTH - 1, k * PIXELDEPTH);
+                unpackX1temp[l] =
+                    (XF_PTNAME(XF_DEPTH(SRC_TYPE, NPPC)))unpackX1[l].range((k + 1) * PIXELDEPTH - 1, k * PIXELDEPTH);
+                unpackX2temp[l] =
+                    (XF_PTNAME(XF_DEPTH(SRC_TYPE, NPPC)))unpackX2[l].range((k + 1) * PIXELDEPTH - 1, k * PIXELDEPTH);
             }
-            XF_CTUNAME(DEPTH, NPPC) currentoutput;
-            interpolatePixel<DEPTH, INTERPOLATION_TYPE, NPPC>(
+            XF_PTNAME(XF_DEPTH(SRC_TYPE, NPPC)) currentoutput;
+            interpolatePixel<SRC_TYPE, INTERPOLATION_TYPE, NPPC>(
                 unpackX1temp[indexx[i] - initIndex], unpackX2temp[indexx[i] - initIndex],
                 unpackX1temp[indexx[i] - initIndex + 1], unpackX2temp[indexx[i] - initIndex + 1], Wx[i], Wy,
                 currentoutput);
@@ -149,8 +154,8 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
 // clang-format off
         #pragma HLS UNROLL
         // clang-format on
-        pixel.range((i + 1) * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC) - 1,
-                    i * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC)) = outputPixel[i];
+        pixel.range((i + 1) * XF_DTPIXELDEPTH(SRC_TYPE, NPPC) * XF_CHANNELS(SRC_TYPE, NPPC) - 1,
+                    i * XF_DTPIXELDEPTH(SRC_TYPE, NPPC) * XF_CHANNELS(SRC_TYPE, NPPC)) = outputPixel[i];
     }
 }
 static uint64_t xfUDivResize(uint64_t in_n, unsigned short in_d) {

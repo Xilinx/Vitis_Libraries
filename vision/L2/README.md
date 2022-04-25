@@ -1,6 +1,6 @@
 ## Level 2: Kernels and Engines
 
-Level 2 contains the host-callable kernels and engines for various Vitis Vision functions.
+Level 2 contains the OpenCL host-callable kernels and engines for various Vitis Vision functions.
 
 'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
 
@@ -12,7 +12,7 @@ Level 2 contains the host-callable kernels and engines for various Vitis Vision 
 
 ### Commands to run AIE tests:
 
-Please refer to the [Evaluating the functionality ](https://xilinx.github.io/Vitis_Libraries/vision/2021.2/overview-aie.html#evaluating-the-functionality) sub-section in [Getting Started with Vitis Vision AIE](https://xilinx.github.io/Vitis_Libraries/vision/2021.2/overview-aie.html#getting-started-with-vitis-vision-aie) section of [Vitis Vision AIE Library User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2021.2/overview-aie.html#) chapter.
+Please refer to the [Evaluating the functionality ](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/overview-aie.html#evaluating-the-functionality) sub-section in [Getting Started with Vitis Vision AIE](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/overview-aie.html#getting-started-with-vitis-vision-aie) section of [Vitis Vision AIE Library User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/overview-aie.html#) chapter.
 
 ### Commands to run PL tests:
 
@@ -41,10 +41,6 @@ Please refer to the [Evaluating the functionality ](https://xilinx.github.io/Vit
 	Unzip the rootfs file : "gunzip ./rootfs.ext4.gz"
 
     export SYSROOT=< path-to-platform-sysroot >
-
-    export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-
-	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
 
     make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
 

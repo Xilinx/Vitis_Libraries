@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,25 +19,26 @@ source settings.tcl
 set PROJ "cvtcolor.prj"
 set SOLN "sol1"
 
-
 if {![info exists CLKP]} {
   set CLKP 3.3
 }
 
 open_project -reset $PROJ
 
-add_files ${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_accel_gen_vitis.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D${TEST}=1" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D${TEST}=1"
-add_files -tb ${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp -cflags "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D${TEST}=1" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D${TEST}=1"
-set_top ${ACCELTOP}
+add_files "${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_accel_gen_vitis.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp" -cflags "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+set_top cvtcolor_rgba2iyuv
 
 open_solution -reset $SOLN
 
-#set_part $XPART
-set_part {xc7vx485t-ffg1157-1}
+
+
+
+set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core" -argv " ${TESTDATA} " -clean
+  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/input/input.jpg ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/output/ref_Y.png ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/output/ref_U.png ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/output/ref_V.png "
 }
 
 if {$CSYNTH == 1} {
@@ -45,7 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core" -trace_level all -argv " ${TESTDATA} "
+  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/input/input.jpg ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/output/ref_Y.png ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/output/ref_U.png ${XF_PROJ_ROOT}/data/cvtcolor/RGBA2IYUV/output/ref_V.png "
 }
 
 if {$VIVADO_SYN == 1} {

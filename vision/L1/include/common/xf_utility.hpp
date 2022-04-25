@@ -19,11 +19,273 @@
 
 #include "ap_axi_sdata.h"
 #include "common/xf_common.hpp"
+#include "common/xf_video_mem.hpp"
 #include <assert.h>
 #include <string.h>
 
 namespace xf {
 namespace cv {
+
+// ======================================================================================
+// Function to read from DDR and copy to xf::cv::Mat
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void Ptr2xfMat(ap_uint<BUS_WIDTH>* in_ptr, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = out_mat.rows * (out_mat.cols >> XF_BITSHIFT(NPPC));
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+
+        out_mat.write(i, (XF_TNAME(TYPE, NPPC))in_ptr[i]);
+    }
+
+} // End of Ptr2xfMat()
+
+// ======================================================================================
+// Function to read from DDR and copy to xf::cv::Mat
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void xfMat2Ptr(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat, ap_uint<BUS_WIDTH>* out_ptr) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = in_mat.rows * (in_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+
+        out_ptr[i] = in_mat.read(i);
+    }
+
+} // End of xfMat2Ptr()
+// ======================================================================================
+
+// ======================================================================================
+// Function to split xf::cv::Mat into 2 streams (1 for DDR PTR and 1 for xf::cv::Mat)
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void xFDuplicateMat_PTRMAT(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+                           ap_uint<BUS_WIDTH>* out_ptr,
+                           xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = in_mat.rows * (in_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+
+        XF_TNAME(TYPE, NPPC) tmp = in_mat.read(i);
+
+        out_ptr[i] = (ap_uint<BUS_WIDTH>)tmp;
+        out_mat.write(i, tmp);
+    }
+
+} // End of xFDuplicateMat_PTRMAT()
+// ======================================================================================
+
+// ======================================================================================
+// Function to split xf::cv::Mat into 3 streams (1 for DDR PTR and 2 for xf::cv::Mat)
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void xFDuplicateMat_PTRMAT2(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+                            ap_uint<BUS_WIDTH>* out_ptr,
+                            xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat1,
+                            xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat2) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = in_mat.rows * (in_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+
+        XF_TNAME(TYPE, NPPC) tmp = in_mat.read(i);
+
+        out_ptr[i] = (ap_uint<BUS_WIDTH>)tmp;
+        out_mat1.write(i, tmp);
+        out_mat2.write(i, tmp);
+        // out_mat2.write(i, (XF_TNAME(XF_16SC1, NPPC))tmp); // TODO: Remove me as I am for experiment
+    }
+
+} // End of xFDuplicateMat_PTRMAT2()
+// ======================================================================================
+
+// ======================================================================================
+// Function to split xf::cv::Mat into 3 streams (1 for DDR PTR, 1 for xf::cv::Mat and 1 for AXI stream)
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void xFDuplicateMat_PTR_MAT_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+                                ap_uint<BUS_WIDTH>* out_ptr,
+                                xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat,
+                                hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = in_mat.rows * (in_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+
+        ap_axiu<BUS_WIDTH, 0, 0, 0> v;
+        XF_TNAME(TYPE, NPPC) tmp = in_mat.read(i);
+
+        out_ptr[i] = tmp;
+        out_mat.write(i, tmp);
+
+        v.data = tmp;
+        out_axi.write(v);
+    }
+
+} // End of xFDuplicateMat_PTR_MAT_AXI()
+// ======================================================================================
+
+// ======================================================================================
+// Function to stream out xf::cv::Mat on AXI bus for K2K streaming
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void xFMat2AXI_Strm(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat, hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = in_mat.rows * (in_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+
+        ap_axiu<BUS_WIDTH, 0, 0, 0> v;
+
+        v.data = in_mat.read(i);
+        out_axi.write(v);
+    }
+
+} // End of xFMat2AXI_Strm()
+// ======================================================================================
+
+// ======================================================================================
+// Function to read AXI stream into xf::cv::Mat for K2K streaming
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void AXI_Strm2xFMat(hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& in_axi, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = out_mat.rows * (out_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+        ap_axiu<BUS_WIDTH, 0, 0, 0> v = in_axi.read();
+
+        out_mat.write(i, v.data);
+    }
+
+} // End of AXI_Strm2xFMat()
+// ======================================================================================
+
+// ======================================================================================
+// Function to split xf::cv::Mat into 2 streams (1 for DDR PTR and 1 for AXI stream)
+// ======================================================================================
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
+void xFDuplicateMat_PTR_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+                            ap_uint<BUS_WIDTH>* out_ptr,
+                            hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
+#pragma HLS INLINE OFF
+
+    const int c_TRIP_COUNT = ROWS * COLS;
+    int loopcount = in_mat.rows * (in_mat.cols >> XF_BITSHIFT(NPPC));
+
+    for (int i = 0; i < loopcount; i++) {
+#pragma HLS pipeline II = 1
+#pragma HLS LOOP_TRIPCOUNT min = c_TRIP_COUNT max = c_TRIP_COUNT
+        ap_axiu<BUS_WIDTH, 0, 0, 0> v;
+        XF_TNAME(TYPE, NPPC) tmp = in_mat.read(i);
+
+        out_ptr[i] = tmp;
+
+        v.data = tmp;
+        out_axi.write(v);
+    }
+
+} // End of xFDuplicateMat_PTR_AXI()
+// ======================================================================================
+
+// ======================================================================================
+// Function to set border in the extracted kernel sized block
+// ======================================================================================
+template <int K_ROWS, int K_COLS, typename SRC_T, int BORDER_T>
+void xFSetBorder(xf::cv::Window<K_ROWS, K_COLS, SRC_T>& src_blk,
+                 uint16_t _row,
+                 uint16_t _col,
+                 uint16_t _src_rows,
+                 uint16_t _src_cols) {
+#pragma HLS INLINE OFF
+
+    uint16_t blk_t_idx, blk_b_idx;
+    uint16_t blk_l_idx, blk_r_idx;
+
+    blk_t_idx = (K_ROWS - _row - 1);
+    blk_b_idx = (K_ROWS - (_row - _src_rows + 1) - 1);
+
+    blk_l_idx = (K_COLS - _col - 1);
+    blk_r_idx = (K_COLS - (_col - _src_cols + 1) - 1);
+
+    for (uint16_t r = 0; r < K_ROWS; r++) {
+#pragma HLS UNROLL
+        for (uint16_t c = 0; c < K_COLS; c++) {
+#pragma HLS UNROLL
+
+            bool top_border = ((r < blk_t_idx) && (_row < K_ROWS - 1)) ? true : false;
+            bool bottom_border = ((r > blk_b_idx) && (_row >= _src_rows)) ? true : false;
+            bool left_border = ((c < blk_l_idx) && (_col < K_COLS - 1)) ? true : false;
+            bool right_border = ((c > blk_r_idx) && (_col >= _src_cols)) ? true : false;
+
+            uint16_t r_idx = r, c_idx = c;
+
+            if (BORDER_T == XF_BORDER_REPLICATE) {
+                r_idx = top_border ? blk_t_idx : bottom_border ? blk_b_idx : r;
+
+            } else if (BORDER_T == XF_BORDER_REFLECT_101) {
+                r_idx = top_border ? (2 * blk_t_idx - r) : bottom_border ? (2 * blk_b_idx - r) : r;
+
+            } else if (BORDER_T == XF_BORDER_REFLECT) {
+                r_idx = top_border ? (2 * blk_t_idx - r - 1) : bottom_border ? (2 * blk_b_idx - r + 1) : r;
+
+            } else { // TODO: Need to add other modes support
+                r_idx = r;
+            }
+
+            if (BORDER_T == XF_BORDER_REPLICATE) {
+                c_idx = left_border ? blk_l_idx : right_border ? blk_r_idx : c;
+
+            } else if (BORDER_T == XF_BORDER_REFLECT_101) {
+                c_idx = left_border ? (2 * blk_l_idx - c) : right_border ? (2 * blk_r_idx - c) : c;
+
+            } else if (BORDER_T == XF_BORDER_REFLECT) {
+                c_idx = left_border ? (2 * blk_l_idx - c - 1) : right_border ? (2 * blk_r_idx - c + 1) : c;
+
+            } else { // TODO: Need to add other modes support
+                c_idx = c;
+            }
+
+            if ((top_border | bottom_border | left_border | right_border) && (BORDER_T == XF_BORDER_CONSTANT)) {
+                src_blk.val[r][c] = 0;
+            } else {
+                src_blk.val[r][c] = src_blk.val[r_idx][c_idx];
+            }
+        }
+    }
+
+} // End of xFSetBorder()
+// ======================================================================================
 
 /**
  * Extract Pixels from a packed word into an array from the index pos.

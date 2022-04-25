@@ -415,7 +415,8 @@ class. The following are a few supported types:
    For instance, ``XF_PTSNAME             (XF_16UC1,XF_NPPC2)`` resolves
    to ``unsigned             short``.
 
-.. note:: ``ap_uint<>``, ``ap_int<>``, ``ap_fixed<>``, and ``ap_ufixed<>`` types belong to the high-level synthesis (HLS) library. For more information, see the Vivado Design Suite User Guide: High-Level Synthesis (`UG902 <https://www.xilinx.com/cgi-bin/docs/rdoc?v=2019.1;d=ug902-vivado-high-level-synthesis.pdf>`_).
+.. note:: ``ap_uint<>``, ``ap_int<>``, ``ap_fixed<>``, and ``ap_ufixed<>`` types belong to the high-level synthesis (HLS) library. 
+For more information, see the Vitis HLS User Guide: High-Level Synthesis (`UG1399 <https://docs.xilinx.com/r/en-US/ug1399-vitis-hls>`_).
 
 .. _xf-imread:
 
@@ -637,6 +638,9 @@ Vitis Vision Library Functions
 The Vitis Vision library is a set of select OpenCV functions optimized for
 Zynq-7000, Zynq UltraScale+ MPSoC, Alveo U200 and U50 devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
+
+.. Important::
+   **All the functions in the library are implemented in streaming model except 4. Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
 
 .. note:: `Resolution Conversion (Resize) <#resolution-conversion>`_ in 8 pixel per cycle mode, `Dense Pyramidal LK Optical Flow <#dense-pyramidal-lk-optical>`_, and `Dense Non-Pyramidal LK Optical Flow <#dense-non-pyramidal-lk-optical>`_ functions are not supported on the Zynq-7000 SoC ZC702 devices, due to the higher resource utilization.
 
@@ -7858,6 +7862,10 @@ Multiple ROI Extraction Example
 
     {xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[0],roi[0]); xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[1],roi[1]); xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[2],roi[2]);}
     
+
+.. _custombgr2y8:
+.. include:: include/custom_bgr2y8_api.rst
+
 
 .. _customcca:
 
@@ -15349,6 +15357,8 @@ latencies obtained for different interpolation types.
 
 .. include:: include/rgbir_api.rst
 
+.. include:: include/rotate_api.rst
+
 .. _bgr2hsv:
 
 BGR to HSV Conversion
@@ -16983,6 +16993,8 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
     +=====================+==================+==============+
     | 300                 | 18               | 18           |
     +---------------------+------------------+--------------+
+
+.. include:: include/tvl1_api.rst
 
 .. _warptransform:
 

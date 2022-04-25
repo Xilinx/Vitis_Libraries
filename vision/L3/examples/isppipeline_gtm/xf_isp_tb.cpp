@@ -125,6 +125,8 @@ int main(int argc, char** argv) {
 
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     unsigned short rgain = 256;
     unsigned short bgain = 256;
@@ -154,6 +156,9 @@ int main(int argc, char** argv) {
     cl::Device device = devices[0];
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_SRC_T, XF_NPPC) << std::endl;
+    std::cout << "NPPC:" << XF_NPPC << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_ISPPipeline");

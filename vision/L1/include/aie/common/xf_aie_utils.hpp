@@ -158,6 +158,10 @@ inline void xfUnsignedSaturation(void* img_ptr) {
     ((metadata_elem_t*)img_ptr)[POS_MDS_SAT_EN] = 1;
 }
 
+inline void xfDefaultSaturation(void* img_ptr) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_SAT_EN] = 0;
+}
+
 inline void xfSignedSaturation(void* img_ptr) {
     ((metadata_elem_t*)img_ptr)[POS_MDS_SAT_EN] = 2;
 }

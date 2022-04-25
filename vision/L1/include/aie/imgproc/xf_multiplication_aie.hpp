@@ -86,6 +86,7 @@ __attribute__((noinline)) void multiplication_api(input_window_int16* restrict i
     const int16_t image_height = xfGetTileHeight(img_in_ptr);
 
     xfCopyMetaData(img_in_ptr, img_out_ptr);
+    xfUnsignedSaturation(img_out_ptr);
 
     int16_t* restrict ptr_in = (int16_t*)xfGetImgDataPtr(img_in_ptr);
     int16_t* restrict ptr_in1 = (int16_t*)xfGetImgDataPtr(img_in_ptr1);

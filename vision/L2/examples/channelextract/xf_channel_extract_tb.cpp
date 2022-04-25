@@ -42,12 +42,17 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = in_rgba.rows;
     int width = in_rgba.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device);
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC4, XF_NPPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC4, XF_NPPC1) << std::endl;
+    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_channelextract");

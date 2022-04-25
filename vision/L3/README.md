@@ -38,10 +38,6 @@ This directory contains whole applications formed by stitching a pipeline of Vit
 
     export SYSROOT=< path-to-platform-sysroot >
 
-	export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-
-	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
-
     make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
 
     make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build.

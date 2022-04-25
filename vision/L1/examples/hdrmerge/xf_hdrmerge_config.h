@@ -40,7 +40,7 @@
 #define W_B_SIZE 65536
 #endif
 
-// Useful macro functions definations
+// Useful macro functions definitions
 #define _DATA_WIDTH_(_T, _N) (XF_PIXELWIDTH(_T, _N) * XF_NPIXPERCYCLE(_N))
 #define _BYTE_ALIGN_(_N) ((((_N) + 7) / 8) * 8)
 

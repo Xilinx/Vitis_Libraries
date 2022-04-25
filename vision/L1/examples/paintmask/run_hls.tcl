@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,11 +25,14 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/paintmask/xf_paintmask_accel.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/paintmask/xf_paintmask_tb.cpp" -cflags "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/paintmask/xf_paintmask_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/paintmask/xf_paintmask_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/paintmask/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top paintmask_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP

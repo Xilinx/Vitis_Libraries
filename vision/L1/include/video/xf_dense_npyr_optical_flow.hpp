@@ -51,6 +51,7 @@ static void readMatRows16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& src,
     }
 }
 
+/*
 template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void writeMatRowsRGBA16(
     hls::stream<rgba_t>& pixStream0, hls::stream<rgba_t>& pixStream1, ap_uint<64>* dst, int rows, int cols, int size) {
@@ -75,6 +76,7 @@ static void writeMatRowsRGBA16(
         *(dst + i) = l;
     }
 }
+*/
 
 // write rgba stream to external array dst. The "a" is just padding and is
 // unused

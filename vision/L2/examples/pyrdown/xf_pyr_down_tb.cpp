@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
     output_diff_xf_cv.create(output_height, output_width, CV_8UC1);
 #endif
 
-    std::cout << "Input Height " << input_height << " Input_Width " << input_width << std::endl;
+    std::cout << "Input image height : " << input_height << std::endl;
+    std::cout << "Input image width  : " << input_width << std::endl;
     std::cout << "Output Height " << output_height << " Output_Width " << output_width << std::endl;
 
     cv::pyrDown(input_image, output_image, cv::Size(output_width, output_height), cv::BORDER_REPLICATE);
@@ -74,6 +75,9 @@ int main(int argc, char* argv[]) {
 
     inBufVec.push_back(imageToDevice);
     outBufVec.push_back(imageFromDevice);
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC_T) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC_T) << std::endl;
+    std::cout << "NPPC:" << NPC_T << std::endl;
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);

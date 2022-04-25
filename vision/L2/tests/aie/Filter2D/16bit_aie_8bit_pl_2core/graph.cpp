@@ -19,10 +19,10 @@
 
 static constexpr int CORES = 2;
 // Virtual platform ports
-PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-PLIO* in2 = new PLIO("DataIn2", adf::plio_64_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output1.txt");
-PLIO* out2 = new PLIO("DataOut2", adf::plio_64_bits, "data/output2.txt");
+PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
+PLIO* in2 = new PLIO("DataIn2", adf::plio_128_bits, "data/input.txt");
+PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output1.txt");
+PLIO* out2 = new PLIO("DataOut2", adf::plio_128_bits, "data/output2.txt");
 
 simulation::platform<CORES, CORES> platform(in1, in2, out1, out2);
 

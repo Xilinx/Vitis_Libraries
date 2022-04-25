@@ -16,8 +16,8 @@
 
 #include "graph.h"
 
-PLIO* in_0 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-PLIO* out_0 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
+PLIO* in_0 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
+PLIO* out_0 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
 
 // connect dataflow graph to simulation platform
 simulation::platform<1, 1> platform(in_0, out_0);

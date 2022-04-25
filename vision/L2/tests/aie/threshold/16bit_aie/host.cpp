@@ -297,12 +297,12 @@ int main(int argc, char** argv)
         int errorCount = 0;
 
         {
+            int16_t* inp = (int16_t*)xf::cv::aie::xfGetImgDataPtr(bufferMapped[0]);
             int16_t* outp = (int16_t*)xf::cv::aie::xfGetImgDataPtr(bufferMapped[1]);
             int16_t* refp = (int16_t*)xf::cv::aie::xfGetImgDataPtr(golden);
             for (int i = 0; i < TILE_ELEMENTS; i++) {
                 if (outp[i] != refp[i]) {
-                    printf("Error found @ %d, %d != %d	%d\n", i, (int16_t)bufferMapped[1][i], golden[i],
-                           (int16_t)bufferMapped[0][i]);
+                    printf("Error found @ %d, %d != %d	%d\n", i, (int16_t)outp[i], refp[i], (int16_t)inp[i]);
                     errorCount++;
                 }
             }

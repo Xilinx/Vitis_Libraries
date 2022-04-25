@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,17 +25,20 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_accel.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_tb.cpp" -cflags "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top ISPPipeline_accel
 
 open_solution -reset $SOLN
+
+
+
 
 set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/16bit.png "
+  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/gaincontrol_hd_input.png "
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/16bit.png "
+  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/gaincontrol_hd_input.png "
 }
 
 if {$VIVADO_SYN == 1} {
@@ -51,7 +54,7 @@ if {$VIVADO_SYN == 1} {
 }
 
 if {$VIVADO_IMPL == 1} {
-  export_design -flow impl -rtl verilog -format ip_catalog
+  export_design -flow impl -rtl verilog
 }
 
 exit

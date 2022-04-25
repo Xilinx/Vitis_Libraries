@@ -38,6 +38,8 @@ int main(int argc, char** argv) {
 
     int rows = in_img.rows;
     int cols = in_img.cols;
+    std::cout << "Input image height : " << rows << std::endl;
+    std::cout << "Input image width  : " << cols << std::endl;
 
     // HLS Implementation [[
     cv::Mat yuv_image_hls;
@@ -51,6 +53,10 @@ int main(int argc, char** argv) {
     int clip = 3;
     int tilesY = 4;
     int tilesX = 4;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC) << std::endl;
+    std::cout << "NPPC:" << NPC << std::endl;
+
     (void)cl_kernel_mgr::registerKernel("clahe_accel", "krnl_clahe", XCLIN(yuv_planes_hls[0]), XCLOUT(dst_hls),
                                         XCLIN(rows), XCLIN(cols), XCLIN(clip), XCLIN(tilesY), XCLIN(tilesX));
 

@@ -166,4 +166,12 @@ int main(int argc, char* argv[]) {
     cv::absdiff(image_output, opencv_image, diff_img);
 
     xf::cv::analyzeDiff(diff_img, 0, err_per);
+
+    if (err_per > 1) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
+
+    return 0;
 }

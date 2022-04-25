@@ -111,6 +111,8 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// CL ////////////////////////
     int height = in_img.rows;
     int width = in_img.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
 
     int* roi = (int*)malloc(NUM_ROI * 4 * sizeof(int));
     for (int i = 0, j = 0; i < (NUM_ROI * 4); j++, i += 4) {
@@ -133,6 +135,10 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC) << std::endl;
+    std::cout << "NPPC:" << NPC << std::endl;
+
     // Load binary:
 
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_crop");
@@ -214,7 +220,7 @@ int main(int argc, char** argv) {
                             (ROI_height[1] * ROI_width[1] * OUTPUT_CH_TYPE),
                             out_img[1].data, // Data will be stored here
                             nullptr, &event);
-    queue.enqueueReadBuffer(imageFromDeviceroi1, // This buffers data will be read
+    queue.enqueueReadBuffer(imageFromDeviceroi3, // This buffers data will be read
                             CL_TRUE,             // blocking call
                             0,                   // offset
                             (ROI_height[2] * ROI_width[2] * OUTPUT_CH_TYPE),

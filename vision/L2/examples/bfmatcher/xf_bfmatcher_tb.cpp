@@ -47,6 +47,11 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    int height = in_img_1.rows;
+    int width = in_img_1.cols;
+    std::cout << "Input image height : " << height << std::endl;
+    std::cout << "Input image width  : " << width << std::endl;
+
     std::vector<cv::KeyPoint> keypoints1, keypoints2;
     std::vector<std::array<uint8_t, 32> > descriptors1, descriptors2;
     std::vector<cv::DMatch> good_matches;
@@ -115,8 +120,9 @@ int main(int argc, char** argv) {
     hw_time = seconds + nanoseconds * 1e-9;
     hw_time = hw_time * 1e3;
 
-    ///////////////////   HLS module  /////////////////
+    std::cout << "Input Image Channels:" << in_img_1.channels() << std::endl;
 
+    ///////////////////   HLS module  /////////////////
     int16_t tmp_good_matches[nkp1];
 
     // CL implementation for hardware call

@@ -4,14 +4,14 @@
         "Stereolbm L2 function example"
     ], 
     "flow": "vitis", 
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200",
         "aws-vu9p-f1", 
         "vck190", 
         "zcu104", 
         "u50"
     ], 
-    "platform_blacklist": [
+    "platform_blocklist": [
         "u280", 
         "u250",
         "zcu102"
@@ -125,7 +125,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/left.png LIB_DIR/data/right.png", 
+            "cmd_args": "LIB_DIR/data/left_emu.png LIB_DIR/data/right_emu.png", 
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -146,7 +146,9 @@
     ], 
     "data": [
         "LIB_DIR/data/left.png", 
-        "LIB_DIR/data/right.png"
+        "LIB_DIR/data/right.png",
+        "LIB_DIR/data/left_emu.png", 
+        "LIB_DIR/data/right_emu.png"
     ], 
     "host": {
         "host_exe": "stereolbm", 

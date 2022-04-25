@@ -15,8 +15,8 @@
  */
 
 #include "kernels.h"
-#include "imgproc/xf_gaussian_aie.hpp"
+#include "imgproc/xf_gaussian_16b_aie.hpp"
 
-void gaussian(input_window_int32* input, output_window_int32* output) {
-    xf::cv::aie::gaussian_api(input, output);
+void gaussian(input_window_int16* input, const int16_t (&coeff)[16], output_window_int16* output) {
+    xf::cv::aie::gaussian_k3_border(input, coeff, output);
 };

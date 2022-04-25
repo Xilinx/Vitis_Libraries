@@ -32,6 +32,8 @@ examples are described in this section:
 -  `Image Sensor Processing pipeline with HDR <#isp-201hdr>`_
 -  `Image Sensor Processing pipeline with GTM <#isp-201gtm>`_
 -  `Mono image Sensor Processing pipeline <#isp-201mono>`_
+-  `RGB-IR image Sensor Processing pipeline <#isp-201mono>`_
+-  `Image Sensor Processing multistream pipeline - 2022.1 version <#_isp-201multistream>`_
 
 
 .. _interative-pyramidal:
@@ -821,6 +823,8 @@ This ISP includes following 8 blocks:
 *  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
 *  Autoexposurecorrection : This function automatically attempts to correct the exposure level of captured image and also improves contrast of the image.
 
+|isp_20202|
+
 Current design example demonstrates how to use ISP functions in a pipeline. User can include other modules (like gamma correction, color conversion, resize etc) based on their need.
 
 
@@ -940,6 +944,8 @@ This ISP includes following blocks:
 *  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
 *  Gamma correction : Gamma correction improves the overall brightness of image.
 *  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
+
+|isp-20211|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
@@ -1085,6 +1091,8 @@ This ISP includes HDR function with 2021.1 pipeline with out color space convers
 after HDR fusion it will return hdr merged output frame. The HDR output goes to ISP 2021.1 pipeline and returns the output RGB image.
 
 * HDRMerge : HDRMerge module generates the Hign dynamic range image from a set of different exposure frames. Usually, image sensors has limited dynamic range and it's difficult to get HDR image with single image capture. From the sensor, the frames are collected with different exposure times and will get different exposure frames, HDRMerge will generates the HDR frame with those exposure frames.
+
+|isp-hdr|
 
 The following example demonstrates the ISP pipeline with HDR.
 
@@ -1516,6 +1524,212 @@ The following example demonstrates the ISP pipeline with above list of functions
 					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, img_out);
 				}
 				
+.. isp_rgbir:
+
+RGB-IR image Sensor Processing pipeline
+=======================================
+
+This Image Sensor Processing (ISP) pipeline works on a raw bayer pattern image that has IR data at some pixel loactions. It creates a fully processed RGB image and an IR image.
+
+This ISP includes following blocks:
+
+*  RGBIR to Bayer : This module converts the input image with R,G,B,IR pixel data into a standard bayer pattern image along with a full IR data image.
+*  Gain Control : The Gain control module improves the overall brightness of the image.
+*  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
+*  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
+*  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
+*  Gamma correction : Gamma correction improves the overall brightness of image.
+*  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
+
+Current design example demonstrates how to use ISP functions in a pipeline. 
+ 
+User can dynamically configure the below parameters to the pipeline.
+
+.. table::  Runtime parameters for the pipeline
+
+   +---------------+-------------------------------------------------------------+
+   | Parameter     | Description                                                 |
+   +===============+=============================================================+
+   | rgain         | To configure gain value for the red channel.                |
+   |               |                                                             |
+   +---------------+-------------------------------------------------------------+
+   | bgain         | To configure gain value for the blue channel.               |
+   |               |                                                             |
+   +---------------+-------------------------------------------------------------+ 
+   | gamma_lut     | Lookup table for gamma values.first 256 will be R,          |
+   |               | next 256 values are G gamma and last 256 values are         | 
+   |               | B values                                                    | 
+   +---------------+-------------------------------------------------------------+
+   | mode_reg      | Flag to enable/disable AWB algorithm                        |
+   +---------------+-------------------------------------------------------------+
+   | pawb          | %top and %bottom pixels are ignored while computing         |
+   |               | min and max to improve quality.                             |
+   +---------------+-------------------------------------------------------------+
+   | height        | The number of rows in the image or height of the            |
+   |               | image.                                                      |
+   +---------------+-------------------------------------------------------------+
+   | width         | The number of columns in the image or width of the          |
+   |               | image.                                                      |
+   +---------------+-------------------------------------------------------------+
+   | R_IR_C1_Wgts  | 5x5 Weights to calculate R at IR location for constellation1|
+   +---------------+-------------------------------------------------------------+
+   | R_IR_C2_Wgts  | 5x5 Weights to calculate R at IR location for constellation2|
+   +---------------+-------------------------------------------------------------+
+   | B_at_R_wgts   | 5x5 Weights to calculate B at R location                    | 
+   +---------------+-------------------------------------------------------------+
+   | IR_at_R_wgts  | 3x3 Weights to calculate IR at R location                   |
+   +---------------+-------------------------------------------------------------+
+   | IR_at_B_wgts  | 3x3 Weights to calculate IR at B location                   |
+   +---------------+-------------------------------------------------------------+
+   | sub_wgts      | Weights to perform weighted subtraction of IR               |
+   |               | image from RGB image. sub_wgts[0] -> G Pixel,               |
+   |               | sub_wgts[1] -> R Pixel, sub_wgts[2] -> B Pixel              |
+   |               | sub_wgts[3] -> calculated B Pixel                           |
+   +---------------+-------------------------------------------------------------+
+   
+User can also use below compile time parameters to the pipeline.
+
+.. table::  Compiletime parameters for the pipeline
+
+   +-----------------+------------------------------------------------------+
+   | Parameter       | Description                                          |
+   +=================+======================================================+
+   | XF_HEIGHT       | Maximum height of input and output image             |
+   +-----------------+------------------------------------------------------+
+   | XF_WIDTH        | Maximum width of input and output image              |
+   |                 | (Must be multiple of NPC)                            |
+   +-----------------+------------------------------------------------------+
+   |XF_BAYER_PATTERN | The Bayer format of the RAW input image.             |
+   |                 | Supported formats are BGGR, GRBG.                    |
+   +-----------------+------------------------------------------------------+
+   | XF_SRC_T        |Input pixel type;supported pixel widths are 8,10,12,16|
+   +-----------------+------------------------------------------------------+
+
+.. code:: c
+
+			extern "C" {
+			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+								   ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+								   ap_uint<OUTPUT_PTR_WIDTH>* ir_img_out,
+								   int height,
+								   int width,
+								   uint16_t rgain,
+								   uint16_t bgain,
+								   char R_IR_C1_wgts[25],
+								   char R_IR_C2_wgts[25],
+								   char B_at_R_wgts[25],
+								   char IR_at_R_wgts[9],
+								   char IR_at_B_wgts[9],
+								   char sub_wgts[4],
+								   unsigned char gamma_lut[256 * 3],
+								   unsigned char mode_reg,
+								   uint16_t pawb) {
+			// clang-format off
+			#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
+			#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
+			#pragma HLS INTERFACE m_axi     port=ir_img_out  offset=slave bundle=gmem3
+			#pragma HLS INTERFACE m_axi     port=R_IR_C1_wgts  offset=slave bundle=gmem4
+			#pragma HLS INTERFACE m_axi     port=R_IR_C2_wgts  offset=slave bundle=gmem4
+			#pragma HLS INTERFACE m_axi     port=B_at_R_wgts  offset=slave bundle=gmem4
+			#pragma HLS INTERFACE m_axi     port=IR_at_R_wgts  offset=slave bundle=gmem4
+			#pragma HLS INTERFACE m_axi     port=IR_at_B_wgts  offset=slave bundle=gmem4
+			#pragma HLS INTERFACE m_axi     port=sub_wgts  offset=slave bundle=gmem5
+			#pragma HLS INTERFACE m_axi     port=gamma_lut  offset=slave bundle=gmem6
+
+			// clang-format on
+
+			// clang-format off
+			#pragma HLS ARRAY_PARTITION variable=hist0_awb complete dim=1
+			#pragma HLS ARRAY_PARTITION variable=hist1_awb complete dim=1
+
+				// clang-format on
+
+				if (!flag) {
+					ISPpipeline(img_inp, img_out, ir_img_out, height, width, hist0_awb, hist1_awb, igain_0, igain_1, rgain, bgain,
+								R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, gamma_lut, mode_reg,
+								pawb);
+					flag = 1;
+
+				} else {
+					ISPpipeline(img_inp, img_out, ir_img_out, height, width, hist1_awb, hist0_awb, igain_1, igain_0, rgain, bgain,
+								R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, gamma_lut, mode_reg,
+								pawb);
+					flag = 0;
+				}
+			}
+			
+			void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+							 ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+							 ap_uint<OUTPUT_PTR_WIDTH>* ir_img_out,
+							 unsigned short height,
+							 unsigned short width,
+							 uint32_t hist0[3][HIST_SIZE],
+							 uint32_t hist1[3][HIST_SIZE],
+							 int gain0[3],
+							 int gain1[3],
+							 uint16_t rgain,
+							 uint16_t bgain,
+							 char R_IR_C1_wgts[25],
+							 char R_IR_C2_wgts[25],
+							 char B_at_R_wgts[25],
+							 char IR_at_R_wgts[9],
+							 char IR_at_B_wgts[9],
+							 char sub_wgts[4],
+							 unsigned char gamma_lut[256 * 3],
+							 unsigned char mode_reg,
+							 uint16_t pawb) {
+			// clang-format off
+			#pragma HLS INLINE OFF
+				// clang-format on
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInputCopy1(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 3 * XF_WIDTH> imgInputCopy2(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> fullir_out(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> rggb_out(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demoOut_final(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
+				xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
+				xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
+				xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+
+			// clang-format off
+			#pragma HLS DATAFLOW
+				// clang-format on
+				const int Q_VAL = 1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC));
+
+				float thresh = (float)pawb / 256;
+				float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+
+				float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+
+				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput);
+
+				xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC,
+									3 * XF_WIDTH, XF_BORDER_CONSTANT, XF_USE_URAM>(
+					imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rggb_out, fullir_out);
+
+				xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(rggb_out, gain_out, rgain, bgain);
+				xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
+
+				function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
+																			   height, width, mode_reg, thresh);
+
+				if (XF_DST_T == XF_8UC3) {
+					fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, aecin, height, width);
+				} else {
+					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC>(ltm_in, aecin);
+				}
+				xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, _dst, gamma_lut);
+				xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, _imgOutput);
+
+				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, img_out);
+				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(fullir_out, ir_img_out);
+			}
+
+.. include:: include/isp_multistream_de.rst
+				
 .. |pp_image1| image:: ./images/letterbox.PNG
    :class: image 
    :width: 1000
@@ -1527,3 +1741,15 @@ The following example demonstrates the ISP pipeline with above list of functions
 .. |pp_image| image:: ./images/gnet_pp.png
    :class: image 
    :width: 500
+   
+.. |isp_20202| image:: ./images/isp-2020_2.PNG
+   :class: image 
+   :width: 1000
+   
+.. |isp-20211| image:: ./images/isp-2021_1.PNG
+   :class: image 
+   :width: 1000
+   
+.. |isp-hdr| image:: ./images/isp-hdr.PNG
+   :class: image 
+   :width: 1000

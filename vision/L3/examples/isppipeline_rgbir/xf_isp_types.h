@@ -30,7 +30,6 @@
 
 // Requried Vision modules
 #include "imgproc/xf_rgbir.hpp"
-#include "imgproc/xf_rgbir_bilinear.hpp"
 #include "imgproc/xf_duplicateimage.hpp"
 #include "imgproc/xf_bpc.hpp"
 #include "imgproc/xf_gaincontrol.hpp"
@@ -49,10 +48,10 @@
 #define S_DEPTH 4096
 
 // --------------------------------------------------------------------
-// Macros definations
+// Macros definitions
 // --------------------------------------------------------------------
 
-// Useful macro functions definations
+// Useful macro functions definitions
 #define _DATA_WIDTH_(_T, _N) (XF_PIXELWIDTH(_T, _N) * XF_NPIXPERCYCLE(_N))
 #define _BYTE_ALIGN_(_N) ((((_N) + 7) / 8) * 8)
 

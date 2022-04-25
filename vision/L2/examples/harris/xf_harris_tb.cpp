@@ -60,6 +60,8 @@ int main(int argc, char** argv) {
     uint32_t nCorners = 0;
     uint16_t imgwidth = in_img.cols;
     uint16_t imgheight = in_img.rows;
+    std::cout << "Input image height : " << in_img.rows << std::endl;
+    std::cout << "Input image width  : " << in_img.cols << std::endl;
 
     // OpenCL section:
     size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
@@ -79,6 +81,10 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPIX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPIX) << std::endl;
+    std::cout << "NPPC:" << NPIX << std::endl;
 
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_harris");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);

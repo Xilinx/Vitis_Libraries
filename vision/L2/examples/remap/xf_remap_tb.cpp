@@ -56,6 +56,8 @@ int main(int argc, char** argv) {
     hls_remapped.create(src.rows, src.cols, src.type()); // create memory for output images
     diff.create(src.rows, src.cols, src.type());
 
+    std::cout << "Input image height : " << src.rows << std::endl;
+    std::cout << "Input image width  : " << src.cols << std::endl;
 // Initialize the float maps:
 #if READ_MAPS_FROM_FILE
     // read the float map data from the file (code could be alternated for reading
@@ -112,6 +114,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC) << std::endl;
+    std::cout << "NPPC:" << NPC << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_remap");

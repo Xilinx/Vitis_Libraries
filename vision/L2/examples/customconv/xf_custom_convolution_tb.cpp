@@ -90,6 +90,9 @@ int main(int argc, char** argv) {
 
     int rows = in_img.rows;
     int cols = in_img.cols;
+    std::cout << "Input image height : " << rows << std::endl;
+    std::cout << "Input image width  : " << cols << std::endl;
+
 #if GRAY
     // OpenCL section:
     size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
@@ -116,6 +119,9 @@ int main(int argc, char** argv) {
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(INTYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(INTYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     // Get the device:
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -214,7 +220,8 @@ int main(int argc, char** argv) {
     if (err_per > 0.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
+    } else
+        std::cout << "Test Passed .... !!!" << std::endl;
 
     return 0;
 }

@@ -320,7 +320,7 @@ int main(int argc, char** argv)
             int16_t* refp = (int16_t*)xf::cv::aie::xfGetImgDataPtr(golden);
             for (int i = 0; i < TILE_ELEMENTS; i++) {
                 if (outp[i] != refp[i]) {
-                    printf("Error found @ %d, %d != %d\n", i, bufferMapped[2][i], golden[i]);
+                    printf("Error found @ %d, %d != %d\n", i, outp[i], refp[i]);
                     errorCount++;
                 }
             }

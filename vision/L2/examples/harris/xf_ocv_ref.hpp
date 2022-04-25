@@ -19,9 +19,6 @@
 
 #include "xf_harris_config.h"
 
-using namespace cv;
-using namespace std;
-
 typedef float NMSTYPE;
 
 bool OCVFindMaximum2(NMSTYPE* t1, NMSTYPE* t2, NMSTYPE* m1, NMSTYPE* b1, NMSTYPE* b2) {
