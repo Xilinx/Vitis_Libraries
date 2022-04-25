@@ -52,6 +52,7 @@ Currently this includes the following operations for dense matrix
 
    overview.rst
    tutorial.rst
+   release.rst
 
 .. toctree::
    :caption: User Guide

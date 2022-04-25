@@ -163,6 +163,7 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS +=   --config $(CUR_DIR)/conn_u50.cfg
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_LDFLAGS += --vivado.prop run.impl_1.STEPS.PLACE_DESIGN.ARGS.DIRECTIVE=SSI_SpreadLogic_high
 
 else 
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
