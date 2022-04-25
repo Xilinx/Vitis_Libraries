@@ -40,7 +40,7 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Database Library'
-copyright = '2021, Xilinx'
+copyright = '2022, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
