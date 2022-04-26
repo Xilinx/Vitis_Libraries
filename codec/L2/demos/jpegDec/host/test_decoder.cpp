@@ -138,7 +138,8 @@ void rebuild_raw_yuv(std::string file_name,
                      int hls_bc[MAX_NUM_COLOR],
                      // hls::stream<xf::codec::idct_out_t >   strm_iDCT_x8[8],
                      ap_uint<64>* yuv_mcu_pointer) {
-    std::string fn = file_name.substr(0, file_name.find(".")) + ".raw";
+    std::string file = file_name.substr(file_name.find_last_of('/') + 1);
+    std::string fn = file.substr(0, file.find_last_of(".")) + ".raw";
     FILE* f = fopen(fn.c_str(), "wb");
     std::cout << "WARNING: " << fn << " will be opened for binary write." << std::endl;
     if (!f) {
@@ -165,7 +166,7 @@ write_mcu_raw_data:
     // fwrite(&end_file, 1, 1, f);//write 0x0a
     fclose(f);
 
-    fn = file_name.substr(0, file_name.find(".")) + ".yuv";
+    fn = file.substr(0, file.find(".")) + ".yuv";
     f = fopen(fn.c_str(), "wb");
     std::cout << "WARNING: " << fn << " will be opened for binary write." << std::endl;
     if (!f) {
@@ -270,7 +271,22 @@ LOOP_write_v:
     // fwrite(&end_file, 1, 1, f);//write 0x0a
     fclose(f);
 
-    printf("Please open the YUV file with fmt %d and (width, height) = (%d, %d) \n", fmt, bas_info->axi_width[0]*8, bas_info->axi_height[0]*8);
+    printf("Please open the YUV file with fmt %d and (width, height) = (%d, %d) \n", fmt, bas_info->axi_width[0] * 8,
+           bas_info->axi_height[0] * 8);
+
+    // write yuv info to a file
+    fn = file.substr(0, file.find(".")) + ".yuv.h";
+    f = fopen(fn.c_str(), "aw");
+    std::cout << "WARNING: " << fn << " will be opened for binary write." << std::endl;
+    if (!f) {
+        std::cerr << "ERROR: " << fn << " cannot be opened for binary write." << std::endl;
+    }
+    fprintf(f, "INFO: fmt=%d, bas_info->mcu_cmp=%d\n", fmt, (int)(bas_info->mcu_cmp));
+    fprintf(f, "INFO: bas_info->hls_mbs[cmp] %d, %d, %d \n", bas_info->hls_mbs[0], bas_info->hls_mbs[1],
+            bas_info->hls_mbs[2]);
+    fprintf(f, "Please open the YUV file with fmt %d and (width, height) = (%d, %d) \n", fmt,
+            bas_info->axi_width[0] * 8, bas_info->axi_height[0] * 8);
+    fclose(f);
 }
 
 // ------------------------------------------------------------
@@ -379,7 +395,6 @@ int main(int argc, const char* argv[]) {
                      "'-JPEGFile' to specified it. \n";
     }
 
-
     ///// declaration
 
     // load data to simulate the ddr data
@@ -402,7 +417,7 @@ int main(int argc, const char* argv[]) {
     // Variables to measure time
     struct timeval startE2E, endE2E;
     gettimeofday(&startE2E, 0);
-    
+
     // To test SYNTHESIS top
     hls::stream<ap_uint<24> > block_strm;
     xf::codec::cmp_info cmp_info[MAX_NUM_COLOR];
@@ -530,20 +545,30 @@ int main(int argc, const char* argv[]) {
 
     // Setup kernel
     std::cout << "INFO: Finish kernel setup" << std::endl;
-    std::vector<cl::Event> events_write(1);
-    std::vector<std::vector<cl::Event> > events_kernel(1);
-    std::vector<cl::Event> events_read(1);
+    const int num_runs = 10;
+    std::vector<std::vector<cl::Event> > events_write(num_runs);
+    std::vector<std::vector<cl::Event> > events_kernel(num_runs);
+    std::vector<std::vector<cl::Event> > events_read(num_runs);
 
-    events_kernel[0].resize(1);
+    for (int i = 0; i < num_runs; ++i) {
+        events_kernel[i].resize(1);
+        events_write[i].resize(1);
+        events_read[i].resize(1);
+    }
 
-    q.enqueueMigrateMemObjects(ob_in, 0, nullptr, &events_write[0]); // 0 : migrate from host to dev
+    for (int i = 0; i < num_runs; ++i) {
+        if (i < 1) {
+            q.enqueueMigrateMemObjects(ob_in, 0, nullptr, &events_write[i][0]); // 0 : migrate from host to dev
+        } else {
+            q.enqueueMigrateMemObjects(ob_in, 0, &events_read[i - 1],
+                                       &events_write[i][0]); // 0 : migrate from host to dev
+        }
+        // Launch kernel and compute kernel execution time
+        q.enqueueTask(kernel_jpegDecoder, &events_write[i], &events_kernel[i][0]);
 
-    // Launch kernel and compute kernel execution time
-    q.enqueueTask(kernel_jpegDecoder, &events_write, &events_kernel[0][0]);
-
-    // Data transfer from device buffer to host buffer
-    q.enqueueMigrateMemObjects(ob_out, 1, &events_kernel[0], &events_read[0]); // 1 : migrate from dev to host
-
+        // Data transfer from device buffer to host buffer
+        q.enqueueMigrateMemObjects(ob_out, 1, &events_kernel[i], &events_read[i][0]); // 1 : migrate from dev to host
+    }
     q.finish();
 
     gettimeofday(&endE2E, 0);
@@ -553,25 +578,27 @@ int main(int argc, const char* argv[]) {
     // print related times
     unsigned long timeStart, timeEnd, exec_time0, write_time, read_time;
     std::cout << "-------------------------------------------------------" << std::endl;
-    events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
-    events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
+    events_write[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
+    events_write[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
     write_time = (timeEnd - timeStart) / 1000.0;
     std::cout << "INFO: Data transfer from host to device: " << write_time << " us\n";
     std::cout << "-------------------------------------------------------" << std::endl;
-    events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
-    events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
+    events_read[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
+    events_read[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
     read_time = (timeEnd - timeStart) / 1000.0;
     std::cout << "INFO: Data transfer from device to host: " << read_time << " us\n";
     std::cout << "-------------------------------------------------------" << std::endl;
 
     exec_time0 = 0;
-    int num_runs = 1;
     for (int i = 0; i < num_runs; ++i) {
-        events_kernel[0][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
-        events_kernel[0][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
+        events_kernel[i][0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
+        events_kernel[i][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
         exec_time0 += (timeEnd - timeStart) / 1000.0;
+        unsigned long t = (timeEnd - timeStart) / 1000.0;
+        printf("INFO: kernel %d: execution time %lu usec\n", i, t);
     }
-    std::cout << "INFO: Average kernel execution per run: " << exec_time0 / num_runs << " us\n";
+    exec_time0 = exec_time0 / (unsigned long)num_runs;
+    std::cout << "INFO: Average kernel execution per run: " << exec_time0 << " us\n";
     std::cout << "-------------------------------------------------------" << std::endl;
     unsigned long exec_timeE2E = diff(&endE2E, &startE2E);
     std::cout << "INFO: Average E2E per run: " << exec_timeE2E << " us\n";
@@ -598,7 +625,7 @@ int main(int argc, const char* argv[]) {
                 printf("Warning: [code 3] huffman data is not in expectation!\n");
             }
         }
-        printf("Info: Ready to decode next input file!\n");
+        return 1;
 #ifndef _HLS_TEST_
         logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
     } else {

@@ -22,5 +22,3 @@ Design Internals
    :maxdepth: 1
 
    kernels/jpegDecoder.rst
-   kernels/pikEnc.rst
-   kernels/wepbEnc.rst

@@ -22,4 +22,5 @@ Design Internals
    :maxdepth: 1
 
    IPs/jpegHuffmanDecoder.rst
+   IPs/jxlOrderTokenize.rst
 

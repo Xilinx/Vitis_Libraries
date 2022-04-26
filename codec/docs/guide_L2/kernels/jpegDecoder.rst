@@ -16,7 +16,7 @@
 .. _l2_kernel_jpeg_decoder:
 
 *************************************************
-Internal Design of jpegDecoder
+JPEG Decoder
 *************************************************
 
 

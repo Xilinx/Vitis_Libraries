@@ -23,51 +23,21 @@
 Benchmark 
 ==========
     
-.. _pictures:
 
-Pictures
+Performance Summary for APIs
 -----------
 
-The data is used by benchmarks, our commonly used pictures are listed in table 1. 
-
-.. table:: Table 1 Pictures for benchmark
+.. table:: Table 1 Summary table for performance and resources of APIs
     :align: center
 
-    +--------------------+----------+-------------+
-    |   Pictures         |  Format  |    Size     |
-    +====================+==========+=============+
-    |  android.jpg       |    420   |  960*1280   |
-    +--------------------+----------+-------------+
-    |  offset.jpg        |    422   |  5184*3456  |
-    +--------------------+----------+-------------+
-    |  hq.jpg            |    444   |  5760*3840  |
-    +--------------------+----------+-------------+
-    |  iphone.jpg        |    420   |  3264*2448  |
-    +--------------------+----------+-------------+
-    |  lena_c_512.png    |    444   |   512*512   |
-    +--------------------+----------+-------------+
-    |  1920x1080.png     |    444   |  1920*1080  |
-    +--------------------+----------+-------------+
++------------------------------+-------+------------------------+-------+--------+-------+--------+--------+-----+-----+-------+
+|  API                         | Type  | Input Description      | FPS   | MB/s   | MP/s  | Freq.  | LUT    | BRAM| URAM| DSP   |
++==============================+=======+========================+=======+========+=======+========+========+=====+=====+=======+
+|  kernelJpegDecoderTop        | HW    | lena_c_512.jpg         |  1148 | 87.0   |       | 243MHz |  23.1k |  28 |   0 |   39  |
++------------------------------+-------+------------------------+-------+--------+-------+--------+--------+-----+-----+-------+
+|  jpegHuffmanDecoder          | cosim | lena_c_512.jpg         |  2288 |    174 |       | 270MHz |   7.9K |   5 |   0 |    2  |
++------------------------------+-------+------------------------+-------+--------+-------+--------+--------+-----+-----+-------+
 
-Performance
------------
-
-For representing the resource utilization in each benchmark, we separate the overall utilization into 2 parts, where P stands for the resource usage in
-platform, that is those instantiated in static region of the FPGA card, as well as K represents those used in kernels (dynamic region). The input is
-png, jpg, pik, e.g. format, and the target device is set to Alveo U200.
-
-.. table:: Table 2 Performance for processing pictures on FPGA
-    :align: center
-
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |    Architecture     |     Picture      |  Latency(ms) |  Timing  |    LUT(P/K)    |  BRAM(P/K)  |  URAM(P/K) |  DSP(P/K)  |
-    +=====================+==================+==============+==========+================+=============+============+============+
-    | JPEG Huffman Decoder|   android.jpg    |    0.889     |  270MHz  |  108.1K/7.9K   |   178/5     |    0/0     |     4/12   |
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |  JPEG Decoder       |   android.jpg    |    1.515     |  243MHz  |  108.1K/23.1K  |   178/28    |    0/0     |     4/39   |
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
-    |  PIK Encoder        |  lena_c_512.png  |    16.0      |  300MHz  |  150.9K/439.4K |   338/62    |    0/16    |     7/0    |
-    +---------------------+------------------+--------------+----------+----------------+-------------+------------+------------+
 
 These are details for benchmark result and usage steps.
 
@@ -76,7 +46,6 @@ These are details for benchmark result and usage steps.
 
    benchmark/jpegHuffmanDecoderIP.rst
    benchmark/jpegDecoder.rst
-   benchmark/pikEnc.rst
    
 
 Test Overview
@@ -107,6 +76,6 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.2/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2022.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

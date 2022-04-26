@@ -15,7 +15,7 @@
 
 
 *************************************************
-Internal Design of jpegHuffmanDecoder
+kernelParserDecoderTop
 *************************************************
 
 
@@ -23,7 +23,7 @@ Overview
 ========
 This API is decoder supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create 1 non-zero symbol coeffiectsi (before iDCT) within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.
 
-As an independent IP, L1 API is the key circuit of L2 API.  
+As an independent IP, L1 API is the key circuit of L2 API, which achieve the JPEG parser and Huffman decoder, without the IDCT module achieved in L2.  
 L2 API runs as a kernel demo, which can also show the overall performance of the circuit.
 
 It can be seen from the benchmark of the API that the decoding speed of huffman decoder(L1 IP) is usually faster than that of iDCT(in L2 kernel). In practical applications, jpeg decoder is often used as the front module of the entire codec board.
@@ -32,9 +32,9 @@ Implemention
 ============
 The input JPEG and output Features:
 
-Table 1 : jpegDecoder Features
+Table 1 : JPEG huffman Decoder Features
 
-.. table:: Table 1 jpegDecoder Features
+.. table:: Table 1 JPEG huffman Decoder Features
     :align: center
 
     +-------------------+-----------------------------------------------------------------------+
@@ -55,11 +55,11 @@ Table 1 : jpegDecoder Features
 
 The algorithm implemention is shown as the figure below:
 
-Figure 2 : jpegDecoder architecture on FPGA
+Figure 2 : JPEG Decoder architecture on FPGA
 
 .. _my-figure-jpegDec-2:
 .. figure:: /images/jpegDec/jpegL2architecture.png
-      :alt: Figure 2 jpegDecoder architecture on FPGA
+      :alt: Figure 2 JPEG Decoder architecture on FPGA
       :width: 80%
       :align: center
 

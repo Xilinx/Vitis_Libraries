@@ -22,12 +22,11 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-Codec Library is an open-sourced library written in C/C++ accelerating image processing including JPEG decoder and pik encoder. It now covers a level of acceleration: the module level(L1) and the pre-defined kernel level(L2).
+Codec Library is an open-sourced library written in C/C++ for accelerating image coding, decoding and related processing algorithms. It now covers a level of acceleration: the module level(L1) and the pre-defined kernel level(L2).
 
-2021.1
+2022.1
 ----
 
-The 2021.1 release provides a range of algorithm, includes:
+The 2022.1 release provides a range of algorithms, includes:
 
-- JPEG Decoder: This API supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.  
-- Pik Encoder: This API is based on Google's PIK, which was 'chosen as the base framework for JPEG XL'. The pikEnc is based on the 'fast mode' of PIK which can provide better encoding efficnty than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. It can proved higher throughput and lower latency compared to software-based solutions.  
+1. JPEG decoding: one L2 API is provided for accelerating entire JPEG decoding process, which supports the ‘Sequential DCT-based mode’ of ISO/IEC 10918-1 standard. It can process 1 Huffman token and create up to 8 DCT coefficients within one cycle. It is also an easy-to-use decoder as it can directly parse the JPEG file header without help of software functions. In addition, L1 API is provided for Huffman decoding.

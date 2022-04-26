@@ -1,0 +1,67 @@
+{
+    "name": "Xilinx Order Tokenize HLS Test",
+    "description": "Xilinx jxl Order Tokenize HLS Test",
+    "flow": "hls",
+    "platform_whitelist": [
+        "u200"
+    ],
+    "platform_blacklist": [],
+    "part_whitelist": [],
+    "part_blacklist": [],
+    "project": "tokenize",
+    "solution": "solution1",
+    "clock": "3.33",
+    "topfunction": "top_order_tokenize",
+    "top": {
+        "source": [
+            "kernel/topOrderTokenize.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/kernel"
+    },
+    "testbench": {
+        "source": [
+            "host/test_orderTokenize.cpp"                             
+
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/kernel",
+        "ldflags": "-pthread -std=c++11",
+        "argv": {
+            "hls_csim": "-i ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/orders.txt -g ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/goldens.txt",
+            "hls_cosim": "-i ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/orders.txt -g ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/goldens.txt"
+        },
+        "stdmath": false 
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "hls_vivado_syn": 16384,
+                    "hls_csim": 16384,
+                    "hls_cosim": 16384,
+                    "hls_vivado_impl": 16384,
+                    "hls_csynth": 16384
+                },
+                "max_time_min": {
+                    "hls_vivado_syn": 480,
+                    "hls_csim": 120,
+                    "hls_cosim": 480,
+                    "hls_vivado_impl": 480,
+                    "hls_csynth": 240
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "hls_vivado_syn",
+            "hls_vivado_impl"
+        ],
+        "category": "canary"
+    }
+}

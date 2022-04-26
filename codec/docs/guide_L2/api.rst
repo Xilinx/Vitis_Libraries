@@ -22,5 +22,4 @@ API Document
    :maxdepth: 2
 
    ../rst_L2/namespace_xf_codec.rst
-   ../guide_L2/pik_api.rst
    :start-after: FunctionSection

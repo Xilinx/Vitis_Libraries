@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2022 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@
 Vitis Codec Library
 ==========================
 
-Vitis Codec Library is an open-sourced Vitis library written in C++ for accelerating image applications in a variety of use cases. It now covers a level of acceleration: the pre-defined kernel level (L2), and will evolve to offer the module level (L1).
+Codec Library is an open-sourced library written in C/C++ accelerating image coding, decoding and related processing. The algorithms of JPEG decoding is accelerated
 
-Currently, this includes the following algorithm implementation:
 
-- JPEG Decoder: "JPEG" stands for Joint Photographic Experts Group, the name of the committee that created the JPEG standard and also other still picture coding standards.
-- PIK Encoder: PIK is the prototype of JPEG XL, which is a raster-graphics file format supporting both lossy and lossless compression. It is designed to outperform existing raster formats and thus to become their universal replacement. 
+- For JPEG decoding, one L2 API is provided for accelerating entire JPEG decoding process, which supports the ‘Sequential DCT-based mode’ of ISO/IEC 10918-1 standard. It can process 1 Huffman token and create up to 8 DCT coefficients within one cycle. It is also an easy-to-use decoder as it can directly parse the JPEG file header without help of software functions. In addition, L1 API is provided for Huffman decoding. 
+
 
 .. toctree::
    :caption: Library Overview

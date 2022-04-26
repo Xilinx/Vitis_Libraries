@@ -34,7 +34,7 @@
  *
  * @param jpeg_pointer the input jpeg to be read from DDR.
  * @param size the total bytes to be read from DDR.
- * @param yuv_mcu_pointer the output yuv to DDR in mcu order.
+ * @param yuv_mcu_pointer the output yuv to DDR in mcu order. 1 ap_uint<64> has 8 uint8_t pixels after idct.
  * @param info information of the image, maybe use in the recovery image.
  */
 // a.input the jpg 420/422/444 baseline file
