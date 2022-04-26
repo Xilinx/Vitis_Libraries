@@ -393,9 +393,9 @@ One typical input format of geospatial data is CSV, thus a csv parser to extract
 <img alt="../../_images/knn_diagram.png" class="align-center" src="../../_images/knn_diagram.png" />
 <p>Building Blocks:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://xilinx.github.io/Vitis_Libraries/graph/2022.1/guide_L1/primitives/sortTopK.html">CSV Parser(DataAnalytic Library L1 Primitive)</a>: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.</li>
+<li>CSV Parser(DataAnalytic Library L1 Primitive) <a class="reference internal" href="../../guide_L1/internals/csvParser.html#guide-csv-parser"><span class="std std-ref">CSV Parser</span></a>: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.</li>
 <li>Distance: compute distance between base location and spatial object location; Euclidean distance is applied.</li>
-<li><a class="reference external" href="https://pages.gitenterprise.xilinx.com/FaaSApps/xf_DataAnalytics/2022.1/guide_L1/internals/csvParser.html">Sort Top-K(Graph Library L1 Primitive)</a>: sort distance in ascending order and keep top-k objects.</li>
+<li><a class="reference external" href="https://xilinx.github.io/Vitis_Libraries/graph/2021.2/guide_L1/primitives/sortTopK.html">Sort Top-K(Graph Library L1 Primitive)</a> : sort distance in ascending order and keep top-k objects.</li>
 </ul>
 </div>
 <div class="section" id="end2end-performance">
