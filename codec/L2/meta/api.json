@@ -1,0 +1,45 @@
+{
+	"schema": "vitis_libraries_api_list_schema-1.0",
+	"api_list": [
+		{
+			"api_name": "xf::codec::kernelJpegDecoderTop",
+			"spec": {
+				"schema": "vitis_libraries_api_list_schema-1.0",
+				"api_name": "xf::codec::kernelJpegDecoderTop",
+				"display_name": "kernelJpegDecoderTop",
+				"brief": "Level 2 : kernel implement for jfif parser + huffman decoder + iQ_iDCT.",
+				"target_domain": "PL",
+				"header_file_name": [
+					"XAcc_idct.hpp"
+				],
+				"search_paths": [
+					"L2/include/hw/jpegDec"
+				],
+				"instance": "function",
+				"parameters": [],
+				"ports": [
+					{
+						"name": "jpeg_pointer",
+						"direction": "",
+						"type": "ap_uint< (16) > *"
+					},
+					{
+						"name": "size",
+						"direction": "",
+						"type": "const int"
+					},
+					{
+						"name": "yuv_mcu_pointer",
+						"direction": "",
+						"type": "ap_uint< 64 > *"
+					},
+					{
+						"name": "info",
+						"direction": "",
+						"type": "ap_uint< 32 > *"
+					}
+				]
+			}
+		}
+	]
+}

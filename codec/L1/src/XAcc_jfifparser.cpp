@@ -599,6 +599,7 @@ void decoder_jpg_top(ap_uint<AXI_WIDTH>* ptr,
  * @param block_strm the stream of coefficients in block,23:is_rst, 22:is_endblock,21~16:bpos,15~0:block val
  * @param rtn the flag of the jfif parser succeed
  * @param rtn2 the flag of the decode succeed
+ * @param pout the decOutput
  */
 void kernelParserDecoderTop(ap_uint<AXI_WIDTH>* datatoDDR,
                             const int size,

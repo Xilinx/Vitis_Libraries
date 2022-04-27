@@ -1,0 +1,106 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::codec::kernelParserDecoderTop",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::codec::kernelParserDecoderTop",
+                "display_name": "kernelParserDecoderTop",
+                "brief": "Level 2 : kernel for jfif parser + huffman decoder.",
+                "target_domain": "",
+                "header_file_name": [
+                    "XAcc_jfifparser.hpp"
+                ],
+                "search_paths": [
+                    "L1/include"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "datatoDDR",
+                        "direction": "",
+                        "type": "ap_uint< (16) > *"
+                    },
+                    {
+                        "name": "size",
+                        "direction": "",
+                        "type": "const int"
+                    },
+                    {
+                        "name": "img_info",
+                        "direction": "",
+                        "type": "xf::codec::img_info&"
+                    },
+                    {
+                        "name": "hls_cmpnfo[MAX_NUM_COLOR]",
+                        "direction": "",
+                        "type": "xf::codec::hls_compInfo"
+                    },
+                    {
+                        "name": "block_strm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<24> >&"
+                    },
+                    {
+                        "name": "rtn",
+                        "direction": "",
+                        "type": "int&"
+                    },
+                    {
+                        "name": "rtn2",
+                        "direction": "",
+                        "type": "bool&"
+                    },
+                    {
+			"name": "pout",
+                        "direction": "",
+                        "type": "xf::codec::decOutput*"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::codec::top_order_tokenize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::codec::top_order_tokenize",
+                "display_name": "top_order_tokenize",
+                "brief": "JXL order_tokenize case",
+                "target_domain": "",
+                "header_file_name": [
+                    "topOrderTokenize.hpp"
+                ],
+                "search_paths": [
+                    "/L1/include/"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "used_orders",
+                        "direction": "",
+                        "type": "ap_uint<32>"
+                    },
+                    {
+                        "name": "orderStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >"
+                    },
+                    {
+                        "name": "tokenStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<64> >"
+                    },
+                    {
+                        "name": "e_tokenStrm",
+                        "direction": "",
+                        "type": "hls::stream<bool>"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}
