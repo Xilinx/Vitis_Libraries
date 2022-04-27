@@ -397,6 +397,10 @@ function OptanonWrapper() { }
 <li><strong>csv scanner</strong>: Used to accelerate the extract, transform and load process. It integrates GZIP decompression, CSV parser, filter module together to make them work in parallel. ETL accelerator could work together with database to run queries on large size of semi-structured and unstructured data.</li>
 <li><strong>Geospatial APIs</strong>: Two major APIs in this family have been included: the Spatial Join and KNN. The former API inserts the columns from one feature table to another based on location or proximity, while the latter is often used to find the K nearest neighbors around the center point. They are both vital for spatial analysis and spatial data mining.</li>
 </ul>
+<p>There are some known issues for this release.</p>
+<ul class="simple">
+<li>Log Analyer in L2 demo fails hardware build with 2022.1 Vitis. Please use 2021.2 Vitis for it,</li>
+</ul>
 </div>
 <div class="section" id="vitis-data-compression-library">
 	<h2>Vitis Data Compression Library<a class="headerlink" href="#vitis-data-compression-library" title="Permalink to this headline">¶</a></h2>
