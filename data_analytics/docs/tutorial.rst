@@ -81,8 +81,8 @@ Command to Run L3 cases
 
     cd L3/tests/vitis_case_folder
     
-    # build and run one of the following using U2 platform
-    make run TARGET=sw_emu DEVICE=/path/to/xilinx_u2_gen3x4_xdma_gc_2_202110_1.xpfm
+    # build and run one of the following using u200 platform
+    make run TARGET=sw_emu DEVICE=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
     
     # delete generated files
     make cleanall

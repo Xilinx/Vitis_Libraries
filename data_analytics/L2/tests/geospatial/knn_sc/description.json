@@ -10,12 +10,10 @@
         "zc"
     ], 
     "platform_properties": {
-        "xilinx_u2_gen3x4_xdma_gc_2_202110_1": {
+        "u50": {
             "v++": {
                 "compiler": {
-                    "clflags": [
-                        "-DUSE_U2"
-                    ]
+                    "clflags": []
                 }
             }
         }
