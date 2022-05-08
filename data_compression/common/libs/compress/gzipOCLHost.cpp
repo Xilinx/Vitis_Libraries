@@ -1441,7 +1441,7 @@ size_t gzipOCLHost::deflate_buffer(
                                                                    &(buffer->rd_event)));
             cl_int err;
             OCL_CHECK(err, err = buffer->rd_event.setCallback(CL_COMPLETE, event_compress_cb, (void*)buffer));
-            input_size = 0;
+            // input_size = 0;
             actionDone = true;
         }
     }
