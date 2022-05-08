@@ -209,13 +209,18 @@ gzipOCLHost::gzipOCLHost(const std::string& binaryFileName,
                          enum design_flow dflow,
                          const int bank_id) {
     m_cdflow = cd_flow;
+    m_zlibFlow = (enum design_flow)dflow;
     m_device = device;
     m_pending = 0;
     m_context = context;
     m_program = program;
     m_islibz = true;
     m_isSlaveBridge = sb_opt;
-    if (m_zlibFlow) m_checksum = 1;
+    if (m_zlibFlow) {
+        m_checksum = 1;
+        m_isZlib = true;
+    }
+
     if (m_cdflow == COMP_ONLY)
         m_kidx = 1;
     else
