@@ -137,8 +137,8 @@ void zlib_compress(const std::string& inFile_name) {
         std::cout << "#Iterations " << num_iter;
         std::cout << ", Input File: " << inFile_name;
         std::cout << ", Output File: " << outFile_name << std::endl;
-        std::cout << "Input Size: " << input_size / MiB << "MiB ";
-        std::cout << " Compressed Size: " << compress_len / MiB << "MiB ";
+        std::cout << "Input Size: " << std::fixed << std::setprecision(2) << (float)input_size / MiB << "MiB ";
+        std::cout << " Compressed Size: " << std::fixed << std::setprecision(2) << (float)compress_len / MiB << "MiB ";
         std::cout << " CR: " << std::fixed << std::setprecision(2) << (float)input_size / compress_len;
         std::cout << " PID: " << getpid();
         std::cout << " PPID: " << getppid();
