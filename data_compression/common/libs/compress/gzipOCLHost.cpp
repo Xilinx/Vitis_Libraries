@@ -1350,9 +1350,7 @@ size_t gzipOCLHost::deflate_buffer(
     cl_int err;
     std::string compress_kname;
     if (m_compressFullKernel == NULL) {
-        // Random: Use kernel name directly and let XRT
-        // decide the CU connection based on HBM bank
-        compress_kname = compress_kernel_names[1];
+        compress_kname = compress_kernel_names[2];
         OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
         initialize_checksum = true;
     }
