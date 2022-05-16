@@ -83,7 +83,7 @@ int main() {
     bool res = true;
     for (int i = 0; i < rows; i++) {
         eRetStrm.read();
-        res = diff(retStrm[0].read(), golden[i]);
+        res &= diff(retStrm[0].read(), golden[i]);
     }
     eRetStrm.read();
 
