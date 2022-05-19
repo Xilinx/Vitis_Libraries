@@ -28,7 +28,9 @@
 #include "data_engine_sc.hpp"
 
 namespace sssd_engine {
-/********** SmartSSD Software API definition **********/
+/**
+ *@brief class to handle a specific SSD device
+ */
 class SmartSSDCache {
    private:
     /**
@@ -59,7 +61,7 @@ class SmartSSDCache {
     FILE* log_ptr;
 
     /**
-     * get the file size
+     * @brief get the file size
      * @param file_path file path
      */
     inline size_t getFileSize(std::string file_path) {
@@ -72,7 +74,8 @@ class SmartSSDCache {
     }
 
     /**
-     * Check basename and get the disk id based on mount info
+     * @brief Check basename and get the disk id based on mount info
+     * @param file_path file path
      */
     int32_t getDiskID(const std::string& file_path);
 
@@ -146,7 +149,7 @@ class SmartSSDCache {
      *
      * @param value values
      * @param isnull is null flags
-     * @pram hash hash value
+     * @param hash hash value
      * @param sd the schema
      *
      */

@@ -29,10 +29,6 @@ The Data Analytics Library has the following addition in the 2022.1 release:
 * **csv scanner** could be used to accelerate the extract, transform and load process. It integrates GZIP decompression, CSV parser, filter module together to make them work in parallel. ETL accelerator could work together with database to run queries on large size of semi-structured and unstructured data.
 * **Geospatial APIs.** Two major APIs in this family has been included: the Spatial Join and KNN. The former API inserts the columns from one feature table to another based on location or proximity, while the latter is often used to find the K nearest neighbors around the center point. They are both vital for spatial analysis and spatial data mining.
 
-There are some known issues for this release.
-
-* Log Analyer in L2 demo fails hardware build with 2022.1 Vitis. Please use 2021.2 Vitis for it,
-
 2021.2
 ------
 

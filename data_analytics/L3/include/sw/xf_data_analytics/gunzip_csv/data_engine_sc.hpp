@@ -43,15 +43,17 @@ struct FileDescriptors {
     int* fd;
 };
 
-/* class to manage kernels on single device
+/**
+ * @brief class to manage kernels on single device
  */
 class DataEngine {
    private:
-    /*
-     *@brief execute kernel
+    /**
+     * @brief execute kernel
      * @param file_path file path.
      * @param size size of input file in bytes
-     * @param cfg pointer to configuration buffer.
+     * @param cfg pointer to configuration buffer
+     * @return object that contains the scan error code and poninter to result buffer
      */
     RetObj run_all(std::string file_path, size_t size, uint64_t* cfg);
 
@@ -72,8 +74,6 @@ class DataEngine {
     uint64_t* dummy_cfg;
     /**
      * @brief execute data engine.
-     *
-     * @param file_path path of xclbin.
      */
     void run();
 
@@ -94,7 +94,7 @@ class DataEngine {
    public:
     /**
      * @brief constructor of data engine.
-     * context, program, command queue are created and ready after fpga init.
+     * context, program, command queue are created and ready after FPGA init
      *
      * @param t_id targeted device id.
      * @param _csvInBufPool input CSV buffer pool
@@ -126,7 +126,7 @@ class DataEngine {
     /**
      * @brief push request to queue
      *
-     * @param prom promise to synchronize status of exection
+     * @param prom promise to synchronize status of execution
      * @param file_path file path
      * @param size file size
      * @param cfg pointer to configuration buffer

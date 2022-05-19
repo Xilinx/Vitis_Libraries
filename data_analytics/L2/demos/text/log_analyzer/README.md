@@ -88,8 +88,3 @@ note:
 1. The each line in the input log must has less than 4090 characters.
 2. The baseline version is a single thread program.
 
-
-## Known Issues
-
-* This case fails hardware build with 2022.1 Vitis. Please use 2021.2 Vitis for it,
-

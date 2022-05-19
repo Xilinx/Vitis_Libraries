@@ -36,6 +36,12 @@ Kernel Templates in ``xf::data_analytics::text``
 .. include:: ../rst_L2/namespace_xf_data_analytics_text.rst
    :start-after: FunctionSection
 
+Kernel Templates in ``xf::data_analytics::dataframe``
+*****************************************************
+
+.. include:: ../rst_L2/namespace_xf_data_analytics_dataframe.rst
+   :start-after: FunctionSection
+
 Kernel Templates in ``xf::data_analytics::geospatial``
 ******************************************************
 

@@ -24,6 +24,7 @@
 
 INPUT                  = ../L2/include/hw/xf_data_analytics/classification \
                          ../L2/include/hw/xf_data_analytics/clustering \
+                         ../L2/include/hw/xf_data_analytics/dataframe \
                          ../L2/include/hw/xf_data_analytics/regression \
                          ../L2/include/hw/xf_data_analytics/text \
                          ../L2/include/hw/xf_data_analytics/geospatial

@@ -53,11 +53,11 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := samsung_U2
+PLATFORM := xilinx_u2_gen3x4_xdma_gc_2_202110_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  samsung_U2
+PLATFORM_ALLOWLIST +=  xilinx_u2_gen3x4_xdma_gc_2_202110_1
 PLATFORM_BLOCKLIST +=  zc
 
 GCC_INTOOL := 8.3.0

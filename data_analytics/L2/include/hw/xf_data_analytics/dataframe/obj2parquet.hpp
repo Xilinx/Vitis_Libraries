@@ -18,11 +18,10 @@
 #define _XF_DATA_ANALYTICS_ETL_HPP_
 /**
  * @brief From DataFrame to Parquet
- * \rst
- * \endrst
  *
- * @param
- * TBD
+ * @param ddr_obj pointer to DDR buffer contains input objects
+ * @param schema schema
+ * @param ddr_parquet pointer to DDR buffer contains output parquet results
  *
  */
 extern "C" void ObjToParquet(ap_uint<88> ddr_obj[1 << 25], ap_uint<8> schema[16], ap_uint<64> ddr_parquet[1 << 25]);

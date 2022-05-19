@@ -109,11 +109,6 @@ Target audience of L2 API are users who has certain understanding of HLS and pro
 (4) Get accurate kernel resources and clock.
 (5) Analyze kernel's timing performance and throughput.
 
-.. image:: /images/12pipeline_gzip_csv_structure.png
-   :alt: Kernel Structure
-   :scale: 50%
-   :align: center
-
 Command to Run L2 cases
 -------------------------
 

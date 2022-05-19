@@ -23,4 +23,7 @@ Software Acceleration Classes
 
 .. include:: ../rst_L3/enum_xf_data_analytics_text_re_ErrCode.rst
 .. include:: ../rst_L3/class_xf_data_analytics_text_re_RegexEngine.rst
+.. include:: ../rst_L3/class_sssd_engine_DataEngineConfig.rst
+.. include:: ../rst_L3/class_sssd_engine_data_engine_sc_DataEngine.rst
+.. include:: ../rst_L3/class_sssd_engine_SmartSSDCache.rst
 

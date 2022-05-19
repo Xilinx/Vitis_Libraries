@@ -4,7 +4,7 @@
     "description": "A SystemCompiler example for Gunzip CSV parser acceleration.", 
     "flow": "vitis", 
     "platform_allowlist": [
-        "u2"
+        "u2_"
     ], 
     "platform_blocklist": [
         "zc"

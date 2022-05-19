@@ -152,9 +152,9 @@ VPP_FLAGS_reEngineKernel += --hls.clock 300000000:reEngineKernel
 VPP_FLAGS_GeoIP_kernel += --hls.clock 300000000:GeoIP_kernel
 VPP_FLAGS_WJ_kernel += --hls.clock 300000000:WJ_kernel
 ifneq ($(HOST_ARCH), x86)
-VPP_LDFLAGS_logAnalyzer += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_logAnalyzer += --clock.defaultFreqHz 250000000
 else
-VPP_LDFLAGS_logAnalyzer += --kernel_frequency 300
+VPP_LDFLAGS_logAnalyzer += --kernel_frequency 250
 endif
 VPP_LDFLAGS_logAnalyzer_temp := --config $(CUR_DIR)/conn_u200.cfg
 VPP_LDFLAGS_logAnalyzer += $(VPP_LDFLAGS_logAnalyzer_temp)
@@ -164,9 +164,9 @@ VPP_FLAGS_reEngineKernel += --hls.clock 300000000:reEngineKernel
 VPP_FLAGS_GeoIP_kernel += --hls.clock 300000000:GeoIP_kernel
 VPP_FLAGS_WJ_kernel += --hls.clock 300000000:WJ_kernel
 ifneq ($(HOST_ARCH), x86)
-VPP_LDFLAGS_logAnalyzer += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_logAnalyzer += --clock.defaultFreqHz 250000000
 else
-VPP_LDFLAGS_logAnalyzer += --kernel_frequency 300
+VPP_LDFLAGS_logAnalyzer += --kernel_frequency 250
 endif
 
 endif
@@ -367,3 +367,4 @@ cleanall: cleanh cleank
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
 
 clean: cleanh
+

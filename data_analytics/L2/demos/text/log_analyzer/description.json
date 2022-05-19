@@ -114,7 +114,7 @@
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 300,
+            "frequency": 250,
             "name": "logAnalyzer"
         }
     ],
@@ -143,6 +143,8 @@
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }
