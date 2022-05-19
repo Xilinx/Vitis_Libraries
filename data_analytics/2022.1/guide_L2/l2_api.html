@@ -281,6 +281,10 @@ function OptanonWrapper() { }
 <li class="toctree-l3"><a class="reference internal" href="#reengine">reEngine</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#kernel-templates-in-xf-data-analytics-dataframe">Kernel Templates in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::dataframe</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#csv-scanner">csv_scanner</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#kernel-templates-in-xf-data-analytics-geospatial">Kernel Templates in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::geospatial</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#knn">knn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#strtreetop">strtreeTop</a></li>
@@ -655,6 +659,45 @@ function OptanonWrapper() { }
 </tr>
 <tr class="row-even"><td>out_buff</td>
 <td>Output match results.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="kernel-templates-in-xf-data-analytics-dataframe">
+<h1>Kernel Templates in <code class="docutils literal notranslate"><span class="pre">xf::data_analytics::dataframe</span></code><a class="headerlink" href="#kernel-templates-in-xf-data-analytics-dataframe" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="csv-scanner">
+<span id="cid-xf-data-analytics-dataframe-csv-scanner"></span><span id="doxid-namespacexf-1-1data-analytics-1-1dataframe-1a7225fedd621f68a79e4d8ea6ad639267"></span><h2>csv_scanner<a class="headerlink" href="#csv-scanner" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;xf_data_analytics/dataframe/csv_scanner.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">csv_scanner</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">128</span><span class="o">&gt;*</span> <span class="n">csvBuf</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;*</span> <span class="n">firValue</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">szBuf</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">cfgBuf</span>
+    <span class="p">)</span>
+</pre>
+<p>csv scanner kernel</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>csvBuf</td>
+<td>input CSV files</td>
+</tr>
+<tr class="row-even"><td>firValue</td>
+<td>result buffer</td>
+</tr>
+<tr class="row-odd"><td>szBuf</td>
+<td>size of input block and pre-allocated size of output block</td>
+</tr>
+<tr class="row-even"><td>cfgBuf</td>
+<td>input configuration</td>
 </tr>
 </tbody>
 </table>

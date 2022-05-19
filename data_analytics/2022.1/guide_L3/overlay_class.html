@@ -75,7 +75,7 @@ function OptanonWrapper() { }
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Regular Expression Acceleration" href="re/get_start.html" />
+    <link rel="next" title="Regular Expression Acceleration" href="re_engine/get_start.html" />
     <link rel="prev" title="L3 Overlay User Guide" href="L3.html" /> 
 	</head>
 	<body>
@@ -282,9 +282,25 @@ function OptanonWrapper() { }
 <li class="toctree-l4"><a class="reference internal" href="#methods">Methods</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#class-sssd-engine-dataengineconfig">class sssd_engine::DataEngineConfig</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Methods</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="re/get_start.html">Regular Expression Acceleration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-sssd-engine-data-engine-sc-dataengine">class sssd_engine::data_engine_sc::DataEngine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-sssd-engine-smartssdcache">class sssd_engine::SmartSSDCache</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">Methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="re_engine/get_start.html">Regular Expression Acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_engine/get_start.html">CSV Scanner</a></li>
 </ul>
 </li>
 </ul>
@@ -600,6 +616,422 @@ function OptanonWrapper() { }
 </div>
 </div>
 </div>
+<div class="section" id="class-sssd-engine-dataengineconfig">
+<span id="cid-sssd-engine-dataengineconfig"></span><span id="doxid-classsssd-engine-1-1-data-engine-config"></span><span id="index-2"></span><h2>class sssd_engine::DataEngineConfig<a class="headerlink" href="#class-sssd-engine-dataengineconfig" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;data_engine_config.hpp&quot;</span>
+</pre>
+<div class="section" id="id5">
+<h3>Overview<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>generating configuration bits for CSV scanner kernel</p>
+<pre class="highlight overview-code-block literal-block">
+
+</pre>
+</div>
+<div class="section" id="id6">
+<h3>Methods<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="dataengineconfig">
+<span id="cid-sssd-engine-dataengineconfig-dataengineconfig"></span><span id="doxid-classsssd-engine-1-1-data-engine-config-1abd8d107bcf5af1d41bafed841825232f"></span><h4>DataEngineConfig<a class="headerlink" href="#dataengineconfig" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">DataEngineConfig</span> <span class="p">()</span>
+</pre>
+<p>default constructor</p>
+</div>
+<div class="section" id="genconfigbits">
+<span id="cid-sssd-engine-dataengineconfig-genconfigbits"></span><span id="doxid-classsssd-engine-1-1-data-engine-config-1a85fffdbcd93be62331526d78f5a34927"></span><h4>genConfigBits<a class="headerlink" href="#genconfigbits" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<a class="reference internal" href="../rst_L3/enum_ErrorCode.html#doxid-sssd-api-8h-1a59e56af19e754a6aa26a612ebf91d05f"><span class="std std-ref">ErrorCode</span></a><span></span> <span class="n">genConfigBits</span> <span class="p">(</span>
+    <span class="kt">bool</span> <span class="n">gzip</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_L3/struct_sssd_scandesc_t.html#doxid-structsssd-scandesc-t"><span class="std std-ref">sssd_scandesc_t</span></a><span></span><span class="o">*</span> <span class="n">sd</span><span class="p">,</span>
+    <span class="kt">uint64_t</span><span class="o">*</span> <span class="n">cfg</span>
+    <span class="p">)</span>
+</pre>
+<p>generate configuration bits for kernel</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>gzip</td>
+<td>file under gzip or not</td>
+</tr>
+<tr class="row-even"><td>sd</td>
+<td>schema for describing the table</td>
+</tr>
+<tr class="row-odd"><td>cfg</td>
+<td>kernel configurations</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>error code</p>
+</div>
+</div>
+</div>
+<div class="section" id="class-sssd-engine-data-engine-sc-dataengine">
+<span id="cid-sssd-engine-data-engine-sc-dataengine"></span><span id="doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine"></span><span id="index-3"></span><h2>class sssd_engine::data_engine_sc::DataEngine<a class="headerlink" href="#class-sssd-engine-data-engine-sc-dataengine" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;data_engine_sc.hpp&quot;</span>
+</pre>
+<div class="section" id="id7">
+<h3>Overview<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>class to manage kernels on single device</p>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="c1">// fields</span>
+
+<span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <a class="reference internal" href="../rst_L3/class_sssd_engine_data_engine_sc_DataEngine.html#doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine-1ada123105f7bd82232c627c1709ecf6fc"><span class="std std-ref">run_t</span></a>
+</pre>
+<div class="section" id="fields">
+<h4>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block" id="cid-sssd-engine-data-engine-sc-dataengine-run-t">
+<span id="doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine-1ada123105f7bd82232c627c1709ecf6fc"></span><span></span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">run_t</span>
+</pre>
+<p>thread for run data engine;</p>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>Methods<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="dataengine">
+<span id="cid-sssd-engine-data-engine-sc-dataengine-dataengine"></span><span id="doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine-1a53df8e9ef06c49b869afab9ffea18057"></span><h4>DataEngine<a class="headerlink" href="#dataengine" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">DataEngine</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">t_id</span><span class="p">,</span>
+    <span class="n">VPP_BP</span><span class="o">&amp;</span> <span class="n">_csvInBufPool</span><span class="p">,</span>
+    <span class="n">VPP_BP</span><span class="o">&amp;</span> <span class="n">_cfgInBufPool</span><span class="p">,</span>
+    <span class="n">VPP_BP</span><span class="o">&amp;</span> <span class="n">_outBufPool</span><span class="p">,</span>
+    <span class="n">VPP_BP</span><span class="o">&amp;</span> <span class="n">_metaBufPool</span><span class="p">,</span>
+    <span class="n">VPP_CC</span><span class="o">*</span> <span class="n">_cuCluster</span>
+    <span class="p">)</span>
+</pre>
+<p>constructor of data engine. context, program, command queue are created and ready after FPGA init</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>t_id</td>
+<td>targeted device id.</td>
+</tr>
+<tr class="row-even"><td>_csvInBufPool</td>
+<td>input CSV buffer pool</td>
+</tr>
+<tr class="row-odd"><td>_cfgInBufPool</td>
+<td>input configuration buffer pool</td>
+</tr>
+<tr class="row-even"><td>_outBufPool</td>
+<td>output result buffer pool</td>
+</tr>
+<tr class="row-odd"><td>_metaBufPool</td>
+<td>output meta buffer pool</td>
+</tr>
+<tr class="row-even"><td>_cuCluster</td>
+<td>CU clusters</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id9">
+<span id="doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine-1a98c6161a826dd772d7cad35909045cdd"></span><span id="id10"></span><h4>~DataEngine<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="o">~</span><span class="n">DataEngine</span> <span class="p">()</span>
+</pre>
+<p>default deconstructor</p>
+</div>
+<div class="section" id="pushrequest">
+<span id="cid-sssd-engine-data-engine-sc-dataengine-pushrequest"></span><span id="doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine-1a679029b67a7ea9b7e6d150b33654472b"></span><h4>pushRequest<a class="headerlink" href="#pushrequest" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">pushRequest</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">promise</span> <span class="o">&lt;</span><a class="reference internal" href="../rst_L3/struct_RetObj.html#doxid-struct-ret-obj"><span class="std std-ref">RetObj</span></a><span></span><span class="o">&gt;</span> <span class="n">prom</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">file_path</span><span class="p">,</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span>
+    <span class="kt">uint64_t</span><span class="o">*</span> <span class="n">cfg</span>
+    <span class="p">)</span>
+</pre>
+<p>push request to queue</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>prom</td>
+<td>promise to synchronize status of execution</td>
+</tr>
+<tr class="row-even"><td>file_path</td>
+<td>file path</td>
+</tr>
+<tr class="row-odd"><td>size</td>
+<td>file size</td>
+</tr>
+<tr class="row-even"><td>cfg</td>
+<td>pointer to configuration buffer</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="release">
+<span id="cid-sssd-engine-data-engine-sc-dataengine-release"></span><span id="doxid-classsssd-engine-1-1data-engine-sc-1-1-data-engine-1a6a3bcc03ea31557f0433e86ac060b801"></span><h4>release<a class="headerlink" href="#release" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">release</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">buf</span><span class="p">)</span>
+</pre>
+<p>release buffer</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>buf</td>
+<td>buffer to be released</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="class-sssd-engine-smartssdcache">
+<span id="cid-sssd-engine-smartssdcache"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache"></span><span id="index-4"></span><h2>class sssd_engine::SmartSSDCache<a class="headerlink" href="#class-sssd-engine-smartssdcache" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<pre class="highlight overview-code-block literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;smart_ssd_cache.hpp&quot;</span>
+</pre>
+<div class="section" id="id11">
+<h3>Overview<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<p>class to handle a specific SSD device</p>
+<pre class="highlight overview-code-block literal-block">
+
+</pre>
+</div>
+<div class="section" id="id12">
+<h3>Methods<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="getcardnum">
+<span id="cid-sssd-engine-smartssdcache-getcardnum"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1afc4baedf7fdb9c760d3edbe5f096edfa"></span><h4>getCardNum<a class="headerlink" href="#getcardnum" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">int</span> <span class="n">getCardNum</span> <span class="p">()</span>
+</pre>
+<p>get number of cards</p>
+<p class="rubric">Returns:</p>
+<p>number of cards</p>
+</div>
+<div class="section" id="smartssdcache">
+<span id="cid-sssd-engine-smartssdcache-smartssdcache"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1a350e3f48bf33fcf539e939ac83c9a3d1"></span><h4>SmartSSDCache<a class="headerlink" href="#smartssdcache" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">SmartSSDCache</span> <span class="p">(</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">xclbin_path</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">card_num</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_L3/struct_sssd_info_t.html#doxid-structsssd-info-t"><span class="std std-ref">sssd_info_t</span></a><span></span><span class="o">*</span> <span class="n">disks</span><span class="p">,</span>
+    <span class="kt">FILE</span><span class="o">*</span> <span class="n">log</span>
+    <span class="p">)</span>
+</pre>
+<p>default constructor, instantiate data engine</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>xclbin_path</td>
+<td>path of xclbin</td>
+</tr>
+<tr class="row-even"><td>card_num</td>
+<td>number of availabe SmartSSD cards</td>
+</tr>
+<tr class="row-odd"><td>disks</td>
+<td>information of the SSDs</td>
+</tr>
+<tr class="row-even"><td>log</td>
+<td>file handler for dumping the logs</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id13">
+<span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1ad1fab994cbbcaca1fbf06e2e3b92bbba"></span><span id="id14"></span><h4>~SmartSSDCache<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="o">~</span><span class="n">SmartSSDCache</span> <span class="p">()</span>
+</pre>
+<p>default deconstructor</p>
+</div>
+<div class="section" id="addfile">
+<span id="cid-sssd-engine-smartssdcache-addfile"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1ae977a7e4418886533b2efc4895b611e3"></span><h4>addFile<a class="headerlink" href="#addfile" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<a class="reference internal" href="../rst_L3/enum_ErrorCode.html#doxid-sssd-api-8h-1a59e56af19e754a6aa26a612ebf91d05f"><span class="std std-ref">ErrorCode</span></a><span></span> <span class="n">addFile</span> <span class="p">(</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span> <span class="o">&lt;</span><span class="kt">char</span><span class="p">[]</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">,</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">filename</span>
+    <span class="p">)</span>
+</pre>
+<p>store file to managed SmartSSD cards. Copy data from CPU memory to SSD cards</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>data</td>
+<td>pointer to file content in memory. Before return, the block of storage will be released</td>
+</tr>
+<tr class="row-even"><td>size</td>
+<td>file size</td>
+</tr>
+<tr class="row-odd"><td>filename</td>
+<td>file to store</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>success or fail status</p>
+</div>
+<div class="section" id="scanfile">
+<span id="cid-sssd-engine-smartssdcache-scanfile"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1adc1f07b35414cd4de1fb69c88810decc"></span><h4>scanFile<a class="headerlink" href="#scanfile" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">char</span><span class="o">*</span> <span class="n">scanFile</span> <span class="p">(</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">fname</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_L3/struct_sssd_scandesc_t.html#doxid-structsssd-scandesc-t"><span class="std std-ref">sssd_scandesc_t</span></a><span></span><span class="o">*</span> <span class="n">sd</span><span class="p">,</span>
+    <a class="reference internal" href="../rst_L3/enum_ErrorCode.html#doxid-sssd-api-8h-1a59e56af19e754a6aa26a612ebf91d05f"><span class="std std-ref">ErrorCode</span></a><span></span><span class="o">&amp;</span> <span class="n">err</span>
+    <span class="p">)</span>
+</pre>
+<p>scan files from managed SmartSSD cards.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>fname</td>
+<td>file name;</td>
+</tr>
+<tr class="row-even"><td>sd</td>
+<td>pointer to configuration including schema, projection and filter conditions filenames.</td>
+</tr>
+<tr class="row-odd"><td>err</td>
+<td>return the status of exectution.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>pointer the selected row. It is stored in format defined by data type in schema.</p>
+</div>
+<div class="section" id="listfiles">
+<span id="cid-sssd-engine-smartssdcache-listfiles"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1a8a0ee6e1a8278d6b38a062b1c8bb807c"></span><h4>listFiles<a class="headerlink" href="#listfiles" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<a class="reference internal" href="../rst_L3/enum_ErrorCode.html#doxid-sssd-api-8h-1a59e56af19e754a6aa26a612ebf91d05f"><span class="std std-ref">ErrorCode</span></a><span></span> <span class="n">listFiles</span> <span class="p">(</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">path_pattern</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">file_list</span>
+    <span class="p">)</span>
+</pre>
+<p>list all the file name that matche the path_pattern</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>path_pattern</td>
+<td>specify the path_pattern for regex</td>
+</tr>
+<tr class="row-even"><td>file_list</td>
+<td>store the file name that matched the path_pattern</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Returns:</p>
+<p>fail/success</p>
+</div>
+<div class="section" id="print-input">
+<span id="cid-sssd-engine-smartssdcache-print-input"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1a2fe5bd711ea9c73e7f76bf9046bae6ff"></span><h4>print_input<a class="headerlink" href="#print-input" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">print_input</span> <span class="p">(</span><span class="k">const</span> <a class="reference internal" href="../rst_L3/struct_sssd_scandesc_t.html#doxid-structsssd-scandesc-t"><span class="std std-ref">sssd_scandesc_t</span></a><span></span><span class="o">*</span> <span class="n">sd</span><span class="p">)</span>
+</pre>
+<p>print input information</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>sd</td>
+<td>the input schema</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="print-output">
+<span id="cid-sssd-engine-smartssdcache-print-output"></span><span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1a40b180a5049d945e1b62a7cf9781a6de"></span><h4>print_output<a class="headerlink" href="#print-output" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">print_output</span> <span class="p">(</span>
+    <span class="k">const</span> <span class="kt">int64_t</span> <span class="n">value</span> <span class="p">[],</span>
+    <span class="k">const</span> <span class="kt">bool</span> <span class="n">isnull</span> <span class="p">[],</span>
+    <span class="kt">int32_t</span> <span class="n">hash</span><span class="p">,</span>
+    <span class="k">const</span> <a class="reference internal" href="../rst_L3/struct_sssd_scandesc_t.html#doxid-structsssd-scandesc-t"><span class="std std-ref">sssd_scandesc_t</span></a><span></span><span class="o">*</span> <span class="n">sd</span>
+    <span class="p">)</span>
+</pre>
+<p>print output information</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>value</td>
+<td>values</td>
+</tr>
+<tr class="row-even"><td>isnull</td>
+<td>is null flags</td>
+</tr>
+<tr class="row-odd"><td>hash</td>
+<td>hash value</td>
+</tr>
+<tr class="row-even"><td>sd</td>
+<td>the schema</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cid-sssd-engine-smartssdcache-release">
+<span id="doxid-classsssd-engine-1-1-smart-s-s-d-cache-1aafcf48ae08852a5d89591281b56fb175"></span><span id="id15"></span><h4>release<a class="headerlink" href="#cid-sssd-engine-smartssdcache-release" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">release</span> <span class="p">(</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">file_path</span><span class="p">,</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">buf_ptr</span>
+    <span class="p">)</span>
+</pre>
+<p>release specified buffer</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>file_path</td>
+<td>path to the file</td>
+</tr>
+<tr class="row-even"><td>buf_ptr</td>
+<td>buffer to be released</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 </div>
 
 
@@ -618,7 +1050,7 @@ function OptanonWrapper() { }
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="re/get_start.html" class="btn btn-neutral float-right" title="Regular Expression Acceleration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="re_engine/get_start.html" class="btn btn-neutral float-right" title="Regular Expression Acceleration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="L3.html" class="btn btn-neutral float-left" title="L3 Overlay User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
