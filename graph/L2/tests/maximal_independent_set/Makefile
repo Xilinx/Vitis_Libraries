@@ -34,9 +34,15 @@ help::
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
-	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
+	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
+	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
+	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -107,14 +113,15 @@ ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
 
-ifeq (,$(findstring opencv,$(CXXFLAGS)))
-CXXFLAGS += $(XRT_CXXFLAGS)
-endif
-
 #Inclue Required Host Source Files
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/maximal_independent_set/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/maximal_independent_set/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -O3 
+
+# workaround for opencv
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
+endif
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
@@ -179,11 +186,6 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -217,21 +219,21 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-vck190_dfx_hw := false
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
+dfx_hw := false
+$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-ifeq ($(findstring vck190_base_dfx, $(PLATFORM_NAME)),vck190_base_dfx)
+ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
 ifeq ($(TARGET),hw)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
-vck190_dfx_hw := true
+dfx_hw := true
 endif
 endif
-ifeq ($(vck190_dfx_hw), false)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+ifeq ($(dfx_hw), false)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 
@@ -278,12 +280,12 @@ endif
 #hw
 ifeq ($(TARGET), hw)
 ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
-ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+ifeq (,$(wildcard $(BUILD_DIR)/mis_kernel.awsxclbin))
 	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
 else
-	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
+	$(ECHO) "Running HW using generated .awsxclbin"
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	$(EXE_FILE) $(HOST_ARGS)
+	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
 	
 endif
 else ifeq ($(HOST_ARCH), x86)
