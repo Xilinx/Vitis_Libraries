@@ -81,9 +81,14 @@ typedef ap_uint<14> HCODE_T;
 // to decode 420 800*800 need 50*50*4 =10000
 // to decode 444 800*800 need 100*100*3 =30000
 #define MAXCMP_BC (1036800)
+// ------------------------------------------------------------
+#define MAX_NUM_BLOCK88_W (512)
+#define MAX_NUM_BLOCK88_H (512)
+#define MAX_NUM_BLOCK88 (MAX_NUM_BLOCK88_W * MAX_NUM_BLOCK88_H)
 
 namespace xf {
 namespace codec {
+
 // ------------------------------------------------------------
 // input width AXI_WIDTH = 16, means the decoder cloud process 16bits per cycle, in max speed
 // output width OUT_WIDTH = 64,means the decoder meigrate 8 Bytes of YUV per cycle, a faster design to be explore.
@@ -91,7 +96,10 @@ namespace codec {
 #define OUT_WIDTH (64)
 //
 enum COLOR_FORMAT { C400 = 0, C420, C422, C444 };
-//
+
+// ------------------------------------------------------------
+/// all basic information for image (size, idct, tables)
+/// maybe used by the next process like lepton, CNN, ...
 struct bas_info {
     COLOR_FORMAT format;
     uint16_t axi_width[MAX_NUM_COLOR];
@@ -112,6 +120,24 @@ struct bas_info {
     uint8_t hls_mbs[MAX_NUM_COLOR];
     uint32_t all_blocks;
 };
+// ------------------------------------------------------------
+/// image size information for jpeg mcu
+struct img_info {
+    uint8_t hls_cs_cmpc;
+    uint32_t hls_mcuc; // the total mcu
+    uint16_t hls_mcuh; // the horizontal mcu
+    uint16_t hls_mcuv;
+};
+// ------------------------------------------------------------
+/// component size information for jpeg mcu
+struct cmp_info {
+    int sfv; // sample factor vertical
+    int sfh; // sample factor horizontal
+    int mbs; // blocks in mcu
+    int bcv; // block count vertical (interleaved)
+    int bch; // block count horizontal (interleaved)
+    int bc;  // block count (all) (interleaved)
+};
 
 // for IQ IDCT
 //#ifndef __SYNTHESIS__
@@ -122,9 +148,12 @@ typedef uint8_t idct_out_t;
 // typedef ap_uint<8> idct_out_t;
 //#endif
 
-#define MAX_NUM_BLOCK88_W (512)
-#define MAX_NUM_BLOCK88_H (512)
-#define MAX_NUM_BLOCK88 (MAX_NUM_BLOCK88_W * MAX_NUM_BLOCK88_H)
+} // namespace codec
+} // namespace xf
+
+namespace xf {
+namespace codec {
+namespace details {
 //
 const static uint8_t hls_jpeg_zigzag_to_raster[64] = {0,  1,  8,  16, 9,  2,  3,  10, 17, 24, 32, 25, 18, 11, 4,  5,
                                                       12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6,  7,  14, 21, 28,
@@ -138,15 +167,6 @@ const short hls_icos_base_8192_scaled[64] = {
     8192,   6436,  -11363, 2260,  9633, -9633, -2260,  11363,  -6436, 4433,  -10703, 10703, -4433,
     -4433,  10703, -10703, 4433,  2260, -6436, 9633,   -11363, 11363, -9633, 6436,   -2260,
 };
-
-// ------------------------------------------------------------
-
-} // namespace codec
-} // namespace xf
-
-namespace xf {
-namespace codec {
-
 // ------------------------------------------------------------
 struct hls_huff_DHT {
     unsigned short tbl1[2][CMPhuff][1 << DHT1];
@@ -165,22 +185,9 @@ struct sos_data {
     bool rst; //
     bool end_sos;
 };
+
 // ------------------------------------------------------------
-struct img_info {
-    uint8_t hls_cs_cmpc;
-    uint32_t hls_mcuc; // the total mcu
-    uint16_t hls_mcuh; // the horizontal mcu
-    uint16_t hls_mcuv;
-};
-// ------------------------------------------------------------
-struct cmp_info {
-    int sfv; // sample factor vertical
-    int sfh; // sample factor horizontal
-    int mbs; // blocks in mcu
-    int bcv; // block count vertical (interleaved)
-    int bch; // block count horizontal (interleaved)
-    int bc;  // block count (all) (interleaved)
-};
+} // namespace details
 } // namespace codec
 } // namespace xf
 

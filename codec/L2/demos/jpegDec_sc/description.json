@@ -1,0 +1,133 @@
+{
+    "gui": false,
+    "name": "Xilinx JPEG Decoder (SC) Test", 
+    "description": "This example is a SystemCompiler example for decoder supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions", 
+    "flow": "vitis", 
+    "platform_allowlist": [
+        "u50",
+        "u280"
+    ], 
+    "platform_blocklist": [
+        "zc"
+    ],
+    "platform_properties": {
+        "u50": {
+	    "host": {
+	        "compiler": {
+		    "symbols": [
+		        "USE_HBM"
+		    ]
+		}
+	    }
+	},
+        "u280": {
+	    "host": {
+	        "compiler": {
+		    "symbols": [
+		        "USE_HBM"
+		    ]
+		}
+	    }
+	}
+    },
+    "launch": [
+        {
+            "cmd_args": " -JPEGFile LIB_DIR/L2/demos/jpegDec/images/t0.jpg", 
+            "name": "generic launch for all flows",
+            "ld_library_path": [
+                          "$(LD_LIBRARY_PATH)",
+                          "$(XILINX_XRT)/lib"
+                               ] 
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/demos/jpegDec_sc/host/test_decoder.cpp", 
+                "LIB_DIR/L2/demos/jpegDec_sc/kernel/kernelJpegDecoder.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/include/hw/jpegDec", 
+                "LIB_DIR/L2/demos/jpegDec_sc/host", 
+                "LIB_DIR/L2/demos/jpegDec_sc/kernel", 
+                "LIB_DIR/../utils/L1/include"
+            ], 
+            "options": "-O3 -D KERNEL0 -B/usr/lib/x86_64-linux-gnu"
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/include/hw/jpegDec", 
+                "LIB_DIR/../utils/L1/include", 
+                "LIB_DIR/L2/demos/jpegDec_sc/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/demos/jpegDec_sc/kernel/kernelJpegDecoder.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D KERNEL0", 
+                    "name": "kernelJpegDecoder",
+		    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "JDK",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "jpeg_pointer",
+                                    "memory": "HBM[0]"
+                                },
+				{
+                                    "name": "yuv_mcu_pointer",
+                                    "memory": "HBM[1]"
+                                },
+				{
+                                    "name": "infos",
+                                    "memory": "HBM[2]"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "JDK"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 40960, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 1600, 
+                    "vitis_hw_emu": 400, 
+                    "vitis_sw_emu": 120, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

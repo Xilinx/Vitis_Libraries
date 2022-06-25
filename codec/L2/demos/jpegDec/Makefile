@@ -142,7 +142,7 @@ LIBRARY_PATH := $(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-VPP_FLAGS +=  --config $(CUR_DIR)/conn_u200.cfg -g 
+VPP_FLAGS +=   --config $(CUR_DIR)/conn_u200.cfg
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/hw/jpegDec -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L2/demos/jpegDec/kernel
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))

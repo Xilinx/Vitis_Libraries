@@ -747,8 +747,8 @@ inline void kernelJpegDecoderTop(ap_uint<AXI_WIDTH>* jpeg_pointer,
 
     //for reset of the decoder
     uint32_t rst_cnt;
-    int rtn;
-    int rtn2;
+    int rtn = 0;
+    int rtn2 = 0;
 
     //tables
 	uint8_t 						   q_tables[2][8][8];

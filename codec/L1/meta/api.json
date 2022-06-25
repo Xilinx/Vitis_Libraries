@@ -29,43 +29,38 @@
                         "type": "const int"
                     },
                     {
-                        "name": "img_info",
+                        "name": null,
                         "direction": "",
-                        "type": "xf::codec::img_info&"
+                        "type": ""
                     },
                     {
-                        "name": "hls_cmpnfo[MAX_NUM_COLOR]",
+                        "name": null,
                         "direction": "",
-                        "type": "xf::codec::hls_compInfo"
+                        "type": "*pout"
                     },
                     {
                         "name": "block_strm",
                         "direction": "",
-                        "type": "hls::stream<ap_uint<24> >&"
+                        "type": "*pout"
                     },
                     {
                         "name": "rtn",
                         "direction": "",
-                        "type": "int&"
+                        "type": "*pout"
                     },
                     {
                         "name": "rtn2",
                         "direction": "",
-                        "type": "bool&"
-                    },
-                    {
-			"name": "pout",
-                        "direction": "",
-                        "type": "xf::codec::decOutput*"
+                        "type": "*pout"
                     }
                 ]
             }
         },
         {
-            "api_name": "xf::codec::top_order_tokenize",
+            "api_name": "top_order_tokenize",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::codec::top_order_tokenize",
+                "api_name": "top_order_tokenize",
                 "display_name": "top_order_tokenize",
                 "brief": "JXL order_tokenize case",
                 "target_domain": "",
@@ -73,7 +68,7 @@
                     "topOrderTokenize.hpp"
                 ],
                 "search_paths": [
-                    "/L1/include/"
+                    "/L1/tests/jxlEnc/order_tokenize/kernel"
                 ],
                 "instance": "function",
                 "parameters": [],
