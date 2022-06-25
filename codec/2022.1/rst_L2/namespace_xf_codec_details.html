@@ -74,7 +74,7 @@ function OptanonWrapper() { }
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="enum xf::codec::COLOR_FORMAT" href="enum_xf_codec_COLOR_FORMAT.html" />
+    <link rel="next" title="struct xf::codec::details::hls_huff_DHT" href="struct_xf_codec_details_hls_huff_DHT.html" />
     <link rel="prev" title="namespace codec" href="namespace_xf_codec.html" /> 
 	</head>
 	<body>
@@ -257,6 +257,7 @@ function OptanonWrapper() { }
 <li class="toctree-l1"><a class="reference internal" href="../overview.html#license">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html#trademark-notice">Trademark Notice</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Vitis Codec Library Tutorial</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
 <ul>
@@ -347,8 +348,8 @@ function OptanonWrapper() { }
 <span id="cid-xf-codec-details"></span><span id="doxid-namespacexf-1-1codec-1-1details"></span><span id="index-0"></span><h1>namespace details<a class="headerlink" href="#namespace-details" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-details-huffman-decoder">
-<span id="doxid-namespacexf-1-1codec-1-1details-1afcae98ca0871dcfd1a200713d249de58"></span><span id="cid-xf-codec-details-pick-huff-data"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a6e5fe726869791db5cb4817b8123b98d"></span><span id="cid-xf-codec-details-setotherqtab"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a8e918cc25d2662975d9e2b8d3153b6de"></span><span id="cid-xf-codec-details-onebyte"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ac4350dad5eb2d12837bb2debbc659c5a"></span><span id="cid-xf-codec-details-readbytes"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ac99b00b9f893ee40e842e237a8426fe2"></span><span id="cid-xf-codec-details-copyinfo"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a13e9a6ce01c1e8493b5ca502d832af02"></span><span id="cid-xf-codec-details-mcu-reorder"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ac981d572a13341003293906932965a49"></span><span id="cid-xf-codec-details-jpeg-zigzag-to-raster"></span><span id="doxid-namespacexf-1-1codec-1-1details-1adde4fed6be8d0dda56f124727ad91e1c"></span><span id="cid-xf-codec-details-array-to-raster"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a4d3bd377094da5a9ad043781eebee994"></span><span id="cid-xf-codec-details-cache-mcu"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a5f03c0e968ce438cd39dd2d49df05d56"></span><span id="cid-xf-codec-details-hls-idct-v"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a6166da2d9d12d082b264d47e6c35ab33"></span><span id="cid-xf-codec-details-hls-idct-h"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a27a4285e52c59cdf6a795418679b6fed"></span><span id="cid-xf-codec-details-r2"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744ac8a05578ceecb37f219cd54b541dcd7e"></span><span id="cid-xf-codec-details-w3mw5"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a67d2e222da4417064ed7987228283391"></span><span id="cid-xf-codec-details-w3pw5"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a1f3e3720ceabae38853384ffed42ea04"></span><span id="cid-xf-codec-details-w2mw6"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a750bb9ec38bdd201a16d0a12522f1177"></span><span id="cid-xf-codec-details-w2pw6"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744ac30ee69ae3a11953c24aa8a7dbdc7050"></span><span id="cid-xf-codec-details-w1mw7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a843a616dc81c850a0f769e6f644cd395"></span><span id="cid-xf-codec-details-w1pw7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a73fe4039176fd74bd986c7168f710f77"></span><span id="cid-xf-codec-details-w7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a9efb97d6d23eb8c409be54c1109743a4"></span><span id="cid-xf-codec-details-w6"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744ad668739ebd8e542f29a9e6cefade854c"></span><span id="cid-xf-codec-details-w5"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a52b99fa78ba284e3842302e9f1fe8e7c"></span><span id="cid-xf-codec-details-w3"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a10081c6e1483df15bb03b5cc851aab21"></span><span id="cid-xf-codec-details-w2"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a17347d0b170fd02f193b1b00223ed999"></span><span id="cid-xf-codec-details-w1"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744aea101f580399631e3c69d5ddbd804607"></span><span id="cid-xf-codec-details-idctm-t"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a927013619c38708dcfe3c1df4d168cdd"></span><span id="cid-xf-codec-details-idct25-t"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a18e40729b8f081a2f1f0bbe343cc2dc3"></span><span></span><span class="c1">// typedefs</span>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-details-abs16">
+<span id="doxid-namespacexf-1-1codec-1-1details-1a4ee2e3848aba08d47b46667b242f5b80"></span><span id="cid-xf-codec-details-hls-compute-aavrg"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a15ec9772752a6965b690fe96d9aff256"></span><span id="cid-xf-codec-details-hls-get-num-nonzeros-context"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a15c967bfcfb3a9deef5a486eb3d5d6c4"></span><span id="cid-xf-codec-details-hls-color-index"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad972956be536b705406aec2dd6706b85"></span><span id="cid-xf-codec-details-collect"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a920f32485cf979ba7369dccd96a7d91a"></span><span id="cid-xf-codec-details-probability-look-up"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a197194978e14c837e80cd3d6c3bb3761"></span><span id="cid-xf-codec-details-init-hlsmodel"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a4efda94004312d7d3e9be463889e76cc"></span><span id="cid-xf-codec-details-push-bit-edge"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a1d426254f5dcc750a916f1aa68d23a22"></span><span id="cid-xf-codec-details-pre-serialize-tokens-edges"></span><span id="doxid-namespacexf-1-1codec-1-1details-1adfaf95dc7fb04f7d5aeed808400bd2fb"></span><span id="cid-xf-codec-details-hls-serialize-tokens-edges"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a77855f5aa47f5b5d6476251f42fef475"></span><span id="cid-xf-codec-details-push-bit-edge-0"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a865ff87e9ee146bcff8484e8dbe3bd96"></span><span id="cid-xf-codec-details-prepare-edge"></span><span id="doxid-namespacexf-1-1codec-1-1details-1aa1b89c382cec131b5245215bd99b92b1"></span><span id="cid-xf-codec-details-dc-push-bit-v2"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a1e2b74380bf2810193a5f5d666a5ed39"></span><span id="cid-xf-codec-details-dc-push-bit"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a99d1fcba712c7b4d872fe52070c86fe6"></span><span id="cid-xf-codec-details-pre-serialize-tokens-dc"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a24dc00dbe3bdb6a3780ba3f88f89ed7a"></span><span id="cid-xf-codec-details-hls-serialize-tokens-dc"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad8276c3d736defade22f8af3c9072ee7"></span><span id="cid-xf-codec-details-kernel-leptone-strmin-engine"></span><span id="doxid-namespacexf-1-1codec-1-1details-1af175049ff8f0095337777e14185f65aa"></span><span id="cid-xf-codec-details-vpx-enc-syn"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a079a1b958d40c0771ccd44c563d26184"></span><span id="cid-xf-codec-details-vpx-enc-pos"></span><span id="doxid-namespacexf-1-1codec-1-1details-1acf70d72200466f37ad4fe75670948660"></span><span id="cid-xf-codec-details-vpx-enc-run"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a4886906be9fda0022012646ad4050ca9"></span><span id="cid-xf-codec-details-vpx-enc-value"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a51af35d4dae7b2478f72fa8e56f781fc"></span><span id="cid-xf-codec-details-vpx-enc-range"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a2823c56295d1d09326a972c71d27cbd8"></span><span id="cid-xf-codec-details-push-bit-7x7-v2"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ae24a4efddc83c2cbc0913f2ced94e1d2"></span><span id="cid-xf-codec-details-push-bit-7x7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a22f74ee31946905a2bc9ed8a910956c6"></span><span id="cid-xf-codec-details-pre-serialize-tokens-77"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a736743db586c95ecc187e1081b2515c3"></span><span id="cid-xf-codec-details-hls-serialize-tokens-77"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a2ff2d232a3b92c0660ec9659ed5a0eb2"></span><span id="cid-xf-codec-details-preprocess"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a7a865fc20b33c260b30b727204fd7f5d"></span><span id="cid-xf-codec-details-duplicate-coef"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a8267fff38c55cdc85f801f17ee9d71d1"></span><span id="cid-xf-codec-details-huffman-decoder"></span><span id="doxid-namespacexf-1-1codec-1-1details-1afcae98ca0871dcfd1a200713d249de58"></span><span id="cid-xf-codec-details-pick-huff-data"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a6e5fe726869791db5cb4817b8123b98d"></span><span id="cid-xf-codec-details-setotherqtab"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a8e918cc25d2662975d9e2b8d3153b6de"></span><span id="cid-xf-codec-details-onebyte"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ac4350dad5eb2d12837bb2debbc659c5a"></span><span id="cid-xf-codec-details-readbytes"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ac99b00b9f893ee40e842e237a8426fe2"></span><span id="cid-xf-codec-details-copyinfo"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a13e9a6ce01c1e8493b5ca502d832af02"></span><span id="cid-xf-codec-details-mcu-reorder"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ac981d572a13341003293906932965a49"></span><span id="cid-xf-codec-details-jpeg-zigzag-to-raster"></span><span id="doxid-namespacexf-1-1codec-1-1details-1adde4fed6be8d0dda56f124727ad91e1c"></span><span id="cid-xf-codec-details-array-to-raster"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a4d3bd377094da5a9ad043781eebee994"></span><span id="cid-xf-codec-details-cache-mcu"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a5f03c0e968ce438cd39dd2d49df05d56"></span><span id="cid-xf-codec-details-hls-idct-v"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a6166da2d9d12d082b264d47e6c35ab33"></span><span id="cid-xf-codec-details-hls-idct-h"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a27a4285e52c59cdf6a795418679b6fed"></span><span id="cid-xf-codec-details-hls-icos-base-8192-scaled"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a06d2f590ff1339438705d9b51007cc08"></span><span id="cid-xf-codec-details-hls-jpeg-zigzag-to-raster"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ab8331c0b0aae51127cb14876dfbc95cc"></span><span id="cid-xf-codec-details-r2"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744ac8a05578ceecb37f219cd54b541dcd7e"></span><span id="cid-xf-codec-details-w3mw5"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a67d2e222da4417064ed7987228283391"></span><span id="cid-xf-codec-details-w3pw5"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a1f3e3720ceabae38853384ffed42ea04"></span><span id="cid-xf-codec-details-w2mw6"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a750bb9ec38bdd201a16d0a12522f1177"></span><span id="cid-xf-codec-details-w2pw6"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744ac30ee69ae3a11953c24aa8a7dbdc7050"></span><span id="cid-xf-codec-details-w1mw7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a843a616dc81c850a0f769e6f644cd395"></span><span id="cid-xf-codec-details-w1pw7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a73fe4039176fd74bd986c7168f710f77"></span><span id="cid-xf-codec-details-w7"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a9efb97d6d23eb8c409be54c1109743a4"></span><span id="cid-xf-codec-details-w6"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744ad668739ebd8e542f29a9e6cefade854c"></span><span id="cid-xf-codec-details-w5"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a52b99fa78ba284e3842302e9f1fe8e7c"></span><span id="cid-xf-codec-details-w3"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a10081c6e1483df15bb03b5cc851aab21"></span><span id="cid-xf-codec-details-w2"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744a17347d0b170fd02f193b1b00223ed999"></span><span id="cid-xf-codec-details-w1"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ad14e339171ee18458fabfa9cdf876744aea101f580399631e3c69d5ddbd804607"></span><span id="cid-xf-codec-details-idctm-t"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a927013619c38708dcfe3c1df4d168cdd"></span><span id="cid-xf-codec-details-idct25-t"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a18e40729b8f081a2f1f0bbe343cc2dc3"></span><span></span><span class="c1">// typedefs</span>
 
 <span class="k">typedef</span> <span class="kt">int</span> <span class="n">idct25_t</span>
 <span class="k">typedef</span> <span class="n">ap_int</span> <span class="o">&lt;</span><span class="mi">24</span><span class="o">&gt;</span> <span class="n">idctm_t</span>
@@ -371,6 +372,27 @@ function OptanonWrapper() { }
     <span class="n">w3mw5</span> <span class="o">=</span> <span class="n">w3</span> <span class="o">-</span> <span class="n">w5</span>
     <span class="n">r2</span> <span class="o">=</span> <span class="mi">181</span>
 <span class="p">}</span>
+
+<span class="c1">// structs</span>
+
+<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_details_hls_huff_DHT.html#doxid-structxf-1-1codec-1-1details-1-1hls-huff-d-h-t"><span class="std std-ref">hls_huff_DHT</span></a><span></span>
+<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_details_hls_huff_segment.html#doxid-structxf-1-1codec-1-1details-1-1hls-huff-segment"><span class="std std-ref">hls_huff_segment</span></a><span></span>
+<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_details_sos_data.html#doxid-structxf-1-1codec-1-1details-1-1sos-data"><span class="std std-ref">sos_data</span></a><span></span>
+
+<span class="c1">// classes</span>
+
+<span class="k">template</span> <span class="o">&lt;</span>
+    <span class="kt">int</span> <span class="n">_W</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">_I</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">_WBIT</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">_NPPC</span>
+    <span class="o">&gt;</span>
+<span class="k">class</span> <a class="reference internal" href="class_xf_codec_details_BicubicInterpolator.html#doxid-classxf-1-1codec-1-1details-1-1-bicubic-interpolator"><span class="std std-ref">BicubicInterpolator</span></a><span></span>
+
+<span class="c1">// global variables</span>
+
+<span class="k">static</span> <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_jpeg_zigzag_to_raster</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
+<span class="k">const</span> <span class="kt">short</span> <span class="n">hls_icos_base_8192_scaled</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
 </pre>
 <div class="section" id="decoder-jpg-full-top">
 <span id="cid-xf-codec-details-decoder-jpg-full-top"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a184dcf7ab768e286ea77f30ddacefdc3"></span><h2>decoder_jpg_full_top<a class="headerlink" href="#decoder-jpg-full-top" title="Permalink to this headline">¶</a></h2>
@@ -383,20 +405,20 @@ function OptanonWrapper() { }
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">_WAxi</span><span class="o">&gt;*</span> <span class="n">ptr</span><span class="p">,</span>
     <span class="k">const</span> <span class="kt">int</span> <span class="n">sz</span><span class="p">,</span>
     <span class="k">const</span> <span class="kt">int</span> <span class="n">c</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
-    <span class="kt">uint8_t</span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
     <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">ac_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span>
-    <span class="kt">int16_t</span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
-    <span class="kt">uint8_t</span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
     <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">dc_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
-    <span class="kt">int16_t</span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span> <span class="n">hls_cmp</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">q_tables</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">8</span><span class="p">][</span><span class="mi">8</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">q_tables</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">8</span><span class="p">][</span><span class="mi">8</span><span class="p">],</span>
     <span class="k">const</span> <a class="reference internal" href="struct_xf_codec_img_info.html#doxid-structxf-1-1codec-1-1img-info"><span class="std std-ref">img_info</span></a><span></span> <span class="n">img_info</span><span class="p">,</span>
     <span class="k">const</span> <a class="reference internal" href="struct_xf_codec_bas_info.html#doxid-structxf-1-1codec-1-1bas-info"><span class="std std-ref">bas_info</span></a><span></span> <span class="n">bas_info</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">rtn2</span><span class="p">,</span>
-    <span class="kt">uint32_t</span><span class="o">&amp;</span> <span class="n">rst_cnt</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">&amp;</span> <span class="n">rst_cnt</span><span class="p">,</span>
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">yuv_mcu_pointer</span>
     <span class="p">)</span>
 </pre>
@@ -454,7 +476,7 @@ function OptanonWrapper() { }
 <span class="kt">void</span> <span class="n">burstWrite</span> <span class="p">(</span>
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">_WAxi</span><span class="o">&gt;*</span> <span class="n">yuv_mcu_pointer</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><a class="reference internal" href="namespace_xf_codec.html#doxid-namespacexf-1-1codec-1a4edc4e258d4cb852c8a3a05280f69a9b"><span class="std std-ref">idct_out_t</span></a><span></span><span class="o">&gt;</span> <span class="n">strm_iDCT_x8</span> <span class="p">[</span><span class="mi">8</span><span class="p">],</span>
-    <span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">all_blocks</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">all_blocks</span>
     <span class="p">)</span>
 </pre>
 <p>the template of stream width of _WAxi burst out.</p>
@@ -488,17 +510,17 @@ function OptanonWrapper() { }
     <span class="k">const</span> <span class="kt">int</span> <span class="n">size</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">r</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span>
-    <span class="kt">uint16_t</span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
-    <span class="kt">uint8_t</span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
     <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">ac_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span>
-    <span class="kt">int16_t</span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
-    <span class="kt">uint8_t</span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
     <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">dc_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
-    <span class="kt">int16_t</span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;&amp;</span> <span class="n">hls_cmp</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">left</span><span class="p">,</span>
-    <span class="kt">uint8_t</span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
-    <span class="kt">uint8_t</span> <span class="n">q_tables</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">8</span><span class="p">][</span><span class="mi">8</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">q_tables</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">8</span><span class="p">][</span><span class="mi">8</span><span class="p">],</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">rtn</span><span class="p">,</span>
     <a class="reference internal" href="struct_xf_codec_img_info.html#doxid-structxf-1-1codec-1-1img-info"><span class="std std-ref">img_info</span></a><span></span><span class="o">&amp;</span> <span class="n">img_info</span><span class="p">,</span>
     <a class="reference internal" href="struct_xf_codec_cmp_info.html#doxid-structxf-1-1codec-1-1cmp-info"><span class="std std-ref">cmp_info</span></a><span></span> <span class="n">cmp_info</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
@@ -568,18 +590,18 @@ function OptanonWrapper() { }
     <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">&gt;*</span> <span class="n">ptr</span><span class="p">,</span>
     <span class="k">const</span> <span class="kt">int</span> <span class="n">sz</span><span class="p">,</span>
     <span class="k">const</span> <span class="kt">int</span> <span class="n">c</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
-    <span class="kt">uint8_t</span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
     <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">ac_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span>
-    <span class="kt">int16_t</span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
-    <span class="kt">uint8_t</span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
     <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">dc_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
-    <span class="kt">int16_t</span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span> <span class="n">hls_cmp</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
     <span class="k">const</span> <a class="reference internal" href="struct_xf_codec_img_info.html#doxid-structxf-1-1codec-1-1img-info"><span class="std std-ref">img_info</span></a><span></span> <span class="n">img_info</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">rtn2</span><span class="p">,</span>
-    <span class="kt">uint32_t</span><span class="o">&amp;</span> <span class="n">rst_cnt</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">&amp;</span> <span class="n">rst_cnt</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">24</span><span class="o">&gt;&gt;&amp;</span> <span class="n">block_strm</span>
     <span class="p">)</span>
 </pre>
@@ -634,20 +656,20 @@ function OptanonWrapper() { }
 <span class="kt">void</span> <span class="n">mcu_decoder</span> <span class="p">(</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">CHTYPE</span><span class="o">&gt;&amp;</span> <span class="n">image_strm</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">eof_strm</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">dht_tbl1</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">9</span><span class="p">)],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">ac_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">165</span><span class="p">],</span>
     <span class="k">const</span> <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">ac_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span>
-    <span class="k">const</span> <span class="kt">int16_t</span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">ac_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">dc_value_buckets</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span>
     <span class="k">const</span> <a class="reference internal" href="global.html#doxid-utils-x-acc-jpeg-8hpp-1a4f630cbe596dfad86f6ac3d25d965a7b"><span class="std std-ref">HCODE_T</span></a><span></span> <span class="n">dc_huff_start_code</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
-    <span class="k">const</span> <span class="kt">int16_t</span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">dc_huff_start_addr</span> <span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">16</span><span class="p">],</span>
     <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span> <span class="n">hls_cmp</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_cs_cmpc</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
-    <span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">hls_mcuh</span><span class="p">,</span>
-    <span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">hls_mcuc</span><span class="p">,</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_cs_cmpc</span><span class="p">,</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_mbs</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">hls_mcuh</span><span class="p">,</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">hls_mcuc</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">rtn2</span><span class="p">,</span>
-    <span class="kt">uint32_t</span><span class="o">&amp;</span> <span class="n">rst_cnt</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">&amp;</span> <span class="n">rst_cnt</span><span class="p">,</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">24</span><span class="o">&gt;&gt;&amp;</span> <span class="n">block_strm</span>
     <span class="p">)</span>
 </pre>
@@ -691,14 +713,14 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">hls_next_mcupos2</span> <span class="p">(</span>
     <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">24</span><span class="o">&gt;&gt;&amp;</span> <span class="n">block_strm</span><span class="p">,</span>
-    <span class="kt">int16_t</span> <span class="n">hls_block</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1036800</span><span class="p">)</span><span class="o">*</span><span class="mi">64</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">hls_block</span> <span class="p">[(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1036800</span><span class="p">)</span><span class="o">*</span><span class="mi">64</span><span class="p">],</span>
     <span class="kt">int</span> <span class="n">hls_sfv</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span>
     <span class="kt">int</span> <span class="n">hls_sfh</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_mbs</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+    <span class="k">const</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_mbs</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span>
     <span class="kt">int</span> <span class="n">hls_bch</span><span class="p">,</span>
     <span class="kt">int</span> <span class="n">hls_bc</span><span class="p">,</span>
-    <span class="kt">int32_t</span> <span class="n">hls_mcuc</span><span class="p">,</span>
-    <span class="kt">uint8_t</span> <span class="n">hls_cs_cmpc</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span> <span class="n">hls_mcuc</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_cs_cmpc</span><span class="p">,</span>
     <span class="kt">bool</span> <span class="n">rtn2</span><span class="p">,</span>
     <span class="kt">int</span><span class="o">&amp;</span> <span class="n">sta</span>
     <span class="p">)</span>
@@ -738,6 +760,110 @@ function OptanonWrapper() { }
 </tbody>
 </table>
 </div>
+<div class="section" id="loadtostrm">
+<span id="cid-xf-codec-details-loadtostrm"></span><span id="doxid-namespacexf-1-1codec-1-1details-1ae13e2148cf6228209aa24b744d85072d"></span><h2>loadToStrm<a class="headerlink" href="#loadtostrm" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;resize/bicubicinterpolator.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">loadToStrm</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">width</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">height</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;*</span> <span class="n">axi_src</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;&gt;&amp;</span> <span class="n">src_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>The function is loading the pixels of image into stream.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>width</td>
+<td>representing the number of input image each row</td>
+</tr>
+<tr class="row-even"><td>height</td>
+<td>representing the number of input image each column</td>
+</tr>
+<tr class="row-odd"><td>axi_src</td>
+<td>the hbm port for input</td>
+</tr>
+<tr class="row-even"><td>src_strm</td>
+<td>the input stream of bicubic interpolator</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pickoutstrm">
+<span id="cid-xf-codec-details-pickoutstrm"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a79d5b83c5b830d52f134fe19674fa0b6"></span><h2>pickOutStrm<a class="headerlink" href="#pickoutstrm" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;resize/bicubicinterpolator.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">pickOutStrm</span> <span class="p">(</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">72</span><span class="o">&gt;&gt;&amp;</span> <span class="n">dst_strm</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">e_dst</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;&gt;&amp;</span> <span class="n">pixel_strm</span>
+    <span class="p">)</span>
+</pre>
+<p>The function is picking out valid value of interpolation from 72-bits, the (0, 63) saving the valid value and the (64, 71) representing the number of valid value of interpolation.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>dst_strm</td>
+<td>the output of bicubic interpolator</td>
+</tr>
+<tr class="row-even"><td>e_dst</td>
+<td>the flag of output</td>
+</tr>
+<tr class="row-odd"><td>pixel_strm</td>
+<td>the compact 64-bits or representing 8 pixels</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="loadtoimage">
+<span id="cid-xf-codec-details-loadtoimage"></span><span id="doxid-namespacexf-1-1codec-1-1details-1a8f0649ba737d9570239702997925cd87"></span><h2>loadToImage<a class="headerlink" href="#loadtoimage" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;resize/bicubicinterpolator.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">loadToImage</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">width</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">height</span><span class="p">,</span>
+    <span class="n">hls</span><span class="o">::</span><span class="n">stream</span> <span class="o">&lt;</span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;&gt;&amp;</span> <span class="n">pixel_strm</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;*</span> <span class="n">axi_dst</span>
+    <span class="p">)</span>
+</pre>
+<p>The function is putting the result of interpolation into memory hbm.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>width</td>
+<td>representing the number of output image each row</td>
+</tr>
+<tr class="row-even"><td>height</td>
+<td>representing the number of output image each column</td>
+</tr>
+<tr class="row-odd"><td>dst_strm</td>
+<td>the output stream of bicubic interpolator</td>
+</tr>
+<tr class="row-even"><td>axi_dst</td>
+<td>the hbm port for output</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
@@ -756,7 +882,7 @@ function OptanonWrapper() { }
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="enum_xf_codec_COLOR_FORMAT.html" class="btn btn-neutral float-right" title="enum xf::codec::COLOR_FORMAT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="struct_xf_codec_details_hls_huff_DHT.html" class="btn btn-neutral float-right" title="struct xf::codec::details::hls_huff_DHT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="namespace_xf_codec.html" class="btn btn-neutral float-left" title="namespace codec" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

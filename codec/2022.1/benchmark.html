@@ -75,7 +75,7 @@ function OptanonWrapper() { }
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="JPEG Decoder" href="benchmark/jpegDecoder.html" />
-    <link rel="prev" title="JPEG Decoder" href="guide_L2/kernels/jpegDecoder.html" /> 
+    <link rel="prev" title="JXL Encoder" href="guide_L2/kernels/jxlEnc.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -257,6 +257,7 @@ function OptanonWrapper() { }
 <li class="toctree-l1"><a class="reference internal" href="overview.html#license">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="overview.html#trademark-notice">Trademark Notice</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Vitis Codec Library Tutorial</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
 <ul>
@@ -278,6 +279,10 @@ function OptanonWrapper() { }
 <li class="toctree-l2"><a class="reference internal" href="#performance-summary-for-apis">Performance Summary for APIs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="benchmark/jpegHuffmanDecoderIP.html">JPEG Huffman Decoder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="benchmark/jpegDecoder.html">JPEG Decoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="benchmark/pikEnc.html">PIK Encoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="benchmark/resize.html">Resize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="benchmark/webpEnc.html">Webp Encoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="benchmark/jxlEnc.html">JXL Encoder</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#test-overview">Test Overview</a><ul>
@@ -383,6 +388,78 @@ function OptanonWrapper() { }
 </tr>
 </thead>
 <tbody valign="top">
+<tr class="row-even"><td>pikEncKernel1Top</td>
+<td>HW</td>
+<td>lena_c_512.jpg</td>
+<td>62.5</td>
+<td>&#160;</td>
+<td>16.4</td>
+<td>200MHz</td>
+<td>97.4k</td>
+<td>25</td>
+<td>93</td>
+<td>568</td>
+</tr>
+<tr class="row-odd"><td>pikEncKernel2Top</td>
+<td>HW</td>
+<td>lena_c_512.jpg</td>
+<td>62.5</td>
+<td>&#160;</td>
+<td>16.4</td>
+<td>200MHz</td>
+<td>262.5k</td>
+<td>411</td>
+<td>252</td>
+<td>1614</td>
+</tr>
+<tr class="row-even"><td>pikEncKernel3Top</td>
+<td>HW</td>
+<td>lena_c_512.jpg</td>
+<td>62.5</td>
+<td>&#160;</td>
+<td>16.4</td>
+<td>200MHz</td>
+<td>90.0k</td>
+<td>178</td>
+<td>128</td>
+<td>216</td>
+</tr>
+<tr class="row-odd"><td>pikEncKernel1Top</td>
+<td>HW</td>
+<td>lena_c_2048.png</td>
+<td>5.2</td>
+<td>&#160;</td>
+<td>22</td>
+<td>200MHz</td>
+<td>97.4k</td>
+<td>25</td>
+<td>93</td>
+<td>568</td>
+</tr>
+<tr class="row-even"><td>pikEncKernel2Top</td>
+<td>HW</td>
+<td>lena_c_2048.png</td>
+<td>5.2</td>
+<td>&#160;</td>
+<td>22</td>
+<td>200MHz</td>
+<td>262.5k</td>
+<td>411</td>
+<td>252</td>
+<td>1614</td>
+</tr>
+<tr class="row-odd"><td>pikEncKernel3Top</td>
+<td>HW</td>
+<td>lena_c_2048.png</td>
+<td>5.2</td>
+<td>&#160;</td>
+<td>22</td>
+<td>200MHz</td>
+<td>90.0k</td>
+<td>178</td>
+<td>128</td>
+<td>216</td>
+</tr>
 <tr class="row-even"><td>kernelJpegDecoderTop</td>
 <td>HW</td>
 <td>lena_c_512.jpg</td>
@@ -394,6 +471,150 @@ function OptanonWrapper() { }
 <td>28</td>
 <td>0</td>
 <td>39</td>
+</tr>
+<tr class="row-odd"><td>resizeTop(NP=8)</td>
+<td>HW</td>
+<td>7680*4320 to 512*512</td>
+<td>79.7</td>
+<td>2644.3</td>
+<td>&#160;</td>
+<td>341MHz</td>
+<td>15.0k</td>
+<td>29</td>
+<td>0</td>
+<td>168</td>
+</tr>
+<tr class="row-even"><td>resizeTop(NP=8)</td>
+<td>HW</td>
+<td>7680*4320 to 1920*1080</td>
+<td>80.5</td>
+<td>2670.8</td>
+<td>&#160;</td>
+<td>341MHz</td>
+<td>15.0k</td>
+<td>29</td>
+<td>0</td>
+<td>168</td>
+</tr>
+<tr class="row-odd"><td>webp_IntraPredLoop2_NoOut_1</td>
+<td>HW</td>
+<td>lena_c_512.png</td>
+<td>&#160;</td>
+<td>127.17</td>
+<td>&#160;</td>
+<td>250MHz</td>
+<td>52.9k</td>
+<td>72</td>
+<td>10</td>
+<td>410</td>
+</tr>
+<tr class="row-even"><td>webp_2_ArithmeticCoding_1</td>
+<td>HW</td>
+<td>lena_c_512.png</td>
+<td>&#160;</td>
+<td>127.17</td>
+<td>&#160;</td>
+<td>250MHz</td>
+<td>15.9k</td>
+<td>157</td>
+<td>0</td>
+<td>4</td>
+</tr>
+<tr class="row-odd"><td>webp_IntraPredLoop2_NoOut_1</td>
+<td>HW</td>
+<td>1920x1080.png</td>
+<td>&#160;</td>
+<td>172.54</td>
+<td>&#160;</td>
+<td>250MHz</td>
+<td>52.9k</td>
+<td>72</td>
+<td>10</td>
+<td>410</td>
+</tr>
+<tr class="row-even"><td>webp_2_ArithmeticCoding_1</td>
+<td>HW</td>
+<td>1920x1080.png</td>
+<td>&#160;</td>
+<td>172.54</td>
+<td>&#160;</td>
+<td>250MHz</td>
+<td>15.9k</td>
+<td>157</td>
+<td>0</td>
+<td>4</td>
+</tr>
+<tr class="row-odd"><td>JxlEnc_ans_clusterHistogram</td>
+<td>HW</td>
+<td>lena_c_512.png</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>56.9</td>
+<td>291MHz</td>
+<td>38.5K</td>
+<td>70</td>
+<td>28</td>
+<td>51</td>
+</tr>
+<tr class="row-even"><td>JxlEnc_lossy_enc_compute</td>
+<td>HW</td>
+<td>lena_c_512.png</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>72.2</td>
+<td>260MHz</td>
+<td>121.7K</td>
+<td>364</td>
+<td>53</td>
+<td>498</td>
+</tr>
+<tr class="row-odd"><td>JxlEnc_ans_initHistogram</td>
+<td>HW</td>
+<td>lena_c_512.png</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>43.2</td>
+<td>289MHz</td>
+<td>39.3K</td>
+<td>50</td>
+<td>41</td>
+<td>95</td>
+</tr>
+<tr class="row-even"><td>JxlEnc_ans_clusterHistogram</td>
+<td>HW</td>
+<td>hq_2Kx2K.png</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>101.9</td>
+<td>291MHz</td>
+<td>38.5K</td>
+<td>70</td>
+<td>28</td>
+<td>51</td>
+</tr>
+<tr class="row-odd"><td>JxlEnc_lossy_enc_compute</td>
+<td>HW</td>
+<td>hq_2Kx2K.png</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>83.3</td>
+<td>260MHz</td>
+<td>121.7K</td>
+<td>364</td>
+<td>53</td>
+<td>498</td>
+</tr>
+<tr class="row-even"><td>JxlEnc_ans_initHistogram</td>
+<td>HW</td>
+<td>hq_2Kx2K.png</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>52.9</td>
+<td>289MHz</td>
+<td>39.3K</td>
+<td>50</td>
+<td>41</td>
+<td>95</td>
 </tr>
 <tr class="row-odd"><td>jpegHuffmanDecoder</td>
 <td>cosim</td>
@@ -414,6 +635,10 @@ function OptanonWrapper() { }
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="benchmark/jpegHuffmanDecoderIP.html">JPEG Huffman Decoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark/jpegDecoder.html">JPEG Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/pikEnc.html">PIK Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/resize.html">Resize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/webpEnc.html">Webp Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/jxlEnc.html">JXL Encoder</a></li>
 </ul>
 </div>
 </div>
@@ -464,7 +689,7 @@ git checkout master
         <a href="benchmark/jpegDecoder.html" class="btn btn-neutral float-right" title="JPEG Decoder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="guide_L2/kernels/jpegDecoder.html" class="btn btn-neutral float-left" title="JPEG Decoder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="guide_L2/kernels/jxlEnc.html" class="btn btn-neutral float-left" title="JXL Encoder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

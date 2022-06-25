@@ -257,6 +257,7 @@ function OptanonWrapper() { }
 <li class="toctree-l1"><a class="reference internal" href="../overview.html#license">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html#trademark-notice">Trademark Notice</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Vitis Codec Library Tutorial</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
 <ul>
@@ -345,15 +346,15 @@ function OptanonWrapper() { }
 <span id="cid-xf-codec"></span><span id="doxid-namespacexf-1-1codec"></span><span id="index-0"></span><h1>namespace codec<a class="headerlink" href="#namespace-codec" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-hls-icos-base-8192-scaled">
-<span id="doxid-namespacexf-1-1codec-1a2e5da0b8f19effcaf64c6726da50ace2"></span><span id="cid-xf-codec-hls-jpeg-zigzag-to-raster"></span><span id="doxid-namespacexf-1-1codec-1a9d871222775e514a78395ddde346ee5e"></span><span id="cid-xf-codec-idct-out-t"></span><span id="doxid-namespacexf-1-1codec-1a4edc4e258d4cb852c8a3a05280f69a9b"></span><span id="cid-xf-codec-idct-in-t"></span><span id="doxid-namespacexf-1-1codec-1a4e8314bbc5f82d4d68f32f0797340168"></span><span></span><span class="c1">// namespaces</span>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-codec-idct-out-t">
+<span id="doxid-namespacexf-1-1codec-1a4edc4e258d4cb852c8a3a05280f69a9b"></span><span id="cid-xf-codec-idct-in-t"></span><span id="doxid-namespacexf-1-1codec-1a4e8314bbc5f82d4d68f32f0797340168"></span><span></span><span class="c1">// namespaces</span>
 
 <span class="k">namespace</span> <a class="reference internal" href="namespace_xf_codec_details.html#doxid-namespacexf-1-1codec-1-1details"><span class="std std-ref">xf::codec::details</span></a><span></span>
 
 <span class="c1">// typedefs</span>
 
-<span class="k">typedef</span> <span class="kt">int16_t</span> <span class="n">idct_in_t</span>
-<span class="k">typedef</span> <span class="kt">uint8_t</span> <span class="n">idct_out_t</span>
+<span class="k">typedef</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aa343fa3b3d06292b959ffdd4c4703b06"><span class="std std-ref">int16_t</span></a><span></span> <span class="n">idct_in_t</span>
+<span class="k">typedef</span> <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">idct_out_t</span>
 
 <span class="c1">// enums</span>
 
@@ -363,16 +364,176 @@ function OptanonWrapper() { }
 
 <span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_bas_info.html#doxid-structxf-1-1codec-1-1bas-info"><span class="std std-ref">bas_info</span></a><span></span>
 <span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_cmp_info.html#doxid-structxf-1-1codec-1-1cmp-info"><span class="std std-ref">cmp_info</span></a><span></span>
-<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_hls_huff_DHT.html#doxid-structxf-1-1codec-1-1hls-huff-d-h-t"><span class="std std-ref">hls_huff_DHT</span></a><span></span>
-<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_hls_huff_segment.html#doxid-structxf-1-1codec-1-1hls-huff-segment"><span class="std std-ref">hls_huff_segment</span></a><span></span>
-<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_img_info.html#doxid-structxf-1-1codec-1-1img-info"><span class="std std-ref">img_info</span></a><span></span>
-<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_sos_data.html#doxid-structxf-1-1codec-1-1sos-data"><span class="std std-ref">sos_data</span></a><span></span>
-
-<span class="c1">// global variables</span>
-
-<span class="k">static</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">hls_jpeg_zigzag_to_raster</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
-<span class="k">const</span> <span class="kt">short</span> <span class="n">hls_icos_base_8192_scaled</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
+<span class="k">struct</span> <a class="reference internal" href="struct_xf_codec_img_info.html#doxid-structxf-1-1codec-1-1img-info"><span class="std std-ref">img_info</span></a>
 </pre>
+<div class="section" id="pikenckernel1top">
+<span id="cid-xf-codec-pikenckernel1top"></span><span id="doxid-namespacexf-1-1codec-1a096b24ebdbfc59758d43e9b8aeea229e"></span><h2>pikEncKernel1Top<a class="headerlink" href="#pikenckernel1top" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;pikEnc/XAccPIKKernel1.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">pikEncKernel1Top</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">config</span> <span class="p">[(</span><span class="mi">32</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">rbuf</span> <span class="p">[((</span><span class="mi">8192</span> <span class="o">*</span><span class="mi">8192</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">axi_out</span> <span class="p">[(</span><span class="mi">3</span> <span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="mi">32</span> <span class="o">*</span><span class="mi">32</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">axi_cmap</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span><span class="o">/</span><span class="mi">64</span> <span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">axi_qf</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span><span class="o">+</span><span class="mi">2</span><span class="p">)]</span>
+    <span class="p">)</span>
+</pre>
+<p>Level 2 : kernel1 implement for pik.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>config</td>
+<td>control signals, such as image size information, stream length and offsets of each colors.</td>
+</tr>
+<tr class="row-even"><td>rbuf</td>
+<td>the input RGB data, alligned by different colors.</td>
+</tr>
+<tr class="row-odd"><td>axi_out</td>
+<td>the output of XYB data generated by color transformation of RGB.</td>
+</tr>
+<tr class="row-even"><td>axi_cmap</td>
+<td>color correlation map, for adjust color in AC quantization.</td>
+</tr>
+<tr class="row-odd"><td>axi_qf</td>
+<td>information of the quant-field, for choosing correct quant-table in AC quantization.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pikenckernel2top">
+<span id="cid-xf-codec-pikenckernel2top"></span><span id="doxid-namespacexf-1-1codec-1a5c7a3911250c077175e09ec4b52949e3"></span><h2>pikEncKernel2Top<a class="headerlink" href="#pikenckernel2top" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;pikEnc/XAccPIKKernel2.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">pikEncKernel2Top</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">config</span> <span class="p">[(</span><span class="mi">32</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">2</span><span class="o">*</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">src</span> <span class="p">[(</span><span class="mi">3</span> <span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="mi">32</span> <span class="o">*</span><span class="mi">32</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">quant_field_in</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span><span class="o">+</span><span class="mi">2</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">cmap</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span><span class="o">/</span><span class="mi">64</span> <span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">ac</span> <span class="p">[(</span><span class="mi">3</span> <span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="mi">32</span> <span class="o">*</span><span class="mi">32</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">dc</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span><span class="o">*</span><span class="mi">3</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">quant_field_out</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span><span class="o">+</span><span class="mi">2</span><span class="p">)],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">ac_strategy</span> <span class="p">[((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">block</span> <span class="p">[((</span><span class="mi">1024</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1024</span><span class="p">))],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">order</span> <span class="p">[(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">64</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">64</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">1024</span><span class="p">)</span><span class="o">+</span><span class="mi">64</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">64</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span> <span class="o">*</span><span class="mi">64</span><span class="p">]</span>
+    <span class="p">)</span>
+</pre>
+<p>Level 2 : kernel2 implement for pik.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>config</td>
+<td>control signals, such as image size information, stream length and offsets of each colors.</td>
+</tr>
+<tr class="row-even"><td>src</td>
+<td>the input XYB data, alligned by different colors and stored in 32x32 of rectangular block order.</td>
+</tr>
+<tr class="row-odd"><td>quant_field_in</td>
+<td>information of the floating point quant-field, for choosing correct quant-table in AC quantization.</td>
+</tr>
+<tr class="row-even"><td>cmap</td>
+<td>color correlation map, for adjust color in AC quantization.</td>
+</tr>
+<tr class="row-odd"><td>ac</td>
+<td>output quantized AC stream.</td>
+</tr>
+<tr class="row-even"><td>dc</td>
+<td>output quantized DC stream.</td>
+</tr>
+<tr class="row-odd"><td>quant_field_out</td>
+<td>output information of quantized quant-field, it indicate the correct quant-table for decoder.</td>
+</tr>
+<tr class="row-even"><td>ac_strategy</td>
+<td>output AC strategy is the information about DCT size of each 8x8 block in image.</td>
+</tr>
+<tr class="row-odd"><td>block</td>
+<td>output block show the beginning position of each DCT computation.</td>
+</tr>
+<tr class="row-even"><td>order</td>
+<td>output information of order is used for zigzag encoding in kernel3.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pikenckernel3top">
+<span id="cid-xf-codec-pikenckernel3top"></span><span id="doxid-namespacexf-1-1codec-1ad76c18306ec6b108ef5af3c7b8e115e6"></span><h2>pikEncKernel3Top<a class="headerlink" href="#pikenckernel3top" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;pikEnc/XAccPIKKernel3.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">pikEncKernel3Top</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">config</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ddr_ac</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ddr_dc</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ddr_quant_field</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ddr_ac_strategy</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ddr_block</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">hls_order</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">histo_cfg</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">dc_histo_code_out</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">dc_code_out</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ac_histo_code_out</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">ac_code_out</span>
+    <span class="p">)</span>
+</pre>
+<p>Level 2 : kernel3 implement for pik.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>config</td>
+<td>control signals, such as image size information, stream length and offsets of each colors.</td>
+</tr>
+<tr class="row-even"><td>ddr_ac</td>
+<td>input quantized AC stream.</td>
+</tr>
+<tr class="row-odd"><td>ddr_dc</td>
+<td>input quantized DC stream.</td>
+</tr>
+<tr class="row-even"><td>ddr_quant_field</td>
+<td>input of quant-table information for decoder</td>
+</tr>
+<tr class="row-odd"><td>ddr_ac_strategy</td>
+<td>input information of DCT size of each small block8x8.</td>
+</tr>
+<tr class="row-even"><td>ddr_block</td>
+<td>input information of DCT starting position.</td>
+</tr>
+<tr class="row-odd"><td>hls_order</td>
+<td>input information of encoding order.</td>
+</tr>
+<tr class="row-even"><td>histo_cfg</td>
+<td>output config for AC and DC histo lengths.</td>
+</tr>
+<tr class="row-odd"><td>dc_histo_code_out</td>
+<td>encoding result of DC histo.</td>
+</tr>
+<tr class="row-even"><td>dc_code_out</td>
+<td>encoding result of DC token.</td>
+</tr>
+<tr class="row-odd"><td>ac_histo_code_out</td>
+<td>the encoding result of AC histo.</td>
+</tr>
+<tr class="row-even"><td>ac_code_out</td>
+<td>encoding result of AC token.</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="kerneljpegdecodertop">
 <span id="cid-xf-codec-kerneljpegdecodertop"></span><span id="doxid-namespacexf-1-1codec-1a045c64f702ee630bfb1648cacfc1f662"></span><h2>kernelJpegDecoderTop<a class="headerlink" href="#kerneljpegdecodertop" title="Permalink to this headline">¶</a></h2>
 <pre class="highlight literal-block">
@@ -408,6 +569,560 @@ function OptanonWrapper() { }
 </tr>
 <tr class="row-odd"><td>info</td>
 <td>information of the image, maybe use in the recovery image.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="resizetop">
+<span id="cid-xf-codec-resizetop"></span><span id="doxid-namespacexf-1-1codec-1a27ac906bd3e3558ed71d6b5631be23dc"></span><h2>resizeTop<a class="headerlink" href="#resizetop" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;resize/bicubicinterpolator.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">resizeTop</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;*</span> <span class="n">configs</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;*</span> <span class="n">axi_src</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="n">WDATA</span><span class="o">&gt;*</span> <span class="n">axi_dst</span>
+    <span class="p">)</span>
+</pre>
+<p>Resize scales the image from bigger to smaller based bicubic interpolation algorithm and it takes advantage of uram storage features to implement 8-pixels/clock.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>configs</td>
+<td>the stored parameters representing src_width, src_height, dst_width, dst_height.</td>
+</tr>
+<tr class="row-even"><td>axi_src</td>
+<td>the hbm memory for input</td>
+</tr>
+<tr class="row-odd"><td>axi_dst</td>
+<td>the hbm memory for output</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="webp-intrapredloop2-noout-1">
+<span id="cid-xf-codec-webp-intrapredloop2-noout-1"></span><span id="doxid-namespacexf-1-1codec-1afb5f9822eba943c21a381cca167d9f37"></span><h2>webp_IntraPredLoop2_NoOut_1<a class="headerlink" href="#webp-intrapredloop2-noout-1" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;webpEnc/vp8_hls_syn.h&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">webp_IntraPredLoop2_NoOut_1</span> <span class="p">(</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">p_info</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">ysrc</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">usrc</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">vsrc</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">pout_level</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">pout_prob</span>
+    <span class="p">)</span>
+</pre>
+<p>Level 2 : kernel for WebP intra prediction.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>p_info</td>
+<td>basic information of image and compression parameters. More details can be found in function kernel_IntraPredLoop2_NoOut_core.</td>
+</tr>
+<tr class="row-even"><td>ysrc</td>
+<td>the Y sample of image as input.</td>
+</tr>
+<tr class="row-odd"><td>usrc</td>
+<td>the U sample of image as input.</td>
+</tr>
+<tr class="row-even"><td>vsrc</td>
+<td>the V sample of image as input.</td>
+</tr>
+<tr class="row-odd"><td>pout_level</td>
+<td>point to structures contains coefficients from a MB for output.</td>
+</tr>
+<tr class="row-even"><td>pout_prob</td>
+<td>probability table for output.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="webp-2-arithmeticcoding-1">
+<span id="cid-xf-codec-webp-2-arithmeticcoding-1"></span><span id="doxid-namespacexf-1-1codec-1a18c398af0bb5c902a1dac344b8711366"></span><h2>webp_2_ArithmeticCoding_1<a class="headerlink" href="#webp-2-arithmeticcoding-1" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;webpEnc/vp8_hls_syn.h&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">webp_2_ArithmeticCoding_1</span> <span class="p">(</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">pin_level</span> <span class="p">[((((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="mi">384</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="p">))],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">pin_prob</span> <span class="p">[</span><span class="mi">2048</span><span class="o">/</span><span class="mi">4</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">pout_bw</span> <span class="p">[((((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="mi">384</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="p">))],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">pout_ret</span> <span class="p">[((((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="p">))],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">pout_pred</span> <span class="p">[((((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="p">(((</span><span class="mi">4096</span><span class="p">)</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="mi">8</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="p">))]</span>
+    <span class="p">)</span>
+</pre>
+<p>Level 2 : kernel for WebP arithmetic coding.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>pin_level</td>
+<td>point to structures contains coefficients from a MB as an input.</td>
+</tr>
+<tr class="row-even"><td>pin_prob</td>
+<td>probability table as an input.</td>
+</tr>
+<tr class="row-odd"><td>pout_bw</td>
+<td>byte-stream created by arithmetic coding</td>
+</tr>
+<tr class="row-even"><td>pout_ret</td>
+<td>output stream in which the element indicates the non-zero status of 6 blocks of a MB</td>
+</tr>
+<tr class="row-odd"><td>pout_pred</td>
+<td>output stream of prediction mode of Y.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="jpegdecleptonenc">
+<span id="cid-xf-codec-jpegdecleptonenc"></span><span id="doxid-namespacexf-1-1codec-1a6065b01ad31eb923ccdaa8860b9627d9"></span><h2>jpegDecLeptonEnc<a class="headerlink" href="#jpegdecleptonenc" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;leptonEnc/lepton/jpeg_dec_lepton_enc.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">jpegDecLeptonEnc</span> <span class="p">(</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">&gt;*</span> <span class="n">datainDDR</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">jpgSize</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">*</span> <span class="n">arithInfo</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;*</span> <span class="n">res</span>
+    <span class="p">)</span>
+</pre>
+<p>IMGAE Jpeg Decoder Lepton Encoder internal kernel.</p>
+<p>For detailed document, see <span class="xref std std-ref">JpegD_LeptonE_kernel_design</span>.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>datainDDR</td>
+<td>input image buffer.</td>
+</tr>
+<tr class="row-even"><td>jpgSize</td>
+<td>size of input image buffer.</td>
+</tr>
+<tr class="row-odd"><td>arithInfo</td>
+<td>meta information of output buffer.</td>
+</tr>
+<tr class="row-even"><td>res</td>
+<td>output lepton format data buffer.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="jxlenc-ans-clusterhistogram">
+<span id="cid-xf-codec-jxlenc-ans-clusterhistogram"></span><span id="doxid-namespacexf-1-1codec-1a577c737c2f09e41199639074c4b9ba1d"></span><h2>JxlEnc_ans_clusterHistogram<a class="headerlink" href="#jxlenc-ans-clusterhistogram" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;jxlEnc/hls_cluster_histogram.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">JxlEnc_ans_clusterHistogram</span> <span class="p">(</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">config</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_totalcnt0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty_histo0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">ctx_map0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusd0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size_clusd0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusdin0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_totalcnt1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty_histo1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">ctx_map1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusd1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size_clusd1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusdin1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_totalcnt2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty_histo2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">ctx_map2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusd2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size_clusd2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusdin2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_totalcnt3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty_histo3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">ctx_map3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusd3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size_clusd3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusdin3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_totalcnt4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty_histo4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">ctx_map4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusd4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histo_size_clusd4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_clusdin4_ptr</span>
+    <span class="p">)</span>
+</pre>
+<p>JXL ANS cluster Histogram kernel.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>config</td>
+<td>configuration for the kernel.</td>
+</tr>
+<tr class="row-even"><td>histograms0_ptr</td>
+<td>histograms for Block Context Map.</td>
+</tr>
+<tr class="row-odd"><td>histo_totalcnt0_ptr</td>
+<td>Count of context for histograms for Block Context Map.</td>
+</tr>
+<tr class="row-even"><td>histo_size0_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-odd"><td>nonempty_histo0_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-even"><td>ctx_map0_ptr</td>
+<td>the input context map</td>
+</tr>
+<tr class="row-odd"><td>histograms_clusd0_ptr</td>
+<td>the clustered histogram</td>
+</tr>
+<tr class="row-even"><td>histograms_clusdin0_ptr</td>
+<td>the context for the clustered histogram</td>
+</tr>
+<tr class="row-odd"><td>histograms1_ptr</td>
+<td>histograms for Modular frame tree.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt1_ptr</td>
+<td>Count of context for histograms for Modular frame tree.</td>
+</tr>
+<tr class="row-odd"><td>histo_size1_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo1_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-odd"><td>ctx_map1_ptr</td>
+<td>the input context map</td>
+</tr>
+<tr class="row-even"><td>histograms_clusd1_ptr</td>
+<td>the clustered histogram</td>
+</tr>
+<tr class="row-odd"><td>histograms_clusdin1_ptr</td>
+<td>the context for the clustered histogram</td>
+</tr>
+<tr class="row-even"><td>histograms2_ptr</td>
+<td>histograms for code from Modular frame.</td>
+</tr>
+<tr class="row-odd"><td>histo_totalcnt2_ptr</td>
+<td>Count of context for histograms for Modular frame.</td>
+</tr>
+<tr class="row-even"><td>histo_size2_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-odd"><td>nonempty_histo2_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-even"><td>ctx_map2_ptr</td>
+<td>the input context map</td>
+</tr>
+<tr class="row-odd"><td>histograms_clusd2_ptr</td>
+<td>the clustered histogram</td>
+</tr>
+<tr class="row-even"><td>histograms_clusdin2_ptr</td>
+<td>the context for the clustered histogram</td>
+</tr>
+<tr class="row-odd"><td>histograms3_ptr</td>
+<td>histograms for coef orders.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt3_ptr</td>
+<td>Count of context for histograms for coef orders.</td>
+</tr>
+<tr class="row-odd"><td>histo_size3_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo3_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-odd"><td>ctx_map3_ptr</td>
+<td>the input context map</td>
+</tr>
+<tr class="row-even"><td>histograms_clusd3_ptr</td>
+<td>the clustered histogram</td>
+</tr>
+<tr class="row-odd"><td>histograms_clusdin3_ptr</td>
+<td>the context for the clustered histogram</td>
+</tr>
+<tr class="row-even"><td>histograms4_ptr</td>
+<td>histograms for ac coefficients.</td>
+</tr>
+<tr class="row-odd"><td>histo_totalcnt4_ptr</td>
+<td>Count of context for histograms for ac coefficients.</td>
+</tr>
+<tr class="row-even"><td>histo_size4_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-odd"><td>nonempty_histo4_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-even"><td>ctx_map4_ptr</td>
+<td>the input context map</td>
+</tr>
+<tr class="row-odd"><td>histograms_clusd4_ptr</td>
+<td>the clustered histogram</td>
+</tr>
+<tr class="row-even"><td>histograms_clusdin4_ptr</td>
+<td>the context for the clustered histogram</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="jxlenc-ans-inithistogram">
+<span id="cid-xf-codec-jxlenc-ans-inithistogram"></span><span id="doxid-namespacexf-1-1codec-1aece1e2459947a3672b996a07406bafcf"></span><h2>JxlEnc_ans_initHistogram<a class="headerlink" href="#jxlenc-ans-inithistogram" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;jxlEnc/hls_init_histogram.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">JxlEnc_ans_initHistogram</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">config</span> <span class="p">[</span><span class="mi">32</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span> <span class="n">ac_coeff_ordered_ddr</span> <span class="p">[</span><span class="n">ALL_PIXEL</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span> <span class="n">strategy_ddr</span> <span class="p">[</span><span class="n">MAX_NUM_BLK88</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span> <span class="n">qf_ddr</span> <span class="p">[</span><span class="n">MAX_NUM_BLK88</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">qdc_ddr</span> <span class="p">[</span><span class="n">MAX_NUM_BLK88</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">ctx_map</span> <span class="p">[</span><span class="n">MAX_QF_THRESH_SIZE</span><span class="p">],</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">qf_thresholds</span> <span class="p">[</span><span class="n">MAX_CTX_MAP_SIZE</span><span class="p">],</span>
+    <span class="kt">uint64_t</span> <span class="n">ac_tokens_ddr</span> <span class="p">[</span><span class="n">MAX_AC_TOKEN_SIZE</span><span class="p">],</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">tokens0_ptr</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">tokens1_ptr</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">tokens2_ptr</span><span class="p">,</span>
+    <span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;*</span> <span class="n">tokens3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_size0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">total_count0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty0_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_size1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">total_count1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty1_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_size2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">total_count2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty2_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_size3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">total_count3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty3_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a32f2e37ee053cf2ce8ca28d1f74630e5"><span class="std std-ref">int32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">histograms_size4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">total_count4_ptr</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">nonempty4_ptr</span>
+    <span class="p">)</span>
+</pre>
+<p>JXL ANS init Histogram kernel.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>config</td>
+<td>configuration for the kernel.</td>
+</tr>
+<tr class="row-even"><td>ac_coef_ordered_ddr</td>
+<td>ac coefficients</td>
+</tr>
+<tr class="row-odd"><td>strategy_ddr</td>
+<td>ac strategy</td>
+</tr>
+<tr class="row-even"><td>qf_ddr</td>
+<td>quant field</td>
+</tr>
+<tr class="row-odd"><td>qdc_ddr</td>
+<td>qdc</td>
+</tr>
+<tr class="row-even"><td>ctx_map</td>
+<td>ctx_map ddr</td>
+</tr>
+<tr class="row-odd"><td>qf_thresholds</td>
+<td>quantfield_thresholds</td>
+</tr>
+<tr class="row-even"><td>ac_tokens_ddr</td>
+<td>the ouput of ac tokens</td>
+</tr>
+<tr class="row-odd"><td>token0_ptr</td>
+<td>tokens for Block Context Map</td>
+</tr>
+<tr class="row-even"><td>token1_ptr</td>
+<td>tokens for Modular frame tree</td>
+</tr>
+<tr class="row-odd"><td>token2_ptr</td>
+<td>tokens for coef orders</td>
+</tr>
+<tr class="row-even"><td>token3_ptr</td>
+<td>tokens for Modular frames</td>
+</tr>
+<tr class="row-odd"><td>histograms0_ptr</td>
+<td>histograms for Block Context Map.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt0_ptr</td>
+<td>Count of context for histograms for Block Context Map.</td>
+</tr>
+<tr class="row-odd"><td>histo_size0_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo0_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-odd"><td>histograms1_ptr</td>
+<td>histograms for Modular frame tree.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt1_ptr</td>
+<td>Count of context for histograms for Modular frame tree.</td>
+</tr>
+<tr class="row-odd"><td>histo_size1_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo1_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-odd"><td>histograms2_ptr</td>
+<td>histograms for code from Modular frame.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt2_ptr</td>
+<td>Count of context for histograms for Modular frame.</td>
+</tr>
+<tr class="row-odd"><td>histo_size2_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo2_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-odd"><td>histograms3_ptr</td>
+<td>histograms for coef orders.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt3_ptr</td>
+<td>Count of context for histograms for coef orders.</td>
+</tr>
+<tr class="row-odd"><td>histo_size3_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo3_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+<tr class="row-odd"><td>histograms4_ptr</td>
+<td>histograms for ac coefficients.</td>
+</tr>
+<tr class="row-even"><td>histo_totalcnt4_ptr</td>
+<td>Count of context for histograms for ac coefficients.</td>
+</tr>
+<tr class="row-odd"><td>histo_size4_ptr</td>
+<td>size for each context</td>
+</tr>
+<tr class="row-even"><td>nonempty_histo4_ptr</td>
+<td>indicate which context is empty</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="jxlenc-lossy-enc-compute">
+<span id="cid-xf-codec-jxlenc-lossy-enc-compute"></span><span id="doxid-namespacexf-1-1codec-1a9aa7ae0cf6d32b5ba3745c84696d3da9"></span><h2>JxlEnc_lossy_enc_compute<a class="headerlink" href="#jxlenc-lossy-enc-compute" title="Permalink to this headline">¶</a></h2>
+<pre class="highlight literal-block">
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;jxlEnc/hls_lossy_enc_compute.hpp&quot;</span>
+</pre>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="kt">void</span> <span class="n">JxlEnc_lossy_enc_compute</span> <span class="p">(</span>
+    <span class="kt">int</span> <span class="n">config</span> <span class="p">[</span><span class="n">MAX_NUM_CONFIG</span><span class="p">],</span>
+    <span class="kt">float</span> <span class="n">config_fl</span> <span class="p">[</span><span class="n">MAX_NUM_CONFIG</span><span class="p">],</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">hls_opsin_1</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">hls_opsin_2</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">hls_opsin_3</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">quant_field_row</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">masking_field_row</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">aq_map_f</span><span class="p">,</span>
+    <span class="kt">int8_t</span><span class="o">*</span> <span class="n">cmap_axi</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">*</span> <span class="n">ac_coef_axiout</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span><span class="o">*</span> <span class="n">strategy_all</span><span class="p">,</span>
+    <span class="kt">int</span><span class="o">*</span> <span class="n">raw_quant_field_i</span><span class="p">,</span>
+    <a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span><span class="o">*</span> <span class="n">hls_order</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">hls_dc8x8</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">hls_dc16x16</span><span class="p">,</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">hls_dc32x32</span>
+    <span class="p">)</span>
+</pre>
+<p>Level 2 : kernel implement for JXL lossy frame encode computing.</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>config</td>
+<td>the int config signal, such as image size, field stride and etc.</td>
+</tr>
+<tr class="row-even"><td>config_fl</td>
+<td>the floating config signal, such as cost, inv_global_scale and etc.</td>
+</tr>
+<tr class="row-odd"><td>hls_opsin_1</td>
+<td>the input RGB image data for channnel-1.</td>
+</tr>
+<tr class="row-even"><td>hls_opsin_2</td>
+<td>the input RGB image data for channnel-2.</td>
+</tr>
+<tr class="row-odd"><td>hls_opsin_3</td>
+<td>the input RGB image data for channnel-3.</td>
+</tr>
+<tr class="row-even"><td>quant_field_row</td>
+<td>the initial quant_filed data.</td>
+</tr>
+<tr class="row-odd"><td>masking_filed_row</td>
+<td>the initial masking_filed data.</td>
+</tr>
+<tr class="row-even"><td>aq_map_f</td>
+<td>the initial adjust quant map data.</td>
+</tr>
+<tr class="row-odd"><td>cmap_axi</td>
+<td>the output of color correlation map.</td>
+</tr>
+<tr class="row-even"><td>ac_coef_axiout</td>
+<td>the output of quanted AC coefficients.</td>
+</tr>
+<tr class="row-odd"><td>strategy_all</td>
+<td>the output of strategy for each block in image</td>
+</tr>
+<tr class="row-even"><td>raw_quant_field_i</td>
+<td>the output of computed raw_quant_field</td>
+</tr>
+<tr class="row-odd"><td>hls_order</td>
+<td>the output of orders for each block in image</td>
+</tr>
+<tr class="row-even"><td>hls_dc8x8</td>
+<td>the DC coefficients output for 8x8 blocks</td>
+</tr>
+<tr class="row-odd"><td>hls_dc16x16</td>
+<td>the DC coefficients output for 16x16 blocks</td>
+</tr>
+<tr class="row-even"><td>hls_dc32x32</td>
+<td>the DC coefficients output for 32x32 blocks</td>
 </tr>
 </tbody>
 </table>

@@ -74,8 +74,8 @@ function OptanonWrapper() { }
   <link rel="stylesheet" href="../_static/css/pro.min.css" media="all" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="struct xf::codec::sos_data" href="struct_xf_codec_sos_data.html" />
-    <link rel="prev" title="struct xf::codec::hls_huff_segment" href="struct_xf_codec_hls_huff_segment.html" /> 
+    <link rel="next" title="Design Internals" href="../guide_L2/internals.html" />
+    <link rel="prev" title="struct xf::codec::cmp_info" href="struct_xf_codec_cmp_info.html" /> 
 	</head>
 	<body>
 		<div class="xilinx-bs3"/>
@@ -257,6 +257,7 @@ function OptanonWrapper() { }
 <li class="toctree-l1"><a class="reference internal" href="../overview.html#license">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html#trademark-notice">Trademark Notice</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Vitis Codec Library Tutorial</a></li>
 </ul>
 <p class="caption"><span class="caption-text">L1 User Guide</span></p>
 <ul>
@@ -350,13 +351,14 @@ function OptanonWrapper() { }
 <pre class="highlight overview-code-block literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;utils_XAcc_jpeg.hpp&quot;</span>
 </pre>
+<p>image size information for jpeg mcu</p>
 <pre class="highlight overview-code-block literal-block" id="cid-xf-codec-img-info-hls-mcuv">
 <span id="doxid-structxf-1-1codec-1-1img-info-1a401a4ee3d4649a33f677d6e004e46cea"></span><span id="cid-xf-codec-img-info-hls-mcuh"></span><span id="doxid-structxf-1-1codec-1-1img-info-1aea419bba2b3e4442508b540e87ea4bb8"></span><span id="cid-xf-codec-img-info-hls-mcuc"></span><span id="doxid-structxf-1-1codec-1-1img-info-1a469d7833d5907364e9e645aee19ccd08"></span><span id="cid-xf-codec-img-info-hls-cs-cmpc"></span><span id="doxid-structxf-1-1codec-1-1img-info-1ac00dfe3f0556d70ce6ed970fd5b96361"></span><span></span><span class="c1">// fields</span>
 
-<span class="kt">uint8_t</span> <span class="n">hls_cs_cmpc</span>
-<span class="kt">uint32_t</span> <span class="n">hls_mcuc</span>
-<span class="kt">uint16_t</span> <span class="n">hls_mcuh</span>
-<span class="kt">uint16_t</span> <span class="n">hls_mcuv</span>
+<a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1aba7bc1797add20fe3efdf37ced1182c5"><span class="std std-ref">uint8_t</span></a><span></span> <span class="n">hls_cs_cmpc</span>
+<a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1a435d1572bf3f880d55459d9805097f62"><span class="std std-ref">uint32_t</span></a><span></span> <span class="n">hls_mcuc</span>
+<a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">hls_mcuh</span>
+<a class="reference internal" href="global.html#doxid-vp8-hls-syn-8h-1adf4d876453337156dde61095e1f20223"><span class="std std-ref">uint16_t</span></a><span></span> <span class="n">hls_mcuv</span>
 </pre>
 </div>
 
@@ -376,10 +378,10 @@ function OptanonWrapper() { }
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="struct_xf_codec_sos_data.html" class="btn btn-neutral float-right" title="struct xf::codec::sos_data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../guide_L2/internals.html" class="btn btn-neutral float-right" title="Design Internals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="struct_xf_codec_hls_huff_segment.html" class="btn btn-neutral float-left" title="struct xf::codec::hls_huff_segment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="struct_xf_codec_cmp_info.html" class="btn btn-neutral float-left" title="struct xf::codec::cmp_info" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

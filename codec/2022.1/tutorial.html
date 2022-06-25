@@ -1,0 +1,1411 @@
+﻿
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vitis, Database, Vitis Database Library, Alveo" name="keywords" />
+<meta content="Vitis Database Library is an open-sourced Vitis library written in C++ for accelerating database applications in a variety of use cases." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+	<!-- OneTrust Cookies Consent Notice start for xilinx.github.io -->
+<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="37701bd4-e5c0-4ee3-9329-e7475d0b13a7" ></script>
+<script type="text/javascript">
+function OptanonWrapper() { }
+</script>
+<!-- OneTrust Cookies Consent Notice end for xilinx.github.io -->
+		<!-- Google Tag Manager -->
+	<script type="text/plain" class="optanon-category-C0002">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5RHQV7');</script>
+	<!-- End Google Tag Manager -->
+	
+        <!-- Google Tag Manager -->
+        <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5RHQV7" height="0" width="0" style="display:none;visibility:hidden" class="optanon-category-C0002"></iframe></noscript>
+        <!-- End Google Tag Manager -->	
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="_static/js/gtm.js"></script>
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="_static/js/linkid.js"></script>
+    <script type="text/javascript" src="_static/js/Searchbox.min.js"></script>
+    <script type="text/javascript" src="_static/js/header-footer.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Document" href="guide_L1/api.html" />
+    <link rel="prev" title="Release Note" href="release.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+ <div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+
+    
+    
+
+    
+
+
+
+<div class="xf-content-height">
+    
+
+<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+    
+    <div class="header parbase aem-GridColumn aem-GridColumn--default--12"><noindex>
+	<header data-component="header" class="site-header">
+		<nav class="navbar navbar-default">
+			<div class="container-fluid main-nav">
+				<div class="row">
+					<div class="navbar-column col-xs-4 col-sm-5">
+						<ul class="nav navbar-nav hidden-xs">
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+								</li>
+							</ul>
+							
+						<ul class="nav navbar-nav hidden-sm hidden-md hidden-lg">
+							<li>
+									<button data-target="#header-container-0" data-function="toggle">Solutions</button>
+								</li>
+							<li>
+									<button data-target="#header-container-1" data-function="toggle">Products</button>
+								</li>
+							<li>
+									<button data-target="#header-container-2" data-function="toggle">Company</button>
+								</li>
+							</ul>
+							
+						<div id="header-container-0" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-1" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-2" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							</div>
+					<div class="logo-column col-xs-4 col-sm-2">
+						<div class="logo">
+							<a target="_blank" href="https://www.xilinx.com/">
+								<img src="https://github.com/Xilinx/Image-Collateral/blob/main/xilinx-header-logo.svg?raw=true" title="Xilinx Inc"/>
+							</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			</nav></header></noindex></div>
+		
+	
+</div>
+
+    
+</div>
+</div>
+
+<div class="calloutBanner parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><div class="callout-banner">
+    Xilinx is now a part of <a target="_blank" href="https://www.amd.com/en/corporate/xilinx-acquisition">AMD</a> |  <a target="_blank" href="https://www.amd.com/en/corporate/privacy">Learn More</a>
+</div>
+</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Vitis Codec Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2022.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Library Overview</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#license">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#trademark-notice">Trademark Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release.html">Release Note</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vitis Codec Library Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vitis-codec-and-hardware-acceleration">Vitis Codec and Hardware Acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-1-how-vitis-codec-library-works">Lab-1: How Vitis Codec Library Works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-the-vitis-codec-library">Get the Vitis Codec Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-the-dependencies">Get the Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-environment">Setup Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-the-vitis-graph-library">Download the Vitis Graph Library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-to-run-l1-cases">Command to Run L1 cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-to-run-l2-cases">Command to Run L2 cases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-2-using-l1-level-api-to-evaluate-jpeg-decoding-acceleration">Lab-2: Using L1-level API to evaluate JPEG decoding acceleration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lab-purpose">Lab purpose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operation-steps">Operation steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#learn-about-run-hls-tcl-file">(1) Learn about <code class="docutils literal notranslate"><span class="pre">run_hls.tcl</span></code> file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#csim">(2) CSIM:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#synthesis">(3) Synthesis:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cosim">(4) COSIM:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-with-export">(5) Design with export</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lab-summary">Lab summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-3-using-l2-level-api-to-implement-a-single-kernel-acceleration-for-jpeg-decoding">Lab-3: Using L2-level API to implement a single-kernel acceleration for JPEG decoding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Lab purpose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Operation steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#understand-the-work-directory">(1) Understand the Work Directory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#build-kernel-for-different-modes">(2) Build kernel for different modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-kernel-in-software-emulation-mode">(3) Run kernel in Software-Emulation mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-kernel-in-hardware-emulation-mode">(4) Run kernel in Hardware-Emulation mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-kernel-in-hardware">(5) Run kernel in Hardware</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Lab summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-4-using-multi-kernel-solution-to-accelerate-webp-encoding-based-on-open-source-project">Lab-4: Using multi-kernel solution to accelerate WebP encoding based on open-source project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Lab purpose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Operation steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#open-source-project-analysis-and-kernel-partition">(1) Open source project analysis and kernel partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#project-files-for-multi-kernel-design">(2) Project files for multi-kernel design</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#software-emulation">(3) Software Emulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-emulation">(4) Hardware Emulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-build-and-check-resource-consumption">(5) Hardware Build and Check Resource Consumption</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-running">(6) Hardware Running</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Lab summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tutorial-summary">Tutorial Summary</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">L1 User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide_L1/api.html">API Document</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide_L1/internals.html">Design Internals</a></li>
+</ul>
+<p class="caption"><span class="caption-text">L2 User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide_L2/api.html">API Document</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide_L2/internals.html">Design Internals</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+
+            
+			
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Vitis Codec Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Vitis Codec Library Tutorial</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="vitis-codec-library-tutorial">
+<span id="brief"></span><h1>Vitis Codec Library Tutorial<a class="headerlink" href="#vitis-codec-library-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="vitis-codec-and-hardware-acceleration">
+<h2>Vitis Codec and Hardware Acceleration<a class="headerlink" href="#vitis-codec-and-hardware-acceleration" title="Permalink to this headline">¶</a></h2>
+<p>Image encoding and decoding (codec in short) are very common and important operations in Internet applications. The Vitis Codec library provides a set of acceleration APIs to accelerate image encoding, decoding and other related algorithms. This tutorial will be based on the popular JPEG decoding and WebP encoding to show how to accelerate image codec projects by using these APIs.</p>
+<p>The tutorial includes four labs:</p>
+<ul class="simple">
+<li>Lab-1: How Vitis Codec Library Works</li>
+<li>Lab-2: Using L1-level API to evaluate JPEG decoding acceleration</li>
+<li>Lab-3: Using L2-level API to implement a single-kernel acceleration for JPEG decoding</li>
+<li>Lab-4: Using multi-kernel solution to accelerate WebP encoding based on open-source project</li>
+</ul>
+</div>
+<div class="section" id="lab-1-how-vitis-codec-library-works">
+<h2>Lab-1: How Vitis Codec Library Works<a class="headerlink" href="#lab-1-how-vitis-codec-library-works" title="Permalink to this headline">¶</a></h2>
+<p>Vitis Codec Library is an open-sourced library written in HLS C/C++ for the acceleration of image processing. It aims to provides reference designs for image codec algorithms that fit the <a class="reference external" href="https://www.xilinx.com/products/boards-and-kits/alveo.html">Xilinx Alveo Series</a>
+acceleration cards. The APIs in Vitis Codec Library have been classified into two layers, namely L1/L2. Each targets to serve different audience.</p>
+<ul class="simple">
+<li>L1 APIs locate at <code class="docutils literal notranslate"><span class="pre">Vitis_Libraries/codec/L1</span></code>. They are basic components that will be used to compose compute-units. The L1 APIs are all well-optimized HLS designs and are able to fit into various resource constraints.</li>
+<li>L2 APIs locate at <code class="docutils literal notranslate"><span class="pre">Vitis_Libraries/codec/L2</span></code>. They are a number of compute-unit designs running on Alveo cards. It provides a set of compute-unit designs implemented in HLS codes. These L2 APIs needs to be compiled as OpenCL kernels and will be called by OpenCL APIs.</li>
+</ul>
+</div>
+<div class="section" id="get-the-vitis-codec-library">
+<h2>Get the Vitis Codec Library<a class="headerlink" href="#get-the-vitis-codec-library" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-the-dependencies">
+<h3>Get the Dependencies<a class="headerlink" href="#get-the-dependencies" title="Permalink to this headline">¶</a></h3>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a>, Instructions to install Vitis can be found <a class="reference external" href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installation">here</a>.</div>
+<div class="line"><a class="reference external" href="https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/alveo/u50.html">Alveo U50 packages</a>, Instructions to deploy Alveo U50 can be found <a class="reference external" href="https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_8/ug1370-u50-installation.pdf">here</a>.</div>
+<div class="line"><a class="reference external" href="https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted">Alveo U200 packages</a>, Instructions to deploy Alveo U200 can be found <a class="reference external" href="https://www.xilinx.com/cgi-bin/docs/pdfdoc?url=https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/2_0/ug1301-getting-started-guide-alveo-accelerator-cards.pdf">here</a>.</div>
+</div>
+</div>
+<div class="section" id="setup-environment">
+<h3>Setup Environment<a class="headerlink" href="#setup-environment" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="ch">#!/bin/bash</span>
+<span class="nb">source</span> &lt;Vitis_install_path&gt;/Vitis/2022.1/settings64.sh
+<span class="nb">source</span> &lt;install_path_xrt&gt;/xrt/setup.sh
+<span class="nb">export</span> <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span>&lt;install_path_platforms&gt;
+<span class="nb">export</span> <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1
+<span class="nb">export</span> <span class="nv">TARGET</span><span class="o">=</span>sw_emu
+</pre>
+<p>Note: The TARGET environment variable can be set as sw_emu, hw_emu and hw according to which emulation mode is expected to run.
+sw_emu is for C level emulations. hw_emu is for RTL level emulations. hw is for real on-board test. For more information about the Vitis Target please have a look at <a class="reference external" href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Build-Targets?tocId=8ijg9En3MQ_7CJBZrUFENw">here</a>.</p>
+</div>
+<div class="section" id="download-the-vitis-graph-library">
+<h3>Download the Vitis Graph Library<a class="headerlink" href="#download-the-vitis-graph-library" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="ch">#!/bin/bash</span>
+git clone https://github.com/Xilinx/Vitis_Libraries.git
+<span class="nb">cd</span> Vitis_Libraries/codec
+</pre>
+</div>
+<div class="section" id="command-to-run-l1-cases">
+<h3>Command to Run L1 cases<a class="headerlink" href="#command-to-run-l1-cases" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="ch">#!/bin/bash</span>
+<span class="nb">cd</span> L1/tests/jpegdec                    <span class="c1"># jpegdec is an example case. Please change directory to any other cases in L1/test if interested</span>
+make <span class="nb">help</span>                              <span class="c1"># show available make command</span>
+make run <span class="nv">CSIM</span><span class="o">=</span><span class="m">1</span>                        <span class="c1"># run C level simulation of the HLS code</span>
+make run <span class="nv">CSYNTH</span><span class="o">=</span><span class="m">1</span> <span class="nv">COSIM</span><span class="o">=</span><span class="m">1</span>              <span class="c1"># run RTL level simulation of the HLS code</span>
+make cleanall
+</pre>
+<p>Test control variables are:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">CSIM</span></code> for C level simulation.</li>
+<li><code class="docutils literal notranslate"><span class="pre">CSYNTH</span></code> for high level synthesis to RTL.</li>
+<li><code class="docutils literal notranslate"><span class="pre">COSIM</span></code> for co-simulation between software test bench and generated RTL.</li>
+<li><code class="docutils literal notranslate"><span class="pre">VIVADO_SYN</span></code> for synthesis by Vivado.</li>
+<li><code class="docutils literal notranslate"><span class="pre">VIVADO_IMPL</span></code> for implementation by Vivado.</li>
+</ul>
+<p>For all these variables, setting to <code class="docutils literal notranslate"><span class="pre">1</span></code> indicates execution while <code class="docutils literal notranslate"><span class="pre">0</span></code> for skipping.
+The default value of all these control variables are <code class="docutils literal notranslate"><span class="pre">0</span></code>, so they can be omitted from command line
+if the corresponding step is not wanted.</p>
+<p>For more information about L1 APIs please have <a class="reference internal" href="#tutorial-lab2"><span class="std std-ref">Lab-2: Using L1-level API to evaluate JPEG decoding acceleration</span></a>.</p>
+</div>
+<div class="section" id="command-to-run-l2-cases">
+<h3>Command to Run L2 cases<a class="headerlink" href="#command-to-run-l2-cases" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight literal-block">
+<span></span><span class="ch">#!/bin/bash</span>
+<span class="nb">cd</span> L2/demos/jpegDec                    <span class="c1"># jpegDec is an example case. Please change directory to any other cases in L2/demos if interested.</span>
+make <span class="nb">help</span>                              <span class="c1"># show available make command</span>
+make host                              <span class="c1"># build the binary running on host</span>
+make build                             <span class="c1"># build the binary running on Alveo</span>
+make run                               <span class="c1"># run the entire program</span>
+make cleanall
+</pre>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">TARGET</span></code> decides the FPGA binary type</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">sw_emu</span></code> is for software emulation</li>
+<li><code class="docutils literal notranslate"><span class="pre">hw_emu</span></code> is for hardware emulation</li>
+<li><code class="docutils literal notranslate"><span class="pre">hw</span></code> is for deployment on physical card. (Compilation to hardware binary often takes hours.)</li>
+</ul>
+<p>Besides <code class="docutils literal notranslate"><span class="pre">run</span></code>, the Vitis case makefile also allows <code class="docutils literal notranslate"><span class="pre">host</span></code> and <code class="docutils literal notranslate"><span class="pre">xclbin</span></code> as build target.</p>
+<p>For more information about L2 APIs please have a look at <a class="reference internal" href="#tutorial-lab3"><span class="std std-ref">Lab-3: Using L2-level API to implement a single-kernel acceleration for JPEG decoding</span></a>.</p>
+</div>
+</div>
+<div class="section" id="lab-2-using-l1-level-api-to-evaluate-jpeg-decoding-acceleration">
+<span id="tutorial-lab2"></span><h2>Lab-2: Using L1-level API to evaluate JPEG decoding acceleration<a class="headerlink" href="#lab-2-using-l1-level-api-to-evaluate-jpeg-decoding-acceleration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lab-purpose">
+<h3>Lab purpose<a class="headerlink" href="#lab-purpose" title="Permalink to this headline">¶</a></h3>
+<p>Before using Vitis flow to build a full-function kernel running on hardware, users may want to use a relative simple flow to estimate performance and resource consumption for some key modules of a complex algorithm. In this lab, users will estimate a key module called ‘kernel_parser_decoder ‘ which involves JPEG parsing and Huffman decoding. Users will get an exported IP of the key module in the end of this lab, but this is just the first step to achieve a successful design.</p>
+</div>
+<div class="section" id="operation-steps">
+<h3>Operation steps<a class="headerlink" href="#operation-steps" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="learn-about-run-hls-tcl-file">
+<h4>(1) Learn about <code class="docutils literal notranslate"><span class="pre">run_hls.tcl</span></code> file<a class="headerlink" href="#learn-about-run-hls-tcl-file" title="Permalink to this headline">¶</a></h4>
+<p>In Vitis libraries, all L1 flows are controlled by a tcl file named <code class="docutils literal notranslate"><span class="pre">run_hls.tcl</span></code>. The file for this lab can be found at <code class="docutils literal notranslate"><span class="pre">L1/tests/jpegDec/run_</span> <span class="pre">hls.tcl</span></code>. Compared to L2 flow which is based on Opencl kernels, L1 flow allows users to quickly set the top-level functions so that they can focus more on a few functions of interests, analyze the performance bottlenecks of these functions, or run rapid synthesis and simulation without any source code modification.</p>
+</div>
+<div class="section" id="csim">
+<h4>(2) CSIM:<a class="headerlink" href="#csim" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li>Build and run one of the following using U200 platform</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L1/tests/jpegdec
+
+make run <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm <span class="nv">CSIM</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># DEVICE is case-insensitive and support awk regex.</span>
+
+<span class="c1"># Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.</span>
+
+make run <span class="nv">XPART</span><span class="o">=</span>xcu200-fsgd2104-2-e <span class="nv">CSIM</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># delete generated files</span>
+make clean
+</pre>
+<ol class="arabic simple" start="2">
+<li>Change input jpeg file for test</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span>vi run_hls.tcl
+
+<span class="c1"># update the *.jpg path after the &quot;-JPEGFile&quot;</span>
+-JPEGFile *.jpg
+</pre>
+<p>Example csim output:</p>
+<pre class="highlight literal-block">
+<span></span>------------ Test <span class="k">for</span> decode image.jpg  -------------
+WARNING: Vitis_Libraries/codec/L1/images/t0.jpg will be opened <span class="k">for</span> binary read.
+<span class="m">51193</span> entries <span class="nb">read</span> from Vitis_Libraries/codec/L1/images/t0.jpg
+<span class="nv">hls_mcuv</span><span class="o">=</span><span class="m">33</span>, <span class="nv">hls_mcuh</span><span class="o">=</span><span class="m">39</span>, <span class="nv">hls_mcuc</span><span class="o">=</span><span class="m">1287</span>,
+huffman <span class="m">1</span> bits codes is :0b0000000000000000
+huffman <span class="m">2</span> bits codes is :0b0000000000000000
+huffman <span class="m">3</span> bits codes is :0b0000000000000010
+huffman <span class="m">4</span> bits codes is :0b0000000000001110
+huffman <span class="m">5</span> bits codes is :0b0000000000011110
+huffman <span class="m">6</span> bits codes is :0b0000000000111110
+huffman <span class="m">7</span> bits codes is :0b0000000001111110
+huffman <span class="m">8</span> bits codes is :0b0000000011111110
+huffman <span class="m">9</span> bits codes is :0b0000000111111110
+huffman <span class="m">10</span> bits codes is :0b0000001111111110
+huffman <span class="m">11</span> bits codes is :0b0000011111111100
+huffman <span class="m">12</span> bits codes is :0b0000111111111000
+huffman <span class="m">13</span> bits codes is :0b0001111111110000
+huffman <span class="m">14</span> bits codes is :0b0011111111100000
+huffman <span class="m">15</span> bits codes is :0b0111111111000000
+huffman <span class="m">16</span> bits codes is :0b1111111110000000
+...
+
+the end <span class="m">3</span> blocks before zigzag are :
+ffffffb6,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+ffffffe6,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0015</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+Ready <span class="k">for</span> next image!
+INFO: <span class="o">[</span>SIM <span class="m">211</span>-1<span class="o">]</span> CSim <span class="k">done</span> with <span class="m">0</span> errors.
+</pre>
+<p>In order to facilitate user observation, the key module prints out the last three 8x8 DCT coefficients of the last MCU, including a Y, U and V.</p>
+</div>
+<div class="section" id="synthesis">
+<h4>(3) Synthesis:<a class="headerlink" href="#synthesis" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li>Build and run one of the following using U200 platform</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span>make run <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm <span class="nv">CSYNTH</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># DEVICE is case-insensitive and support awk regex.</span>
+
+<span class="c1"># Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.</span>
+
+make run <span class="nv">XPART</span><span class="o">=</span>xcu200-fsgd2104-2-e <span class="nv">CSYNTH</span><span class="o">=</span><span class="m">1</span>
+</pre>
+<ol class="arabic simple" start="2">
+<li>Quick reset the top-level functions so that they can focus more on a few functions of interest</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span>vi run_hls.tcl
+
+<span class="c1"># update the &quot;set_top kernel_parser_decoder&quot;, for example &quot;set_top Huffman_decoder&quot;, the name of top is the function name in the design codes.</span>
+set_top kernel_parser_decoder --&gt; set_top Huffman_decoder
+</pre>
+<p>Then rerun the command of CSYNTH, will allow user to analyze the performance bottlenecks of “Huffman_decoder” function, or run rapid synthesis and simulation without any source code modification.</p>
+<p>Example Synthesis output:</p>
+<pre class="highlight literal-block">
+<span></span>Vitis HLS - High-Level Synthesis from C, C++ and OpenCL v2022.1 <span class="o">(</span><span class="m">64</span>-bit<span class="o">)</span>
+...
+
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-1510<span class="o">]</span> Running: set_top kernel_parser_decoder
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-1510<span class="o">]</span> Running: open_solution -reset solution1
+...
+
+INFO: <span class="o">[</span>VHDL <span class="m">208</span>-304<span class="o">]</span> Generating VHDL RTL <span class="k">for</span> kernel_parser_decoder.
+INFO: <span class="o">[</span>VLOG <span class="m">209</span>-307<span class="o">]</span> Generating Verilog RTL <span class="k">for</span> kernel_parser_decoder.
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-790<span class="o">]</span> **** Loop Constraint Status: All loop constraints were NOT satisfied.
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-789<span class="o">]</span> **** Estimated Fmax: <span class="m">271</span>.96 MHz
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-111<span class="o">]</span> Finished Command csynth_design CPU user time: <span class="m">65</span>.56 seconds. CPU system time: <span class="m">4</span>.61 seconds. Elapsed time: <span class="m">73</span>.87 seconds<span class="p">;</span> current allocated memory: <span class="m">448</span>.0
+<span class="m">00</span> MB.
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-112<span class="o">]</span> Total CPU user time: <span class="m">71</span>.64 seconds. Total CPU system time: <span class="m">6</span>.21 seconds. Total elapsed time: <span class="m">80</span>.36 seconds<span class="p">;</span> peak allocated memory: <span class="m">1</span>.195 GB.
+</pre>
+<p>Loop constraints may not be satisfied, as the goal of loop is set to 300MHz in the run_hls.tcl, and different hls tool version may result in different “Estimated Fmax”.</p>
+<ol class="arabic simple" start="3">
+<li>Check the unsatisfied path</li>
+</ol>
+<p>Read the report of  CSYNTH, grep “critical path” like below:</p>
+<pre class="highlight literal-block">
+<span></span>INFO: <span class="o">[</span>HLS <span class="m">200</span>-10<span class="o">]</span> ----------------------------------------------------------------
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-42<span class="o">]</span> -- Implementing module <span class="s1">&#39;Huffman_decoder_Pipeline_DECODE_LOOP&#39;</span>
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-10<span class="o">]</span> ----------------------------------------------------------------
+INFO: <span class="o">[</span>SCHED <span class="m">204</span>-11<span class="o">]</span> Starting scheduling ...
+INFO: <span class="o">[</span>SCHED <span class="m">204</span>-61<span class="o">]</span> Pipelining loop <span class="s1">&#39;DECODE_LOOP&#39;</span>.
+INFO: <span class="o">[</span>HLS <span class="m">200</span>-1470<span class="o">]</span> Pipelining result : Target <span class="nv">II</span> <span class="o">=</span> <span class="m">1</span>, Final <span class="nv">II</span> <span class="o">=</span> <span class="m">1</span>, <span class="nv">Depth</span> <span class="o">=</span> <span class="m">4</span>, loop <span class="s1">&#39;DECODE_LOOP&#39;</span>
+WARNING: <span class="o">[</span>HLS <span class="m">200</span>-1016<span class="o">]</span> The critical path in module <span class="s1">&#39;Huffman_decoder_Pipeline_DECODE_LOOP&#39;</span> consists of the following:   <span class="s1">&#39;add&#39;</span> operation
+<span class="o">(</span><span class="s1">&#39;add_ln503&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:503<span class="o">)</span> <span class="o">[</span><span class="m">582</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.705 ns<span class="o">)</span>
+   <span class="s1">&#39;shl&#39;</span> operation <span class="o">(</span><span class="s1">&#39;shl_ln503&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:503<span class="o">)</span> <span class="o">[</span><span class="m">584</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span> ns<span class="o">)</span>
+   <span class="s1">&#39;icmp&#39;</span> operation <span class="o">(</span><span class="s1">&#39;icmp_ln503&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:503<span class="o">)</span> <span class="o">[</span><span class="m">585</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.859 ns<span class="o">)</span>
+   <span class="s1">&#39;and&#39;</span> operation <span class="o">(</span><span class="s1">&#39;and_ln503&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:503<span class="o">)</span> <span class="o">[</span><span class="m">591</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span> ns<span class="o">)</span>
+   <span class="s1">&#39;select&#39;</span> operation <span class="o">(</span><span class="s1">&#39;select_ln503&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:503<span class="o">)</span> <span class="o">[</span><span class="m">592</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span> ns<span class="o">)</span>
+   <span class="s1">&#39;select&#39;</span> operation <span class="o">(</span><span class="s1">&#39;block_tmp&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:498<span class="o">)</span> <span class="o">[</span><span class="m">593</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.243 ns<span class="o">)</span>
+   <span class="s1">&#39;add&#39;</span> operation <span class="o">(</span><span class="s1">&#39;block&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">[</span><span class="m">599</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.785 ns<span class="o">)</span>
+   multiplexor before <span class="s1">&#39;phi&#39;</span> operation <span class="o">(</span><span class="s1">&#39;block&#39;</span><span class="o">)</span> with incoming values : <span class="o">(</span><span class="s1">&#39;lastDC_load&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">(</span><span class="s1">&#39;block&#39;</span>,
+   Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">[</span><span class="m">628</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.387 ns<span class="o">)</span>
+   <span class="s1">&#39;phi&#39;</span> operation <span class="o">(</span><span class="s1">&#39;block&#39;</span><span class="o">)</span> with incoming values : <span class="o">(</span><span class="s1">&#39;lastDC_load&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">(</span><span class="s1">&#39;block&#39;</span>,
+   Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">[</span><span class="m">628</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span> ns<span class="o">)</span>
+   multiplexor before <span class="s1">&#39;phi&#39;</span> operation <span class="o">(</span><span class="s1">&#39;empty_304&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> with incoming values : <span class="o">(</span><span class="s1">&#39;lastDC_load&#39;</span>,
+   Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">(</span><span class="s1">&#39;block&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">(</span><span class="s1">&#39;lastDC_load_1&#39;</span><span class="o">)</span> <span class="o">[</span><span class="m">632</span><span class="o">]</span>
+   <span class="o">(</span><span class="m">0</span>.387 ns<span class="o">)</span>
+   <span class="s1">&#39;phi&#39;</span> operation <span class="o">(</span><span class="s1">&#39;empty_304&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> with incoming values : <span class="o">(</span><span class="s1">&#39;lastDC_load&#39;</span>, Vitis_Libraries/codec/
+   L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">(</span><span class="s1">&#39;block&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:516<span class="o">)</span> <span class="o">(</span><span class="s1">&#39;lastDC_load_1&#39;</span><span class="o">)</span> <span class="o">[</span><span class="m">632</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span> ns<span class="o">)</span>
+   <span class="s1">&#39;select&#39;</span> operation <span class="o">(</span><span class="s1">&#39;select_ln549_2&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:549<span class="o">)</span> <span class="o">[</span><span class="m">641</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.243 ns<span class="o">)</span>
+   <span class="s1">&#39;store&#39;</span> operation <span class="o">(</span><span class="s1">&#39;lastDC_write_ln592&#39;</span>, Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:592<span class="o">)</span> of variable <span class="s1">&#39;select_ln549_2&#39;</span>,
+   Vitis_Libraries/codec/L1/src/XAcc_jpegdecoder.cpp:549 on <span class="nb">local</span> variable <span class="s1">&#39;op&#39;</span> <span class="o">[</span><span class="m">651</span><span class="o">]</span>  <span class="o">(</span><span class="m">0</span>.453 ns<span class="o">)</span>
+...
+</pre>
+<p>Then check the report for this loop: use command “vi test.prj/solution1/syn/report/Huffman_decoder_Pipeline_DECODE_LOOP_csynth.rpt ” in the meanwhile open the GUI.</p>
+<p>In the Schedule Viewer in GUI, users could check the details of the circuit:</p>
+<div class="figure align-center" id="tutorial-figure-lab2-6">
+<a class="reference internal image-reference" href="_images/L2jpegdec-6.PNG"><img alt="_images/L2jpegdec-6.PNG" src="_images/L2jpegdec-6.PNG" style="width: 100%;" /></a>
+</div>
+<p>Comparing the two above, it can be seen that the timing is not satisfied because the number of bits of the shift register and comparator is large. There is no better optimization method for this situation. Users can reduce the bit width of this circuit according to their needs to improve the timing. Of course, this change may also lead to a reduction in bandwidth, so there needs a trade-off between the width and frequency to achieve the best performance.</p>
+</div>
+<div class="section" id="cosim">
+<h4>(4) COSIM:<a class="headerlink" href="#cosim" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li>Build and run one of the following with U200 platform</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span>make run <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm <span class="nv">COSIM</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># DEVICE is case-insensitive and support awk regex.</span>
+
+<span class="c1"># Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.</span>
+
+make run <span class="nv">XPART</span><span class="o">=</span>xcu200-fsgd2104-2-e <span class="nv">COSIM</span><span class="o">=</span><span class="m">1</span>
+</pre>
+<p>Example output:</p>
+<pre class="highlight literal-block">
+<span></span>...
+
+<span class="c1"># xsim {kernel_parser_decoder} -autoloadwcfg -tclbatch {kernel_parser_decoder.tcl}</span>
+Time resolution is <span class="m">1</span> ps
+<span class="nb">source</span> kernel_parser_decoder.tcl
+<span class="c1">## run all</span>
+////////////////////////////////////////////////////////////////////////////////////
+// Inter-Transaction Progress: Completed Transaction / Total Transaction
+// Intra-Transaction Progress: Measured Latency / Latency Estimation * <span class="m">100</span>%
+//
+// RTL Simulation : <span class="s2">&quot;Inter-Transaction Progress&quot;</span> <span class="o">[</span><span class="s2">&quot;Intra-Transaction Progress&quot;</span><span class="o">]</span> @ <span class="s2">&quot;Simulation Time&quot;</span>
+////////////////////////////////////////////////////////////////////////////////////
+// RTL Simulation : <span class="m">0</span> / <span class="m">1</span> <span class="o">[</span>n/a<span class="o">]</span> @ <span class="s2">&quot;109000&quot;</span>
+// RTL Simulation : <span class="m">1</span> / <span class="m">1</span> <span class="o">[</span>n/a<span class="o">]</span> @ <span class="s2">&quot;543586000&quot;</span>
+////////////////////////////////////////////////////////////////////////////////////
+<span class="nv">$finish</span> called at <span class="nb">time</span> : <span class="m">543586000</span> ps : File <span class="s2">&quot;Vitis_Libraries/codec/L1/tests/jpegdec/test.prj/solution1/sim/verilog/kernel_parser_decoder.autotb.v&quot;</span> Line
+<span class="m">1564</span>
+run: Time <span class="o">(</span>s<span class="o">)</span>: <span class="nv">cpu</span> <span class="o">=</span> <span class="m">00</span>:00:02 <span class="p">;</span> <span class="nv">elapsed</span> <span class="o">=</span> <span class="m">00</span>:01:18 . Memory <span class="o">(</span>MB<span class="o">)</span>: <span class="nv">peak</span> <span class="o">=</span> <span class="m">2840</span>.148 <span class="p">;</span> <span class="nv">gain</span> <span class="o">=</span> <span class="m">0</span>.000 <span class="p">;</span> free <span class="nv">physical</span> <span class="o">=</span> <span class="m">28775</span> <span class="p">;</span> free <span class="nv">virtual</span> <span class="o">=</span> <span class="m">213419</span>
+<span class="c1">## quit</span>
+INFO: xsimkernel Simulation Memory Usage: <span class="m">307116</span> KB <span class="o">(</span>Peak: <span class="m">371652</span> KB<span class="o">)</span>, Simulation CPU Usage: <span class="m">77750</span> ms
+INFO: <span class="o">[</span>Common <span class="m">17</span>-206<span class="o">]</span> Exiting xsim at Sun Apr <span class="m">17</span> <span class="m">20</span>:36:36 <span class="m">2022</span>...
+INFO: <span class="o">[</span>COSIM <span class="m">212</span>-316<span class="o">]</span> Starting C post checking ...
+
+------------ Test <span class="k">for</span> decode image.jpg  -------------
+WARNING: Vitis_Libraries/codec/L1/images/t0.jpg will be opened <span class="k">for</span> binary read.
+<span class="m">51193</span> entries <span class="nb">read</span> from Vitis_Libraries/codec/L1/images/t0.jpg
+****the end <span class="m">3</span> blocks before zigzag are :
+ffffffb6,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+ffffffe6,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0015</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+<span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,  <span class="m">0000</span>,
+Ready <span class="k">for</span> next image!
+INFO: <span class="o">[</span>COSIM <span class="m">212</span>-1000<span class="o">]</span> *** C/RTL co-simulation finished: PASS ***
+...
+</pre>
+</div>
+<div class="section" id="design-with-export">
+<h4>(5) Design with export<a class="headerlink" href="#design-with-export" title="Permalink to this headline">¶</a></h4>
+<p>In this step, the HLS tool will run CSYNTH, VIVADO_SYN and VIVADO_IMPL flow to generate the IP file.</p>
+<ol class="arabic simple">
+<li>Build and run one of the following using U200 platform</li>
+</ol>
+<pre class="highlight literal-block">
+<span></span>make run <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm <span class="nv">VIVADO_IMPL</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># DEVICE is case-insensitive and support awk regex.</span>
+
+<span class="c1"># Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.</span>
+
+make run <span class="nv">XPART</span><span class="o">=</span>xcu200-fsgd2104-2-e <span class="nv">VIVADO_IMPL</span><span class="o">=</span><span class="m">1</span>
+</pre>
+<p>Example output:</p>
+<pre class="highlight literal-block">
+<span></span>Implementation tool: Xilinx Vivado v.2022.1
+
+...
+
+<span class="c1">#=== Post-Implementation Resource usage ===</span>
+SLICE:            <span class="m">0</span>
+LUT:           <span class="m">7945</span>
+FF:            <span class="m">8073</span>
+DSP:             <span class="m">12</span>
+BRAM:             <span class="m">5</span>
+URAM:             <span class="m">0</span>
+LATCH:            <span class="m">0</span>
+SRL:            <span class="m">678</span>
+CLB:           <span class="m">1746</span>
+
+<span class="c1">#=== Final timing ===</span>
+CP required:                     <span class="m">3</span>.330
+CP achieved post-synthesis:      <span class="m">3</span>.605
+CP achieved post-implementation: <span class="m">3</span>.347
+Timing not met
+</pre>
+<p>The report shows ‘timing not met’, that means the Vivado implementation process cannot achieve the targeted frequency (300MHz set in the run_hls.tcl). As this module always plays a role of bottleneck in entire JPGE decoding architecture, the final JPEG decoder should be likely to work at 270 to 280 MHz. That is a common situation for complex HLS designs. This tutorial will not discuss solutions for timing problem but for most of cases we still have a chance to improve the frequency.</p>
+<p>Based on the above results, we can make some estimates about the throughputs, including:</p>
+<ul class="simple">
+<li>The design can process a Huffman symbol up to 270 million per second</li>
+<li>Assuming that if the compression ratio is 4 ~ 8 for a JPEG image, the final output speed will be up to 1 ~ 2GB of YUV data per second</li>
+<li>If the inverse quantization and inverse DCT transform modules need matching throughput of Huffman, it is best to recovery 4 ~ 8 pixels in a cycle</li>
+</ul>
+<p>Compared with synthesis, using <code class="docutils literal notranslate"><span class="pre">Export</span></code> can obtain more accurate performance and resource consumption. Users usually needn’t to do <code class="docutils literal notranslate"><span class="pre">Export</span></code> for each design iteration, but it is recommended to periodically perform <code class="docutils literal notranslate"><span class="pre">Export</span></code> to confirm whether the performance and area of the design can meet the requirement.</p>
+</div>
+</div>
+<div class="section" id="lab-summary">
+<h3>Lab summary<a class="headerlink" href="#lab-summary" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>L1 is based on HLS flow. The main steps include CSIM, synthesis, COSIM and export which are controlled by a <code class="docutils literal notranslate"><span class="pre">run_hls.tcl</span></code> file</li>
+<li>L1 flow is helpful to estimate resources and performance</li>
+<li>L1 flow makes it easier to change the top-level function</li>
+</ul>
+</div>
+</div>
+<div class="section" id="lab-3-using-l2-level-api-to-implement-a-single-kernel-acceleration-for-jpeg-decoding">
+<span id="tutorial-lab3"></span><h2>Lab-3: Using L2-level API to implement a single-kernel acceleration for JPEG decoding<a class="headerlink" href="#lab-3-using-l2-level-api-to-implement-a-single-kernel-acceleration-for-jpeg-decoding" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h3>Lab purpose<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>To learn:</p>
+<ul class="simple">
+<li>Basic process of L2 operation</li>
+<li>Implement complete accelerated application</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h3>Operation steps<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="understand-the-work-directory">
+<h4>(1) Understand the Work Directory<a class="headerlink" href="#understand-the-work-directory" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">Makefile</span></code>: L2 flow control file</li>
+<li><code class="docutils literal notranslate"><span class="pre">conn_u200.cfg</span></code>: to specify the external memory ports map. Some constraints of Vivado can also be added here</li>
+<li><code class="docutils literal notranslate"><span class="pre">description.json</span></code>: The description of the L2 API used for creating the Makefile automatically</li>
+<li><code class="docutils literal notranslate"><span class="pre">utils.mk</span></code>: included by the Makefile</li>
+</ul>
+<p>Setup environment</p>
+<pre class="highlight literal-block">
+<span></span><span class="nb">source</span> &lt;intstall_path_vitis&gt;/installs/lin64/Vitis/2022.1/settings64.sh
+<span class="nb">source</span> &lt;intstall_path_xrt&gt;/xrt/setup.sh
+<span class="nb">export</span> <span class="nv">PLATFORM_REPO_PATHS</span><span class="o">=</span>&lt;intstall_path_platform&gt;/platforms
+</pre>
+</div>
+<div class="section" id="build-kernel-for-different-modes">
+<h4>(2) Build kernel for different modes<a class="headerlink" href="#build-kernel-for-different-modes" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L2/demos/jpegDec
+
+<span class="c1"># build and run one of the following using U200 platform</span>
+make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+
+<span class="c1"># delete generated files</span>
+make cleanall
+</pre>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">TARGET</span></code> decides the FPGA binary type</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">sw_emu</span></code> is for software emulation</li>
+<li><code class="docutils literal notranslate"><span class="pre">hw_emu</span></code> is for hardware emulation</li>
+<li><code class="docutils literal notranslate"><span class="pre">hw</span></code> is for deployment on physical card. (Compilation to hardware binary often takes hours.)</li>
+</ul>
+<p>Besides <code class="docutils literal notranslate"><span class="pre">run</span></code>, the Vitis case makefile also allows <code class="docutils literal notranslate"><span class="pre">host</span></code> and <code class="docutils literal notranslate"><span class="pre">xclbin</span></code> as build target.</p>
+</div>
+<div class="section" id="run-kernel-in-software-emulation-mode">
+<h4>(3) Run kernel in Software-Emulation mode<a class="headerlink" href="#run-kernel-in-software-emulation-mode" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="c1"># build and run JPEG Decoder using U200 platform</span>
+make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+</pre>
+<p>Example output:</p>
+<pre class="highlight literal-block">
+<span></span>...
+
+Info: Test passed
+INFO: writing the YUV file!
+WARNING: t0.raw will be opened <span class="k">for</span> binary write.
+WARNING: t0.yuv will be opened <span class="k">for</span> binary write.
+INFO: fmt <span class="m">1</span>, bas_info-&gt;mcu_cmp <span class="o">=</span> <span class="m">6</span>
+INFO: bas_info-&gt;hls_mbs<span class="o">[</span>cmp<span class="o">]</span> <span class="m">4</span>, <span class="m">1</span>, <span class="m">1</span>
+3F, 3F, 3F, 3F, 3F, 3F, 3F, 3F,
+3F, 3F, 3F, 3F, 3F, 3F, 3F, 3F,
+3F, 3F, 3F, 3F, 3F, 3F, 3F, 3F,
+3F, 3F, 3E, 3E, 3E, 3E, 3E, 3E,
+3D, 3E, 3E, 3E, 3F, 3F, 3F, 3F,
+3F, 3F, 3F, 3F, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>,
+<span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>,
+3F, 3F, 3F, 3F, 3F, 3F, 3F, 3F,
+3E, 3E, 3E, 3E, 3E, 3E, 3E, 3E,
+<span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>,
+3F, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>,
+<span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, 3F, 3F, 3F,
+<span class="m">41</span>, <span class="m">41</span>, <span class="m">40</span>, <span class="m">40</span>, 3F, <span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>,
+<span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>,
+<span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>,
+<span class="m">40</span>, <span class="m">40</span>, <span class="m">40</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>, <span class="m">41</span>,
+<span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>,
+<span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>,
+<span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>,
+<span class="m">63</span>, <span class="m">63</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>,
+<span class="m">61</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>,
+<span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>,
+<span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>,
+<span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>,
+<span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>, <span class="m">62</span>,
+<span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>,
+<span class="m">63</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>,
+<span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">63</span>, <span class="m">63</span>, <span class="m">63</span>,
+<span class="m">65</span>, <span class="m">65</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">63</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>,
+<span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>,
+<span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>,
+<span class="m">64</span>, <span class="m">64</span>, <span class="m">64</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>, <span class="m">65</span>,
+Please open the YUV file with fmt <span class="m">1</span> and <span class="o">(</span>width, height<span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="m">624</span>, <span class="m">528</span><span class="o">)</span>
+
+...
+</pre>
+</div>
+<div class="section" id="run-kernel-in-hardware-emulation-mode">
+<h4>(4) Run kernel in Hardware-Emulation mode<a class="headerlink" href="#run-kernel-in-hardware-emulation-mode" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="c1"># build and run JPEG Decoder using U200 platform</span>
+make run <span class="nv">TARGET</span><span class="o">=</span>hw_emu <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+</pre>
+<p>Now the test bench will run the case 10 times to calculate an average speed of the kernel</p>
+<p>Example output</p>
+<pre class="highlight literal-block">
+<span></span>...
+
+------------ Test <span class="k">for</span> decode image.jpg  -------------
+WARNING: Vitis_Libraries/codec/L2/demos/jpegDec/images/t0.jpg will be opened <span class="k">for</span> binary read.
+<span class="m">51193</span> entries <span class="nb">read</span> from Vitis_Libraries/codec/L2/demos/jpegDec/images/t0.jpg
+Found Platform
+Platform Name: Xilinx
+Info: Context created
+Info: Command queue created
+INFO: Found <span class="nv">Device</span><span class="o">=</span>xilinx_u50_gen3x16_xdma_201920_3
+INFO: Importing build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernelJpegDecoder.xclbin
+Loading: <span class="s1">&#39;build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernelJpegDecoder.xclbin&#39;</span>
+Loading: <span class="s1">&#39;build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernelJpegDecoder.xclbin&#39;</span>
+INFO: <span class="o">[</span>HW-EMU <span class="m">01</span><span class="o">]</span> Hardware emulation runs simulation underneath. Using a large data <span class="nb">set</span> will result in long simulation times. It is recommended that a small dataset is
+used <span class="k">for</span> faster execution. The flow uses approximate models <span class="k">for</span> Global memories and interconnect and hence the performance data generated is approximate.
+configuring penguin scheduler mode
+scheduler config ert<span class="o">(</span><span class="m">0</span><span class="o">)</span>, dataflow<span class="o">(</span><span class="m">1</span><span class="o">)</span>, slots<span class="o">(</span><span class="m">16</span><span class="o">)</span>, cudma<span class="o">(</span><span class="m">1</span><span class="o">)</span>, cuisr<span class="o">(</span><span class="m">0</span><span class="o">)</span>, cdma<span class="o">(</span><span class="m">0</span><span class="o">)</span>, cus<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+Info: Program created
+INFO: Kernel has been created
+Info: Kernel created
+INFO: Kernel has been created
+INFO: Finish kernel setup
+INFO: Finish kernel execution
+INFO: Finish E2E execution
+-------------------------------------------------------
+INFO: Data transfer from host to device: <span class="m">360540</span> us
+-------------------------------------------------------
+INFO: Data transfer from device to host: <span class="m">296951</span> us
+-------------------------------------------------------
+INFO: kernel <span class="m">0</span>: execution <span class="nb">time</span> <span class="m">135012750</span> usec
+INFO: kernel <span class="m">1</span>: execution <span class="nb">time</span> <span class="m">131009663</span> usec
+INFO: kernel <span class="m">2</span>: execution <span class="nb">time</span> <span class="m">134012825</span> usec
+INFO: kernel <span class="m">3</span>: execution <span class="nb">time</span> <span class="m">133013391</span> usec
+INFO: kernel <span class="m">4</span>: execution <span class="nb">time</span> <span class="m">132012707</span> usec
+INFO: kernel <span class="m">5</span>: execution <span class="nb">time</span> <span class="m">133013044</span> usec
+INFO: kernel <span class="m">6</span>: execution <span class="nb">time</span> <span class="m">130013132</span> usec
+INFO: kernel <span class="m">7</span>: execution <span class="nb">time</span> <span class="m">130012762</span> usec
+INFO: kernel <span class="m">8</span>: execution <span class="nb">time</span> <span class="m">130012930</span> usec
+INFO: kernel <span class="m">9</span>: execution <span class="nb">time</span> <span class="m">135013237</span> usec
+INFO: Average kernel execution per run: <span class="m">132312644</span> us
+-------------------------------------------------------
+INFO: Average E2E per run: <span class="m">1355900288</span> us
+-------------------------------------------------------
+
+...
+
+Please open the YUV file with fmt <span class="m">1</span> and <span class="o">(</span>width, height<span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="m">624</span>, <span class="m">528</span><span class="o">)</span>
+WARNING: Vitis_Libraries/codec/L2/demos/jpegDec/images/t0.yuv.h will be opened <span class="k">for</span> binary write.
+Ready <span class="k">for</span> next image!
+INFO: <span class="o">[</span>HW-EMU <span class="m">06</span>-0<span class="o">]</span> Waiting <span class="k">for</span> the simulator process to <span class="nb">exit</span>
+INFO: <span class="o">[</span>HW-EMU <span class="m">06</span>-1<span class="o">]</span> All the simulator processes exited successfully
+</pre>
+</div>
+<div class="section" id="run-kernel-in-hardware">
+<h4>(5) Run kernel in Hardware<a class="headerlink" href="#run-kernel-in-hardware" title="Permalink to this headline">¶</a></h4>
+<p>Now the test bench will run the case 10 times to calculate an average speed of the kernel</p>
+<pre class="highlight literal-block">
+<span></span><span class="c1"># build and run JPEG Decoder using U200 platform</span>
+make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+</pre>
+<p>Building xclbin will take about 4 hours, take a coffee break.</p>
+<p>Example output:</p>
+<pre class="highlight literal-block">
+<span></span>Found Platform
+Platform Name: Xilinx
+INFO: Found Device=xilinx_u200_gen3x16_xdma_2_202110_1
+INFO: Importing kernelJpegDecoder.xclbin
+Loading: &#39;kernelJpegDecoder.xclbin&#39;
+INFO: Kernel has been created
+INFO: Finish kernel setup
+...
+
+INFO: Finish kernel execution
+INFO: Finish E2E execution
+INFO: Data transfer from host to device: 108 us
+INFO: Data transfer from device to host: 726 us
+INFO: Average kernel execution per run: 1515 us
+...
+
+INFO: android.yuv will be generated from the jpeg decoder&#39;s output
+INFO: android.yuv is generated correctly
+</pre>
+<p>So for this 1280x960 android.jpg file the output throughput is about 1216MB/s ( (1280x960x3)/2/1515 ).</p>
+<p>To check the output yuv file, download <a class="reference external" href="https://sourceforge.net/projects/raw-yuvplayer/">https://sourceforge.net/projects/raw-yuvplayer/</a> . Then upload the rebuild_image.yuv, set the right sample radio and custom size on the software, and check the yuv file.</p>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>Lab summary<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>L2 flow is based on Vitis flow, and the main steps include sw_emu, hw_emu, and hw</li>
+<li>Run hardware acceleration application on a device</li>
+</ul>
+</div>
+</div>
+<div class="section" id="lab-4-using-multi-kernel-solution-to-accelerate-webp-encoding-based-on-open-source-project">
+<span id="tutorial-lab4"></span><h2>Lab-4: Using multi-kernel solution to accelerate WebP encoding based on open-source project<a class="headerlink" href="#lab-4-using-multi-kernel-solution-to-accelerate-webp-encoding-based-on-open-source-project" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h3>Lab purpose<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>The user’s image codec may be based on an open source project. This lab will show an accelerated process based on an open source project, the Webp encoder. Webp image coding is not only more complex, but also involves HW/SW partition and the design of multiple kernels.
+To learn:</p>
+<ul class="simple">
+<li>L2 accelerated process for open source projects</li>
+<li>Multi kernel acceleration process</li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h3>Operation steps<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="open-source-project-analysis-and-kernel-partition">
+<h4>(1) Open source project analysis and kernel partition<a class="headerlink" href="#open-source-project-analysis-and-kernel-partition" title="Permalink to this headline">¶</a></h4>
+<p>Here are two basic kernel partition principles:</p>
+<ul class="simple">
+<li><ol class="first arabic">
+<li>Focus on the operation which computing workload related to image size.  And try to abstract some one-time or limit-time operations in pre-processing or post-processing which can be excluded from kernel. Although the computation of image encoding is large, some preprocessing and post-processing workload have no relation with the image size, so they can be excluded outside from kernel. This situation is common for many image codec algorithms. For example, encoding always needs to calculate some quantization parameters by using some complex floating operations but only for limit time for an image. Another example is the adding  head for compressed bit-stream.</li>
+</ol>
+</li>
+<li><ol class="first arabic" start="2">
+<li>Serial running modules with large latency related to image size should be divided into different kernels to realize multi kernel concurrency</li>
+</ol>
+</li>
+</ul>
+<p>Webp can be divided into two serial modules, one is for prediction and probability statistics, and the other is for arithmetic coding. Since the arithmetic coding can’t start until the probability statistics module finish scanning the entire image, it should be divided into two kernels. In this way, when processing multiple images, the two kernels can be concurrent, which increases the system throughput.</p>
+</div>
+<div class="section" id="project-files-for-multi-kernel-design">
+<h4>(2) Project files for multi-kernel design<a class="headerlink" href="#project-files-for-multi-kernel-design" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">Makefile</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">conn_u200.ini</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">description.json</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">utils.mk</span></code></li>
+</ul>
+</div>
+<div class="section" id="software-emulation">
+<h4>(3) Software Emulation<a class="headerlink" href="#software-emulation" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L2/demos/webpEnc
+make run <span class="nv">TARGET</span><span class="o">=</span>sw_emu <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1
+</pre>
+</div>
+<div class="section" id="hardware-emulation">
+<h4>(4) Hardware Emulation<a class="headerlink" href="#hardware-emulation" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L2/demos/webpEnc
+make run <span class="nv">TARGET</span><span class="o">=</span>hw_emu <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1
+</pre>
+<p>report path: reports/_x.hw_emu.xilinx_u200_gen3x16_xdma_2_202110_1/webp_IntraPredLoop2_NoOut_1/hls_reports/webp_IntraPredLoop2_NoOut_1_csynth.rpt</p>
+<pre class="highlight literal-block">
+<span></span>+---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>         Name        <span class="p">|</span> BRAM_18K<span class="p">|</span>  DSP <span class="p">|</span>    FF   <span class="p">|</span>   LUT   <span class="p">|</span> URAM<span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>DSP                  <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Expression           <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        <span class="m">0</span><span class="p">|</span>        <span class="m">2</span><span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>FIFO                 <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Instance             <span class="p">|</span>      <span class="m">105</span><span class="p">|</span>   <span class="m">387</span><span class="p">|</span>   <span class="m">119670</span><span class="p">|</span>   <span class="m">178708</span><span class="p">|</span>    <span class="m">8</span><span class="p">|</span>
+<span class="p">|</span>Memory               <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Multiplexer          <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>      <span class="m">101</span><span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Register             <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>      <span class="m">392</span><span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Total                <span class="p">|</span>      <span class="m">105</span><span class="p">|</span>   <span class="m">387</span><span class="p">|</span>   <span class="m">120062</span><span class="p">|</span>   <span class="m">178811</span><span class="p">|</span>    <span class="m">8</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Available SLR        <span class="p">|</span>     <span class="m">1440</span><span class="p">|</span>  <span class="m">2280</span><span class="p">|</span>   <span class="m">788160</span><span class="p">|</span>   <span class="m">394080</span><span class="p">|</span>  <span class="m">320</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Utilization SLR <span class="o">(</span>%<span class="o">)</span>  <span class="p">|</span>        <span class="m">7</span><span class="p">|</span>    <span class="m">16</span><span class="p">|</span>       <span class="m">15</span><span class="p">|</span>       <span class="m">45</span><span class="p">|</span>    <span class="m">2</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Available            <span class="p">|</span>     <span class="m">4320</span><span class="p">|</span>  <span class="m">6840</span><span class="p">|</span>  <span class="m">2364480</span><span class="p">|</span>  <span class="m">1182240</span><span class="p">|</span>  <span class="m">960</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Utilization <span class="o">(</span>%<span class="o">)</span>      <span class="p">|</span>        <span class="m">2</span><span class="p">|</span>     <span class="m">5</span><span class="p">|</span>        <span class="m">5</span><span class="p">|</span>       <span class="m">15</span><span class="p">|</span>   ~0<span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+</pre>
+<p>report path: reports/_x.hw.xilinx_u200_gen3x16_xdma_2_202110_1/webp_2_ArithmeticCoding_1/hls_reports/webp_2_ArithmeticCoding_1_csynth.rpt</p>
+<pre class="highlight literal-block">
+<span></span>+---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>         Name        <span class="p">|</span> BRAM_18K<span class="p">|</span>  DSP <span class="p">|</span>    FF   <span class="p">|</span>   LUT   <span class="p">|</span> URAM<span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>DSP                  <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Expression           <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        <span class="m">0</span><span class="p">|</span>     <span class="m">1127</span><span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>FIFO                 <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Instance             <span class="p">|</span>       <span class="m">24</span><span class="p">|</span>     <span class="m">3</span><span class="p">|</span>    <span class="m">26227</span><span class="p">|</span>    <span class="m">33840</span><span class="p">|</span>    <span class="m">0</span><span class="p">|</span>
+<span class="p">|</span>Memory               <span class="p">|</span>        <span class="m">1</span><span class="p">|</span>     -<span class="p">|</span>        <span class="m">0</span><span class="p">|</span>        <span class="m">0</span><span class="p">|</span>    <span class="m">0</span><span class="p">|</span>
+<span class="p">|</span>Multiplexer          <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>        -<span class="p">|</span>     <span class="m">1610</span><span class="p">|</span>    -<span class="p">|</span>
+<span class="p">|</span>Register             <span class="p">|</span>        -<span class="p">|</span>     -<span class="p">|</span>     <span class="m">1415</span><span class="p">|</span>        -<span class="p">|</span>    -<span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Total                <span class="p">|</span>       <span class="m">25</span><span class="p">|</span>     <span class="m">3</span><span class="p">|</span>    <span class="m">27642</span><span class="p">|</span>    <span class="m">36577</span><span class="p">|</span>    <span class="m">0</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Available SLR        <span class="p">|</span>     <span class="m">1440</span><span class="p">|</span>  <span class="m">2280</span><span class="p">|</span>   <span class="m">788160</span><span class="p">|</span>   <span class="m">394080</span><span class="p">|</span>  <span class="m">320</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Utilization SLR <span class="o">(</span>%<span class="o">)</span>  <span class="p">|</span>        <span class="m">1</span><span class="p">|</span>    ~0<span class="p">|</span>        <span class="m">3</span><span class="p">|</span>        <span class="m">9</span><span class="p">|</span>    <span class="m">0</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Available            <span class="p">|</span>     <span class="m">4320</span><span class="p">|</span>  <span class="m">6840</span><span class="p">|</span>  <span class="m">2364480</span><span class="p">|</span>  <span class="m">1182240</span><span class="p">|</span>  <span class="m">960</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+<span class="p">|</span>Utilization <span class="o">(</span>%<span class="o">)</span>      <span class="p">|</span>       ~0<span class="p">|</span>    ~0<span class="p">|</span>        <span class="m">1</span><span class="p">|</span>        <span class="m">3</span><span class="p">|</span>    <span class="m">0</span><span class="p">|</span>
++---------------------+---------+------+---------+---------+-----+
+</pre>
+</div>
+<div class="section" id="hardware-build-and-check-resource-consumption">
+<h4>(5) Hardware Build and Check Resource Consumption<a class="headerlink" href="#hardware-build-and-check-resource-consumption" title="Permalink to this headline">¶</a></h4>
+<pre class="highlight literal-block">
+<span></span><span class="nb">cd</span> L2/demos/webpEnc
+make run <span class="nv">TARGET</span><span class="o">=</span>hw <span class="nv">DEVICE</span><span class="o">=</span>xilinx_u200_gen3x16_xdma_2_202110_1
+</pre>
+<p>report path: _x_temp.hw.xilinx_u200_gen3x16_xdma_2_202110_1/link/vivado/vpl/prj/prj.runs/impl_1/kernel_util_routed.rpt</p>
+<pre class="highlight literal-block">
+<span></span>+----------------------------------+------------------+------------------+-------------------+----------------+---------------+----------------+
+<span class="p">|</span> Name                             <span class="p">|</span> LUT              <span class="p">|</span> LUTAsMem         <span class="p">|</span> REG               <span class="p">|</span> BRAM           <span class="p">|</span> URAM          <span class="p">|</span> DSP            <span class="p">|</span>
++----------------------------------+------------------+------------------+-------------------+----------------+---------------+----------------+
+<span class="p">|</span> Platform                         <span class="p">|</span> <span class="m">192064</span> <span class="o">[</span> <span class="m">16</span>.25%<span class="o">]</span> <span class="p">|</span>  <span class="m">17282</span> <span class="o">[</span>  <span class="m">2</span>.92%<span class="o">]</span> <span class="p">|</span>  <span class="m">268446</span> <span class="o">[</span> <span class="m">11</span>.35%<span class="o">]</span> <span class="p">|</span>  <span class="m">314</span> <span class="o">[</span> <span class="m">14</span>.54%<span class="o">]</span> <span class="p">|</span>  <span class="m">20</span> <span class="o">[</span>  <span class="m">2</span>.08%<span class="o">]</span> <span class="p">|</span>   <span class="m">10</span> <span class="o">[</span>  <span class="m">0</span>.15%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span> User Budget                      <span class="p">|</span> <span class="m">990176</span> <span class="o">[</span><span class="m">100</span>.00%<span class="o">]</span> <span class="p">|</span> <span class="m">574558</span> <span class="o">[</span><span class="m">100</span>.00%<span class="o">]</span> <span class="p">|</span> <span class="m">2096034</span> <span class="o">[</span><span class="m">100</span>.00%<span class="o">]</span> <span class="p">|</span> <span class="m">1846</span> <span class="o">[</span><span class="m">100</span>.00%<span class="o">]</span> <span class="p">|</span> <span class="m">940</span> <span class="o">[</span><span class="m">100</span>.00%<span class="o">]</span> <span class="p">|</span> <span class="m">6830</span> <span class="o">[</span><span class="m">100</span>.00%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span>    Used Resources                <span class="p">|</span>  <span class="m">69389</span> <span class="o">[</span>  <span class="m">7</span>.01%<span class="o">]</span> <span class="p">|</span>   <span class="m">7136</span> <span class="o">[</span>  <span class="m">1</span>.24%<span class="o">]</span> <span class="p">|</span>   <span class="m">91572</span> <span class="o">[</span>  <span class="m">4</span>.37%<span class="o">]</span> <span class="p">|</span>   <span class="m">87</span> <span class="o">[</span>  <span class="m">4</span>.71%<span class="o">]</span> <span class="p">|</span>  <span class="m">10</span> <span class="o">[</span>  <span class="m">1</span>.06%<span class="o">]</span> <span class="p">|</span>  <span class="m">414</span> <span class="o">[</span>  <span class="m">6</span>.06%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span>    Unused Resources              <span class="p">|</span> <span class="m">920787</span> <span class="o">[</span> <span class="m">92</span>.99%<span class="o">]</span> <span class="p">|</span> <span class="m">567422</span> <span class="o">[</span> <span class="m">98</span>.76%<span class="o">]</span> <span class="p">|</span> <span class="m">2004462</span> <span class="o">[</span> <span class="m">95</span>.63%<span class="o">]</span> <span class="p">|</span> <span class="m">1759</span> <span class="o">[</span> <span class="m">95</span>.29%<span class="o">]</span> <span class="p">|</span> <span class="m">930</span> <span class="o">[</span> <span class="m">98</span>.94%<span class="o">]</span> <span class="p">|</span> <span class="m">6416</span> <span class="o">[</span> <span class="m">93</span>.94%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span> webp_2_ArithmeticCoding_1        <span class="p">|</span>  <span class="m">16065</span> <span class="o">[</span>  <span class="m">1</span>.62%<span class="o">]</span> <span class="p">|</span>   <span class="m">2520</span> <span class="o">[</span>  <span class="m">0</span>.44%<span class="o">]</span> <span class="p">|</span>   <span class="m">22841</span> <span class="o">[</span>  <span class="m">1</span>.09%<span class="o">]</span> <span class="p">|</span>   <span class="m">15</span> <span class="o">[</span>  <span class="m">0</span>.81%<span class="o">]</span> <span class="p">|</span>   <span class="m">0</span> <span class="o">[</span>  <span class="m">0</span>.00%<span class="o">]</span> <span class="p">|</span>    <span class="m">4</span> <span class="o">[</span>  <span class="m">0</span>.06%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span>    webp_2_ArithmeticCoding_1_1   <span class="p">|</span>  <span class="m">16065</span> <span class="o">[</span>  <span class="m">1</span>.62%<span class="o">]</span> <span class="p">|</span>   <span class="m">2520</span> <span class="o">[</span>  <span class="m">0</span>.44%<span class="o">]</span> <span class="p">|</span>   <span class="m">22841</span> <span class="o">[</span>  <span class="m">1</span>.09%<span class="o">]</span> <span class="p">|</span>   <span class="m">15</span> <span class="o">[</span>  <span class="m">0</span>.81%<span class="o">]</span> <span class="p">|</span>   <span class="m">0</span> <span class="o">[</span>  <span class="m">0</span>.00%<span class="o">]</span> <span class="p">|</span>    <span class="m">4</span> <span class="o">[</span>  <span class="m">0</span>.06%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span> webp_IntraPredLoop2_NoOut_1      <span class="p">|</span>  <span class="m">53324</span> <span class="o">[</span>  <span class="m">5</span>.39%<span class="o">]</span> <span class="p">|</span>   <span class="m">4616</span> <span class="o">[</span>  <span class="m">0</span>.80%<span class="o">]</span> <span class="p">|</span>   <span class="m">68731</span> <span class="o">[</span>  <span class="m">3</span>.28%<span class="o">]</span> <span class="p">|</span>   <span class="m">72</span> <span class="o">[</span>  <span class="m">3</span>.90%<span class="o">]</span> <span class="p">|</span>  <span class="m">10</span> <span class="o">[</span>  <span class="m">1</span>.06%<span class="o">]</span> <span class="p">|</span>  <span class="m">410</span> <span class="o">[</span>  <span class="m">6</span>.00%<span class="o">]</span> <span class="p">|</span>
+<span class="p">|</span>    webp_IntraPredLoop2_NoOut_1_1 <span class="p">|</span>  <span class="m">53324</span> <span class="o">[</span>  <span class="m">5</span>.39%<span class="o">]</span> <span class="p">|</span>   <span class="m">4616</span> <span class="o">[</span>  <span class="m">0</span>.80%<span class="o">]</span> <span class="p">|</span>   <span class="m">68731</span> <span class="o">[</span>  <span class="m">3</span>.28%<span class="o">]</span> <span class="p">|</span>   <span class="m">72</span> <span class="o">[</span>  <span class="m">3</span>.90%<span class="o">]</span> <span class="p">|</span>  <span class="m">10</span> <span class="o">[</span>  <span class="m">1</span>.06%<span class="o">]</span> <span class="p">|</span>  <span class="m">410</span> <span class="o">[</span>  <span class="m">6</span>.00%<span class="o">]</span> <span class="p">|</span>
++----------------------------------+------------------+------------------+-------------------+----------------+---------------+----------------+
+</pre>
+</div>
+<div class="section" id="hardware-running">
+<h4>(6) Hardware Running<a class="headerlink" href="#hardware-running" title="Permalink to this headline">¶</a></h4>
+<p>Webp Input Arguments:</p>
+<pre class="highlight literal-block">
+<span></span>Usage: cwebp -<span class="o">[</span>-use_ocl -q -o<span class="o">]</span>
+      -xclbin :     the kernel file
+      list.rst:     the input list
+      -use_ocl:     should be kept
+      -q:           compression quality
+      -o:           output directory
+</pre>
+<p>Compared to original command-line parameter, there are three differences here. The first is ‘-xclbin’ for specifying the kernel files. The second is a change for input image file which is replaced by a file list file in which more than one input images are listed line by line. The third, the ‘-use_ocl’ is used for enable vitis flow.</p>
+<p>The following figure shows the host information when run on board. The time listed in the figure is not accurate.</p>
+<pre class="highlight literal-block">
+<span></span>./cwebp -xclbin kernel.xclbin list.rst -use_ocl -q <span class="m">80</span> -o ./images
+INFO: CreateKernel start.
+INFO: Number of Platforms: <span class="m">1</span>
+INFO: Selected Platform: Xilinx
+INFO: Number of devices <span class="k">for</span> platform <span class="m">0</span>: <span class="m">2</span>
+INFO: target_device found:   xilinx_u200_gen3x16_xdma_base_2
+INFO: target_device chosen:  xilinx_u200_gen3x16_xdma_base_2
+Info: Context created
+Info: Command queue created
+INFO: OpenCL Version: <span class="m">1</span>.-48
+INFO: Loading kernel.xclbin
+INFO: Loading kernel.xclbin Finished
+Info: Program created
+Info: Kernel created
+Info: Kernel created
+INFO: CreateKernel finished. Computation <span class="nb">time</span> is <span class="m">328</span>.504000 <span class="o">(</span>ms<span class="o">)</span>
+
+INFO: Create buffers started.
+INFO: Create buffers finished. Computation <span class="nb">time</span> is <span class="m">48</span>.225000 <span class="o">(</span>ms<span class="o">)</span>
+
+INFO: WebPEncodeAsync Starts...
+INFO: <span class="nv">Nloop</span> <span class="o">=</span> <span class="m">1</span>
+INFO: VP8EncTokenLoopAsync starts ...
+
+*** Picture: <span class="m">1</span> - <span class="m">1</span>,  Buffer: <span class="m">0</span>, Instance: <span class="m">0</span>, Event: <span class="m">0</span> ***
+HtoD webpen.c
+INFO: Host2Device finished. Computation <span class="nb">time</span> is <span class="m">0</span>.874000 <span class="o">(</span>ms<span class="o">)</span>
+INFO: PredKernel Finished. Computation <span class="nb">time</span> is <span class="m">0</span>.258000 <span class="o">(</span>ms<span class="o">)</span>
+INFO: ACKernel Finished. Computation <span class="nb">time</span> is <span class="m">0</span>.155000 <span class="o">(</span>ms<span class="o">)</span>
+INFO: Device2Host finished. Computation <span class="nb">time</span> is <span class="m">0</span>.118000 <span class="o">(</span>ms<span class="o">)</span>
+
+INFO: Loop of Pictures Finished. Computation <span class="nb">time</span> is <span class="m">17</span>.825000 <span class="o">(</span>ms<span class="o">)</span>
+INFO: VP8EncTokenLoopAsync Finished. Computation <span class="nb">time</span> is <span class="m">24</span>.683000 <span class="o">(</span>ms<span class="o">)</span>
+INFO: WebPEncodeAsync Finished. Computation <span class="nb">time</span> is <span class="m">31</span>.885000 <span class="o">(</span>ms<span class="o">)</span>
+
+INFO: Release Kernel.
+Info: Test passed
+</pre>
+<p>To get the accurate kernel execution time, please add a file “xrt.ini”, and fill this file with following directives.</p>
+<pre class="highlight literal-block">
+<span></span><span class="c1">#Start of Debug group</span>
+<span class="o">[</span>Debug<span class="o">]</span>
+<span class="nv">profile</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">timeline_trace</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">data_transfer_trace</span><span class="o">=</span>fine
+<span class="nv">app_debug</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">opencl_summary</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">opencl_trace</span><span class="o">=</span><span class="nb">true</span>
+
+<span class="c1">#Start of Runtime group</span>
+<span class="o">[</span>Runtime<span class="o">]</span>
+<span class="nv">runtime_log</span> <span class="o">=</span> console
+</pre>
+<pre class="highlight literal-block">
+<span></span>Kernel Execution
+Kernel,Number Of Enqueues,Total Time <span class="o">(</span>ms<span class="o">)</span>,Minimum Time <span class="o">(</span>ms<span class="o">)</span>,Average Time <span class="o">(</span>ms<span class="o">)</span>,Maximum Time <span class="o">(</span>ms<span class="o">)</span>,
+webp_2_ArithmeticCoding_1,1,2.95381,2.95381,2.95381,2.95381,
+webp_IntraPredLoop2_NoOut_1,1,3.61861,3.61861,3.61861,3.61861,
+</pre>
+<p>For more information about how to analyze performance, please refer to <a class="reference external" href="https://docs.xilinx.com/r/2020.2-English/ug1393-vitis-application-acceleration/Profiling-Optimizing-and-Debugging-the-Application">Application Acceleration Development (UG1393)</a></p>
+</div>
+</div>
+<div class="section" id="id9">
+<h3>Lab summary<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Focus on the operation which computing workload related to image size</li>
+<li>Serial processed modules may be divided into multiple kernels to realize multi-kernel concurrency</li>
+</ul>
+</div>
+</div>
+<div class="section" id="tutorial-summary">
+<h2>Tutorial Summary<a class="headerlink" href="#tutorial-summary" title="Permalink to this headline">¶</a></h2>
+<p>JPEG decoder and webp encoder are very representative in image transcoding applications. Codec Library has also launched many other open source and self-developed APIs some of them can support the developing flow based on System Compiler from 22.1. The tutorial will be developed to cover more codecs and their combinations, more flows and more classic applications.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="guide_L1/api.html" class="btn btn-neutral float-right" title="API Document" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="release.html" class="btn btn-neutral float-left" title="Release Note" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+														
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<div class="lang-select dropup hidden-md hidden-lg">
+		<button data-toggle="dropdown">
+			<span class="fas fa-globe" aria-hidden="true"></span>
+			<span>
+				
+					English
+				</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a target="_blank" href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+																	<div class="lang-select dropup hidden-xs hidden-sm">
+	<button data-toggle="dropdown">
+		<span class="fas fa-globe" aria-hidden="true"></span>
+		<span>
+			
+				English
+			</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+															</div>
+														</div>
+														<div class="col-md-pull-5 col-lg-pull-5 col-md-5 col-lg-5">
+															<span class="copyright">©2022 Advanced Micro Devices, Inc</span>
+														</div>
+
+													</div>
+													                    <div class="movethisrowtoleft row">
+                        <div class="col-xs-24">
+                            <ul class="sub-menu">
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/privacy">Privacy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/cookies">Cookie Policy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/trademarks">Trademarks</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/statement-human-trafficking-forced-labor.pdf">Statement on Forced Labor</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/competition">Fair and Open Competition</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf">UK Tax Strategy</a></li>
+								<li><a target="_blank" href="https://docs.xilinx.com/v/u/9x6YvZKuWyhJId7y7RQQKA">Inclusive Terminology</a></li>
+                                <li><a href="#cookiessettings" class="ot-sdk-show-settings">Cookies Settings</a></li>
+                            </ul>
+                        </div>
+                    </div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+<div class="backToTop parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><noindex>
+    <span data-component="backToTopButton" class="backToTopButton loaded">
+        <ul>
+            <li>
+                <a href="https://www.author.xilinx.com/xx/rebrand/amd/en-amd-xilinx-header-footer.html#top" class="btn top">
+                    <span class="fas fa-angle-up" aria-hidden="true"></span>
+                </a>
+            </li>
+        </ul>
+    </span>
+</noindex></div>
+			</div>
+		</div>
+
+
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>
