@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.5
+# vitis makefile-generator v2.0.6
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -50,6 +50,7 @@ ifndef XILINX_XRT
   export XILINX_XRT
 endif
 
+.PHONY: check_device
 check_device:
 	@set -eu; \
 	inallowlist=False; \
@@ -70,8 +71,8 @@ check_device:
 	fi;
 
 #get HOST_ARCH by PLATFORM
+ifneq (,$(PLATFORM))
 HOST_ARCH_temp = $(shell platforminfo -p $(PLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
-$(warning HOST_ARCH_temp:$(HOST_ARCH_temp))
 ifeq ($(HOST_ARCH_temp), x86)
 HOST_ARCH := x86
 else ifeq ($(HOST_ARCH_temp), cortex-a9)
@@ -79,7 +80,7 @@ HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
 endif
-$(info HOST_ARCH: $(HOST_ARCH))
+endif
 
 
 #get suffix of kernel by PLATFORM
@@ -94,7 +95,6 @@ endif
 else
 LINK_TARGET_FMT := xclbin
 endif
-$(warning LINK_TARGET_FMT:$(LINK_TARGET_FMT))
 
 #Checks for Device Family
 ifeq ($(HOST_ARCH), aarch32)
@@ -108,6 +108,7 @@ ifneq ($(HOST_ARCH), $(filter $(HOST_ARCH),aarch64 aarch32 x86))
 $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
+.PHONY: check_version check_sysroot check_kimage check_rootfs
 check_version:
 ifneq (, $(shell which git))
 ifneq (,$(wildcard $(XFLIB_DIR)/.git))
@@ -115,27 +116,53 @@ ifneq (,$(wildcard $(XFLIB_DIR)/.git))
 endif
 endif
 
-#Checks for SYSROOT
+#Set/Check SYSROOT/K_IMAGE/ROOTFS
+ifneq ($(HOST_ARCH), x86)
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
+K_IMAGE ?= $(SYSROOT)/../../uImage
+else
+K_IMAGE ?= $(SYSROOT)/../../Image
+endif
+ROOTFS ?= $(SYSROOT)/../../rootfs.ext4
+endif
+
 check_sysroot:
 ifneq ($(HOST_ARCH), x86)
-ifndef SYSROOT
+ifeq (,$(wildcard $(SYSROOT)))
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+check_kimage:
+ifneq ($(HOST_ARCH), x86)
+ifeq (,$(wildcard $(K_IMAGE)))
+	$(error K_IMAGE ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+check_rootfs:
+ifneq ($(HOST_ARCH), x86)
+ifeq (,$(wildcard $(ROOTFS)))
+	$(error ROOTFS ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
 
 #Checks for g++
 CXX := g++
-CXX_REQ := $(shell echo $(GCC_INTOOL) | cut -f 1 -d ".")
 ifeq ($(HOST_ARCH), x86)
-ifneq ($(shell expr $(shell echo "__GNUG__" | g++ -E -x c++ - | tail -1) \>= $(CXX_REQ)), 1)
+ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
+CXX_VER := 8.3.0
+else
+CXX_VER := 6.2.0
+endif
+CXX_V := $(shell echo $(CXX_VER) | awk -F. '{print tolower($$1)}')
+ifneq ($(shell expr $(shell echo "__GNUG__" | g++ -E -x c++ - | tail -1) \>= $(CXX_V)), 1)
 ifndef XILINX_VIVADO
-$(error [ERROR]: g++ version too old. Please use $(CXX_REQ) or above)
+$(error [ERROR]: g++ version too old. Please use $(CXX_VER) or above)
 else
-CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-$(GCC_INTOOL)/bin/g++
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/bin/g++
 ifeq ($(LD_LIBRARY_PATH),)
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(GCC_INTOOL)/lib64
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/lib64
 else
-export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(GCC_INTOOL)/lib64:$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-$(CXX_VER)/lib64:$(LD_LIBRARY_PATH)
 endif
 $(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
@@ -150,7 +177,14 @@ endif
 OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
 OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
 
-ifeq ($(OSDIST), centos)
+# for centos and redhat
+ifneq ($(findstring centos,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+endif
+endif
+else ifneq ($(findstring redhat,$(OSDIST)),)
 ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
 ifeq ($(HOST_ARCH), x86)
 XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
