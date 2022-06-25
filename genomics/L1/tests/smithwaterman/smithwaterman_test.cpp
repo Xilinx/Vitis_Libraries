@@ -6,6 +6,8 @@
 #include <stdint.h>
 #define NUMITER 4
 #define NUM_BLOCKS 1
+#define NUMPACKED 32
+#define MAXPE 32
 
 void smithwatermanMaxscore(ap_uint<NUMPACKED * 2>* input, ap_uint<NUMPACKED * 2>* output, int* size) {
 #pragma HLS INTERFACE m_axi port = input offset = slave bundle = gmem depth = 1536

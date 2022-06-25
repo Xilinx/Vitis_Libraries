@@ -79,6 +79,8 @@ class ContextBase {
             small = t;
         }
 
+        if (std::isinf(small) == -1 || std::isinf(big) == -1) return big;
+
         NUMBER diff = big - small;
         if (diff >= ((NUMBER)MAX_JACOBIAN_TOLERANCE)) return big;
 

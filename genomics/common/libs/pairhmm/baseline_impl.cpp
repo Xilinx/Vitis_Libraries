@@ -22,9 +22,9 @@ using namespace std;
 
 template <class NUMBER>
 NUMBER compute_full_prob_baseline(testcase* tc, NUMBER* before_last_log) {
-    int r, c;
-    int ROWS = tc->rslen + 1;
-    int COLS = tc->haplen + 1;
+    unsigned int r, c;
+    unsigned int ROWS = tc->rslen + 1;
+    unsigned int COLS = tc->haplen + 1;
 
     Context<NUMBER> ctx;
 

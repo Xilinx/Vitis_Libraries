@@ -50,7 +50,6 @@ ifndef XILINX_XRT
   export XILINX_XRT
 endif
 
-.PHONY: check_device
 check_device:
 	@set -eu; \
 	inallowlist=False; \
@@ -108,7 +107,6 @@ ifneq ($(HOST_ARCH), $(filter $(HOST_ARCH),aarch64 aarch32 x86))
 $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
-.PHONY: check_version check_sysroot check_kimage check_rootfs
 check_version:
 ifneq (, $(shell which git))
 ifneq (,$(wildcard $(XFLIB_DIR)/.git))
@@ -116,32 +114,11 @@ ifneq (,$(wildcard $(XFLIB_DIR)/.git))
 endif
 endif
 
-#Set/Check SYSROOT/K_IMAGE/ROOTFS
-ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
-K_IMAGE ?= $(SYSROOT)/../../uImage
-else
-K_IMAGE ?= $(SYSROOT)/../../Image
-endif
-ROOTFS ?= $(SYSROOT)/../../rootfs.ext4
-endif
-
+#Checks for SYSROOT
 check_sysroot:
 ifneq ($(HOST_ARCH), x86)
-ifeq (,$(wildcard $(SYSROOT)))
+ifndef SYSROOT
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
-endif
-endif
-check_kimage:
-ifneq ($(HOST_ARCH), x86)
-ifeq (,$(wildcard $(K_IMAGE)))
-	$(error K_IMAGE ENV variable is not set, please set ENV variable correctly and rerun)
-endif
-endif
-check_rootfs:
-ifneq ($(HOST_ARCH), x86)
-ifeq (,$(wildcard $(ROOTFS)))
-	$(error ROOTFS ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
 

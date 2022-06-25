@@ -417,7 +417,7 @@ bool SmithWatermanApp::run(int idevice, int nruns) {
     int err;
     unsigned int* output;
     unsigned int* outputGolden;
-    unsigned int* input;
+    unsigned int* input = 0;
     int* iterNum;
     int hwBlockSize = NUMPACKED * m_blockSz;
     int totalSamples = m_numSamples;

@@ -22,9 +22,7 @@
 #define MATCH 2
 #define MISS_MATCH -1
 #define ABSMAXCOST MATCH
-#define MAXPE 32
 #define MINVAL -32000
-#define NUMPACKED 32
 
 #define UINTSZ sizeof(unsigned int)
 #define UINTSZ_K (NUMPACKED * 2) / 8

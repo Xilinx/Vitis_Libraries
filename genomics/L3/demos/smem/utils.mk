@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.5
+# vitis makefile-generator v2.0.6
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -50,6 +50,7 @@ ifndef XILINX_XRT
   export XILINX_XRT
 endif
 
+.PHONY: check_device
 check_device:
 	@set -eu; \
 	inallowlist=False; \
@@ -107,6 +108,7 @@ ifneq ($(HOST_ARCH), $(filter $(HOST_ARCH),aarch64 aarch32 x86))
 $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
+.PHONY: check_version check_sysroot check_kimage check_rootfs
 check_version:
 ifneq (, $(shell which git))
 ifneq (,$(wildcard $(XFLIB_DIR)/.git))
@@ -114,11 +116,32 @@ ifneq (,$(wildcard $(XFLIB_DIR)/.git))
 endif
 endif
 
-#Checks for SYSROOT
+#Set/Check SYSROOT/K_IMAGE/ROOTFS
+ifneq ($(HOST_ARCH), x86)
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
+K_IMAGE ?= $(SYSROOT)/../../uImage
+else
+K_IMAGE ?= $(SYSROOT)/../../Image
+endif
+ROOTFS ?= $(SYSROOT)/../../rootfs.ext4
+endif
+
 check_sysroot:
 ifneq ($(HOST_ARCH), x86)
-ifndef SYSROOT
+ifeq (,$(wildcard $(SYSROOT)))
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+check_kimage:
+ifneq ($(HOST_ARCH), x86)
+ifeq (,$(wildcard $(K_IMAGE)))
+	$(error K_IMAGE ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+check_rootfs:
+ifneq ($(HOST_ARCH), x86)
+ifeq (,$(wildcard $(ROOTFS)))
+	$(error ROOTFS ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
 

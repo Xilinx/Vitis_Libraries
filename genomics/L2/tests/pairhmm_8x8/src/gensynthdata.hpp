@@ -72,8 +72,8 @@ int GenInputs(pairhmmInput* in, int size) {
     in->haps.clear();
     in->reads.resize(16 * (size + 1));
     in->haps.resize((size + 1));
-    printf("%s - readsize %lu \n", __FUNCTION__, in->reads.size());
-    printf("%s - readsize %lu \n", __FUNCTION__, in->haps.size());
+    printf("%s - readsize %d \n", __FUNCTION__, in->reads.size());
+    printf("%s - readsize %d \n", __FUNCTION__, in->haps.size());
     for (int i = 0; (size_t)i < in->reads.size(); i++) {
         Read& curRead = in->reads[i];
         for (int j = 0; j < GenLen(MAX_READ_LEN); j++) {
@@ -93,12 +93,14 @@ int GenInputs(pairhmmInput* in, int size) {
     return 0;
 }
 
+#if 0
 int GenOutputs(pairhmmInput* in, pairhmmOutput* out) {
     xilPairHMM* accelPhmm = new xilPairHMM();
     accelPhmm->computePairhmmAVX(in, out, false);
     delete accelPhmm;
     return 0;
 }
+#endif
 
 int GetInputs(pairhmmInput* in, std::string filename) {
     std::ifstream ifs(filename.c_str(), std::ifstream::in);

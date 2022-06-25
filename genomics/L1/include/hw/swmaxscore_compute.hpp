@@ -21,6 +21,8 @@
 #include <string.h>
 #include "hls_stream.h"
 #include <stdint.h>
+#define NUMPACKED 32
+#define MAXPE 32
 
 namespace xf {
 namespace genomics {

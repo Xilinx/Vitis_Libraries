@@ -312,7 +312,7 @@ int readReadRefFile(char* fname, unsigned int** pairs, unsigned int** maxv, int 
     int refSz = 0;
     int sampleNum = 0;
     int numInt = 0;
-    int numSamples;
+    int numSamples = 0;
     while ((sampleNum < N) && getToken(fp, string)) {
         if (!strcmp(string, "rdsz")) {
             getToken(fp, string);

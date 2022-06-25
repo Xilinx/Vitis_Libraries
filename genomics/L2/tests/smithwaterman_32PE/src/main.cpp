@@ -76,7 +76,6 @@ int main(int argc, char* argv[]) {
     }
     int doubleBuffered = parser.value_to_int("double-buffered");
     int idxSelectedDevice = parser.value_to_int("select-device");
-    int nThreads = parser.value_to_int("number-of-threads");
     int verifyMode = parser.value_to_int("verify-mode");
 
     LogInfo("Platform: %s, Device: %s", strPlatformName.c_str(), strDeviceName.c_str());

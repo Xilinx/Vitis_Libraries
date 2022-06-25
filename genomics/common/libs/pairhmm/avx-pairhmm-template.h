@@ -32,7 +32,7 @@ void CONCAT(CONCAT(precompute_masks_, SIMD_ENGINE),
         int mOffset = (col - 1) % maskBitCnt;
         MASK_TYPE bitMask = ((MASK_TYPE)0x1) << (maskBitCnt - 1 - mOffset);
 
-        char hapChar = ConvertChar::get(tc.hap[col - 1]);
+        unsigned char hapChar = ConvertChar::get(tc.hap[col - 1]);
 
         if (hapChar == AMBIG_CHAR) {
             for (int ci = 0; ci < NUM_DISTINCT_CHARS; ++ci) maskArr[mIndex][ci] |= bitMask;
@@ -301,20 +301,16 @@ NUMBER CONCAT(CONCAT(compute_full_prob_, SIMD_ENGINE), PRECISION)(testcase* tc) 
     /* Probality vectors */
     SIMD_TYPE pGAPM, pMM, pMX, pXX, pMY, pYY;
 
-    struct timeval start, end;
     NUMBER result_avx2;
     Context<NUMBER> ctx;
     UNION_TYPE rs, rsN;
-    HAP_TYPE hap;
-    SIMD_TYPE distmSel, distmChosen;
+    SIMD_TYPE distmChosen;
     SIMD_TYPE distm, _1_distm;
 
-    int r, c;
     NUMBER zero = ctx._(0.0);
-    UNION_TYPE packed1;
+    UNION_TYPE packed1 __attribute__((unused));
     packed1.d = VEC_SET1_VAL(1.0);
     SIMD_TYPE N_packed256 = VEC_POPCVT_CHAR('N');
-    NUMBER init_Y = ctx.INITIAL_CONSTANT / (tc->haplen);
     int remainingRows = (ROWS - 1) % AVX_LENGTH;
     int stripe_cnt = ((ROWS - 1) / AVX_LENGTH) + (remainingRows != 0);
 
