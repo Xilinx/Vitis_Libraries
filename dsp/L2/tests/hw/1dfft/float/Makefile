@@ -1,4 +1,4 @@
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.5
+# vitis makefile-generator v2.0.6
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -30,13 +30,19 @@ help::
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
-	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
+	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
+	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
+	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -61,18 +67,20 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u250_gen3x16_xdma_3_1_202020_1
+PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  u250 aws-vu9p-f1 vck190
 PLATFORM_BLOCKLIST +=  zc
 
-GCC_INTOOL := 8.3.0
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
 BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
@@ -105,10 +113,6 @@ ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
 
-ifneq (,$(findstring OPENCV_INCLUDE,$(CXXFLAGS)))
-CXXFLAGS += $(XRT_CXXFLAGS)
-endif
-
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
@@ -134,6 +138,11 @@ CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw/vitis_fft/float -I $(XFLIB_DIR)/L2/in
 CXXFLAGS += -O3
 
 endif
+# workaround for opencv
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
+endif
+
 EXE_NAME := testFFT.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
@@ -173,10 +182,22 @@ endif
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS_fft1DKernel += --hls.clock 300000000:fft1DKernel
+ifneq ($(HOST_ARCH), x86)
+VPP_LDFLAGS_fft1DKernel += --clock.defaultFreqHz 300000000
+else
+VPP_LDFLAGS_fft1DKernel += --kernel_frequency 300
+endif
 VPP_LDFLAGS_fft1DKernel_temp := --config $(CUR_DIR)/conn_u250.cfg
 VPP_LDFLAGS_fft1DKernel += $(VPP_LDFLAGS_fft1DKernel_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
+VPP_FLAGS_fft1DKernel += --hls.clock 300000000:fft1DKernel
+ifneq ($(HOST_ARCH), x86)
+VPP_LDFLAGS_fft1DKernel += --clock.defaultFreqHz 300000000
+else
+VPP_LDFLAGS_fft1DKernel += --kernel_frequency 300
+endif
 VPP_LDFLAGS_fft1DKernel_temp := --config $(CUR_DIR)/conn_aws_f1.cfg
 VPP_LDFLAGS_fft1DKernel += $(VPP_LDFLAGS_fft1DKernel_temp)
 
@@ -200,7 +221,7 @@ endif
 $(TEMP_DIR)/fft1DKernel.xo: $(CUR_DIR)/kernel/top_module.cpp 
 	$(ECHO) "Compiling Kernel: fft1DKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_fft1DKernel) $(VPP_FLAGS) -k fft1DKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(VPP_FLAGS_fft1DKernel) $(VPP_FLAGS) -k fft1DKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_fft1DKernel_OBJS += $(TEMP_DIR)/fft1DKernel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_fft1DKernel_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
@@ -224,11 +245,6 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -262,12 +278,23 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
+dfx_hw := false
+$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
+dfx_hw := true
+endif
+endif
+ifeq ($(dfx_hw), false)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	@echo "### ***** sd_card generation done! ***** ###"
+endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
@@ -275,7 +302,14 @@ endif
 ############################## Setting Essential Checks and Building Rules ##############################
 RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
-run: check_device  $(RUN_DEPS)
+
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+all: check_device  check_vpp check_platform mkflag $(RUN_DEPS)
+run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
@@ -304,7 +338,17 @@ endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifeq (,$(wildcard $(BUILD_DIR)/fft1DKernel.awsxclbin))
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running HW using generated .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
+	
+endif
+else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -314,13 +358,8 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: all clean cleanall emconfig
+.PHONY: clean cleanall emconfig
 emconfig: $(EMCONFIG)
-ifeq ($(HOST_ARCH), x86)
-all:  check_vpp check_platform check_xrt $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-else
-all:  check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-endif
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
@@ -343,13 +382,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) 
 
 clean: cleanh
