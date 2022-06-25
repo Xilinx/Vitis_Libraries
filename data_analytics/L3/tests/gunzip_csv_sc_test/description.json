@@ -4,11 +4,23 @@
     "description": "A SystemCompiler example for Gunzip CSV parser acceleration.", 
     "flow": "vitis", 
     "platform_allowlist": [
-        "u2_"
+        "u2_",
+        "u50"
     ], 
     "platform_blocklist": [
         "zc"
     ], 
+    "platform_properties": {
+        "u2_": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_P2P"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": "not_use_by_now \"LIB_DIR/L3/tests/gunzip_csv_sc_test/data/input*.csv.gz\" \"LIB_DIR/L3/tests/gunzip_csv_sc_test/data\"", 

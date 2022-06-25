@@ -139,9 +139,14 @@ void DataEngine::run() {
         ap_uint<128>* hbuf_in;
         FileDescriptors* s_r_handle = new FileDescriptors;
         int* fd_collect = new int[file_nm];
+        int* buf_sz_collect = new int[file_nm];
         for (int i = 0; i < file_nm; ++i) {
+#ifdef USE_P2P
             // p2p data transfer size aligned to 4K
             int fd = open(file_list[i].c_str(), O_RDONLY | O_DIRECT);
+#else
+            int fd = open(file_list[i].c_str(), O_RDONLY);
+#endif
 
             if (fd == -1) {
                 fprintf(stderr, "ERROR: Cannot open the input file!!\n");
@@ -156,13 +161,27 @@ void DataEngine::run() {
             hbuf_meta[N + 1 + i] += out_offt; // file size
             // align to 4K
             int csv_buf_sz = (sz + 4095) / 4096 * 4096;
+            buf_sz_collect[i] = csv_buf_sz;
             in_offt += csv_buf_sz / 16;
             out_offt += (out_sz + 31) / 32;
 
+#ifdef USE_P2P
             hbuf_in = (ap_uint<128>*)data_engine_acc::file_buf(csvInBufPool, fd, csv_buf_sz, 0, buf_offt);
+#endif
             buf_offt += csv_buf_sz;
             last_file = file_list[i];
         }
+#ifndef USE_P2P
+        hbuf_in = (ap_uint<128>*)data_engine_acc::alloc_buf(csvInBufPool, buf_offt);
+        uint8_t* hbuf_in_i8 = reinterpret_cast<uint8_t*>(hbuf_in);
+        buf_offt = 0;
+        for (int i = 0; i < file_nm; i++) {
+            if (pread(fd_collect[i], hbuf_in_i8 + buf_offt, buf_sz_collect[i], 0) == -1) {
+                fprintf(stderr, "ERROR: File reading failed.\n");
+            }
+            buf_offt += buf_sz_collect[i];
+        }
+#endif
         s_r_handle->fd = fd_collect;
         data_engine_acc::set_handle(int64_t(s_r_handle));
         for (int i = file_nm; i < N; ++i) {

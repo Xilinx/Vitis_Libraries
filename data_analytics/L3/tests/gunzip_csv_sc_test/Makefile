@@ -18,11 +18,11 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=</x86>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
@@ -53,11 +53,11 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u2_gen3x4_xdma_gc_2_202110_1
+PLATFORM := u2_
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  xilinx_u2_gen3x4_xdma_gc_2_202110_1
+PLATFORM_ALLOWLIST +=  u2_ u50
 PLATFORM_BLOCKLIST +=  zc
 
 GCC_INTOOL := 8.3.0
@@ -122,10 +122,18 @@ endif
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u2_/'))
+HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/data_engine_sc.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/data_engine_config.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/smart_ssd_cache.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/sssd_api.cpp 
+CXXFLAGS +=  -D USE_P2P
+CXXFLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../data_compression/L1/include/hw -I $(XFLIB_DIR)/../security/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw/xf_data_analytics/dataframe -I $(XFLIB_DIR)/L2/include/hw/xf_data_analytics/dataframe/gunzip_csv -I $(XFLIB_DIR)/L3/include/sw/xf_data_analytics/gunzip_csv -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS += -O3
+
+else 
 HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/data_engine_sc.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/data_engine_config.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/smart_ssd_cache.cpp $(XFLIB_DIR)/L3/src/sw/gunzip_csv/sssd_api.cpp 
 CXXFLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../data_compression/L1/include/hw -I $(XFLIB_DIR)/../security/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw/xf_data_analytics/dataframe -I $(XFLIB_DIR)/L2/include/hw/xf_data_analytics/dataframe/gunzip_csv -I $(XFLIB_DIR)/L3/include/sw/xf_data_analytics/gunzip_csv -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3
 
+endif
 EXE_NAME := host.exe
 EXE_OBJS := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(HOST_SRCS))))
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
@@ -169,7 +177,7 @@ $(ACC_OBJS_data_engine_acc_hls_kernel): $(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
 BINARY_CONTAINERS_DEPS  += $(ACC_OBJS_data_engine_acc_hls_kernel) 
 $(BINARY_CONTAINERS_TMP) : $(BINARY_CONTAINERS_DEPS)
 	@echo "--> Making $@ from: $?"
-	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) -o $(BINARY_CONTAINERS) -l $^
+	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) $(VPP_LDFLAGS_data_engine_acc_hls_kernel) -o $(BINARY_CONTAINERS) -l $^
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_TMP)
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_DEPS)
 
@@ -257,12 +265,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) 
 
 clean: cleanh

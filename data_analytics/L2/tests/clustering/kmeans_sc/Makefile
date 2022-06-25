@@ -53,12 +53,12 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u250_gen3x16_xdma_3_1_202020_1
+PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  u250 u200
-PLATFORM_BLOCKLIST +=  xilinx_u250_xdma_201830_2 xilinx_u200_xdma_201830_2 zc aws-vu9p-f1
+PLATFORM_BLOCKLIST +=  zc aws-vu9p-f1
 
 GCC_INTOOL := 8.3.0
 BINUTILS_INTOOL := 2.37
@@ -158,7 +158,7 @@ $(ACC_OBJS_kmeansKernel): $(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
 BINARY_CONTAINERS_DEPS  += $(ACC_OBJS_kmeansKernel) 
 $(BINARY_CONTAINERS_TMP) : $(BINARY_CONTAINERS_DEPS)
 	@echo "--> Making $@ from: $?"
-	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) -o $(BINARY_CONTAINERS) -l $^
+	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) $(VPP_LDFLAGS_kmeanskernel) -o $(BINARY_CONTAINERS) -l $^
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_TMP)
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_DEPS)
 
@@ -246,12 +246,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) 
 
 clean: cleanh

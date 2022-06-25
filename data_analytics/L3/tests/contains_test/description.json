@@ -10,6 +10,7 @@
     "platform_blocklist": [
         "zc"
     ], 
+    "match_makefile": "false",
     "testinfo": {
         "disable": false, 
         "jobs": [

@@ -18,17 +18,17 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH required for SoC shells"
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=. HOST_ARCH is required for SoC shells"
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -46,18 +46,18 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting devault value
 TARGET ?= sw_emu
-HOST_ARCH ?= 
+HOST_ARCH ?= x86
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u50_gen3x16_xdma_201920_3
+PLATFORM := xilinx_u50_gen3x16_xdma_5_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  xilinx_u50_gen3x16_xdma_201920_3
+PLATFORM_ALLOWLIST +=  u50
 PLATFORM_BLOCKLIST +=  zc
 
 GCC_INTOOL := 8.3.0
@@ -78,8 +78,6 @@ RUN_DEPS :=
 # set debug switch
 ifneq ($(debug),yes)
 CXXFLAGS += -O3
-else
-CXXFLAGS += -g
 endif
 
 # get global setting
@@ -140,8 +138,7 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u2_gen3x4_xdma_gc_2_202110_1/'))
-VPP_FLAGS +=   -DUSE_U2
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS +=  -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/../graph/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
 
 else 
@@ -178,7 +175,7 @@ $(ACC_OBJS_kernel_knn): $(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
 BINARY_CONTAINERS_DEPS  += $(ACC_OBJS_kernel_knn) 
 $(BINARY_CONTAINERS_TMP) : $(BINARY_CONTAINERS_DEPS)
 	@echo "--> Making $@ from: $?"
-	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) -o $(BINARY_CONTAINERS) -l $^
+	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_knn) -o $(BINARY_CONTAINERS) -l $^
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_TMP)
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_DEPS)
 
@@ -266,12 +263,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) 
 
 clean: cleanh

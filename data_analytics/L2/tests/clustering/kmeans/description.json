@@ -5,14 +5,12 @@
     "flow": "vitis", 
     "platform_type": "", 
     "platform_allowlist": [
-        "xilinx_u250_gen3x16_xdma_3_1_202020_1", 
-        "xilinx_u50_gen3x16_xdma_201920_3", 
+        "u250", 
+        "u50", 
         "aws-vu9p-f1" 
     ], 
     "platform_blocklist": [
-	"vck190",
-        "xilinx_u250_xdma_201830_2",
-        "xilinx_u200_xdma_201830_2"
+	    "vck190"
     ], 
     "platform_properties": {
         "u250": {
