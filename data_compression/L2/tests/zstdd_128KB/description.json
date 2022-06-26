@@ -5,7 +5,9 @@
     ],
     "flow": "vitis",
     "default_device": "u200",
-    "platform_blocklist": [],
+    "platform_blocklist": [
+        "vck190_base_dfx"
+     ],
     "platform_allowlist": [
         "u200",
         "u250",

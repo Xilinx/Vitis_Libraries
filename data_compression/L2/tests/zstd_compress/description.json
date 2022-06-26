@@ -6,7 +6,7 @@
     "flow": "vitis",
     "default_device": "u200",
     "platform_blocklist": [
-        "xilinx_vck190_base_202210_1"
+        "vck190_base_dfx"
     ],
     "platform_allowlist": [
         "u200", 

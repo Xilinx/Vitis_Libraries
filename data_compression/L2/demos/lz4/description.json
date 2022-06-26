@@ -32,7 +32,8 @@
     ],
     "default_device": "u200",
     "platform_blocklist": [
-        "zc"
+        "zc",
+        "vck190_base_dfx"
     ],
     "platform_allowlist": [
         "u200",

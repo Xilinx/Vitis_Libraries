@@ -21,7 +21,8 @@
     "default_device": "u250",
     "platform_blocklist": [
         "zc",
-        "xilinx_u50_gen3x16_xdma_5_202210_1"
+        "xilinx_u50_gen3x16_xdma_5_202210_1",
+        "vck190_base_dfx"
     ],
     "platform_allowlist": [
         "u200",
@@ -143,7 +144,13 @@
                     ],
                     "options": "--sysroot=$(SYSROOT)"
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "decompress",
+                    "ldclflags": "--config PROJECT/connectivity.cfg --clock.id 4:xilDecompress_1"
+                }
+            ]
         }
     }
 }

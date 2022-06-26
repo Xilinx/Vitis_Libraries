@@ -39,19 +39,19 @@ The host executable generated is named as "**xgzip**" and it is generated in ``.
 
 Following is the usage of the executable:
 
-1. To execute single file for compression                      : ``./build/xgzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name>``
-2. To execute single file for decompression                    : ``./build/xgzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
-3. To test and validate single file (compress & decompress)    : ``./build/xgzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -t <input file_name>``
-4. To execute multiple files for compression          : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -cfl <files.list>``
-5. To execute multiple files for decompression        : ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -dfl <compressed files.list>``                       
-6. To validate multiple files (compress & decompress)          : ``./build/xgzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -l <files.list>``
+1. To execute single file for compression                      : ``./build_dir.<TARGET mode>.<xsa_name>/xgzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -c <input file_name>``
+2. To execute single file for decompression                    : ``./build_dir.<TARGET mode>.<xsa_name>/xgzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -d <compressed file_name>``
+3. To test and validate single file (compress & decompress)    : ``./build_dir.<TARGET mode>.<xsa_name>/xgzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -t <input file_name>``
+4. To execute multiple files for compression          : ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -cfl <files.list>``
+5. To execute multiple files for decompression        : ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -dfl <compressed files.list>``                       
+6. To validate multiple files (compress & decompress)          : ``./build_dir.<TARGET mode>.<xsa_name>/xgzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -l <files.list>``
 
                 - ``<files.list>``: Contains various file names with current path
 
 The default design flow is GZIP design to run the ZLIB, enable the switch ``-zlib`` in the command line, as mentioned below:
-``./build/xgzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name> -zlib 1``
+``./build_dir.<TARGET mode>.<xsa_name>/xgzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -c <input file_name> -zlib 1``
 
-The -xbin option mentioned above is optional, you can provide path to your binary file using -xbin option otherwise it will by default map to ``./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin`` 
+The -xbin option mentioned above is optional, you can provide path to your binary file using -xbin option otherwise it will by default map to ``./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin`` 
 
 The usage of the generated executable is as follows:
 

@@ -37,8 +37,8 @@ Average Compression Ratio	    2.68x (Silesia Benchmark)
 
 Executable Usage:
 
-1. To execute single file for decompression           : ``./build/xil_zlib -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <compressed file_name>``
-2. To decompress multiple files                       : ``./build/xil_zlib -cx ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -cfl <files.list>``
+1. To execute single file for decompression           : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -cx ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -c <compressed file_name>``
+2. To decompress multiple files                       : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -cx ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -cfl <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 

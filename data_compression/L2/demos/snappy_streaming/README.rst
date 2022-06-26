@@ -44,12 +44,12 @@ Note: Overall throughput can still be increased with multiple compute units.
 Executable Usage
 ~~~~~~~~~~~~~~~
                                                                                                                                                              
-1. To execute single file for compression   : ``./build/xil_snappy_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin> -c <file_name>``
-2. To execute single file for decompression : ``./build/xil_snappy_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin> -d <file_name.snappy>``
-3. To validate single file (compress & decompress) : ``./build/xil_snappy_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin> -t <files_name>``
-4. To execute multiple files for compression           : ``./build/xil_snappy_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin -cfl <files.list>``
-5. To execute multiple files for decompression          : ``./build/xil_snappy_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin -dfl <compressed files.list>``   
-6. To validate multiple files (compress & decompress)      : ``./build/xil_snappy_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin -l <files.list>``  
+1. To execute single file for compression   : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress_streaming.xclbin> -c <file_name>``
+2. To execute single file for decompression : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress_streaming.xclbin> -d <file_name.snappy>``
+3. To validate single file (compress & decompress) : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress_streaming.xclbin> -t <files_name>``
+4. To execute multiple files for compression           : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress_streaming.xclbin -cfl <files.list>``
+5. To execute multiple files for decompression          : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress_streaming.xclbin -dfl <compressed files.list>``   
+6. To validate multiple files (compress & decompress)      : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress_streaming.xclbin -l <files.list>``  
         
       - ``<files.list>``: Contains various file names with current path
 

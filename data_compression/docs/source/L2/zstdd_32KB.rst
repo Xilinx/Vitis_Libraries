@@ -38,8 +38,8 @@ Performance Data
 
 Executable Usage:
 
-1. To execute single file for decompression           : ``./build/xil_zlib -dx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
-2. To decompress multiple files                       : ``./build/xil_zlib -dx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -l <files.list>``
+1. To execute single file for decompression           : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -dx ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -d <compressed file_name>``
+2. To decompress multiple files                       : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -dx ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -l <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 

@@ -5,13 +5,14 @@
     ],
     "flow": "vitis",
     "default_device": "u200",
-    "platform_blocklist": [],
+    "platform_blocklist": [
+        "vck190"
+    ],
     "platform_allowlist": [
         "u200",
         "u250",
         "u50",
         "u280",
-        "vck190",
         "aws-vu9p-f1"
     ],
     "data": [

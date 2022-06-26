@@ -11,8 +11,8 @@ The binary host file generated is named as **xil_snappy_decompress_streaming** a
 Executable Usage
 ----------------
 
-1. To execute single file for decompression             : ``./build/xil_snappy_decompress_streaming  -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress_streaming.xclbin -d <input file_name>``
-2. To execute multiple files for decompression    : ``./build/xil_snappy_decompress_streaming  -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/decompress_streaming.xclbin -dfl <files.list>``
+1. To execute single file for decompression             : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_decompress_streaming  -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -d <input file_name>``
+2. To execute multiple files for decompression    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_decompress_streaming  -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -dfl <files.list>``
 
     - ``<files.list>``: Contains various file names with current path
 

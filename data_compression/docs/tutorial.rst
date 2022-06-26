@@ -48,9 +48,12 @@ L3 API are more scalable solutions to achieve maximum performance with optimized
 
 This demo is aimed at showcasing Xilinx Alveo U250 acceleration of Gzip_app and Xilinx Alveo U50 (HBM Platform) acceleration of Gzip_hbm  for both compression and decompression, it also supports Zlib with a host argument switch.
 
-Tested Tool: 2021.2
-Tested XRT:  2021.2
-Tested XSA:  xilinx_u50_gen3x16_xdma_201920_3
+.. code-block:: shell
+   
+   Tested Tool:  2022.1
+   Tested XRT :  2022.1
+   Tested XSA :  xilinx_u250_gen3x16_xdma_4_1_202210_1
+   Tested XSA :  xilinx_u50_gen3x16_xdma_5_202210_1
 
 +---------------------------------------------------------------------------------------------------------+--------------------------------+-------------------+----------+---------+-------+-------+--------+------------------------------------------------+
 | Flow                                                                                                    |Target Compute units            |Compression-Ratio  |  FMax    |  LUT    |  BRAM |  URAM | Memory | Througput                                      |
@@ -63,29 +66,29 @@ Tested XSA:  xilinx_u50_gen3x16_xdma_201920_3
 
 This application is present under ``L3/demos`` directory. Follow build instructions to generate executable and binary.
 
-The host executable generated is named as "**xil_gzip**" and it is generated in ``./build`` directory.
+The host executable generated is named as "**xil_gzip**" and it is generated in ``./build_dir.<TARGET mode>.<xsa_name>/`` directory.
 
 Executable Usage
 ----------------
 
 1. To execute single file for compression               
-                                          ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name>``
+                                          ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -c <input file_name>``
 
 2. To execute single file for decompression           :
-                                            ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
+                                            ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin  -d <compressed file_name>``
 
 3. To validate single file (compress & decompress) 
-                                            ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -t <input file_name>``
+                                            ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -t <input file_name>``
 4. To execute multiple files for compression   
-                                            ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -cfl <files.list>``
+                                            ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -cfl <files.list>``
 5. To execute multiple files for decompression   
-                                             ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -dfl <compressed files.list>``
+                                             ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -dfl <compressed files.list>``
 6. To validate multiple files (compress & decompress) 
-                                             ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -l <files.list>``
+                                             ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -l <files.list>``
 
     - ``<files.list>``: Contains various file names with current path
 
-The default design flow is GZIP design to run the ZLIB, enable the switch ``-zlib`` in the command line, as mentioned below: ``./build/xil_gzip -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name> -zlib 1``
+The default design flow is GZIP design to run the ZLIB, enable the switch ``-zlib`` in the command line, as mentioned below: ``./build_dir.<TARGET mode>.<xsa_name>/xil_gzip -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress_decompress.xclbin -c <input file_name> -zlib 1``
 
 
 L2 API
@@ -129,7 +132,7 @@ Commands to Run L2 and L3 cases
 
     cd L2/tests/    
     # build and run one of the following using U250 platform
-    make run TARGET=sw_emu DEVICE=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1/
+    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_4_1_202210_1/
     
     # delete generated files
     make cleanall
@@ -164,7 +167,7 @@ Command to Run L1 cases
     cd L1/tests/
     
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-        DEVICE=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1/
+        PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_4_1_202210_1/
 
 Test control variables are:
 
