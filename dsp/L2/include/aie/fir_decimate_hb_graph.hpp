@@ -516,7 +516,6 @@ class fir_decimate_hb_graph : public graph {
         }
     }
 
-
    public:
     kernel m_firKernels[TP_CASC_LEN];
     /**

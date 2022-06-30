@@ -470,8 +470,6 @@ class fir_sr_asym_graph : public graph {
     static constexpr unsigned int RTP_PORT_POS =
         ((TP_DUAL_IP == DUAL_IP_DUAL) ? ((TP_CASC_IN == CASC_IN_TRUE) ? 3 : 2) : 1);
 
-
-
     /**
      * @brief Helper Aliases
      */
