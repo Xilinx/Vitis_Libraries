@@ -470,7 +470,7 @@ class fir_sr_asym_graph : public graph {
     static constexpr unsigned int RTP_PORT_POS =
         ((TP_DUAL_IP == DUAL_IP_DUAL) ? ((TP_CASC_IN == CASC_IN_TRUE) ? 3 : 2) : 1);
 
-    kernel m_firKernels[TP_SSR * TP_SSR * TP_CASC_LEN];
+
 
     /**
      * @brief Helper Aliases
@@ -740,6 +740,7 @@ class fir_sr_asym_graph : public graph {
                   "Module size of 32kB");
 
    public:
+    kernel m_firKernels[TP_SSR * TP_SSR * TP_CASC_LEN];
     /**
      * The input data array to the function. This input array is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).

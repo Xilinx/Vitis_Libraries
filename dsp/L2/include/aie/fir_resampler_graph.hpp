@@ -599,9 +599,10 @@ class fir_resampler_graph : public graph {
             source(m_firKernels[i]) = "fir_resampler.cpp";
         }
     }
-    kernel m_firKernels[TP_CASC_LEN];
 
    public:
+    kernel m_firKernels[TP_CASC_LEN];
+
     /**
      * The input data to the function. This input is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
