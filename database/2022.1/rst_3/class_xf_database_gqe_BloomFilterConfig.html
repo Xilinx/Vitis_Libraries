@@ -346,7 +346,7 @@ function OptanonWrapper() { }
 <div class="toctree-wrapper compound">
 </div>
 <pre class="highlight overview-code-block literal-block">
-<span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_filter_config.hpp&quot;</span>
+<span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_bloomfilter_config.hpp&quot;</span>
 </pre>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
@@ -357,7 +357,84 @@ function OptanonWrapper() { }
 <div class="section" id="methods">
 <h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="bloomfilterconfig">
-<span id="cid-xf-database-gqe-bloomfilterconfig-bloomfilterconfig"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1af4fadaa1dd93e4e9260d12e07bb19c88"></span><h3>BloomFilterConfig<a class="headerlink" href="#bloomfilterconfig" title="Permalink to this headline">¶</a></h3>
+<span id="cid-xf-database-gqe-bloomfilterconfig-bloomfilterconfig"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1a45f7c47b2d964f538237bff0d9ec18d5"></span><h3>BloomFilterConfig<a class="headerlink" href="#bloomfilterconfig" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">BloomFilterConfig</span> <span class="p">(</span>
+    <a class="reference internal" href="class_xf_database_gqe_TableSection.html#doxid-classxf-1-1database-1-1gqe-1-1-table-section"><span class="std std-ref">TableSection</span></a><span></span> <span class="n">a</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_a</span><span class="p">,</span>
+    <a class="reference internal" href="class_xf_database_gqe_TableSection.html#doxid-classxf-1-1database-1-1gqe-1-1-table-section"><span class="std std-ref">TableSection</span></a><span></span> <span class="n">b</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_b</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">bf_str</span><span class="p">,</span>
+    <a class="reference internal" href="class_xf_database_gqe_TableSection.html#doxid-classxf-1-1database-1-1gqe-1-1-table-section"><span class="std std-ref">TableSection</span></a><span></span> <span class="n">c</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="n">build_probe</span>
+    <span class="p">)</span>
+</pre>
+<p>constructor of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config"><span class="std std-ref">BloomFilterConfig</span></a> .</p>
+<p>The class generates bloom filter configure bits by parsing the bloom filter run arguments,</p>
+<p class="rubric">Parameters:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>a</td>
+<td>left table</td>
+</tr>
+<tr class="row-even"><td>filter_a</td>
+<td>filter condition of left table</td>
+</tr>
+<tr class="row-odd"><td>b</td>
+<td>right table</td>
+</tr>
+<tr class="row-even"><td>filter_b</td>
+<td>filter condition of right table</td>
+</tr>
+<tr class="row-odd"><td>bf_str</td>
+<td>bloomfilter condition(s)</td>
+</tr>
+<tr class="row-even"><td>c</td>
+<td>result table</td>
+</tr>
+<tr class="row-odd"><td>output_str</td>
+<td>output column mapping</td>
+</tr>
+<tr class="row-even"><td>build_probe</td>
+<td>true for probe, false for build</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getbloomfilterconfigbits">
+<span id="cid-xf-database-gqe-bloomfilterconfig-getbloomfilterconfigbits"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1aaaad16210b1b94770d6bd3c2c279eebb"></span><h3>getBloomFilterConfigBits<a class="headerlink" href="#getbloomfilterconfigbits" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">ap_uint</span> <span class="o">&lt;</span><span class="mi">512</span><span class="o">&gt;*</span> <span class="n">getBloomFilterConfigBits</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get the gqeJoin kernel config</p>
+<p class="rubric">Returns:</p>
+<p>bloom filter config bits</p>
+</div>
+<div class="section" id="getshufflescan">
+<span id="cid-xf-database-gqe-bloomfilterconfig-getshufflescan"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1ad7dd6f1faf6ce7dad9feb1d8aca0cab2"></span><h3>getShuffleScan<a class="headerlink" href="#getshufflescan" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;&gt;</span> <span class="n">getShuffleScan</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get the sw-shuffle config for scan.</p>
+<p class="rubric">Returns:</p>
+<p>return the scan sw_shuffle cfg</p>
+</div>
+<div class="section" id="getshufflewrite">
+<span id="cid-xf-database-gqe-bloomfilterconfig-getshufflewrite"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1a24e1004bebf1ba7edcfd458a0b498c3b"></span><h3>getShuffleWrite<a class="headerlink" href="#getshufflewrite" title="Permalink to this headline">¶</a></h3>
+<pre class="highlight title-code-block literal-block">
+<span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">getShuffleWrite</span> <span class="p">()</span> <span class="k">const</span>
+</pre>
+<p>get the sw-shuffle config for write out.</p>
+<p class="rubric">Returns:</p>
+<p>return the write out sw_shuffle cfg</p>
+</div>
+<div class="section" id="cid-xf-database-gqe-bloomfilterconfig-bloomfilterconfig-2">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1af4fadaa1dd93e4e9260d12e07bb19c88"></span><span id="id1"></span><h3>BloomFilterConfig<a class="headerlink" href="#cid-xf-database-gqe-bloomfilterconfig-bloomfilterconfig-2" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="n">BloomFilterConfig</span> <span class="p">(</span>
     <a class="reference internal" href="class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span> <span class="n">tab_in</span><span class="p">,</span>
@@ -407,23 +484,14 @@ function OptanonWrapper() { }
 <p class="rubric">Returns:</p>
 <p>gqeFilter config bits (14 * ap_uint&lt;512&gt;)</p>
 </div>
-<div class="section" id="getshufflescan">
-<span id="cid-xf-database-gqe-bloomfilterconfig-getshufflescan"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1a71aa7c478b2faf28c2362865e94334c5"></span><h3>getShuffleScan<a class="headerlink" href="#getshufflescan" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="cid-xf-database-gqe-bloomfilterconfig-getshufflescan-2">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1a71aa7c478b2faf28c2362865e94334c5"></span><span id="id2"></span><h3>getShuffleScan<a class="headerlink" href="#cid-xf-database-gqe-bloomfilterconfig-getshufflescan-2" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">getShuffleScan</span> <span class="p">()</span> <span class="k">const</span>
 </pre>
 <p>get the sw-shuffle config for scan</p>
 <p class="rubric">Returns:</p>
 <p>the scan sw_shuffle cfg</p>
-</div>
-<div class="section" id="getshufflewrite">
-<span id="cid-xf-database-gqe-bloomfilterconfig-getshufflewrite"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-config-1a24e1004bebf1ba7edcfd458a0b498c3b"></span><h3>getShuffleWrite<a class="headerlink" href="#getshufflewrite" title="Permalink to this headline">¶</a></h3>
-<pre class="highlight title-code-block literal-block">
-<span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span> <span class="n">getShuffleWrite</span> <span class="p">()</span> <span class="k">const</span>
-</pre>
-<p>get the sw-shuffle config for write out</p>
-<p class="rubric">Returns:</p>
-<p>the write out sw_shuffle cfg</p>
 </div>
 </div>
 </div>
@@ -448,7 +516,7 @@ function OptanonWrapper() { }
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on April 24, 2022.
       </span>
 
     </p>

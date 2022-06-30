@@ -259,6 +259,7 @@ function OptanonWrapper() { }
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Vitis Database Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html#known-issue">Known Issue</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../design_flows.html">Design Flows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Vitis Database Library Tutorial</a></li>
@@ -409,7 +410,7 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="n">Table</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">)</span>
 </pre>
-<p>construct of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
+<p>construct of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -430,13 +431,13 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
     <span class="kt">void</span><span class="o">*</span> <span class="n">_ptr</span><span class="p">,</span>
     <span class="kt">int</span> <span class="n">row_num</span>
     <span class="p">)</span>
 </pre>
-<p>add one column into the <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> with user-provided buffer pointer.</p>
-<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , tab_o_col0, 10000);</p>
+<p>add one column into the <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> with user-provided buffer pointer.</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , tab_o_col0, 10000);</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -464,12 +465,12 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
     <span class="kt">int</span> <span class="n">row_num</span>
     <span class="p">)</span>
 </pre>
-<p>allocate buffer for one column and add it into the <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
-<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , 10000);</p>
+<p>allocate buffer for one column and add it into the <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , 10000);</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -494,12 +495,12 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">dat_list</span>
     <span class="p">)</span>
 </pre>
 <p>create one column with several sections by loading rows from data file.</p>
-<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , {file1.dat,file2.dat});</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , {file1.dat,file2.dat});</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -524,12 +525,12 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">addCol</span> <span class="p">(</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_name</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
-    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="k">struct</span> <a class="reference internal" href="../rst_3/struct_xf_database_gqe_ColPtr.html#doxid-structxf-1-1database-1-1gqe-1-1-col-ptr"><span class="std std-ref">ColPtr</span></a><span></span><span class="o">&gt;</span> <span class="n">ptr_pairs</span>
+    <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2"><span class="std std-ref">TypeEnum</span></a><span></span> <span class="n">type_size</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><span class="k">struct</span> <a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_ColPtr.html#doxid-structxf-1-1database-1-1gqe-1-1-col-ptr"><span class="std std-ref">ColPtr</span></a><span></span><span class="o">&gt;</span> <span class="n">ptr_pairs</span>
     <span class="p">)</span>
 </pre>
 <p>create one column with several sections by user-provided pointer list</p>
-<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , {{ptr1,10000},{ptr2,20000}});</p>
+<p>usage: tab.addCol(“o_orderkey”, <a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_TypeEnum.html#doxid-namespacexf-1-1database-1-1gqe-1a5365f96f233b0c2f45c92dbd750345d2a5aa45c269a62299c4dd75c9a494bb731"><span class="std std-ref">TypeEnum::TypeInt32</span></a> , {{ptr1,10000},{ptr2,20000}});</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -922,7 +923,7 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="o">~</span><span class="n">Table</span> <span class="p">()</span>
 </pre>
-<p>deconstructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
+<p>deconstructor of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> .</p>
 </div>
 <div class="section" id="info">
 <span id="cid-xf-database-gqe-table-info"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-table-1a23fb976531c02f4815ea368f39e1dd93"></span><h4>info<a class="headerlink" href="#info" title="Permalink to this headline">¶</a></h4>
@@ -943,7 +944,7 @@ function OptanonWrapper() { }
 <div class="section" id="id4">
 <h3>Overview<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-joiner-joiner">
-<span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a77c3fddc720e9a1695412a06ef55b506"></span><span></span><span class="k">class</span> <span class="nl">Joiner</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">xf::database::gqe::Base</span></a>
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a77c3fddc720e9a1695412a06ef55b506"></span><span></span><span class="k">class</span> <span class="nl">Joiner</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">xf::database::gqe::Base</span></a>
 </pre>
 <div class="section" id="inherited-members">
 <h4>Inherited Members<a class="headerlink" href="#inherited-members" title="Permalink to this headline">¶</a></h4>
@@ -957,10 +958,10 @@ function OptanonWrapper() { }
 <div class="section" id="joiner">
 <span id="id6"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a22bf68fe65d8d5f8e0a48be47f9f1ea6"></span><h4>Joiner<a class="headerlink" href="#joiner" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
-<span></span><span class="n">Joiner</span> <span class="p">(</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a><span></span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span>
+<span></span><span class="n">Joiner</span> <span class="p">(</span><a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a><span></span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span>
 </pre>
-<p>constructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Joiner.html#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> .</p>
-<p>Passing <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> obj to <a class="reference internal" href="../rst_3/class_xf_database_gqe_Joiner.html#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> class. Splitting <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> (OpenCL context, program, commandqueue, host/device buffers creation/allocation etc.) and <a class="reference internal" href="../rst_3/class_xf_database_gqe_Joiner.html#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> Init, guaranteens OpenCL stuff are not released after each join call. So the joiner may launch multi-times.</p>
+<p>constructor of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> .</p>
+<p>Passing <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> obj to <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> class. Splitting <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> (OpenCL context, program, commandqueue, host/device buffers creation/allocation etc.) and <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-joiner"><span class="std std-ref">Joiner</span></a> Init, guaranteens OpenCL stuff are not released after each join call. So the joiner may launch multi-times.</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -969,7 +970,7 @@ function OptanonWrapper() { }
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>obj</td>
-<td>the <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> instance.</td>
+<td>the <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> instance.</td>
 </tr>
 </tbody>
 </table>
@@ -977,16 +978,16 @@ function OptanonWrapper() { }
 <div class="section" id="run">
 <span id="cid-xf-database-gqe-joiner-run"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-joiner-1a141481944b58c4dd1d7ecd41777200cb"></span><h4>run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
-<a class="reference internal" href="../rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">run</span> <span class="p">(</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_a</span><span class="p">,</span>
+<a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">run</span> <span class="p">(</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_a</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_a</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_b</span><span class="p">,</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_b</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_b</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">join_str</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_c</span><span class="p">,</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_c</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
-    <span class="kt">int</span> <span class="n">join_type</span> <span class="o">=</span> <a class="reference internal" href="../rst_3/namespace_xf_database_gqe.html#doxid-namespacexf-1-1database-1-1gqe-1a48260a37f3c58f033217c43cdfe10380a0190ab4db681e407952c182bd745834d"><span class="std std-ref">INNER_JOIN</span></a><span></span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_JoinStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-join-strategy-base"><span class="std std-ref">JoinStrategyBase</span></a><span></span><span class="o">*</span> <span class="n">strategyimp</span> <span class="o">=</span> <span class="k">nullptr</span>
+    <span class="kt">int</span> <span class="n">join_type</span> <span class="o">=</span> <a class="reference internal" href="../build_rst/rst_3/namespace_xf_database_gqe.html#doxid-namespacexf-1-1database-1-1gqe-1a48260a37f3c58f033217c43cdfe10380a0190ab4db681e407952c182bd745834d"><span class="std std-ref">INNER_JOIN</span></a><span></span><span class="p">,</span>
+    <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_JoinStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-join-strategy-base"><span class="std std-ref">JoinStrategyBase</span></a><span></span><span class="o">*</span> <span class="n">strategyimp</span> <span class="o">=</span> <span class="k">nullptr</span>
     <span class="p">)</span>
 </pre>
 <p>Run join with the input arguments defined strategy, which includes.</p>
@@ -1014,7 +1015,7 @@ function OptanonWrapper() { }
   <span class="n">delete</span> <span class="n">smanual</span><span class="p">;</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> tab_o filter condition like “o_rowid &gt; 0”, o_rowid is the col name of tab_o when no filter conditions, given empty fitler condition “”</p>
+<p><a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a> tab_o filter condition like “o_rowid &gt; 0”, o_rowid is the col name of tab_o when no filter conditions, given empty fitler condition “”</p>
 <p>The join condition like “left_join_key_0=right_join_key_0” when dual key join is enabled, using comma as the seperator in join condition, e.g. “left_join_key_0=right_join_key_0,left_join_key_1=right_join_key_1”</p>
 <p>Output strings are like “output_c0 = tab_a_col/tab_b_col”, when several columns are output, using comma as the seperator</p>
 <p class="rubric">Parameters:</p>
@@ -1049,7 +1050,7 @@ function OptanonWrapper() { }
 <td>INNER_JOIN(default) | SEMI_JOIN | ANTI_JOIN.</td>
 </tr>
 <tr class="row-odd"><td>strategyimp</td>
-<td>pointer to an object of <a class="reference internal" href="../rst_3/class_xf_database_gqe_JoinStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-join-strategy-base"><span class="std std-ref">JoinStrategyBase</span></a> or its derived type.</td>
+<td>pointer to an object of <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_JoinStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-join-strategy-base"><span class="std std-ref">JoinStrategyBase</span></a> or its derived type.</td>
 </tr>
 </tbody>
 </table>
@@ -1079,7 +1080,7 @@ function OptanonWrapper() { }
     <span class="kt">float</span> <span class="n">fpp</span> <span class="o">=</span> <span class="mf">0.05f</span>
     <span class="p">)</span>
 </pre>
-<p>constructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_BloomFilter.html#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a></p>
+<p>constructor of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a></p>
 <p>Calculates the size of the bloom-filter based on the number of unique keys and the equation provided in: <a class="reference external" href="https://en.wikipedia.org/wiki/Bloom_filter">https://en.wikipedia.org/wiki/Bloom_filter</a>, as well as allocates buffer for the internal hash-table</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
@@ -1101,7 +1102,7 @@ function OptanonWrapper() { }
 <span id="cid-xf-database-gqe-bloomfilter-build"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1a8d75546775f2906a40655869197f9793"></span><h4>build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="kt">void</span> <span class="n">build</span> <span class="p">(</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span> <span class="n">tab_in</span><span class="p">,</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span> <span class="n">tab_in</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">col_names</span>
     <span class="p">)</span>
 </pre>
@@ -1126,7 +1127,7 @@ function OptanonWrapper() { }
 <div class="section" id="merge">
 <span id="cid-xf-database-gqe-bloomfilter-merge"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter-1a0144360175a09504e9946b192ffdc894"></span><h4>merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
-<span></span><span class="kt">void</span> <span class="n">merge</span> <span class="p">(</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_BloomFilter.html#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a><span></span><span class="o">&amp;</span> <span class="n">bf_in</span><span class="p">)</span>
+<span></span><span class="kt">void</span> <span class="n">merge</span> <span class="p">(</span><a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a><span></span><span class="o">&amp;</span> <span class="n">bf_in</span><span class="p">)</span>
 </pre>
 <p>merge the input bloom-filter into the current one</p>
 <p class="rubric">Parameters:</p>
@@ -1172,7 +1173,7 @@ function OptanonWrapper() { }
 <div class="section" id="id9">
 <h3>Overview<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <pre class="highlight overview-code-block literal-block">
-<span></span><span class="k">class</span> <span class="nl">Filter</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">xf::database::gqe::Base</span></a>
+<span></span><span class="k">class</span> <span class="nl">Filter</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">xf::database::gqe::Base</span></a>
 </pre>
 <div class="section" id="id10">
 <h4>Inherited Members<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
@@ -1186,10 +1187,10 @@ function OptanonWrapper() { }
 <div class="section" id="filter">
 <span id="cid-xf-database-gqe-filter-filter"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-filter-1a4b9fbc3e64605089f56e83d43708f45f"></span><h4>Filter<a class="headerlink" href="#filter" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
-<span></span><span class="n">Filter</span> <span class="p">(</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a><span></span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span>
+<span></span><span class="n">Filter</span> <span class="p">(</span><a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a><span></span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span>
 </pre>
-<p>constructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Filter.html#doxid-classxf-1-1database-1-1gqe-1-1-filter"><span class="std std-ref">Filter</span></a> .</p>
-<p>Initializes hardware as well as loads binary to FPGA by class <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">Base</span></a> &amp; <a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a></p>
+<p>constructor of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-filter"><span class="std std-ref">Filter</span></a> .</p>
+<p>Initializes hardware as well as loads binary to FPGA by class <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">Base</span></a> &amp; <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a></p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -1198,7 +1199,7 @@ function OptanonWrapper() { }
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>obj</td>
-<td><a class="reference internal" href="../rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> class object</td>
+<td><a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_FpgaInit.html#doxid-classxf-1-1database-1-1gqe-1-1-fpga-init"><span class="std std-ref">FpgaInit</span></a> class object</td>
 </tr>
 </tbody>
 </table>
@@ -1208,20 +1209,20 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="o">~</span><span class="n">Filter</span> <span class="p">()</span>
 </pre>
-<p>deconstructor of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Filter.html#doxid-classxf-1-1database-1-1gqe-1-1-filter"><span class="std std-ref">Filter</span></a> .</p>
-<p>clProgram, commandQueue, and Context will be released by class <a class="reference internal" href="../rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">Base</span></a></p>
+<p>deconstructor of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-filter"><span class="std std-ref">Filter</span></a> .</p>
+<p>clProgram, commandQueue, and Context will be released by class <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_Base.html#doxid-classxf-1-1database-1-1gqe-1-1-base"><span class="std std-ref">Base</span></a></p>
 </div>
 <div class="section" id="cid-xf-database-gqe-filter-run">
 <span id="doxid-classxf-1-1database-1-1gqe-1-1-filter-1a2df733163fb12a6abdfcfb8c88eaf346"></span><span id="id14"></span><h4>run<a class="headerlink" href="#cid-xf-database-gqe-filter-run" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
-<a class="reference internal" href="../rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">run</span> <span class="p">(</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_in</span><span class="p">,</span>
+<a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">run</span> <span class="p">(</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_in</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">input_str</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_BloomFilter.html#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a><span></span><span class="o">&amp;</span> <span class="n">bf_in</span><span class="p">,</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-bloom-filter"><span class="std std-ref">BloomFilter</span></a><span></span><span class="o">&amp;</span> <span class="n">bf_in</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_condition</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_out</span><span class="p">,</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_out</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/struct_xf_database_gqe_StrategySet.html#doxid-structxf-1-1database-1-1gqe-1-1-strategy-set"><span class="std std-ref">StrategySet</span></a><span></span> <span class="n">params</span>
+    <a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_StrategySet.html#doxid-structxf-1-1database-1-1gqe-1-1-strategy-set"><span class="std std-ref">StrategySet</span></a><span></span> <span class="n">params</span>
     <span class="p">)</span>
 </pre>
 <p>gqeFilter run function.</p>
@@ -1265,7 +1266,7 @@ function OptanonWrapper() { }
 <td>output column mapping</td>
 </tr>
 <tr class="row-odd"><td>params</td>
-<td><a class="reference internal" href="../rst_3/struct_xf_database_gqe_StrategySet.html#doxid-structxf-1-1database-1-1gqe-1-1-strategy-set"><span class="std std-ref">StrategySet</span></a> struct contatins number of sections of the input table. params.sec_l = 0: uses section info from input table; params.sec_l &gt;= 1: separates input table into params.sec_l sections evenly</td>
+<td><a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_StrategySet.html#doxid-structxf-1-1database-1-1gqe-1-1-strategy-set"><span class="std std-ref">StrategySet</span></a> struct contatins number of sections of the input table. params.sec_l = 0: uses section info from input table; params.sec_l &gt;= 1: separates input table into params.sec_l sections evenly</td>
 </tr>
 </tbody>
 </table>
@@ -1294,7 +1295,7 @@ function OptanonWrapper() { }
 <pre class="highlight title-code-block literal-block">
 <span></span><span class="n">Aggregator</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">xclbin</span><span class="p">)</span>
 </pre>
-<p>construct of <a class="reference internal" href="../rst_3/class_xf_database_gqe_Aggregator.html#doxid-classxf-1-1database-1-1gqe-1-1-aggregator"><span class="std std-ref">Aggregator</span></a> .</p>
+<p>construct of <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-aggregator"><span class="std std-ref">Aggregator</span></a> .</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -1311,14 +1312,14 @@ function OptanonWrapper() { }
 <div class="section" id="aggregate">
 <span id="cid-xf-database-gqe-aggregator-aggregate"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-aggregator-1a84e65484d5c77b5c71de28564e56e885"></span><h4>aggregate<a class="headerlink" href="#aggregate" title="Permalink to this headline">¶</a></h4>
 <pre class="highlight title-code-block literal-block">
-<a class="reference internal" href="../rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">aggregate</span> <span class="p">(</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_in</span><span class="p">,</span>
-    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><a class="reference internal" href="../rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a><span></span><span class="o">&gt;</span> <span class="n">evals_info</span><span class="p">,</span>
+<a class="reference internal" href="../build_rst/rst_3/enum_xf_database_gqe_ErrCode.html#doxid-namespacexf-1-1database-1-1gqe-1ab8c63d2eec74d13d9f190082ca614298"><span class="std std-ref">ErrCode</span></a><span></span> <span class="n">aggregate</span> <span class="p">(</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_in</span><span class="p">,</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span> <span class="o">&lt;</span><a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a><span></span><span class="o">&gt;</span> <span class="n">evals_info</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filter_str</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">group_keys_str</span><span class="p">,</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">output_str</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_Table.html#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_out</span><span class="p">,</span>
-    <a class="reference internal" href="../rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a><span></span><span class="o">*</span> <span class="n">strategyImp</span> <span class="o">=</span> <span class="k">nullptr</span>
+    <a class="reference internal" href="#doxid-classxf-1-1database-1-1gqe-1-1-table"><span class="std std-ref">Table</span></a><span></span><span class="o">&amp;</span> <span class="n">tab_out</span><span class="p">,</span>
+    <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a><span></span><span class="o">*</span> <span class="n">strategyImp</span> <span class="o">=</span> <span class="k">nullptr</span>
     <span class="p">)</span>
 </pre>
 <p>aggregate function.</p>
@@ -1335,10 +1336,10 @@ function OptanonWrapper() { }
 </pre></div>
 </div>
 <p>Input filter_str like “19940101&lt;=o_orderdate &amp;&amp; o_orderdate&lt;19950101”, o_orderdate and o_orderdate must be exsisted colunm names in input table when no filter conditions, input “”</p>
-<p>Input evaluation information as a struct <a class="reference internal" href="../rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a> , creata a valid Evaluation struct using initializer list, e.g. {“l_extendedprice * (-l_discount+c2) / 100”, {0, 100}} <a class="reference internal" href="../rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a> has two members: evaluation string and evaluation constants. In the evaluation string, you can input a final division calculation. Divisor only supports: 10,100,1000,10000 In the evaluation constants, input a constant for each column, if no constant, like “l_extendedprice” above, input zero.</p>
+<p>Input evaluation information as a struct <a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a> , creata a valid Evaluation struct using initializer list, e.g. {“l_extendedprice * (-l_discount+c2) / 100”, {0, 100}} <a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_EvaluationInfo.html#doxid-structxf-1-1database-1-1gqe-1-1-evaluation-info"><span class="std std-ref">EvaluationInfo</span></a> has two members: evaluation string and evaluation constants. In the evaluation string, you can input a final division calculation. Divisor only supports: 10,100,1000,10000 In the evaluation constants, input a constant for each column, if no constant, like “l_extendedprice” above, input zero.</p>
 <p>Input Group keys in a string, like “group_key0, group_key1”, use comma as seperator</p>
 <p>Output strings are like “c0=tab_in_col1, c1=tab_in_col2”, when contains several columns, use comma as seperator</p>
-<p>StrategyImp class pointer of derived class of <a class="reference internal" href="../rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a> .</p>
+<p>StrategyImp class pointer of derived class of <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a> .</p>
 <p class="rubric">Parameters:</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
@@ -1365,7 +1366,7 @@ function OptanonWrapper() { }
 <td>result table</td>
 </tr>
 <tr class="row-odd"><td>strategyImp</td>
-<td>pointer to an object of <a class="reference internal" href="../rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a> or its derived type.</td>
+<td>pointer to an object of <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_AggrStrategyBase.html#doxid-classxf-1-1database-1-1gqe-1-1-aggr-strategy-base"><span class="std std-ref">AggrStrategyBase</span></a> or its derived type.</td>
 </tr>
 </tbody>
 </table>
@@ -1379,29 +1380,29 @@ function OptanonWrapper() { }
 <pre class="highlight overview-code-block literal-block">
 <span></span><span class="cp">#include</span> <span class="cpf">&quot;gqe_workshop.hpp&quot;</span>
 </pre>
-<pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-workshop-join">
-<span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a0fc16ddd9859e730aa5a5ce12aeb1327"></span><span id="cid-xf-database-gqe-workshop-print"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a3d8468093a91fb2c4ff05cf03b936293"></span><span id="cid-xf-database-gqe-workshop-release"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1ae7cb75295ec95b4a22e4ce5a288ef1a4"></span><span id="id18"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a01b117c7db11631277d42e1d21792bdd"></span><span id="cid-xf-database-gqe-workshop-workshop-2"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1af1f85b0f047e324abd93c919f11a42b1"></span><span id="cid-xf-database-gqe-workshop-operator"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1aa3344a2c3ea10ee4057b5121a8b8b2da"></span><span id="cid-xf-database-gqe-workshop-workshop"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1aa147f41f89b814ac15c817cc84db3e13"></span><span id="cid-xf-database-gqe-workshop-cv"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1ac17297a38298517e3d360df11f744b9c"></span><span id="cid-xf-database-gqe-workshop-m"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a58ab3cbf00ed0613fa829f44c618c309"></span><span id="cid-xf-database-gqe-workshop-q"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a153bd55c5b8fb55d198c072cbcc67d47"></span><span id="cid-xf-database-gqe-workshop-join-service-run"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1af85fa059d3bdd61a4fa5be2260eb7deb"></span><span id="cid-xf-database-gqe-workshop-join-service-t"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a5bb71885533cd8c34bc05761cbb5145a"></span><span id="cid-xf-database-gqe-workshop-p2h"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1abc26a0a8485583868d47e7dd68a9d8c6"></span><span id="cid-xf-database-gqe-workshop-h2p"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1ac366ccdb58179f1c1ef8404c4135b126"></span><span id="cid-xf-database-gqe-workshop-worker"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a6949701ba2dbc3a4527ad06026bdad72"></span><span id="cid-xf-database-gqe-workshop-ctx"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a8f07f2ce42e0c5dd6cbfe5f7bcb5efbe"></span><span id="cid-xf-database-gqe-workshop-err"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a9f79e980f99f37caae0ad791882e8333"></span><span></span><span class="k">class</span> <span class="nl">Workshop</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init"><span class="std std-ref">xf::database::gqe::PlatformInit</span></a><span></span>
+<pre class="highlight overview-code-block literal-block" id="cid-xf-database-gqe-workshop-bloomfilter">
+<span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a36954beef952e60ededf8674f72d13f5"></span><span id="cid-xf-database-gqe-workshop-join"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a0fc16ddd9859e730aa5a5ce12aeb1327"></span><span id="cid-xf-database-gqe-workshop-print"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a3d8468093a91fb2c4ff05cf03b936293"></span><span id="cid-xf-database-gqe-workshop-release"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1ae7cb75295ec95b4a22e4ce5a288ef1a4"></span><span id="id18"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a01b117c7db11631277d42e1d21792bdd"></span><span id="cid-xf-database-gqe-workshop-workshop-2"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1af1f85b0f047e324abd93c919f11a42b1"></span><span id="cid-xf-database-gqe-workshop-operator"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1aa3344a2c3ea10ee4057b5121a8b8b2da"></span><span id="cid-xf-database-gqe-workshop-workshop"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1aa147f41f89b814ac15c817cc84db3e13"></span><span id="cid-xf-database-gqe-workshop-cv"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1ac17297a38298517e3d360df11f744b9c"></span><span id="cid-xf-database-gqe-workshop-m"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a58ab3cbf00ed0613fa829f44c618c309"></span><span id="cid-xf-database-gqe-workshop-q"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a1dd63a6cbb1e189661fc257f4bca340b"></span><span id="cid-xf-database-gqe-workshop-join-service-run"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1af85fa059d3bdd61a4fa5be2260eb7deb"></span><span id="cid-xf-database-gqe-workshop-join-service-t"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a5bb71885533cd8c34bc05761cbb5145a"></span><span id="cid-xf-database-gqe-workshop-p2h"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1abc26a0a8485583868d47e7dd68a9d8c6"></span><span id="cid-xf-database-gqe-workshop-h2p"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1ac366ccdb58179f1c1ef8404c4135b126"></span><span id="cid-xf-database-gqe-workshop-worker"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a6949701ba2dbc3a4527ad06026bdad72"></span><span id="cid-xf-database-gqe-workshop-ctx"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a8f07f2ce42e0c5dd6cbfe5f7bcb5efbe"></span><span id="cid-xf-database-gqe-workshop-err"></span><span id="doxid-classxf-1-1database-1-1gqe-1-1-workshop-1a9f79e980f99f37caae0ad791882e8333"></span><span></span><span class="k">class</span> <span class="nl">Workshop</span><span class="p">:</span> <span class="k">public</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init"><span class="std std-ref">xf::database::gqe::PlatformInit</span></a><span></span>
 
 <span class="c1">// fields</span>
 
 <span class="n">cl_int</span> <span class="n">err</span>
 <span class="n">cl_context</span> <span class="n">ctx</span>
-<span class="n">vector</span> <span class="o">&lt;</span><a class="reference internal" href="../rst_3/class_xf_database_gqe_Worker.html#doxid-classxf-1-1database-1-1gqe-1-1-worker"><span class="std std-ref">Worker</span></a><span></span><span class="o">&gt;</span> <span class="n">worker</span>
-<a class="reference internal" href="../rst_3/class_xf_database_gqe_MemCoppier.html#doxid-classxf-1-1database-1-1gqe-1-1-mem-coppier"><span class="std std-ref">MemCoppier</span></a><span></span> <span class="n">h2p</span>
-<a class="reference internal" href="../rst_3/class_xf_database_gqe_MemCoppier.html#doxid-classxf-1-1database-1-1gqe-1-1-mem-coppier"><span class="std std-ref">MemCoppier</span></a><span></span> <span class="n">p2h</span>
+<span class="n">vector</span> <span class="o">&lt;</span><a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_Worker.html#doxid-classxf-1-1database-1-1gqe-1-1-worker"><span class="std std-ref">Worker</span></a><span></span><span class="o">&gt;</span> <span class="n">worker</span>
+<a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_MemCoppier.html#doxid-classxf-1-1database-1-1gqe-1-1-mem-coppier"><span class="std std-ref">MemCoppier</span></a><span></span> <span class="n">h2p</span>
+<a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_MemCoppier.html#doxid-classxf-1-1database-1-1gqe-1-1-mem-coppier"><span class="std std-ref">MemCoppier</span></a><span></span> <span class="n">p2h</span>
 <span class="kr">thread</span> <span class="n">join_service_t</span>
 <span class="kt">bool</span> <span class="n">join_service_run</span>
-<a class="reference internal" href="../rst_3/class_xf_database_gqe_SafeQueue.html#doxid-classxf-1-1database-1-1gqe-1-1-safe-queue"><span class="std std-ref">SafeQueue</span></a><span></span> <span class="o">&lt;</span><a class="reference internal" href="../rst_3/struct_xf_database_gqe_join_task.html#doxid-structxf-1-1database-1-1gqe-1-1join-task"><span class="std std-ref">join_task</span></a><span></span><span class="o">&gt;</span> <span class="n">q</span>
+<a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_SafeQueue.html#doxid-classxf-1-1database-1-1gqe-1-1-safe-queue"><span class="std std-ref">SafeQueue</span></a><span></span> <span class="o">&lt;</span><a class="reference internal" href="../build_rst/rst_3/struct_xf_database_gqe_task_complex.html#doxid-structxf-1-1database-1-1gqe-1-1task-complex"><span class="std std-ref">task_complex</span></a><span></span><span class="o">&gt;</span> <span class="n">q</span>
 <span class="n">mutex</span> <span class="n">m</span>
 <span class="n">condition_variable</span> <span class="n">cv</span>
 </pre>
 <pre class="highlight overview-inherited-code-block literal-block">
 <span></span><span class="c1">// fields</span>
 
-<span class="n">string</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1a265349a0693a7dbb038bc19d7d053b98"><span class="std std-ref">device_shell_name</span></a><span></span>
-<span class="n">cl_platform_id</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1ab52aabf361cd1c2c788886537f0b0236"><span class="std std-ref">xilinx_platform_id</span></a><span></span>
-<span class="kt">int</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1a461206507ed0cba5e64bb1ce2624691f"><span class="std std-ref">device_num</span></a><span></span>
-<span class="n">vector</span> <span class="o">&lt;</span><span class="n">cl_device_id</span><span class="o">&gt;</span> <a class="reference internal" href="../rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1a9fd60bd6107380f470d7414a2b7c1cb4"><span class="std std-ref">device_id</span></a>
+<span class="n">string</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1a265349a0693a7dbb038bc19d7d053b98"><span class="std std-ref">device_shell_name</span></a><span></span>
+<span class="n">cl_platform_id</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1ab52aabf361cd1c2c788886537f0b0236"><span class="std std-ref">xilinx_platform_id</span></a><span></span>
+<span class="kt">int</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1a461206507ed0cba5e64bb1ce2624691f"><span class="std std-ref">device_num</span></a><span></span>
+<span class="n">vector</span> <span class="o">&lt;</span><span class="n">cl_device_id</span><span class="o">&gt;</span> <a class="reference internal" href="../build_rst/rst_3/class_xf_database_gqe_PlatformInit.html#doxid-classxf-1-1database-1-1gqe-1-1-platform-init-1a9fd60bd6107380f470d7414a2b7c1cb4"><span class="std std-ref">device_id</span></a>
 </pre>
 </div>
 </div>
@@ -1435,7 +1436,7 @@ function OptanonWrapper() { }
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on June 30, 2022.
       </span>
 
     </p>

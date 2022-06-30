@@ -259,6 +259,7 @@ function OptanonWrapper() { }
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Vitis Database Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release.html">Release Note</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release.html#known-issue">Known Issue</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design_flows.html">Design Flows</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Vitis Database Library Tutorial</a><ul>
@@ -374,9 +375,9 @@ function OptanonWrapper() { }
 Users only need to specify the result they want with a query language like SQL.
 DBMS converts a query into an execution plan which is a tree of operators, based on certain set of rules and cost functions.
 Execution of the plan is that data flows from the leaves towards the root and the root node produce the final result.
-Query execution performances depends on both execution plan and performance of operator nodes.</p>
+Query execution performances depend on both execution plan and performance of operator nodes.</p>
 <a class="reference internal image-reference" href="_images/exe_plan.png"><img alt="Execution Plan" class="align-center" src="_images/exe_plan.png" style="width: 602.2px; height: 308.8px;" /></a>
-<p>Xilinx Alveo card can help improve operator performance in following way:</p>
+<p>Xilinx Alveo card can help improve operator performance in following ways:</p>
 <ol class="arabic simple">
 <li>Instruction parallelism by creating a customized and long pipeline.</li>
 <li>Data parallelism by processing multiple rows at the same time.</li>
@@ -397,7 +398,7 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 <li>Break down incoming job, distributing sub jobs among all FPGA cards, pipeline data transfers and kernel executions.</li>
 </ol>
 <ul class="simple">
-<li>L2 APIs are kernels running on FPGA cards. Each time called, they will finish certain processing according to input configs. L2 APIs are combinitions of multiple processing unit, each units consists of multiple processing stage. In this way, kernels could both processing multiple data at the same time and apply multiple operations to the same data. L2 API design subject to resource constraints and will differs according to FPGA cards.</li>
+<li>L2 APIs are kernels running on FPGA cards. Each time called, they will finish certain processing according to input configs. L2 APIs are combinations of multiple processing units, each unit consists of multiple processing stages. In this way, kernels could both process multiple data at the same time and apply multiple operations to the same data. L2 API design is subject to resource constraints and may differs according to FPGA cards.</li>
 <li>L1 APIs are basic operators in processing, like filter, aggregator / bloom filter / hash join. They’re all highly optimize HLS design, providing optimal performance. They’re all template design, make them easier to scale and fit into different resource constraint.</li>
 </ul>
 </div>
@@ -409,12 +410,12 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 <p>The major feature of L3 API are:</p>
 <ol class="arabic simple">
 <li>Generalized query execution. L3 API pre-defined operator combinations like “scan + filter + aggregation + write”, “scan + filter + bloom filter + write”, “scan + filter + hash-join + write”, “scan + filter + aggregation + write”. Filter condition support comparision between 4 input columns and 2 constants. Aggregation support max / min / sum / count / mean / variance / norm_L1 / norm_L2. In this way, L3 API could support a generalized query operators.</li>
-<li>Automatic card management. As soon as program created a instance of GQE, it will scan the machine and find all qualified Xilinx FPGA cards by their shell name. It will load the cards with the xclbins, create context / command queue / kernel / host buffer / device buffer / job queue for each card. It will keep alive until user call release() functions. This will finish all the initialization automatically and save the overhead to repeat such setup each time user call GQE API.</li>
+<li>Automatic card management. As soon as program created an instance of GQE, it will scan the machine and find all qualified Xilinx FPGA cards by their shell name. It will load the cards with the xclbins, create context / command queue / kernel / host buffer / device buffer / job queue for each card. It will keep alive until user call release() functions. This will finish all the initialization automatically and save the overhead to repeat such setup each time user call GQE API.</li>
 </ol>
 <a class="reference internal image-reference" href="_images/card_mng.png"><img alt="Card Management" class="align-center" src="_images/card_mng.png" style="width: 570.0px; height: 289.6px;" /></a>
 <ol class="arabic simple" start="3">
 <li>Light weight memory management. The input and output of GQE are data structure call “TableSection”. It only contains pointers to memories which user allocated. In such way, GQE won’t do memory allocation related to input / output. This will make it easier for customer to integrate since it won’t impact original DBMS’s memory pool managment.</li>
-<li>Asynchronous API call. Input for processing will be cut into multiple section of rows. GQE API requries customer to provide an std::future type argument for each row, to indicate readiness of input. GQE also requires an std::promise type arugment for each output section, to notify the caller thread that result is ready. GQE API will push all input arguments into an internal job queue and return immediately. Actual processing won’t begin until the corresponding std::future arguments for input is ready. This will seperate input preparing from actual GQE processing. GQE could start processing the ready sections ahead even if not all input sections are ready. It will help pipeline the “preparing” and “processing” and improve system performance.</li>
+<li>Asynchronous API call. Input for processing will be cut into multiple section of rows. GQE API requries customer to provide an std::future type argument for each row, to indicate readiness of input. GQE also requires an std::promise type argument for each output section, to notify the caller thread that result is ready. GQE API will push all input arguments into an internal job queue and return immediately. Actual processing won’t begin until the corresponding std::future arguments for input is ready. This will seperate input preparing from actual GQE processing. GQE could start processing the ready sections ahead even if not all input sections are ready. It will help pipeline the “preparing” and “processing” and improve system performance.</li>
 <li>Column-oriented. Columnar DBMS will benefit from only accessing subset of columns and more options for data compression.</li>
 </ol>
 </div>
@@ -440,7 +441,7 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 
 <span class="c1">// After the schema of input table has been defined, add rows by section.</span>
 <span class="c1">// Each section added to TableSection should contains exactly same number of columns in the exact same order of attribute.</span>
-<span class="c1">// This only add pointers, which should been valid no later than this seciton&#39;s corresponding future is ready.</span>
+<span class="c1">// This only add pointers, which should been valid no later than this section&#39;s corresponding future is ready.</span>
 <span class="c1">// tab_o_col0, tab_l_col0, tab_c_col0, tab_c_col1, tab_c_col2, tab_c_col3 are pointer to input and output memory</span>
 <span class="c1">// tab_o_valid, tab_l_valid is the validation bits for table O and table L, represent filter result from previous processing, as input.</span>
 <span class="c1">// tab_part_o_col0, tab_part_l_col0 are pointer to intermediate partition result.</span>
@@ -452,7 +453,7 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 
 
 <span class="c1">// intermeidiate result will be stored in &quot;tab_part_o&quot; and &quot;tab_part_l&quot;.</span>
-<span class="c1">// schema definition and adding seciton are similar</span>
+<span class="c1">// schema definition and adding section are similar</span>
 <span class="n">gqe</span><span class="o">::</span><span class="n">TableSection</span> <span class="n">tab_part_o</span><span class="p">(</span><span class="s">&quot;Part O&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;o1&quot;</span><span class="p">,</span> <span class="s">&quot;o2&quot;</span><span class="p">,</span> <span class="s">&quot;o3&quot;</span><span class="p">},</span> <span class="p">{</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int64_t</span><span class="p">),</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int64_t</span><span class="p">),</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int64_t</span><span class="p">)},</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
 <span class="n">gqe</span><span class="o">::</span><span class="n">TableSection</span> <span class="n">tab_part_l</span><span class="p">(</span><span class="s">&quot;Part L&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;l1&quot;</span><span class="p">,</span> <span class="s">&quot;l2&quot;</span><span class="p">,</span> <span class="s">&quot;l3&quot;</span><span class="p">},</span> <span class="p">{</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int64_t</span><span class="p">),</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int64_t</span><span class="p">),</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int64_t</span><span class="p">)},</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
 <span class="n">tab_part_o</span><span class="p">.</span><span class="n">addSec</span><span class="p">({((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">tmp_o1</span><span class="p">),</span> <span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">tmp_o2</span><span class="p">),</span> <span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">tmp_o3</span><span class="p">)},</span> <span class="k">nullptr</span><span class="p">,</span> <span class="n">d_part_o_nrow</span><span class="p">);</span>
@@ -462,7 +463,7 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 <span class="c1">// This will merge the original execution plan tree into 1 operations.</span>
 <span class="c1">// Table O is filtered with &quot;o_rowid&gt;0&quot;</span>
 <span class="c1">// No filter and only partition on table L.</span>
-<span class="c1">// To support bigger input tableSection, GQE will also performan hash partition on Table O and Table L.</span>
+<span class="c1">// To support bigger input tableSection, GQE will also perform hash partition on Table O and Table L.</span>
 <span class="c1">// Join table O and table L with &quot;o_orderkey = l_orderkey&quot;, output 3 columns of l_orderkey, o_rowid and l_rowid.</span>
 <span class="c1">// Join will return imediately</span>
 <span class="n">wksp</span><span class="p">.</span><span class="n">Join</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tab_o</span><span class="p">,</span> <span class="s">&quot;o_rowid&gt;0&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tab_o_ready</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tab_part_o</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tab_l</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tab_l_ready</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tab_part_l</span><span class="p">,</span>
@@ -484,11 +485,11 @@ It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different pa
 <h2>L2 API – GQE kernels<a class="headerlink" href="#l2-api-gqe-kernels" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id1">
 <h3>Target Audience and Major Features<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<p>Target audience of L2 API are users who has certian understanding of HLS and programming on FPGA and want to make modification on kernels, including:</p>
+<p>The target audience of L2 API are users who have a certain understanding of HLS and programming on FPGA and want to make modifications on kernels, including:</p>
 <ol class="arabic simple">
-<li>Operator combinitions in kernel, like number of operators or operator pipeline. Most L1 APIs and glue logics inside L2 kernels are connect with streams. Users could add more operators into kernels to increase its performance as long as it is not bounded by other factors like logic resource and memory bandwidth.</li>
+<li>Operator combinations in the kernel, like the number of operators or operator pipeline. Most L1 APIs and glue logics inside L2 kernels are connected with streams. Users could add more operators into kernels to increase its performance as long as it is not bounded by other factors like logic resource and memory bandwidth.</li>
 <li>Add more pre-processing and post-processing to kernel, like compression / decompression. Certain DBMS might store its data in compressed format to save the memory space and bandwidth to transfer. Adding decompression module to build longer processing pipeline will save the time to decompress the data and increase system performance.</li>
-<li>Kernel combinition to be built on single cards. People might be interested in adjust the kernel combinition to accelerate execution plan with different weight.</li>
+<li>Kernel combination to be built on single cards. People might be interested in adjusting the kernel combination to accelerate the execution plan with different weights.</li>
 <li>Building configs to improve frequency or migrate to other Xilinx FPGA device.</li>
 <li>Test correctness in sw-emu, hw-emu and on-board.</li>
 </ol>
@@ -518,7 +519,7 @@ make cleanall
 <h2>L1 API<a class="headerlink" href="#l1-api" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id2">
 <h3>Target Audience and Major Features<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>Target audience of L1 API are users who is familiar with HLS programming and want to tests / profile / modify operators or add new operator.
+<p>Target audience of L1 API are users who is familiar with HLS programming and want to test / profile / modify operators or add new operator.
 With the HLS test project provided in L1 layer, user could get:</p>
 <ol class="arabic simple">
 <li>Function correctness tests, both in c-simulation and co-simulation</li>
@@ -578,7 +579,7 @@ if the corresponding step is not wanted.</p>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on June 30, 2022.
       </span>
 
     </p>
