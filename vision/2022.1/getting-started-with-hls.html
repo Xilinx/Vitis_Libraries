@@ -483,8 +483,8 @@ representation to cv::Mat format.</td>
 <p>The <code class="docutils literal notranslate"><span class="pre">AXIvideo2xfMat</span></code> function receives a sequence of images using the
 AXI4 Streaming Video and produces an <code class="docutils literal notranslate"><span class="pre">xf::cv::Mat</span></code> representation.</p>
 <p class="rubric">API Syntax</p>
-<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span><span class="nb">int</span> <span class="n">T</span><span class="p">,</span><span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="nb">int</span> <span class="n">AXIvideo2xfMat</span><span class="p">(</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span> <span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">)</span>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span><span class="nb">int</span> <span class="n">T</span><span class="p">,</span><span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="nb">int</span> <span class="n">AXIvideo2xfMat</span><span class="p">(</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span> <span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Parameter Descriptions</p>
@@ -523,11 +523,14 @@ XF_NPPC1 and XF_NPPC8 for 1-pixel
 and 8-pixel operations
 respectively.</td>
 </tr>
-<tr class="row-odd"><td>AXI_video_strm</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Input image.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
 <td>HLS stream of ap_axiu (axi
 protocol) type.</td>
 </tr>
-<tr class="row-even"><td>img</td>
+<tr class="row-odd"><td>img</td>
 <td>Input image.</td>
 </tr>
 </tbody>
@@ -543,8 +546,8 @@ detecting TLAST input.</p>
 sequence of images and encodes it correctly using the AXI4 Streaming
 video protocol.</p>
 <p class="rubric">API Syntax</p>
-<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span> <span class="nb">int</span> <span class="n">T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="nb">int</span> <span class="n">xfMat2AXIvideo</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">,</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">)</span>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span> <span class="nb">int</span> <span class="n">T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="nb">int</span> <span class="n">xfMat2AXIvideo</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">,</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Parameter Descriptions</p>
@@ -583,11 +586,14 @@ XF_NPPC1 and XF_NPPC8 for 1-pixel
 and 8-pixel operations
 respectively.</td>
 </tr>
-<tr class="row-odd"><td>AXI_video_strm</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Output image.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
 <td>HLS stream of ap_axiu (axi
 protocol) type.</td>
 </tr>
-<tr class="row-even"><td>img</td>
+<tr class="row-odd"><td>img</td>
 <td>Output image.</td>
 </tr>
 </tbody>
@@ -708,7 +714,7 @@ protocol) type.</td>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on August 02, 2022.
       </span>
 
     </p>

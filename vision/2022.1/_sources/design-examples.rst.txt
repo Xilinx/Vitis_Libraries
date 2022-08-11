@@ -32,8 +32,15 @@ examples are described in this section:
 -  `Image Sensor Processing pipeline with HDR <#isp-201hdr>`_
 -  `Image Sensor Processing pipeline with GTM <#isp-201gtm>`_
 -  `Mono image Sensor Processing pipeline <#isp-201mono>`_
--  `RGB-IR image Sensor Processing pipeline <#isp-201mono>`_
+-  `RGB-IR image Sensor Processing pipeline <#isp_201rgbir>`_
 -  `Image Sensor Processing multistream pipeline - 2022.1 version <#_isp-201multistream>`_
+
+.. Important::
+   **All the functions in the library are implemented in streaming model except 4. Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
+
+.. Important::
+   **Default depth value for all the memory mapped implemenations(Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
+   Default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
 
 
 .. _interative-pyramidal:
@@ -125,8 +132,8 @@ cornerUpdate()
 
 .. code:: c
 
-   template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC>
-   void cornerUpdate(ap_uint<64> *list_fix, unsigned int *list, uint32_t nCorners, xf::cv::Mat<TYPE,ROWS,COLS,NPC> &flow_vectors, ap_uint<1> harris_flag)
+   template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+   void cornerUpdate(ap_uint<64> *list_fix, unsigned int *list, uint32_t nCorners, xf::cv::Mat<TYPE,ROWS,COLS,NPC, XFCVDEPTH_IN> &flow_vectors, ap_uint<1> harris_flag)
 
 .. rubric:: Parameter Descriptions
 
@@ -135,48 +142,50 @@ The following table describes the template and the function parameters.
 
 .. table:: Table: CornerUpdate Function Parameter Descriptions
 
-   +----------+-----------------------------------------------------------+
-   | Paramete | Description                                               |
-   | r        |                                                           |
-   +==========+===========================================================+
-   | MAXCORNE | Maximum number of corners that the function needs to work |
-   | RSNO     | on                                                        |
-   +----------+-----------------------------------------------------------+
-   | TYPE     | Input Pixel Type. Only 8-bit, unsigned, 1 channel is      |
-   |          | supported (XF_8UC1)                                       |
-   +----------+-----------------------------------------------------------+
-   | ROWS     | Maximum height of input and output image (Must be         |
-   |          | multiple of 8)                                            |
-   +----------+-----------------------------------------------------------+
-   | COLS     | Maximum width of input and output image (Must be multiple |
-   |          | of 8)                                                     |
-   +----------+-----------------------------------------------------------+
-   | NPC      | Number of pixels to be processed per cycle. This function |
-   |          | supports only XF_NPPC1 or 1-pixel per cycle operations.   |
-   +----------+-----------------------------------------------------------+
-   | list_fix | A list of packed fixed point coordinates of the corner    |
-   |          | locations in 16, 5 (16 integer bits and 5 fractional      |
-   |          | bits) format. Bits from 20 to 0 represent the column      |
-   |          | number, while the bits 41 to 21 represent the row number. |
-   |          | The rest of the bits are used for flag, this flag is set  |
-   |          | when the tracked corner is valid.                         |
-   +----------+-----------------------------------------------------------+
-   | list     | A list of packed positive short integer coordinates of    |
-   |          | the corner locations in unsigned short format. Bits from  |
-   |          | 15 to 0 represent the column number, while the bits 31 to |
-   |          | 16 represent the row number. This list is same as the     |
-   |          | list output by Harris Corner Detector.                    |
-   +----------+-----------------------------------------------------------+
-   | nCorners | Number of corners to track                                |
-   +----------+-----------------------------------------------------------+
-   | flow_vec | Packed flow vectors as in xf::cv::DensePyrOpticalFlow     |
-   | tors     | function                                                  |
-   +----------+-----------------------------------------------------------+
-   | harris_f | If set to 1, the function takes input corners from list.  |
-   | lag      |                                                           |
-   |          | if set to 0, the function takes input corners from        |
-   |          | list_fix.                                                 |
-   +----------+-----------------------------------------------------------+
+   +------------------+-----------------------------------------------------------+
+   | Paramete         | Description                                               |
+   | r                |                                                           |
+   +==================+===========================================================+
+   | MAXCORNE         | Maximum number of corners that the function needs to work |
+   | RSNO             | on                                                        |
+   +------------------+-----------------------------------------------------------+
+   | TYPE             | Input Pixel Type. Only 8-bit, unsigned, 1 channel is      |
+   |                  | supported (XF_8UC1)                                       |
+   +------------------+-----------------------------------------------------------+
+   | ROWS             | Maximum height of input and output image (Must be         |
+   |                  | multiple of 8)                                            |
+   +------------------+-----------------------------------------------------------+
+   | COLS             | Maximum width of input and output image (Must be multiple |
+   |                  | of 8)                                                     |
+   +------------------+-----------------------------------------------------------+
+   | NPC              | Number of pixels to be processed per cycle. This function |
+   |                  | supports only XF_NPPC1 or 1-pixel per cycle operations.   |
+   +------------------+-----------------------------------------------------------+
+   | XFCVDEPTH_IN     | Depth of input image                                      |
+   +------------------+-----------------------------------------------------------+
+   | list_fix         | A list of packed fixed point coordinates of the corner    |
+   |                  | locations in 16, 5 (16 integer bits and 5 fractional      |
+   |                  | bits) format. Bits from 20 to 0 represent the column      |
+   |                  | number, while the bits 41 to 21 represent the row number. |
+   |                  | The rest of the bits are used for flag, this flag is set  |
+   |                  | when the tracked corner is valid.                         |
+   +------------------+-----------------------------------------------------------+
+   | list             | A list of packed positive short integer coordinates of    |
+   |                  | the corner locations in unsigned short format. Bits from  |
+   |                  | 15 to 0 represent the column number, while the bits 31 to |
+   |                  | 16 represent the row number. This list is same as the     |
+   |                  | list output by Harris Corner Detector.                    |
+   +------------------+-----------------------------------------------------------+
+   | nCorners         | Number of corners to track                                |
+   +------------------+-----------------------------------------------------------+
+   | flow_vec         | Packed flow vectors as in xf::cv::DensePyrOpticalFlow     |
+   | tors             | function                                                  |
+   +------------------+-----------------------------------------------------------+
+   | harris_f         | If set to 1, the function takes input corners from list.  |
+   | lag              |                                                           |
+   |                  | if set to 0, the function takes input corners from        |
+   |                  | list_fix.                                                 |
+   +------------------+-----------------------------------------------------------+
 
 The example codeworks on an input video which is read and processed
 using the Vitis vision library. 
@@ -190,8 +199,8 @@ cornersImgToList()
 
 .. code:: c
 
-   template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC>
-   void cornersImgToList(xf::cv::Mat<TYPE,ROWS,COLS,NPC> &_src, unsigned int list[MAXCORNERSNO], unsigned int *ncorners)
+   template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+   void cornersImgToList(xf::cv::Mat<TYPE,ROWS,COLS,NPC, XFCVDEPTH_IN> &_src, unsigned int list[MAXCORNERSNO], unsigned int *ncorners)
 
 .. rubric:: Parameter Descriptions
 
@@ -200,21 +209,38 @@ The following table describes the function parameters.
 
 .. table:: Table: CornerImgToList Function Parameter Descriptions
 
-   +----------+-----------------------------------------------------------+
-   | Paramete | Description                                               |
-   | r        |                                                           |
-   +==========+===========================================================+
-   | \_src    | The output image of harris corner detector. The size of   |
-   |          | this xf::cv::Mat object is the size of the input image to |
-   |          | Harris corner detector. The value of each pixel is 255 if |
-   |          | a corner is present in the location, 0 otherwise.         |
-   +----------+-----------------------------------------------------------+
-   | list     | A 32 bit memory allocated, the size of MAXCORNERS, to     |
-   |          | store the corners detected by Harris Detector             |
-   +----------+-----------------------------------------------------------+
-   | ncorners | Total number of corners detected by Harris, that is, the  |
-   |          | number of corners in the list                             |
-   +----------+-----------------------------------------------------------+
+   +------------------+-----------------------------------------------------------+
+   | Paramete         | Description                                               |
+   | r                |                                                           |
+   +==================+===========================================================+
+   | MAXCORNE         | Maximum number of corners that the function needs to work |
+   | RSNO             | on                                                        |
+   +------------------+-----------------------------------------------------------+
+   | TYPE             | Input Pixel Type. Only 8-bit, unsigned, 1 channel is      |
+   |                  | supported (XF_8UC1)                                       |
+   +------------------+-----------------------------------------------------------+
+   | ROWS             | Maximum height of input and output image (Must be         |
+   |                  | multiple of 8)                                            |
+   +------------------+-----------------------------------------------------------+
+   | COLS             | Maximum width of input and output image (Must be multiple |
+   |                  | of 8)                                                     |
+   +------------------+-----------------------------------------------------------+
+   | NPC              | Number of pixels to be processed per cycle. This function |
+   |                  | supports only XF_NPPC1 or 1-pixel per cycle operations.   |
+   +------------------+-----------------------------------------------------------+
+   | XFCVDEPTH_IN     | Depth of input image                                      |
+   +------------------+-----------------------------------------------------------+
+   | \_src            | The output image of harris corner detector. The size of   |
+   |                  | this xf::cv::Mat object is the size of the input image to |
+   |                  | Harris corner detector. The value of each pixel is 255 if |
+   |                  | a corner is present in the location, 0 otherwise.         |
+   +------------------+-----------------------------------------------------------+
+   | list             | A 32 bit memory allocated, the size of MAXCORNERS, to     |
+   |                  | store the corners detected by Harris Detector             |
+   +------------------+-----------------------------------------------------------+
+   | ncorners         | Total number of corners detected by Harris, that is, the  |
+   |                  | number of corners in the list                             |
+   +------------------+-----------------------------------------------------------+
 
 
 
@@ -317,13 +343,13 @@ The following example demonstrates the Color Detection algorithm.
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4
     #pragma HLS INTERFACE s_axilite  port=return
 
-		xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
-		xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> rgb2hsv(rows, cols);
-		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper1(rows, cols);
-		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper2(rows, cols);
-		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper3(rows, cols);
-		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper4(rows, cols);
-		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
+		xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgInput> imgInput(rows, cols);
+		xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_rgb2hsv> rgb2hsv(rows, cols);
+		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgHelper1> imgHelper1(rows, cols);
+		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgHelper2> imgHelper2(rows, cols);
+		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgHelper3> imgHelper3(rows, cols);
+		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgHelper4> imgHelper4(rows, cols);
+		xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgOutput> imgOutput(rows, cols);
 
 		// Copy the shape data:
 		unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
@@ -337,27 +363,27 @@ The following example demonstrates the Color Detection algorithm.
 	#pragma HLS DATAFLOW
 		// clang-format on
 		// Retrieve xf::cv::Mat objects from img_in data:
-		xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+		xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgInput>(img_in, imgInput);
 
 		// Convert RGBA to HSV:
-		xf::cv::bgr2hsv<IN_TYPE, HEIGHT, WIDTH, NPC1>(imgInput, rgb2hsv);
+		xf::cv::bgr2hsv<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgInput, XF_CV_DEPTH_rgb2hsv>(imgInput, rgb2hsv);
 
 		// Do the color thresholding:
-		xf::cv::colorthresholding<IN_TYPE, OUT_TYPE, MAXCOLORS, HEIGHT, WIDTH, NPC1>(rgb2hsv, imgHelper1, low_thresh,
+		xf::cv::colorthresholding<IN_TYPE, OUT_TYPE, MAXCOLORS, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_rgb2hsv, XF_CV_DEPTH_imgHelper1>(rgb2hsv, imgHelper1, low_thresh,
 																					 high_thresh);
 
 		// Use erode and dilate to fully mark color areas:
 		xf::cv::erode<XF_BORDER_CONSTANT, OUT_TYPE, HEIGHT, WIDTH, XF_KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS,
-					  NPC1>(imgHelper1, imgHelper2, _kernel);
+					  NPC1, XF_CV_DEPTH_imgHelper1, XF_CV_DEPTH_imgHelper2>(imgHelper1, imgHelper2, _kernel);
 		xf::cv::dilate<XF_BORDER_CONSTANT, OUT_TYPE, HEIGHT, WIDTH, XF_KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS,
-					   NPC1>(imgHelper2, imgHelper3, _kernel);
+					   NPC1, XF_CV_DEPTH_imgHelper2, XF_CV_DEPTH_imgHelper3>(imgHelper2, imgHelper3, _kernel);
 		xf::cv::dilate<XF_BORDER_CONSTANT, OUT_TYPE, HEIGHT, WIDTH, XF_KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS,
-					   NPC1>(imgHelper3, imgHelper4, _kernel);
+					   NPC1, XF_CV_DEPTH_imgHelper3, XF_CV_DEPTH_imgHelper4>(imgHelper3, imgHelper4, _kernel);
 		xf::cv::erode<XF_BORDER_CONSTANT, OUT_TYPE, HEIGHT, WIDTH, XF_KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS,
-					  NPC1>(imgHelper4, imgOutput, _kernel);
+					  NPC1, XF_CV_DEPTH_imgHelper4, XF_CV_DEPTH_imgOutput>(imgHelper4, imgOutput, _kernel);
 
 		// Convert _dst xf::cv::Mat object to output array:
-		xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+		xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_imgOutput>(imgOutput, img_out);
 
 		return;
 
@@ -532,46 +558,46 @@ The following code is for the pipeline.
 
 		int _cm_size = 9, _dc_size = 5;
 
-		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_L(rows, cols);
+		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAT_L> mat_L(rows, cols);
 
-		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_R(rows, cols);
+		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAT_R> mat_R(rows, cols);
 
-		xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_disp(rows, cols);
+		xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAT_DISP> mat_disp(rows, cols);
 
-		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapxLMat(rows, cols);
+		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAP_XL> mapxLMat(rows, cols);
 
-		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapyLMat(rows, cols);
+		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAP_YL> mapyLMat(rows, cols);
 
-		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapxRMat(rows, cols);
+		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAP_XR> mapxRMat(rows, cols);
 
-		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapyRMat(rows, cols);
+		xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAP_YR> mapyRMat(rows, cols);
 
-		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> leftRemappedMat(rows, cols);
+		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_LEFT_REMAPPED> leftRemappedMat(rows, cols);
 
-		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> rightRemappedMat(rows, cols);
+		xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_RIGHT_REMAPPED> rightRemappedMat(rows, cols);
 
 
 	#pragma HLS DATAFLOW
 
-		xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(img_L, mat_L);
-		xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(img_R, mat_R);
+		xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAT_L>(img_L, mat_L);
+		xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAT_R>(img_R, mat_R);
 
 		xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32FC1, XF_HEIGHT, XF_WIDTH,
-											   XF_NPPC1>(cameraMA_l_fix, distC_l_fix, irA_l_fix, mapxLMat, mapyLMat,
+											   XF_NPPC1, XF_CV_DEPTH_MAP_XL, XF_CV_DEPTH_MAP_YL>(cameraMA_l_fix, distC_l_fix, irA_l_fix, mapxLMat, mapyLMat,
 														 _cm_size, _dc_size);
 		xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32FC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
-					  XF_NPPC1, XF_USE_URAM>(mat_L, leftRemappedMat, mapxLMat, mapyLMat);
+					  XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_MAT_L, XF_CV_DEPTH_LEFT_REMAPPED, XF_CV_DEPTH_MAP_XL, XF_CV_DEPTH_MAP_YL>(mat_L, leftRemappedMat, mapxLMat, mapyLMat);
 
 		xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32FC1, XF_HEIGHT, XF_WIDTH,
-											   XF_NPPC1>(cameraMA_r_fix, distC_r_fix, irA_r_fix, mapxRMat, mapyRMat,
+											   XF_NPPC1, XF_CV_DEPTH_MAP_XR, XF_CV_DEPTH_MAP_YR>(cameraMA_r_fix, distC_r_fix, irA_r_fix, mapxRMat, mapyRMat,
 														 _cm_size, _dc_size);
 		xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32FC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
-					  XF_NPPC1, XF_USE_URAM>(mat_R, rightRemappedMat, mapxRMat, mapyRMat);
+					  XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_MAT_R, XF_CV_DEPTH_RIGHT_REMAPPED, XF_CV_DEPTH_MAP_XR, XF_CV_DEPTH_MAP_YR>(mat_R, rightRemappedMat, mapxRMat, mapyRMat);
 
 		xf::cv::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, XF_8UC1, XF_16UC1, XF_HEIGHT, XF_WIDTH,
-						 XF_NPPC1, XF_USE_URAM>(leftRemappedMat, rightRemappedMat, mat_disp, bm_state);
+						 XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_LEFT_REMAPPED, XF_CV_DEPTH_RIGHT_REMAPPED, XF_CV_DEPTH_MAT_DISP>(leftRemappedMat, rightRemappedMat, mat_disp, bm_state);
 
-		xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(mat_disp, img_disp);
+		xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_MAT_DISP>(mat_disp, img_disp);
 	}
 	
 
@@ -679,16 +705,16 @@ The following example demonstrates the Letterbox algorithm.
 				rows_out_resize = rows_out;
 			}
 
-			xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> imgInput0(rows_in, cols_in);
-			xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T> out_mat_resize(rows_out_resize, cols_out_resize);
-			xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T> out_mat(rows_out, cols_out);
+			xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN_0> imgInput0(rows_in, cols_in);
+			xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_1> out_mat_resize(rows_out_resize, cols_out_resize);
+			xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_2> out_mat(rows_out, cols_out);
 		
 		#pragma HLS DATAFLOW
 		
-			xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC_T>  (img_inp, imgInput0);
-			xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,MAXDOWNSCALE> (imgInput0, out_mat_resize);
-			xf::cv::insertBorder<TYPE, NEWHEIGHT, NEWWIDTH, NEWHEIGHT, NEWWIDTH, NPC_T>(out_mat_resize, out_mat, insert_pad_value);
-			xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, NEWHEIGHT, NEWWIDTH, NPC_T>(out_mat, img_out);
+			xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN_0>  (img_inp, imgInput0);
+			xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_1,MAXDOWNSCALE> (imgInput0, out_mat_resize);
+			xf::cv::insertBorder<TYPE, NEWHEIGHT, NEWWIDTH, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(out_mat_resize, out_mat, insert_pad_value);
+			xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_2>(out_mat, img_out);
 			return;
 			}// end kernel
 
@@ -712,11 +738,13 @@ The output of that function is passed to the xf::cv::insertBorder module and the
 	    int SRC_COLS,
 	    int DST_ROWS,
 	    int DST_COLS,
-	    int NPC
+	    int NPC,
+		int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+        int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT
 	    >
 	void insertBorder (
-	    xf::cv::Mat <TYPE, SRC_ROWS, SRC_COLS, NPC>& _src,
-	    xf::cv::Mat <TYPE, DST_ROWS, DST_COLS, NPC>& _dst,
+	    xf::cv::Mat <TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& _src,
+	    xf::cv::Mat <TYPE, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_OUT>& _dst,
 	    int insert_pad_val
 	    )
 		
@@ -1046,17 +1074,17 @@ The following example demonstrates the ISP pipeline with above list of functions
 				
 				#pragma HLS INLINE OFF
 					
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> lsc_out(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0> imgInput1(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> imgInput2(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> bpc_out(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> gain_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> ltm_in(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> lsc_out(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> _dst(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> aecin(height, width);
+					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> _imgOutput(height, width);
 
 				
 				#pragma HLS DATAFLOW
@@ -1066,20 +1094,20 @@ The following example demonstrates the ISP pipeline with above list of functions
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
-					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(imgInput2, gain_out, rgain, bgain);
-					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
-					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
-					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, lsc_out);
+					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput1);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_3>(imgInput2, gain_out, rgain, bgain);
+					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out);
+					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
+					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3>(ltm_in, lsc_out);
 					if (XF_DST_T == XF_8UC3) {
-						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(lsc_out, aecin, height, width);
+						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin, height, width);
 					} else {
-						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC>(lsc_out, aecin);
+						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin);
 					}
-					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, _dst, gamma_lut);		
-					xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, _imgOutput);
-					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, img_out);
+					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4>(aecin, _dst, gamma_lut);		
+					xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6>(_dst, _imgOutput);
+					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6>(_imgOutput, img_out);
 				}
 				
 .. _isp-201hdr:
@@ -1148,19 +1176,19 @@ The following example demonstrates the ISP pipeline with HDR.
 				 		
 				#pragma HLS INLINE OFF
 				
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInputhdr1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInputhdr2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> lsc_out(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1> imgInputhdr1(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR2> imgInputhdr2(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> imgInput2(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_BPC_OUT> bpc_out(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT> gain_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT> demosaic_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IMPOP> impop(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN> ltm_in(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT> lsc_out(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST> _dst(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN> aecin(height, width);
+					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT> _imgOutput(height, width);
 
 				
 				#pragma HLS DATAFLOW
@@ -1169,24 +1197,24 @@ The following example demonstrates the ISP pipeline with HDR.
 					float thresh = (float)pawb / 256;
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp1, imgInputhdr1);
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp2, imgInputhdr2);
+					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1>(img_inp1, imgInputhdr1);
+					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR2>(img_inp2, imgInputhdr2);
 
-					xf::cv::Hdrmerge_bayer<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, NO_EXPS, W_B_SIZE>(
+					xf::cv::Hdrmerge_bayer<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1, XF_CV_DEPTH_IN_DR2, NO_EXPS, W_B_SIZE>(
 						imgInputhdr1, imgInputhdr2, imgInput1, wr_hls);
 
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);																														
-					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(imgInput2, gain_out, rgain, bgain);
-					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
-					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																				   
-					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, lsc_out);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);																														
+					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_GAIN_OUT>(imgInput2, gain_out, rgain, bgain);
+					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_GAIN_OUT,XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out);
+					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT, XF_CV_DEPTH_LTM_IN>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																				   
+					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN, XF_CV_DEPTH_LSC_OUT>(ltm_in, lsc_out);
 					if (XF_DST_T == XF_8UC3) {
-						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(lsc_out, aecin, height, width);
+						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(lsc_out, aecin, height, width);
 					} else {
-						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC>(lsc_out, aecin);
+						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(lsc_out, aecin);
 					}
-					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, _dst, gamma_lut);					
-					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, img_out);
+					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN, XF_CV_DEPTH_DST>(aecin, _dst, gamma_lut);					
+					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST>(_dst, img_out);
 				}
 				
 .. _isp-201gtm:
@@ -1206,6 +1234,8 @@ This ISP includes following blocks:
 *  Global tone mapping : Reduces the dynamic range from higher range to display range using tone mapping.
 *  Gamma correction : Gamma correction improves the overall brightness of image.
 *  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
+
+|isp-gtm|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
@@ -1322,17 +1352,17 @@ The following example demonstrates the ISP pipeline with above list of functions
 				
 				#pragma HLS INLINE OFF
 					
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> lsc_out(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0> imgInput1(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> imgInput2(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> bpc_out(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> gain_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> ltm_in(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> lsc_out(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> _dst(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> aecin(height, width);
+					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> _imgOutput(height, width);
 
 				
 				#pragma HLS DATAFLOW
@@ -1342,22 +1372,22 @@ The following example demonstrates the ISP pipeline with above list of functions
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
-					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(imgInput2, gain_out, rgain, bgain);
-					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
-					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
-					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, lsc_out);
+					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput1);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCC, XF_CV_DEPTH_IN_1,>(imgInput2, gain_out, rgain, bgain);
+					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out);
+					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
+					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3>(ltm_in, lsc_out);
 					
 					if (XF_DST_T == XF_8UC3) {
-						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(lsc_out, aecin, height, width);
+						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin, height, width);
 					} else {
-						 xf::cv::gtm<XF_DST_T, XF_LTM_T, XF_SRC_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC>(
+						 xf::cv::gtm<XF_DST_T, XF_LTM_T, XF_SRC_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(
                          lsc_out, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, height, width);
 					}
-					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, _dst, gamma_lut);		
-					xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, _imgOutput);
-					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, img_out);
+					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4>(aecin, _dst, gamma_lut);		
+					xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6>(_dst, _imgOutput);
+					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6>(_imgOutput, img_out);
 				}
 
 .. _isp-201mono:
@@ -1379,6 +1409,8 @@ This ISP includes following blocks:
 *  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
 *  Gamma correction : Gamma correction improves the overall brightness of image.
 *  Autoexposure correction : Using CLAHE algorithm to improve brightness and contrast of the image.
+
+|isp-mono|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
@@ -1483,14 +1515,14 @@ The following example demonstrates the ISP pipeline with above list of functions
 				
 				#pragma HLS INLINE OFF
 					
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> dpc_out(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> imgInput2(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DPC_OUT> dpc_out(height, width);
+					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT> gain_out(height, width);
+					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IMPOP> impop(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST> _dst(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN> aecin(height, width);
+					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT> _imgOutput(height, width);
 
 				
 				#pragma HLS DATAFLOW
@@ -1504,27 +1536,27 @@ The following example demonstrates the ISP pipeline with above list of functions
 
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,
+					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1>(img_inp, imgInput1);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(imgInput1, imgInput2, BLACK_LEVEL,
 																									mul_fact);
 
-					xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(imgInput2, dpc_out);
-					xf::cv::gaincontrol_mono<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(dpc_out, gain_out, lgain);
+					xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_DPC_OUT>(imgInput2, dpc_out);
+					xf::cv::gaincontrol_mono<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DPC_OUT, XF_CV_DEPTH_GAIN_OUT>(dpc_out, gain_out, lgain);
 
 					if (XF_DST_T == XF_8UC1) {
-						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(gain_out, aecin, height, width);
+						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT, XF_CV_DEPTH_AEC_IN>(gain_out, aecin, height, width);
 					} else {
-						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC>(gain_out, aecin);
+						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_GAIN_OUT, XF_CV_DEPTH_AEC_IN>(gain_out, aecin);
 					}
 
 					obj.process(_dst, aecin, _lutw, _lutr, _clipCounter, height, width, clip, tilesY, tilesX);
 
-					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, _imgOutput, gamma_lut);
+					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST, XF_CV_DEPTH_OUT>(_dst, _imgOutput, gamma_lut);
 
-					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, img_out);
+					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT>(_imgOutput, img_out);
 				}
 				
-.. isp_rgbir:
+.. _isp_201rgbir:
 
 RGB-IR image Sensor Processing pipeline
 =======================================
@@ -1540,6 +1572,8 @@ This ISP includes following blocks:
 *  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
 *  Gamma correction : Gamma correction improves the overall brightness of image.
 *  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
+
+|isp-rgbir|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
@@ -1681,18 +1715,18 @@ User can also use below compile time parameters to the pipeline.
 			// clang-format off
 			#pragma HLS INLINE OFF
 				// clang-format on
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInputCopy1(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 3 * XF_WIDTH> imgInputCopy2(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> fullir_out(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> rggb_out(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demoOut_final(height, width);
-				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
-				xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-				xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-				xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInput> imgInput(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInputCopy1> imgInputCopy1(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInputCopy2> imgInputCopy2(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_fullir_out> fullir_out(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_rggb_out> rggb_out(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_gain_out> gain_out(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demosaic_out> demosaic_out(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demoOut_final> demoOut_final(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in> ltm_in(height, width);
+				xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__dst> _dst(height, width);
+				xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_aecin> aecin(height, width);
+				xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__imgOutput> _imgOutput(height, width);
 
 			// clang-format off
 			#pragma HLS DATAFLOW
@@ -1704,29 +1738,319 @@ User can also use below compile time parameters to the pipeline.
 
 				float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput);
+				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInput>(img_inp, imgInput);
 
-				xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC,
-									3 * XF_WIDTH, XF_BORDER_CONSTANT, XF_USE_URAM>(
+				xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_BORDER_CONSTANT, XF_USE_URAM, XF_CV_DEPTH_imgInput, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_fullir_out, XF_CV_DEPTH_3XWIDTH>(
 					imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rggb_out, fullir_out);
 
-				xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(rggb_out, gain_out, rgain, bgain);
-				xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
+				xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_gain_out>(rggb_out, gain_out, rgain, bgain);
+				xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_gain_out, XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out);
 
-				function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
-																			   height, width, mode_reg, thresh);
+				function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_ltm_in>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
 
 				if (XF_DST_T == XF_8UC3) {
-					fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, aecin, height, width);
+					fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in, XF_CV_DEPTH_aecin>(ltm_in, aecin, height, width);
 				} else {
-					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC>(ltm_in, aecin);
+					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCXF_CV_DEPTH_ltm_in, XF_CV_DEPTH_aecin>(ltm_in, aecin);
 				}
-				xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, _dst, gamma_lut);
-				xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, _imgOutput);
+				xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_aecin, XF_CV_DEPTH__dst>(aecin, _dst, gamma_lut);
+				xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__dst, XF_CV_DEPTH__imgOutput>(_dst, _imgOutput);
 
-				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, img_out);
-				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(fullir_out, ir_img_out);
+				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__imgOutput>(_imgOutput, img_out);
+				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_fullir_out>(fullir_out, ir_img_out);
 			}
+
+.. _isp-201multistream:
+
+Image Sensor Processing multistream pipeline - 2022.1 version
+=============================================================
+
+	ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
+	Current multi stream pipeline process 4 streams in a Round-Robin method with ouput steams TYPE as XF_8UC3(RGB). And after the color conversion to YUV color space, they are XF_16UC1(YUYV).
+	
+This ISP pipeline inclues 8 blocks, they are following:
+	
+*	Black level correction
+*   Gain Control 
+*   Demosaicing
+*	Auto white balance
+*   Colorcorrection matrix
+*   Quantization and Dithering
+*	Gamma correction
+*   Color space conversion
+
+Note: CCM and Q&D currently supports one output type for all the streams. Upcoming versions will support different output types. 
+
+|isp-20221|
+
+Current design example demonstrates how to use ISP functions in a pipeline. 
+ 
+User can dynamically configure the below parameters to the pipeline.
+
+.. table::  Runtime parameters for the pipeline
+
+   +---------------+------------------------------------------------------+
+   | Parameter     | Description                                          |
+   +===============+======================================================+
+   | blacklevel    | black level value to adjustment overall brightness   |
+   |               | of the image                                         |
+   +---------------+------------------------------------------------------+
+   | rgain         | To configure gain value for the red channel.         |
+   +---------------+------------------------------------------------------+
+   | bgain         | To configure gain value for the blue channel.        |
+   +---------------+------------------------------------------------------+
+   | ggain         | To configure gain value for the green channel.       |
+   +---------------+------------------------------------------------------+
+   | bayer pattern | The Bayer format of the RAW input image.             |
+   |               | supported formats are RGGB, BGGR, GBRG, GRBG         |
+   +---------------+------------------------------------------------------+
+   | gamma_lut     | Lookup table for gamma values.first 256 will be R,   |
+   |               | next 256 values are G gamma and last 256 values are  | 
+   |               | B values                                             | 
+   +---------------+------------------------------------------------------+
+   | pawb          | %top and %bottom pixels are ignored while computing  |
+   |               | min and max to improve quality.                      |
+   +---------------+------------------------------------------------------+
+   | rows          | The number of rows in the image or height of the     |
+   |               | image.                                               |
+   +---------------+------------------------------------------------------+
+   | cols          | The number of columns in the image or width of the   |
+   |               | image.                                               |
+   +---------------+------------------------------------------------------+
+
+User can also use below compile time parameters to the pipeline.
+
+.. table::  Compiletime parameters for the pipeline
+
+   +-----------------+------------------------------------------------------+
+   | Parameter       | Description                                          |
+   +=================+======================================================+
+   | XF_HEIGHT       | Maximum height of input and output image             |
+   +-----------------+------------------------------------------------------+
+   | XF_WIDTH        | Maximum width of input and output image              |
+   |                 | (Must be multiple of NPC)                            |
+   +-----------------+------------------------------------------------------+
+   | XF_SRC_T        |Input pixel type,Supported pixel widths are 8,10,12,16|
+   +-----------------+------------------------------------------------------+
+   | NUM_STREAMS     | Total number of streams                              |
+   +-----------------+------------------------------------------------------+
+   | STRM1_ROWS      | maximum number of rows to be processed for stream 1  | 
+   |                 | in one burst                                         |
+   +-----------------+------------------------------------------------------+
+   | STRM2_ROWS      | maximum number of rows to be processed for stream 2  | 
+   |                 | in one burst                                         |
+   +-----------------+------------------------------------------------------+
+   | STRM3_ROWS      | maximum number of rows to be processed for stream 3  | 
+   |                 | in one burst                                         |
+   +-----------------+------------------------------------------------------+
+   | STRM4_ROWS      | maximum number of rows to be processed for stream 4  | 
+   |                 | in one burst                                         |
+   +-----------------+------------------------------------------------------+
+   
+The following example demonstrates the ISP pipeline with above list of functions.
+
+.. code:: c
+
+			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
+                       ap_uint<INPUT_PTR_WIDTH>* img_inp2,
+                       ap_uint<INPUT_PTR_WIDTH>* img_inp3,
+                       ap_uint<INPUT_PTR_WIDTH>* img_inp4,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out1,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out2,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out3,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out4,
+                       int height,
+                       int width,
+                       unsigned short array_params[NUM_STREAMS][6],
+                       unsigned char gamma_lut[NUM_STREAMS][256 * 3]) {
+				// clang-format off
+				#pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem1
+				#pragma HLS INTERFACE m_axi     port=img_inp2  offset=slave bundle=gmem2
+				#pragma HLS INTERFACE m_axi     port=img_inp3  offset=slave bundle=gmem3
+				#pragma HLS INTERFACE m_axi     port=img_inp4  offset=slave bundle=gmem4
+				#pragma HLS INTERFACE m_axi     port=img_out1  offset=slave bundle=gmem5
+				#pragma HLS INTERFACE m_axi     port=img_out2  offset=slave bundle=gmem6
+				#pragma HLS INTERFACE m_axi     port=img_out3  offset=slave bundle=gmem7
+				#pragma HLS INTERFACE m_axi     port=img_out4  offset=slave bundle=gmem8
+				// clang-format on
+
+				// clang-format off
+				#pragma HLS ARRAY_PARTITION variable=hist0_awb complete dim=1
+				#pragma HLS ARRAY_PARTITION variable=hist1_awb complete dim=1
+					// clang-format on
+
+					struct ispparams_config params[NUM_STREAMS];
+					
+					for(int i = 0; i < NUM_STREAMS; i++){
+				// clang-format off
+				#pragma HLS UNROLL
+					// clang-format on
+								
+						params[i].rgain = array_params[i][0];
+						params[i].bgain = array_params[i][1];
+						params[i].ggain = array_params[i][2];
+						params[i].pawb = array_params[i][3];
+						params[i].bayer_p = array_params[i][4];
+						params[i].black_level = array_params[i][5];
+					}
+					
+					uint32_t tot_rows = NUM_STREAMS * height;
+					const uint16_t pt[NUM_STREAMS] = {STRM1_ROWS, STRM2_ROWS, STRM3_ROWS, STRM4_ROWS};
+					uint16_t max = STRM1_ROWS;
+					for(int i = 1; i < NUM_STREAMS; i++){
+						
+						if(pt[i] > max)
+							max = pt[i];
+					}
+					
+					const uint16_t TC = tot_rows / max;
+					
+					uint32_t addrbound, num_rows;
+
+					int strm_id = 0, idx = 0;
+
+					int rem_rows[NUM_STREAMS] = {height, height, height, height};
+
+					uint32_t offset1 = 0, offset2 = 0, offset3 = 0, offset4 = 0;
+
+					for (int r = 0; r < tot_rows;) {
+				// clang-format off
+						#pragma HLS LOOP_TRIPCOUNT min=0 max=TC
+						#pragma HLS LOOP_FLATTEN off
+						// clang-format on
+
+						// Compute no.of rows to process
+						if (rem_rows[idx] > pt[idx])
+							num_rows = pt[idx];
+						else
+							num_rows = rem_rows[idx];
+
+						// Compute
+						addrbound = num_rows * (width >> XF_BITSHIFT(XF_NPPC));
+						strm_id = idx;
+
+						if (idx == 0 && num_rows > 0) {
+							Streampipeline(img_inp1 + offset1, img_out1 + offset1, num_rows, width, hist0_awb[idx], hist1_awb[idx],
+										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+							offset1 += addrbound;
+						} else if (idx == 1 && num_rows > 0) {
+							Streampipeline(img_inp2 + offset2, img_out2 + offset2, num_rows, width, hist0_awb[idx], hist1_awb[idx],
+										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+
+							offset2 += addrbound;
+						} else if (idx == 2 && num_rows > 0) {
+							Streampipeline(img_inp3 + offset3, img_out3 + offset3, num_rows, width, hist0_awb[idx], hist1_awb[idx],
+										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+
+							offset3 += addrbound;
+						} else if (idx == 3 && num_rows > 0) {
+							Streampipeline(img_inp4 + offset4, img_out4 + offset4, num_rows, width, hist0_awb[idx], hist1_awb[idx],
+										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+
+							offset4 += addrbound;
+						}
+						// Update remaining rows to process
+						rem_rows[idx] = rem_rows[idx] - num_rows;
+
+						// Next stream selection
+						if (idx == NUM_STREAMS - 1)
+							idx = 0;
+						else
+							idx++;
+
+						// Update total rows to process
+						r += num_rows;
+					}
+
+					return;
+				}
+
+			void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+								ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+								unsigned short height,
+								unsigned short width,
+								uint32_t hist0[3][HIST_SIZE],
+								uint32_t hist1[3][HIST_SIZE],
+								int gain0[3],
+								int gain1[3],
+								struct ispparams_config params,
+								unsigned char _gamma_lut[256 * 3],
+								bool flag) {
+				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0> imgInput(height, width);
+				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> blc_out(height, width);
+				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> bpc_out(height, width);
+				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> gain_out(height, width);
+				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
+				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
+				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> ltm_in(height, width);
+				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> lsc_out(height, width);
+				xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> _dst(height, width);
+				xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> aecin(height, width);
+				xf::cv::Mat<XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> imgOutput(height, width);
+
+			// clang-format off
+			#pragma HLS DATAFLOW
+				// clang-format on
+				const int Q_VAL = 1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC));
+
+				float thresh = (float)params.pawb / 256;
+				float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+
+				float mul_fact = (inputMax / (inputMax - params.black_level));
+
+				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput);
+
+				xf::cv::blackLevelCorrection<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput, blc_out,
+																								  params.black_level, mul_fact);
+				// xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput2, bpc_out);
+
+				xf::cv::gaincontrol<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_3>(blc_out, gain_out, params.rgain, params.bgain,
+																			  params.ggain, params.bayer_p);
+				xf::cv::demosaicing<XF_SRC_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out, params.bayer_p);
+
+				function_awb<XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
+																				 height, width, thresh, flag);
+				xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3>(ltm_in, lsc_out);
+				if (XF_DST_T == XF_8UC3) {
+					fifo_copy<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin, height, width);
+				} else {
+					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin);
+				}
+				xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPP, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4C>(aecin, _dst, _gamma_lut);
+				// ColorMat2AXIvideo<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, m_axis_video);
+				xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6>(_dst, imgOutput);
+
+				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6>(imgOutput, img_out);
+
+				return;
+			}
+
+The ISP multistream Pipeline design is validated on Alveo U200 board at 300 MHz frequency. 
+
+.. table:: Table Resource Utilization Summary
+
+    +----------------+----------------+---------------------+----------------------+----------+-------+-------+------+
+    | Operating Mode | Filter size    | Operating Frequency |              Utilization Estimate                      |
+    |                |                |                     |                                                        |
+    |                |                | (MHz)               |                                                        |
+    +                +                +                     +----------------------+----------+-------+-------+------+
+    |                |                |                     | BRAM_18K             | DSP      | FF    | LUT   | URAM |
+    +================+================+=====================+======================+==========+=======+=======+======+
+    | 2 Pixel        | 3x3            | 300                 | 29                   | 69       | 21230 | 18332 | 0    |
+    +----------------+----------------+---------------------+----------------------+----------+-------+-------+------+
+
+.. table:: Table Performance Estimate Summary
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 2 pixel        | 300                 | 17.9ms           |
+    +----------------+---------------------+------------------+
+
 
 .. include:: include/isp_multistream_de.rst
 				
@@ -1751,5 +2075,21 @@ User can also use below compile time parameters to the pipeline.
    :width: 1000
    
 .. |isp-hdr| image:: ./images/isp-hdr.PNG
+   :class: image 
+   :width: 1000
+
+.. |isp-gtm| image:: ./images/isp-gtm.png
+   :class: image 
+   :width: 1000
+
+.. |isp-mono| image:: ./images/isp-mono.png
+   :class: image 
+   :width: 1000
+
+.. |isp-rgbir| image:: ./images/isp-rgbir.png
+   :class: image 
+   :width: 1000
+
+.. |isp-20221| image:: ./images/isp-2022_1.png
    :class: image 
    :width: 1000

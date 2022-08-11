@@ -352,223 +352,301 @@ function OptanonWrapper() { }
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <dl class="docutils">
-<dt>&lt;table&gt;</dt>
-<dd><dl class="first docutils">
-<dt>&lt;tr&gt;</dt>
-<dd>&lt;td align=”center”&gt;&lt;img src=”<a class="reference external" href="https://www.xilinx.com/content/dam/xilinx/imgs/press/media-kits/corporate/xilinx-logo.png">https://www.xilinx.com/content/dam/xilinx/imgs/press/media-kits/corporate/xilinx-logo.png</a>” width=”30%”/&gt;&lt;h1&gt;2022.1 Vitis™ Vision Application Development Flow Tutorials&lt;/h1&gt;
-&lt;/td&gt;</dd>
-</dl>
-<p class="last">&lt;/tr&gt;</p>
-</dd>
-</dl>
-<p>&lt;/table&gt;</p>
-<div class="section" id="getting-started-with-vitis-vision-libraries">
+  <div class="section" id="getting-started-with-vitis-vision-libraries">
 <h1>Getting Started with Vitis Vision Libraries<a class="headerlink" href="#getting-started-with-vitis-vision-libraries" title="Permalink to this headline">¶</a></h1>
-<p>In the first section, this tutorial focuses on how to leverage the Vitis Vision Libraries to build your own design. The tutorial will use L1 library custom convolution as an example. It contains instructions from cloning the library, compile and simulate on its own till instantiate it into top-level design.</p>
+<p>The Vitis vision library has been designed to work in the Vitis development environment, and provides a software
+interface for computer vision functions accelerated on an FPGA device.
+Vitis vision library functions are mostly similar in functionality to their
+OpenCV equivalent.</p>
+<div class="section" id="get-vitis-libraries">
+<h2>Get Vitis Libraries<a class="headerlink" href="#get-vitis-libraries" title="Permalink to this headline">¶</a></h2>
+<p>First we need to clone the Vitis Libraries into local path.</p>
+<p>The Vitis Library repo is located at this link:
+<a class="reference external" href="https://github.com/Xilinx/Vitis_Libraries">https://github.com/Xilinx/Vitis_Libraries</a>. Assuming you are using $/home/project as working directory, then use following command to clone the Vitis Library repository into the working directory:</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">project</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Xilinx</span><span class="o">/</span><span class="n">Vitis_Libraries</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>This will take a few seconds to minutes for downloading depending on network.
+After it is completed, you may browse into the sub folders to get familiar with the file structure.</p>
+<p>Vitis_Libraries/</p>
+<p>├── Jenkinsfile</p>
+<p>├── LICENSE.txt</p>
+<p>├── README.md</p>
+<p>├── blas/</p>
+<p>├── codec/</p>
+<p>├── data_analytics/</p>
+<p>├── data_compression/</p>
+<p>├── database/</p>
+<p>├── dsp/</p>
+<p>├── graph/</p>
+<p>├── hpc/</p>
+<p>├── quantitative_finance/</p>
+<p>├── security/</p>
+<p>├── solver/</p>
+<p>├── sparse/</p>
+<p>├── utils/</p>
+<p>└── vision/</p>
+<p>There are many different categories of libraries under the top-level folder. In this lab, we are going to use the <strong>vision</strong> library. So, let’s enter the sub-directory <em>vision</em>, and you can find following directory structure.</p>
+<p>vision/</p>
+<p>├── Jenkinsfile</p>
+<p>├── L1/</p>
+<p>│   ├── README.md</p>
+<p>│   ├── examples/</p>
+<p>│   ├── include/</p>
+<p>│   ├── lib/</p>
+<p>│   └── tests/</p>
+<p>├── L2/</p>
+<p>│   ├── README.md</p>
+<p>│   ├── examples/</p>
+<p>│   └── tests/</p>
+<p>├── L3/</p>
+<p>│   ├── README.md</p>
+<p>│   ├── benchmarks/</p>
+<p>│   ├── examples/</p>
+<p>│   └── tests/</p>
+<p>├── data/</p>
+<p>├── LICENSE.txt</p>
+<p>├── README.md</p>
+<p>├── docs/</p>
+<p>│   ├── images/</p>
+<p>│   ├── include/</p>
+<p>│   ├── Makefile</p>
+<p>│   ├── Makefile.sphinx</p>
+<p>│   ├── rst files</p>
+<p>│   ├── conf.py</p>
+<p>│   ├── conf_bhp.py</p>
+<p>│   ├── env.csh</p>
+<p>├── ext/</p>
+<p>│   ├── make_utility/</p>
+<p>│   └── xcl2/</p>
+<p>└── library.json</p>
+<p>This library is written in C++ and it contains three levels of abstractions.</p>
+<p><strong>L1</strong>: Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels’ use model in HLS flow</p>
+<p><strong>L2</strong>: Examples that evaluate the Vitis Vision kernels and demonstrate the kernels’ use model in Vitis flow</p>
+<p><strong>L3</strong>: Applications formed by stitching a pipeline of Vitis Vision functions.</p>
+<p>In the first section, this tutorial focuses on how to leverage the Vitis Vision Libraries to build your own design. The tutorial will use L1 library <em>custom convolution</em> as an example.</p>
+<p>L1 functions are targeted for Vitis HLS flow, where C-Simulation, Synthesis, Co-Simulation and RTL implementation can be performed.</p>
+<p>OpenCV-4.4.0 x86 version libs need to be installed before hand. Please refer this <a class="reference external" href="https://support.xilinx.com/s/article/Vitis-2021-1-Libraries-Compiling-and-Installing-OpenCV?language=en_US">page</a> for details on installation.</p>
+<p>This section contains instructions from cloning the library, compile and simulate the top-level design.</p>
 <div class="section" id="before-you-begin">
-<h2>Before You Begin<a class="headerlink" href="#before-you-begin" title="Permalink to this headline">¶</a></h2>
+<h3>Before You Begin<a class="headerlink" href="#before-you-begin" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="prerequisites">
+<h4>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic">
+<li><p class="first">Valid installation of <a class="reference external" href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform">Vitis™ 2022.1</a> or later version and the corresponding licenses.</p>
+</li>
+<li><p class="first">Xilinx® Runtime <a class="reference external" href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms">XRT</a> must be installed. XRT provides software interface to Xilinx FPGAs.</p>
+</li>
+<li><p class="first">Install <a class="reference external" href="https://github.com/opencv/opencv/tree/4.4.0">OpenCV-4.4.0</a> x86 libraries(with compatible libjpeg.so). x86 libs have to be used for</p>
+<blockquote>
+<div><blockquote>
+<div><ol class="loweralpha simple">
+<li>L1 flow irrespective of target FPGA device being PCIe or embedded.</li>
+<li>L2/L3 flow when the target device is PCIe based.</li>
+</ol>
+</div></blockquote>
+<p>For L2/L3 flow targeting embedded platforms, aarch32/aarch64 version OpenCV shipped within their <em>sysroot</em> should be used.</p>
+</div></blockquote>
+</li>
+<li><p class="first">libOpenCL.so must be <a class="reference external" href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader">installed</a> if not present.</p>
+</li>
+</ol>
+</div>
 <div class="section" id="setup-environment">
-<h3>Setup Environment<a class="headerlink" href="#setup-environment" title="Permalink to this headline">¶</a></h3>
-<p>Before playing with the libraries, you need to set up Vitis environment first. For how to set up Vitis environment, please refer to <a class="reference external" href="https://www.xilinx.com/html_docs/xilinx2022_1/vitis_doc/settingupvitisenvironment.html#zks1565446519267">https://www.xilinx.com/html_docs/xilinx2022_1/vitis_doc/settingupvitisenvironment.html#zks1565446519267</a>.
-Below are the example scripts to do environment settings for L1 functions:</p>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
-$ source &lt;Vitis Tool Installation Path&gt;/Xilinx/Vitis/2022.1/settings64.sh
+<h4>Setup Environment<a class="headerlink" href="#setup-environment" title="Permalink to this headline">¶</a></h4>
+<p>Before playing with the libraries, you need to set up Vitis environment first. For how to set up Vitis environment, please refer to <a class="reference external" href="https://www.xilinx.com/html_docs/xilinx2022_1/vitis_doc/settingupvitisenvironment.html#zks1565446519267">https://www.xilinx.com/html_docs/xilinx2022_1/vitis_doc/settingupvitisenvironment.html#zks1565446519267</a>.</p>
+<p>Below are the example scripts to do environment settings for L1 functions:</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span>$ source &lt;Vitis Tool Installation Path&gt;/Xilinx/Vitis/2022.1/settings64.sh
 $ export DEVICE=&lt; path-to-platform-directory &gt;/&lt; platform &gt;.xpfm
 $ source &lt;XRT Installation Path&gt;/xilinx/xrt/setup.sh
 $ export OPENCV_INCLUDE=&lt; path-to-opencv-include-folder &gt;
 $ export OPENCV_LIB=&lt; path-to-opencv-lib-folder &gt;
-$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:&lt; path-to-opencv-lib-folder &gt;</p>
-<p><a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
+$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:&lt; path-to-opencv-lib-folder &gt;
+</pre></div>
 </div>
-<div class="section" id="get-vitis-libraries">
-<h3>Get Vitis Libraries<a class="headerlink" href="#get-vitis-libraries" title="Permalink to this headline">¶</a></h3>
-<p>Now we need to clone the Vitis Libraries into local path.</p>
-<p>The Vitis Library repo is located at this link:
-<a class="reference external" href="https://github.com/Xilinx/Vitis_Libraries">https://github.com/Xilinx/Vitis_Libraries</a>. Assuming you are using $/home/project$ as working directory, then use following command to clone the Vitis Library repository into the working directory:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">cd</span> <span class="pre">/home/project</span>
-<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Xilinx/Vitis_Libraries.git</span>
-<span class="pre">`</span></code></p>
-<p>This will take a few seconds to minutes for downloading depending on network.
-After it is completed, you may browse into the sub folders to get familiar with the file structure.</p>
-<p>~~~
-Vitis_Libraries/
-├── Jenkinsfile
-├── LICENSE.txt
-├── README.md
-├── blas/
-├── codec/
-├── data_analytics/
-├── data_compression/
-├── database/
-├── dsp/
-├── graph/
-├── hpc/
-├── quantitative_finance/
-├── security/
-├── solver/
-├── sparse/
-├── utils/
-└── vision/
-~~~</p>
-<p>There are many different categories of libraries under the top-level folder. In this lab, we are going to use the <strong>vision</strong> library. So, let’s enter the sub-directory <em>vision</em>, and you can find following directory structure.</p>
-<p>~~~
-vision/
-├── Jenkinsfile
-├── L1/
-│   ├── README.md
-│   ├── examples/
-│   ├── include/
-│   ├── lib/
-│   └── tests/
-├── L2/
-│   ├── README.md
-│   ├── examples/
-│   └── tests/
-├── L3/
-│   ├── README.md
-│   ├── benchmarks/
-│   ├── examples/
-│   └── tests/
-├── data/
-├── LICENSE.txt
-├── README.md
-├── docs/
-│   ├── images/
-│   ├── include/
-│   ├── Makefile
-│   ├── Makefile.sphinx
-│   ├── rst files
-│   ├── conf.py
-│   ├── conf_bhp.py
-│   ├── env.csh
-├── ext/
-│   ├── make_utility/
-│   └── xcl2/
-└── library.json
-~~~</p>
-<p>This library is written in C++ and it contains three levels of abstractions.</p>
-<ul class="simple">
-<li>L1: Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels’ use model in HLS flow</li>
-<li>L2: Examples that evaluate the Vitis Vision kernels and demonstrate the kernels’ use model in Vitis flow.</li>
-<li>L3: Applications formed by stitching a pipeline of Vitis Vision functions.</li>
-</ul>
+</div>
 </div>
 </div>
 <div class="section" id="running-the-tutorial">
 <h2>Running the Tutorial<a class="headerlink" href="#running-the-tutorial" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="create-and-run-an-hls-project">
-<h3>Create and run an HLS project<a class="headerlink" href="#create-and-run-an-hls-project" title="Permalink to this headline">¶</a></h3>
-<p>In this step, we are going to create an HLS project by using the files provided in Vitis Library at this link: <a class="reference external" href="https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L1/examples/customconv">https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L1/examples/customconv</a>. The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into <em>/home/project/Vitis_Libraries</em> directory.</p>
+<div class="section" id="create-and-run-a-vitis-hls-project">
+<h3>Create and run a Vitis HLS project<a class="headerlink" href="#create-and-run-a-vitis-hls-project" title="Permalink to this headline">¶</a></h3>
+<p>In this step, we are going to create an HLS project by using the files provided in Vitis Library at this link: <a class="reference external" href="https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L1/examples/customconv">https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L1/examples/customconv</a>.
+The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into <em>/home/project/Vitis_Libraries</em> directory.</p>
 <ol class="arabic simple">
-<li>Go into the <cite>/home/project/Vitis_libraries/vision/L1/examples/customconv</cite> folder and run below command to create the HLS project.</li>
+<li>Go into the <em>/home/project/Vitis_libraries/vision/L1/examples/customconv</em> folder and run below command to create the HLS project.</li>
 </ol>
-<dl class="docutils">
-<dt><a href="#id7"><span class="problematic" id="id8">``</span></a><a href="#id9"><span class="problematic" id="id10">`</span></a></dt>
-<dd>make run CSIM=1 CSYNTH=1 COSIM=1</dd>
-</dl>
-<p><a href="#id11"><span class="problematic" id="id12">``</span></a>`
-By executing the command, it will run through project creation, C simulation, C synthesis, and Co-simulation flow. You can modify the parameter to skip certain steps. After the execution, console window will print out the verification results and show <strong>*PASS*</strong> at the end of simulation.</p>
-<p>~~~</p>
-<dl class="docutils">
-<dt>INFO: Verification results:</dt>
-<dd>Minimum error in intensity = 0
-Maximum error in intensity = 1
-Percentage of pixels above error threshold = 0</dd>
-</dl>
-<p>INFO: [COSIM 212-1000] <strong>* C/RTL co-simulation finished: PASS *</strong></p>
-<p>~~~</p>
-<p>Once your job is complete, the minimum error in intensity, maximum error in intensity, percentage of pixels above error threshold is displayed on screen. The testbench uses an image as input to the customconv and produces the output image and difference image, which are shown below:
-Input image:
-![](images/ref_img.jpg)
-Output image:
-![](images/out_img.jpg)
-Difference image:
-![](images/diff_img.jpg)</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">run</span> <span class="n">CSIM</span><span class="o">=</span><span class="mi">1</span> <span class="n">CSYNTH</span><span class="o">=</span><span class="mi">1</span> <span class="n">COSIM</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>By executing the command, it will run through project creation, C simulation, C synthesis, and Co-simulation flow. You can modify the parameter to skip certain steps. After
+the execution, console window will print out the verification results and show <strong>*PASS*</strong> at the end of simulation.</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">INFO</span><span class="p">:</span> <span class="n">Verification</span> <span class="n">results</span><span class="p">:</span>
+<span class="n">Minimum</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">intensity</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">Maximum</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">intensity</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">Percentage</span> <span class="n">of</span> <span class="n">pixels</span> <span class="n">above</span> <span class="n">error</span> <span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">INFO</span><span class="p">:</span> <span class="p">[</span><span class="n">COSIM</span> <span class="mi">212</span><span class="o">-</span><span class="mi">1000</span><span class="p">]</span> <span class="o">***</span> <span class="n">C</span><span class="o">/</span><span class="n">RTL</span> <span class="n">co</span><span class="o">-</span><span class="n">simulation</span> <span class="n">finished</span><span class="p">:</span> <span class="n">PASS</span> <span class="o">***</span>
+</pre></div>
+</div>
+<p>Once your job is complete, the minimum error in intensity, maximum error in intensity, percentage of pixels above error threshold is displayed on screen. The testbench uses an image as input to the customconv and produces the kernel output image, the OpenCV reference image and a difference image, which are shown below:</p>
+<p>Input image:</p>
+<p><a class="image reference internal" href="_images/128x128.png"><img alt="in_img" class="image" src="_images/128x128.png" style="width: 1000px;" /></a></p>
+<p>OpenCV reference image:</p>
+<p><a class="image reference internal" href="_images/ref_img.jpg"><img alt="ref_img" class="image" src="_images/ref_img.jpg" style="width: 1000px;" /></a></p>
+<p>HLS Output image:</p>
+<p><a class="image reference internal" href="_images/out_img.jpg"><img alt="out_img" class="image" src="_images/out_img.jpg" style="width: 1000px;" /></a></p>
+<p>Difference image:</p>
+<p><a class="image reference internal" href="_images/diff_img.jpg"><img alt="diff_img" class="image" src="_images/diff_img.jpg" style="width: 1000px;" /></a></p>
 <ol class="arabic simple" start="2">
-<li>Now we will open the project in Vitis HLS GUI. Enter the following  <cite>/home/project/Vitis_libraries/vision/L1/examples/customconv</cite> directory and run the below command:</li>
+<li>Now we will open the project in Vitis HLS GUI. Enter the following  <em>/home/project/Vitis_libraries/vision/L1/examples/customconv</em> directory and run the below command:</li>
 </ol>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">vitis_hls</span> <span class="pre">-p</span> <span class="pre">customconv.prj</span> <span class="pre">&amp;</span>
-<span class="pre">`</span></code></p>
-<p>You may browse into the source files, synthesis report or waveform viewer by simply selecting them from the ‘Explorer’ window and ‘Flow Navigator’ window.</p>
-<p>The xf_custom_convolution_tb.cpp calls the Filter2d accel and the parameters are defined in the xf_custom_convolution_config.h and xf_config_params.h files. For detailed instructions about how to use custom convolution, please refer to the github page at: <a class="reference external" href="https://xilinx.github.io/Vitis_Libraries/vision/2022.1/api-reference.html#custom-convolution">https://xilinx.github.io/Vitis_Libraries/vision/2022.1/api-reference.html#custom-convolution</a>.</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vitis_hls</span> <span class="o">-</span><span class="n">p</span> <span class="n">customconv</span><span class="o">.</span><span class="n">prj</span> <span class="o">&amp;</span>
+</pre></div>
+</div>
+<p>You may browse into the source files, synthesis report or waveform viewer by simply selecting them from the <em>Explorer</em> window and <em>Flow Navigator</em> window.</p>
+<p>The <em>xf_custom_convolution_tb.cpp</em> calls the <em>Filter2d</em> accel and the parameters are defined in the <em>xf_custom_convolution_config.h</em> and <em>xf_config_params.h</em> files. For detailed instructions about how to use <em>custom convolution</em>, please refer to the github page at: <a class="reference external" href="https://xilinx.github.io/Vitis_Libraries/vision/2022.1/api-reference.html#custom-convolution">https://xilinx.github.io/Vitis_Libraries/vision/2022.1/api-reference.html#custom-convolution</a>.</p>
 <ol class="arabic simple" start="3">
 <li>Export IP in HLS project</li>
 </ol>
-<p>Now we have verified that the library IP is working properly and we will export it to a Vivado IP. To do so, click the <cite>Export RTL</cite> from <em>IMPLEMENTATION</em> item in <em>Flow Navigator</em>. In the pop-up window, we will leave every settings unchanged and click <cite>OK</cite> to export the IP.
+<p>Now we have verified that the library IP is working properly and we will export it to a Vivado IP. To do so, click the <em>Export RTL</em> from <em>IMPLEMENTATION</em> item in <em>Flow Navigator</em>. In the pop-up window, we will leave every settings unchanged and click <em>OK</em> to export the IP.
 By default, the IP will be exported to the &lt;project folder&gt;/solN/impl; in this case, it is in following directory:</p>
-<p>~~~
-/home/project/Vitis_Libraries/vision/L1/examples/customconv/customconv.prj/sol1/impl
-~~~</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">Vitis_Libraries</span><span class="o">/</span><span class="n">vision</span><span class="o">/</span><span class="n">L1</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">customconv</span><span class="o">/</span><span class="n">customconv</span><span class="o">.</span><span class="n">prj</span><span class="o">/</span><span class="n">sol1</span><span class="o">/</span><span class="n">impl</span>
+</pre></div>
+</div>
 <p>However, you may customize the path in the export pop-up menu.</p>
 <ol class="arabic simple" start="4">
 <li>View Co-Simulation Waveform</li>
 </ol>
-<p>You could modify the co-simulation related command lines in file <em>./run_hls.tcl</em> (around line 46) as below to turn-on the xsim waveform dump switch:</p>
-<div class="section" id="id13">
-<h4>~~~<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
-<dl class="docutils">
-<dt>if {$COSIM == 1} {</dt>
-<dd>cosim_design -wave_debug</dd>
-</dl>
+<p>You could either modify the co-simulation related command lines in file <em>./run_hls.tcl</em> (around line 46) as below to turn-on the xsim waveform dump switch:</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span>if {$COSIM == 1} {
+        cosim_design -wave_debug &lt;other existing flags&gt;
+}
+</pre></div>
 </div>
-<div class="section" id="id14">
-<h4>}<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
-<p>~~~</p>
 <p>Then re-run the command:</p>
-<dl class="docutils">
-<dt><a href="#id15"><span class="problematic" id="id16">``</span></a><a href="#id17"><span class="problematic" id="id18">`</span></a></dt>
-<dd>make run COSIM=1</dd>
-</dl>
-<p><a href="#id19"><span class="problematic" id="id20">``</span></a><a href="#id21"><span class="problematic" id="id22">`</span></a></p>
-<p>You can also perform this operation in GUI, by clicking Run Co-Simulation icon in Flow Navigator and selecting Wave debug option. In this way you could get the simulation waveform, as shown in following example image:</p>
-<p>![](images/cosim_wave.png)</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">run</span> <span class="n">COSIM</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Or</p>
+<p>You can also perform this operation in GUI, by clicking Run Co-Simulation icon in <em>Flow Navigator</em> and selecting <em>Wave debug</em> option. In this way you could get the simulation waveform, as shown in following example image:</p>
+<p><a class="image reference internal" href="_images/cosim_wave.PNG"><img alt="cosim" class="image" src="_images/cosim_wave.PNG" style="width: 1000px;" /></a></p>
 <ol class="arabic simple" start="5">
 <li>Implement the top-level project</li>
 </ol>
-<p>Click <cite>Run Implementation</cite> from Flow navigator panel and click <strong>*OK*</strong> in the pop-up window. This will run through the Vivado synthesis and implementation flow which will generate both timing and resource reports for this IP.</p>
-<p>### Create and run a Vitis project</p>
-<p>In this section, we are going to create a Vitis project by using the files provided in Vitis Library at this link: <a class="reference external" href="https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L2/examples/customconv">https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L2/examples/customconv</a>. The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into <em>/home/project/Vitis_Libraries</em> directory.</p>
-<p>Go into the <cite>/home/project/Vitis_libraries/vision/L2/examples/customconv</cite> folder and run below command to create the HLS project for a DC platform like U200.</p>
-<dl class="docutils">
-<dt><a href="#id23"><span class="problematic" id="id24">``</span></a><a href="#id25"><span class="problematic" id="id26">`</span></a></dt>
-<dd>make run TARGET=sw_emu</dd>
-</dl>
-<p><a href="#id27"><span class="problematic" id="id28">``</span></a>`
-To delete generated files</p>
-<dl class="docutils">
-<dt><a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a></dt>
-<dd>make cleanall</dd>
-</dl>
-<p><a href="#id33"><span class="problematic" id="id34">``</span></a>`
-Here, <cite>TARGET</cite> decides the FPGA binary type</p>
+<p>Click <em>Run Implementation</em> from <em>Flow navigator</em> panel and click <strong>*OK*</strong> in the pop-up window. This will run through the Vivado synthesis and implementation flow which will generate both timing and resource reports for this IP.</p>
+</div>
+</div>
+<div class="section" id="create-and-run-a-vitis-project">
+<h2>Create and run a Vitis project<a class="headerlink" href="#create-and-run-a-vitis-project" title="Permalink to this headline">¶</a></h2>
+<p>In this section, we are going to create a Vitis project by using an L2 example.
+L2/L3 functions are targeted for Vitis flow, where software-emulation, hardware-emulation, and hardware build (to generate FPGA binaries) can be performed.
+OpenCL is used in the testbench for calling the accelerator in L2/L3.</p>
+<p>We will use the files provided in Vitis Library at this link: <a class="reference external" href="https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L2/examples/customconv">https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L2/examples/customconv</a>.
+The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into <em>/home/project/Vitis_Libraries</em> directory.</p>
+<p>Go into the <em>/home/project/Vitis_libraries/vision/L2/examples/customconv</em> folder and run below command to create the Vitis project for a DC platform like U200.</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">run</span> <span class="n">TARGET</span><span class="o">=</span><span class="n">sw_emu</span>
+</pre></div>
+</div>
+<p>Here, <cite>TARGET</cite> decides the FPGA binary type</p>
 <ul class="simple">
 <li><cite>sw_emu</cite> is for software emulation</li>
 <li><cite>hw_emu</cite> is for hardware emulation</li>
 <li><cite>hw</cite> is for deployment on physical card. (Compilation to hardware binary often takes hours.)</li>
 </ul>
-<p>Besides <cite>run</cite>, the Vitis case makefile also allows <cite>host</cite> and <cite>xclbin</cite> as build target.
+<p><strong>Note</strong> : For embedded devices, platforms and common images have to downloaded separately from the
+Xilinx official <a class="reference external" href="https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-platforms.html">download center</a></p>
+<ul class="simple">
+<li>If targeting an embedded platform, <a href="#id1"><span class="problematic" id="id2">`</span></a>install &lt;<a class="reference external" href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q">https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q</a>&gt;__  it and set up the <a href="#id3"><span class="problematic" id="id4">`</span></a>evaluation board &lt;<a class="reference external" href="https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC">https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC</a>&gt;__</li>
+</ul>
+<p>For an embedded device like ZCU102, the command would be</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">run</span> <span class="n">TARGET</span><span class="o">=</span><span class="n">sw_emu</span> <span class="n">HOST_ARCH</span><span class="o">=</span><span class="n">aarch64</span>
+</pre></div>
+</div>
+<p>Besides <em>run</em>, the Vitis case makefile also allows <em>host</em> and <em>xclbin</em> as build target.
 At the end of the flow, console window will print out the verification results and show <strong>*Test Passed …. !!!*</strong> at the end of simulation. The output image is saved in the working directory.</p>
-</div>
-<div class="section" id="id35">
-<h4>~~~<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h4>
-<dl class="docutils">
-<dt>INFO: Verification results:</dt>
-<dd>Minimum error in intensity = 0
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span>INFO: Verification results:
+Minimum error in intensity = 0
 Maximum error in intensity = 1
-Percentage of pixels above error threshold = 0</dd>
-</dl>
-<p>Test Passed …. !!!</p>
-<p>…</p>
-<p>~~~</p>
+Percentage of pixels above error threshold = 0
+
+Test Passed .... !!!
+</pre></div>
 </div>
+<p>Running L3 examples is also the same as L2. The difference between L2 and L3 in Vitis Vision library is that the former generally calls a single kernel in the accelerator, whereas the latter has multiple kernels called in
+pipeline fashion to form a definite end application. Below is an example L3 application formed by stitching multiple kernels in Dataflow.</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">color_detect</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="n">PTR_IN_WIDTH</span><span class="o">&gt;*</span> <span class="n">img_in</span><span class="p">,</span>
+      <span class="n">unsigned</span> <span class="n">char</span><span class="o">*</span> <span class="n">low_thresh</span><span class="p">,</span>
+      <span class="n">unsigned</span> <span class="n">char</span><span class="o">*</span> <span class="n">high_thresh</span><span class="p">,</span>
+      <span class="n">unsigned</span> <span class="n">char</span><span class="o">*</span> <span class="n">process_shape</span><span class="p">,</span>
+      <span class="n">ap_uint</span><span class="o">&lt;</span><span class="n">PTR_OUT_WIDTH</span><span class="o">&gt;*</span> <span class="n">img_out</span><span class="p">,</span>
+      <span class="nb">int</span> <span class="n">rows</span><span class="p">,</span>
+      <span class="nb">int</span> <span class="n">cols</span><span class="p">)</span> <span class="p">{</span>
+
+ <span class="c1">#pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0</span>
+ <span class="c1">#pragma HLS INTERFACE m_axi      port=low_thresh    offset=slave  bundle=gmem1</span>
+ <span class="c1">#pragma HLS INTERFACE s_axilite  port=low_thresh</span>
+ <span class="c1">#pragma HLS INTERFACE m_axi      port=high_thresh   offset=slave  bundle=gmem2</span>
+ <span class="c1">#pragma HLS INTERFACE s_axilite  port=high_thresh</span>
+ <span class="c1">#pragma HLS INTERFACE s_axilite  port=rows</span>
+ <span class="c1">#pragma HLS INTERFACE s_axilite  port=cols</span>
+ <span class="c1">#pragma HLS INTERFACE m_axi      port=process_shape offset=slave  bundle=gmem3</span>
+ <span class="c1">#pragma HLS INTERFACE s_axilite  port=process_shape</span>
+ <span class="c1">#pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4</span>
+ <span class="c1">#pragma HLS INTERFACE s_axilite  port=return</span>
+
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_1</span><span class="o">&gt;</span> <span class="n">imgInput</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_RGB2HSV</span><span class="o">&gt;</span> <span class="n">rgb2hsv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_HELP_1</span><span class="o">&gt;</span> <span class="n">imgHelper1</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_HELP_2</span><span class="o">&gt;</span> <span class="n">imgHelper2</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_HELP_3</span><span class="o">&gt;</span> <span class="n">imgHelper3</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_HELP_4</span><span class="o">&gt;</span> <span class="n">imgHelper4</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_1</span><span class="o">&gt;</span> <span class="n">imgOutput</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+
+ <span class="o">//</span> <span class="n">Copy</span> <span class="n">the</span> <span class="n">shape</span> <span class="n">data</span><span class="p">:</span>
+ <span class="n">unsigned</span> <span class="n">char</span> <span class="n">_kernel</span><span class="p">[</span><span class="n">FILTER_SIZE</span> <span class="o">*</span> <span class="n">FILTER_SIZE</span><span class="p">];</span>
+ <span class="k">for</span> <span class="p">(</span><span class="n">unsigned</span> <span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">FILTER_SIZE</span> <span class="o">*</span> <span class="n">FILTER_SIZE</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">#pragma HLS PIPELINE</span>
+  <span class="n">_kernel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_shape</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+ <span class="p">}</span>
+
+ <span class="c1">#pragma HLS DATAFLOW</span>
+
+ <span class="o">//</span> <span class="n">Retrieve</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="n">objects</span> <span class="kn">from</span> <span class="nn">img_in</span> <span class="n">data</span><span class="p">:</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">PTR_IN_WIDTH</span><span class="p">,</span> <span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_in</span><span class="p">,</span> <span class="n">imgInput</span><span class="p">);</span>
+
+ <span class="o">//</span> <span class="n">Convert</span> <span class="n">RGBA</span> <span class="n">to</span> <span class="n">HSV</span><span class="p">:</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">bgr2hsv</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgInput</span><span class="p">,</span> <span class="n">rgb2hsv</span><span class="p">);</span>
+
+ <span class="o">//</span> <span class="n">Do</span> <span class="n">the</span> <span class="n">color</span> <span class="n">thresholding</span><span class="p">:</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">colorthresholding</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">MAXCOLORS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rgb2hsv</span><span class="p">,</span> <span class="n">imgHelper1</span><span class="p">,</span> <span class="n">low_thresh</span><span class="p">,</span>
+                     <span class="n">high_thresh</span><span class="p">);</span>
+
+ <span class="o">//</span> <span class="n">Use</span> <span class="n">erode</span> <span class="ow">and</span> <span class="n">dilate</span> <span class="n">to</span> <span class="n">fully</span> <span class="n">mark</span> <span class="n">color</span> <span class="n">areas</span><span class="p">:</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">erode</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
+      <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper1</span><span class="p">,</span> <span class="n">imgHelper2</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">dilate</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
+       <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper2</span><span class="p">,</span> <span class="n">imgHelper3</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">dilate</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
+       <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper3</span><span class="p">,</span> <span class="n">imgHelper4</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">erode</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
+      <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper4</span><span class="p">,</span> <span class="n">imgOutput</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+
+ <span class="o">//</span> <span class="n">Convert</span> <span class="n">_dst</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="nb">object</span> <span class="n">to</span> <span class="n">output</span> <span class="n">array</span><span class="p">:</span>
+ <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">PTR_OUT_WIDTH</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgOutput</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
+
+ <span class="k">return</span><span class="p">;</span>
+
+<span class="p">}</span>
+</pre></div>
 </div>
+<p>You can create custom applications similar to above example by calling set of desired kernels from the library.</p>
 </div>
 <div class="section" id="summary">
 <h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
-<p>In this tutorial, we explained how to leverage a L1 and L2 Vitis library element to build your own design. The custom convolution example is selected for explanation, and you may follow similar flow to use other library elements.</p>
+<p>In this tutorial, we explained how to run L1, L2 examples and leverage individual Vitis library kernels to build your own L3 model designs. The <em>custom convolution</em> example is selected for explanation for L1, L2, and <em>color detection</em> for L3.
+You may follow similar flow to use other library elements.</p>
 </div>
 <div class="section" id="reference">
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
@@ -596,7 +674,7 @@ Percentage of pixels above error threshold = 0</dd>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on August 02, 2022.
       </span>
 
     </p>

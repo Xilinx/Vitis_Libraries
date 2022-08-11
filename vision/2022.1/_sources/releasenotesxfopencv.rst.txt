@@ -28,6 +28,8 @@ New features and functions
 		- Multi-stream ISP (basic) support
     • Updates:
 		- Added Demosaicing kernel (xf_demosaicing_rt.hpp) having the input Bayer pattern as run time parameter
+		- Fixed issue with RGBIR L1 testbench
+		- Added support for custom depth specification for xf::cv::Mat in all kernels                       
     • Lib Infra Changes:
 		- Added API JSON for L2, that helps in usage of a given function's API in Vitis GUI	
 

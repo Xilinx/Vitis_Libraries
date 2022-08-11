@@ -142,8 +142,8 @@ AXI4 Streaming Video and produces an ``xf::cv::Mat`` representation.
 
 .. code:: c
 
-   template<int W,int T,int ROWS, int COLS,int NPC>
-   int AXIvideo2xfMat(hls::stream< ap_axiu<W,1,1,1> >& AXI_video_strm, xf::cv::Mat<T,ROWS, COLS, NPC>& img)
+   template<int W,int T,int ROWS, int COLS,int NPC,int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+   int AXIvideo2xfMat(hls::stream< ap_axiu<W,1,1,1> >& AXI_video_strm, xf::cv::Mat<T,ROWS, COLS, NPC, XFCVDEPTH>& img)
 
 .. rubric:: Parameter Descriptions
 
@@ -172,6 +172,8 @@ The following table describes the template and the function parameters.
    |                                   | and 8-pixel operations            |
    |                                   | respectively.                     |
    +-----------------------------------+-----------------------------------+
+   | XFCVDEPTH                         | Depth of the Input image.         |
+   +-----------------------------------+-----------------------------------+
    | AXI_video_strm                    | HLS stream of ap_axiu (axi        |
    |                                   | protocol) type.                   |
    +-----------------------------------+-----------------------------------+
@@ -197,8 +199,8 @@ video protocol.
 
 .. code:: c
 
-   template<int W, int T, int ROWS, int COLS,int NPC>
-   int xfMat2AXIvideo(xf::cv::Mat<T,ROWS, COLS,NPC>& img,hls::stream<ap_axiu<W,1,1,1> >& AXI_video_strm)
+   template<int W, int T, int ROWS, int COLS,int NPC,int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+   int xfMat2AXIvideo(xf::cv::Mat<T,ROWS, COLS,NPC, XFCVDEPTH>& img,hls::stream<ap_axiu<W,1,1,1> >& AXI_video_strm)
 
 .. rubric:: Parameter Descriptions
 
@@ -226,6 +228,8 @@ The following table describes the template and the function parameters.
    |                                   | XF_NPPC1 and XF_NPPC8 for 1-pixel |
    |                                   | and 8-pixel operations            |
    |                                   | respectively.                     |
+   +-----------------------------------+-----------------------------------+
+   | XFCVDEPTH                         | Depth of the Output image.        |
    +-----------------------------------+-----------------------------------+
    | AXI_video_strm                    | HLS stream of ap_axiu (axi        |
    |                                   | protocol) type.                   |

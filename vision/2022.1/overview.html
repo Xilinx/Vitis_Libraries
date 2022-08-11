@@ -372,7 +372,7 @@ function OptanonWrapper() { }
 <li class="toctree-l2"><a class="reference internal" href="#isp-201hdr">Image Sensor Processing pipeline with HDR</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#isp-201gtm">Image Sensor Processing pipeline with GTM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#isp-201mono">Mono image Sensor Processing pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id20">RGB-IR image Sensor Processing pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#isp-201rgbir">RGB-IR image Sensor Processing pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#isp-201multistream">Image Sensor Processing multistream pipeline - 2022.1 version</a></li>
 </ul>
 </li>
@@ -805,11 +805,11 @@ which needs to be added to the address in the first pixel of a row in order to a
 first pixel of the next row.</p>
 <div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">Without</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
 <span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">)</span>
+<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">)</span>
 
 <span class="o">//</span><span class="n">With</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
 <span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
+<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
 </pre></div>
 </div>
 <table border="1" class="docutils" id="id23">
@@ -844,14 +844,17 @@ XF_16UC1, XF_8UC3 and XF_8UC4</td>
 parallel. Example XF_NPPC1,
 XF_NPPC8</td>
 </tr>
-<tr class="row-odd"><td>srcPtr</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Output image.</td>
+</tr>
+<tr class="row-even"><td>srcPtr</td>
 <td>Input pointer. Type of the
 pointer based on the PTR_WIDTH.</td>
 </tr>
-<tr class="row-even"><td>dstMat</td>
+<tr class="row-odd"><td>dstMat</td>
 <td>Output image of type xf::cv::Mat</td>
 </tr>
-<tr class="row-odd"><td>stride</td>
+<tr class="row-even"><td>stride</td>
 <td>Line stride.
 Default value is dstMat.cols</td>
 </tr>
@@ -866,12 +869,12 @@ that to output pointer. xfMat2Array supports line stride. Line stride is the num
 which needs to be added to the address in the first pixel of a row in order to access the
 first pixel of the next row.</p>
 <div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">Without</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
-<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">)</span>
+<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">)</span>
 
 <span class="o">//</span><span class="n">With</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
-<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
+<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
 </pre></div>
 </div>
 <table border="1" class="docutils" id="id24">
@@ -906,19 +909,22 @@ XF_16UC1, XF_8UC3 and XF_8UC4</td>
 parallel. Example XF_NPPC1,
 XF_NPPC8</td>
 </tr>
-<tr class="row-odd"><td>FILLZERO</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Input image.</td>
+</tr>
+<tr class="row-even"><td>FILLZERO</td>
 <td>Line padding Flag. Use when line
 stride support is needed.
 Default value is 1</td>
 </tr>
-<tr class="row-even"><td>dstPtr</td>
+<tr class="row-odd"><td>dstPtr</td>
 <td>Output pointer. Type of the
 pointer based on the PTR_WIDTH.</td>
 </tr>
-<tr class="row-odd"><td>srcMat</td>
+<tr class="row-even"><td>srcMat</td>
 <td>Input image of type xf::cv::Mat</td>
 </tr>
-<tr class="row-even"><td>stride</td>
+<tr class="row-odd"><td>stride</td>
 <td>Line stride.
 Default value is srcMat.cols</td>
 </tr>
@@ -2474,8 +2480,8 @@ representation to cv::Mat format.</td>
 <p>The <code class="docutils literal notranslate"><span class="pre">AXIvideo2xfMat</span></code> function receives a sequence of images using the
 AXI4 Streaming Video and produces an <code class="docutils literal notranslate"><span class="pre">xf::cv::Mat</span></code> representation.</p>
 <p class="rubric">API Syntax</p>
-<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span><span class="nb">int</span> <span class="n">T</span><span class="p">,</span><span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="nb">int</span> <span class="n">AXIvideo2xfMat</span><span class="p">(</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span> <span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">)</span>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span><span class="nb">int</span> <span class="n">T</span><span class="p">,</span><span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="nb">int</span> <span class="n">AXIvideo2xfMat</span><span class="p">(</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span> <span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Parameter Descriptions</p>
@@ -2514,11 +2520,14 @@ XF_NPPC1 and XF_NPPC8 for 1-pixel
 and 8-pixel operations
 respectively.</td>
 </tr>
-<tr class="row-odd"><td>AXI_video_strm</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Input image.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
 <td>HLS stream of ap_axiu (axi
 protocol) type.</td>
 </tr>
-<tr class="row-even"><td>img</td>
+<tr class="row-odd"><td>img</td>
 <td>Input image.</td>
 </tr>
 </tbody>
@@ -2534,8 +2543,8 @@ detecting TLAST input.</p>
 sequence of images and encodes it correctly using the AXI4 Streaming
 video protocol.</p>
 <p class="rubric">API Syntax</p>
-<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span> <span class="nb">int</span> <span class="n">T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="nb">int</span> <span class="n">xfMat2AXIvideo</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">,</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">)</span>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span> <span class="nb">int</span> <span class="n">T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="nb">int</span> <span class="n">xfMat2AXIvideo</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">,</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Parameter Descriptions</p>
@@ -2574,11 +2583,14 @@ XF_NPPC1 and XF_NPPC8 for 1-pixel
 and 8-pixel operations
 respectively.</td>
 </tr>
-<tr class="row-odd"><td>AXI_video_strm</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Output image.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
 <td>HLS stream of ap_axiu (axi
 protocol) type.</td>
 </tr>
-<tr class="row-even"><td>img</td>
+<tr class="row-odd"><td>img</td>
 <td>Output image.</td>
 </tr>
 </tbody>
@@ -3577,9 +3589,18 @@ examples are described in this section:</p>
 <li><a class="reference external" href="#isp-201hdr">Image Sensor Processing pipeline with HDR</a></li>
 <li><a class="reference external" href="#isp-201gtm">Image Sensor Processing pipeline with GTM</a></li>
 <li><a class="reference external" href="#isp-201mono">Mono image Sensor Processing pipeline</a></li>
-<li><a class="reference external" href="#isp-201mono">RGB-IR image Sensor Processing pipeline</a></li>
+<li><a class="reference external" href="#isp_201rgbir">RGB-IR image Sensor Processing pipeline</a></li>
 <li><a class="reference external" href="#_isp-201multistream">Image Sensor Processing multistream pipeline - 2022.1 version</a></li>
 </ul>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last"><strong>All the functions in the library are implemented in streaming model except 4. Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly</strong></p>
+</div>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last"><strong>Default depth value for all the memory mapped implemenations(Crop, EdgeTracing, MeanShiftTracking, Rotate) is “_XFCVDEPTH_DEFAULT = -1”.
+Default depth value for all the streaming model implemenations is “_XFCVDEPTH_DEFAULT = 2”.</strong></p>
+</div>
 <div class="section" id="interative-pyramidal">
 <span id="id6"></span><h2>Iterative Pyramidal Dense Optical Flow<a class="headerlink" href="#interative-pyramidal" title="Permalink to this headline">¶</a></h2>
 <p>The Dense Pyramidal Optical Flow example uses the <code class="docutils literal notranslate"><span class="pre">xf::cv::pyrDown</span></code> and
@@ -3646,8 +3667,8 @@ corners on a 720p image, adding very minimal latency to the pipeline.</p>
 <div class="section" id="cornerupdate">
 <h3>cornerUpdate()<a class="headerlink" href="#cornerupdate" title="Permalink to this headline">¶</a></h3>
 <p class="rubric">API Syntax</p>
-<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">unsigned</span> <span class="nb">int</span> <span class="n">MAXCORNERSNO</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">cornerUpdate</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">list_fix</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="o">*</span><span class="nb">list</span><span class="p">,</span> <span class="n">uint32_t</span> <span class="n">nCorners</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">flow_vectors</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="n">harris_flag</span><span class="p">)</span>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">unsigned</span> <span class="nb">int</span> <span class="n">MAXCORNERSNO</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">XFCVDEPTH_IN</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">cornerUpdate</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">list_fix</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="o">*</span><span class="nb">list</span><span class="p">,</span> <span class="n">uint32_t</span> <span class="n">nCorners</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH_IN</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">flow_vectors</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="n">harris_flag</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Parameter Descriptions</p>
@@ -3655,8 +3676,8 @@ corners on a 720p image, adding very minimal latency to the pipeline.</p>
 <table border="1" class="docutils" id="id43">
 <caption><span class="caption-text">Table: CornerUpdate Function Parameter Descriptions</span><a class="headerlink" href="#id43" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="14%" />
-<col width="86%" />
+<col width="23%" />
+<col width="77%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Paramete
@@ -3686,7 +3707,10 @@ of 8)</td>
 <td>Number of pixels to be processed per cycle. This function
 supports only XF_NPPC1 or 1-pixel per cycle operations.</td>
 </tr>
-<tr class="row-odd"><td>list_fix</td>
+<tr class="row-odd"><td>XFCVDEPTH_IN</td>
+<td>Depth of input image</td>
+</tr>
+<tr class="row-even"><td>list_fix</td>
 <td>A list of packed fixed point coordinates of the corner
 locations in 16, 5 (16 integer bits and 5 fractional
 bits) format. Bits from 20 to 0 represent the column
@@ -3694,22 +3718,22 @@ number, while the bits 41 to 21 represent the row number.
 The rest of the bits are used for flag, this flag is set
 when the tracked corner is valid.</td>
 </tr>
-<tr class="row-even"><td>list</td>
+<tr class="row-odd"><td>list</td>
 <td>A list of packed positive short integer coordinates of
 the corner locations in unsigned short format. Bits from
 15 to 0 represent the column number, while the bits 31 to
 16 represent the row number. This list is same as the
 list output by Harris Corner Detector.</td>
 </tr>
-<tr class="row-odd"><td>nCorners</td>
+<tr class="row-even"><td>nCorners</td>
 <td>Number of corners to track</td>
 </tr>
-<tr class="row-even"><td>flow_vec
+<tr class="row-odd"><td>flow_vec
 tors</td>
 <td>Packed flow vectors as in xf::cv::DensePyrOpticalFlow
 function</td>
 </tr>
-<tr class="row-odd"><td>harris_f
+<tr class="row-even"><td>harris_f
 lag</td>
 <td><p class="first">If set to 1, the function takes input corners from list.</p>
 <p class="last">if set to 0, the function takes input corners from
@@ -3724,8 +3748,8 @@ using the Vitis vision library.</p>
 <div class="section" id="cornersimgtolist">
 <h3>cornersImgToList()<a class="headerlink" href="#cornersimgtolist" title="Permalink to this headline">¶</a></h3>
 <p class="rubric">API Syntax</p>
-<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">unsigned</span> <span class="nb">int</span> <span class="n">MAXCORNERSNO</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">cornersImgToList</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">_src</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="nb">list</span><span class="p">[</span><span class="n">MAXCORNERSNO</span><span class="p">],</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="o">*</span><span class="n">ncorners</span><span class="p">)</span>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">unsigned</span> <span class="nb">int</span> <span class="n">MAXCORNERSNO</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">XFCVDEPTH_IN</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">cornersImgToList</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH_IN</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">_src</span><span class="p">,</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="nb">list</span><span class="p">[</span><span class="n">MAXCORNERSNO</span><span class="p">],</span> <span class="n">unsigned</span> <span class="nb">int</span> <span class="o">*</span><span class="n">ncorners</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Parameter Descriptions</p>
@@ -3733,8 +3757,8 @@ using the Vitis vision library.</p>
 <table border="1" class="docutils" id="id44">
 <caption><span class="caption-text">Table: CornerImgToList Function Parameter Descriptions</span><a class="headerlink" href="#id44" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="14%" />
-<col width="86%" />
+<col width="23%" />
+<col width="77%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Paramete
@@ -3743,6 +3767,30 @@ r</th>
 </tr>
 </thead>
 <tbody valign="top">
+<tr class="row-even"><td>MAXCORNE
+RSNO</td>
+<td>Maximum number of corners that the function needs to work
+on</td>
+</tr>
+<tr class="row-odd"><td>TYPE</td>
+<td>Input Pixel Type. Only 8-bit, unsigned, 1 channel is
+supported (XF_8UC1)</td>
+</tr>
+<tr class="row-even"><td>ROWS</td>
+<td>Maximum height of input and output image (Must be
+multiple of 8)</td>
+</tr>
+<tr class="row-odd"><td>COLS</td>
+<td>Maximum width of input and output image (Must be multiple
+of 8)</td>
+</tr>
+<tr class="row-even"><td>NPC</td>
+<td>Number of pixels to be processed per cycle. This function
+supports only XF_NPPC1 or 1-pixel per cycle operations.</td>
+</tr>
+<tr class="row-odd"><td>XFCVDEPTH_IN</td>
+<td>Depth of input image</td>
+</tr>
 <tr class="row-even"><td>_src</td>
 <td>The output image of harris corner detector. The size of
 this xf::cv::Mat object is the size of the input image to
@@ -3846,13 +3894,13 @@ and once again applying dilate followed by erode.</p>
 <span class="c1">#pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4</span>
 <span class="c1">#pragma HLS INTERFACE s_axilite  port=return</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">imgInput</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">rgb2hsv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">imgHelper1</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">imgHelper2</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">imgHelper3</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">imgHelper4</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span> <span class="n">imgOutput</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgInput</span><span class="o">&gt;</span> <span class="n">imgInput</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_rgb2hsv</span><span class="o">&gt;</span> <span class="n">rgb2hsv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper1</span><span class="o">&gt;</span> <span class="n">imgHelper1</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper2</span><span class="o">&gt;</span> <span class="n">imgHelper2</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper3</span><span class="o">&gt;</span> <span class="n">imgHelper3</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper4</span><span class="o">&gt;</span> <span class="n">imgHelper4</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgOutput</span><span class="o">&gt;</span> <span class="n">imgOutput</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
             <span class="o">//</span> <span class="n">Copy</span> <span class="n">the</span> <span class="n">shape</span> <span class="n">data</span><span class="p">:</span>
             <span class="n">unsigned</span> <span class="n">char</span> <span class="n">_kernel</span><span class="p">[</span><span class="n">FILTER_SIZE</span> <span class="o">*</span> <span class="n">FILTER_SIZE</span><span class="p">];</span>
@@ -3866,27 +3914,27 @@ and once again applying dilate followed by erode.</p>
     <span class="c1">#pragma HLS DATAFLOW</span>
             <span class="o">//</span> <span class="n">clang</span><span class="o">-</span><span class="nb">format</span> <span class="n">on</span>
             <span class="o">//</span> <span class="n">Retrieve</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="n">objects</span> <span class="kn">from</span> <span class="nn">img_in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">PTR_IN_WIDTH</span><span class="p">,</span> <span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_in</span><span class="p">,</span> <span class="n">imgInput</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">PTR_IN_WIDTH</span><span class="p">,</span> <span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgInput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_in</span><span class="p">,</span> <span class="n">imgInput</span><span class="p">);</span>
 
             <span class="o">//</span> <span class="n">Convert</span> <span class="n">RGBA</span> <span class="n">to</span> <span class="n">HSV</span><span class="p">:</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">bgr2hsv</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgInput</span><span class="p">,</span> <span class="n">rgb2hsv</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">bgr2hsv</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgInput</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_rgb2hsv</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgInput</span><span class="p">,</span> <span class="n">rgb2hsv</span><span class="p">);</span>
 
             <span class="o">//</span> <span class="n">Do</span> <span class="n">the</span> <span class="n">color</span> <span class="n">thresholding</span><span class="p">:</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">colorthresholding</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">MAXCOLORS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rgb2hsv</span><span class="p">,</span> <span class="n">imgHelper1</span><span class="p">,</span> <span class="n">low_thresh</span><span class="p">,</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">colorthresholding</span><span class="o">&lt;</span><span class="n">IN_TYPE</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">MAXCOLORS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_rgb2hsv</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rgb2hsv</span><span class="p">,</span> <span class="n">imgHelper1</span><span class="p">,</span> <span class="n">low_thresh</span><span class="p">,</span>
                                                                                                                                                                      <span class="n">high_thresh</span><span class="p">);</span>
 
             <span class="o">//</span> <span class="n">Use</span> <span class="n">erode</span> <span class="ow">and</span> <span class="n">dilate</span> <span class="n">to</span> <span class="n">fully</span> <span class="n">mark</span> <span class="n">color</span> <span class="n">areas</span><span class="p">:</span>
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">erode</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
-                                      <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper1</span><span class="p">,</span> <span class="n">imgHelper2</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+                                      <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper1</span><span class="p">,</span> <span class="n">imgHelper2</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">dilate</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
-                                       <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper2</span><span class="p">,</span> <span class="n">imgHelper3</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+                                       <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper2</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper3</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper2</span><span class="p">,</span> <span class="n">imgHelper3</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">dilate</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
-                                       <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper3</span><span class="p">,</span> <span class="n">imgHelper4</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+                                       <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper3</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper4</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper3</span><span class="p">,</span> <span class="n">imgHelper4</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">erode</span><span class="o">&lt;</span><span class="n">XF_BORDER_CONSTANT</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">XF_KERNEL_SHAPE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">FILTER_SIZE</span><span class="p">,</span> <span class="n">ITERATIONS</span><span class="p">,</span>
-                                      <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper4</span><span class="p">,</span> <span class="n">imgOutput</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
+                                      <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgHelper4</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgOutput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgHelper4</span><span class="p">,</span> <span class="n">imgOutput</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">);</span>
 
             <span class="o">//</span> <span class="n">Convert</span> <span class="n">_dst</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="nb">object</span> <span class="n">to</span> <span class="n">output</span> <span class="n">array</span><span class="p">:</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">PTR_OUT_WIDTH</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgOutput</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">PTR_OUT_WIDTH</span><span class="p">,</span> <span class="n">OUT_TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_imgOutput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgOutput</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
 
             <span class="k">return</span><span class="p">;</span>
 
@@ -4041,46 +4089,46 @@ additional input to the pipeline.</p>
 
             <span class="nb">int</span> <span class="n">_cm_size</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="n">_dc_size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mat_L</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_L</span><span class="o">&gt;</span> <span class="n">mat_L</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mat_R</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_R</span><span class="o">&gt;</span> <span class="n">mat_R</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mat_disp</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_DISP</span><span class="o">&gt;</span> <span class="n">mat_disp</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mapxLMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_XL</span><span class="o">&gt;</span> <span class="n">mapxLMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mapyLMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_YL</span><span class="o">&gt;</span> <span class="n">mapyLMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mapxRMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_XR</span><span class="o">&gt;</span> <span class="n">mapxRMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">mapyRMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_YR</span><span class="o">&gt;</span> <span class="n">mapyRMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">leftRemappedMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_LEFT_REMAPPED</span><span class="o">&gt;</span> <span class="n">leftRemappedMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span> <span class="n">rightRemappedMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_RIGHT_REMAPPED</span><span class="o">&gt;</span> <span class="n">rightRemappedMat</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
 
 
     <span class="c1">#pragma HLS DATAFLOW</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_L</span><span class="p">,</span> <span class="n">mat_L</span><span class="p">);</span>
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_R</span><span class="p">,</span> <span class="n">mat_R</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_L</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_L</span><span class="p">,</span> <span class="n">mat_L</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_R</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_R</span><span class="p">,</span> <span class="n">mat_R</span><span class="p">);</span>
 
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">InitUndistortRectifyMapInverse</span><span class="o">&lt;</span><span class="n">XF_CAMERA_MATRIX_SIZE</span><span class="p">,</span> <span class="n">XF_DIST_COEFF_SIZE</span><span class="p">,</span> <span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span>
-                                                                                       <span class="n">XF_NPPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cameraMA_l_fix</span><span class="p">,</span> <span class="n">distC_l_fix</span><span class="p">,</span> <span class="n">irA_l_fix</span><span class="p">,</span> <span class="n">mapxLMat</span><span class="p">,</span> <span class="n">mapyLMat</span><span class="p">,</span>
+                                                                                       <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_XL</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_YL</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cameraMA_l_fix</span><span class="p">,</span> <span class="n">distC_l_fix</span><span class="p">,</span> <span class="n">irA_l_fix</span><span class="p">,</span> <span class="n">mapxLMat</span><span class="p">,</span> <span class="n">mapyLMat</span><span class="p">,</span>
                                                                                                              <span class="n">_cm_size</span><span class="p">,</span> <span class="n">_dc_size</span><span class="p">);</span>
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">remap</span><span class="o">&lt;</span><span class="n">XF_REMAP_BUFSIZE</span><span class="p">,</span> <span class="n">XF_INTERPOLATION_BILINEAR</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span>
-                                      <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_USE_URAM</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mat_L</span><span class="p">,</span> <span class="n">leftRemappedMat</span><span class="p">,</span> <span class="n">mapxLMat</span><span class="p">,</span> <span class="n">mapyLMat</span><span class="p">);</span>
+                                      <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_USE_URAM</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_L</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_LEFT_REMAPPED</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_XL</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_YL</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mat_L</span><span class="p">,</span> <span class="n">leftRemappedMat</span><span class="p">,</span> <span class="n">mapxLMat</span><span class="p">,</span> <span class="n">mapyLMat</span><span class="p">);</span>
 
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">InitUndistortRectifyMapInverse</span><span class="o">&lt;</span><span class="n">XF_CAMERA_MATRIX_SIZE</span><span class="p">,</span> <span class="n">XF_DIST_COEFF_SIZE</span><span class="p">,</span> <span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span>
-                                                                                       <span class="n">XF_NPPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cameraMA_r_fix</span><span class="p">,</span> <span class="n">distC_r_fix</span><span class="p">,</span> <span class="n">irA_r_fix</span><span class="p">,</span> <span class="n">mapxRMat</span><span class="p">,</span> <span class="n">mapyRMat</span><span class="p">,</span>
+                                                                                       <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_XR</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_YR</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cameraMA_r_fix</span><span class="p">,</span> <span class="n">distC_r_fix</span><span class="p">,</span> <span class="n">irA_r_fix</span><span class="p">,</span> <span class="n">mapxRMat</span><span class="p">,</span> <span class="n">mapyRMat</span><span class="p">,</span>
                                                                                                              <span class="n">_cm_size</span><span class="p">,</span> <span class="n">_dc_size</span><span class="p">);</span>
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">remap</span><span class="o">&lt;</span><span class="n">XF_REMAP_BUFSIZE</span><span class="p">,</span> <span class="n">XF_INTERPOLATION_BILINEAR</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_32FC1</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span>
-                                      <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_USE_URAM</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mat_R</span><span class="p">,</span> <span class="n">rightRemappedMat</span><span class="p">,</span> <span class="n">mapxRMat</span><span class="p">,</span> <span class="n">mapyRMat</span><span class="p">);</span>
+                                      <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_USE_URAM</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_R</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_RIGHT_REMAPPED</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_XR</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAP_YR</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mat_R</span><span class="p">,</span> <span class="n">rightRemappedMat</span><span class="p">,</span> <span class="n">mapxRMat</span><span class="p">,</span> <span class="n">mapyRMat</span><span class="p">);</span>
 
             <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">StereoBM</span><span class="o">&lt;</span><span class="n">SAD_WINDOW_SIZE</span><span class="p">,</span> <span class="n">NO_OF_DISPARITIES</span><span class="p">,</span> <span class="n">PARALLEL_UNITS</span><span class="p">,</span> <span class="n">XF_8UC1</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span>
-                                             <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_USE_URAM</span><span class="o">&gt;</span><span class="p">(</span><span class="n">leftRemappedMat</span><span class="p">,</span> <span class="n">rightRemappedMat</span><span class="p">,</span> <span class="n">mat_disp</span><span class="p">,</span> <span class="n">bm_state</span><span class="p">);</span>
+                                             <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_USE_URAM</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_LEFT_REMAPPED</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_RIGHT_REMAPPED</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_DISP</span><span class="o">&gt;</span><span class="p">(</span><span class="n">leftRemappedMat</span><span class="p">,</span> <span class="n">rightRemappedMat</span><span class="p">,</span> <span class="n">mat_disp</span><span class="p">,</span> <span class="n">bm_state</span><span class="p">);</span>
 
-            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">OUTPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mat_disp</span><span class="p">,</span> <span class="n">img_disp</span><span class="p">);</span>
+            <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">OUTPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_MAT_DISP</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mat_disp</span><span class="p">,</span> <span class="n">img_disp</span><span class="p">);</span>
     <span class="p">}</span>
 </pre></div>
 </div>
@@ -4170,16 +4218,16 @@ functions from Vitis vision library which are used to build this pipeline are <c
                             <span class="n">rows_out_resize</span> <span class="o">=</span> <span class="n">rows_out</span><span class="p">;</span>
                     <span class="p">}</span>
 
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="o">&gt;</span> <span class="n">imgInput0</span><span class="p">(</span><span class="n">rows_in</span><span class="p">,</span> <span class="n">cols_in</span><span class="p">);</span>
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="o">&gt;</span> <span class="n">out_mat_resize</span><span class="p">(</span><span class="n">rows_out_resize</span><span class="p">,</span> <span class="n">cols_out_resize</span><span class="p">);</span>
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="o">&gt;</span> <span class="n">out_mat</span><span class="p">(</span><span class="n">rows_out</span><span class="p">,</span> <span class="n">cols_out</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_0</span><span class="o">&gt;</span> <span class="n">imgInput0</span><span class="p">(</span><span class="n">rows_in</span><span class="p">,</span> <span class="n">cols_in</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_1</span><span class="o">&gt;</span> <span class="n">out_mat_resize</span><span class="p">(</span><span class="n">rows_out_resize</span><span class="p">,</span> <span class="n">cols_out_resize</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_2</span><span class="o">&gt;</span> <span class="n">out_mat</span><span class="p">(</span><span class="n">rows_out</span><span class="p">,</span> <span class="n">cols_out</span><span class="p">);</span>
 
             <span class="c1">#pragma HLS DATAFLOW</span>
 
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span><span class="n">XF_8UC3</span><span class="p">,</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="o">&gt;</span>  <span class="p">(</span><span class="n">img_inp</span><span class="p">,</span> <span class="n">imgInput0</span><span class="p">);</span>
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">resize</span><span class="o">&lt;</span><span class="n">INTERPOLATION</span><span class="p">,</span><span class="n">TYPE</span><span class="p">,</span><span class="n">HEIGHT</span><span class="p">,</span><span class="n">WIDTH</span><span class="p">,</span><span class="n">NEWHEIGHT</span><span class="p">,</span><span class="n">NEWWIDTH</span><span class="p">,</span><span class="n">NPC_T</span><span class="p">,</span><span class="n">MAXDOWNSCALE</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">imgInput0</span><span class="p">,</span> <span class="n">out_mat_resize</span><span class="p">);</span>
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">insertBorder</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">out_mat_resize</span><span class="p">,</span> <span class="n">out_mat</span><span class="p">,</span> <span class="n">insert_pad_value</span><span class="p">);</span>
-                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">OUTPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">out_mat</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span><span class="n">XF_8UC3</span><span class="p">,</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_0</span><span class="o">&gt;</span>  <span class="p">(</span><span class="n">img_inp</span><span class="p">,</span> <span class="n">imgInput0</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">resize</span><span class="o">&lt;</span><span class="n">INTERPOLATION</span><span class="p">,</span><span class="n">TYPE</span><span class="p">,</span><span class="n">HEIGHT</span><span class="p">,</span><span class="n">WIDTH</span><span class="p">,</span><span class="n">NEWHEIGHT</span><span class="p">,</span><span class="n">NEWWIDTH</span><span class="p">,</span><span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_0</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_1</span><span class="p">,</span><span class="n">MAXDOWNSCALE</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">imgInput0</span><span class="p">,</span> <span class="n">out_mat_resize</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">insertBorder</span><span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">out_mat_resize</span><span class="p">,</span> <span class="n">out_mat</span><span class="p">,</span> <span class="n">insert_pad_value</span><span class="p">);</span>
+                    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">OUTPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">NEWHEIGHT</span><span class="p">,</span> <span class="n">NEWWIDTH</span><span class="p">,</span> <span class="n">NPC_T</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">out_mat</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
                     <span class="k">return</span><span class="p">;</span>
                     <span class="p">}</span><span class="o">//</span> <span class="n">end</span> <span class="n">kernel</span>
 </pre></div>
@@ -4198,11 +4246,13 @@ The output of that function is passed to the xf::cv::insertBorder module and the
     <span class="nb">int</span> <span class="n">SRC_COLS</span><span class="p">,</span>
     <span class="nb">int</span> <span class="n">DST_ROWS</span><span class="p">,</span>
     <span class="nb">int</span> <span class="n">DST_COLS</span><span class="p">,</span>
-    <span class="nb">int</span> <span class="n">NPC</span>
+    <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span>
+        <span class="nb">int</span> <span class="n">XFCVDEPTH_IN</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="p">,</span>
+<span class="nb">int</span> <span class="n">XFCVDEPTH_OUT</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span>
     <span class="o">&gt;</span>
 <span class="n">void</span> <span class="n">insertBorder</span> <span class="p">(</span>
-    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">SRC_ROWS</span><span class="p">,</span> <span class="n">SRC_COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">_src</span><span class="p">,</span>
-    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">DST_ROWS</span><span class="p">,</span> <span class="n">DST_COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">_dst</span><span class="p">,</span>
+    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">SRC_ROWS</span><span class="p">,</span> <span class="n">SRC_COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH_IN</span><span class="o">&gt;&amp;</span> <span class="n">_src</span><span class="p">,</span>
+    <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span> <span class="o">&lt;</span><span class="n">TYPE</span><span class="p">,</span> <span class="n">DST_ROWS</span><span class="p">,</span> <span class="n">DST_COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH_OUT</span><span class="o">&gt;&amp;</span> <span class="n">_dst</span><span class="p">,</span>
     <span class="nb">int</span> <span class="n">insert_pad_val</span>
     <span class="p">)</span>
 </pre></div>
@@ -4528,17 +4578,17 @@ void ISPpipeline(ap_uint&lt;INPUT_PTR_WIDTH&gt;* img_inp,
 
         #pragma HLS INLINE OFF
 
-                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput1(height, width);
-                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput2(height, width);
-                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; bpc_out(height, width);
-                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; gain_out(height, width);
-                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; demosaic_out(height, width);
-                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; impop(height, width);
-                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; ltm_in(height, width);
-                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; lsc_out(height, width);
-                xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _dst(height, width);
-                xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; aecin(height, width);
-                xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _imgOutput(height, width);
+                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0&gt; imgInput1(height, width);
+                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1&gt; imgInput2(height, width);
+                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2&gt; bpc_out(height, width);
+                xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3&gt; gain_out(height, width);
+                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0&gt; demosaic_out(height, width);
+                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1&gt; impop(height, width);
+                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2&gt; ltm_in(height, width);
+                xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3&gt; lsc_out(height, width);
+                xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4&gt; _dst(height, width);
+                xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5&gt; aecin(height, width);
+                xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6&gt; _imgOutput(height, width);
 
 
         #pragma HLS DATAFLOW
@@ -4548,20 +4598,20 @@ void ISPpipeline(ap_uint&lt;INPUT_PTR_WIDTH&gt;* img_inp,
                 float inputMax = (1 &lt;&lt; (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
                 float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-                xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(img_inp, imgInput1);
-                xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1&gt;(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
-                xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(imgInput2, gain_out, rgain, bgain);
-                xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0&gt;(gain_out, demosaic_out);
-                function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);
-                xf::cv::colorcorrectionmatrix&lt;XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(ltm_in, lsc_out);
+                xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0&gt;(img_inp, imgInput1);
+                xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1&gt;(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+                xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_3&gt;(imgInput2, gain_out, rgain, bgain);
+                xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0&gt;(gain_out, demosaic_out);
+                function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);
+                xf::cv::colorcorrectionmatrix&lt;XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3&gt;(ltm_in, lsc_out);
                 if (XF_DST_T == XF_8UC3) {
-                        fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(lsc_out, aecin, height, width);
+                        fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5&gt;(lsc_out, aecin, height, width);
                 } else {
-                        xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC&gt;(lsc_out, aecin);
+                        xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5&gt;(lsc_out, aecin);
                 }
-                xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(aecin, _dst, gamma_lut);
-                xf::cv::rgb2yuyv&lt;XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_dst, _imgOutput);
-                xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_imgOutput, img_out);
+                xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4&gt;(aecin, _dst, gamma_lut);
+                xf::cv::rgb2yuyv&lt;XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6&gt;(_dst, _imgOutput);
+                xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6&gt;(_imgOutput, img_out);
         }
 </pre></div>
 </div>
@@ -4625,19 +4675,19 @@ void ISPpipeline(ap_uint&lt;INPUT_PTR_WIDTH&gt;* img_inp1,
 
 #pragma HLS INLINE OFF
 
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInputhdr1(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInputhdr2(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput1(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput2(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; bpc_out(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; gain_out(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; demosaic_out(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; impop(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; ltm_in(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; lsc_out(height, width);
-        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _dst(height, width);
-        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; aecin(height, width);
-        xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _imgOutput(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1&gt; imgInputhdr1(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR2&gt; imgInputhdr2(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1&gt; imgInput1(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2&gt; imgInput2(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_BPC_OUT&gt; bpc_out(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT&gt; gain_out(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT&gt; demosaic_out(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IMPOP&gt; impop(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN&gt; ltm_in(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT&gt; lsc_out(height, width);
+        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST&gt; _dst(height, width);
+        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN&gt; aecin(height, width);
+        xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT&gt; _imgOutput(height, width);
 
 
 #pragma HLS DATAFLOW
@@ -4646,24 +4696,24 @@ void ISPpipeline(ap_uint&lt;INPUT_PTR_WIDTH&gt;* img_inp1,
         float thresh = (float)pawb / 256;
         float inputMax = (1 &lt;&lt; (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
         float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-        xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(img_inp1, imgInputhdr1);
-        xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(img_inp2, imgInputhdr2);
+        xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1&gt;(img_inp1, imgInputhdr1);
+        xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR2&gt;(img_inp2, imgInputhdr2);
 
-        xf::cv::Hdrmerge_bayer&lt;XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, NO_EXPS, W_B_SIZE&gt;(
+        xf::cv::Hdrmerge_bayer&lt;XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1, XF_CV_DEPTH_IN_DR2, NO_EXPS, W_B_SIZE&gt;(
                 imgInputhdr1, imgInputhdr2, imgInput1, wr_hls);
 
-        xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1&gt;(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
-        xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(imgInput2, gain_out, rgain, bgain);
-        xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0&gt;(gain_out, demosaic_out);
-        function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);
-        xf::cv::colorcorrectionmatrix&lt;XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(ltm_in, lsc_out);
+        xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2&gt;(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+        xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_GAIN_OUT&gt;(imgInput2, gain_out, rgain, bgain);
+        xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_GAIN_OUT,XF_CV_DEPTH_DEMOSAIC_OUT&gt;(gain_out, demosaic_out);
+        function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT, XF_CV_DEPTH_LTM_IN&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);
+        xf::cv::colorcorrectionmatrix&lt;XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN, XF_CV_DEPTH_LSC_OUT&gt;(ltm_in, lsc_out);
         if (XF_DST_T == XF_8UC3) {
-                fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(lsc_out, aecin, height, width);
+                fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN&gt;(lsc_out, aecin, height, width);
         } else {
-                xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC&gt;(lsc_out, aecin);
+                xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN&gt;(lsc_out, aecin);
         }
-        xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(aecin, _dst, gamma_lut);
-        xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_8UC3, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_dst, img_out);
+        xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN, XF_CV_DEPTH_DST&gt;(aecin, _dst, gamma_lut);
+        xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_8UC3, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST&gt;(_dst, img_out);
 }
 </pre></div>
 </div>
@@ -4683,6 +4733,7 @@ contrast. The Blacklevelcorrection algorithm corrects the black and white levels
 <li>Gamma correction : Gamma correction improves the overall brightness of image.</li>
 <li>Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.</li>
 </ul>
+<p><a class="image reference internal" href="_images/isp-gtm.png"><img alt="isp-gtm" class="image" src="_images/isp-gtm.png" style="width: 1000px;" /></a></p>
 <p>Current design example demonstrates how to use ISP functions in a pipeline.</p>
 <p>User can dynamically configure the below parameters to the pipeline.</p>
 <table border="1" class="docutils" id="id47">
@@ -4817,17 +4868,17 @@ float c2) {
 
             #pragma HLS INLINE OFF
 
-                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput1(height, width);
-                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput2(height, width);
-                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; bpc_out(height, width);
-                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; gain_out(height, width);
-                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; demosaic_out(height, width);
-                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; impop(height, width);
-                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; ltm_in(height, width);
-                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; lsc_out(height, width);
-                    xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _dst(height, width);
-                    xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; aecin(height, width);
-                    xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _imgOutput(height, width);
+                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0&gt; imgInput1(height, width);
+                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1&gt; imgInput2(height, width);
+                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2&gt; bpc_out(height, width);
+                    xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3&gt; gain_out(height, width);
+                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0&gt; demosaic_out(height, width);
+                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1&gt; impop(height, width);
+                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2&gt; ltm_in(height, width);
+                    xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3&gt; lsc_out(height, width);
+                    xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4&gt; _dst(height, width);
+                    xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5&gt; aecin(height, width);
+                    xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6&gt; _imgOutput(height, width);
 
 
             #pragma HLS DATAFLOW
@@ -4837,22 +4888,22 @@ float c2) {
                     float inputMax = (1 &lt;&lt; (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
                     float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-                    xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(img_inp, imgInput1);
-                    xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1&gt;(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
-                    xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(imgInput2, gain_out, rgain, bgain);
-                    xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0&gt;(gain_out, demosaic_out);
-                    function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);
-                    xf::cv::colorcorrectionmatrix&lt;XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(ltm_in, lsc_out);
+                    xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0&gt;(img_inp, imgInput1);
+                    xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1&gt;(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+                    xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCC, XF_CV_DEPTH_IN_1,&gt;(imgInput2, gain_out, rgain, bgain);
+                    xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0&gt;(gain_out, demosaic_out);
+                    function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);
+                    xf::cv::colorcorrectionmatrix&lt;XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3&gt;(ltm_in, lsc_out);
 
                     if (XF_DST_T == XF_8UC3) {
-                            fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(lsc_out, aecin, height, width);
+                            fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5&gt;(lsc_out, aecin, height, width);
                     } else {
-                             xf::cv::gtm&lt;XF_DST_T, XF_LTM_T, XF_SRC_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(
+                             xf::cv::gtm&lt;XF_DST_T, XF_LTM_T, XF_SRC_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5&gt;(
      lsc_out, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, height, width);
                     }
-                    xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(aecin, _dst, gamma_lut);
-                    xf::cv::rgb2yuyv&lt;XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_dst, _imgOutput);
-                    xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_imgOutput, img_out);
+                    xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4&gt;(aecin, _dst, gamma_lut);
+                    xf::cv::rgb2yuyv&lt;XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6&gt;(_dst, _imgOutput);
+                    xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6&gt;(_imgOutput, img_out);
             }
 </pre></div>
 </div>
@@ -4872,6 +4923,7 @@ contrast. The Blacklevelcorrection algorithm corrects the black and white levels
 <li>Gamma correction : Gamma correction improves the overall brightness of image.</li>
 <li>Autoexposure correction : Using CLAHE algorithm to improve brightness and contrast of the image.</li>
 </ul>
+<p><a class="image reference internal" href="_images/isp-mono.png"><img alt="isp-mono" class="image" src="_images/isp-mono.png" style="width: 1000px;" /></a></p>
 <p>Current design example demonstrates how to use ISP functions in a pipeline.</p>
 <p>User can dynamically configure the below parameters to the pipeline.</p>
 <table border="1" class="docutils" id="id49">
@@ -4992,14 +5044,14 @@ int tilesX) {
 
                #pragma HLS INLINE OFF
 
-                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput1(height, width);
-                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput2(height, width);
-                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; dpc_out(height, width);
-                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; gain_out(height, width);
-                       xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; impop(height, width);
-                       xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _dst(height, width);
-                       xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; aecin(height, width);
-                       xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _imgOutput(height, width);
+                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1&gt; imgInput1(height, width);
+                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2&gt; imgInput2(height, width);
+                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DPC_OUT&gt; dpc_out(height, width);
+                       xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT&gt; gain_out(height, width);
+                       xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IMPOP&gt; impop(height, width);
+                       xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST&gt; _dst(height, width);
+                       xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN&gt; aecin(height, width);
+                       xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT&gt; _imgOutput(height, width);
 
 
                #pragma HLS DATAFLOW
@@ -5013,30 +5065,30 @@ int tilesX) {
 
                        float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-                       xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(img_inp, imgInput1);
-                       xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1&gt;(imgInput1, imgInput2, BLACK_LEVEL,
+                       xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1&gt;(img_inp, imgInput1);
+                       xf::cv::blackLevelCorrection&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2&gt;(imgInput1, imgInput2, BLACK_LEVEL,
                                                                                                                                                                                        mul_fact);
 
-                       xf::cv::medianBlur&lt;WINDOW_SIZE, XF_BORDER_REPLICATE, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(imgInput2, dpc_out);
-                       xf::cv::gaincontrol_mono&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(dpc_out, gain_out, lgain);
+                       xf::cv::medianBlur&lt;WINDOW_SIZE, XF_BORDER_REPLICATE, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_DPC_OUT&gt;(imgInput2, dpc_out);
+                       xf::cv::gaincontrol_mono&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DPC_OUT, XF_CV_DEPTH_GAIN_OUT&gt;(dpc_out, gain_out, lgain);
 
                        if (XF_DST_T == XF_8UC1) {
-                               fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(gain_out, aecin, height, width);
+                               fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT, XF_CV_DEPTH_AEC_IN&gt;(gain_out, aecin, height, width);
                        } else {
-                               xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC&gt;(gain_out, aecin);
+                               xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_GAIN_OUT, XF_CV_DEPTH_AEC_IN&gt;(gain_out, aecin);
                        }
 
                        obj.process(_dst, aecin, _lutw, _lutr, _clipCounter, height, width, clip, tilesY, tilesX);
 
-                       xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_dst, _imgOutput, gamma_lut);
+                       xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST, XF_CV_DEPTH_OUT&gt;(_dst, _imgOutput, gamma_lut);
 
-                       xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_imgOutput, img_out);
+                       xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT&gt;(_imgOutput, img_out);
                }
 </pre></div>
 </div>
 </div>
-<div class="section" id="id20">
-<h2>RGB-IR image Sensor Processing pipeline<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="isp-201rgbir">
+<span id="id20"></span><h2>RGB-IR image Sensor Processing pipeline<a class="headerlink" href="#isp-201rgbir" title="Permalink to this headline">¶</a></h2>
 <p>This Image Sensor Processing (ISP) pipeline works on a raw bayer pattern image that has IR data at some pixel loactions. It creates a fully processed RGB image and an IR image.</p>
 <p>This ISP includes following blocks:</p>
 <ul class="simple">
@@ -5048,6 +5100,7 @@ int tilesX) {
 <li>Gamma correction : Gamma correction improves the overall brightness of image.</li>
 <li>Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.</li>
 </ul>
+<p><a class="image reference internal" href="_images/isp-rgbir.png"><img alt="isp-rgbir" class="image" src="_images/isp-rgbir.png" style="width: 1000px;" /></a></p>
 <p>Current design example demonstrates how to use ISP functions in a pipeline.</p>
 <p>User can dynamically configure the below parameters to the pipeline.</p>
 <table border="1" class="docutils" id="id51">
@@ -5214,18 +5267,18 @@ void ISPpipeline(ap_uint&lt;INPUT_PTR_WIDTH&gt;* img_inp,
 // clang-format off
 #pragma HLS INLINE OFF
         // clang-format on
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInput(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; imgInputCopy1(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 3 * XF_WIDTH&gt; imgInputCopy2(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; fullir_out(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; rggb_out(height, width);
-        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; gain_out(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; demosaic_out(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; demoOut_final(height, width);
-        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; ltm_in(height, width);
-        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _dst(height, width);
-        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; aecin(height, width);
-        xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt; _imgOutput(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInput&gt; imgInput(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInputCopy1&gt; imgInputCopy1(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInputCopy2&gt; imgInputCopy2(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_fullir_out&gt; fullir_out(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_rggb_out&gt; rggb_out(height, width);
+        xf::cv::Mat&lt;XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_gain_out&gt; gain_out(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demosaic_out&gt; demosaic_out(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demoOut_final&gt; demoOut_final(height, width);
+        xf::cv::Mat&lt;XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in&gt; ltm_in(height, width);
+        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__dst&gt; _dst(height, width);
+        xf::cv::Mat&lt;XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_aecin&gt; aecin(height, width);
+        xf::cv::Mat&lt;XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__imgOutput&gt; _imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
@@ -5237,36 +5290,35 @@ void ISPpipeline(ap_uint&lt;INPUT_PTR_WIDTH&gt;* img_inp,
 
         float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-        xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(img_inp, imgInput);
+        xf::cv::Array2xfMat&lt;INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInput&gt;(img_inp, imgInput);
 
-        xf::cv::rgbir2bayer&lt;FILTERSIZE1, FILTERSIZE2, XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC,
-                                                3 * XF_WIDTH, XF_BORDER_CONSTANT, XF_USE_URAM&gt;(
+        xf::cv::rgbir2bayer&lt;FILTERSIZE1, FILTERSIZE2, XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_BORDER_CONSTANT, XF_USE_URAM, XF_CV_DEPTH_imgInput, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_fullir_out, XF_CV_DEPTH_3XWIDTH&gt;(
                 imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rggb_out, fullir_out);
 
-        xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(rggb_out, gain_out, rgain, bgain);
-        xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0&gt;(gain_out, demosaic_out);
+        xf::cv::gaincontrol&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_gain_out&gt;(rggb_out, gain_out, rgain, bgain);
+        xf::cv::demosaicing&lt;XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_gain_out, XF_CV_DEPTH_demosaic_out&gt;(gain_out, demosaic_out);
 
-        function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
-                                                                                                                                   height, width, mode_reg, thresh);
+        function_awb&lt;XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_ltm_in&gt;(demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
 
         if (XF_DST_T == XF_8UC3) {
-                fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(ltm_in, aecin, height, width);
+                fifo_copy&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in, XF_CV_DEPTH_aecin&gt;(ltm_in, aecin, height, width);
         } else {
-                xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC&gt;(ltm_in, aecin);
+                xf::cv::xf_QuatizationDithering&lt;XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCXF_CV_DEPTH_ltm_in, XF_CV_DEPTH_aecin&gt;(ltm_in, aecin);
         }
-        xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(aecin, _dst, gamma_lut);
-        xf::cv::rgb2yuyv&lt;XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_dst, _imgOutput);
+        xf::cv::gammacorrection&lt;XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_aecin, XF_CV_DEPTH__dst&gt;(aecin, _dst, gamma_lut);
+        xf::cv::rgb2yuyv&lt;XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__dst, XF_CV_DEPTH__imgOutput&gt;(_dst, _imgOutput);
 
-        xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(_imgOutput, img_out);
-        xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC&gt;(fullir_out, ir_img_out);
+        xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH__imgOutput&gt;(_imgOutput, img_out);
+        xf::cv::xfMat2Array&lt;OUTPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_fullir_out&gt;(fullir_out, ir_img_out);
 }
 </pre></div>
 </div>
 </div>
 <div class="section" id="isp-201multistream">
 <span id="id21"></span><h2>Image Sensor Processing multistream pipeline - 2022.1 version<a class="headerlink" href="#isp-201multistream" title="Permalink to this headline">¶</a></h2>
-<p>ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
-Current multi stream pipeline process 4 streams in a Round-Robin method with ouput steams TYPE as XF_8UC3(RGB). And after the color conversion to YUV color space, they are XF_16UC1(YUYV).</p>
+<blockquote>
+<div>ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
+Current multi stream pipeline process 4 streams in a Round-Robin method with ouput steams TYPE as XF_8UC3(RGB). And after the color conversion to YUV color space, they are XF_16UC1(YUYV).</div></blockquote>
 <p>This ISP pipeline inclues 8 blocks, they are following:</p>
 <ul class="simple">
 <li>Black level correction</li>
@@ -5278,7 +5330,8 @@ Current multi stream pipeline process 4 streams in a Round-Robin method with oup
 <li>Gamma correction</li>
 <li>Color space conversion</li>
 </ul>
-<p><strong>Note</strong> : CCM and Q&amp;D currently supports one output type for all the streams. Upcoming versions will support different output types.</p>
+<p>Note: CCM and Q&amp;D currently supports one output type for all the streams. Upcoming versions will support different output types.</p>
+<p><a class="image reference internal" href="_images/isp-2022_1.png"><img alt="isp-20221" class="image" src="_images/isp-2022_1.png" style="width: 1000px;" /></a></p>
 <p>Current design example demonstrates how to use ISP functions in a pipeline.</p>
 <p>User can dynamically configure the below parameters to the pipeline.</p>
 <table border="1" class="docutils" id="id53">
@@ -5499,17 +5552,17 @@ in one burst</td>
                                          <span class="n">struct</span> <span class="n">ispparams_config</span> <span class="n">params</span><span class="p">,</span>
                                          <span class="n">unsigned</span> <span class="n">char</span> <span class="n">_gamma_lut</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
                                          <span class="nb">bool</span> <span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">imgInput</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">blc_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">bpc_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">gain_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">demosaic_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">impop</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">ltm_in</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">lsc_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">_dst</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">aecin</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span> <span class="n">imgOutput</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_0</span><span class="o">&gt;</span> <span class="n">imgInput</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_1</span><span class="o">&gt;</span> <span class="n">blc_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_2</span><span class="o">&gt;</span> <span class="n">bpc_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_3</span><span class="o">&gt;</span> <span class="n">gain_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_0</span><span class="o">&gt;</span> <span class="n">demosaic_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_1</span><span class="o">&gt;</span> <span class="n">impop</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_2</span><span class="o">&gt;</span> <span class="n">ltm_in</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_3</span><span class="o">&gt;</span> <span class="n">lsc_out</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_4</span><span class="o">&gt;</span> <span class="n">_dst</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_5</span><span class="o">&gt;</span> <span class="n">aecin</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_6</span><span class="o">&gt;</span> <span class="n">imgOutput</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
 
  <span class="o">//</span> <span class="n">clang</span><span class="o">-</span><span class="nb">format</span> <span class="n">off</span>
  <span class="c1">#pragma HLS DATAFLOW</span>
@@ -5521,29 +5574,29 @@ in one burst</td>
 
          <span class="nb">float</span> <span class="n">mul_fact</span> <span class="o">=</span> <span class="p">(</span><span class="n">inputMax</span> <span class="o">/</span> <span class="p">(</span><span class="n">inputMax</span> <span class="o">-</span> <span class="n">params</span><span class="o">.</span><span class="n">black_level</span><span class="p">));</span>
 
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_inp</span><span class="p">,</span> <span class="n">imgInput</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Array2xfMat</span><span class="o">&lt;</span><span class="n">INPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">img_inp</span><span class="p">,</span> <span class="n">imgInput</span><span class="p">);</span>
 
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">blackLevelCorrection</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgInput</span><span class="p">,</span> <span class="n">blc_out</span><span class="p">,</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">blackLevelCorrection</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_0</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgInput</span><span class="p">,</span> <span class="n">blc_out</span><span class="p">,</span>
                                                                                                                                                                            <span class="n">params</span><span class="o">.</span><span class="n">black_level</span><span class="p">,</span> <span class="n">mul_fact</span><span class="p">);</span>
          <span class="o">//</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">badpixelcorrection</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgInput2</span><span class="p">,</span> <span class="n">bpc_out</span><span class="p">);</span>
 
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">gaincontrol</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">blc_out</span><span class="p">,</span> <span class="n">gain_out</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">rgain</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">bgain</span><span class="p">,</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">gaincontrol</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_1</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_3</span><span class="o">&gt;</span><span class="p">(</span><span class="n">blc_out</span><span class="p">,</span> <span class="n">gain_out</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">rgain</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">bgain</span><span class="p">,</span>
                                                                                                                                    <span class="n">params</span><span class="o">.</span><span class="n">ggain</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">bayer_p</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">demosaicing</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gain_out</span><span class="p">,</span> <span class="n">demosaic_out</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">bayer_p</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">demosaicing</span><span class="o">&lt;</span><span class="n">XF_SRC_T</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_IN_3</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gain_out</span><span class="p">,</span> <span class="n">demosaic_out</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">bayer_p</span><span class="p">);</span>
 
-         <span class="n">function_awb</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">demosaic_out</span><span class="p">,</span> <span class="n">ltm_in</span><span class="p">,</span> <span class="n">hist0</span><span class="p">,</span> <span class="n">hist1</span><span class="p">,</span> <span class="n">gain0</span><span class="p">,</span> <span class="n">gain1</span><span class="p">,</span>
+         <span class="n">function_awb</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_0</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">demosaic_out</span><span class="p">,</span> <span class="n">ltm_in</span><span class="p">,</span> <span class="n">hist0</span><span class="p">,</span> <span class="n">hist1</span><span class="p">,</span> <span class="n">gain0</span><span class="p">,</span> <span class="n">gain1</span><span class="p">,</span>
                                                                                                                                           <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">thresh</span><span class="p">,</span> <span class="n">flag</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">colorcorrectionmatrix</span><span class="o">&lt;</span><span class="n">XF_CCM_TYPE</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ltm_in</span><span class="p">,</span> <span class="n">lsc_out</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">colorcorrectionmatrix</span><span class="o">&lt;</span><span class="n">XF_CCM_TYPE</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_2</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_3</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ltm_in</span><span class="p">,</span> <span class="n">lsc_out</span><span class="p">);</span>
          <span class="k">if</span> <span class="p">(</span><span class="n">XF_DST_T</span> <span class="o">==</span> <span class="n">XF_8UC3</span><span class="p">)</span> <span class="p">{</span>
-                 <span class="n">fifo_copy</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lsc_out</span><span class="p">,</span> <span class="n">aecin</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
+                 <span class="n">fifo_copy</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_3</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_5</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lsc_out</span><span class="p">,</span> <span class="n">aecin</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">);</span>
          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                 <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xf_QuatizationDithering</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">Q_VAL</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lsc_out</span><span class="p">,</span> <span class="n">aecin</span><span class="p">);</span>
+                 <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xf_QuatizationDithering</span><span class="o">&lt;</span><span class="n">XF_DST_T</span><span class="p">,</span> <span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">Q_VAL</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_3</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_5</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lsc_out</span><span class="p">,</span> <span class="n">aecin</span><span class="p">);</span>
          <span class="p">}</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">gammacorrection</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">aecin</span><span class="p">,</span> <span class="n">_dst</span><span class="p">,</span> <span class="n">_gamma_lut</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">gammacorrection</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPP</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_5</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_4C</span><span class="o">&gt;</span><span class="p">(</span><span class="n">aecin</span><span class="p">,</span> <span class="n">_dst</span><span class="p">,</span> <span class="n">_gamma_lut</span><span class="p">);</span>
          <span class="o">//</span> <span class="n">ColorMat2AXIvideo</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">XF_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_dst</span><span class="p">,</span> <span class="n">m_axis_video</span><span class="p">);</span>
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">rgb2yuyv</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_dst</span><span class="p">,</span> <span class="n">imgOutput</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">rgb2yuyv</span><span class="o">&lt;</span><span class="n">XF_LTM_T</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_4</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_6</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_dst</span><span class="p">,</span> <span class="n">imgOutput</span><span class="p">);</span>
 
-         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">OUTPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgOutput</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
+         <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">xfMat2Array</span><span class="o">&lt;</span><span class="n">OUTPUT_PTR_WIDTH</span><span class="p">,</span> <span class="n">XF_16UC1</span><span class="p">,</span> <span class="n">STRM_HEIGHT</span><span class="p">,</span> <span class="n">XF_WIDTH</span><span class="p">,</span> <span class="n">XF_NPPC</span><span class="p">,</span> <span class="n">XF_CV_DEPTH_OUT_6</span><span class="o">&gt;</span><span class="p">(</span><span class="n">imgOutput</span><span class="p">,</span> <span class="n">img_out</span><span class="p">);</span>
 
          <span class="k">return</span><span class="p">;</span>
  <span class="p">}</span>
@@ -5645,7 +5698,7 @@ in one burst</td>
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on August 02, 2022.
       </span>
 
     </p>

@@ -492,11 +492,11 @@ which needs to be added to the address in the first pixel of a row in order to a
 first pixel of the next row.</p>
 <div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">Without</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
 <span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">)</span>
+<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">)</span>
 
 <span class="o">//</span><span class="n">With</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
 <span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
+<span class="n">void</span> <span class="n">Array2xfMat</span><span class="p">(</span><span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">srcPtr</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">dstMat</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
 </pre></div>
 </div>
 <table border="1" class="docutils" id="id1">
@@ -531,14 +531,17 @@ XF_16UC1, XF_8UC3 and XF_8UC4</td>
 parallel. Example XF_NPPC1,
 XF_NPPC8</td>
 </tr>
-<tr class="row-odd"><td>srcPtr</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Output image.</td>
+</tr>
+<tr class="row-even"><td>srcPtr</td>
 <td>Input pointer. Type of the
 pointer based on the PTR_WIDTH.</td>
 </tr>
-<tr class="row-even"><td>dstMat</td>
+<tr class="row-odd"><td>dstMat</td>
 <td>Output image of type xf::cv::Mat</td>
 </tr>
-<tr class="row-odd"><td>stride</td>
+<tr class="row-even"><td>stride</td>
 <td>Line stride.
 Default value is dstMat.cols</td>
 </tr>
@@ -553,12 +556,12 @@ that to output pointer. xfMat2Array supports line stride. Line stride is the num
 which needs to be added to the address in the first pixel of a row in order to access the
 first pixel of the next row.</p>
 <div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">Without</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
-<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">)</span>
+<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">)</span>
 
 <span class="o">//</span><span class="n">With</span> <span class="n">Line</span> <span class="n">stride</span> <span class="n">support</span>
-<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
+<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">PTR_WIDTH</span><span class="p">,</span> <span class="nb">int</span> <span class="n">MAT_T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span> <span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="p">,</span> <span class="nb">int</span> <span class="n">FILLZERO</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">xfMat2Array</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">MAT_T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span><span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span><span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">srcMat</span><span class="p">,</span> <span class="n">ap_uint</span><span class="o">&lt;</span> <span class="n">PTR_WIDTH</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">dstPtr</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stride</span><span class="p">)</span>
 </pre></div>
 </div>
 <table border="1" class="docutils" id="id2">
@@ -593,19 +596,22 @@ XF_16UC1, XF_8UC3 and XF_8UC4</td>
 parallel. Example XF_NPPC1,
 XF_NPPC8</td>
 </tr>
-<tr class="row-odd"><td>FILLZERO</td>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Input image.</td>
+</tr>
+<tr class="row-even"><td>FILLZERO</td>
 <td>Line padding Flag. Use when line
 stride support is needed.
 Default value is 1</td>
 </tr>
-<tr class="row-even"><td>dstPtr</td>
+<tr class="row-odd"><td>dstPtr</td>
 <td>Output pointer. Type of the
 pointer based on the PTR_WIDTH.</td>
 </tr>
-<tr class="row-odd"><td>srcMat</td>
+<tr class="row-even"><td>srcMat</td>
 <td>Input image of type xf::cv::Mat</td>
 </tr>
-<tr class="row-even"><td>stride</td>
+<tr class="row-odd"><td>stride</td>
 <td>Line stride.
 Default value is srcMat.cols</td>
 </tr>
@@ -1074,7 +1080,7 @@ $ make run TARGET=&lt; sw_emu|hw_emu|hw &gt; HOST_ARCH=&lt; aarch32 | aarch64 &g
   <div role="contentinfo" class="copyright">
     <p class="footerinfo">
       <span class="lastupdated">
-        Last updated on April 20, 2022.
+        Last updated on August 02, 2022.
       </span>
 
     </p>
